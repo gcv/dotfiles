@@ -1,0 +1,16 @@
+startup_message off
+defscrollback 2000
+escape ``
+
+vbell off 
+autodetach on
+
+hardstatus on
+hardstatus alwayslastline
+hardstatus string "%{.bW}%-w%{BW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+
+bind = resize =
+bind + resize +1
+bind - resize -1
+bind _ resize max
+
