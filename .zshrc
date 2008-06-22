@@ -17,9 +17,6 @@ alias rm='rm -i'
 alias dir='ls -aCF'
 alias v='ls -lahF'
 alias h='history'
-alias sbcl='SBCL_HOME=/opt/sbcl/lib/sbcl /opt/sbcl/bin/sbcl --core /opt/sbcl/lib/sbcl/sbcl.core'
-alias openmcl='/opt/ccl/scripts/openmcl64 --load ~/.ccl-init.lisp'
-alias acl='/opt/acl80_express/alisp'
 alias gc='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n'
 
 
