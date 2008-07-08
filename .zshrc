@@ -16,8 +16,12 @@ export MANPATH=$MANPATH:/opt/local/man
 alias rm='rm -i'
 alias dir='ls -aCF'
 alias v='ls -lahF'
-alias h='history'
 alias gc='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n'
+
+alias -g ...='../..'
+alias -g ....='../../..'
+alias -g .....='../../../..'
+alias -g ......='../../../../..'
 
 
 ### ls color output
@@ -25,24 +29,60 @@ export LS_COLORS="no=00:fi=00:di=95:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40
 
 
 ### shell history settings
-HISTSIZE=1000
+HISTSIZE=10000
 HISTFILE=~/.history
-SAVEHIST=1000
+SAVEHIST=10000
 
 
 ### shell settings
 bindkey -e                        # Emacs keybindings
-bindkey '^?' backward-delete-char # fix Mac keyboard backspace
-bindkey '^[[3~' delete-char       # make sure the delete key still works
 ulimit -c 0                       # no core dumps
 ulimit -s unlimited               # stop limiting the stack
-setopt notify                     # tell me when jobs terminate
+
+
+### keyboard settings
+bindkey '^?' backward-delete-char     # Mac keyboard backspace
+bindkey '^D' list-choices
+bindkey '^P' history-beginning-search-backward
+bindkey '^N' history-beginning-search-forward
+bindkey '^[[1~' beginning-of-line
+bindkey '^[[4~' end-of-line
+bindkey '^[[2~' overwrite-mode
+bindkey '^[[3~' delete-char
+bindkey '^[[6~' end-of-history
+bindkey '^[[5~' beginning-of-history
+bindkey '^[^I' reverse-menu-complete
+bindkey '^[OA' up-line-or-history
+bindkey '^[[A' up-line-or-history
+bindkey '^[[B' down-line-or-history
+bindkey '^[OB' down-line-or-history
+bindkey '^[OD' backward-char
+bindkey '^[OC' forward-char
+bindkey '^[[[A' run-help
+bindkey '^[[[B' which-command
+bindkey '^[[[C' where-is
+
+
+### history options
+setopt extended_history           # saves timestamps on history
+setopt hist_expire_dups_first     # expire history duplicates first
+setopt hist_no_store              # don't save 'history' cmd in history
+setopt inc_append_history         # append history incrementally
+setopt share_history              # share history between open shells
+
+
+### shell options
+setopt auto_cd                    # automatically execute chdir
 setopt check_jobs                 # check jobs before exiting the shell
-setopt autocd extendedglob        # automatically execute chdir
-setopt nobeep                     # stop beeping
+setopt correct                    # correct spelling of commands
+setopt correct_all                # correct spelling of each word
+setopt extended_glob              # globs #, ~, and ^
 setopt long_list_jobs             # use the long format for job listings
+setopt nobeep                     # stop beeping
 setopt noclobber                  # do not clobber existing files
+setopt noflow_control             # don't use flow control (^S/^Q)
 setopt nohup                      # do not terminate child processes on exit
+setopt notify                     # tell me when jobs terminate
 
 
 ### command completion
@@ -54,11 +94,9 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
 zstyle ':completion:*' matcher-list '' 'r:|[._-]=** r:|=**' 'l:|=* r:|=*' 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' max-errors 1
-zstyle ':completion:*' menu select=1
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
 zstyle ':completion:*' substitute 1
 zstyle ':completion:*' use-compctl false
-# zstyle :compinstall filename '/Users/kostya/.zshrc'
 autoload -Uz compinit
 compinit
 
@@ -120,10 +158,15 @@ function emacsbatch() { emacs -batch -f batch-byte-compile $* }
 
 
 ### search for files containing the given string in the current directory
-function findf() { find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | xargs -0 grep -I -l -i -e $1 }
+function findf() {
+    find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
+        xargs -0 grep -I -l -i -e $1
+}
 
 
 ### Search for files containing the given string in the current directory,
 ### and print lines with the string.
-function findl() { find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | xargs -0 grep -I -n -i -e $1 } 
-
+function findl() {
+    find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
+        xargs -0 grep -I -n -i -e $1
+}
