@@ -42,7 +42,6 @@ ulimit -s unlimited               # stop limiting the stack
 
 ### keyboard settings
 bindkey '^?' backward-delete-char     # Mac keyboard backspace
-bindkey '^D' list-choices
 bindkey '^P' history-beginning-search-backward
 bindkey '^N' history-beginning-search-forward
 bindkey '^[[1~' beginning-of-line
