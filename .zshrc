@@ -106,7 +106,7 @@ PS1="[%m:%4c] "
 
 ### set up window information for various terminal types
 case $TERM in
-    xterm*)
+    xterm*|cygwin)
         precmd() { print -Pn "\e]0;%n@%m: %~\a" }
         ;;
     screen)
