@@ -4,6 +4,7 @@ export LESS="-M -R"
 export PAGER=less
 export CVS_RSH=ssh
 export LC_CTYPE=en_US.UTF-8
+export LC_COLLATE=C
 
 
 ### path
@@ -16,7 +17,12 @@ export MANPATH=$MANPATH:/opt/local/man
 alias rm='rm -i'
 alias dir='ls -aCF'
 alias v='ls -lahF'
-alias gc='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n'
+if [[ `uname` == "Darwin" &&
+      -a '/Applications/Emacs.app/Contents/MacOS/bin/emacsclient' ]]; then
+    alias gc='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n'
+else
+    alias gc='emacsclient -n'
+fi
 
 alias -g ...='../..'
 alias -g ....='../../..'
