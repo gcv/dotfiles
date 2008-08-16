@@ -99,24 +99,6 @@ setopt pushd_silent               # no output after pushd and popd
 setopt pushd_to_home              # pushd with no arguments goes to ~
 setopt pushd_ignore_dups          # no duplicates in directory stack
 
-function pushd () {
-    # Fixes directory stack order when pushd_ignore_dups is
-    # set. Default behavior example: for stack [a, b, c, d, e], pushd
-    # <c> would result in [c, d, e, a, b]. This means that going back
-    # and forth between a and c becomes unnecessarily difficult. With
-    # this change, the new stack becomes [c, a, b, d, e]: history
-    # order is not replaced.
-    setopt local_options glob_subst
-    unsetopt ksharrays
-    case $1 in
-        +*) setopt pushdignoredups
-            builtin pushd ${${=$(dirs)}[$1+1]};;
-        -*) setopt pushdignoredups
-            builtin pushd ${${=$(dirs)}[$1-1]};;
-        *) builtin pushd $*;;
-    esac
-}
-
 
 ### command completion
 zstyle ':completion:*' completer _expand _complete _approximate
