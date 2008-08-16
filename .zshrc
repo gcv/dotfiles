@@ -17,6 +17,8 @@ export MANPATH=$MANPATH:/opt/local/man
 alias rm='rm -i'
 alias dir='ls -aCF'
 alias v='ls -lahF'
+alias d='dirs -v'
+
 if [[ `uname` == "Darwin" &&
       -a '/Applications/Emacs.app/Contents/MacOS/bin/emacsclient' ]]; then
     alias gc='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n'
@@ -90,6 +92,32 @@ setopt nohup                      # do not terminate child processes on exit
 setopt notify                     # tell me when jobs terminate
 
 
+### directory stack customization
+setopt auto_pushd                 # automatic directory stack
+setopt pushd_minus                # swap +/- for pushd and popd
+setopt pushd_silent               # no output after pushd and popd
+setopt pushd_to_home              # pushd with no arguments goes to ~
+setopt pushd_ignore_dups          # no duplicates in directory stack
+
+function pushd () {
+    # Fixes directory stack order when pushd_ignore_dups is
+    # set. Default behavior example: for stack [a, b, c, d, e], pushd
+    # <c> would result in [c, d, e, a, b]. This means that going back
+    # and forth between a and c becomes unnecessarily difficult. With
+    # this change, the new stack becomes [c, a, b, d, e]: history
+    # order is not replaced.
+    setopt local_options glob_subst
+    unsetopt ksharrays
+    case $1 in
+        +*) setopt pushdignoredups
+            builtin pushd ${${=$(dirs)}[$1+1]};;
+        -*) setopt pushdignoredups
+            builtin pushd ${${=$(dirs)}[$1-1]};;
+        *) builtin pushd $*;;
+    esac
+}
+
+
 ### command completion
 zstyle ':completion:*' completer _expand _complete _approximate
 zstyle ':completion:*' completions 1
@@ -110,9 +138,9 @@ compinit
 PS1="[%m:%4c] "
 
 
-### set up window information for various terminal types
+### title bar or status bar
 case $TERM in
-    xterm*|cygwin)
+    xterm*|rxvt*|cygwin)
         precmd() { print -Pn "\e]0;%n@%m: %~\a" }
         ;;
     screen)
@@ -124,7 +152,7 @@ case $TERM in
 esac
 
 
-### customize the environment for the benefit of TRAMP
+### TRAMP environment settings
 if [[ $TERM == "dumb" ]]; then
     PS1="%m%# "
     unsetopt zle
@@ -138,31 +166,8 @@ function pskill() {
 }
 
 
-### set DISPLAY to where I logged in from, or to the argument
-function disp() {
-   if [[ $# == 0 ]] then
-      export DISPLAY=$(who am i | awk '{print $6}' | tr -d '()'):0
-   else
-      export DISPLAY="${*}:0"
-   fi
-}
-
-
-### cd and ls
-function cl() { cd $1 && v }
-
-
-### display the current directory as a tree
-function tree() {
-   find . | sed -e 's/[^\/]*\//|----/g' -e 's/---- |/    |/g' | $PAGER
-}
-
-
-### use Emacs to batch-compile the given files
-function emacsbatch() { emacs -batch -f batch-byte-compile $* }
-
-
-### search for files containing the given string in the current directory
+### Search for files containing the given string in the current
+### directory.
 function findf() {
     find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
         xargs -0 grep -I -l -i -e $1
