@@ -21,9 +21,9 @@ alias d='dirs -v'
 
 if [[ `uname` == "Darwin" &&
       -a '/Applications/Emacs.app/Contents/MacOS/bin/emacsclient' ]]; then
-    alias gc='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n'
+    alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n'
 else
-    alias gc='emacsclient -n'
+    alias ec='emacsclient -n'
 fi
 
 alias -g ...='../..'
