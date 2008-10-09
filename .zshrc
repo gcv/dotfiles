@@ -90,6 +90,7 @@ setopt noclobber                  # do not clobber existing files
 setopt noflow_control             # don't use flow control (^S/^Q)
 setopt nohup                      # do not terminate child processes on exit
 setopt notify                     # tell me when jobs terminate
+setopt prompt_subst               # allow prompt variable substitution
 
 
 ### directory stack customization
@@ -116,19 +117,42 @@ autoload -Uz compinit
 compinit
 
 
-### prompt
-PS1="[%m:%4c] "
+### colors
+autoload colors zsh/terminfo
+if [[ "$terminfo[colors]" -ge 8 ]]; then
+    colors
+fi
+for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
+    eval COLOR_BOLD_$color="%{$terminfo[bold]$fg[${(L)color}]%}"
+    eval COLOR_$color="%{$fg[${(L)color}]%}"
+done
+COLOR_NONE="%{$terminfo[sgr0]%}"
+
+
+### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
+# PROMPT="[%m:%4c] "
+PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4c]${COLOR_NONE} "
+RPROMPT="%(?..${COLOR_RED}[%?]${COLOR_NONE})"
 
 
 ### title bar or status bar
 case $TERM in
     xterm*|rxvt*|cygwin)
-        precmd() { print -Pn "\e]0;%n@%m: %~\a" }
+        precmd() {
+            print -Pn "\e]0;%n@%m: %~\a"
+        }
+        preexec() {
+            print -Pn "\e]0;%n@%m: %~ [$1]\a"
+        }
         ;;
     screen)
+        precmd() {
+            print -Pn "\e]0;%n@%m: %~ (screen)\a"
+            print -Pn "\ek\b\e\\"
+        }
         preexec () {
-            local CMD=${1[(wr)^(*=*|sudo|ssh|-*)]}
-            echo -ne "\ek$CMD\e\\"
+            print -Pn "\e]0;%n@%m: %~ [$1] (screen)\a"
+            print -Pn "\ek${1[(wr)^(*=*|sudo|ssh|-*)]}\e\\"
         }
         ;;
 esac

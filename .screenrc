@@ -1,13 +1,13 @@
 startup_message off
 defscrollback 2000
 escape ``
-
 vbell off 
 autodetach on
+shelltitle ''
+hardstatus off
 
-hardstatus on
-hardstatus alwayslastline
-hardstatus string "%{.bW}%-w%{BW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+caption always "%{.bW}%-w%{BW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+#caption always "%{= kG}[ %{G}%H %{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B} %d/%m %{W}%c %{g}]"
 
 bind = resize =
 bind + resize +1
