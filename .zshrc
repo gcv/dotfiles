@@ -142,16 +142,16 @@ case $TERM in
             print -Pn "\e]0;%n@%m: %~\a"
         }
         preexec() {
-            print -Pn "\e]0;%n@%m: %~ [$1]\a"
+            # print -Pn "\e]0;%n@%m: %~ [$1]\a"
         }
         ;;
     screen)
         precmd() {
             print -Pn "\e]0;%n@%m: %~ (screen)\a"
-            print -Pn "\ek\b\e\\"
+            print -Pn "\ek \e\\"
         }
         preexec () {
-            print -Pn "\e]0;%n@%m: %~ [$1] (screen)\a"
+            # print -Pn "\e]0;%n@%m: %~ [$1] (screen)\a"
             print -Pn "\ek${1[(wr)^(*=*|sudo|ssh|-*)]}\e\\"
         }
         ;;
