@@ -147,11 +147,11 @@ case $TERM in
         ;;
     screen)
         precmd() {
-            print -Pn "\e]0;%n@%m: %~ (screen)\a"
+            print -Pn "\e]0;%n@%m: %~\a"
             print -Pn "\ek \e\\"
         }
         preexec () {
-            # print -Pn "\e]0;%n@%m: %~ [$1] (screen)\a"
+            # print -Pn "\e]0;%n@%m: %~ [$1]\a"
             print -Pn "\ek${1[(wr)^(*=*|sudo|ssh|-*)]}\e\\"
         }
         ;;
