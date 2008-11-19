@@ -4,6 +4,7 @@ escape ``
 vbell off 
 autodetach on
 shelltitle ''
+altscreen on
 hardstatus off
 
 caption always "%{.bW}%-w%{BW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
@@ -14,3 +15,8 @@ bind + resize +1
 bind - resize -1
 bind _ resize max
 
+# Make Shift-[PgUp|PgDown] work properly.
+bindkey ^[[5;3~ eval "copy" "stuff \"^u\""
+bindkey ^[[6;3~ eval "copy"
+bindkey -m ^[[5;3~ stuff "^u"
+bindkey -m ^[[6;3~ stuff "^d"
