@@ -9,7 +9,7 @@ export LC_COLLATE=C
 
 ### path
 typeset -U path
-path=($HOME/sw/bin /opt/local/bin /usr/local/bin /usr/local/sbin $path)
+path=($HOME/sw/bin /opt/local/bin /usr/local/bin /usr/bin /bin $HOME/sw/sbin /opt/local/sbin /usr/local/sbin /usr/sbin /sbin $path)
 export MANPATH=$MANPATH:/opt/local/man
 
 
