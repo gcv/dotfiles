@@ -165,6 +165,11 @@ if [[ $TERM == "dumb" ]]; then
 fi
 
 
+### j.sh: A useful utility which tracks directory usage and allows
+### jumping into previously used directories by a brief matching regexp.
+. ~/.zsh-j.sh
+
+
 ### pskill <process name>
 function pskill() {
    kill -9 $(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')
