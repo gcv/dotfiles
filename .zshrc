@@ -140,6 +140,7 @@ case $TERM in
     xterm*|rxvt*|cygwin)
         precmd() {
             print -Pn "\e]0;%n@%m: %~\a"
+            j --add "$(pwd -P)"
         }
         preexec() {
             # print -Pn "\e]0;%n@%m: %~ [$1]\a"
@@ -149,6 +150,7 @@ case $TERM in
         precmd() {
             print -Pn "\e]0;%n@%m: %~\a"
             print -Pn "\ek \e\\"
+            j --add "$(pwd -P)"
         }
         preexec () {
             # print -Pn "\e]0;%n@%m: %~ [$1]\a"
