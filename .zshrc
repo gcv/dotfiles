@@ -167,11 +167,6 @@ if [[ $TERM == "dumb" ]]; then
 fi
 
 
-### j.sh: A useful utility which tracks directory usage and allows
-### jumping into previously used directories by a brief matching regexp.
-. ~/.zsh-j.sh
-
-
 ### pskill <process name>
 function pskill() {
    kill -9 $(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')
@@ -193,3 +188,64 @@ function findl() {
     find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
         xargs -0 grep -I -n -i -e $1
 }
+
+
+### Maintains a jump-list of directories you actually use. Old
+### directories eventually fall off the list.
+###
+### Original Python implementation: http://github.com/joelthelion/autojump
+### sh port: http://github.com/rupa/j
+### zsh port: http://github.com/burke/j
+###
+### usage: cd around for a while
+###   j [--l] [regex1 ... regexn]
+###     regex1 ... regexn jump to the most used directory matching all masks
+###     --l               show the list instead of jumping
+###                       with no args, returns full list
+function j() {
+    # change jfile if you already have a .j file for something else
+    jfile=$HOME/.j
+    if [ "$1" = "--add" ]; then
+        shift
+        # we're in $HOME all the time, let something else get all the
+        # good letters
+        [ "$*" = "$HOME" ] && return
+        awk -v q="$*" -v mx=1000 -F"|" '
+  $2 >= 1 {
+    if ($1 == q) { l[$1] = $2 + 1; x = 1 } else l[$1] = $2
+    y += $2
+  }
+  END {
+    x || l[q] = 1
+    if (y > mx) {
+      for (i in l) print i "|" l[i]*(0.9*mx/y) # aging
+    } else for (i in l) print i "|" l[i]
+  }
+  ' $jfile 2>/dev/null > $jfile.tmp
+        mv -f $jfile.tmp $jfile
+    elif [ "$1" = "" ];then
+        cd ~
+    elif [ "$1" = "--l" ];then
+        shift
+        awk -v q="$*" -F"|" '
+  BEGIN { split(q,a," ") }
+  { for (o in a) $1 !~ a[o] && $1 = ""; if ($1) print $2 "\t" $1 }
+  ' $jfile 2>/dev/null | sort -n
+    else
+        # prefer case sensitive
+        cd=$(awk -v q="$*" -F"|" '
+  BEGIN { split(q,a," ") }
+  { for (o in a) $1 !~ a[o] && $1 = ""; if ($1) { print $2 "\t" $1; x = 1 } }
+  END {
+    if (x) exit
+    close(FILENAME)
+    while (getline < FILENAME) {
+      for (o in a) tolower($1) !~ tolower(a[o]) && $1 = ""
+      if ($1) print $2 "\t" $1
+    }
+  }
+  ' $jfile 2>/dev/null | sort -nr | head -n 1 | cut -f 2)
+        [ "$cd" ] && cd "$cd"
+    fi
+}
+compdef _files j
