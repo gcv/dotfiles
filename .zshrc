@@ -26,6 +26,13 @@ else
     alias ec='emacsclient -n'
 fi
 
+if [[ `uname` == "Linux" ]]; then
+    alias ls='ls --color'
+elif [[ `uname` == "Darwin" &&
+        -a '/opt/local/bin/gls' ]]; then
+    alias ls='gls --color'
+fi
+
 alias -g ...='../..'
 alias -g ....='../../..'
 alias -g .....='../../../..'
@@ -223,10 +230,10 @@ function j() {
   }
   ' $jfile 2>/dev/null > $jfile.tmp
         mv -f $jfile.tmp $jfile
-    elif [ "$1" = "" ];then
-        cd ~
-    elif [ "$1" = "--l" ];then
-        shift
+    elif [ "$1" = "" -o "$1" = "--l" ]; then
+        if [ "$1" = "--l" ]; then
+            shift
+        fi
         awk -v q="$*" -F"|" '
   BEGIN { split(q,a," ") }
   { for (o in a) $1 !~ a[o] && $1 = ""; if ($1) print $2 "\t" $1 }
