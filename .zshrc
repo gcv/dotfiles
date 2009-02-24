@@ -147,7 +147,6 @@ case $TERM in
     xterm*|rxvt*|cygwin)
         precmd() {
             print -Pn "\e]0;%n@%m: %~\a"
-            j --add "$(pwd -P)"
         }
         preexec() {
             # print -Pn "\e]0;%n@%m: %~ [$1]\a"
@@ -157,7 +156,6 @@ case $TERM in
         precmd() {
             print -Pn "\e]0;%n@%m: %~\a"
             print -Pn "\ek \e\\"
-            j --add "$(pwd -P)"
         }
         preexec () {
             # print -Pn "\e]0;%n@%m: %~ [$1]\a"
@@ -211,21 +209,21 @@ function findl() {
 ###                       with no args, returns full list
 function j() {
     # change jfile if you already have a .j file for something else
-    jfile=$HOME/.j
+    local jfile=$HOME/.j
     if [ "$1" = "--add" ]; then
         shift
         # we're in $HOME all the time, let something else get all the
         # good letters
         [ "$*" = "$HOME" ] && return
-        awk -v q="$*" -v mx=1000 -F"|" '
+        awk -v q="$*" -F"|" '
   $2 >= 1 {
-    if ($1 == q) { l[$1] = $2 + 1; x = 1 } else l[$1] = $2
-    y += $2
+    if ($1 == q) { l[$1] = $2 + 1; found = 1 } else l[$1] = $2
+    count += $2
   }
   END {
-    x || l[q] = 1
-    if (y > mx) {
-      for (i in l) print i "|" l[i]*(0.9*mx/y) # aging
+    found || l[q] = 1
+    if (count > 1000) {
+      for (i in l) print i "|" 0.9*l[i] # aging
     } else for (i in l) print i "|" l[i]
   }
   ' $jfile 2>/dev/null > $jfile.tmp
@@ -235,19 +233,29 @@ function j() {
             shift
         fi
         awk -v q="$*" -F"|" '
-  BEGIN { split(q,a," ") }
-  { for (o in a) $1 !~ a[o] && $1 = ""; if ($1) print $2 "\t" $1 }
+  BEGIN { split(q, a, " ") }
+  { for (i in a) $1 !~ a[i] && $1 = ""; if ($1) print $2 "\t" $1 }
   ' $jfile 2>/dev/null | sort -n
+    # for completion
+    elif [ "$1" = "--complete" ]; then
+        awk -v q="$2" -F"|" '
+  BEGIN { split(substr(q, 3), a, " ") }
+   { for (i in a) $1 !~ a[i] && $1 = ""; if ($1) print $1 }
+  ' $jfile 2>/dev/null
+  # if we hit enter on a completion just go there (ugh, this is ugly)
+  # =~ doesn't exist in zsh. I don't care. What does this do anyway?
+  # elif [[ "$*" =~ "/" ]]; then
+  # local x=$*; x=/${x#*/}; [ -d "$x" ] && cd "$x"
     else
         # prefer case sensitive
-        cd=$(awk -v q="$*" -F"|" '
+        local cd=$(awk -v q="$*" -F"|" '
   BEGIN { split(q,a," ") }
-  { for (o in a) $1 !~ a[o] && $1 = ""; if ($1) { print $2 "\t" $1; x = 1 } }
+  { for (i in a) $1 !~ a[i] && $1 = ""; if ($1) { print $2 "\t" $1; x = 1 } }
   END {
     if (x) exit
     close(FILENAME)
     while (getline < FILENAME) {
-      for (o in a) tolower($1) !~ tolower(a[o]) && $1 = ""
+      for (i in a) tolower($1) !~ tolower(a[i]) && $1 = ""
       if ($1) print $2 "\t" $1
     }
   }
@@ -255,4 +263,11 @@ function j() {
         [ "$cd" ] && cd "$cd"
     fi
 }
+
+function j_precmd() {
+    j --add "$(pwd -P)"
+}
+
+precmd_functions+=(j_precmd)
+
 compdef _files j
