@@ -113,17 +113,24 @@ setopt pushd_ignore_dups          # no duplicates in directory stack
 
 
 ### command completion
-zstyle ':completion:*' completer _expand _complete _approximate
+zstyle ':completion:*' completer _expand _complete _correct _approximate
 zstyle ':completion:*' completions 1
+zstyle ':completion:*' expand prefix suffix
 zstyle ':completion:*' glob 1
 zstyle ':completion:*' group-name ''
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' insert-unambiguous true
 zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' list-suffixes true
 zstyle ':completion:*' matcher-list '' 'r:|[._-]=** r:|=**' 'l:|=* r:|=*' 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' max-errors 1
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
 zstyle ':completion:*' substitute 1
 zstyle ':completion:*' use-compctl false
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*:functions' ignored-patterns '_*'
+zstyle ':completion:*:kill:*' force-list always
+zstyle ':completion:*:*:kill:*' menu yes select
+# initialize
 autoload -Uz compinit
 compinit
 
