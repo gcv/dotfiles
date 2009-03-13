@@ -75,6 +75,8 @@ bindkey '^[OC' forward-char
 bindkey '^[[[A' run-help
 bindkey '^[[[B' which-command
 bindkey '^[[[C' where-is
+bindkey '^@' set-mark-command
+bindkey '^W' copy-region-as-kill
 
 
 ### history options
