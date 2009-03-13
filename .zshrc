@@ -265,7 +265,7 @@ BEGIN { split(substr(q, 3), a, " ") } {
     }
 
     # navigation and other commands
-    local x;
+    local x
     local out
     for x; do
         case $x in
