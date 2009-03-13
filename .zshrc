@@ -206,79 +206,153 @@ function findl() {
 }
 
 
-### Maintains a jump-list of directories you actually use. Old
-### directories eventually fall off the list.
-###
-### Original Python implementation: http://github.com/joelthelion/autojump
-### sh port: http://github.com/rupa/j
-### zsh port: http://github.com/burke/j
-###
-### usage: cd around for a while
-###   j [--l] [regex1 ... regexn]
-###     regex1 ... regexn jump to the most used directory matching all masks
-###     --l               show the list instead of jumping
-###                       with no args, returns full list
+### Directory stack jump: cd to an entry in the directory stack which
+### matches the given regexps.
+function dsj() {
+    local words="$@"
+    local regex="${words/\ /.*}"
+    local matching_dirs=$( dirs -lp | sort -u | grep "$regex" )
+    local dir_to_switch_to=$( echo $matching_dirs | head -1 )
+    cd "$dir_to_switch_to"
+}
+
+
+### Maintains a jump-list of used directories. Adapted for zsh from
+### http://github.com/rupa/j
 function j() {
-    # change jfile if you already have a .j file for something else
     local jfile=$HOME/.j
-    if [ "$1" = "--add" ]; then
+
+    # add to jump list
+    [ "$1" = "--add" -o "$1" = "-a" ] && {
         shift
-        # we're in $HOME all the time, let something else get all the
-        # good letters
+        # ignore $HOME, it would dominate the jump list
         [ "$*" = "$HOME" ] && return
-        awk -v q="$*" -F"|" '
-  $2 >= 1 {
-    if ($1 == q) { l[$1] = $2 + 1; found = 1 } else l[$1] = $2
-    count += $2
-  }
-  END {
-    found || l[q] = 1
-    if (count > 1000) {
-      for (i in l) print i "|" 0.9*l[i] # aging
-    } else for (i in l) print i "|" l[i]
-  }
-  ' $jfile 2>/dev/null > $jfile.tmp
-        mv -f $jfile.tmp $jfile
-    elif [ "$1" = "" -o "$1" = "--l" ]; then
-        if [ "$1" = "--l" ]; then
-            shift
-        fi
-        awk -v q="$*" -F"|" '
-  BEGIN { split(q, a, " ") }
-  { for (i in a) $1 !~ a[i] && $1 = ""; if ($1) print $2 "\t" $1 }
-  ' $jfile 2>/dev/null | sort -n
-    # for completion
-    elif [ "$1" = "--complete" ]; then
-        awk -v q="$2" -F"|" '
-  BEGIN { split(substr(q, 3), a, " ") }
-   { for (i in a) $1 !~ a[i] && $1 = ""; if ($1) print $1 }
-  ' $jfile 2>/dev/null
-  # if we hit enter on a completion just go there (ugh, this is ugly)
-  # =~ doesn't exist in zsh. I don't care. What does this do anyway?
-  # elif [[ "$*" =~ "/" ]]; then
-  # local x=$*; x=/${x#*/}; [ -d "$x" ] && cd "$x"
-    else
-        # prefer case sensitive
-        local cd=$(awk -v q="$*" -F"|" '
-  BEGIN { split(q,a," ") }
-  { for (i in a) $1 !~ a[i] && $1 = ""; if ($1) { print $2 "\t" $1; x = 1 } }
-  END {
-    if (x) exit
-    close(FILENAME)
-    while (getline < FILENAME) {
-      for (i in a) tolower($1) !~ tolower(a[i]) && $1 = ""
-      if ($1) print $2 "\t" $1
+        # else...
+        awk -v q="$*" -v t="$(date +%s)" -F"|" '
+$2 >= 1 {
+    if ($1 == q) {
+        l[$1] = $2 + 1
+        d[$1] = t
+        found = 1
     }
-  }
-  ' $jfile 2>/dev/null | sort -nr | head -n 1 | cut -f 2)
-        [ "$cd" ] && cd "$cd"
+    else {
+        l[$1] = $2
+        d[$1] = $3
+        count += $2
+    }
+}
+END {
+    if (!found) l[q] = 1 && d[q] = t
+    if (count > 1000) {
+        for (i in l) print i "|" 0.9*l[i] "|" d[i] # aging
+    }
+    else for (i in l) print i "|" l[i] "|" d[i]
+}
+        ' $jfile 2>/dev/null > $jfile.tmp
+        mv -f $jfile.tmp $jfile
+        return
+    }
+
+    # autocompletion support
+    [ "$1" = "--complete" -o "$1" = "-c" ] && {
+        awk -v q="$2" -F"|" '
+BEGIN { split(substr(q, 3), a, " ") } {
+    if (system("test -d \"" $1 "\"")) next
+    for (i in a) $1 !~ a[i] && $1 = ""; if ($1) print $1
+}
+        ' $jfile 2>/dev/null
+        return
+    }
+
+    # navigation and other commands
+    local x;
+    local out
+    for x; do
+        case $x in
+            -h|--help)   echo "j [--h[elp]] [--r] [--l] [regex1 ... regexn]"; return;;
+            -l|--list)   local list=1;;
+            -r|--recent) local recent=r;;
+            -s|--short)  local short=1;;
+            *)           local out="$out $x";;
+        esac;
+        shift;
+    done
+
+    set -- $out
+
+    if [ -z "$1" -o "$list" ]; then
+        [ "$short" ] && return
+        awk -v q="$*" -v t="$(date +%s)" -v r="$recent" -F"|" '
+BEGIN {
+    f = 2;
+    split(q, a, " ");
+    if (r) f = 3
+}
+{
+    if (system("test -d \"" $1 "\"")) next
+    for (i in a) $1 !~ a[i] && $1 = ""
+    if ($1) if (f == 3) { print t - $f "\t" $1 } else print $f "\t" $1
+}
+        ' $jfile 2>/dev/null | sort -n$recent
+
+    # not sure what this does...
+    elif [ -d "/${out#*/}" ]; then
+        cd "/${out#*/}"
+
+    # prefer case sensitive
+    else
+        out=$(awk -v q="$*" -v s="$short" -v r="$recent" -F"|" '
+BEGIN {
+    split(q, a, " ");
+    if (r) { f = 3 } else f = 2
+}
+{
+    if (system("test -d \"" $1 "\"")) next
+    for (i in a) $1 !~ a[i] && $1 = ""
+    if ($1) {
+        if (s) {
+            if (length($1) <= length(x)) {
+                x = $1
+            }
+            else if (! x) x = $1
+        }
+        else if ($f >= dx) { x = $1; dx = $f }
+    }
+}
+END {
+    if (! x) {
+        close(FILENAME)
+        while (getline < FILENAME) {
+            if (system("test -d \"" $1 "\"")) continue
+            for (i in a) tolower($1) !~ tolower(a[i]) && $1 = ""
+            if ($1) {
+                if (s) {
+                    if (length($1) <= length(x)) {
+                        x = $1
+                    }
+                    else if (! x) x = $1
+                } else if ($f >= dx) { x = $1; dx = $f }
+            }
+        }
+    }
+    if (x) print x
+}
+        ' $jfile)
+        [ "$out" ] && cd "$out"
     fi
 }
+
+alias jr="j -r"
+alias js="j -s"
+
+function _j() {
+    compadd -M 'l:|=* r:|=*' -M 'm:{a-zA-Z}={A-Za-z}' $(j --complete)
+}
+
+compdef _j j
 
 function j_precmd() {
     j --add "$(pwd -P)"
 }
 
 precmd_functions+=(j_precmd)
-
-compdef _files j
