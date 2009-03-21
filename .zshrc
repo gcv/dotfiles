@@ -73,11 +73,11 @@ setopt correct                    # correct spelling of commands
 setopt no_correct_all             # do not correct spelling of files (annoying)
 setopt extended_glob              # globs #, ~, and ^
 setopt long_list_jobs             # use the long format for job listings
-setopt nobeep                     # stop beeping
-setopt nohist_beep                # turn off no-history item beeps
-setopt noclobber                  # do not clobber existing files
-setopt noflow_control             # don't use flow control (^S/^Q)
-setopt nohup                      # do not terminate child processes on exit
+setopt no_beep                    # stop beeping
+setopt no_hist_beep               # turn off no-history item beeps
+setopt no_clobber                 # do not clobber existing files
+setopt no_flow_control            # don't use flow control (^S/^Q)
+setopt no_hup                     # do not terminate child processes on exit
 setopt notify                     # tell me when jobs terminate
 setopt prompt_subst               # allow prompt variable substitution
 setopt transient_rprompt          # remove previous rprompt after command
