@@ -80,6 +80,7 @@ setopt noflow_control             # don't use flow control (^S/^Q)
 setopt nohup                      # do not terminate child processes on exit
 setopt notify                     # tell me when jobs terminate
 setopt prompt_subst               # allow prompt variable substitution
+setopt transient_rprompt          # remove previous rprompt after command
 
 
 ### directory stack customization
