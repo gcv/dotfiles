@@ -70,7 +70,7 @@ setopt share_history              # share commands between shells (c.f. inc_appe
 setopt auto_cd                    # automatically execute chdir
 setopt check_jobs                 # check jobs before exiting the shell
 setopt correct                    # correct spelling of commands
-setopt correct_all                # correct spelling of each word
+setopt no_correct_all             # do not correct spelling of files (annoying)
 setopt extended_glob              # globs #, ~, and ^
 setopt long_list_jobs             # use the long format for job listings
 setopt nobeep                     # stop beeping
