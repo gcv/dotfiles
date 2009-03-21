@@ -55,6 +55,46 @@ ulimit -c 0                       # no core dumps
 ulimit -s unlimited               # stop limiting the stack
 
 
+### history options
+setopt extended_history           # saves timestamps on history
+setopt hist_expire_dups_first     # expire history duplicates first
+setopt hist_reduce_blanks         # remove superfluous whitespace
+setopt hist_no_store              # do not save 'history' cmd in history
+setopt hist_save_no_dups          # do not save duplicates
+setopt hist_verify                # preview history expansions
+#setopt inc_append_history        # append each command (c.f. share_history)
+setopt share_history              # share commands between shells (c.f. inc_append_history)
+
+
+### shell options
+setopt auto_cd                    # automatically execute chdir
+setopt check_jobs                 # check jobs before exiting the shell
+setopt correct                    # correct spelling of commands
+setopt correct_all                # correct spelling of each word
+setopt extended_glob              # globs #, ~, and ^
+setopt long_list_jobs             # use the long format for job listings
+setopt nobeep                     # stop beeping
+setopt nohist_beep                # turn off no-history item beeps
+setopt noclobber                  # do not clobber existing files
+setopt noflow_control             # don't use flow control (^S/^Q)
+setopt nohup                      # do not terminate child processes on exit
+setopt notify                     # tell me when jobs terminate
+setopt prompt_subst               # allow prompt variable substitution
+
+
+### directory stack customization
+setopt auto_pushd                 # automatic directory stack
+setopt pushd_minus                # swap +/- for pushd and popd
+setopt pushd_silent               # no output after pushd and popd
+setopt pushd_to_home              # pushd with no arguments goes to ~
+setopt pushd_ignore_dups          # no duplicates in directory stack
+
+
+### edit command line in text editor (bound to M-e below)
+autoload -U edit-command-line
+zle -N edit-command-line
+
+
 ### keyboard settings
 bindkey '^?' backward-delete-char     # Mac keyboard backspace
 bindkey '^P' history-beginning-search-backward
@@ -77,39 +117,8 @@ bindkey '^[[[B' which-command
 bindkey '^[[[C' where-is
 bindkey '^@' set-mark-command
 bindkey '^W' copy-region-as-kill
-
-
-### history options
-setopt extended_history           # saves timestamps on history
-setopt hist_expire_dups_first     # expire history duplicates first
-setopt hist_reduce_blanks         # remove superfluous whitespace
-setopt hist_no_store              # do not save 'history' cmd in history
-setopt hist_save_no_dups          # do not save duplicates
-setopt inc_append_history         # append history incrementally
-setopt share_history              # share history between open shells
-
-
-### shell options
-setopt auto_cd                    # automatically execute chdir
-setopt check_jobs                 # check jobs before exiting the shell
-setopt correct                    # correct spelling of commands
-setopt correct_all                # correct spelling of each word
-setopt extended_glob              # globs #, ~, and ^
-setopt long_list_jobs             # use the long format for job listings
-setopt nobeep                     # stop beeping
-setopt noclobber                  # do not clobber existing files
-setopt noflow_control             # don't use flow control (^S/^Q)
-setopt nohup                      # do not terminate child processes on exit
-setopt notify                     # tell me when jobs terminate
-setopt prompt_subst               # allow prompt variable substitution
-
-
-### directory stack customization
-setopt auto_pushd                 # automatic directory stack
-setopt pushd_minus                # swap +/- for pushd and popd
-setopt pushd_silent               # no output after pushd and popd
-setopt pushd_to_home              # pushd with no arguments goes to ~
-setopt pushd_ignore_dups          # no duplicates in directory stack
+bindkey ' ' magic-space
+bindkey '\ee' edit-command-line
 
 
 ### command completion
@@ -136,7 +145,7 @@ compinit
 
 
 ### colors
-autoload colors zsh/terminfo
+autoload -U colors zsh/terminfo
 if [[ "$terminfo[colors]" -ge 8 ]]; then
     colors
 fi
