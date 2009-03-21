@@ -62,7 +62,7 @@ setopt hist_reduce_blanks         # remove superfluous whitespace
 setopt hist_no_store              # do not save 'history' cmd in history
 setopt hist_save_no_dups          # do not save duplicates
 setopt hist_verify                # preview history expansions
-#setopt inc_append_history        # append each command (c.f. share_history)
+# setopt inc_append_history       # append each command (c.f. share_history)
 setopt share_history              # share commands between shells (c.f. inc_append_history)
 
 
@@ -157,8 +157,8 @@ COLOR_NONE="%{$terminfo[sgr0]%}"
 
 
 ### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
-# PROMPT="[%m:%4c] "
-PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4c]${COLOR_NONE} "
+# PROMPT="[%m:%4~] "
+PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~]${COLOR_NONE} "
 RPROMPT="%(?..${COLOR_RED}[%?]${COLOR_NONE})"
 
 
@@ -166,19 +166,19 @@ RPROMPT="%(?..${COLOR_RED}[%?]${COLOR_NONE})"
 case $TERM in
     xterm*|rxvt*|cygwin)
         precmd() {
-            print -Pn "\e]0;%n@%m: %~\a"
+            print -Pn "\e]0;%n@%m (%y): %5~\a"
         }
         preexec() {
-            # print -Pn "\e]0;%n@%m: %~ [$1]\a"
+            # print -Pn "\e]0;%n@%m (%y): %5~ [$1]\a"
         }
         ;;
     screen)
         precmd() {
-            print -Pn "\e]0;%n@%m: %~\a"
+            print -Pn "\e]0;%n@%m (%y): %5~\a"
             print -Pn "\ek \e\\"
         }
         preexec () {
-            # print -Pn "\e]0;%n@%m: %~ [$1]\a"
+            # print -Pn "\e]0;%n@%m (%y): %5~ [$1]\a"
             print -Pn "\ek${1[(wr)^(*=*|sudo|ssh|-*)]}\e\\"
         }
         ;;
