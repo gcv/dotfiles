@@ -366,3 +366,68 @@ function j_precmd() {
 }
 
 precmd_functions+=(j_precmd)
+
+
+### Set up the EC2 environment.
+function ec2setup() {
+    # variables
+    local ec2_home
+    local potential_places
+    local place
+    local version
+    local key
+
+    # autocompletion support
+    if [[ "$1" = "-c" || "$1" = "--complete" ]]; then
+        for key in ~/.ec2/pk-*.pem(N:t); do
+            echo ${key} | sed -e 's/pk-//' | sed -e 's/\.pem//'
+        done
+        return 0
+    fi
+
+    # sanity check
+    if [[ -z "$1" ]]; then
+        echo "key ID required; they're usually in ~/.ec2"
+        return 1
+    fi
+
+    # find EC2 installation
+    if [[ "${EC2_HOME}" = "" || -z "$(which ec2-describe-instances)" ]]; then
+        potential_places=( ~ ~/sw/packages(N) /*/local(N) /*/*/local(N) )
+        for place in ${potential_places[@]}; do
+            for version in ${place}/ec2-api-tools*(/NOn); do
+                ec2_home=${version}
+                break
+            done
+        done
+        if [[ -z ${ec2_home} ]]; then
+            echo "EC2 tools not found anywhere"
+            return 1
+        fi
+        export EC2_HOME="${ec2_home}"
+        echo "export EC2_HOME=${EC2_HOME}"
+        export PATH="${EC2_HOME}/bin:${PATH}"
+    fi
+
+    # which keys?
+    local ec2_private_key=$(echo ~/.ec2/pk-$1.pem)
+    if [[ ! -f "${ec2_private_key}" ]]; then
+        echo "private key $1 not found"
+        return 1
+    fi
+    local ec2_cert=$(echo ~/.ec2/cert-$1.pem)
+    if [[ ! -f "${ec2_cert}" ]]; then
+        echo "cert $1 not found"
+        return 1
+    fi
+    export EC2_PRIVATE_KEY="${ec2_private_key}"
+    echo "export EC2_PRIVATE_KEY=${EC2_PRIVATE_KEY}"
+    export EC2_CERT="${ec2_cert}"
+    echo "export EC2_CERT=${EC2_CERT}"
+}
+
+function _ec2setup() {
+    compadd $(ec2setup --complete)
+}
+
+compdef _ec2setup ec2setup
