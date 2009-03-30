@@ -7,10 +7,27 @@ export LC_CTYPE=en_US.UTF-8
 export LC_COLLATE=C
 
 
-### path
+### paths
 typeset -U path
-path=($HOME/sw/bin /opt/local/bin /usr/local/bin /usr/bin /bin $HOME/sw/sbin /opt/local/sbin /usr/local/sbin /usr/sbin /sbin $path)
-export MANPATH=$MANPATH:/opt/local/man
+path=( /opt/local/bin /opt/local/sbin
+       /usr/local/bin /usr/local/sbin
+       /usr/bin /usr/sbin
+       /bin /sbin
+       $path )
+
+typeset -U manpath
+manpath+=( /opt/local/man )
+
+for sw_package in ~/sw/*(@N); do
+    # Add locally-installed packages to the path. Assume packages were
+    # installed as versioned directories with symbolic links to the
+    # active version:
+    #   ./configure --prefix=~/sw/package-version && make && make install
+    #   ln -s ~/sw/package-version ~/sw/package
+    [[ -d ${sw_package}/bin ]] && path=( ${sw_package}/bin ${path} )
+    [[ -d ${sw_package}/sbin ]] && path=( ${sw_package}/sbin ${path} )
+    [[ -d ${sw_package}/man ]] && manpath=( ${sw_package}/man ${manpath} )
+done
 
 
 ### aliases
