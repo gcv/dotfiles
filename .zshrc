@@ -5,6 +5,7 @@ export PAGER=less
 export CVS_RSH=ssh
 export LC_CTYPE=en_US.UTF-8
 export LC_COLLATE=C
+export UNAME=`uname`
 
 
 ### paths
@@ -36,19 +37,12 @@ alias dir='ls -aCF'
 alias v='ls -lahF'
 alias d='dirs -v'
 
-if [[ `uname` == "Darwin" &&
-      -a '/Applications/Emacs.app/Contents/MacOS/bin/emacsclient' ]]; then
-    alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n'
-else
+[[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
+    alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n' || \
     alias ec='emacsclient -n'
-fi
 
-if [[ `uname` == "Linux" ]]; then
-    alias ls='ls --color'
-elif [[ `uname` == "Darwin" &&
-        -a '/opt/local/bin/gls' ]]; then
-    alias ls='gls --color'
-fi
+[[ ${UNAME} == "Linux" ]] && alias ls='ls --color'
+[[ ${UNAME} == "Darwin" && -x "/opt/local/bin/gls" ]] && alias ls='gls --color'
 
 alias -g ...='../..'
 alias -g ....='../../..'
