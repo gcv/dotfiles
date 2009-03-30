@@ -372,9 +372,7 @@ precmd_functions+=(j_precmd)
 function ec2setup() {
     # variables
     local ec2_home
-    local potential_places
-    local place
-    local version
+    local ec2_versions
     local key
 
     # autocompletion support
@@ -393,16 +391,12 @@ function ec2setup() {
 
     # find EC2 installation
     if [[ "${EC2_HOME}" = "" || -z "$(which ec2-describe-instances)" ]]; then
-        potential_places=( ~ ~/sw/packages(N) /*/local(N) /*/*/local(N) )
-        for place in ${potential_places[@]}; do
-            for version in ${place}/ec2-api-tools*(/NOn); do
-                ec2_home=${version}
-                break
-            done
-        done
-        if [[ -z ${ec2_home} ]]; then
+        ec2_versions=( {~,~/sw/packages,/opt}/ec2-api-tools*(/NOn) )
+        if [[ -z ${ec2_versions[@]} ]]; then
             echo "EC2 tools not found anywhere"
             return 1
+        else
+            ec2_home=${ec2_versions[0]}
         fi
         export EC2_HOME="${ec2_home}"
         echo "export EC2_HOME=${EC2_HOME}"
