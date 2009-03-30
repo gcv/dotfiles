@@ -402,7 +402,7 @@ function ec2setup() {
 
     # find EC2 installation
     if [[ "${EC2_HOME}" = "" || -z "$(which ec2-describe-instances)" ]]; then
-        ec2_versions=( {~,~/sw/packages,/opt}/ec2-api-tools*(/NOn) )
+        ec2_versions=( {~,~/sw,/opt}/ec2-api-tools*(/NOn) )
         if [[ -z ${ec2_versions[@]} ]]; then
             echo "EC2 tools not found anywhere"
             return 1
