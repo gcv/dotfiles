@@ -177,7 +177,7 @@ function precmd_vcs_info() {
     vcs_info
 }
 
-precmd_functions+=( precmd_vcs_info )
+is-at-least "4.3.7" && precmd_functions+=( precmd_vcs_info )
 
 
 ### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
