@@ -1,3 +1,38 @@
+autoload -Uz compinit && compinit                          # completion
+autoload -Uz edit-command-line && zle -N edit-command-line # bound to M-e below
+autoload -Uz colors zsh/terminfo                           # symbolic colors
+autoload -Uz is-at-least                                   # zsh version checks
+autoload -Uz vcs_info                                      # VCS status
+
+
+### paths include locally-installed packages under ~/sw as symbolic
+### links to the active version:
+###   ./configure --prefix=~/sw/package-version && make && make install
+###   ln -s ~/sw/package-version ~/sw/package
+typeset -U path
+path=(
+    ~/sw/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
+    ~/sw/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
+    /opt/local/bin /opt/local/sbin
+    /usr/local/bin /usr/local/sbin
+    /usr/bin /usr/sbin
+    /bin /sbin
+    $path
+)
+
+typeset -U manpath
+manpath+=(
+    ~/sw/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
+    /opt/local/man
+)
+
+
+### switch to a more recent version of zsh if found in the path
+if [[ -x $(whence zsh) ]]; then
+    is-at-least $(zsh --version | awk '{print $2}') || exec zsh
+fi
+
+
 ### environmental variables
 export EDITOR=vi
 export LESS="-M -R"
@@ -6,29 +41,6 @@ export CVS_RSH=ssh
 export LC_CTYPE=en_US.UTF-8
 export LC_COLLATE=C
 export UNAME=`uname`
-
-
-### paths
-typeset -U path
-path=( /opt/local/bin /opt/local/sbin
-       /usr/local/bin /usr/local/sbin
-       /usr/bin /usr/sbin
-       /bin /sbin
-       $path )
-
-typeset -U manpath
-manpath+=( /opt/local/man )
-
-for sw_package in ~/sw/*(@N); do
-    # Add locally-installed packages to the path. Assume packages were
-    # installed as versioned directories with symbolic links to the
-    # active version:
-    #   ./configure --prefix=~/sw/package-version && make && make install
-    #   ln -s ~/sw/package-version ~/sw/package
-    [[ -d ${sw_package}/bin ]] && path=( ${sw_package}/bin ${path} )
-    [[ -d ${sw_package}/sbin ]] && path=( ${sw_package}/sbin ${path} )
-    [[ -d ${sw_package}/man ]] && manpath=( ${sw_package}/man ${manpath} )
-done
 
 
 ### aliases
@@ -102,11 +114,6 @@ setopt pushd_to_home              # pushd with no arguments goes to ~
 setopt pushd_ignore_dups          # no duplicates in directory stack
 
 
-### edit command line in text editor (bound to M-e below)
-autoload -U edit-command-line
-zle -N edit-command-line
-
-
 ### keyboard settings
 bindkey '^?' backward-delete-char     # Mac keyboard backspace
 bindkey '^P' history-beginning-search-backward
@@ -151,13 +158,9 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*:functions' ignored-patterns '_*'
 zstyle ':completion:*:kill:*' force-list always
 zstyle ':completion:*:*:kill:*' menu yes select
-# initialize
-autoload -Uz compinit
-compinit
 
 
 ### colors
-autoload -U colors zsh/terminfo
 if [[ "$terminfo[colors]" -ge 8 ]]; then
     colors
 fi
