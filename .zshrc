@@ -3,6 +3,9 @@ autoload -Uz edit-command-line && zle -N edit-command-line # bound to M-e below
 autoload -Uz colors zsh/terminfo                           # symbolic colors
 autoload -Uz is-at-least                                   # zsh version checks
 autoload -Uz vcs_info                                      # VCS status
+bindkey -e                                                 # Emacs keybindings
+ulimit -c 0                                                # no core dumps
+ulimit -s unlimited                                        # no stack limits
 
 
 ### paths include locally-installed packages under ~/sw as symbolic
@@ -70,12 +73,6 @@ export LS_COLORS="no=00:fi=00:di=95:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40
 HISTSIZE=10000
 HISTFILE=~/.history
 SAVEHIST=10000
-
-
-### shell settings
-bindkey -e                        # Emacs keybindings
-ulimit -c 0                       # no core dumps
-ulimit -s unlimited               # stop limiting the stack
 
 
 ### history options
@@ -171,31 +168,47 @@ done
 COLOR_NONE="%{$terminfo[sgr0]%}"
 
 
+### vcs_info configuration
+zstyle ':vcs_info:*' formats " %s:${COLOR_GREEN}%b${COLOR_NONE}"
+zstyle ':vcs_info:*' actionformats " %s:${COLOR_GREEN}%b${COLOR_NONE} ${COLOR_RED}%a${COLOR_NONE}"
+zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat "${COLOR_GREEN}%b${COLOR_NONE}:%r"
+
+function precmd_vcs_info() {
+    vcs_info
+}
+
+precmd_functions+=( precmd_vcs_info )
+
+
 ### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
 # PROMPT="[%m:%4~] "
-PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~]${COLOR_NONE} "
+PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}'"]${COLOR_NONE} "
 RPROMPT="%(?..${COLOR_RED}[%?]${COLOR_NONE})"
 
 
 ### title bar or status bar
 case $TERM in
     xterm*|rxvt*|cygwin)
-        precmd() {
+        function precmd_xterm() {
             print -Pn "\e]0;%n@%m (%y): %5~\a"
         }
-        preexec() {
+        precmd_functions+=( precmd_xterm )
+        function preexec_xterm() {
             # print -Pn "\e]0;%n@%m (%y): %5~ [$1]\a"
         }
+        preexec_functions+=( preexec_xterm )
         ;;
     screen)
-        precmd() {
+        function precmd_screen() {
             print -Pn "\e]0;%n@%m (%y): %5~\a"
             print -Pn "\ek \e\\"
         }
-        preexec () {
+        precmd_functions+=( precmd_screen )
+        function preexec_screen () {
             # print -Pn "\e]0;%n@%m (%y): %5~ [$1]\a"
             print -Pn "\ek${1[(wr)^(*=*|sudo|ssh|-*)]}\e\\"
         }
+        preexec_functions+=( preexec_screen )
         ;;
 esac
 
@@ -375,11 +388,11 @@ function _j() {
 
 compdef _j j
 
-function j_precmd() {
+function precmd_j() {
     j --add "$(pwd -P)"
 }
 
-precmd_functions+=(j_precmd)
+precmd_functions+=( precmd_j )
 
 
 ### Set up the EC2 environment.
