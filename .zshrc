@@ -26,8 +26,11 @@ path=(
 typeset -U manpath
 manpath+=(
     ~/sw/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
+    ~/sw/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
     /opt/local/man
 )
+# append colon for manpath search order splicing
+export MANPATH=${MANPATH}:
 
 
 ### switch to a more recent version of zsh if found in the path
