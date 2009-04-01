@@ -142,7 +142,7 @@ bindkey '\ee' edit-command-line
 
 
 ### command completion
-compinit
+compinit -i                                                # no insecure files
 zstyle ':completion:*' completer _expand _complete _correct _approximate
 zstyle ':completion:*' completions 1
 zstyle ':completion:*' expand prefix suffix
