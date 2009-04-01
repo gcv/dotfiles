@@ -95,6 +95,7 @@ setopt check_jobs                 # check jobs before exiting the shell
 setopt correct                    # correct spelling of commands
 setopt no_correct_all             # do not correct spelling of files (annoying)
 setopt extended_glob              # globs #, ~, and ^
+setopt numeric_glob_sort          # orders files numerically
 setopt long_list_jobs             # use the long format for job listings
 setopt no_beep                    # stop beeping
 setopt no_hist_beep               # turn off no-history item beeps
