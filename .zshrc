@@ -262,6 +262,9 @@ function dsj() {
 ### Maintains a jump-list of used directories. Adapted for zsh from
 ### http://github.com/rupa/j
 function j() {
+    # do not use j() if the user has switched uids
+    [[ $(echo ${HOME}(:t)) != ${USER} ]] && return 0
+
     local jfile=$HOME/.j
 
     # add to jump list
