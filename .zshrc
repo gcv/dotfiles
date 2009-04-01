@@ -1,4 +1,4 @@
-autoload -Uz compinit && compinit                          # completion
+autoload -Uz compinit                                      # prepare completion
 autoload -Uz edit-command-line && zle -N edit-command-line # bound to M-e below
 autoload -Uz colors zsh/terminfo                           # symbolic colors
 autoload -Uz is-at-least                                   # zsh version checks
@@ -141,6 +141,7 @@ bindkey '\ee' edit-command-line
 
 
 ### command completion
+compinit
 zstyle ':completion:*' completer _expand _complete _correct _approximate
 zstyle ':completion:*' completions 1
 zstyle ':completion:*' expand prefix suffix
