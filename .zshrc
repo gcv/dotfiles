@@ -8,7 +8,7 @@ ulimit -c 0                                                # no core dumps
 ulimit -s unlimited                                        # no stack limits
 
 
-### paths include locally-installed packages under ~/sw as symbolic
+### Paths include locally-installed packages under ~/sw as symbolic
 ### links to the active version:
 ###   ./configure --prefix=~/sw/package-version && make && make install
 ###   ln -s ~/sw/package-version ~/sw/package
@@ -29,11 +29,11 @@ manpath+=(
     ~/sw/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
     /opt/local/man
 )
-# append colon for manpath search order splicing
-export MANPATH=${MANPATH}:
+export MANPATH=${MANPATH}:                                 # append colon
 
 
-### switch to a more recent version of zsh if found in the path
+### Switch to a more recent zsh if found in path. Be sure not to
+### initialize completion system until after this happens.
 if [[ -x $(whence zsh) ]]; then
     is-at-least $(zsh --version | awk '{print $2}') || exec zsh
 fi
