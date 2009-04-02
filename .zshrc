@@ -136,7 +136,7 @@ bindkey '^[[[A' run-help
 bindkey '^[[[B' which-command
 bindkey '^[[[C' where-is
 bindkey '^@' set-mark-command
-bindkey '^W' copy-region-as-kill
+bindkey '^[W' copy-region-as-kill
 bindkey ' ' magic-space
 bindkey '\ee' edit-command-line
 
