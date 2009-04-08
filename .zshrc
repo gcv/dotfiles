@@ -105,6 +105,7 @@ setopt no_hup                     # do not terminate child processes on exit
 setopt notify                     # tell me when jobs terminate
 setopt prompt_subst               # allow prompt variable substitution
 setopt transient_rprompt          # remove previous rprompt after command
+setopt auto_menu                  # turn on menu-completion after two tabs
 
 
 ### directory stack customization
@@ -156,6 +157,7 @@ zstyle ':completion:*' max-errors 1
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
 zstyle ':completion:*' substitute 1
 zstyle ':completion:*' use-compctl false
+zstyle ':completion:*:default' menu 'select=0'
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*:functions' ignored-patterns '_*'
 zstyle ':completion:*:kill:*' force-list always
