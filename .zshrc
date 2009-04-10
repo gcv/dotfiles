@@ -106,6 +106,9 @@ setopt notify                     # tell me when jobs terminate
 setopt prompt_subst               # allow prompt variable substitution
 setopt transient_rprompt          # remove previous rprompt after command
 setopt auto_menu                  # turn on menu-completion after two tabs
+setopt short_loops                # allow one-line 'for' and 'repeat' loops
+setopt rc_expand_param            # repeated array expansions
+setopt rc_quotes                  # '' means a single quote in single quotes
 
 
 ### directory stack customization
