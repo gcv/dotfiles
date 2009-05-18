@@ -320,7 +320,7 @@ BEGIN { split(substr(q, 3), a, " ") } {
     local out
     for x; do
         case $x in
-            -h|--help)   echo "j [--h[elp]] [--r] [--l] [regex1 ... regexn]"; return;;
+            -h|--help)   echo "j [--h[elp]] [--l] [--r] [--s] [regex1 ... regexn]"; return;;
             -l|--list)   local list=1;;
             -r|--recent) local recent=r;;
             -s|--short)  local short=1;;
@@ -330,6 +330,14 @@ BEGIN { split(substr(q, 3), a, " ") } {
     done
 
     set -- $out
+
+    # remove directories which no longer exist
+    awk -F"|" '
+{
+    if (system("test -d \"" $1 "\"")) next; print $0
+}
+    ' $jfile 2>/dev/null > $jfile.tmp
+    mv -f $jfile.tmp $jfile
 
     if [ -z "$1" -o "$list" ]; then
         [ "$short" ] && return
