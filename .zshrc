@@ -280,20 +280,19 @@ function j() {
         [ "$*" = "$HOME" ] && return
         # else...
         awk -v q="$*" -v t="$(date +%s)" -F"|" '
+BEGIN { l[q] = 1; d[q] = t }
 $2 >= 1 {
     if ($1 == q) {
         l[$1] = $2 + 1
         d[$1] = t
-        found = 1
     }
     else {
         l[$1] = $2
         d[$1] = $3
-        count += $2
     }
+    count += $2
 }
 END {
-    if (!found) l[q] = 1 && d[q] = t
     if (count > 1000) {
         for (i in l) print i "|" 0.9*l[i] "|" d[i] # aging
     }
@@ -308,8 +307,8 @@ END {
     [ "$1" = "--complete" -o "$1" = "-c" ] && {
         awk -v q="$2" -F"|" '
 BEGIN { split(substr(q, 3), a, " ") } {
-    if (system("test -d \"" $1 "\"")) next
-    for (i in a) $1 !~ a[i] && $1 = ""; if ($1) print $1
+    for (i in a) $1 !~ a[i] && $1 = ""
+    if ($1) print $1
 }
         ' $jfile 2>/dev/null
         return
@@ -348,7 +347,6 @@ BEGIN {
     if (r) f = 3
 }
 {
-    if (system("test -d \"" $1 "\"")) next
     for (i in a) $1 !~ a[i] && $1 = ""
     if ($1) if (f == 3) { print t - $f "\t" $1 } else print $f "\t" $1
 }
@@ -382,7 +380,6 @@ END {
     if (! x) {
         close(FILENAME)
         while (getline < FILENAME) {
-            if (system("test -d \"" $1 "\"")) continue
             for (i in a) tolower($1) !~ tolower(a[i]) && $1 = ""
             if ($1) {
                 if (s) {
