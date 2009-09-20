@@ -144,6 +144,8 @@ bindkey '^[W' copy-region-as-kill
 bindkey ' ' magic-space
 bindkey '\ee' edit-command-line
 bindkey '\C-xu' universal-argument
+bindkey '^[^[[D' backward-word
+bindkey '^[^[[C' forward-word
 
 
 ### command completion
