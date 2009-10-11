@@ -47,6 +47,7 @@ export CVS_RSH=ssh
 export LC_CTYPE=en_US.UTF-8
 export LC_COLLATE=C
 export UNAME=`uname`
+export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
 
 
 ### aliases
