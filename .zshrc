@@ -342,8 +342,8 @@ function z() {
      if( typ == "recent" ) {
       cmd = "sort -nr >&2"
      } else cmd = "sort -n >&2"
-     for( i in files ) if( files[i] ) printf "%-15s %s\n", files[i], i | cmd
-     if( override ) printf "%-15s %s\n", "common:", override > "/dev/stderr"
+     for( i in files ) if( files[i] ) printf "%-10s %s\n", files[i], i | cmd
+     if( override ) printf "%-10s %s\n", "common:", override > "/dev/stderr"
     } else {
      if( override ) toopen = override
      print toopen
@@ -370,14 +370,14 @@ function z() {
     } else if( typ == "recent" ) {
      f = t-$3
     } else f = frecent($2, $3)
-    case[$1] = nocase[$1] = f
+    wcase[$1] = nocase[$1] = f
     for( i in a ) {
-     if( $1 !~ a[i] ) delete case[$1]
+     if( $1 !~ a[i] ) delete wcase[$1]
      if( tolower($1) !~ tolower(a[i]) ) delete nocase[$1]
     }
-    if( case[$1] > oldf ) {
+    if( wcase[$1] > oldf ) {
      cx = $1
-     oldf = case[$1]
+     oldf = wcase[$1]
     } else if( nocase[$1] > noldf ) {
      ncx = $1
      noldf = nocase[$1]
@@ -385,7 +385,7 @@ function z() {
    }
    END {
     if( cx ) {
-     output(case, cx, common(case, a, 0))
+     output(wcase, cx, common(wcase, a, 0))
     } else if( ncx ) output(nocase, ncx, common(nocase, a, 1))
    }
   ' $datafile)"
