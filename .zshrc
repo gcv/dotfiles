@@ -257,17 +257,6 @@ function findl() {
 }
 
 
-### Directory stack jump: cd to an entry in the directory stack which
-### matches the given regexps.
-function dsj() {
-    local words="$@"
-    local regex="${words/\ /.*}"
-    local matching_dirs=$( dirs -lp | sort -u | grep "$regex" )
-    local dir_to_switch_to=$( echo $matching_dirs | head -1 )
-    cd "$dir_to_switch_to"
-}
-
-
 ### Maintains a jump-list of used directories. z is the new j. Adapted for zsh
 ### from http://github.com/rupa/z
 function z() {
