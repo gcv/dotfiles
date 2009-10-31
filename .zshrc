@@ -430,7 +430,7 @@ function ec2setup() {
             echo "EC2 tools not found anywhere"
             return 1
         else
-            ec2_home=${ec2_versions[0]}
+            ec2_home=${ec2_versions[1]}
         fi
         export EC2_HOME="${ec2_home}"
         echo "export EC2_HOME=${EC2_HOME}"
