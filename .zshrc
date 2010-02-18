@@ -16,6 +16,7 @@ typeset -U path
 path=(
     ~/sw/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
     ~/sw/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
+    /opt/brew/bin /opt/brew/sbin
     /opt/local/bin /opt/local/sbin
     /usr/local/bin /usr/local/sbin
     /usr/bin /usr/sbin
@@ -27,6 +28,7 @@ typeset -U manpath
 manpath+=(
     ~/sw/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
     ~/sw/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
+    /opt/brew/share/man
     /opt/local/man
 )
 export MANPATH=${MANPATH}:                                 # append colon
@@ -61,7 +63,7 @@ alias d='dirs -v'
     alias ec='emacsclient -n'
 
 [[ ${UNAME} == "Linux" ]] && alias ls='ls --color'
-[[ ${UNAME} == "Darwin" && -x "/opt/local/bin/gls" ]] && alias ls='gls --color'
+[[ ${UNAME} == "Darwin" && -x "/opt/brew/bin/gls" ]] && alias ls='gls --color'
 
 alias -g ...='../..'
 alias -g ....='../../..'
