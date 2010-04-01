@@ -265,7 +265,7 @@ function z() {
     # do not use z() if the user has switched uids
     [[ $(echo ${HOME}(:t)) != ${USER} ]] && return 0
 
-    local datafile=$HOME/.z
+    local datafile="$HOME/.z"
 
     # adding entries
     if [ "$1" = "--add" -o "$1" = "-a" ]; then
