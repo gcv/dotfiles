@@ -288,8 +288,8 @@ function z() {
      for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
     } else for( i in rank ) print i "|" rank[i] "|" time[i]
    }
-  ' $datafile 2>/dev/null > $datafile.tmp
-        mv -f $datafile.tmp $datafile
+  ' "$datafile" 2>/dev/null > "$datafile.tmp"
+        mv -f "$datafile.tmp" "$datafile"
 
     # autocompletion support
     elif [ "$1" = "--complete" ]; then
@@ -308,7 +308,7 @@ function z() {
      if( $1 ) print $1
     }
    }
-  ' $datafile 2>/dev/null
+  ' "$datafile" 2>/dev/null
 
     # navigation and other commands
     else
@@ -388,11 +388,11 @@ function z() {
      output(wcase, cx, common(wcase, a, 0))
     } else if( ncx ) output(nocase, ncx, common(nocase, a, 1))
    }
-  ' $datafile)"
+  ' "$datafile")"
         if [ $? -gt 0 ]; then
-            rm -f $datafile.tmp
+            rm -f "$datafile.tmp"
         else
-            mv -f $datafile.tmp $datafile
+            mv -f "$datafile.tmp" "$datafile"
             [ "$cd" ] && cd "$cd"
         fi
     fi
