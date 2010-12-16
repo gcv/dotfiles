@@ -267,16 +267,19 @@ function z() {
 
     local datafile="$HOME/.z"
 
-    # adding entries
+    # add entries
     if [ "$1" = "--add" -o "$1" = "-a" ]; then
         shift
         [ "$*" = "$HOME" ] && return
-        awk -v p="$*" -v t="$(date +%s)" -F"|" '
-   BEGIN { rank[p] = 1; time[p] = t }
+        awk -v path="$*" -v now="$(date +%s)" -F"|" '
+   BEGIN {
+     rank[path] = 1
+     time[path] = now
+   }
    $2 >= 1 {
-    if( $1 == p ) {
+    if( $1 == path ) {
      rank[$1] = $2 + 1
-     time[$1] = t
+     time[$1] = now
     } else {
      rank[$1] = $2
      time[$1] = $3
@@ -328,7 +331,10 @@ function z() {
 
         # if we hit enter on a completion just go there
         [ -d "$last" ] && cd "$last" && return
+
+        # no file yet
         [ -f "$datafile" ] || return
+
         local cd="$(awk -v t="$(date +%s)" -v list="$list" -v typ="$typ" -v q="$fnd" -v tmpfl="$datafile.tmp" -F"|" '
    function frecent(rank, time) {
     dx = t-time
@@ -407,7 +413,7 @@ function _z() {
 compdef _z z
 
 function precmd_z() {
-    z --add "$(pwd -P)"
+    z --add "$(pwd -P 2>/dev/null)"
 }
 
 precmd_functions+=( precmd_z )
