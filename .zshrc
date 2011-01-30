@@ -236,6 +236,13 @@ if [[ $TERM == "dumb" ]]; then
 fi
 
 
+### Turn on autojump (https://github.com/joelthelion/autojump); should be
+### installed using Homebrew.
+if [ -f `brew --prefix`/etc/autojump ]; then
+    . `brew --prefix`/etc/autojump
+fi
+
+
 ### pskill <process name>
 function pskill() {
    kill -9 $(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')
@@ -257,166 +264,6 @@ function findl() {
     find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
         xargs -0 grep -I -n -i -e $1
 }
-
-
-### Maintains a jump-list of used directories. z is the new j. Adapted for zsh
-### from http://github.com/rupa/z
-function z() {
-    # do not use z() if the user has switched uids
-    [[ $(echo ${HOME}(:t)) != ${USER} ]] && return 0
-
-    local datafile="$HOME/.z"
-
-    # add entries
-    if [ "$1" = "--add" -o "$1" = "-a" ]; then
-        shift
-        [ "$*" = "$HOME" ] && return
-        awk -v path="$*" -v now="$(date +%s)" -F"|" '
-   BEGIN {
-     rank[path] = 1
-     time[path] = now
-   }
-   $2 >= 1 {
-    if( $1 == path ) {
-     rank[$1] = $2 + 1
-     time[$1] = now
-    } else {
-     rank[$1] = $2
-     time[$1] = $3
-    }
-    count += $2
-   }
-   END {
-    if( count > 1000 ) {
-     for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
-    } else for( i in rank ) print i "|" rank[i] "|" time[i]
-   }
-  ' "$datafile" 2>/dev/null > "$datafile.tmp"
-        mv -f "$datafile.tmp" "$datafile"
-
-    # autocompletion support
-    elif [ "$1" = "--complete" ]; then
-        awk -v q="$2" -F"|" '
-   BEGIN {
-    if( q == tolower(q) ) nocase = 1
-    split(substr(q,3),fnd," ")
-   }
-   {
-    if( system("test -d \"" $1 "\"") ) next
-    if( nocase ) {
-     for( i in fnd ) tolower($1) !~ tolower(fnd[i]) && $1 = ""
-     if( $1 ) print $1
-    } else {
-     for( i in fnd ) $1 !~ fnd[i] && $1 = ""
-     if( $1 ) print $1
-    }
-   }
-  ' "$datafile" 2>/dev/null
-
-    # navigation and other commands
-    else
-        while [ "$1" ]; do
-            case "$1" in
-                -h|--help) echo "z [-h][-l][-r][-t] args" >&2; return;;
-                -l|--list) local list=1;;
-                -r|--rank) local typ="rank";;
-                -t|--time|--recent) local typ="recent";;
-                --) while [ "$1" ]; do shift; local fnd="$fnd $1"; done;;
-                *) local fnd="$fnd $1";;
-            esac
-            local last=$1
-            shift
-        done
-        [ "$fnd" ] || local list=1
-
-        # if we hit enter on a completion just go there
-        [ -d "$last" ] && cd "$last" && return
-
-        # no file yet
-        [ -f "$datafile" ] || return
-
-        local cd="$(awk -v t="$(date +%s)" -v list="$list" -v typ="$typ" -v q="$fnd" -v tmpfl="$datafile.tmp" -F"|" '
-   function frecent(rank, time) {
-    dx = t-time
-    if( dx < 3600 ) return rank*4
-    if( dx < 86400 ) return rank*2
-    if( dx < 604800 ) return rank/2
-    return rank/4
-   }
-   function output(files, toopen, override) {
-    if( list ) {
-     if( typ == "recent" ) {
-      cmd = "sort -nr >&2"
-     } else cmd = "sort -n >&2"
-     for( i in files ) if( files[i] ) printf "%-10s %s\n", files[i], i | cmd
-     if( override ) printf "%-10s %s\n", "common:", override > "/dev/stderr"
-    } else {
-     if( override ) toopen = override
-     print toopen
-    }
-   }
-   function common(matches, fnd, nc) {
-    for( i in matches ) {
-     if( matches[i] && (!short || length(i) < length(short)) ) short = i
-    }
-    if( short == "/" ) return
-    for( i in matches ) if( matches[i] && i !~ short ) x = 1
-    if( x ) return
-    if( nc ) {
-     for( i in fnd ) if( tolower(short) !~ tolower(fnd[i]) ) x = 1
-    } else for( i in fnd ) if( short !~ fnd[i] ) x = 1
-    if( !x ) return short
-   }
-   BEGIN { split(q, a, " ") }
-   {
-    if( system("test -d \"" $1 "\"") ) next
-    print $0 >> tmpfl
-    if( typ == "rank" ) {
-     f = $2
-    } else if( typ == "recent" ) {
-     f = t-$3
-    } else f = frecent($2, $3)
-    wcase[$1] = nocase[$1] = f
-    for( i in a ) {
-     if( $1 !~ a[i] ) delete wcase[$1]
-     if( tolower($1) !~ tolower(a[i]) ) delete nocase[$1]
-    }
-    if( wcase[$1] > oldf ) {
-     cx = $1
-     oldf = wcase[$1]
-    } else if( nocase[$1] > noldf ) {
-     ncx = $1
-     noldf = nocase[$1]
-    }
-   }
-   END {
-    if( cx ) {
-     output(wcase, cx, common(wcase, a, 0))
-    } else if( ncx ) output(nocase, ncx, common(nocase, a, 1))
-   }
-  ' "$datafile")"
-        if [ $? -gt 0 ]; then
-            rm -f "$datafile.tmp"
-        else
-            mv -f "$datafile.tmp" "$datafile"
-            [ "$cd" ] && cd "$cd"
-        fi
-    fi
-}
-
-alias j="z"
-
-function _z() {
-    compadd -M 'l:|=* r:|=*' -M 'm:{a-zA-Z}={A-Za-z}' $(z --complete)
-}
-
-compdef _z z
-
-function precmd_z() {
-    z --add "$(pwd -P 2>/dev/null)"
-}
-
-precmd_functions+=( precmd_z )
 
 
 ### Set up the EC2 environment.
