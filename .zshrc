@@ -198,7 +198,7 @@ is-at-least "4.3.7" && precmd_functions+=( precmd_vcs_info )
 
 ### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
 # PROMPT="[%m:%4~] "
-PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}'"]${COLOR_NONE} "
+PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}${rvm_info_msg}'"]${COLOR_NONE} "
 RPROMPT="%(?..${COLOR_RED}[%?]${COLOR_NONE})"
 
 
@@ -323,3 +323,14 @@ function _ec2setup() {
 }
 
 compdef _ec2setup ec2setup
+
+
+### Turn on RVM.
+function rvm_on() {
+    [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
+    # fpath=($fpath $HOME/.rvm/scripts/zsh/Completion)
+    function rvm_prompt_update() {
+        rvm_info_msg=" rvm:${COLOR_CYAN}$(~/.rvm/bin/rvm-prompt i v p g s)${COLOR_NONE}"
+    }
+    precmd_functions+=(rvm_prompt_update)
+}
