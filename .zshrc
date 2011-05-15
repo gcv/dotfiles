@@ -330,7 +330,12 @@ function rvm_on() {
     [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
     # fpath=($fpath $HOME/.rvm/scripts/zsh/Completion)
     function rvm_prompt_update() {
-        rvm_info_msg=" rvm:${COLOR_CYAN}$(~/.rvm/bin/rvm-prompt i v p g s)${COLOR_NONE}"
+        local rvm_prompt=$(~/.rvm/bin/rvm-prompt i v p g)
+        if [ -z $rvm_prompt ]; then
+            rvm_info_msg=""
+        else
+            rvm_info_msg=" rvm:${COLOR_CYAN}${rvm_prompt}${COLOR_NONE}"
+        fi
     }
     precmd_functions+=(rvm_prompt_update)
 }
