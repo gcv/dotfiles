@@ -198,7 +198,7 @@ is-at-least "4.3.7" && precmd_functions+=( precmd_vcs_info )
 
 ### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
 # PROMPT="[%m:%4~] "
-PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}${rvm_info_msg}'"]${COLOR_NONE} "
+PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}'"]${COLOR_NONE} "
 RPROMPT="%(?..${COLOR_RED}[%?]${COLOR_NONE})"
 
 
@@ -332,9 +332,11 @@ function rvm_on() {
     function rvm_prompt_update() {
         local rvm_prompt=$(~/.rvm/bin/rvm-prompt i v p g)
         if [ -z $rvm_prompt ]; then
-            rvm_info_msg=""
+            PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}'"]${COLOR_NONE} "
         else
             rvm_info_msg=" rvm:${COLOR_CYAN}${rvm_prompt}${COLOR_NONE}"
+            PROMPT="┌ ${COLOR_MAGENTA}%8~${COLOR_NONE}
+└ %(!.${COLOR_RED}.${COLOR_NONE})${COLOR_MAGENTA}%m${COLOR_NONE}"'${vcs_info_msg_0_}${rvm_info_msg}'" ∴ ${COLOR_NONE}"
         fi
     }
     precmd_functions+=(rvm_prompt_update)
