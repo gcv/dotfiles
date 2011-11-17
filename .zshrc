@@ -57,6 +57,7 @@ alias rm='rm -i'
 alias dir='ls -aCF'
 alias v='ls -lahF'
 alias d='dirs -v'
+alias pf='open -a "Path Finder.app"'
 
 [[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
     alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n' || \
