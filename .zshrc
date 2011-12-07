@@ -45,6 +45,7 @@ fi
 export EDITOR=vi
 export LESS="-M -R"
 export PAGER=less
+export LESSHISTFILE=/dev/null
 export CVS_RSH=ssh
 export LC_CTYPE=en_US.UTF-8
 export LC_COLLATE=C
