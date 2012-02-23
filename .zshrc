@@ -8,12 +8,16 @@ ulimit -c 0                                                # no core dumps
 ulimit -s unlimited                                        # no stack limits
 
 
-### Paths include locally-installed packages under ~/sw as symbolic
-### links to the active version:
-###   ./configure --prefix=~/sw/package-version && make && make install
-###   ln -s ~/sw/package-version ~/sw/package
+### Paths include locally-installed packages under ~/.local as symbolic links to
+### the active version:
+###   ./configure --prefix=~/.local/package-version && make && make install
+###   ln -s ~/.local/package-version ~/.local/package
 typeset -U path
 path=(
+    ~/.local/bin ~/.local/sbin
+    ~/.local/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
+    ~/.local/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
+    # TODO: ~/sw is deprecated.
     ~/sw/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
     ~/sw/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
     /opt/brew/bin /opt/brew/sbin
@@ -26,6 +30,10 @@ path=(
 
 typeset -U manpath
 manpath+=(
+    ~/.local/share/man
+    ~/.local/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
+    ~/.local/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
+    # TODO: ~/sw is deprecated.
     ~/sw/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
     ~/sw/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
     /opt/brew/share/man
@@ -291,7 +299,7 @@ function ec2setup() {
 
     # find EC2 installation
     if [[ "${EC2_HOME}" = "" || -z "$(which ec2-describe-instances)" ]]; then
-        ec2_versions=( {~,~/sw,/opt}/ec2-api-tools*(/NOn) )
+        ec2_versions=( {~,~/.local,/opt}/ec2-api-tools*(/NOn) )
         if [[ -z ${ec2_versions[@]} ]]; then
             echo "EC2 tools not found anywhere"
             return 1
