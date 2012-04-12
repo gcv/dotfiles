@@ -17,9 +17,6 @@ path=(
     ~/.local/bin ~/.local/sbin
     ~/.local/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
     ~/.local/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
-    # TODO: ~/sw is deprecated.
-    ~/sw/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
-    ~/sw/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
     /opt/brew/bin /opt/brew/sbin
     /opt/local/bin /opt/local/sbin
     /usr/local/bin /usr/local/sbin
