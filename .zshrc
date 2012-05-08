@@ -30,9 +30,6 @@ manpath+=(
     ~/.local/share/man
     ~/.local/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
     ~/.local/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
-    # TODO: ~/sw is deprecated.
-    ~/sw/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
-    ~/sw/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
     /opt/brew/share/man
     /opt/local/man
 )
@@ -245,7 +242,7 @@ fi
 
 ### Turn on autojump (https://github.com/joelthelion/autojump); should be
 ### installed using Homebrew.
-if [ -f `brew --prefix`/etc/autojump ]; then
+if [[ ${UNAME} == "Darwin" && -f `brew --prefix`/etc/autojump ]]; then
     . `brew --prefix`/etc/autojump
 fi
 
