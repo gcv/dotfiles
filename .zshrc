@@ -345,3 +345,29 @@ function rvm_on() {
     }
     precmd_functions+=(rvm_prompt_update)
 }
+
+
+### Turn on Python virtualenv.
+function pve() {
+    local pd=~/.python
+    local env_name=$1
+    if [[ -z ${env_name} ]]; then
+        echo "usage: pve <envname>"
+        return 1
+    fi
+    if [[ ! -e ${pd} ]]; then
+        echo "${pd} not found"
+        return 1
+    fi
+    pushd ${pd}
+    if [[ ! -f virtualenv.py ]]; then
+        curl -O https://raw.github.com/pypa/virtualenv/master/virtualenv.py
+    fi
+    if [[ ! -d ${env_name} ]]; then
+        echo "installing virtualenv"
+        python virtualenv.py ${env_name}
+    fi
+    echo "switching to existing Python environment ${env_name}"
+    path=(`pwd`/${env_name}/bin ${path:#`pwd`/*})
+    popd
+}
