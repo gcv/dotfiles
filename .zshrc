@@ -35,6 +35,9 @@ manpath+=(
 )
 export MANPATH=${MANPATH}:                                 # append colon
 
+typeset -U fpath
+fpath+=(/opt/brew/share/zsh/site-functions)
+
 
 ### Switch to a more recent zsh if found in path. Be sure not to
 ### initialize completion system until after this happens.
@@ -332,7 +335,9 @@ compdef _ec2setup ec2setup
 ### Turn on RVM.
 function rvm_on() {
     [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
-    # fpath=($fpath $HOME/.rvm/scripts/zsh/Completion)
+    # autocompletion
+    fpath=($fpath $HOME/.rvm/scripts/zsh/Completion)
+    compinit -i
     function rvm_prompt_update() {
         local rvm_prompt=$(~/.rvm/bin/rvm-prompt i v p g)
         if [ -z $rvm_prompt ]; then
