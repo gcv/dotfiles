@@ -376,3 +376,7 @@ function pve() {
     path=(`pwd`/${env_name}/bin ${path:#`pwd`/*})
     popd
 }
+
+
+######### yesterday we obeyed kings and bent our necks before emperors #########
+#########               but today we kneel only to truth               #########
