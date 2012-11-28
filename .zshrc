@@ -244,7 +244,7 @@ fi
 
 
 ### Turn on autojump (https://github.com/joelthelion/autojump).
-[[ ${UNAME} == "Darwin" && -f `brew --prefix`/etc/autojump ]] && . `brew --prefix`/etc/autojump
+[[ ${UNAME} == "Darwin" && -f `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
 [[ ${UNAME} == "Linux" && -f /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
 
 
