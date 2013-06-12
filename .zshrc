@@ -90,6 +90,7 @@ SAVEHIST=10000
 
 ### history options
 setopt extended_history           # saves timestamps on history
+setopt hist_ignore_space          # do not save command entries which start with a space
 setopt hist_expire_dups_first     # expire history duplicates first
 setopt hist_reduce_blanks         # remove superfluous whitespace
 setopt hist_no_store              # do not save 'history' cmd in history
