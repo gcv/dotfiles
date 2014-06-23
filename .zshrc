@@ -365,11 +365,15 @@ function pve() {
     fi
     pushd ${pd}
     if [[ ! -f virtualenv.py ]]; then
-        curl -O https://raw.github.com/pypa/virtualenv/master/virtualenv.py
+        curl -L -O https://raw.github.com/pypa/virtualenv/master/virtualenv.py
     fi
     if [[ ! -d ${env_name} ]]; then
         echo "installing virtualenv"
-        python virtualenv.py ${env_name}
+        python virtualenv.py ${env_name} --no-setuptools
+        if [[ ! -f get-pip.py ]]; then
+            curl -L -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+        fi
+        ${env_name}/bin/python ./get-pip.py
     fi
     echo "switching to existing Python environment ${env_name}"
     path=(`pwd`/${env_name}/bin ${path:#`pwd`/*})
