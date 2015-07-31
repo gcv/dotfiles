@@ -1,5 +1,5 @@
 startup_message off
-defscrollback 2000
+defscrollback 10000
 escape ``
 vbell off 
 autodetach on
@@ -15,8 +15,6 @@ bind + resize +1
 bind - resize -1
 bind _ resize max
 
-# Make Shift-[PgUp|PgDown] work properly.
-bindkey ^[[5;3~ eval "copy" "stuff \"^u\""
-bindkey ^[[6;3~ eval "copy"
-bindkey -m ^[[5;3~ stuff "^u"
-bindkey -m ^[[6;3~ stuff "^d"
+# fix PgUp and PgDown
+bindkey "^[[5~" eval "copy" "stuff ^b"
+bindkey "^[[6~" eval "copy" "stuff ^f"
