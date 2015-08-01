@@ -388,12 +388,6 @@ function pve() {
 }
 
 
-### Turn on GVM (golang version manager).
-function gvm_on() {
-    source ~/.gvm/scripts/gvm
-}
-
-
 ### GPG directory encryption.
 function gpgd() {
 
