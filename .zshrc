@@ -206,7 +206,7 @@ is-at-least "4.3.7" && precmd_functions+=( precmd_vcs_info )
 
 ### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
 # PROMPT="[%m:%4~] "
-PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}'"]${COLOR_NONE} "
+PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}${COLOR_MAGENTA}${VIRTUAL_ENV:+ }`basename ${VIRTUAL_ENV:-""}`${COLOR_NONE}'"]${COLOR_NONE} "
 RPROMPT="%(?..${COLOR_RED}[%?]${COLOR_NONE})"
 
 
@@ -355,9 +355,15 @@ function rvm_on() {
 function pve() {
     local pd=~/.python
     local env_name=$1
+    local system_python=/usr/bin/python2
     if [[ -z ${env_name} ]]; then
-        echo "usage: pve <envname>"
-        return 1
+        if [[ -z ${VIRTUAL_ENV} ]]; then
+            echo "usage: pve <envname>"
+            return 1
+        else
+            deactivate
+            return 0
+        fi
     fi
     if [[ ! -e ${pd} ]]; then
         echo "${pd} not found"
@@ -369,14 +375,15 @@ function pve() {
     fi
     if [[ ! -d ${env_name} ]]; then
         echo "installing virtualenv"
-        python virtualenv.py ${env_name} --no-setuptools
+        ${system_python} virtualenv.py ${env_name} --no-setuptools
         if [[ ! -f get-pip.py ]]; then
             curl -L -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
         fi
         ${env_name}/bin/python ./get-pip.py
     fi
     echo "switching to existing Python environment ${env_name}"
-    path=(`pwd`/${env_name}/bin ${path:#`pwd`/*})
+    VIRTUAL_ENV_DISABLE_PROMPT=true
+    source "${env_name}/bin/activate"
     popd
 }
 
