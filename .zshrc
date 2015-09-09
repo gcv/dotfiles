@@ -13,17 +13,20 @@ ulimit -s unlimited                                        # no stack limits
 ###   ./configure --prefix=~/.local/package-version && make && make install
 ###   ln -s ~/.local/package-version ~/.local/package
 typeset -U path
-path=(
-    ~/.local/bin ~/.local/sbin
-    ~/.local/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
-    ~/.local/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
-    /opt/brew/bin /opt/brew/sbin
-    /opt/local/bin /opt/local/sbin
-    /usr/local/bin /usr/local/sbin
-    /usr/bin /usr/sbin
-    /bin /sbin
-    $path
-)
+function path_reset() {
+    path=(
+        ~/.local/bin ~/.local/sbin
+        ~/.local/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
+        ~/.local/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
+        /opt/brew/bin /opt/brew/sbin
+        /opt/local/bin /opt/local/sbin
+        /usr/local/bin /usr/local/sbin
+        /usr/bin /usr/sbin
+        /bin /sbin
+        $path
+    )
+}
+path_reset
 
 typeset -U manpath
 manpath+=(
