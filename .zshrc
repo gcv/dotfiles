@@ -358,10 +358,9 @@ function rvm_on() {
 function pve() {
     local pd=~/.python
     local env_name=$1
-    local system_python=/usr/bin/python2
     if [[ -z ${env_name} ]]; then
         if [[ -z ${VIRTUAL_ENV} ]]; then
-            echo "usage: pve <envname>"
+            echo "usage: pve{2,3} <envname>"
             return 1
         else
             deactivate
@@ -370,6 +369,11 @@ function pve() {
     fi
     if [[ ! -e ${pd} ]]; then
         echo "${pd} not found"
+        return 1
+    fi
+    local system_python=$2
+    if [[ ! -f "${system_python}" ]]; then
+        echo "no system python found"
         return 1
     fi
     pushd ${pd}
@@ -388,6 +392,34 @@ function pve() {
     VIRTUAL_ENV_DISABLE_PROMPT=true
     source "${env_name}/bin/activate"
     popd
+}
+
+function pve2() {
+    local system_python
+    if [[ -f /usr/bin/python2 ]]; then
+        system_python=/usr/bin/python2
+    elif [[ -f /usr/bin/python2.7 ]]; then
+        system_python=/usr/bin/python2.7
+    elif [[ -f /usr/bin/python2.6 ]]; then
+        system_python=/usr/bin/python2.6
+    else
+        echo "no system python found"
+        return 1
+    fi
+    pve "$1" "${system_python}"
+}
+
+function pve3() {
+    local system_python
+    if [[ -f /usr/bin/python3 ]]; then
+        system_python=/usr/bin/python3
+    elif [[ -f /usr/bin/python3.5 ]]; then
+        system_python=/usr/bin/python3.5
+    else
+        echo "no system python found"
+        return 1
+    fi
+    pve "$1" "${system_python}"
 }
 
 
