@@ -396,14 +396,14 @@ function pve() {
 
 function pve2() {
     local system_python
-    if [[ -f /usr/bin/python2 ]]; then
-        system_python=/usr/bin/python2
-    elif [[ -f /usr/bin/python2.7 ]]; then
-        system_python=/usr/bin/python2.7
-    elif [[ -f /usr/bin/python2.6 ]]; then
-        system_python=/usr/bin/python2.6
+    if [[ -f `which python2` ]]; then
+        system_python=`which python2`
+    elif [[ -f `which python2.7` ]]; then
+        system_python=`which python2.7`
+    elif [[ -f `which python2.6` ]]; then
+        system_python=`which python2.6`
     else
-        echo "no system python found"
+        echo "no system python2 found"
         return 1
     fi
     pve "$1" "${system_python}"
@@ -411,12 +411,12 @@ function pve2() {
 
 function pve3() {
     local system_python
-    if [[ -f /usr/bin/python3 ]]; then
-        system_python=/usr/bin/python3
-    elif [[ -f /usr/bin/python3.5 ]]; then
-        system_python=/usr/bin/python3.5
+    if [[ -f `which python3` ]]; then
+        system_python=`which python3`
+    elif [[ -f `which python3.5` ]]; then
+        system_python=`which python3.5`
     else
-        echo "no system python found"
+        echo "no system python3 found"
         return 1
     fi
     pve "$1" "${system_python}"
