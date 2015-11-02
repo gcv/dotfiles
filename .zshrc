@@ -123,6 +123,8 @@ setopt auto_menu                  # turn on menu-completion after two tabs
 setopt short_loops                # allow one-line 'for' and 'repeat' loops
 setopt rc_expand_param            # repeated array expansions
 setopt rc_quotes                  # '' means a single quote in single quotes
+setopt no_rm_star_silent          # prompt before deleting *
+setopt rm_star_wait               # wait 10 seconds before reacting
 
 
 ### directory stack customization
