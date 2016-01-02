@@ -59,6 +59,7 @@ export LC_CTYPE=en_US.UTF-8
 export LC_COLLATE=C
 export UNAME=`uname`
 export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
+export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
 
 
 ### aliases
