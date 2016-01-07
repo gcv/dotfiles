@@ -214,9 +214,9 @@ is-at-least "4.3.7" && precmd_functions+=( precmd_vcs_info )
 
 
 ### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
-# PROMPT="[%m:%4~] "
-PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}${COLOR_MAGENTA}${VIRTUAL_ENV:+ }`basename ${VIRTUAL_ENV:-""}`${COLOR_NONE}'"]${COLOR_NONE} "
-RPROMPT="%(?..${COLOR_RED}[%?]${COLOR_NONE})"
+# PROMPT='[%m:%4~] '
+PROMPT='%(!.${COLOR_RED}.${COLOR_NONE})[%m:$(shorten_path_disambiguate_keep_last)${vcs_info_msg_0_}${COLOR_MAGENTA}${VIRTUAL_ENV:+ }`basename ${VIRTUAL_ENV:-""}`${COLOR_NONE}]${COLOR_NONE} '
+RPROMPT='%(?..${COLOR_RED}[%?]${COLOR_NONE})'
 
 
 ### title bar or status bar
@@ -693,6 +693,80 @@ function gpgd() {
         cmd="help"
     fi
     gpgd_${cmd} $* || return 1
+
+}
+
+
+### utility function for unambiguously shortening the present working directory
+function shorten_path_disambiguate_keep_last() {
+
+    # This code transforms the present working directory from
+    # /one/two/three/four/five/six to /o/t/t/f/f/six or t/f/f/six, subject to
+    # the value of max_entries.
+    # Adapted from http://mika.l3ib.org/code/zsh-functions/disambiguate-keeplast
+
+    local max_entries
+    max_entries=4
+
+    # short holds the result we want to print
+    # full holds the full path up to the current segment
+    # part holds the current segment, will get as few characters as
+    # possible from cur, which is the full current segment
+
+    local short full part cur
+    local first
+    local -a split    # the array we loop over
+
+    # We do the (D) expansion right here and
+    # handle it later if it had any effect
+    split=(${(s:/:)${(Q)${(D)1:-$PWD}}})
+
+    if [[ $split == "" ]]; then
+        echo /
+        return 0
+    fi
+
+    # Handling. Perhaps NOT use (D) above and check after shortening?
+    if [[ $split[1] = \~* ]]; then
+        # named directory we skip shortening the first element
+        # and manually prepend the first element to the return value
+        first=$split[1]
+        # full should already contain the first
+        # component since we don't start there
+        full=$~split[1]
+        shift split
+    fi
+
+    # we don't want to end up with something like ~/
+    if (( $#split > 0 )); then
+        part=/
+    fi
+
+    while (( $#split > ${max_entries} )); do
+        first=""
+        part=""
+        shift split
+    done
+
+    for cur ($split[1,-2]) {
+        while {
+            part+=$cur[1]
+            cur=$cur[2,-1]
+            local -a glob
+            glob=( $full/$part*(-/N) )
+            # continue adding if more than one directory matches or
+            # the current string is . or ..
+            # but stop if there are no more characters to add
+            (( $#glob > 1 )) || [[ $part == (.|..) ]] && (( $#cur > 0 ))
+        } { # this is a do-while loop
+        }
+        full+=$part$cur
+        short+=$part
+        part=/
+    }
+
+    echo $first$short$part$split[-1]
+    return 0
 
 }
 
