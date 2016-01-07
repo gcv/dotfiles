@@ -73,6 +73,10 @@ alias pf='open -a "Path Finder.app"'
     alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n' || \
     alias ec='emacsclient -n'
 
+[[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
+    alias et='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -a "" -t' || \
+    alias et='emacsclient -a "" -t'
+
 [[ ${UNAME} == "Linux" ]] && alias ls='ls --color'
 [[ ${UNAME} == "Darwin" && -x "/opt/brew/bin/gls" ]] && alias ls='gls --color'
 
