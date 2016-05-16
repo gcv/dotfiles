@@ -8,6 +8,19 @@ ulimit -c 0                                                # no core dumps
 ulimit -s unlimited                                        # no stack limits
 
 
+### environmental variables
+export EDITOR=vi
+export LESS="-M -R"
+export PAGER=less
+export LESSHISTFILE=/dev/null
+export CVS_RSH=ssh
+export LC_CTYPE=en_US.UTF-8
+export LC_COLLATE=C
+export UNAME=`uname`
+export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
+export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
+
+
 ### Paths include locally-installed packages under ~/.local as symbolic links to
 ### the active version:
 ###   ./configure --prefix=~/.local/package-version && make && make install
@@ -47,19 +60,6 @@ fpath+=(/opt/brew/share/zsh/site-functions)
 if [[ -x $(whence zsh) ]]; then
     is-at-least $(zsh --version | awk '{print $2}') || exec zsh
 fi
-
-
-### environmental variables
-export EDITOR=vi
-export LESS="-M -R"
-export PAGER=less
-export LESSHISTFILE=/dev/null
-export CVS_RSH=ssh
-export LC_CTYPE=en_US.UTF-8
-export LC_COLLATE=C
-export UNAME=`uname`
-export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
-export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
 
 
 ### aliases
