@@ -384,13 +384,13 @@ function pve() {
     fi
     pushd ${pd}
     if [[ ! -f virtualenv.py ]]; then
-        curl -L -O https://raw.github.com/pypa/virtualenv/master/virtualenv.py
+        curl -L -O 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
     fi
     if [[ ! -d ${env_name} ]]; then
         echo "installing virtualenv"
-        ${system_python} virtualenv.py ${env_name} --no-setuptools
+        ${system_python} virtualenv.py ${env_name} --no-setuptools --no-pip --no-wheel
         if [[ ! -f get-pip.py ]]; then
-            curl -L -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+            curl -L -O 'https://bootstrap.pypa.io/get-pip.py'
         fi
         ${env_name}/bin/python ./get-pip.py
     fi
