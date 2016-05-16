@@ -27,11 +27,13 @@ export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
 ###   ln -s ~/.local/package-version ~/.local/package
 typeset -U path
 function path_reset() {
+    local homebrew_dir="/opt/brew"
+    [[ ${UNAME} == "Linux" ]] && homebrew_dir="${HOME}/.linuxbrew"
     path=(
         ~/.local/bin ~/.local/sbin
         ~/.local/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
         ~/.local/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
-        /opt/brew/bin /opt/brew/sbin
+        ${homebrew_dir}/bin ${homebrew_dir}/sbin
         /opt/local/bin /opt/local/sbin
         /usr/local/bin /usr/local/sbin
         /usr/bin /usr/sbin
