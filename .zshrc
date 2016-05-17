@@ -70,6 +70,7 @@ alias dir='ls -aCF'
 alias v='ls -lahF'
 alias d='dirs -v'
 alias pf='open -a "Path Finder.app"'
+function dtmux() { docker exec -ti $1 script -q -c "tmux attach || tmux new" /dev/null }
 
 [[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
     alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n' || \
