@@ -475,10 +475,6 @@ function gpgd() {
         echo "no tar found" 1>&2
         return 1
     fi
-    if [[ -z $(command -v srm) ]]; then
-        echo "no srm found" 1>&2
-        return 1
-    fi
     if [[ -z $(command -v mktemp) ]]; then
         echo "no mktemp found" 1>&2
         return 1
@@ -557,7 +553,7 @@ function gpgd() {
         rm -f "${tmpfile}"
         tar cz "./${archive_filename_noext}" | gpg --encrypt "${=recipients_gpg_arg}" --output "${tmpfile}"
         mv "${tmpfile}" "${archive_file}"
-        srm -rf -s "${archive_filename_noext}"
+        rm -rfP "${archive_filename_noext}"
     }
 
     function gpgd_check_shared_mount_points() {
@@ -686,7 +682,7 @@ function gpgd() {
         rm -f "${tmpfile}"
         tar cz --exclude .gpgd-archive-file "./${mount_point_basename}" | gpg --encrypt "${=recipients_gpg_arg}" --output "${tmpfile}"
         mv "${tmpfile}" "${archive_path}"
-        srm -rf -s "${mount_point}"
+        rm -rfP "${mount_point}"
         popd
     }
 
