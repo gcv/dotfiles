@@ -553,7 +553,7 @@ function gpgd() {
         rm -f "${tmpfile}"
         tar cz "./${archive_filename_noext}" | gpg --encrypt "${=recipients_gpg_arg}" --output "${tmpfile}"
         mv "${tmpfile}" "${archive_file}"
-        rm -rfP "${archive_filename_noext}"
+        rm -rf "${archive_filename_noext}"
     }
 
     function gpgd_check_shared_mount_points() {
@@ -682,7 +682,7 @@ function gpgd() {
         rm -f "${tmpfile}"
         tar cz --exclude .gpgd-archive-file "./${mount_point_basename}" | gpg --encrypt "${=recipients_gpg_arg}" --output "${tmpfile}"
         mv "${tmpfile}" "${archive_path}"
-        rm -rfP "${mount_point}"
+        rm -rf "${mount_point}"
         popd
     }
 
