@@ -55,6 +55,35 @@ hs.hotkey.bind(
       win:setFrame(f)
 end)
 
+hs.hotkey.bind(
+   {"cmd", "alt", "ctrl"}, "up",
+   function()
+      local win = hs.window.focusedWindow()
+      local f = win:frame()
+      local screen = win:screen()
+      local max = screen:frame()
+      f.x = max.x + (max.w / 8)
+      f.y = max.y
+      f.w = (max.w / 8) * 6
+      f.h = max.h
+      win:setFrame(f)
+end)
+
+hs.hotkey.bind(
+   {"cmd", "alt", "ctrl"}, "down",
+   function()
+      local win = hs.window.focusedWindow()
+      local f = win:frame()
+      local screen = win:screen()
+      local max = screen:frame()
+      local c = 100
+      f.x = max.x + (max.w / 8) + c
+      f.y = max.y + c
+      f.w = (max.w / 8) * 6 - (2 * c)
+      f.h = max.h - (2 * c)
+      win:setFrame(f)
+end)
+
 
 -- f11: iTerm2 or Terminal
 
