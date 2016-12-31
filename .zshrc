@@ -83,6 +83,10 @@ function dtmux() { docker exec -ti $1 script -q -c "tmux attach || tmux new" /de
 [[ ${UNAME} == "Linux" ]] && alias ls='ls --color'
 [[ ${UNAME} == "Darwin" && -x "/opt/brew/bin/gls" ]] && alias ls='gls --color'
 
+[[ ${UNAME} == "Darwin" ]] && function brewdeps() {
+        brew list -1 | while read cask; do echo -ne "\x1B[1;34m $cask \x1B[0m"; brew uses $cask --installed | awk '{printf(" %s ", $0)}'; echo ""; done
+    }
+
 alias -g ...='../..'
 alias -g ....='../../..'
 alias -g .....='../../../..'
