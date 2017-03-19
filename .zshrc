@@ -774,5 +774,48 @@ function shorten_path_disambiguate_keep_last() {
 }
 
 
+### utility function for uploading a file to S3 with a speed limit
+function s3cp() {
+
+    # environment check
+    if [[ -z $(command -v pv) ]]; then
+        echo "no pv found" 1>&2
+        return 1
+    fi
+    if [[ -z $(command -v aws) ]]; then
+        echo "no aws found" 1>&2
+        return 1
+    fi
+
+    # args
+    local speed=$1
+    local region=$2
+    local storage_class=$3
+    local src=$4
+    local dst_path=$5
+
+    [[ -z "${speed}" ]] && return 1
+    [[ -z "${region}" ]] && return 1
+    [[ -z "${storage_class}" ]] && return 1
+    [[ -z "${src}" ]] && return 1
+    [[ -z "${dst_path}" ]] && return 1
+
+    if [[ ! -f "${src}" ]]; then
+        echo "source file not found" 1>&2
+        return 1
+    fi
+
+    local dst
+    if [[ "${dst_path}" == */ ]]; then
+        dst="${dst_path}${src}"
+    else
+        dst="${dst_path}/${src}"
+    fi
+
+    pv -L ${speed} "${src}" | aws s3 cp --region="${region}" --storage-class="${storage_class}" - "${dst}"
+
+}
+
+
 ######### yesterday we obeyed kings and bent our necks before emperors #########
 #########               but today we kneel only to truth               #########
