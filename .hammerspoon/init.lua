@@ -84,6 +84,31 @@ hs.hotkey.bind(
       win:setFrame(f)
 end)
 
+-- full-screen on other display
+hs.hotkey.bind(
+   {"cmd", "alt", "ctrl"}, "f",
+   function()
+      local win = hs.window.focusedWindow()
+      local allScreens = hs.screen.allScreens()
+      -- if #allScreens > 2 then
+      --    hs.alert.show("More than 3 displays not supported.")
+      --    return
+      -- end
+      local currentScreen = win:screen()
+      local nextScreen = currentScreen:next()
+      local previousScreen = currentScreen:previous()
+      if win:isFullScreen() then
+         win:setFullScreen(false)
+         hs.timer.waitWhile(
+            function() win:isFullScreen(); end,
+            function() win:centerOnScreen(nextScreen, true); end,
+            0.5)
+      else
+         win:centerOnScreen(nextScreen, true)
+         win:setFullScreen(true)
+      end
+end)
+
 
 -- f11: iTerm2 or Terminal
 
