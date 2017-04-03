@@ -85,6 +85,7 @@ hs.hotkey.bind(
 end)
 
 -- full-screen on other display
+fullScreenWindowFrames = {}
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "f",
    function()
@@ -101,9 +102,18 @@ hs.hotkey.bind(
          win:setFullScreen(false)
          hs.timer.waitWhile(
             function() win:isFullScreen(); end,
-            function() win:centerOnScreen(nextScreen, true); end,
+            function()
+               local oldFrame = fullScreenWindowFrames[win:id()]
+               if oldFrame then
+                  win:move(oldFrame)
+               else
+                  win:centerOnScreen(nextScreen, true)
+               end
+               fullScreenWindowFrames[win:id()] = nil
+            end,
             0.5)
       else
+         fullScreenWindowFrames[win:id()] = win:frame()
          win:centerOnScreen(nextScreen, true)
          win:setFullScreen(true)
       end
