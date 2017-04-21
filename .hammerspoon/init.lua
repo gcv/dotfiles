@@ -4,8 +4,27 @@ hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "r",
    function()
       hs.reload()
-end)
+   end
+)
 hs.alert("Reloading Hammerspoon configuration")
+
+
+-- brightness control
+
+hs.hotkey.bind(
+   {"cmd", "alt", "ctrl"}, "b",
+   function()
+      hs.brightness.set(1)
+      -- local screens = hs.screen.allScreens()
+      -- hs.fnutils.each(
+      --    screens,
+      --    function(screen)
+      --       screen:setBrightness(0.01)
+      --    end
+      -- )
+      -- hs.alert("brightness updated")
+   end
+)
 
 
 -- helpers
@@ -39,7 +58,8 @@ hs.hotkey.bind(
       f.w = max.w / 2
       f.h = max.h
       win:setFrame(f)
-end)
+   end
+)
 
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "right",
@@ -53,7 +73,8 @@ hs.hotkey.bind(
       f.w = max.w / 2
       f.h = max.h
       win:setFrame(f)
-end)
+   end
+)
 
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "up",
@@ -67,7 +88,8 @@ hs.hotkey.bind(
       f.w = (max.w / 8) * 6
       f.h = max.h
       win:setFrame(f)
-end)
+   end
+)
 
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "down",
@@ -82,7 +104,8 @@ hs.hotkey.bind(
       f.w = (max.w / 8) * 6 - (2 * c)
       f.h = max.h - (2 * c)
       win:setFrame(f)
-end)
+   end
+)
 
 -- full-screen on other display
 fullScreenWindowFrames = {}
@@ -117,7 +140,8 @@ hs.hotkey.bind(
          win:centerOnScreen(nextScreen, true)
          win:setFullScreen(true)
       end
-end)
+   end
+)
 
 
 -- f11: iTerm2 or Terminal
@@ -147,7 +171,8 @@ function ctrl_c:entered()
          1,
          function()
             ctrl_c:exit()
-      end)
+         end
+      )
    end
 end
 
@@ -156,7 +181,8 @@ ctrl_c:bind(
    function()
       app_switch_emacs()
       ctrl_c:exit()
-end)
+   end
+)
 
 function ctrl_c:exited()
    -- nothing
