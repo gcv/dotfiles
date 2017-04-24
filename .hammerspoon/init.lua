@@ -46,100 +46,150 @@ end
 
 -- window sizing
 
+previousFrames = {}
+
+function alterOrRestoreFrame(win, alterCb, restoreCb)
+   local previousFrame = previousFrames[win:id()]
+   if previousFrame then
+      restoreCb(win, previousFrame)
+      previousFrames[win:id()] = nil
+   else
+      previousFrames[win:id()] = win:frame()
+      alterCb(win)
+   end
+end
+
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "left",
    function()
-      local win = hs.window.focusedWindow()
-      local f = win:frame()
-      local screen = win:screen()
-      local max = screen:frame()
-      f.x = max.x
-      f.y = max.y
-      f.w = max.w / 2
-      f.h = max.h
-      win:setFrame(f)
+      alterOrRestoreFrame(
+         hs.window.focusedWindow(),
+         -- alter
+         function(win)
+            local f = win:frame()
+            local screen = win:screen()
+            local max = screen:frame()
+            f.x = max.x
+            f.y = max.y
+            f.w = max.w / 2
+            f.h = max.h
+            win:setFrame(f)
+         end,
+         -- restore
+         function(win, previousFrame)
+            win:move(previousFrame)
+         end
+      )
    end
 )
 
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "right",
    function()
-      local win = hs.window.focusedWindow()
-      local f = win:frame()
-      local screen = win:screen()
-      local max = screen:frame()
-      f.x = max.x + (max.w / 2)
-      f.y = max.y
-      f.w = max.w / 2
-      f.h = max.h
-      win:setFrame(f)
+      alterOrRestoreFrame(
+         hs.window.focusedWindow(),
+         -- alter
+         function(win)
+            local f = win:frame()
+            local screen = win:screen()
+            local max = screen:frame()
+            f.x = max.x + (max.w / 2)
+            f.y = max.y
+            f.w = max.w / 2
+            f.h = max.h
+            win:setFrame(f)
+         end,
+         -- restore
+         function(win, previousFrame)
+            win:move(previousFrame)
+         end
+      )
    end
 )
 
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "up",
    function()
-      local win = hs.window.focusedWindow()
-      local f = win:frame()
-      local screen = win:screen()
-      local max = screen:frame()
-      f.x = max.x + (max.w / 8)
-      f.y = max.y
-      f.w = (max.w / 8) * 6
-      f.h = max.h
-      win:setFrame(f)
+      alterOrRestoreFrame(
+         hs.window.focusedWindow(),
+         -- alter
+         function(win)
+            local f = win:frame()
+            local screen = win:screen()
+            local max = screen:frame()
+            f.x = max.x + (max.w / 8)
+            f.y = max.y
+            f.w = (max.w / 8) * 6
+            f.h = max.h
+            win:setFrame(f)
+         end,
+         -- restore
+         function(win, previousFrame)
+            win:move(previousFrame)
+         end
+      )
    end
 )
 
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "down",
    function()
-      local win = hs.window.focusedWindow()
-      local f = win:frame()
-      local screen = win:screen()
-      local max = screen:frame()
-      local c = 100
-      f.x = max.x + (max.w / 8) + c
-      f.y = max.y + c
-      f.w = (max.w / 8) * 6 - (2 * c)
-      f.h = max.h - (2 * c)
-      win:setFrame(f)
+      alterOrRestoreFrame(
+         hs.window.focusedWindow(),
+         -- alter
+         function(win)
+            local f = win:frame()
+            local screen = win:screen()
+            local max = screen:frame()
+            local c = 100
+            f.x = max.x + (max.w / 8) + c
+            f.y = max.y + c
+            f.w = (max.w / 8) * 6 - (2 * c)
+            f.h = max.h - (2 * c)
+            win:setFrame(f)
+         end,
+         -- restore
+         function(win, previousFrame)
+            win:move(previousFrame)
+         end
+      )
    end
 )
 
 -- full-screen on other display
-fullScreenWindowFrames = {}
 hs.hotkey.bind(
    {"cmd", "alt", "ctrl"}, "f",
    function()
-      local win = hs.window.focusedWindow()
-      local allScreens = hs.screen.allScreens()
-      -- if #allScreens > 2 then
-      --    hs.alert.show("More than 3 displays not supported.")
-      --    return
-      -- end
-      local currentScreen = win:screen()
-      local nextScreen = currentScreen:next()
-      local previousScreen = currentScreen:previous()
-      if win:isFullScreen() then
-         win:setFullScreen(false)
-         hs.timer.waitWhile(
-            function() win:isFullScreen(); end,
-            function()
-               local oldFrame = fullScreenWindowFrames[win:id()]
-               if oldFrame then
-                  win:move(oldFrame)
-               else
-                  win:centerOnScreen(nextScreen, true)
-               end
-               fullScreenWindowFrames[win:id()] = nil
-            end,
-            0.5)
-      else
-         fullScreenWindowFrames[win:id()] = win:frame()
-         win:centerOnScreen(nextScreen, true)
-         win:setFullScreen(true)
-      end
+      alterOrRestoreFrame(
+         hs.window.focusedWindow(),
+         -- alter
+         function(win)
+            if win:isFullScreen() then
+               -- this branch occurs if the window was full-screened but not by
+               -- this other-display logic; so just un-full-screen the window
+               win:setFullScreen(false)
+            else
+               local currentScreen = win:screen()
+               local nextScreen = currentScreen:next()
+               win:centerOnScreen(nextScreen, true)
+               win:setFullScreen(true)
+            end
+         end,
+         -- restore
+         function(win, previousFrame)
+            win:setFullScreen(false)
+            hs.timer.waitWhile(
+               function() return win:isFullScreen(); end,
+               function()
+                  if previousFrame then
+                     win:move(previousFrame)
+                  else
+                     win:centerOnScreen(nextScreen, true)
+                  end
+               end,
+               0.5)
+         end
+      )
    end
 )
 
