@@ -274,7 +274,9 @@
 
 (setq frame-title-format
       (list "%b"
-            '(:eval (cv--mode-line-abbrev-file-name))
+            '(:eval (if (fboundp 'cv--mode-line-abbrev-file-name)
+                        (cv--mode-line-abbrev-file-name)
+                      ""))
             '(:eval (if (and (boundp 'persp-curr) persp-curr)
                         (concatenate 'string " — " (persp-name persp-curr))
                       "")))
