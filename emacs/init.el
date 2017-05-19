@@ -284,55 +284,6 @@
       org-frame-title-format-backup frame-title-format)
 
 
-(setq-default mode-line-format
-              (list "%e"
-                    mode-line-front-space
-                    ;;mode-line-mule-info
-                    ;;mode-line-modified
-                    ;;mode-line-remote
-                    '(:eval (when (file-remote-p default-directory)
-                              (propertize "%1@"
-                                          'mouse-face 'mode-line-highlight
-                                          'help-echo (concat "remote: " default-directory))))
-                    '(:eval (cond (buffer-read-only "%*")
-                                  ((buffer-modified-p) "*") ;; ❉ is nice for fonts which support it
-                                  (t " "))
-                            " ")
-                    " "
-                    (list 20 mode-line-buffer-identification)
-                    "    "
-                    (list 8
-                          (propertize "%l"
-                                      ;;'face 'mode-line
-                                      'help-echo "Line number")
-                          ":"
-                          (propertize "%c" 'help-echo "Column number"))
-                    "  "
-                    "["
-                    (list -3 (propertize "%p"
-                                         ;;'face 'font-lock-constant-face
-                                         'help-echo "Position in buffer"))
-                    "/"
-                    (propertize "%I" 'help-echo "Buffer size")
-                    "] "
-                    "   "
-                    mode-line-modes
-                    "   "
-                    mode-line-misc-info
-                    '(:eval (when (stringp vc-mode)
-                              (let* ((branch-name (replace-regexp-in-string
-                                                   (format "^\s*%s:?-?" (vc-backend buffer-file-name))
-                                                   ""
-                                                   vc-mode))
-                                     (buffer-vc-state (vc-state buffer-file-name))
-                                     (f (cond ((string= "up-to-date" buffer-vc-state)
-                                               '((:slant normal :foreground "darkgreen")))
-                                              (t
-                                               '((:slant normal))))))
-                                (propertize branch-name 'face f))))
-                    mode-line-end-spaces))
-
-
 (setq display-buffer-reuse-frames t)         ; reuse windows in other frames
 (setq pop-up-windows nil)                    ; display-buffer: avoid splitting
 (setq even-window-heights nil)               ; display-buffer: avoid resizing
@@ -811,6 +762,7 @@
                       "org.el"
                       "elisp.el"
                       "themes.el"
+                      "modeline.el"
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
     (load-file (expand-file-name (concat "../" f) user-emacs-directory))))
