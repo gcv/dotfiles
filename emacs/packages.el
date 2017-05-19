@@ -474,6 +474,8 @@
             (setq magit-diff-refine-hunk t) ; "all" shows word differences in all hunks
             ;;(setq auto-revert-check-vc-info t)
 
+            (magit-define-popup-switch 'magit-log-popup ?f "Follow renames" "--follow")
+
             (add-hook 'magit-status-mode-hook
               (lambda ()
                 (define-key magit-status-mode-map (kbd "W")
