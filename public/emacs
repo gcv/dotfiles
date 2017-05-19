@@ -1,0 +1,6 @@
+;;(package-initialize)
+
+(setq user-init-file (or load-file-name (buffer-file-name)))
+(setq user-emacs-directory "~/Code/dotfiles/emacs/emacs.d/")
+
+(load-file (expand-file-name "../init.el" user-emacs-directory))
