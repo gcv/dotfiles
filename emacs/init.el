@@ -158,9 +158,7 @@
 
 
 ;; unique naming
-
 (require 'uniquify)
-
 (setq uniquify-buffer-name-style 'forward)
 (setq uniquify-ignore-buffers-re "^\\*")
 
@@ -308,6 +306,7 @@
 
 
 ;; clicking in a different window should not move the cursor inside that window
+
 (defun cv--mouse-set-point (orig-fn &rest args)
   (let* ((event (car args))
          (event-name (car event))
@@ -728,10 +727,6 @@
 (add-to-list 'auto-mode-alist '("\\.asd$" . lisp-mode))
 
 (require 'refactor)                     ; custom Lisp symbol renaming
-
-(setq common-lisp-hyperspec-root "~/Files/Common Lisp/CL HyperSpec 7.0/HyperSpec")
-(setq common-lisp-hyperspec-symbol-table
-     (concat common-lisp-hyperspec-root "/Data/Map_Sym.txt"))
 
 (add-hook 'lisp-mode-hook
   (lambda ()

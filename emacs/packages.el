@@ -645,6 +645,10 @@
             (setq slime-net-coding-system 'utf-8-unix)
             (setq inferior-lisp-program "sbcl")
 
+            (setq common-lisp-hyperspec-root "~/Files/Common Lisp/CL HyperSpec 7.0/HyperSpec")
+            (setq common-lisp-hyperspec-symbol-table
+                  (concat common-lisp-hyperspec-root "/Data/Map_Sym.txt"))
+
             ;;(add-hook 'slime-mode-hook
             ;;  (lambda ()
             ;;    (setq slime-truncate-lines nil)))
