@@ -538,6 +538,26 @@
 (setq ediff-split-window-function 'split-window-horizontally)
 
 
+;; eshell
+
+(setq eshell-prompt-function
+      (lambda ()
+        (concat
+         (propertize "┌─[" 'face `(:foreground "lightgreen"))
+         (propertize (user-real-login-name) 'face `(:foreground "lightblue"))
+         (propertize "@" 'face `(:foreground "lightgreen"))
+         (propertize (system-name) 'face `(:foreground "blanchedalmond"))
+         (propertize "]──[" 'face `(:foreground "lightgreen"))
+         (propertize (format-time-string "%H:%M" (current-time)) 'face `(:foreground "yellow"))
+         (propertize "]──[" 'face `(:foreground "lightgreen"))
+         (propertize (concat (eshell/pwd)) 'face `(:foreground "white"))
+         (propertize "]\n" 'face `(:foreground "lightgreen"))
+         (propertize "└─>" 'face `(:foreground "lightgreen"))
+         (propertize (if (= (user-uid) 0) " #" " $") 'face `(:foreground "lightgreen"))
+         (propertize " " 'face `(:foreground 'inherit))
+         )))
+
+
 ;; ido mode
 
 (setq ido-everywhere t

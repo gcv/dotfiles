@@ -204,6 +204,23 @@ hs.hotkey.bind({}, "f11", app_switch_terminal)
 hs.hotkey.bind({}, "f12", app_switch_emacs)
 
 
+-- Ctrl-Alt-Cmd-s: Safari
+
+hs.hotkey.bind(
+   {"cmd", "alt", "ctrl"}, "s",
+   function()
+      hs.osascript.applescript(
+         [[tell application "Safari"
+              make new document
+              activate
+           end tell]]
+      )
+      local w = hs.window.frontmostWindow()
+      w:centerOnScreen()
+   end
+)
+
+
 -- iTerm2: C-c C-z flips to Emacs.
 
 ctrl_c = hs.hotkey.modal.new("ctrl", "c")

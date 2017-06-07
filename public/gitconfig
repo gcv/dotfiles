@@ -2,6 +2,8 @@
         path = ~/Code/dotfiles/private/gitconfig
 [color]
 	ui = auto
+[diff]
+	indentHeuristic = true
 [alias]
         lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ar)%Creset' --abbrev-commit --date=relative
         search = log -p -G
