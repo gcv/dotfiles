@@ -11,7 +11,7 @@
                       :family "Menlo" :weight 'bold)
   (set-face-attribute 'bold nil :family "Menlo" :weight 'bold)
   (set-face-attribute 'aw-leading-char-face nil :foreground "red" :background nil
-                      :weight 'bold)
+                      :family "Menlo" :weight 'bold)
   (set-face-attribute 'term nil :foreground nil :background nil))
 
 
@@ -46,18 +46,23 @@
   (cv--theme-common))
 
 
-(defun theme-solarized-light ()
-  (interactive)
-  (disable-all-themes)
-  (load-theme 'solarized-light t)
+(defun cv--theme-solarized-common ()
   (setq solarized-distinct-fringe-background t)
   (setq solarized-high-contrast-mode-line t)
   (setq solarized-use-less-bold nil)
   (setq solarized-use-more-italic nil)
   (setq solarized-scale-org-headlines t)
+  (setq solarized-use-variable-pitch nil)
+  (setq solarized-scale-org-headlines nil))
+
+
+(defun theme-solarized-light ()
+  (interactive)
+  (disable-all-themes)
+  (load-theme 'solarized-light t)
   (set-face-attribute 'bold nil :foreground "navy")
-  (set-face-attribute 'magit-diff-add nil :foreground "darkgreen")
   (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
+  (cv--theme-solarized-common)
   (cv--theme-common))
 
 
@@ -65,28 +70,20 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'solarized-dark t)
-  (setq solarized-distinct-fringe-background t)
-  (setq solarized-high-contrast-mode-line t)
-  (setq solarized-use-less-bold nil)
-  (setq solarized-use-more-italic nil)
-  (setq solarized-scale-org-headlines t)
   (set-face-background 'default "#081a25")
   (set-face-foreground 'default "#adad9c")
   (set-face-foreground 'isearch "#0f9999")
   (set-face-background 'isearch "grey12")
   (set-face-foreground 'lazy-highlight "#0a6666")
   (set-face-background 'lazy-highlight "grey12")
-  (set-face-foreground 'mode-line "#888888")
-  (set-face-background 'mode-line "grey14")
-  (set-face-foreground 'mode-line-inactive "#23313a")
-  (set-face-background 'mode-line-inactive "grey40")
+  (set-face-foreground 'mode-line-inactive "#888888")
+  (set-face-background 'mode-line-inactive "grey14")
+  (set-face-foreground 'mode-line "#23313a")
+  (set-face-background 'mode-line "grey40")
   (set-face-attribute 'mode-line nil :box nil)
   (set-face-foreground 'show-paren-match "black")
   (set-face-background 'show-paren-match "#2e5c99")
   (set-face-foreground 'js2-external-variable "#b37f47")
-  (set-face-foreground 'magit-section-title "black")
-  (set-face-background 'magit-section-title "white")
-  (set-face-foreground 'magit-diff-add "lightblue")
   (set-face-foreground 'ido-first-match "#64b3b3")
   (set-face-foreground 'ido-only-match nil)
   (set-face-foreground 'font-lock-type-face "#3d9ccc")
@@ -108,6 +105,7 @@
   (set-face-foreground 'org-level-1 "#7089a6")
   (set-face-foreground 'org-level-2 "#a9a9cc")
   (set-face-foreground 'org-level-3 "#8aba99")
+  (cv--theme-solarized-common)
   (cv--theme-common))
 
 
