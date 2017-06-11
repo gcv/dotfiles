@@ -36,16 +36,16 @@ ${BREW_HOME}/bin/brew install \
      cmake \
      coreutils \
      ctags \
-     docker \
-     docker-machine \
      findutils \
      git \
      global \
      gnupg@1.4 \
      gsl \
+     haskell-stack \
      heroku \
      icu4c \
      ledger \
+     leiningen \
      libtool \
      makedepend \
      maven \
