@@ -26,44 +26,51 @@ fi
 
 
 ${BREW_HOME}/bin/brew install \
-     aspell \
-     autoconf \
-     autojump \
-     automake \
-     awscli \
-     bash \
-     boost \
-     cmake \
-     coreutils \
-     ctags \
-     findutils \
-     git \
-     global \
-     gnupg@1.4 \
-     gsl \
-     haskell-stack \
-     heroku \
-     icu4c \
-     ledger \
-     leiningen \
-     libtool \
-     makedepend \
-     maven \
-     nmap \
-     offlineimap \
-     pkg-config \
-     pv \
-     python3 \
-     rlwrap \
-     roswell \
-     sqlite \
-     swig \
-     taglib \
-     the_silver_searcher \
-     tmux \
-     tree \
-     watch \
-     wget \
-     xz \
-     youtube-dl \
-     zsh
+    # system basics
+    bash \    
+    coreutils \
+    findutils \
+    python3 \
+    xz \
+    zsh \
+    # utilities and apps
+    aspell \
+    autojump \
+    git \
+    gnupg@1.4 \
+    ledger \
+    nmap \
+    offlineimap \
+    pv \
+    rlwrap \
+    sqlite \
+    the_silver_searcher \
+    tmux \
+    tree \
+    watch \
+    wget \
+    youtube-dl \
+    # external service tools
+    awscli \
+    heroku \
+    # C and C++ development tools
+    autoconf \
+    automake \
+    cmake \
+    ctags \
+    global \
+    swig \
+    # libraries
+    boost \
+    gsl \
+    icu4c \
+    taglib \
+    # external development environment management tools
+    haskell-stack \
+    leiningen \
+    maven \
+    # nvm \
+    # rbenv \
+    # pyenv \
+    # rustup \ # pretty broken dependency story
+    roswell
