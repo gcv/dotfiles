@@ -412,6 +412,7 @@ function pve() {
     VIRTUAL_ENV_DISABLE_PROMPT=true
     source "${env_name}/bin/activate"
     popd
+    rehash
 }
 
 function pve2() {
