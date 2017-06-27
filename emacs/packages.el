@@ -616,10 +616,22 @@
 (use-package projectile
   :pin melpa-stable
   :config (progn
+
             (projectile-global-mode)
             (setq projectile-enable-caching nil)
             (setq projectile-tags-command "ctags -Re -f \"%s\" %s")
-            (setq-default projectile-mode-line '(:eval (format " [%s]" (projectile-project-name))))
+
+            (setq cv--projectile-project-cache (make-hash-table))
+
+            (defun cv--projectile-project-name ()
+              (if-let ((name (gethash (current-buffer) cv--projectile-project-cache)))
+                  name
+                (puthash (current-buffer) (projectile-project-name) cv--projectile-project-cache)))
+
+            (setq-default projectile-mode-line '(:eval (if (file-remote-p default-directory)
+                                                           (format " [%s]" (cv--projectile-project-name))
+                                                         (format " [%s]" (projectile-project-name)))))
+
             ))
 
 

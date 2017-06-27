@@ -30,7 +30,7 @@
         '(:eval (let* ((clean-modes (-remove
                                      #'(lambda (x) (or (equal x "(") (equal x ")")))
                                      mode-line-modes))
-                       (vc-state (if (stringp vc-mode)
+                       (vc-state (if (and (stringp vc-mode) (not (file-remote-p default-directory)))
                                      (let* ((branch-name (replace-regexp-in-string
                                                           (format "^\s*%s:?-?" (vc-backend buffer-file-name))
                                                           ""
