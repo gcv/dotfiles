@@ -72,6 +72,7 @@
   (load-theme 'solarized-dark t)
   (set-face-background 'default "#081a25")
   (set-face-foreground 'default "#adad9c")
+  (set-face-attribute 'bold nil :foreground "papayawhip")
   (set-face-foreground 'isearch "#0f9999")
   (set-face-background 'isearch "grey12")
   (set-face-foreground 'lazy-highlight "#0a6666")
