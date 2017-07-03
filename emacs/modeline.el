@@ -37,7 +37,9 @@
                                                           (format "^\s*%s:?-?" (vc-backend buffer-file-name))
                                                           ""
                                                           vc-mode))
-                                            (formatted-branch-name (concat "— " branch-name))
+                                            (formatted-branch-name (concat "— " (if (< (length branch-name) 12)
+                                                                                    branch-name
+                                                                                  (substring branch-name -12))))
                                             (buffer-vc-state (vc-state buffer-file-name))
                                             (f (cond ((string= "up-to-date" buffer-vc-state)
                                                       '((:slant normal)))
