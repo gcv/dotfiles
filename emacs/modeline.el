@@ -26,7 +26,9 @@
         '(:eval (cond (buffer-read-only "%* ")
                       ((buffer-modified-p) "❉ ") ; ❉ is nice for fonts which support it, * suffices otherwise
                       (t "  ")))
-        '(:eval (propertize "%12b" 'face 'mode-line-buffer-id 'help-echo default-directory))
+        '(:eval (propertize "%12b"
+                            'face 'mode-line-buffer-id
+                            'help-echo (or buffer-file-name default-directory)))
         '(:eval (let* ((clean-modes (-remove
                                      #'(lambda (x) (or (equal x "(") (equal x ")")))
                                      mode-line-modes))
