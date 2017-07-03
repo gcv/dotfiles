@@ -45,6 +45,7 @@
                                    ""))
                        (ctr (format-mode-line (list clean-modes vc-state))))
                   (list (cv--mode-line-fill-center (/ (length ctr) 2))
+                        " "
                         ctr)))
         '(:eval (let* ((pos (format-mode-line (list (list -3 (propertize "%P" 'help-echo "Position in buffer"))
                                                     "/"
