@@ -415,6 +415,7 @@
             (add-to-list 'auto-mode-alist '("\\.jsx$" . js2-jsx-mode))
 
             (setq js2-basic-offset 2
+                  js-switch-indent-offset 2
                   js2-mirror-mode nil
                   js2-bounce-indent-p nil)
 
