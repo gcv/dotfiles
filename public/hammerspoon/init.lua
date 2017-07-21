@@ -9,6 +9,23 @@ hs.hotkey.bind(
 hs.alert("Reloading Hammerspoon configuration")
 
 
+-- trying to isolate Spaces keyboard switching bug
+
+-- hs.hotkey.bind(
+--    {"ctrl"}, "2",
+--    function()
+--       hs.alert("ctrl 2 hit")
+--    end
+-- )
+
+-- hs.hotkey.bind(
+--    {"ctrl"}, "3",
+--    function()
+--       hs.alert("ctrl 3 hit")
+--    end
+-- )
+
+
 -- brightness control
 
 hs.hotkey.bind(
