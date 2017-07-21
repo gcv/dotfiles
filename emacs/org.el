@@ -15,7 +15,7 @@
 (add-to-list 'auto-mode-alist '("\\.note$" . org-mode))
 
 (setq org-directory "~/Notes")
-(setq org-agenda-files '("~/Notes/Tasks.note"))
+;;(setq org-agenda-files '("~/Notes/Tasks.note"))
 
 (setq org-startup-indented t)
 (setq org-startup-folded 'nofold)
