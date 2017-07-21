@@ -38,7 +38,9 @@ ${BREW_HOME}/bin/brew install \
     autojump \
     git \
     gnupg@1.4 \
+    htop \
     ledger \
+    magic-wormhole \
     nmap \
     offlineimap \
     pv \
