@@ -156,6 +156,11 @@
             "\\*helm"
             "\\*helm-mode"))
 
+(defun cv--boring-buffer? (buf)
+  (-all? #'null (mapcar #'(lambda (x)
+                            (string-match-p x (buffer-name buf)))
+                        boring-buffers)))
+
 
 ;; unique naming
 (require 'uniquify)
@@ -183,17 +188,24 @@
                (lambda (buf)
                  (with-current-buffer buf
                    (or (not (member buf (persp-buffers persp-curr)))
-                       (not (-all? #'null (mapcar #'(lambda (x) (string-match-p x (buffer-name buf)))
-                                                  boring-buffers)))))))
+                       (not (cv--boring-buffer? buf))))))
              nil)
+
+(add-to-list 'bs-configurations
+             '("all-not-boring" nil nil nil
+               (lambda (buf)
+                 (not (cv--boring-buffer? buf)))))
 
 (global-set-key (kbd "C-x C-b") (lambda ()
                                   (interactive)
                                   (if (and (fboundp 'persp-buffers) persp-mode)
                                       (bs--show-with-configuration "persp")
-                                    (bs--show-with-configuration "all"))))
+                                    (bs--show-with-configuration "all-not-boring"))))
 
-(global-set-key (kbd "C-x C-M-b") 'bs-show)
+;;(global-set-key (kbd "C-x C-M-b") 'bs-show)
+(global-set-key (kbd "C-x C-M-b") (lambda ()
+                                    (interactive)
+                                    (bs--show-with-configuration "all-not-boring")))
 
 
 ;; minibuffer configuration
@@ -577,11 +589,6 @@
 (global-set-key (kbd "C-x M-d") 'ido-dired)
 (global-set-key (kbd "C-x C-d") 'ido-dired)
 (global-set-key (kbd "C-x M-i") 'ido-insert-file)
-(global-set-key (kbd "C-x 5 M-C-f") 'ido-find-file-other-frame)
-(global-set-key (kbd "C-x 5 M-f") 'ido-find-file-other-frame)
-(global-set-key (kbd "C-x 4 M-C-f") 'ido-find-file-other-window)
-(global-set-key (kbd "C-x 4 M-f") 'ido-find-file-other-window)
-(global-set-key (kbd "C-x M-b") 'ido-switch-buffer-other-frame)
 
 
 ;; Gnus

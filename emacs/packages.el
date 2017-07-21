@@ -267,6 +267,10 @@
 
             (require 'helm-config)
 
+            (setq helm-buffers-fuzzy-matching t
+                  helm-M-x-fuzzy-match t
+                  helm-imenu-fuzzy-match t)
+
             (global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
             (global-set-key (kbd "C-M-y") 'helm-show-kill-ring)
 
@@ -325,6 +329,10 @@
 
             ;; the buffer list mode string is not useful and too long
             (setq helm-buffer-max-len-mode 0)
+            (setq helm-buffer-max-length 35)
+
+            ;; helm-mini is pretty useful
+            (global-set-key (kbd "C-x M-b") 'helm-mini)
 
             ))
 
