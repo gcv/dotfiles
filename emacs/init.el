@@ -552,22 +552,55 @@
 
 ;; eshell
 
+;; FIXME: Make C-S-d exit eshell and delete the window like ielm.
+;; FIXME: Perform the same directory shortening as zsh.
+
+(setq eshell-banner-message ""
+      eshell-hist-ignoredups t
+      eshell-save-history-index t)
+
 (setq eshell-prompt-function
       (lambda ()
         (concat
-         (propertize "┌─[" 'face `(:foreground "lightgreen"))
+         (propertize "┌─[ " 'face `(:foreground "lightgreen"))
          (propertize (user-real-login-name) 'face `(:foreground "lightblue"))
          (propertize "@" 'face `(:foreground "lightgreen"))
          (propertize (system-name) 'face `(:foreground "blanchedalmond"))
-         (propertize "]──[" 'face `(:foreground "lightgreen"))
-         (propertize (format-time-string "%H:%M" (current-time)) 'face `(:foreground "yellow"))
-         (propertize "]──[" 'face `(:foreground "lightgreen"))
-         (propertize (concat (eshell/pwd)) 'face `(:foreground "white"))
-         (propertize "]\n" 'face `(:foreground "lightgreen"))
-         (propertize "└─>" 'face `(:foreground "lightgreen"))
-         (propertize (if (= (user-uid) 0) " #" " $") 'face `(:foreground "lightgreen"))
+         (propertize " " 'face `(:foreground "lightgreen"))
+         (propertize (concat (cv--dir-replace-home (eshell/pwd))) 'face `(:foreground "white"))
+         (propertize " ]\n" 'face `(:foreground "lightgreen"))
+         (propertize "└" 'face `(:foreground "lightgreen"))
+         (propertize (if (= (user-uid) 0) " #" " ∴") 'face `(:foreground "lightgreen"))
          (propertize " " 'face `(:foreground 'inherit))
          )))
+
+(defun eshell/o (filename)
+  "Just type o filename in eshell to open the file."
+  (find-file filename))
+
+(defun eshell/x ()
+  (insert "exit")
+  (eshell-send-input)
+  (delete-window))
+
+(eshell/alias "v" "ls -la")
+
+(defun eshell-here ()
+  (interactive)
+  (let* ((parent (if (buffer-file-name)
+                     (file-name-directory (buffer-file-name))
+                   default-directory))
+         (height (/ (window-total-height) 3))
+         (name (car (last (split-string parent "/" t)))))
+    (split-window-vertically (- height))
+    (other-window 1)
+    (eshell "new")
+    (rename-buffer (concat "*eshell: " name "*"))
+
+    (insert (concat "ls"))
+    (eshell-send-input)))
+
+(global-set-key (kbd "C-!") 'eshell-here)
 
 
 ;; ido mode
