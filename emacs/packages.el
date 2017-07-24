@@ -333,6 +333,9 @@
 
             ;; helm-mini is pretty useful
             (global-set-key (kbd "C-x M-b") 'helm-mini)
+            (setq helm-mini-default-sources '(helm-source-buffers-list
+                                              helm-source-projectile-recentf-list
+                                              helm-source-buffer-not-found))
 
             ))
 
