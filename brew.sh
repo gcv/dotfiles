@@ -26,14 +26,14 @@ fi
 
 
 ${BREW_HOME}/bin/brew install \
-    # system basics
+    `# system basics` \
     bash \    
     coreutils \
     findutils \
     python3 \
     xz \
     zsh \
-    # utilities and apps
+    `# utilities and apps` \
     aspell \
     autojump \
     git \
@@ -52,27 +52,27 @@ ${BREW_HOME}/bin/brew install \
     watch \
     wget \
     youtube-dl \
-    # external service tools
+    `# external service tools` \
     awscli \
-    heroku \
-    # C and C++ development tools
+    `#heroku # nasty node dependency introduced` \
+    `# C and C++ development tools` \
     autoconf \
     automake \
     cmake \
     ctags \
     global \
     swig \
-    # libraries
+    `# libraries` \
     boost \
     gsl \
     icu4c \
     taglib \
-    # external development environment management tools
+    `# external development environment management tools` \
     haskell-stack \
     leiningen \
     maven \
-    # nvm \
-    # rbenv \
-    # pyenv \
-    # rustup \ # pretty broken dependency story
+    `# nvm` \
+    `# rbenv` \
+    `# pyenv` \
+    `# rustup # pretty broken dependency story` \
     roswell
