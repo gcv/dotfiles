@@ -12,6 +12,14 @@ hs.alert("Reloading Hammerspoon configuration")
 -- trying to isolate Spaces keyboard switching bug
 
 -- hs.hotkey.bind(
+--    {"ctrl"}, "5",
+--    function()
+--       -- hs.alert("ctrl 1 hit")
+--       -- hs.osascript.applescript([[tell application "System Events" to key code 18 using control down]])
+--    end
+-- )
+
+-- hs.hotkey.bind(
 --    {"ctrl"}, "2",
 --    function()
 --       hs.alert("ctrl 2 hit")
