@@ -583,8 +583,6 @@
   (eshell-send-input)
   (delete-window))
 
-(eshell/alias "v" "ls -la")
-
 (defun eshell-here ()
   (interactive)
   (let* ((parent (if (buffer-file-name)
@@ -601,6 +599,10 @@
     (eshell-send-input)))
 
 (global-set-key (kbd "C-!") 'eshell-here)
+
+(add-hook 'eshell-mode-hook
+  (lambda ()
+    (eshell/alias "v" "ls -la")))
 
 
 ;; ido mode
