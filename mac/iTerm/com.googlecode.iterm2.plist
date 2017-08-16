@@ -253,7 +253,7 @@
 	<key>NSWindow Frame iTerm Window 0</key>
 	<string>366 230 570 377 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>2228 46 829 945 1280 0 1920 1057 </string>
+	<string>81 400 570 377 0 0 1280 777 </string>
 	<key>NeverWarnAboutShortLivedSessions_85C6836A-DC41-4DB7-9F4B-D0122538F2DB</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_85C6836A-DC41-4DB7-9F4B-D0122538F2DB_selection</key>
@@ -2542,7 +2542,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2017-06-27T14:36:27Z</date>
+	<date>2017-07-25T19:11:12Z</date>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>ShowBookmarkName</key>
@@ -2593,6 +2593,10 @@
 	<integer>0</integer>
 	<key>WordCharacters</key>
 	<string>/-+\~_.</string>
+	<key>findIgnoreCase_iTerm</key>
+	<true/>
+	<key>findRegex_iTerm</key>
+	<false/>
 	<key>iTerm Version</key>
 	<string>3.0.15</string>
 	<key>kCPKSelectionViewPreferredModeKey</key>
