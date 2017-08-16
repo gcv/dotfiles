@@ -353,6 +353,17 @@
 ;;; global key bindings, not specific to other modes or functionality
 ;;; ----------------------------------------------------------------------------
 
+(global-unset-key (kbd "C-0"))
+(global-unset-key (kbd "C-1"))
+(global-unset-key (kbd "C-2"))
+(global-unset-key (kbd "C-3"))
+(global-unset-key (kbd "C-4"))
+(global-unset-key (kbd "C-5"))
+(global-unset-key (kbd "C-6"))
+(global-unset-key (kbd "C-7"))
+(global-unset-key (kbd "C-8"))
+(global-unset-key (kbd "C-9"))
+
 (when window-system (global-unset-key (kbd "C-z")))
 (global-set-key (kbd "M-h") 'ns-do-hide-emacs)
 
