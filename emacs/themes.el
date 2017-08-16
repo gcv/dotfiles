@@ -122,4 +122,5 @@
   (set-face-attribute 'isearch nil :background "lightblue" :foreground nil :underline nil)
   (set-face-attribute 'lazy-highlight nil :background "#e6e6fa" :underline nil)
   (set-face-attribute 'trailing-whitespace nil :background "red")
+  (set-face-attribute 'js2-error nil :box nil)
   (cv--theme-common))
