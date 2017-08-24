@@ -106,6 +106,7 @@
   (set-face-foreground 'org-level-1 "#7089a6")
   (set-face-foreground 'org-level-2 "#a9a9cc")
   (set-face-foreground 'org-level-3 "#8aba99")
+  (set-face-attribute 'org-checkbox nil :box nil)
   (cv--theme-solarized-common)
   (cv--theme-common))
 
