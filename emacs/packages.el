@@ -378,6 +378,13 @@
             ))
 
 
+(use-package helm-swoop
+  :pin melpa-stable
+  :config (progn
+            (global-set-key (kbd "C-M-S-i") 'helm-swoop)
+            (define-key isearch-mode-map (kbd "C-M-S-i") 'helm-swoop-from-isearch)))
+
+
 (use-package highlight
   :pin marmalade
   :config (progn
