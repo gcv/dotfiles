@@ -120,6 +120,7 @@
   (set-face-attribute 'org-level-1 nil :height 1.0 :background nil :overline nil)
   (set-face-attribute 'org-level-2 nil :height 1.0 :background nil :foreground "#000099" :overline nil)
   (set-face-attribute 'org-level-3 nil :height 1.0 :background nil :foreground "#0000cc" :overline nil)
+  (set-face-attribute 'org-checkbox nil :box nil)
   (set-face-attribute 'isearch nil :background "lightblue" :foreground nil :underline nil)
   (set-face-attribute 'lazy-highlight nil :background "#e6e6fa" :underline nil)
   (set-face-attribute 'trailing-whitespace nil :background "red")
