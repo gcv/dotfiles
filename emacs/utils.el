@@ -69,3 +69,10 @@
              (equal home (substring dir 0 home-len)))
         (concat "~" (substring dir home-len))
       dir)))
+
+
+(defun cv--apply-fn-region (fn start end)
+  "Run a function over the region between START and END in current buffer."
+  (save-excursion
+    (let ((text (delete-and-extract-region start end)))
+      (insert (funcall fn text)))))

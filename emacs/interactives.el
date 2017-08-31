@@ -355,3 +355,15 @@ return 0
     (let* ((old-mls (assoc mode minor-mode-alist)))
       (when old-mls
         (setf (cadr old-mls) mode-line-string)))))
+
+
+(defun url-encode-region (start end)
+  "URL-encode the region between START and END in current buffer."
+  (interactive "r")
+  (cv--apply-fn-region #'url-hexify-string start end))
+
+
+(defun url-decode-region (start end)
+  "URL-decode the region between START and END in current buffer."
+  (interactive "r")
+  (cv--apply-fn-region #'url-unhex-string start end))
