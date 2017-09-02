@@ -528,6 +528,11 @@
             ))
 
 
+(use-package material-theme
+  :pin melpa-stable
+  :defer t)
+
+
 (use-package multiple-cursors
   :pin melpa-stable
   :config (progn

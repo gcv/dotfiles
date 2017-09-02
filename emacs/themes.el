@@ -126,3 +126,15 @@
   (set-face-attribute 'trailing-whitespace nil :background "red")
   (set-face-attribute 'js2-error nil :box nil)
   (cv--theme-common))
+
+
+(defun theme-material-dark ()
+  (interactive)
+  (disable-all-themes)
+  (load-theme 'material t))
+
+
+(defun theme-material-light ()
+  (interactive)
+  (disable-all-themes)
+  (load-theme 'material-light t))
