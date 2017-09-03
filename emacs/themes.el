@@ -128,13 +128,23 @@
   (cv--theme-common))
 
 
+(defun cv--theme-material-common ()
+  (set-face-attribute 'org-level-1 nil :height 1.0 :box nil)
+  (set-face-attribute 'org-level-2 nil :height 1.0 :box nil)
+  (set-face-attribute 'org-level-3 nil :height 1.0 :box nil))
+
+
 (defun theme-material-dark ()
   (interactive)
   (disable-all-themes)
-  (load-theme 'material t))
+  (load-theme 'material t)
+  (cv--theme-material-common)
+  (cv--theme-common))
 
 
 (defun theme-material-light ()
   (interactive)
   (disable-all-themes)
-  (load-theme 'material-light t))
+  (load-theme 'material-light t)
+  (cv--theme-material-common)
+  (cv--theme-common))
