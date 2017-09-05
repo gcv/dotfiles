@@ -77,6 +77,15 @@
   (server-start))
 
 
+;; exit safety
+(when window-system
+  (global-set-key (kbd "C-x C-c") (lambda ()
+                                    (interactive)
+                                    (if (y-or-n-p "Are you sure you want to exit Emacs? ")
+                                        (save-buffers-kill-emacs)
+                                      (message "Canceled exit")))))
+
+
 
 ;;; ----------------------------------------------------------------------------
 ;;; paths
