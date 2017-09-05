@@ -563,8 +563,8 @@
 
 ;; eshell
 
-;; FIXME: Make C-S-d exit eshell and delete the window like ielm.
-;; FIXME: Perform the same directory shortening as zsh.
+;; FIXME: Perform the same directory shortening as zsh; remember path display is
+;; now in the modeline.
 
 (setq eshell-banner-message ""
       eshell-hist-ignoredups t
@@ -573,17 +573,16 @@
 (setq eshell-prompt-function
       (lambda ()
         (concat
-         (propertize "┌─[ " 'face `(:foreground "lightgreen"))
+         (propertize "[" 'face `(:foreground "lightgreen"))
          (propertize (user-real-login-name) 'face `(:foreground "lightblue"))
          (propertize "@" 'face `(:foreground "lightgreen"))
          (propertize (system-name) 'face `(:foreground "blanchedalmond"))
-         (propertize " " 'face `(:foreground "lightgreen"))
-         (propertize (concat (cv--dir-replace-home (eshell/pwd))) 'face `(:foreground "white"))
-         (propertize " ]\n" 'face `(:foreground "lightgreen"))
-         (propertize "└" 'face `(:foreground "lightgreen"))
-         (propertize (if (= (user-uid) 0) " #" " ∴") 'face `(:foreground "lightgreen"))
+         (propertize "]" 'face `(:foreground "lightgreen"))
+         ;; (propertize (if (= (user-uid) 0) " #" " ∴") 'face `(:foreground "lightgreen"))
          (propertize " " 'face `(:foreground 'inherit))
          )))
+
+(setq eshell-prompt-regexp "^\\[.*?\\] ")
 
 (defun eshell/o (filename)
   "Just type o filename in eshell to open the file."
@@ -605,7 +604,6 @@
     (other-window 1)
     (eshell "new")
     (rename-buffer (concat "*eshell: " name "*"))
-
     (insert (concat "ls"))
     (eshell-send-input)))
 
@@ -613,7 +611,31 @@
 
 (add-hook 'eshell-mode-hook
   (lambda ()
+    (local-set-key (kbd "C-p") 'eshell-previous-input)
+    (local-set-key (kbd "C-p") 'eshell-next-input)
+    (local-set-key (kbd "C-r") 'eshell-isearch-backward)
+    (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
     (eshell/alias "v" "ls -la")))
+
+
+;; TODO: Delete these after Emacs 25.3.
+
+(defun eshell-next-prompt (n)
+    "Move to end of Nth next prompt in the buffer.
+See `eshell-prompt-regexp'."
+    (interactive "p")
+    (re-search-forward eshell-prompt-regexp nil t n)
+    (when eshell-highlight-prompt
+      (while (not (get-text-property (line-beginning-position) 'read-only) )
+        (re-search-forward eshell-prompt-regexp nil t n)))
+    (eshell-skip-prompt))
+
+(defun eshell-previous-prompt (n)
+    "Move to end of Nth previous prompt in the buffer.
+See `eshell-prompt-regexp'."
+    (interactive "p")
+    (backward-char)
+    (eshell-next-prompt (- n)))
 
 
 ;; ido mode

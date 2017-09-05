@@ -47,7 +47,9 @@
                                                       '((:slant italic))))))
                                        (propertize formatted-branch-name 'face f))
                                    ""))
-                       (ctr (format-mode-line (list clean-modes vc-state))))
+                       (ctr (if (eq 'eshell-mode major-mode)
+                                (eshell/pwd)
+                              (format-mode-line (list clean-modes vc-state)))))
                   (list (cv--mode-line-fill-center (/ (length ctr) 2))
                         " "
                         ctr)))
