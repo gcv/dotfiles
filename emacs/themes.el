@@ -2,6 +2,7 @@
   (set-face-attribute 'mode-line-buffer-id nil :foreground nil :background nil
                       :family "Menlo" :weight 'bold :slant 'normal)
   (set-face-attribute 'org-code nil :family "Menlo" :weight 'bold)
+  (set-face-attribute 'org-checkbox nil :box nil :background nil :foreground nil)
   (set-face-attribute 'org-mode-line-clock nil :foreground nil :background nil)
   (set-face-attribute 'org-mode-line-clock nil :inherit 'unspecified)
   (set-face-attribute 'helm-source-header nil :foreground nil :background nil
@@ -35,9 +36,7 @@
   (set-face-background 'isearch-lazy-highlight-face "grey25")
   (set-face-background 'show-paren-match "#5f7f5f")
   (set-face-background 'trailing-whitespace "#ff0000")
-  (set-face-background 'org-checkbox nil)
-  (set-face-foreground 'org-checkbox "blanchedalmond")
-  (set-face-attribute 'org-checkbox nil :box nil)
+  (set-face-attribute 'org-checkbox nil :background nil :foreground "blanchedalmond")
   (set-face-foreground 'org-level-2 "#ccbbdd")
   (set-face-foreground 'org-level-3 "#edcbab")
   (set-face-foreground 'org-archived "grey50")
@@ -106,7 +105,6 @@
   (set-face-foreground 'org-level-1 "#7089a6")
   (set-face-foreground 'org-level-2 "#a9a9cc")
   (set-face-foreground 'org-level-3 "#8aba99")
-  (set-face-attribute 'org-checkbox nil :box nil)
   (cv--theme-solarized-common)
   (cv--theme-common))
 
@@ -120,7 +118,6 @@
   (set-face-attribute 'org-level-1 nil :height 1.0 :background nil :overline nil)
   (set-face-attribute 'org-level-2 nil :height 1.0 :background nil :foreground "#000099" :overline nil)
   (set-face-attribute 'org-level-3 nil :height 1.0 :background nil :foreground "#0000cc" :overline nil)
-  (set-face-attribute 'org-checkbox nil :box nil)
   (set-face-attribute 'isearch nil :background "lightblue" :foreground nil :underline nil)
   (set-face-attribute 'lazy-highlight nil :background "#e6e6fa" :underline nil)
   (set-face-attribute 'trailing-whitespace nil :background "red")
@@ -129,6 +126,7 @@
 
 
 (defun cv--theme-material-common ()
+  (set-face-attribute 'cursor nil :background "#21bdff")
   (set-face-attribute 'org-level-1 nil :height 1.0 :box nil)
   (set-face-attribute 'org-level-2 nil :height 1.0 :box nil)
   (set-face-attribute 'org-level-3 nil :height 1.0 :box nil))
