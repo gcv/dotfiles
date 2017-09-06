@@ -12,7 +12,8 @@
                       :family "Menlo" :weight 'bold)
   (set-face-attribute 'bold nil :family "Menlo" :weight 'bold)
   (set-face-attribute 'aw-leading-char-face nil :foreground "red" :background nil
-                      :family "Menlo" :weight 'bold)
+                      :family "Menlo" :height 2.0 :weight 'bold)
+  (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
   (set-face-attribute 'term nil :foreground nil :background nil))
 
 
@@ -122,6 +123,7 @@
   (set-face-attribute 'lazy-highlight nil :background "#e6e6fa" :underline nil)
   (set-face-attribute 'trailing-whitespace nil :background "red")
   (set-face-attribute 'js2-error nil :box nil)
+  (set-face-attribute 'aw-background-face nil :foreground "gray60" :background nil)
   (cv--theme-common))
 
 
@@ -144,5 +146,6 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'material-light t)
+  (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
   (cv--theme-material-common)
   (cv--theme-common))
