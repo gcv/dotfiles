@@ -39,6 +39,10 @@
 (load custom-file 'noerror)                                     ; customize: load customizations
 
 
+;; security
+(setq tls-program '("gnutls-cli --x509cafile %t -p %p %h"))
+
+
 ;; control beeping
 (setq ring-bell-function
       (lambda ()
