@@ -184,6 +184,8 @@
 	<integer>0</integer>
 	<key>HotkeyCode</key>
 	<integer>0</integer>
+	<key>HotkeyMigratedFromSingleToMulti</key>
+	<true/>
 	<key>HotkeyModifiers</key>
 	<integer>0</integer>
 	<key>IRMemory</key>
@@ -251,9 +253,9 @@
 	<key>NSWindow Frame UKCrashReporter</key>
 	<string>80 193 592 584 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>366 230 570 377 0 0 1280 777 </string>
+	<string>385 291 570 447 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>81 400 570 377 0 0 1280 777 </string>
+	<string>-1275 423 570 377 -1366 -224 1366 1024 </string>
 	<key>NeverWarnAboutShortLivedSessions_85C6836A-DC41-4DB7-9F4B-D0122538F2DB</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_85C6836A-DC41-4DB7-9F4B-D0122538F2DB_selection</key>
@@ -2446,6 +2448,8 @@
 	<true/>
 	<key>NoSyncDoNotWarnBeforeMultilinePaste_selection</key>
 	<integer>0</integer>
+	<key>NoSyncHaveWarnedAboutIncompatibleSoftware</key>
+	<true/>
 	<key>NoSyncInstallationId</key>
 	<string>E2C74B7E-4FE4-4E5D-BF7B-D654E5F514CE</string>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
@@ -2542,7 +2546,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2017-07-25T19:11:12Z</date>
+	<date>2017-09-25T04:42:13Z</date>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>ShowBookmarkName</key>
@@ -2598,7 +2602,7 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.0.15</string>
+	<string>3.1.1</string>
 	<key>kCPKSelectionViewPreferredModeKey</key>
 	<integer>0</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>
