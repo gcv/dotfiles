@@ -36,6 +36,7 @@ ${BREW_HOME}/bin/brew install \
     `# utilities and apps` \
     aspell \
     autojump \
+    exiftool \
     git \
     gnupg@1.4 \
     htop \
