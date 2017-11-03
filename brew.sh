@@ -69,11 +69,11 @@ ${BREW_HOME}/bin/brew install \
     icu4c \
     taglib \
     `# external development environment management tools` \
-    haskell-stack \
-    leiningen \
-    maven \
     `# nvm` \
     `# rbenv` \
     `# pyenv` \
     `# rustup # pretty broken dependency story` \
-    roswell
+    `# roswell` \
+    `# haskell-stack` \
+    leiningen \
+    maven \
