@@ -20,6 +20,7 @@ nrepl-history
 projectile-bookmarks.eld
 recentf
 semanticdb/
+server
 srecode-map.el
 swank/
 tramp

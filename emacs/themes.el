@@ -1,20 +1,25 @@
 (defun cv--theme-common ()
-  (set-face-attribute 'mode-line-buffer-id nil :foreground nil :background nil
-                      :family "Menlo" :weight 'bold :slant 'normal)
-  (set-face-attribute 'org-code nil :family "Menlo" :weight 'bold)
-  (set-face-attribute 'org-checkbox nil :box nil :background nil :foreground nil)
-  (set-face-attribute 'org-mode-line-clock nil :foreground nil :background nil)
-  (set-face-attribute 'org-mode-line-clock nil :inherit 'unspecified)
-  (set-face-attribute 'helm-source-header nil :foreground nil :background nil
-                      :family "Menlo" :weight 'bold)
-  (set-face-attribute 'helm-selection nil :underline nil)
-  (set-face-attribute 'dired-header nil :foreground nil :background nil
-                      :family "Menlo" :weight 'bold)
-  (set-face-attribute 'bold nil :family "Menlo" :weight 'bold)
-  (set-face-attribute 'aw-leading-char-face nil :foreground "red" :background nil
-                      :family "Menlo" :height 2.0 :weight 'bold)
-  (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
-  (set-face-attribute 'term nil :foreground nil :background nil))
+  (let ((base-font (cond ((member "Menlo" (font-family-list)) "Menlo")
+                         ((member "Consolas" (font-family-list)) "Consolas")
+                         (t nil))))
+    (set-face-attribute 'minibuffer-prompt nil :family base-font)
+    (set-face-attribute 'mode-line nil :family base-font)
+    (set-face-attribute 'mode-line-buffer-id nil :foreground nil :background nil
+                        :family base-font :weight 'bold :slant 'normal)
+    (set-face-attribute 'org-code nil :family base-font :weight 'bold)
+    (set-face-attribute 'org-checkbox nil :box nil :background nil :foreground nil)
+    (set-face-attribute 'org-mode-line-clock nil :foreground nil :background nil)
+    (set-face-attribute 'org-mode-line-clock nil :inherit 'unspecified)
+    (set-face-attribute 'helm-source-header nil :foreground nil :background nil
+                        :family base-font :weight 'bold)
+    (set-face-attribute 'helm-selection nil :underline nil)
+    (set-face-attribute 'dired-header nil :foreground nil :background nil
+                        :family base-font :weight 'bold)
+    (set-face-attribute 'bold nil :family base-font :weight 'bold)
+    (set-face-attribute 'aw-leading-char-face nil :foreground "red" :background nil
+                        :family base-font :height 2.0 :weight 'bold)
+    (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
+    (set-face-attribute 'term nil :foreground nil :background nil)))
 
 
 (defun theme-zenburn ()

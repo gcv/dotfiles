@@ -16,6 +16,12 @@
                                              (0.5 . left-margin))))))
 
 
+(setq cv--mode-line-buffer-modified-mark
+      (if (member "Menlo" (font-family-list))
+          "❉ "
+        "* "))
+
+
 (setq-default mode-line-format
   (list "%e"
         mode-line-front-space
@@ -24,7 +30,7 @@
                               'mouse-face 'mode-line-highlight
                               'help-echo (concat "remote: " default-directory))))
         '(:eval (cond (buffer-read-only "%* ")
-                      ((buffer-modified-p) "❉ ") ; ❉ is nice for fonts which support it, * suffices otherwise
+                      ((buffer-modified-p) cv--mode-line-buffer-modified-mark)
                       (t "  ")))
         '(:eval (propertize "%12b"
                             'face 'mode-line-buffer-id
