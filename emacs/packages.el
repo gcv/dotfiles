@@ -181,6 +181,10 @@
   :diminish "")
 
 
+(use-package eshell-autojump
+  :pin melpa-stable)
+
+
 (use-package flycheck
   :pin melpa
   :defer t)
