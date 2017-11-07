@@ -54,7 +54,7 @@
                                        (propertize formatted-branch-name 'face f))
                                    ""))
                        (ctr (if (eq 'eshell-mode major-mode)
-                                (eshell/pwd)
+                                (eshell/shortpwd)
                               (format-mode-line (list clean-modes vc-state)))))
                   (list (cv--mode-line-fill-center (/ (length ctr) 2))
                         " "

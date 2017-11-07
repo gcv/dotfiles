@@ -573,7 +573,7 @@
 ;; eshell
 
 ;; FIXME: Perform the same directory shortening as zsh; remember path display is
-;; now in the modeline.
+;; now in the modeline. Change eshell/shortpwd to get this to work.
 
 (setq eshell-banner-message ""
       eshell-hist-ignoredups t
@@ -592,6 +592,23 @@
          )))
 
 (setq eshell-prompt-regexp "^\\[.*?\\] ")
+
+(defun eshell/shortpwd ()
+  (let ((base (eshell/pwd))
+        (home-rx (format "^%s" (replace-regexp-in-string "/" "\\\\/" (getenv "HOME")))))
+    (replace-regexp-in-string home-rx "~" base)))
+
+(defun eshell/... ()
+  (eshell/cd "../.."))
+
+(defun eshell/.... ()
+  (eshell/cd "../../.."))
+
+(defun eshell/..... ()
+  (eshell/cd "../../../.."))
+
+(defun eshell/...... ()
+  (eshell/cd "../../../../.."))
 
 (defun eshell/o (filename)
   "Just type o filename in eshell to open the file."
@@ -624,6 +641,7 @@
     (local-set-key (kbd "C-p") 'eshell-next-input)
     (local-set-key (kbd "C-r") 'eshell-isearch-backward)
     (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
+    (local-set-key (kbd "<tab>") 'company-complete)
     (eshell/alias "v" "ls -la")))
 
 
