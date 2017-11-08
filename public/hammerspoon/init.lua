@@ -88,6 +88,21 @@ function alterOrRestoreFrame(win, alterCb, restoreCb)
    end
 end
 
+function frameFillMostOfScreenUp(windowFrame, screenFrame)
+   windowFrame.x = screenFrame.x + (screenFrame.w / 8)
+   windowFrame.y = screenFrame.y
+   windowFrame.w = (screenFrame.w / 8) * 6
+   windowFrame.h = screenFrame.h
+end
+
+function frameFillMostOfScreenDown(windowFrame, screenFrame)
+   local c = 100
+   windowFrame.x = screenFrame.x + (screenFrame.w / 8) + c
+   windowFrame.y = screenFrame.y + c
+   windowFrame.w = (screenFrame.w / 8) * 6 - (2 * c)
+   windowFrame.h = screenFrame.h - (2 * c)
+end
+
 hs.hotkey.bind(
    {"ctrl", "alt", "cmd"}, "left",
    function()
@@ -135,10 +150,7 @@ hs.hotkey.bind(
             local f = win:frame()
             local screen = win:screen()
             local max = screen:frame()
-            f.x = max.x + (max.w / 8)
-            f.y = max.y
-            f.w = (max.w / 8) * 6
-            f.h = max.h
+            frameFillMostOfScreenUp(f, max)
             win:setFrame(f)
          end
       )
@@ -154,16 +166,68 @@ hs.hotkey.bind(
             local f = win:frame()
             local screen = win:screen()
             local max = screen:frame()
-            local c = 100
-            f.x = max.x + (max.w / 8) + c
-            f.y = max.y + c
-            f.w = (max.w / 8) * 6 - (2 * c)
-            f.h = max.h - (2 * c)
+            frameFillMostOfScreenDown(f, max)
             win:setFrame(f)
          end
       )
    end
 )
+
+function makeScreenFillHotkeysForScreen(keyString, screenId)
+   hs.hotkey.bind(
+      {"alt", "cmd"}, keyString,
+      function()
+         alterOrRestoreFrame(
+            hs.window.focusedWindow(),
+            function(win)
+               local f = win:frame()
+               local screen = hs.screen.allScreens()[screenId]
+               local max = screen:frame()
+               frameFillMostOfScreenUp(f, max)
+               win:setFrame(f)
+            end
+         )
+      end
+   )
+   hs.hotkey.bind(
+      {"ctrl", "alt", "cmd"}, keyString,
+      function()
+         alterOrRestoreFrame(
+            hs.window.focusedWindow(),
+            function(win)
+               local f = win:frame()
+               local screen = hs.screen.allScreens()[screenId]
+               local max = screen:frame()
+               frameFillMostOfScreenDown(f, max)
+               win:setFrame(f)
+            end
+         )
+      end
+   )
+   hs.hotkey.bind(
+      {"shift", "alt", "cmd"}, keyString,
+      function()
+         alterOrRestoreFrame(
+            hs.window.focusedWindow(),
+            function(win)
+               local f = win:frame()
+               local screen = hs.screen.allScreens()[screenId]
+               local max = screen:frame()
+               f.x = max.x
+               f.y = max.y
+               f.w = (max.w / 8) * 7
+               f.h = max.h
+               win:setFrame(f)
+            end
+         )
+      end
+   )
+end
+
+makeScreenFillHotkeysForScreen("1", 1)
+makeScreenFillHotkeysForScreen("2", 2)
+makeScreenFillHotkeysForScreen("3", 3)
+makeScreenFillHotkeysForScreen("4", 4)
 
 -- full-screen on other display
 hs.hotkey.bind(
