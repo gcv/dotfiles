@@ -1,7 +1,7 @@
 -- Hammerspoon configuration reload
 
 hs.hotkey.bind(
-   {"cmd", "alt", "ctrl"}, "r",
+   {"ctrl", "alt", "cmd"}, "r",
    function()
       hs.reload()
    end
@@ -37,7 +37,7 @@ hs.alert("Reloading Hammerspoon configuration")
 -- brightness control
 
 hs.hotkey.bind(
-   {"cmd", "alt", "ctrl"}, "b",
+   {"ctrl", "alt", "cmd"}, "b",
    function()
       hs.brightness.set(1)
       -- local screens = hs.screen.allScreens()
@@ -85,7 +85,7 @@ function alterOrRestoreFrame(win, alterCb, restoreCb)
 end
 
 hs.hotkey.bind(
-   {"cmd", "alt", "ctrl"}, "left",
+   {"ctrl", "alt", "cmd"}, "left",
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
@@ -109,7 +109,7 @@ hs.hotkey.bind(
 )
 
 hs.hotkey.bind(
-   {"cmd", "alt", "ctrl"}, "right",
+   {"ctrl", "alt", "cmd"}, "right",
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
@@ -133,7 +133,7 @@ hs.hotkey.bind(
 )
 
 hs.hotkey.bind(
-   {"cmd", "alt", "ctrl"}, "up",
+   {"ctrl", "alt", "cmd"}, "up",
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
@@ -157,7 +157,7 @@ hs.hotkey.bind(
 )
 
 hs.hotkey.bind(
-   {"cmd", "alt", "ctrl"}, "down",
+   {"ctrl", "alt", "cmd"}, "down",
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
@@ -183,7 +183,7 @@ hs.hotkey.bind(
 
 -- full-screen on other display
 hs.hotkey.bind(
-   {"cmd", "alt", "ctrl"}, "f",
+   {"ctrl", "alt", "cmd"}, "f",
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
@@ -232,7 +232,7 @@ hs.hotkey.bind({}, "f12", appSwitchEmacs)
 -- Ctrl-Alt-Cmd-s: Safari
 
 hs.hotkey.bind(
-   {"cmd", "alt", "ctrl"}, "s",
+   {"ctrl", "alt", "cmd"}, "s",
    function()
       hs.osascript.applescript(
          [[tell application "Safari"
