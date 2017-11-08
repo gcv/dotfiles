@@ -95,12 +95,20 @@ function frameFillMostOfScreenUp(windowFrame, screenFrame)
    windowFrame.h = screenFrame.h
 end
 
-function frameFillMostOfScreenDown(windowFrame, screenFrame)
+function frameFillMostOfScreenCenter1(windowFrame, screenFrame)
    local c = 100
    windowFrame.x = screenFrame.x + (screenFrame.w / 8) + c
    windowFrame.y = screenFrame.y + c
    windowFrame.w = (screenFrame.w / 8) * 6 - (2 * c)
    windowFrame.h = screenFrame.h - (2 * c)
+end
+
+function frameFillMostOfScreenCenter2(windowFrame, screenFrame)
+   local c = 20
+   windowFrame.x = screenFrame.x + (screenFrame.w / 8)
+   windowFrame.y = screenFrame.y + (screenFrame.h / 8) + c
+   windowFrame.w = (screenFrame.w / 8) * 6
+   windowFrame.h = (screenFrame.h / 8) * 6 - (2 * c)
 end
 
 hs.hotkey.bind(
@@ -152,7 +160,19 @@ hs.hotkey.bind(
       local f = win:frame()
       local screen = win:screen()
       local max = screen:frame()
-      frameFillMostOfScreenDown(f, max)
+      frameFillMostOfScreenCenter1(f, max)
+      win:setFrame(f)
+   end
+)
+
+hs.hotkey.bind(
+   {"shift", "ctrl", "alt", "cmd"}, "down",
+   function()
+      local win = hs.window.focusedWindow()
+      local f = win:frame()
+      local screen = win:screen()
+      local max = screen:frame()
+      frameFillMostOfScreenCenter2(f, max)
       win:setFrame(f)
    end
 )
@@ -176,7 +196,7 @@ function makeScreenFillHotkeysForScreen(keyString, screenId)
          local f = win:frame()
          local screen = hs.screen.allScreens()[screenId]
          local max = screen:frame()
-         frameFillMostOfScreenDown(f, max)
+         frameFillMostOfScreenCenter1(f, max)
          win:setFrame(f)
       end
    )
@@ -191,6 +211,17 @@ function makeScreenFillHotkeysForScreen(keyString, screenId)
          f.y = max.y
          f.w = (max.w / 8) * 7
          f.h = max.h
+         win:setFrame(f)
+      end
+   )
+   hs.hotkey.bind(
+      {"shift", "ctrl", "alt", "cmd"}, keyString,
+      function()
+         local win = hs.window.focusedWindow()
+         local f = win:frame()
+         local screen = hs.screen.allScreens()[screenId]
+         local max = screen:frame()
+         frameFillMostOfScreenCenter2(f, max)
          win:setFrame(f)
       end
    )
