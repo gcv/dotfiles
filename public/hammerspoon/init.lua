@@ -54,14 +54,14 @@ hs.hotkey.bind(
 
 -- helpers
 
-function app_switch_emacs()
+function appSwitchEmacs()
    local emacs = hs.application.get("Emacs")
    if emacs then
       emacs:activate()
    end
 end
 
-function app_switch_terminal()
+function appSwitchTerminal()
    local term = hs.application.get("iTerm2") or hs.application.get("Terminal")
    if term then
       term:activate()
@@ -221,12 +221,12 @@ hs.hotkey.bind(
 
 -- f11: iTerm2 or Terminal
 
-hs.hotkey.bind({}, "f11", app_switch_terminal)
+hs.hotkey.bind({}, "f11", appSwitchTerminal)
 
 
 -- f12: Emacs
 
-hs.hotkey.bind({}, "f12", app_switch_emacs)
+hs.hotkey.bind({}, "f12", appSwitchEmacs)
 
 
 -- Ctrl-Alt-Cmd-s: Safari
@@ -248,34 +248,34 @@ hs.hotkey.bind(
 
 -- iTerm2: C-c C-z flips to Emacs.
 
-ctrl_c = hs.hotkey.modal.new("ctrl", "c")
+ctrlC = hs.hotkey.modal.new("ctrl", "c")
 
-function ctrl_c:entered()
+function ctrlC:entered()
    local app = hs.application.frontmostApplication()
    local app_name = app:name()
    if "iTerm2" ~= app_name and "Terminal" ~= "app_name" then
       -- forward C-c to underlying app
       hs.eventtap.keyStroke({"ctrl"}, "c")
-      ctrl_c:exit()
+      ctrlC:exit()
    else
       -- timeout
       hs.timer.doAfter(
          1,
          function()
-            ctrl_c:exit()
+            ctrlC:exit()
          end
       )
    end
 end
 
-ctrl_c:bind(
+ctrlC:bind(
    {"ctrl"}, "z",
    function()
-      app_switch_emacs()
-      ctrl_c:exit()
+      appSwitchEmacs()
+      ctrlC:exit()
    end
 )
 
-function ctrl_c:exited()
+function ctrlC:exited()
    -- nothing
 end
