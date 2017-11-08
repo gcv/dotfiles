@@ -74,6 +74,10 @@ end
 previousFrames = {}
 
 function alterOrRestoreFrame(win, alterCb, restoreCb)
+   local restoreCb = restoreCb or
+      function(win, previousFrame)
+         win:move(previousFrame)
+      end
    local previousFrame = previousFrames[win:id()]
    if previousFrame then
       restoreCb(win, previousFrame)
@@ -89,7 +93,6 @@ hs.hotkey.bind(
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
-         -- alter
          function(win)
             local f = win:frame()
             local screen = win:screen()
@@ -99,10 +102,6 @@ hs.hotkey.bind(
             f.w = max.w / 2
             f.h = max.h
             win:setFrame(f)
-         end,
-         -- restore
-         function(win, previousFrame)
-            win:move(previousFrame)
          end
       )
    end
@@ -113,7 +112,6 @@ hs.hotkey.bind(
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
-         -- alter
          function(win)
             local f = win:frame()
             local screen = win:screen()
@@ -123,10 +121,6 @@ hs.hotkey.bind(
             f.w = max.w / 2
             f.h = max.h
             win:setFrame(f)
-         end,
-         -- restore
-         function(win, previousFrame)
-            win:move(previousFrame)
          end
       )
    end
@@ -137,7 +131,6 @@ hs.hotkey.bind(
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
-         -- alter
          function(win)
             local f = win:frame()
             local screen = win:screen()
@@ -147,10 +140,6 @@ hs.hotkey.bind(
             f.w = (max.w / 8) * 6
             f.h = max.h
             win:setFrame(f)
-         end,
-         -- restore
-         function(win, previousFrame)
-            win:move(previousFrame)
          end
       )
    end
@@ -161,7 +150,6 @@ hs.hotkey.bind(
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
-         -- alter
          function(win)
             local f = win:frame()
             local screen = win:screen()
@@ -172,10 +160,6 @@ hs.hotkey.bind(
             f.w = (max.w / 8) * 6 - (2 * c)
             f.h = max.h - (2 * c)
             win:setFrame(f)
-         end,
-         -- restore
-         function(win, previousFrame)
-            win:move(previousFrame)
          end
       )
    end
