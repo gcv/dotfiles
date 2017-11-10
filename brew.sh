@@ -25,15 +25,18 @@ if [[ ! -d "$BREW_HOME" ]]; then
 fi
 
 
+# system basics
 ${BREW_HOME}/bin/brew install \
-    `# system basics` \
-    bash \    
+    bash \
     coreutils \
     findutils \
     python3 \
     xz \
-    zsh \
-    `# utilities and apps` \
+    zsh
+
+
+# utilities and apps
+${BREW_HOME}/bin/brew install \
     aspell \
     autojump \
     exiftool \
@@ -52,28 +55,35 @@ ${BREW_HOME}/bin/brew install \
     tree \
     watch \
     wget \
-    youtube-dl \
-    `# external service tools` \
-    awscli \
-    `#heroku # nasty node dependency introduced` \
-    `# C and C++ development tools` \
+    youtube-dl
+
+
+# external service tools
+# excluded: heroku, due to nasty dependency
+${BREW_HOME}/bin/brew install \
+    awscli
+
+
+# C and C++ development tools
+${BREW_HOME}/bin/brew install \
     autoconf \
     automake \
     cmake \
     ctags \
     global \
-    swig \
-    `# libraries` \
+    swig
+
+
+# libraries
+${BREW_HOME}/bin/brew install \
     boost \
     gsl \
     icu4c \
-    taglib \
-    `# external development environment management tools` \
-    `# nvm` \
-    `# rbenv` \
-    `# pyenv` \
-    `# rustup # pretty broken dependency story` \
-    `# roswell` \
-    `# haskell-stack` \
+    taglib
+
+
+# external development environment management tools
+# excluded: roswell, haskell-stack, nvm, rbenv, pyenv, rustup (horrible dependency story)
+${BREW_HOME}/bin/brew install \
     leiningen \
-    maven \
+    maven
