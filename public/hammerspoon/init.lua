@@ -104,7 +104,7 @@ function frameFillMostOfScreenCenter1(windowFrame, screenFrame)
 end
 
 function frameFillMostOfScreenCenter2(windowFrame, screenFrame)
-   local c = 20
+   local c = 25
    windowFrame.x = screenFrame.x + (screenFrame.w / 8)
    windowFrame.y = screenFrame.y + (screenFrame.h / 8) + c
    windowFrame.w = (screenFrame.w / 8) * 6
