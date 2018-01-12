@@ -7,6 +7,7 @@
 
 (use-package async    :pin melpa-stable)
 (use-package dash     :pin melpa-stable) ; a modern list library
+(use-package ht       :pin melpa-stable) ; hash tables
 (use-package s        :pin melpa-stable) ; string handling
 (use-package f        :pin melpa-stable) ; file handling
 (use-package queue    :pin gnu)
