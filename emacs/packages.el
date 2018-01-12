@@ -182,6 +182,16 @@
   :diminish "")
 
 
+(use-package emojify
+  :pin melpa-stable
+  :config (progn
+            ;; 'unicode currently broken on macOS
+            (setq emojify-display-style 'image)
+            (setq emojify-emoji-style (list 'unicode))
+            (global-emojify-mode)
+            ))
+
+
 (use-package eshell-autojump
   :pin melpa-stable)
 
