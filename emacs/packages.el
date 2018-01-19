@@ -588,6 +588,42 @@
             ))
 
 
+(use-package origami
+  :pin melpa
+  :config (progn
+
+            (setq origami-show-fold-header t)
+
+            (defhydra cv--hydra-origami (:color red)
+              "
+  _o_pen node   _O_pen node rec    toggle _f_orward  _u_ndo
+  _c_lose node  _C_lose node rec   toggle _a_ll      _r_edo
+  _n_ext fold   _p_revious fold    _<tab>_ smart     _R_eset
+  "
+              ("<up>" previous-line)
+              ("<down>" next-line)
+              ("<left>" left-char)
+              ("<right>" right-char)
+              ("<tab>" origami-recursively-toggle-node)
+              ("S-<tab>" origami-show-only-node)
+              ("o" origami-open-node)
+              ("O" origami-open-node-recursively)
+              ("c" origami-close-node)
+              ("C" origami-close-node-recursively)
+              ("n" origami-next-fold)
+              ("p" origami-previous-fold)
+              ("f" origami-forward-toggle-node)
+              ("a" origami-toggle-all-nodes)
+              ("u" origami-undo)
+              ("r" origami-redo)
+              ("R" origami-reset)
+              )
+
+            (define-key origami-mode-map (kbd "C-h M-o") 'cv--hydra-origami/body)
+
+            ))
+
+
 (use-package paredit
   :pin melpa-stable
   :diminish " π"
