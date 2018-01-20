@@ -235,6 +235,13 @@
             ))
 
 
+(use-package git-auto-commit-mode
+  :pin melpa-stable
+  :config (progn
+            (setq gac-automatically-push-p nil)
+            ))
+
+
 (use-package golden-ratio
   :pin melpa
   :diminish " φ"
