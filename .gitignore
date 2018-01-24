@@ -1,1 +1,2 @@
 *.pyc
+/emacs/emacs.d/projectile.cache
