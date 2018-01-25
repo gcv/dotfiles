@@ -367,3 +367,17 @@ return 0
   "URL-decode the region between START and END in current buffer."
   (interactive "r")
   (cv--apply-fn-region #'url-unhex-string start end))
+
+
+(defun which-active-modes ()
+  "Give a message of which minor modes are enabled in the current buffer."
+  (interactive)
+  (let* ((actives-raw (mapcar (lambda (mode)
+                                (condition-case nil
+                                    (when (and (symbolp mode) (symbol-value mode))
+                                      mode)
+                                  (error nil)))
+                              minor-mode-list))
+         (actives (-remove #'null actives-raw))
+         (sorted-actives (sort actives #'string-lessp)))
+    (message "Active modes are %s" sorted-actives)))
