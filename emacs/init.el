@@ -641,6 +641,7 @@
     (local-set-key (kbd "C-p") 'eshell-next-input)
     (local-set-key (kbd "C-r") 'eshell-isearch-backward)
     (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
+    (local-set-key (kbd "C-c C-z") 'flip-windows)
     (local-set-key (kbd "<tab>") 'company-complete)
     (eshell/alias "v" "ls -la")))
 

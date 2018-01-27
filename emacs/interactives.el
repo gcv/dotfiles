@@ -232,18 +232,23 @@
   ;; 4: nothing
   (let* ((buffers (buffer-list (selected-frame)))
          (current (car buffers))
+         (eshell-rx "\\*eshell.*\\*")
          (term-rx "\\*terminal<.+>\\*"))
-    (cond ((catch 'break
-             (dolist (buffer buffers)
-               (when (string-match term-rx (buffer-name buffer))
-                 (let ((window (get-buffer-window buffer)))
-                   (when window
-                     (select-window window)
-                     (throw 'break t))))))
-           t)
-          ((not (eq 'darwin system-type))
-           nil)
-          ((= 1 (do-applescript "
+    (flet ((internal-switch (rx)
+             (catch 'break
+               (dolist (buffer buffers)
+                 (when (string-match rx (buffer-name buffer))
+                   (let ((window (get-buffer-window buffer)))
+                     (when window
+                       (select-window window)
+                       (throw 'break t))))))))
+      (cond ((internal-switch eshell-rx)
+             t)
+            ((internal-switch term-rx)
+             t)
+            ((not (eq 'darwin system-type))
+             nil)
+            ((= 1 (do-applescript "
 if application \"iTerm\" is running then
   tell application \"iTerm\"
     activate
@@ -252,8 +257,8 @@ if application \"iTerm\" is running then
 end if
 return 0
 "))
-           t)
-          ((= 1 (do-applescript "
+             t)
+            ((= 1 (do-applescript "
 if application \"Terminal\" is running then
   tell application \"Terminal\"
     activate
@@ -262,8 +267,8 @@ if application \"Terminal\" is running then
 end if
 return 0
 "))
-           t)
-          (t nil))))
+             t)
+            (t nil)))))
 
 (global-set-key (kbd "C-c C-z") 'switch-to-last-terminal-buffer)
 
