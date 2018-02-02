@@ -46,6 +46,7 @@
   (set-face-foreground 'org-level-2 "#ccbbdd")
   (set-face-foreground 'org-level-3 "#edcbab")
   (set-face-foreground 'org-archived "grey50")
+  (set-face-attribute 'markdown-code-face nil :background "black")
   (set-face-attribute 'company-tooltip-selection nil :background "#224983")
   (set-face-attribute 'company-tooltip-common-selection nil :background "#224983")
   (cv--theme-common))
