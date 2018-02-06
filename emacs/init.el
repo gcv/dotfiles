@@ -712,7 +712,12 @@ See `eshell-prompt-regexp'."
 
 (require 'term)
 
-(setq term-suppress-hard-newline nil)   ; seems to be better kept off for screen
+;; term-suppress-hard-newline is an interesting animal. With normal term use, it
+;; seems to be better kept as t. Otherwise, it generates hard newlines whenever
+;; terminal output wraps around the screen. However, GNU screen doesn't like t,
+;; it needs nil. But tmux works perfectly well with t. See
+;; https://stackoverflow.com/questions/24517172/is-there-a-way-to-make-regions-in-term-modes-respect-line-wrapping/48634830.
+(setq term-suppress-hard-newline t)
 
 (add-hook 'term-mode-hook
   (lambda ()
