@@ -701,6 +701,18 @@
 
             (advice-add 'persp-set-ido-buffers :after #'cv--persp-set-ido-buffers)
 
+            (defun cv--persp-rename (orig-fn &rest args)
+              (let* ((new-name (car args))
+                     (old-name (persp-name persp-curr))
+                     (scratch-buf (get-buffer (format "*scratch* (%s)" old-name)))
+                     (new-scratch-name (format "*scratch* (%s)" new-name)))
+                (apply orig-fn args)
+                (when scratch-buf
+                  (with-current-buffer scratch-buf
+                    (rename-buffer new-scratch-name)))))
+
+            (advice-add 'persp-rename :around #'cv--persp-rename)
+
             ))
 
 
