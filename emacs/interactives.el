@@ -17,6 +17,36 @@
     (set-fontset-font "fontset-default" 'unicode font-family)))
 
 
+(cl-defun header-line (&optional (header-on t header-given))
+  (interactive)
+  (if (or (and header-given (not header-on))
+          (and (not header-given) header-line-format))
+      (setq-default header-line-format nil)
+    (set-face-attribute 'header-line nil
+                        :height (let ((default-height (face-attribute 'default :height)))
+                                  (cond ((= 150 default-height) 120)
+                                        ((= 120 default-height) 100)
+                                        (t (round (* 0.80 (face-attribute 'default :height)))))))
+    (setq-default header-line-format
+      (list '(:eval (let ((pwd (if (buffer-file-name)
+                                   (cv--display-dir (buffer-file-name))
+                                 "")))
+                      (list (cv--mode-line-fill-center (/ (length pwd) 2))
+                            pwd)))))))
+
+
+(defun m150 ()
+  (interactive)
+  (set-font "Menlo" 150)
+  (header-line header-line-format))
+
+
+(defun m120 ()
+  (interactive)
+  (set-font "Menlo" 120)
+  (header-line header-line-format))
+
+
 (defun set-font-current-buffer (font-family height)
   (interactive "sFont family: \nnHeight: ")
   (let ((face-name (gensym)))

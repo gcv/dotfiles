@@ -61,13 +61,14 @@
         (message (format "%s ignored." filename))))))
 
 
-(defun cv--dir-replace-home (dir)
-  "If directory starts with the absolute path of HOME, replace that path with a ~."
-  (let* ((home (expand-file-name (getenv "HOME")))
-         (home-len (length home)))
-    (if (and (>= (length dir) home-len)
-             (equal home (substring dir 0 home-len)))
-        (concat "~" (substring dir home-len))
+(cl-defun cv--display-dir (dir &optional (shorten-to-display t))
+  "Display a shortened directory name, where the home directory
+   is shortened, as per convention, to ~, but also narrow to the
+   display width if desired. FIXME: Feature not implemented, see
+   zsh disambiguate_keep_last."
+  (let ((dir (abbreviate-file-name dir)))
+    (if (not shorten-to-display)
+        dir
       dir)))
 
 

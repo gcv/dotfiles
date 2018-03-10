@@ -594,9 +594,7 @@
 (setq eshell-prompt-regexp "^\\[.*?\\] ")
 
 (defun eshell/shortpwd ()
-  (let ((base (eshell/pwd))
-        (home-rx (format "^%s" (replace-regexp-in-string "/" "\\\\/" (getenv "HOME")))))
-    (replace-regexp-in-string home-rx "~" base)))
+  (cv--display-dir (eshell/pwd)))
 
 (defun eshell/... ()
   (eshell/cd "../.."))
