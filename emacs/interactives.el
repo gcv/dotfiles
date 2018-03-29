@@ -22,17 +22,23 @@
   (if (or (and header-given (not header-on))
           (and (not header-given) header-line-format))
       (setq-default header-line-format nil)
-    (set-face-attribute 'header-line nil
-                        :height (let ((default-height (face-attribute 'default :height)))
-                                  (cond ((= 150 default-height) 120)
-                                        ((= 120 default-height) 100)
-                                        (t (round (* 0.80 (face-attribute 'default :height)))))))
-    (setq-default header-line-format
-      (list '(:eval (let ((pwd (if (buffer-file-name)
-                                   (cv--display-dir (buffer-file-name))
-                                 "")))
-                      (list (cv--mode-line-fill-center (/ (length pwd) 2))
-                            pwd)))))))
+    (let* ((default-height (face-attribute 'default :height))
+           (header-line-height (cond ((= 150 default-height) 120)
+                                     ((= 120 default-height) 100)
+                                     (t (round (* 0.80 (face-attribute 'default :height))))))
+           ;; XXX: centering-multiplier is necessary because
+           ;; cv--mode-line-fill-center does not adapt to different font sizes
+           ;; in the main buffer and the header. :(
+           (centering-multiplier (cond ((= 120 default-height) 2.3)
+                                       ((= 150 default-height) 2.5)
+                                       (t 2))))
+      (set-face-attribute 'header-line nil :height header-line-height)
+      (setq-default header-line-format
+        (list `(:eval (let ((pwd (if (buffer-file-name)
+                                     (cv--display-dir (buffer-file-name))
+                                   "")))
+                        (list (cv--mode-line-fill-center (/ (length pwd) ,centering-multiplier))
+                              pwd))))))))
 
 
 (defun m150 ()
