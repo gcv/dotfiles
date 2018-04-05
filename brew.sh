@@ -30,7 +30,7 @@ ${BREW_HOME}/bin/brew install \
     bash \
     coreutils \
     findutils \
-    python3 \
+    python \
     xz \
     zsh
 
