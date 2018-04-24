@@ -255,11 +255,15 @@
 	<key>NSWindow Frame UKCrashReporter</key>
 	<string>80 193 592 584 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 186 1280 592 0 0 1280 777 </string>
+	<string>0 312 1280 466 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>29 171 570 377 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
 	<string>658 198 570 377 0 0 1280 777 </string>
+	<key>NeverWarnAboutShortLivedSessions_494E70CE-4083-4977-A258-43317001EE51</key>
+	<true/>
+	<key>NeverWarnAboutShortLivedSessions_494E70CE-4083-4977-A258-43317001EE51_selection</key>
+	<integer>0</integer>
 	<key>NeverWarnAboutShortLivedSessions_85C6836A-DC41-4DB7-9F4B-D0122538F2DB</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_85C6836A-DC41-4DB7-9F4B-D0122538F2DB_selection</key>
@@ -1871,7 +1875,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2018-01-31T22:49:35Z</date>
+	<date>2018-04-05T19:43:06Z</date>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>ShowBookmarkName</key>
