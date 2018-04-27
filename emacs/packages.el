@@ -739,6 +739,17 @@
             ))
 
 
+(use-package restclient
+  :pin melpa
+  :config (progn
+            (setq restclient-log-request nil)
+            ))
+
+
+(use-package restclient-helm
+  :pin melpa)
+
+
 (use-package rust-mode
   :pin melpa
   :config (progn
