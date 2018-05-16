@@ -74,6 +74,7 @@ function dtmux() { docker exec -ti $1 script -q -c "tmux attach || tmux new" /de
 function dlatex() { docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data "blang/latex:ubuntu" "$@" }
 # latexmk -cd -f -interaction=batchmode -pdf file.tex
 # latexmk -c or -C to clean up
+function doctave() { docker run --rm -it -v "$PWD":/source schickling/octave }
 
 [[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
     alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n' || \
