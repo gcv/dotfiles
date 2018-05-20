@@ -587,6 +587,7 @@
             (when window-system (add-to-list 'term-bind-key-alist '("M-[" . multi-term-prev)))
             (add-to-list 'term-bind-key-alist '("M-]" . multi-term-next))
             (add-to-list 'term-bind-key-alist '("C-o" . flip-windows))
+            (add-to-list 'term-bind-key-alist '("C-M-o" . ace-window))
             (add-to-list 'term-bind-key-alist '("C-c C-z" . flip-windows))
             ))
 

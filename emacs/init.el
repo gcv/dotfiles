@@ -738,7 +738,7 @@ See `eshell-prompt-regexp'."
          (get-buffer-process (current-buffer))
          (if string string (current-kill 0)))))
     (define-key term-raw-map (kbd "M-o") 'other-window)
-    (define-key term-raw-map (kbd "C-M-o") 'ido-switch-buffer-other-window)
+    (define-key term-raw-map (kbd "C-M-o") 'ace-window)
     (define-key term-raw-map (kbd "C-c C-e") #'(lambda ()
                                                  (interactive)
                                                  (term-send-raw-string "\e")))))
