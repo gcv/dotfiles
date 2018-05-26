@@ -196,6 +196,16 @@
   :pin melpa-stable)
 
 
+(add-to-list 'package-pinned-packages '(julia-mode . "melpa-stable"))
+
+(use-package ess
+  :pin melpa-stable
+  :config (progn
+            (require 'ess-site)
+            (setq ess-eldoc-show-on-symbol t)
+            ))
+
+
 (use-package flycheck
   :pin melpa
   :defer t)
