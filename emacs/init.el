@@ -162,6 +162,7 @@
             "\\*Completions\\*"
             "\\*Quail Completions\\*"
             "TAGS"
+            "\\*ESS\\*"
             "\\*helm"
             "\\*helm-mode"))
 
@@ -196,7 +197,7 @@
              '("persp" nil nil nil
                (lambda (buf)
                  (with-current-buffer buf
-                   (or (not (member buf (persp-buffers persp-curr)))
+                   (or (not (member buf (persp-buffers (persp-curr))))
                        (not (cv--boring-buffer? buf))))))
              nil)
 
@@ -296,8 +297,8 @@
             '(:eval (if (fboundp 'cv--mode-line-abbrev-file-name)
                         (cv--mode-line-abbrev-file-name)
                       ""))
-            '(:eval (if (and (boundp 'persp-curr) persp-curr)
-                        (concatenate 'string " — " (persp-name persp-curr))
+            '(:eval (if (and (fboundp 'persp-curr) (persp-curr))
+                        (concatenate 'string " — " (persp-name (persp-curr)))
                       "")))
       ;; org-mode needs a copy of this for when it might manipulate the frame title
       org-frame-title-format-backup frame-title-format)
@@ -666,7 +667,7 @@ See `eshell-prompt-regexp'."
 
 ;; ido mode
 
-(setq ido-everywhere t
+(setq ido-everywhere nil
       ido-auto-merge-work-directories-length -1 ; don't look for files in strange places
       ido-confirm-unique-completion t
       ido-enable-flex-matching t

@@ -672,7 +672,7 @@
 
 
 (use-package perspective
-  :pin melpa
+  :pin melpa-stable
   :config (progn
 
             (persp-mode)
@@ -696,8 +696,8 @@
 
             (defun persp-mode-cleanup-killed-buffers ()
               (interactive)
-              (let ((live-buffers (-reject #'(lambda (b) (null (buffer-name b))) (persp-buffers persp-curr))))
-                (setf (persp-buffers persp-curr) live-buffers)))
+              (let ((live-buffers (-reject #'(lambda (b) (null (buffer-name b))) (persp-buffers (persp-curr)))))
+                (setf (persp-buffers (persp-curr)) live-buffers)))
 
             (defun cv--persp-set-ido-buffers ()
               (when (boundp 'ido-temp-list)
@@ -715,7 +715,7 @@
 
             (defun cv--persp-rename (orig-fn &rest args)
               (let* ((new-name (car args))
-                     (old-name (persp-name persp-curr))
+                     (old-name (persp-name (persp-curr)))
                      (scratch-buf (get-buffer (format "*scratch* (%s)" old-name)))
                      (new-scratch-name (format "*scratch* (%s)" new-name)))
                 (apply orig-fn args)

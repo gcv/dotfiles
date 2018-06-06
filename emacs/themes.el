@@ -39,7 +39,7 @@
   ;;(set-face-background 'hl-line "#343335")
   (set-face-background 'region "grey35")
   (set-face-background 'isearch "steelblue4")
-  (set-face-background 'isearch-lazy-highlight-face "grey25")
+  (set-face-background 'lazy-highlight "grey25")
   (set-face-background 'show-paren-match "#5f7f5f")
   (set-face-background 'trailing-whitespace "#ff0000")
   (set-face-attribute 'org-checkbox nil :background nil :foreground "blanchedalmond")

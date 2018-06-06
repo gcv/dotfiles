@@ -8,7 +8,7 @@
 (require 'ob-ledger)
 (require 'ob-gnuplot)
 (require 'ob-calc)
-(require 'ob-sh)
+;;(require 'ob-sh)
 (require 'ob-sqlite)
 
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
