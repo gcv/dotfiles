@@ -31,6 +31,8 @@ ${BREW_HOME}/bin/brew install \
     coreutils \
     findutils \
     python \
+    python@2 \
+    p7zip \
     xz \
     zsh
 
@@ -40,7 +42,9 @@ ${BREW_HOME}/bin/brew install \
     aspell \
     autojump \
     exiftool \
+    fdupes \
     git \
+    git-lfs \
     gnupg@1.4 \
     htop \
     ledger \
@@ -77,8 +81,10 @@ ${BREW_HOME}/bin/brew install \
 # libraries
 ${BREW_HOME}/bin/brew install \
     boost \
+    gnutls \
     gsl \
     icu4c \
+    p11-kit \
     taglib
 
 
