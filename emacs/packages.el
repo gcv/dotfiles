@@ -249,6 +249,7 @@
   :pin melpa-stable
   :config (progn
             (setq gac-automatically-push-p nil)
+            (setq-default gac-debounce-interval 300)
             ))
 
 

@@ -164,10 +164,12 @@ should already have been set up."
       (remhash actual-buffer gac--debounce-timers))))
 
 (defun gac-kill-buffer-hook ()
-  (when gac-debounce-interval
+  (when (and gac-debounce-interval
+             gac--debounce-timers
+             (gethash (current-buffer) gac--debounce-timers))
     (gac--after-save)))
 
-(add-hook 'kill-buffer-hook 'gac-kill-buffer-hook)
+(add-hook 'kill-buffer-hook #'gac-kill-buffer-hook)
 
 (defun gac-after-save-func ()
   "Commit the current file.
