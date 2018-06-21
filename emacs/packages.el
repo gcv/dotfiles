@@ -854,6 +854,8 @@
 
             (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
             (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+            (add-to-list 'auto-mode-alist '("\\.ts?\\'" . web-mode))
+            (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
 
             (setq web-mode-enable-current-element-highlight t
                   web-mode-markup-indent-offset 2
