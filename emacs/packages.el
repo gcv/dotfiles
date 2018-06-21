@@ -882,6 +882,10 @@
             ))
 
 
+(use-package yaml-mode
+  :pin melpa-stable)
+
+
 (use-package zenburn-theme
   :pin melpa-stable
   :defer t)
