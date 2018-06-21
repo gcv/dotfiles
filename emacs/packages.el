@@ -563,6 +563,7 @@
 
             (add-hook 'markdown-mode-hook
               (lambda ()
+                (setq mode-name "MD")
                 (local-unset-key (kbd "M-<up>"))
                 (local-unset-key (kbd "M-<down>"))
                 (setq show-trailing-whitespace t)
