@@ -378,6 +378,13 @@ function rvm_on() {
 }
 
 
+### Turn on NVM.
+function nvm_on() {
+    export NVM_DIR="$HOME/.nvm"
+    [[ -s "/opt/brew/opt/nvm/nvm.sh" ]] && source "/opt/brew/opt/nvm/nvm.sh"
+}
+
+
 ### Turn on Python virtualenv.
 function pve() {
     local pd=~/.python
