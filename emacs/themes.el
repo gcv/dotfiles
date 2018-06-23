@@ -130,6 +130,7 @@
   (set-face-attribute 'trailing-whitespace nil :background "red")
   (set-face-attribute 'js2-error nil :box nil)
   (set-face-attribute 'aw-background-face nil :foreground "gray60" :background nil)
+  (set-face-attribute 'mode-line-inactive nil :background "#dbdcda" :box '(:line-width 1 :color "#f0f0ef"))
   (cv--theme-common))
 
 
@@ -144,6 +145,12 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'material t)
+  ;; NB: :box '(:line-width -n) draws a box internally, without increasing the rendered size of the text!
+  (set-face-attribute 'mode-line nil :box '(:line-width 1 :color "#35575b"))
+  (set-face-attribute 'mode-line nil :background "#35575b")
+  (set-face-attribute 'mode-line-inactive nil :background "black")
+  (set-face-attribute 'fringe nil :background "#35575b")
+  (set-face-attribute 'vertical-border nil :foreground "#dcdccc")
   (cv--theme-material-common)
   (cv--theme-common))
 
@@ -153,5 +160,7 @@
   (disable-all-themes)
   (load-theme 'material-light t)
   (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
+  (set-face-attribute 'mode-line nil :box '(:line-width 1 :color "#90a4ae"))
+  (set-face-attribute 'mode-line-inactive nil :box '(:line-width 1 :color "#eceff1"))
   (cv--theme-material-common)
   (cv--theme-common))
