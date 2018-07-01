@@ -482,7 +482,54 @@
 
 
 (use-package julia-mode
-  :pin melpa-stable)
+  :pin melpa-stable
+  :config (progn
+
+            (add-to-list 'display-buffer-alist '("\\*Julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
+
+            (defun cv-julia-send-region ()
+              (interactive)
+              (let ((inf-julia-buffer (get-buffer "*Julia*")))
+                (when (and inf-julia-buffer (use-region-p))
+                  (let ((text (buffer-substring-no-properties (region-beginning) (region-end))))
+                    (save-excursion
+                      (with-current-buffer inf-julia-buffer
+                        (end-of-buffer)
+                        (insert text)
+                        (comint-send-input)))))))
+
+            (defun cv-julia-send-buffer ()
+              (interactive)
+              (let ((filename buffer-file-name)
+                    (inf-julia-buffer (get-buffer "*Julia*")))
+                (when inf-julia-buffer
+                  (save-excursion
+                    (with-current-buffer inf-julia-buffer
+                      (end-of-buffer)
+                      (insert "include(\"" filename "\")")
+                      (comint-send-input))))))
+
+            (add-hook 'julia-mode-hook
+              (lambda ()
+                (local-set-key (kbd "C-c C-z") 'inferior-julia)
+                (local-set-key (kbd "C-c C-c") 'cv-julia-send-region)
+                (local-set-key (kbd "C-M-x") 'cv-julia-send-region)
+                (local-set-key (kbd "C-c C-k") 'cv-julia-send-buffer)))
+
+            (add-hook 'inferior-julia-mode-hook
+              (lambda ()
+                (local-set-key (kbd "C-c C-z") 'flip-windows)
+                (local-set-key (kbd "C-S-d") (lambda ()
+                                               (interactive)
+                                               (comint-interrupt-subjob)
+                                               (end-of-buffer)
+                                               (insert "quit()")
+                                               (comint-send-input)
+                                               (sleep-for 0 100)
+                                               (kill-buffer)
+                                               (delete-window)))))
+
+            ))
 
 
 (use-package ledger-mode
