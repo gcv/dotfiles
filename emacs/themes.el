@@ -151,6 +151,7 @@
   (set-face-attribute 'mode-line-inactive nil :background "black")
   (set-face-attribute 'fringe nil :background "#35575b")
   (set-face-attribute 'vertical-border nil :foreground "#dcdccc")
+  (set-face-attribute 'magit-diff-removed-highlight nil :foreground "red")
   (cv--theme-material-common)
   (cv--theme-common))
 
