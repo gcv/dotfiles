@@ -720,6 +720,7 @@ See `eshell-prompt-regexp'."
 
 (add-hook 'term-mode-hook
   (lambda ()
+    (define-key term-raw-map (kbd "M-:") 'eval-expression)
     (define-key term-raw-map (kbd "C-m") 'term-send-raw)
     (define-key term-raw-map (kbd "C-p") 'term-send-raw)
     (define-key term-raw-map (kbd "C-n") 'term-send-raw)
