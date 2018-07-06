@@ -793,6 +793,18 @@ function shorten_path_disambiguate_keep_last() {
 }
 
 
+### utility function for setting AWS access environment variables
+function awscreds() {
+    local profile=$1
+    if [[ -z "${profile}" ]]; then
+        echo "no profile given" 1>&2
+        return 1
+    fi
+    export AWS_ACCESS_KEY_ID=$(aws --profile ${profile} configure get aws_access_key_id)
+    export AWS_SECRET_ACCESS_KEY=$(aws --profile ${profile} configure get aws_secret_access_key)
+}
+
+
 ### utility function for uploading a file to S3 with a speed limit
 function s3cp() {
 

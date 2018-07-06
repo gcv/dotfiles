@@ -89,7 +89,8 @@ ${BREW_HOME}/bin/brew install \
 
 
 # external development environment management tools
-# excluded: roswell, haskell-stack, nvm, rbenv, pyenv, rustup (horrible dependency story)
+# excluded: roswell, haskell-stack, rbenv, pyenv, rustup (horrible dependency story)
 ${BREW_HOME}/bin/brew install \
     leiningen \
-    maven
+    maven \
+    nvm
