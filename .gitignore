@@ -1,2 +1,3 @@
 *.pyc
 /emacs/emacs.d/projectile.cache
+/emacs/emacs.d/network-security.data

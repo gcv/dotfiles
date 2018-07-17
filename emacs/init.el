@@ -39,6 +39,11 @@
 (load custom-file 'noerror)                                     ; customize: load customizations
 
 
+;; security
+(setq network-security-level 'high)
+(setq tls-checktrust t)
+
+
 ;; control beeping
 (setq ring-bell-function
       (lambda ()
