@@ -303,6 +303,7 @@
                   helm-M-x-fuzzy-match t
                   helm-imenu-fuzzy-match t)
 
+            (global-set-key (kbd "M-x") 'helm-M-x)
             (global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
             (global-set-key (kbd "C-M-y") 'helm-show-kill-ring)
 
@@ -858,11 +859,11 @@
   :pin melpa-stable
   :config (progn
             (setq smex-save-file (concat user-emacs-directory ".smex-items"))
-            (global-set-key (kbd "M-x") (lambda ()
-                                          (interactive)
-                                          (or (boundp 'smex-cache)
-                                              (smex-initialize))
-                                          (smex)))
+            ;;(global-set-key (kbd "M-x") (lambda ()
+            ;;                              (interactive)
+            ;;                              (or (boundp 'smex-cache)
+            ;;                                  (smex-initialize))
+            ;;                              (smex)))
             ))
 
 
