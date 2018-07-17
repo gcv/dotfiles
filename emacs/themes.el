@@ -68,6 +68,8 @@
   (load-theme 'solarized-light t)
   (set-face-attribute 'bold nil :foreground "navy")
   (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
+  (set-face-attribute 'markdown-pre-face nil :background nil)
+  (set-face-attribute 'markdown-code-face nil :background nil)
   (cv--theme-solarized-common)
   (cv--theme-common))
 
@@ -166,5 +168,7 @@
   (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
   (set-face-attribute 'mode-line nil :box '(:line-width 1 :color "#90a4ae"))
   (set-face-attribute 'mode-line-inactive nil :box '(:line-width 1 :color "#eceff1"))
+  (set-face-attribute 'markdown-pre-face nil :background nil)
+  (set-face-attribute 'markdown-code-face nil :background nil)
   (cv--theme-material-common)
   (cv--theme-common))
