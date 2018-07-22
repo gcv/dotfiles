@@ -65,6 +65,10 @@
     (define-key org-mode-map (kbd "M-C-<down>") 'org-timestamp-down)
     (define-key org-mode-map (kbd "M-<up>") 'scroll-up-line)
     (define-key org-mode-map (kbd "M-<down>") 'scroll-down-line)
+    (define-key org-mode-map (kbd "M-S-<up>") 'org-move-subtree-up)
+    (define-key org-mode-map (kbd "M-S-<down>") 'org-move-subtree-up)
+    (define-key org-mode-map (kbd "M-C-S-<up>") 'org-shiftmetaup)
+    (define-key org-mode-map (kbd "M-C-S-<down>") 'org-shiftmetadown)
     (define-key org-mode-map (kbd "C-S-a") 'beginning-of-line)
     (define-key org-mode-map (kbd "C-S-e") 'end-of-line)
     ;; turn off all archiving shortcuts
