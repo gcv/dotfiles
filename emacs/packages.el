@@ -487,34 +487,74 @@
   :config (progn
 
             (add-to-list 'display-buffer-alist '("\\*Julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
+            (add-to-list 'display-buffer-alist '("\\*julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
 
             (setq julia-prompt-regexp "julia> ")
 
+            (define-minor-mode cv-inferior-julia-mode
+              "An inferior Julia mode running in an ansi-term buffer instead of comint."
+              :init-value nil
+              :lighter " Julia"
+              :keymap (make-sparse-keymap))
+
+            (define-key cv-inferior-julia-mode-map (kbd "M-x") 'helm-M-x)
+            (define-key cv-inferior-julia-mode-map (kbd "C-c C-z") 'flip-windows)
+            (define-key cv-inferior-julia-mode-map (kbd "C-S-d")
+              (lambda ()
+                (interactive)
+                (term-interrupt-subjob)
+                (term-send-eof)
+                (sleep-for 0 500)
+                (kill-buffer)
+                (delete-window)))
+
+            (defun cv-term-julia ()
+              (interactive)
+              (let ((julia-buffer (get-buffer "*julia*")))
+                (if julia-buffer
+                    (pop-to-buffer-same-window julia-buffer)
+                  (ansi-term "julia" "julia")
+                  (cv-inferior-julia-mode))))
+
+            (defun cv--term-julia-buffer ()
+              (or (get-buffer "*julia*") (get-buffer "*Julia*")))
+
+            (defun cv--term-julia-buffer-mode (buf)
+              (save-excursion
+                (with-current-buffer buf
+                  major-mode)))
+
             (defun cv-julia-send-region ()
               (interactive)
-              (let ((inf-julia-buffer (get-buffer "*Julia*")))
+              (let* ((inf-julia-buffer (cv--term-julia-buffer))
+                     (mode (cv--term-julia-buffer-mode inf-julia-buffer)))
                 (when (and inf-julia-buffer (use-region-p))
-                  (let ((text (buffer-substring-no-properties (region-beginning) (region-end))))
+                  (let ((text (s-trim (buffer-substring-no-properties (region-beginning) (region-end)))))
                     (save-excursion
                       (with-current-buffer inf-julia-buffer
-                        (end-of-buffer)
+                        (unless (equal 'term-mode mode) (end-of-buffer))
                         (insert text)
-                        (comint-send-input)))))))
+                        (if (equal 'term-mode mode)
+                            (term-send-input)
+                          (comint-send-input))))))))
 
             (defun cv-julia-send-buffer ()
               (interactive)
-              (let ((filename buffer-file-name)
-                    (inf-julia-buffer (get-buffer "*Julia*")))
+              (let* ((filename buffer-file-name)
+                     (inf-julia-buffer (cv--term-julia-buffer))
+                     (mode (cv--term-julia-buffer-mode inf-julia-buffer)))
                 (when inf-julia-buffer
                   (save-excursion
                     (with-current-buffer inf-julia-buffer
-                      (end-of-buffer)
+                      (unless (equal 'term-mode mode) (end-of-buffer))
                       (insert "include(\"" filename "\")")
-                      (comint-send-input))))))
+                      (if (equal 'term-mode mode)
+                          (term-send-input)
+                        (comint-send-input)))))))
 
             (add-hook 'julia-mode-hook
               (lambda ()
-                (local-set-key (kbd "C-c C-z") 'inferior-julia)
+                (local-set-key (kbd "C-c C-z") 'cv-term-julia)
                 (local-set-key (kbd "C-c C-c") 'cv-julia-send-region)
                 (local-set-key (kbd "C-M-x") 'cv-julia-send-region)
                 (local-set-key (kbd "C-c C-k") 'cv-julia-send-buffer)))
