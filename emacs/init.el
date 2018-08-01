@@ -1,6 +1,7 @@
 (require 'cl)
 (require 'subr-x)
 
+(setq load-prefer-newer t)                                      ; deal with outdated .elc files
 (setq-default indent-tabs-mode nil)                             ; replace tabs with spaces
 (transient-mark-mode -1)                                        ; turn off transient-mark mode
 (setq-default fill-column 80)                                   ; 80-character screens, not 70
@@ -576,6 +577,11 @@
 (setq ediff-split-window-function 'split-window-horizontally)
 
 
+;; comint
+
+(setq-default comint-input-ignoredups t)
+
+
 ;; eshell
 
 ;; FIXME: Perform the same directory shortening as zsh; remember path display is
@@ -644,6 +650,7 @@
     (local-set-key (kbd "C-p") 'eshell-previous-input)
     (local-set-key (kbd "C-p") 'eshell-next-input)
     (local-set-key (kbd "C-r") 'eshell-isearch-backward)
+    (local-set-key (kbd "C-M-r") 'helm-eshell-history)
     (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
     (local-set-key (kbd "C-c C-z") 'flip-windows)
     (local-set-key (kbd "<tab>") 'company-complete)

@@ -488,6 +488,8 @@
 
             (add-to-list 'display-buffer-alist '("\\*Julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
 
+            (setq julia-prompt-regexp "julia> ")
+
             (defun cv-julia-send-region ()
               (interactive)
               (let ((inf-julia-buffer (get-buffer "*Julia*")))
@@ -519,6 +521,12 @@
 
             (add-hook 'inferior-julia-mode-hook
               (lambda ()
+                (local-set-key (kbd "C-a") 'comint-bol)
+                (local-set-key (kbd "M-p") 'comint-previous-matching-input-from-input)
+                (local-set-key (kbd "M-n") 'comint-next-matching-input-from-input)
+                (local-set-key (kbd "<up>") 'comint-previous-input)
+                (local-set-key (kbd "<down>") 'comint-next-input)
+                (local-set-key (kbd "C-r") 'helm-comint-input-ring)
                 (local-set-key (kbd "C-c C-z") 'flip-windows)
                 (local-set-key (kbd "C-S-d") (lambda ()
                                                (interactive)
