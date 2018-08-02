@@ -600,6 +600,7 @@
 
             (add-hook 'julia-mode-hook
               (lambda ()
+                (subword-mode)
                 (local-set-key (kbd "C-c C-z") 'cv-term-julia)
                 (local-set-key (kbd "C-c C-c") 'cv-julia-send-top-level-form)
                 (local-set-key (kbd "C-M-x") 'cv-julia-send-region)

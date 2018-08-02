@@ -745,6 +745,7 @@ See `eshell-prompt-regexp'."
     (define-key term-raw-map (kbd "M-<left>") (kbd "M-b"))
     (define-key term-raw-map (kbd "M-<right>") (kbd "M-f"))
     (define-key term-raw-map (kbd "C-<backspace>") 'term-send-backward-kill-word)
+    (define-key term-raw-map (kbd "M-w") 'kill-ring-save)
     (define-key term-raw-map (kbd "C-y")
       (lambda (&optional string)
         (interactive)
