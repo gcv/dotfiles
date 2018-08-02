@@ -497,6 +497,8 @@
               :lighter " Julia"
               :keymap (make-sparse-keymap))
 
+            (define-key cv-inferior-julia-mode-map (kbd "<up>") 'term-send-prior)
+            (define-key cv-inferior-julia-mode-map (kbd "<down>") 'term-send-next)
             (define-key cv-inferior-julia-mode-map (kbd "M-x") 'helm-M-x)
             (define-key cv-inferior-julia-mode-map (kbd "C-c C-z") 'flip-windows)
             (define-key cv-inferior-julia-mode-map (kbd "C-S-d")
@@ -524,19 +526,63 @@
                 (with-current-buffer buf
                   major-mode)))
 
+            (defun cv--term-julia-send-via-tmp-file (buf text-raw)
+              (let ((text (s-trim text-raw))
+                    (mode (cv--term-julia-buffer-mode buf))
+                    (tmpfile (make-temp-file
+                              (expand-file-name "julia-tmp"
+                                                (or small-temporary-file-directory
+                                                    temporary-file-directory)))))
+                (unwind-protect
+                    (progn
+                      (with-temp-file tmpfile
+                        (insert text))
+                      (save-excursion
+                        (with-current-buffer buf
+                          (unless (equal 'term-mode mode) (end-of-buffer))
+                          (insert "include(\"" tmpfile "\");")
+                          (if (equal 'term-mode mode)
+                              (term-send-input)
+                            (comint-send-input))
+                          ;; wait for the inclusion to succeed (i.e., the prompt prints)
+                          (let ((sleep-total 0))
+                            (while (and (< sleep-total 5000)
+                                        (not (string-equal "julia>" (current-word))))
+                              (sleep-for 0 20)
+                              (setf sleep-total (+ sleep-total 20)))))))
+                  ;; cleanup
+                  (delete-file tmpfile))))
+
             (defun cv-julia-send-region ()
               (interactive)
-              (let* ((inf-julia-buffer (cv--term-julia-buffer))
-                     (mode (cv--term-julia-buffer-mode inf-julia-buffer)))
+              (let* ((inf-julia-buffer (cv--term-julia-buffer)))
                 (when (and inf-julia-buffer (use-region-p))
-                  (let ((text (s-trim (buffer-substring-no-properties (region-beginning) (region-end)))))
+                  (let ((text (buffer-substring-no-properties (region-beginning) (region-end))))
+                    (cv--term-julia-send-via-tmp-file inf-julia-buffer text)))))
+
+            (defun cv-julia-send-top-level-form ()
+              (interactive)
+              (let* ((inf-julia-buffer (cv--term-julia-buffer))
+)
+                (when inf-julia-buffer
+                  (let ((starting-point (point)))
                     (save-excursion
-                      (with-current-buffer inf-julia-buffer
-                        (unless (equal 'term-mode mode) (end-of-buffer))
-                        (insert text)
-                        (if (equal 'term-mode mode)
-                            (term-send-input)
-                          (comint-send-input))))))))
+                      (beginning-of-line)
+                      (unless (= 1 starting-point) (left-char))
+                      (let* ((ending-raw (re-search-forward "\nend\n\n" nil t))
+                             ;; subtract two trailing newlines
+                             (ending (- (or ending-raw 0) 2))
+                             (beginning-raw (re-search-backward
+                                             (concat "\\(\nfunction\\)\\|"
+                                                     "\\(\ntype\\)")))
+                             ;; add one leading newline
+                             (beginning (+ beginning-raw 1)))
+                        (if (or (not (and ending-raw beginning-raw))
+                                (< starting-point beginning)
+                                (> starting-point ending))
+                            (message "no suitable top-level form found")
+                          (let ((text (buffer-substring-no-properties beginning ending)))
+                            (cv--term-julia-send-via-tmp-file inf-julia-buffer text)))))))))
 
             (defun cv-julia-send-buffer ()
               (interactive)
@@ -547,7 +593,7 @@
                   (save-excursion
                     (with-current-buffer inf-julia-buffer
                       (unless (equal 'term-mode mode) (end-of-buffer))
-                      (insert "include(\"" filename "\")")
+                      (insert "include(\"" filename "\");")
                       (if (equal 'term-mode mode)
                           (term-send-input)
                         (comint-send-input)))))))
@@ -555,7 +601,7 @@
             (add-hook 'julia-mode-hook
               (lambda ()
                 (local-set-key (kbd "C-c C-z") 'cv-term-julia)
-                (local-set-key (kbd "C-c C-c") 'cv-julia-send-region)
+                (local-set-key (kbd "C-c C-c") 'cv-julia-send-top-level-form)
                 (local-set-key (kbd "C-M-x") 'cv-julia-send-region)
                 (local-set-key (kbd "C-c C-k") 'cv-julia-send-buffer)))
 
