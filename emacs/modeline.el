@@ -38,8 +38,7 @@
         '(:eval (let* ((clean-modes (-remove
                                      #'(lambda (x) (or (equal x "(") (equal x ")")))
                                      mode-line-modes))
-                       (vc-state (if (and (> (window-total-width) 80) ; check for room
-                                          (< (length (buffer-name)) (/ (window-total-width) 2.7))
+                       (vc-state (if (and (> (window-total-width) (+ 52 (length (format-mode-line (list clean-modes))) (length (buffer-name)))) ; check for room
                                           (stringp vc-mode)
                                           (not (file-remote-p default-directory)))
                                      (let* ((branch-name (replace-regexp-in-string
@@ -60,8 +59,7 @@
                                 (eshell/shortpwd)
                               (format-mode-line (list clean-modes vc-state)))))
                   ;; only show the center mode (and version control) info if there's enough room
-                  (if (and (> (window-total-width) (+ 50 (length (buffer-name))))
-                           (< (length ctr) (- (window-total-width) (length (buffer-name)) 30)))
+                  (if (and (> (window-total-width) (+ 30 (length ctr) (length (buffer-name)))))
                       (list (cv--mode-line-fill-center (/ (length ctr) 2))
                             " "
                             ctr)
