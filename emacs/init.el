@@ -584,9 +584,6 @@
 
 ;; eshell
 
-;; FIXME: Perform the same directory shortening as zsh; remember path display is
-;; now in the modeline. Change eshell/shortpwd to get this to work.
-
 (setq eshell-banner-message ""
       eshell-hist-ignoredups t
       eshell-save-history-index t)

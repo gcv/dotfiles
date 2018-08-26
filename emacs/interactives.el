@@ -35,7 +35,7 @@
       (set-face-attribute 'header-line nil :height header-line-height)
       (setq-default header-line-format
         (list `(:eval (let ((pwd (if (buffer-file-name)
-                                     (cv--display-dir (buffer-file-name))
+                                     (cv--display-dir (buffer-file-name) nil)
                                    "")))
                         (list (cv--mode-line-fill-center (/ (length pwd) ,centering-multiplier))
                               pwd))))))))

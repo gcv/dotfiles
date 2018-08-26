@@ -64,12 +64,40 @@
 (cl-defun cv--display-dir (dir &optional (shorten-to-display t))
   "Display a shortened directory name, where the home directory
    is shortened, as per convention, to ~, but also narrow to the
-   display width if desired. FIXME: Feature not implemented, see
-   zsh disambiguate_keep_last."
-  (let ((dir (abbreviate-file-name dir)))
+   display width if desired."
+  (let ((dir (f-abbrev (f-canonical dir))))
     (if (not shorten-to-display)
         dir
-      dir)))
+      ;; Simple, but does not disambiguate:
+      ;;(replace-regexp-in-string "\\([^\/]\\)\\(.*?\\)/" "\\1/" dir)
+      ;; Complex and nasty, but behaves like zsh disambiguate_keep_last.
+      (if (string= "/" dir)
+          "/"
+        (let* ((split (rest (f-split dir)))
+               (final (-last-item split))
+               (so-far (if (string= "~" (first split)) "~" "")))
+          (cl-labels ((shared-prefix (entries target)
+                                     (cond ((not (-contains? entries target)) "")
+                                           ((= 1 (length entries)) (substring (first entries) 0 1))
+                                           (t (cl-labels ((go (idx candidates)
+                                                              (let* ((subs (mapcar (lambda (x) (substring x 0 idx)) candidates))
+                                                                     (target-sub (substring target 0 idx))
+                                                                     (d (-remove (lambda (x) (not (string= x target-sub))) subs))
+                                                                     (nc (-remove (lambda (x) (not (s-starts-with? target-sub x))) candidates)))
+                                                                (if (= (length d) 1)
+                                                                    (first d)
+                                                                  (go (1+ idx) nc)))))
+                                                (go 0 entries)))))
+                      (fun (entry)
+                           (if (string= "~" entry)
+                               entry
+                             (let* ((wc (concat so-far "/" (substring entry 0 1) "*"))
+                                    (all (file-expand-wildcards wc))
+                                    (dirs (-filter #'file-directory-p all))
+                                    (dir-names (mapcar #'f-filename dirs)))
+                               (setf so-far (concat so-far "/" entry))
+                               (shared-prefix dir-names entry)))))
+            (f-abbrev (apply #'f-join (append (list "/") (mapcar #'fun (-butlast split)) (list final))))))))))
 
 
 (defun cv--apply-fn-region (fn start end)
