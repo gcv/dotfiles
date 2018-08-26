@@ -38,7 +38,10 @@
         '(:eval (let* ((clean-modes (-remove
                                      #'(lambda (x) (or (equal x "(") (equal x ")")))
                                      mode-line-modes))
-                       (vc-state (if (and (stringp vc-mode) (not (file-remote-p default-directory)))
+                       (vc-state (if (and (> (window-total-width) 80) ; check for room
+                                          (< (length (buffer-name)) (/ (window-total-width) 2.7))
+                                          (stringp vc-mode)
+                                          (not (file-remote-p default-directory)))
                                      (let* ((branch-name (replace-regexp-in-string
                                                           (format "^\s*%s:?-?" (vc-backend buffer-file-name))
                                                           ""
@@ -56,9 +59,13 @@
                        (ctr (if (eq 'eshell-mode major-mode)
                                 (eshell/shortpwd)
                               (format-mode-line (list clean-modes vc-state)))))
-                  (list (cv--mode-line-fill-center (/ (length ctr) 2))
-                        " "
-                        ctr)))
+                  ;; only show the center mode (and version control) info if there's enough room
+                  (if (and (> (window-total-width) (+ 50 (length (buffer-name))))
+                           (< (length ctr) (- (window-total-width) (length (buffer-name)) 30)))
+                      (list (cv--mode-line-fill-center (/ (length ctr) 2))
+                            " "
+                            ctr)
+                    "")))
         '(:eval (let* ((pos (format-mode-line (list (list -3 (propertize "%P" 'help-echo "Position in buffer"))
                                                     "/"
                                                     (propertize "%I" 'help-echo "Buffer size"))))
@@ -69,7 +76,10 @@
                        (pos-length (max 18 (+ 1 row-length (length pos)))))
                   (list
                    (cv--mode-line-fill pos-length)
-                   (replace-regexp-in-string "%" "%%" pos)  ; XXX: Nasty fix for nested escape problem.
+                   ;; only show buffer position if there's enough room
+                   (if (> (window-total-width) (+ 30 (length (buffer-name))))
+                       (replace-regexp-in-string "%" "%%" pos)  ; XXX: Nasty fix for nested escape problem.
+                     "")
                    (cv--mode-line-fill row-length)
                    row
                    (cv--mode-line-fill col-length)

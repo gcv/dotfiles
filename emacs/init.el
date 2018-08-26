@@ -600,7 +600,7 @@
          (propertize (system-name) 'face `(:foreground "blanchedalmond"))
          (propertize "]" 'face `(:foreground "lightgreen"))
          ;; (propertize (if (= (user-uid) 0) " #" " ∴") 'face `(:foreground "lightgreen"))
-         (propertize " " 'face `(:foreground 'inherit))
+         " "
          )))
 
 (setq eshell-prompt-regexp "^\\[.*?\\] ")
