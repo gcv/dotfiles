@@ -276,6 +276,20 @@ fi
 [[ ${UNAME} == "Linux" && -f /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
 
 
+### Turn on fzf (fuzzy finder) integration if found.
+if [[ $(command -v fzf) ]]; then
+    export FZF_DEFAULT_OPTS='--layout=reverse --inline-info'
+    if [[ $(command -v brew) ]]; then
+        [[ $- == *i* ]] && source "$(brew --cellar)/fzf/$(fzf --version | awk '{print $1}')/shell/completion.zsh" 2>/dev/null
+        source "$(brew --cellar)/fzf/$(fzf --version | awk '{print $1}')/shell/key-bindings.zsh"
+        # but change keybindings to be more palatable
+        bindkey '^R' history-incremental-search-backward # restore default
+        bindkey '\er' fzf-history-widget # Esc-r to use fzf's history search
+        bindkey '\et' fzf-file-widget # Esc-t to use fzf's file search
+    fi
+fi
+
+
 ### pskill <process name>
 function pskill() {
    kill -9 $(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')
