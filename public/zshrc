@@ -290,6 +290,14 @@ if [[ $(command -v fzf) ]]; then
 fi
 
 
+### Turn on Docker autocompletion on macOS with Docker.app.
+if [[ "${UNAME}" == "Darwin" && -f "/Applications/Docker.app/Contents/Resources/etc/docker.zsh-completion" ]]; then
+    . /Applications/Docker.app/Contents/Resources/etc/docker.zsh-completion
+    compinit -i
+    compdef _docker docker
+fi
+
+
 ### pskill <process name>
 function pskill() {
    kill -9 $(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')
