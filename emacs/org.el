@@ -52,6 +52,11 @@
     (diminish 'org-indent-mode)
     (setq show-trailing-whitespace t)
     (visual-line-mode)
+    ;; set the input method which makes it easy to type special characters, but
+    ;; don't turn it on: a simple C-\ then toggles it with no further prompting
+    (set-input-method 'TeX)
+    (deactivate-input-method)
+    ;; keybindings
     (define-key org-mode-map (kbd "M-+") 'org-shiftright)
     (define-key org-mode-map (kbd "M--") 'org-shiftleft)
     (define-key org-mode-map (kbd "S-<up>") nil)
