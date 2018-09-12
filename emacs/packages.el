@@ -260,7 +260,7 @@
             (add-to-list 'golden-ratio-exclude-modes 'which-key-mode)
             (add-to-list 'golden-ratio-exclude-buffer-names "*buffer-selection*")
 
-            (defun golden-ratio-toggle ()
+            (defun toggle-golden-ratio ()
               (interactive)
               (golden-ratio-mode (if golden-ratio-mode 0 1))
               (when golden-ratio-mode (golden-ratio)))

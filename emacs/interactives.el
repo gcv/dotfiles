@@ -17,7 +17,7 @@
     (set-fontset-font "fontset-default" 'unicode font-family)))
 
 
-(cl-defun header-line (&optional (header-on t header-given))
+(cl-defun toggle-header-line (&optional (header-on t header-given))
   (interactive)
   (if (or (and header-given (not header-on))
           (and (not header-given) header-line-format))
