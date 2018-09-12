@@ -422,3 +422,9 @@ return 0
          (actives (-remove #'null actives-raw))
          (sorted-actives (sort actives #'string-lessp)))
     (message "Active modes are %s" sorted-actives)))
+
+
+(defun json-reformat ()
+  (interactive)
+  (save-excursion
+    (shell-command-on-region (mark) (point) "python -m json.tool" (buffer-name) t)))
