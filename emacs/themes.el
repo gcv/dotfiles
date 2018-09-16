@@ -1,3 +1,5 @@
+;;; Good resource for making colors: https://www.w3schools.com/colors/colors_picker.asp
+
 (defun cv--theme-common ()
   (let ((base-font (cond ((member "Menlo" (font-family-list)) "Menlo")
                          ((member "Consolas" (font-family-list)) "Consolas")
@@ -15,7 +17,7 @@
     (set-face-attribute 'helm-selection nil :underline nil)
     (set-face-attribute 'dired-header nil :foreground nil :background nil
                         :family base-font :weight 'bold)
-    (set-face-attribute 'bold nil :family base-font :weight 'bold)
+    (set-face-attribute 'bold nil :family base-font :foreground nil :weight 'bold)
     (set-face-attribute 'aw-leading-char-face nil :foreground "red" :background nil
                         :family base-font :height 2.0 :weight 'bold)
     (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
@@ -171,4 +173,32 @@
   (set-face-attribute 'markdown-pre-face nil :background nil)
   (set-face-attribute 'markdown-code-face nil :background nil)
   (cv--theme-material-common)
+  (cv--theme-common))
+
+
+(defun theme-green-phosphor ()
+  (interactive)
+  (disable-all-themes)
+  (load-theme 'green-phosphor t)
+  (let ((base-color "#159e2b")
+        (base-color-darker "#107d23")
+        (base-color-lighter "#1acb38")
+        (blue "#7089a6")
+        (blue-lighter-1 "#91a4ba")
+        (blue-lighter-2 "#b1bece")
+        (blue-lighter-3 "#d0d8e2")
+        (blue-darker-1 "#627e9d")
+        (blue-darker-2 "#58718d"))
+    (set-face-attribute 'default nil :foreground base-color)
+    (set-face-attribute 'minibuffer-prompt nil :foreground base-color)
+    (set-face-attribute 'mode-line nil :foreground "black" :background base-color)
+    (set-face-attribute 'mode-line-inactive nil :box '(:line-width 1 :color "grey55"))
+    (set-face-attribute 'org-hide nil :foreground "black" :background "black")
+    (set-face-attribute 'org-level-1 nil :foreground blue-lighter-3)
+    (set-face-attribute 'org-level-2 nil :foreground blue-lighter-2)
+    (set-face-attribute 'org-level-3 nil :foreground blue-lighter-1)
+    (set-face-attribute 'org-level-4 nil :foreground blue)
+    (set-face-attribute 'org-special-keyword nil :foreground "#007799")
+    (set-face-attribute 'isearch nil :background base-color-lighter :foreground "black" :underline nil)
+    (set-face-attribute 'lazy-highlight nil :background base-color-darker :foreground "black" :underline nil))
   (cv--theme-common))

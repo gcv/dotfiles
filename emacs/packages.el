@@ -277,6 +277,11 @@
             ))
 
 
+(use-package green-phosphor-theme
+  :pin melpa
+  :defer t)
+
+
 (use-package haskell-mode
   :pin melpa-stable
   :config (progn
