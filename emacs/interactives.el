@@ -428,3 +428,13 @@ return 0
   (interactive)
   (save-excursion
     (shell-command-on-region (mark) (point) "python -m json.tool" (buffer-name) t)))
+
+
+(defun dec-to-hex (dec)
+  (interactive "nDecimal: ")
+  (message (format "%x" dec)))
+
+
+(defun hex-to-dec (hex)
+  (interactive "sHex: ")
+  (message (format "%d" (string-to-number hex 16))))
