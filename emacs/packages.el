@@ -270,7 +270,7 @@
 
 ;; http://www.emacswiki.org/emacs/GotoChg
 (use-package goto-chg
-  :pin marmalade
+  :pin melpa-stable
   :config (progn
             (when window-system (global-set-key (kbd "C-M-[") 'goto-last-change))
             (global-set-key (kbd "C-M-]") 'goto-last-change-reverse)
