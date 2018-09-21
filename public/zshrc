@@ -839,6 +839,10 @@ function s3cp() {
         echo "no aws found" 1>&2
         return 1
     fi
+    if [[ -z "${AWS_ACCESS_KEY_ID}" ]]; then
+        echo "set AWS credentials first (maybe use awscreds?)" 1>&2
+        return 1
+    fi
 
     # args
     local speed=$1
