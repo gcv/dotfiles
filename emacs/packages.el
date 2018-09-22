@@ -424,7 +424,7 @@
 
 
 (use-package highlight
-  ;;:pin marmalade
+  :pin melpa
   :config (progn
 
             (defface cv--hlt-highlight
