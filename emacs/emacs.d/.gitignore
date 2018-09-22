@@ -16,8 +16,10 @@ elpa/archives
 elpa/gnupg/
 eshell/
 history
+network-security.data
 nrepl-history
 projectile-bookmarks.eld
+projectile.cache
 recentf
 semanticdb/
 server
