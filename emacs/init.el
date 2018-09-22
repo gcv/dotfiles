@@ -899,7 +899,7 @@ See `eshell-prompt-regexp'."
                       "modeline.el"
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
-    (load-file (expand-file-name (concat "../" f) user-emacs-directory))))
+    (load-file (expand-file-name (concat "../" f) (file-truename user-emacs-directory)))))
 
 
 
