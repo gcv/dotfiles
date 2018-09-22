@@ -19,6 +19,9 @@
 
 (cl-defun toggle-header-line (&optional (header-on t header-given))
   (interactive)
+  ;; XXX: Sometimes, the header-line face is undefined. Then copy it from the
+  ;; mode-line face.
+  (condition-case err (face-id 'header-line) (copy-face 'mode-line 'header-line))
   (if (or (and header-given (not header-on))
           (and (not header-given) header-line-format))
       (setq-default header-line-format nil)
@@ -35,7 +38,7 @@
       (set-face-attribute 'header-line nil :height header-line-height)
       (setq-default header-line-format
         (list `(:eval (let ((pwd (if (buffer-file-name)
-                                     (cv--display-dir (buffer-file-name) nil)
+                                     (cv--display-dir (buffer-file-name) t)
                                    "")))
                         (list (cv--mode-line-fill-center (/ (length pwd) ,centering-multiplier))
                               pwd))))))))
@@ -44,13 +47,13 @@
 (defun m150 ()
   (interactive)
   (set-font "Menlo" 150)
-  (header-line header-line-format))
+  (toggle-header-line header-line-format))
 
 
 (defun m120 ()
   (interactive)
   (set-font "Menlo" 120)
-  (header-line header-line-format))
+  (toggle-header-line header-line-format))
 
 
 (defun set-font-current-buffer (font-family height)
