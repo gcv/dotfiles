@@ -313,6 +313,7 @@
 (setq display-buffer-reuse-frames t)         ; reuse windows in other frames
 (setq pop-up-windows nil)                    ; display-buffer: avoid splitting
 (setq even-window-heights nil)               ; display-buffer: avoid resizing
+(setq window-resize-pixelwise t)             ; smoother window resizing?
 
 
 (winner-mode 1)                              ; restore windows: C-c right-arrow
