@@ -47,8 +47,10 @@ ${BREW_HOME}/bin/brew install \
     git-lfs \
     gnupg@1.4 \
     htop \
+    jq \
     ledger \
     magic-wormhole \
+    mosh \
     nmap \
     offlineimap \
     pv \
@@ -63,7 +65,7 @@ ${BREW_HOME}/bin/brew install \
 
 
 # external service tools
-# excluded: heroku, due to nasty dependency
+# excluded: heroku, due to nasty dependency (node)
 ${BREW_HOME}/bin/brew install \
     awscli
 
