@@ -454,6 +454,13 @@
             ))
 
 
+(use-package intero
+  :pin melpa-stable
+  :config (progn
+            (intero-global-mode 1)
+            ))
+
+
 (use-package ivy                        ; Ivy / Swiper / Counsel
   :pin melpa
   :config (progn
