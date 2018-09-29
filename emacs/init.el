@@ -752,10 +752,7 @@ See `eshell-prompt-regexp'."
          (if string string (current-kill 0)))))
     (define-key term-raw-map (kbd "C-M-y") 'helm-show-kill-ring)
     (define-key term-raw-map (kbd "M-o") 'other-window)
-    (define-key term-raw-map (kbd "C-M-o") 'ace-window)
-    (define-key term-raw-map (kbd "C-c C-e") #'(lambda ()
-                                                 (interactive)
-                                                 (term-send-raw-string "\e")))))
+    (define-key term-raw-map (kbd "C-M-o") 'ace-window)))
 
 
 ;; text-mode
