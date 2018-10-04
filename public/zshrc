@@ -3,6 +3,7 @@ autoload -Uz edit-command-line && zle -N edit-command-line # bound to M-e below
 autoload -Uz colors zsh/terminfo                           # symbolic colors
 autoload -Uz is-at-least                                   # zsh version checks
 autoload -Uz vcs_info                                      # VCS status
+autoload -Uz zmv                                           # file renamer
 bindkey -e                                                 # Emacs keybindings
 ulimit -c 0                                                # no core dumps
 ulimit -s unlimited                                        # no stack limits
@@ -133,6 +134,7 @@ setopt correct                    # correct spelling of commands
 setopt no_correct_all             # do not correct spelling of files (annoying)
 setopt extended_glob              # globs #, ~, and ^
 setopt numeric_glob_sort          # orders files numerically
+setopt glob_star_short            # saner recursive glob syntax, e.g. **/*.c
 setopt long_list_jobs             # use the long format for job listings
 setopt no_beep                    # stop beeping
 setopt no_hist_beep               # turn off no-history item beeps
