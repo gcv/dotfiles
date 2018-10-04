@@ -273,7 +273,7 @@
          (current (car buffers))
          (eshell-rx "\\*eshell.*\\*")
          (term-rx "\\*terminal<.+>\\*"))
-    (flet ((internal-switch (rx)
+    (cl-flet ((internal-switch (rx)
              (catch 'break
                (dolist (buffer buffers)
                  (when (string-match rx (buffer-name buffer))
