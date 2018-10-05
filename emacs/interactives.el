@@ -3,7 +3,11 @@
 ;; - Monaco (classic Mac, missing bold variant, missing many Unicode symbols, excellent at size 140)
 ;; - Menlo (has bold variant, better Unicode coverage than Monaco, excellent at size 120)
 ;; - DejaVu Sans Mono (almost identical to Menlo, distinctions on 0-*~, sometimes better for smaller line spacing)
+;; - Noto Mono
 ;; decent choices (have Unicode or character problems): Consolas, Inconsolata, Anonymous Pro
+;; note about fontsets:
+;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Modifying-Fontsets.html
+;; shows how to use a specific font for a different codepoint range
 (defun set-font (font-family height)
   (interactive "sFont family: \nnHeight: ")
   (set-face-attribute 'default nil :family font-family :height height)
