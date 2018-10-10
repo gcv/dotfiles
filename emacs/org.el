@@ -2,12 +2,12 @@
 (require 'org-crypt)
 (require 'org-clock)
 
+(require 'ob-awk)
 (require 'ob-python)
 (require 'ob-ruby)
 (require 'ob-C)
 (require 'ob-ledger)
 (require 'ob-gnuplot)
-(require 'ob-calc)
 ;;(require 'ob-sh)
 (require 'ob-sqlite)
 
