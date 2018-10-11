@@ -753,6 +753,15 @@
             ))
 
 
+;; turn on when built-in Org dependency is up-to-date
+;;(use-package ob-async
+;;  :pin melpa-stable)
+
+
+(use-package ob-restclient
+  :pin melpa)
+
+
 (use-package olivetti                   ; focused writing mode
   :pin melpa-stable
   :config (progn
