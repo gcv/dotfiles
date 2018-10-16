@@ -62,10 +62,9 @@
             ))
 
 
-(add-to-list 'package-pinned-packages '(clojure-mode . "melpa-stable"))
-
 (use-package cider
   :pin melpa-stable
+  :after (clojure-mode)
   :config (progn
 
             (setq cider-show-error-buffer t
@@ -150,17 +149,14 @@
             ))
 
 
-(add-to-list 'package-pinned-packages '(lua-mode . "melpa"))
-
 (use-package company-lua
-  :pin melpa)
+  :pin melpa
+  :after (:all company lua-mode))
 
-
-(add-to-list 'package-pinned-packages '(web-mode . "melpa-stable"))
-(add-to-list 'package-pinned-packages '(web-completion-data . "melpa-stable"))
 
 (use-package company-web
-  :pin melpa-stable)
+  :pin melpa-stable
+  :after (:all company web-mode web-completion-data))
 
 
 (use-package counsel                    ; Ivy / Swiper / Counsel
@@ -203,6 +199,7 @@
 
 (use-package flycheck-rust
   :pin melpa
+  :after (flycheck)
   :defer t)
 
 
@@ -299,6 +296,7 @@
 
 (use-package helm
   :pin melpa-stable
+  :after (:all helm-core popup)
   :diminish ""
   :config (progn
 
@@ -379,11 +377,13 @@
 
 
 (use-package helm-ag
-  :pin melpa-stable)
+  :pin melpa-stable
+  :after (helm-core))
 
 
 (use-package helm-gtags
   :pin melpa-stable
+  :after (helm-core)
   :config (progn
 
             (setq helm-gtags-path-style 'root
@@ -407,10 +407,9 @@
             ))
 
 
-(add-to-list 'package-pinned-packages '(projectile . "melpa-stable"))
-
 (use-package helm-projectile
   :pin melpa-stable
+  :after (:all helm-core projectile)
   :config (progn
             (helm-projectile-on)
             ))
@@ -418,6 +417,7 @@
 
 (use-package helm-swoop
   :pin melpa-stable
+  :after (helm-core)
   :config (progn
             (global-set-key (kbd "C-M-S-i") 'helm-swoop)
             (define-key isearch-mode-map (kbd "C-M-S-i") 'helm-swoop-from-isearch)))
@@ -456,6 +456,7 @@
 
 (use-package intero
   :pin melpa-stable
+  :after (haskell-mode)
   :config (progn
             (intero-global-mode 1)
             ))
@@ -778,6 +779,7 @@
 
 (use-package origami
   :pin melpa
+  :after (hydra)
   :config (progn
 
             (setq origami-show-fold-header t)
@@ -918,7 +920,8 @@
 
 
 (use-package restclient-helm
-  :pin melpa)
+  :pin melpa
+  :after (restclient))
 
 
 (use-package rust-mode
@@ -964,6 +967,7 @@
 
 (use-package slime-company
   :pin melpa-stable
+  :after (:all company slime)
   :config (progn
             ;; XXX: This is here instead of the slime :config section to make
             ;; sure it runs after the slime-company is available.
