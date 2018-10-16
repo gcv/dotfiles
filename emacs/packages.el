@@ -1010,8 +1010,32 @@
             ))
 
 
+(use-package tide                       ; TypeScript IDE
+  :pin melpa-stable
+  :after (:all company flycheck typescript-mode)
+  :diminish " Tide"
+  :config (progn
+
+            (setq tide-node-executable "~/.nvm/versions/node/v8.10.0/bin/node")
+
+            ))
+
+
+;;; Installed purely because it's a tide dependency. web-mode provides superior
+;;; TS indentation.
+(use-package typescript-mode
+  :pin melpa-stable
+  :diminish " TS"
+  :config (progn
+
+            (setq auto-mode-alist (delete '("\\.ts$" . typescript-mode) auto-mode-alist))
+
+            ))
+
+
 (use-package web-mode
   :pin melpa-stable
+  :after (:all flycheck tide)
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
@@ -1024,9 +1048,13 @@
                   web-mode-code-indent-offset 2
                   web-mode-css-indent-offset 2)
 
-            (add-hook 'web-mode-hook
-              (lambda ()
-                (local-set-key (kbd "C-m") 'newline-and-indent)))
+            (defun /web-mode-hook ()
+              (when (-contains? '("ts" "tsx") (file-name-extension buffer-file-name))
+                (tide-setup)
+                (flycheck-mode))
+              (local-set-key (kbd "C-m") 'newline-and-indent))
+
+            (add-hook 'web-mode-hook #'/web-mode-hook)
 
             ))
 
