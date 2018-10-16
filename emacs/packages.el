@@ -12,6 +12,7 @@
 (use-package f        :pin melpa-stable) ; file handling
 (use-package queue    :pin gnu)
 (use-package epl      :pin melpa-stable) ; package.el wrapper
+(use-package pfuture  :pin melpa-stable)
 (use-package pkg-info :pin melpa-stable) ; Emacs package
 
 
@@ -1026,6 +1027,20 @@
   :pin melpa
   :config (progn
             (global-set-key (kbd "M-S-C-s") 'swiper)
+            ))
+
+
+(use-package treemacs
+  :pin melpa-stable
+  :config (progn
+
+            (setq treemacs-persist-file (expand-file-name "treemacs/treemacs-persist" user-emacs-directory))
+
+            (defun /treemacs-mode-hook ()
+              (define-key treemacs-mode-map (kbd "<S-return>") #'treemacs-visit-node-ace))
+
+            (add-hook 'treemacs-mode-hook #'/treemacs-mode-hook)
+
             ))
 
 

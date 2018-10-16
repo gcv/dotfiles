@@ -26,5 +26,6 @@ server
 srecode-map.el
 swank/
 tramp
+treemacs/
 trusted-elisp-files.el
 url/
