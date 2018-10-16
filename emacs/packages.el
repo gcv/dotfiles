@@ -41,11 +41,12 @@
 
             (add-to-list 'auto-mode-alist '("\\.adoc$" . adoc-mode))
 
-            (add-hook 'adoc-mode-hook
-              (lambda ()
-                (setq mode-name "AD")
-                (setq show-trailing-whitespace t)
-                (visual-line-mode)))
+            (defun /adoc-mode-hook ()
+              (setq mode-name "AD")
+              (setq show-trailing-whitespace t)
+              (visual-line-mode))
+
+            (add-hook 'adoc-mode-hook #'/adoc-mode-hook)
 
             ))
 
@@ -74,22 +75,25 @@
                   cider-repl-history-file (concat user-emacs-directory "nrepl-history")
                   cider-mode-line '(:eval (format " cider[%s]" (cider-current-ns))))
 
-            (add-hook 'cider-mode-hook
-              (lambda ()
-                (paredit-mode 1)
-                (define-key cider-mode-map (kbd "C-c C-,") #'cider-test-run-tests)
-                (define-key cider-mode-map (kbd "C-c C-t") nil)
-                (define-key cider-mode-map (kbd "C-c M-p") nil)))
+            (defun /cider-mode-hook ()
+              (paredit-mode 1)
+              (define-key cider-mode-map (kbd "C-c C-,") #'cider-test-run-tests)
+              (define-key cider-mode-map (kbd "C-c C-t") nil)
+              (define-key cider-mode-map (kbd "C-c M-p") nil))
 
-            (add-hook 'cider-test-report-mode-hook
-              (lambda ()
-                (paredit-mode 1)
-                (define-key cider-test-report-mode-map (kbd "C-c C-,") #'cider-test-run-tests)))
+            (add-hook 'cider-mode-hook #'/cider-mode-hook)
 
-            (add-hook 'cider-repl-mode-hook
-              (lambda ()
-                (paredit-mode 1)
-                (subword-mode)))
+            (defun /cider-test-report-mode-hook ()
+              (paredit-mode 1)
+              (define-key cider-test-report-mode-map (kbd "C-c C-,") #'cider-test-run-tests))
+
+            (add-hook 'cider-test-report-mode-hook #'/cider-test-report-mode-hook)
+
+            (defun /cider-repl-mode-hook ()
+              (paredit-mode 1)
+              (subword-mode))
+
+            (add-hook 'cider-repl-mode-hook #'/cider-repl-mode-hook)
 
             (defun cv--display-buffer-reuse-window-nil (orig-fn &rest args)
               (let ((display-buffer-overriding-action '(display-buffer-reuse-window . nil)))
@@ -105,19 +109,20 @@
   :pin melpa-stable
   :config (progn
 
-            (add-hook 'clojure-mode-hook
-              (lambda ()
-                (paredit-mode 1)
-                (subword-mode)
-                (setq show-trailing-whitespace t)
-                (define-key clojure-mode-map (kbd "C-m") 'newline-and-indent)
-                (define-key clojure-mode-map (kbd "C-c C-t") 'projectile-toggle-between-implementation-and-test)
-                ;; indentation fixes
-                (put-clojure-indent 'if 4)
-                (put-clojure-indent 'if-not 4)
-                (put-clojure-indent 'if-let 4)
-                (put-clojure-indent 'let-kw 2)
-                (put-clojure-indent 'handle 1)))
+            (defun /clojure-mode-hook ()
+              (paredit-mode 1)
+              (subword-mode)
+              (setq show-trailing-whitespace t)
+              (define-key clojure-mode-map (kbd "C-m") 'newline-and-indent)
+              (define-key clojure-mode-map (kbd "C-c C-t") 'projectile-toggle-between-implementation-and-test)
+              ;; indentation fixes
+              (put-clojure-indent 'if 4)
+              (put-clojure-indent 'if-not 4)
+              (put-clojure-indent 'if-let 4)
+              (put-clojure-indent 'let-kw 2)
+              (put-clojure-indent 'handle 1))
+
+            (add-hook 'clojure-mode-hook #'/clojure-mode-hook)
 
             ))
 
@@ -283,10 +288,11 @@
   :pin melpa-stable
   :config (progn
 
-            (add-hook 'haskell-mode-hook
-              (lambda ()
-                (turn-on-haskell-unicode-input-method)
-                (turn-on-haskell-indentation)))
+            (defun /haskell-mode-hook ()
+              (turn-on-haskell-unicode-input-method)
+              (turn-on-haskell-indentation))
+
+            (add-hook 'haskell-mode-hook #'/haskell-mode-hook)
 
             ))
 
@@ -395,14 +401,15 @@
                   helm-gtags-direct-helm-completing t
                   helm-gtags-fuzzy-match t)
 
-            (add-hook 'helm-gtags-mode-hook
-              (lambda ()
-                (diminish-minor-mode 'helm-gtags-mode)
-                (local-set-key (kbd "C-c C-t r") 'helm-gtags-find-rtag)
-                (local-set-key (kbd "C-c C-t f") 'helm-gtags-parse-file)
-                (local-set-key (kbd "M-.") 'helm-gtags-find-tag)
-                (local-set-key (kbd "M-,") 'helm-gtags-pop-stack)
-                (local-set-key (kbd "M-*") 'helm-gtags-pop-stack)))
+            (defun /helm-gtags-mode-hook ()
+              (diminish-minor-mode 'helm-gtags-mode)
+              (local-set-key (kbd "C-c C-t r") 'helm-gtags-find-rtag)
+              (local-set-key (kbd "C-c C-t f") 'helm-gtags-parse-file)
+              (local-set-key (kbd "M-.") 'helm-gtags-find-tag)
+              (local-set-key (kbd "M-,") 'helm-gtags-pop-stack)
+              (local-set-key (kbd "M-*") 'helm-gtags-pop-stack))
+
+            (add-hook 'helm-gtags-mode-hook #'/helm-gtags-mode-hook)
 
             ))
 
@@ -483,14 +490,15 @@
                   js2-mirror-mode nil
                   js2-bounce-indent-p nil)
 
-            (add-hook 'js2-mode-hook
-              (lambda ()
-                (setq mode-name "JS")
-                (local-set-key (kbd "C-m") 'newline-and-indent)
-                (local-set-key (kbd "M-,") 'pop-tag-mark)
-                (local-unset-key (kbd "M-j"))
-                (subword-mode)
-                (setq show-trailing-whitespace t)))
+            (defun /js2-mode-hook ()
+              (setq mode-name "JS")
+              (local-set-key (kbd "C-m") 'newline-and-indent)
+              (local-set-key (kbd "M-,") 'pop-tag-mark)
+              (local-unset-key (kbd "M-j"))
+              (subword-mode)
+              (setq show-trailing-whitespace t))
+
+            (add-hook 'js2-mode-hook #'/js2-mode-hook)
 
             ))
 
@@ -611,32 +619,34 @@
                           (term-send-input)
                         (comint-send-input)))))))
 
-            (add-hook 'julia-mode-hook
-              (lambda ()
-                (subword-mode)
-                (local-set-key (kbd "C-c C-z") 'cv-term-julia)
-                (local-set-key (kbd "C-c C-c") 'cv-julia-send-top-level-form)
-                (local-set-key (kbd "C-M-x") 'cv-julia-send-region)
-                (local-set-key (kbd "C-c C-k") 'cv-julia-send-buffer)))
+            (defun /julia-mode-hook ()
+              (subword-mode)
+              (local-set-key (kbd "C-c C-z") 'cv-term-julia)
+              (local-set-key (kbd "C-c C-c") 'cv-julia-send-top-level-form)
+              (local-set-key (kbd "C-M-x") 'cv-julia-send-region)
+              (local-set-key (kbd "C-c C-k") 'cv-julia-send-buffer))
 
-            (add-hook 'inferior-julia-mode-hook
-              (lambda ()
-                (local-set-key (kbd "C-a") 'comint-bol)
-                (local-set-key (kbd "M-p") 'comint-previous-matching-input-from-input)
-                (local-set-key (kbd "M-n") 'comint-next-matching-input-from-input)
-                (local-set-key (kbd "<up>") 'comint-previous-input)
-                (local-set-key (kbd "<down>") 'comint-next-input)
-                (local-set-key (kbd "C-r") 'helm-comint-input-ring)
-                (local-set-key (kbd "C-c C-z") 'flip-windows)
-                (local-set-key (kbd "C-S-d") (lambda ()
-                                               (interactive)
-                                               (comint-interrupt-subjob)
-                                               (end-of-buffer)
-                                               (insert "quit()")
-                                               (comint-send-input)
-                                               (sleep-for 0 100)
-                                               (kill-buffer)
-                                               (delete-window)))))
+            (add-hook 'julia-mode-hook #'/julia-mode-hook)
+
+            (defun /inferior-julia-mode-hook ()
+              (local-set-key (kbd "C-a") 'comint-bol)
+              (local-set-key (kbd "M-p") 'comint-previous-matching-input-from-input)
+              (local-set-key (kbd "M-n") 'comint-next-matching-input-from-input)
+              (local-set-key (kbd "<up>") 'comint-previous-input)
+              (local-set-key (kbd "<down>") 'comint-next-input)
+              (local-set-key (kbd "C-r") 'helm-comint-input-ring)
+              (local-set-key (kbd "C-c C-z") 'flip-windows)
+              (local-set-key (kbd "C-S-d") (lambda ()
+                                             (interactive)
+                                             (comint-interrupt-subjob)
+                                             (end-of-buffer)
+                                             (insert "quit()")
+                                             (comint-send-input)
+                                             (sleep-for 0 100)
+                                             (kill-buffer)
+                                             (delete-window))))
+
+            (add-hook 'inferior-julia-mode-hook #'/inferior-julia-mode-hook)
 
             ))
 
@@ -647,9 +657,10 @@
 
             (add-to-list 'auto-mode-alist '("\\.dat$" . ledger-mode))
 
-            (add-hook 'ledger-mode-hook
-              (lambda ()
-                (local-set-key (kbd "C-c C-f") 'flush-to-fill-column)))
+            (defun /ledger-mode-hook ()
+              (local-set-key (kbd "C-c C-f") 'flush-to-fill-column))
+
+            (add-hook 'ledger-mode-hook #'/ledger-mode-hook)
 
             ))
 
@@ -663,10 +674,11 @@
   :pin melpa
   :config (progn
 
-            (add-hook 'lua-mode-hook
-              (lambda ()
-                (subword-mode)
-                (setq show-trailing-whitespace t)))
+            (defun /lua-mode-hook ()
+              (subword-mode)
+              (setq show-trailing-whitespace t))
+
+            (add-hook 'lua-mode-hook #'/lua-mode-hook)
 
             ))
 
@@ -688,15 +700,16 @@
 
             (magit-define-popup-switch 'magit-log-popup ?f "Follow renames" "--follow")
 
-            (add-hook 'magit-status-mode-hook
-              (lambda ()
-                (define-key magit-status-mode-map (kbd "W")
-                  (lambda ()
-                    (interactive)
-                    (if (member "-w" magit-diff-options)
-                        (setq magit-diff-options (remove "-w" magit-diff-options))
-                      (add-to-list 'magit-diff-options "-w"))
-                    (magit-refresh)))))
+            (defun /magit-status-mode-hook ()
+              (define-key magit-status-mode-map (kbd "W")
+                (lambda ()
+                  (interactive)
+                  (if (member "-w" magit-diff-options)
+                      (setq magit-diff-options (remove "-w" magit-diff-options))
+                    (add-to-list 'magit-diff-options "-w"))
+                  (magit-refresh))))
+
+            (add-hook 'magit-status-mode-hook #'/magit-status-mode-hook)
 
             (remove-hook 'git-commit-setup-hook 'git-commit-turn-on-auto-fill)
             (remove-hook 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
@@ -711,13 +724,14 @@
             (add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
             (add-to-list 'auto-mode-alist '("\\.md$" . markdown-mode))
 
-            (add-hook 'markdown-mode-hook
-              (lambda ()
-                (setq mode-name "MD")
-                (local-unset-key (kbd "M-<up>"))
-                (local-unset-key (kbd "M-<down>"))
-                (setq show-trailing-whitespace t)
-                (visual-line-mode)))
+            (defun /markdown-mode-hook ()
+              (setq mode-name "MD")
+              (local-unset-key (kbd "M-<up>"))
+              (local-unset-key (kbd "M-<down>"))
+              (setq show-trailing-whitespace t)
+              (visual-line-mode))
+
+            (add-hook 'markdown-mode-hook #'/markdown-mode-hook)
 
             ))
 
@@ -767,12 +781,13 @@
   :pin melpa-stable
   :config (progn
 
-            (add-hook 'olivetti-mode-hook
-              (lambda ()
-                (setq right-fringe-width 0
-                      left-fringe-width 0)
-                (set-window-buffer (frame-selected-window) (current-buffer))
-                (olivetti-set-width 90)))
+            (defun /olivetti-mode-hook ()
+              (setq right-fringe-width 0
+                    left-fringe-width 0)
+              (set-window-buffer (frame-selected-window) (current-buffer))
+              (olivetti-set-width 90))
+
+            (add-hook 'olivetti-mode-hook #'/olivetti-mode-hook)
 
             ))
 
@@ -930,9 +945,10 @@
 
             (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
 
-            (add-hook 'rust-mode-hook
-              (lambda ()
-                (flycheck-mode)))
+            (defun /rust-mode-hook ()
+              (flycheck-mode))
+
+            (add-hook 'rust-mode-hook #'/rust-mode-hook)
 
             ))
 
@@ -950,17 +966,19 @@
             (setq common-lisp-hyperspec-symbol-table
                   (concat common-lisp-hyperspec-root "/Data/Map_Sym.txt"))
 
-            ;;(add-hook 'slime-mode-hook
-            ;;  (lambda ()
-            ;;    (setq slime-truncate-lines nil)))
+            ;;(defun /slime-mode-hook ()
+            ;;  (setq slime-truncate-lines nil))
+            ;;
+            ;;(add-hook 'slime-mode-hook #'/slime-mode-hook)
 
-            ;;(add-hook 'slime-repl-mode-hook
-            ;;  (lambda ()
-            ;;    (paredit-mode 1)
-            ;;    (define-key slime-repl-mode-map "[" 'paredit-open-square)
-            ;;    (define-key slime-repl-mode-map "]" 'paredit-close-square)
-            ;;    (define-key slime-repl-mode-map "{" 'paredit-open-curly)
-            ;;    (define-key slime-repl-mode-map "}" 'paredit-close-curly)))
+            ;;(defun /slime-repl-mode-hook ()
+            ;;  (paredit-mode 1)
+            ;;  (define-key slime-repl-mode-map "[" 'paredit-open-square)
+            ;;  (define-key slime-repl-mode-map "]" 'paredit-close-square)
+            ;;  (define-key slime-repl-mode-map "{" 'paredit-open-curly)
+            ;;  (define-key slime-repl-mode-map "}" 'paredit-close-curly))
+            ;;
+            ;;(add-hook 'slime-repl-mode-hook #'/slime-repl-mode-hook)
 
             ))
 
@@ -996,9 +1014,10 @@
   :pin melpa
   :config (progn
 
-            (add-hook 'swift-mode-hook
-              (lambda ()
-                (local-unset-key (kbd "C-c C-z"))))
+            (defun /swift-mode-hook ()
+              (local-unset-key (kbd "C-c C-z")))
+
+            (add-hook 'swift-mode-hook #'/swift-mode-hook)
 
             ))
 

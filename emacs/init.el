@@ -231,10 +231,11 @@
 (setq max-mini-window-height 10)
 
 ;; exit the minibuffer when clicking outside it
-(add-hook 'mouse-leave-buffer-hook
-  (lambda ()
-    (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-      (abort-recursive-edit))))
+(defun /mouse-leave-buffer-hook ()
+  (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
+    (abort-recursive-edit)))
+
+(add-hook 'mouse-leave-buffer-hook #'/mouse-leave-buffer-hook)
 
 ;; tweak the minibuffer to always kill some annoying buffers on exit
 ;; NB: This is now deprecated in favor filtering out boring-buffers, but
@@ -272,14 +273,15 @@
     "/Secure Files/"
     "[Pp]asswords\\.\\(note\\|text\\|txt\\|org\\)$"))
 
-(add-hook 'find-file-hook
-  (lambda ()
-    (when (normal-backup-enable-predicate buffer-file-name)
-      (let ((backup t))
-        (mapc (lambda (re)
-                (setq backup (and backup (not (string-match re buffer-file-name)))))
-              backup-ignore-regexps)
-        (unless backup (sensitive-mode))))))
+(defun /find-file-hook ()
+  (when (normal-backup-enable-predicate buffer-file-name)
+    (let ((backup t))
+      (mapc (lambda (re)
+              (setq backup (and backup (not (string-match re buffer-file-name)))))
+            backup-ignore-regexps)
+      (unless backup (sensitive-mode)))))
+
+(add-hook 'find-file-hook #'/find-file-hook)
 
 (setq backup-by-copying t
       backup-directory-alist `(("." . ,(concat user-emacs-directory "backups")))
@@ -536,9 +538,10 @@
 
 ;; subword-mode
 
-(add-hook 'subword-mode-hook
-  (lambda ()
-    (diminish 'subword-mode)))
+(defun /subword-mode-hook ()
+  (diminish 'subword-mode))
+
+(add-hook 'subword-mode-hook #'/subword-mode-hook)
 
 
 ;; dired
@@ -551,23 +554,24 @@
   (setq dired-listing-switches "-gGha")
   (setq dired-use-ls-dired t))
 
-(add-hook 'dired-mode-hook
-  (lambda ()
-    (define-key dired-mode-map (kbd "<RET>")
-      (lambda ()
-        (interactive)
-        (let ((f (dired-get-file-for-visit)))
-          (if (file-directory-p f)
-              (dired-find-alternate-file)
-            (dired-find-file)))))
-    (define-key dired-mode-map (kbd "a") 'dired-find-alternate-file)
-    (define-key dired-mode-map (kbd "^")
-      (lambda ()
-        (interactive)
-        (let ((curr (directory-file-name (dired-current-directory))))
-          (find-alternate-file "..")
-          (message curr)
-          (dired-goto-file curr))))))
+(defun /dired-mode-hook ()
+  (define-key dired-mode-map (kbd "<RET>")
+    (lambda ()
+      (interactive)
+      (let ((f (dired-get-file-for-visit)))
+        (if (file-directory-p f)
+            (dired-find-alternate-file)
+          (dired-find-file)))))
+  (define-key dired-mode-map (kbd "a") 'dired-find-alternate-file)
+  (define-key dired-mode-map (kbd "^")
+    (lambda ()
+      (interactive)
+      (let ((curr (directory-file-name (dired-current-directory))))
+        (find-alternate-file "..")
+        (message curr)
+        (dired-goto-file curr)))))
+
+(add-hook 'dired-mode-hook #'/dired-mode-hook)
 
 
 ;; ediff
@@ -643,16 +647,17 @@
 
 (global-set-key (kbd "C-!") 'eshell-here)
 
-(add-hook 'eshell-mode-hook
-  (lambda ()
-    (local-set-key (kbd "C-p") 'eshell-previous-input)
-    (local-set-key (kbd "C-p") 'eshell-next-input)
-    (local-set-key (kbd "C-r") 'eshell-isearch-backward)
-    (local-set-key (kbd "C-M-r") 'helm-eshell-history)
-    (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
-    (local-set-key (kbd "C-c C-z") 'flip-windows)
-    (local-set-key (kbd "<tab>") 'company-complete)
-    (eshell/alias "v" "ls -la")))
+(defun /eshell-mode-hook ()
+  (local-set-key (kbd "C-p") 'eshell-previous-input)
+  (local-set-key (kbd "C-p") 'eshell-next-input)
+  (local-set-key (kbd "C-r") 'eshell-isearch-backward)
+  (local-set-key (kbd "C-M-r") 'helm-eshell-history)
+  (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
+  (local-set-key (kbd "C-c C-z") 'flip-windows)
+  (local-set-key (kbd "<tab>") 'company-complete)
+  (eshell/alias "v" "ls -la"))
+
+(add-hook 'eshell-mode-hook #'/eshell-mode-hook)
 
 
 ;; TODO: Delete these after Emacs 25.3.
@@ -728,46 +733,49 @@ See `eshell-prompt-regexp'."
 ;; https://stackoverflow.com/questions/24517172/is-there-a-way-to-make-regions-in-term-modes-respect-line-wrapping/48634830.
 (setq term-suppress-hard-newline t)
 
-(add-hook 'term-mode-hook
-  (lambda ()
-    (define-key term-raw-map (kbd "M-:") 'eval-expression)
-    (define-key term-raw-map (kbd "C-m") 'term-send-raw)
-    (define-key term-raw-map (kbd "C-p") 'term-send-raw)
-    (define-key term-raw-map (kbd "C-n") 'term-send-raw)
-    (define-key term-raw-map (kbd "M-C-n") 'next-line)
-    (define-key term-raw-map (kbd "M-C-p") 'previous-line)
-    (define-key term-raw-map (kbd "M-C-f") 'forward-char)
-    (define-key term-raw-map (kbd "M-C-b") 'backward-char)
-    (define-key term-raw-map (kbd "C-<left>") (kbd "M-b"))
-    (define-key term-raw-map (kbd "C-<right>") (kbd "M-f"))
-    (define-key term-raw-map (kbd "M-<left>") (kbd "M-b"))
-    (define-key term-raw-map (kbd "M-<right>") (kbd "M-f"))
-    (define-key term-raw-map (kbd "C-<backspace>") 'term-send-backward-kill-word)
-    (define-key term-raw-map (kbd "M-w") 'kill-ring-save)
-    (define-key term-raw-map (kbd "C-y")
-      (lambda (&optional string)
-        (interactive)
-        (process-send-string
-         (get-buffer-process (current-buffer))
-         (if string string (current-kill 0)))))
-    (define-key term-raw-map (kbd "C-M-y") 'helm-show-kill-ring)
-    (define-key term-raw-map (kbd "M-o") 'other-window)
-    (define-key term-raw-map (kbd "C-M-o") 'ace-window)))
+(defun /term-mode-hook ()
+  (define-key term-raw-map (kbd "M-:") 'eval-expression)
+  (define-key term-raw-map (kbd "C-m") 'term-send-raw)
+  (define-key term-raw-map (kbd "C-p") 'term-send-raw)
+  (define-key term-raw-map (kbd "C-n") 'term-send-raw)
+  (define-key term-raw-map (kbd "M-C-n") 'next-line)
+  (define-key term-raw-map (kbd "M-C-p") 'previous-line)
+  (define-key term-raw-map (kbd "M-C-f") 'forward-char)
+  (define-key term-raw-map (kbd "M-C-b") 'backward-char)
+  (define-key term-raw-map (kbd "C-<left>") (kbd "M-b"))
+  (define-key term-raw-map (kbd "C-<right>") (kbd "M-f"))
+  (define-key term-raw-map (kbd "M-<left>") (kbd "M-b"))
+  (define-key term-raw-map (kbd "M-<right>") (kbd "M-f"))
+  (define-key term-raw-map (kbd "C-<backspace>") 'term-send-backward-kill-word)
+  (define-key term-raw-map (kbd "M-w") 'kill-ring-save)
+  (define-key term-raw-map (kbd "C-y")
+    (lambda (&optional string)
+      (interactive)
+      (process-send-string
+       (get-buffer-process (current-buffer))
+       (if string string (current-kill 0)))))
+  (define-key term-raw-map (kbd "C-M-y") 'helm-show-kill-ring)
+  (define-key term-raw-map (kbd "M-o") 'other-window)
+  (define-key term-raw-map (kbd "C-M-o") 'ace-window))
+
+(add-hook 'term-mode-hook #'/term-mode-hook)
 
 
 ;; text-mode
 
-(add-hook 'text-mode-hook
-  (lambda ()
-    (when (string-equal major-mode "text-mode")
-      (visual-line-mode))))
+(defun /text-mode-hook ()
+  (when (string-equal major-mode "text-mode")
+    (visual-line-mode)))
+
+(add-hook 'text-mode-hook #'/text-mode-hook)
 
 
 ;; tex-mode
 
-(add-hook 'latex-mode-hook
-  (lambda ()
-    (visual-line-mode)))
+(defun /latex-mode-hook ()
+  (visual-line-mode))
+
+(add-hook 'latex-mode-hook #'/latex-mode-hook)
 
 
 ;; css-mode
@@ -780,21 +788,23 @@ See `eshell-prompt-regexp'."
 
 ;; ruby-mode
 
-(add-hook 'ruby-mode-hook
-  (lambda ()
-    (subword-mode)
-    (define-key ruby-mode-map (kbd "C-m") 'newline-and-indent)
-    (define-key ruby-mode-map (kbd "M-,") 'pop-tag-mark)
-    (setq show-trailing-whitespace t)))
+(defun /ruby-mode-hook ()
+  (subword-mode)
+  (define-key ruby-mode-map (kbd "C-m") 'newline-and-indent)
+  (define-key ruby-mode-map (kbd "M-,") 'pop-tag-mark)
+  (setq show-trailing-whitespace t))
+
+(add-hook 'ruby-mode-hook #'/ruby-mode-hook)
 
 
 ;; sh-mode (shell script)
 
 (add-to-list 'auto-mode-alist '("zshrc" . sh-mode))
 
-(add-hook 'sh-mode
-  (lambda ()
-    (local-unset-key (kbd "C-c C-z"))))
+(defun /sh-mode ()
+  (local-unset-key (kbd "C-c C-z")))
+
+(add-hook 'sh-mode #'/sh-mode)
 
 
 ;; nxml-mode
@@ -808,54 +818,58 @@ See `eshell-prompt-regexp'."
 
 (setq python-python-command "python2.7")
 
-(add-hook 'python-mode-hook
-  (lambda ()
-    (setq show-trailing-whitespace t)
-    (define-key python-mode-map (kbd "C-c C-z") nil)
-    (subword-mode)
-    (defconst python-block-pairs
-      '(("else" "if" "elif" "while" "for" "try" "except")
-        ("elif" "if" "elif")
-        ;; fix finally - try - except indentation
-        ("except" "try" "except")
-        ("finally" "try" "except")))))
+(defun /python-mode-hook ()
+  (setq show-trailing-whitespace t)
+  (define-key python-mode-map (kbd "C-c C-z") nil)
+  (subword-mode)
+  (defconst python-block-pairs
+    '(("else" "if" "elif" "while" "for" "try" "except")
+      ("elif" "if" "elif")
+      ;; fix finally - try - except indentation
+      ("except" "try" "except")
+      ("finally" "try" "except"))))
+
+(add-hook 'python-mode-hook #'/python-mode-hook)
 
 
 ;; cc-mode (C, C++, Objective-C)
 
-(add-hook 'c-mode-common-hook
-  (lambda ()
-    (c-set-style "ellemtel")
-    (local-set-key (kbd "C-m") 'newline-and-indent)
-    (local-set-key (kbd "C-M-x") 'compile)
-    (local-set-key (kbd "M-,") 'pop-tag-mark)
-    (local-unset-key (kbd "M-j"))
-    (electric-indent-local-mode t)
-    (c-toggle-auto-newline -1)
-    (subword-mode)
-    (helm-gtags-mode 1)
-    (setq show-trailing-whitespace t)))
+(defun /c-mode-common-hook ()
+  (c-set-style "ellemtel")
+  (local-set-key (kbd "C-m") 'newline-and-indent)
+  (local-set-key (kbd "C-M-x") 'compile)
+  (local-set-key (kbd "M-,") 'pop-tag-mark)
+  (local-unset-key (kbd "M-j"))
+  (electric-indent-local-mode t)
+  (c-toggle-auto-newline -1)
+  (subword-mode)
+  (helm-gtags-mode 1)
+  (setq show-trailing-whitespace t))
 
-(add-hook 'objc-mode-hook
-  (lambda ()
-    (setq c-basic-offset 4)))
+(add-hook 'c-mode-common-hook #'/c-mode-common-hook)
 
-(add-hook 'c++-mode-hook
-  (lambda ()
-    ;; See http://stackoverflow.com/questions/14939608/how-to-change-emacs-struct-indents-from-4-to-2-spaces for more information.
-    ;; take care of indenting "class ... { private: ... }" blocks
-    (c-set-offset 'inclass '++)
-    (c-set-offset 'access-label '-)
-    (c-set-offset 'friend '-)
-    ;; take care of indenting "struct ... { ... }" blocks
-    (c-set-offset 'topmost-intro
-                  (lambda (langelem)
-                    (let ((inclass (assoc 'inclass c-syntactic-context)))
-                      (if (not inclass)
-                          0
-                        (save-excursion
-                          (goto-char (c-langelem-pos inclass))
-                          (if (looking-at "struct") '- '=))))))))
+(defun /objc-mode-hook ()
+  (setq c-basic-offset 4))
+
+(add-hook 'objc-mode-hook #'/objc-mode-hook)
+
+(defun /c++-mode-hook ()
+  ;; See http://stackoverflow.com/questions/14939608/how-to-change-emacs-struct-indents-from-4-to-2-spaces for more information.
+  ;; take care of indenting "class ... { private: ... }" blocks
+  (c-set-offset 'inclass '++)
+  (c-set-offset 'access-label '-)
+  (c-set-offset 'friend '-)
+  ;; take care of indenting "struct ... { ... }" blocks
+  (c-set-offset 'topmost-intro
+                (lambda (langelem)
+                  (let ((inclass (assoc 'inclass c-syntactic-context)))
+                    (if (not inclass)
+                        0
+                      (save-excursion
+                        (goto-char (c-langelem-pos inclass))
+                        (if (looking-at "struct") '- '=)))))))
+
+(add-hook 'c++-mode-hook #'/c++-mode-hook)
 
 
 ;; Common Lisp
@@ -865,20 +879,21 @@ See `eshell-prompt-regexp'."
 
 (require 'refactor)                     ; custom Lisp symbol renaming
 
-(add-hook 'lisp-mode-hook
-  (lambda ()
-    (paredit-mode 1)
-    (setq lisp-indent-function 'common-lisp-indent-function)
-    (define-key lisp-mode-map (kbd "C-m") 'newline-and-indent)
-    ;;(define-key lisp-mode-map (kbd "C-.") 'slime-complete-symbol)
-    (setq show-trailing-whitespace t)
-    ;; fix loop macro indentation
-    (setq lisp-simple-loop-indentation 1)
-    (setq lisp-loop-keyword-indentation 6)
-    (setq lisp-loop-forms-indentation 6)
-    ;; make square brackets and parentheses equivalent for indentation
-    (modify-syntax-entry ?\[ "(]" lisp-mode-syntax-table)
-    (modify-syntax-entry ?\] ")[" lisp-mode-syntax-table)))
+(defun /lisp-mode-hook ()
+  (paredit-mode 1)
+  (setq lisp-indent-function 'common-lisp-indent-function)
+  (define-key lisp-mode-map (kbd "C-m") 'newline-and-indent)
+  ;;(define-key lisp-mode-map (kbd "C-.") 'slime-complete-symbol)
+  (setq show-trailing-whitespace t)
+  ;; fix loop macro indentation
+  (setq lisp-simple-loop-indentation 1)
+  (setq lisp-loop-keyword-indentation 6)
+  (setq lisp-loop-forms-indentation 6)
+  ;; make square brackets and parentheses equivalent for indentation
+  (modify-syntax-entry ?\[ "(]" lisp-mode-syntax-table)
+  (modify-syntax-entry ?\] ")[" lisp-mode-syntax-table))
+
+(add-hook 'lisp-mode-hook #'/lisp-mode-hook)
 
 
 

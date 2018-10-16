@@ -46,43 +46,44 @@
 (org-crypt-use-before-save-magic)
 (setq org-tags-exclude-from-inheritance (quote ("crypt")))
 
-(add-hook 'org-mode-hook
-  (lambda ()
-    (setq mode-name "Ω")
-    (diminish 'org-indent-mode)
-    (setq show-trailing-whitespace t)
-    (visual-line-mode)
-    ;; set the input method which makes it easy to type special characters, but
-    ;; don't turn it on: a simple C-\ then toggles it with no further prompting
-    (set-input-method 'TeX)
-    (deactivate-input-method)
-    ;; keybindings
-    (define-key org-mode-map (kbd "M-+") 'org-shiftright)
-    (define-key org-mode-map (kbd "M--") 'org-shiftleft)
-    (define-key org-mode-map (kbd "S-<up>") nil)
-    (define-key org-mode-map (kbd "S-<down>") nil)
-    (define-key org-mode-map (kbd "S-<left>") nil)
-    (define-key org-mode-map (kbd "S-<right>") nil)
-    (define-key org-mode-map (kbd "M-h") nil)
-    (define-key org-mode-map (kbd "C-c C-z") nil)
-    (define-key org-mode-map (kbd "C-c M-z") 'org-add-note)
-    (define-key org-mode-map (kbd "M-C-<up>") 'org-timestamp-up)
-    (define-key org-mode-map (kbd "M-C-<down>") 'org-timestamp-down)
-    (define-key org-mode-map (kbd "M-<up>") 'scroll-up-line)
-    (define-key org-mode-map (kbd "M-<down>") 'scroll-down-line)
-    (define-key org-mode-map (kbd "M-S-<up>") 'org-move-subtree-up)
-    (define-key org-mode-map (kbd "M-S-<down>") 'org-move-subtree-up)
-    (define-key org-mode-map (kbd "M-C-S-<up>") 'org-shiftmetaup)
-    (define-key org-mode-map (kbd "M-C-S-<down>") 'org-shiftmetadown)
-    (define-key org-mode-map (kbd "C-S-a") 'beginning-of-line)
-    (define-key org-mode-map (kbd "C-S-e") 'end-of-line)
-    ;; turn off all archiving shortcuts
-    (define-key org-mode-map (kbd "C-c $") nil) ;; default: org-archive-subtree
-    (define-key org-mode-map (kbd "C-c C-x C-a") nil) ;; default: org-archive-subtree-default
-    (define-key org-mode-map (kbd "C-c C-x A") nil) ;; default: org-archive-to-archive-sibling
-    (define-key org-mode-map (kbd "C-c C-x a") nil) ;; default: org-toggle-archive-tag
-    (define-key org-mode-map (kbd "C-c C-x C-s") nil) ;; default: org-advertized-archive-subtree
-    ))
+(defun /org-mode-hook ()
+  (setq mode-name "Ω")
+  (diminish 'org-indent-mode)
+  (setq show-trailing-whitespace t)
+  (visual-line-mode)
+  ;; set the input method which makes it easy to type special characters, but
+  ;; don't turn it on: a simple C-\ then toggles it with no further prompting
+  (set-input-method 'TeX)
+  (deactivate-input-method)
+  ;; keybindings
+  (define-key org-mode-map (kbd "M-+") 'org-shiftright)
+  (define-key org-mode-map (kbd "M--") 'org-shiftleft)
+  (define-key org-mode-map (kbd "S-<up>") nil)
+  (define-key org-mode-map (kbd "S-<down>") nil)
+  (define-key org-mode-map (kbd "S-<left>") nil)
+  (define-key org-mode-map (kbd "S-<right>") nil)
+  (define-key org-mode-map (kbd "M-h") nil)
+  (define-key org-mode-map (kbd "C-c C-z") nil)
+  (define-key org-mode-map (kbd "C-c M-z") 'org-add-note)
+  (define-key org-mode-map (kbd "M-C-<up>") 'org-timestamp-up)
+  (define-key org-mode-map (kbd "M-C-<down>") 'org-timestamp-down)
+  (define-key org-mode-map (kbd "M-<up>") 'scroll-up-line)
+  (define-key org-mode-map (kbd "M-<down>") 'scroll-down-line)
+  (define-key org-mode-map (kbd "M-S-<up>") 'org-move-subtree-up)
+  (define-key org-mode-map (kbd "M-S-<down>") 'org-move-subtree-up)
+  (define-key org-mode-map (kbd "M-C-S-<up>") 'org-shiftmetaup)
+  (define-key org-mode-map (kbd "M-C-S-<down>") 'org-shiftmetadown)
+  (define-key org-mode-map (kbd "C-S-a") 'beginning-of-line)
+  (define-key org-mode-map (kbd "C-S-e") 'end-of-line)
+  ;; turn off all archiving shortcuts
+  (define-key org-mode-map (kbd "C-c $") nil) ;; default: org-archive-subtree
+  (define-key org-mode-map (kbd "C-c C-x C-a") nil) ;; default: org-archive-subtree-default
+  (define-key org-mode-map (kbd "C-c C-x A") nil) ;; default: org-archive-to-archive-sibling
+  (define-key org-mode-map (kbd "C-c C-x a") nil) ;; default: org-toggle-archive-tag
+  (define-key org-mode-map (kbd "C-c C-x C-s") nil) ;; default: org-advertized-archive-subtree
+  )
+
+(add-hook 'org-mode-hook #'/org-mode-hook)
 
 (defun cv--org-kill-calendar-buffer (&rest args)
   (let ((buf (get-buffer "*Calendar*")))
