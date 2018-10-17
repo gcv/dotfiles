@@ -18,3 +18,5 @@
 	clean = git-lfs clean -- %f
 [magit]
 	hideCampaign = true
+[diff "gpg"]
+	textconv = gpg --no-tty --decrypt
