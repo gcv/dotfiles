@@ -1035,6 +1035,7 @@
   :config (progn
 
             (setq treemacs-persist-file (expand-file-name "treemacs/treemacs-persist" user-emacs-directory))
+            (setq treemacs-no-png-images t)
 
             (defun /treemacs-mode-hook ()
               (define-key treemacs-mode-map (kbd "<S-return>") #'treemacs-visit-node-ace))

@@ -48,7 +48,7 @@
                                             (formatted-branch-name (concat "— " (if (< (length branch-name) 12)
                                                                                     branch-name
                                                                                   (substring branch-name -12))))
-                                            (buffer-vc-state (vc-state buffer-file-name))
+                                            (buffer-vc-state (vc-state (or buffer-file-name default-directory)))
                                             (f (cond ((string= "up-to-date" buffer-vc-state)
                                                       '((:slant normal)))
                                                      (t
