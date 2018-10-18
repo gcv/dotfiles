@@ -38,7 +38,7 @@
   (set-face-foreground 'mode-line-inactive "grey42")
   (set-face-background 'highlight "grey35")
   (set-face-underline 'highlight nil)
-  ;;(set-face-background 'hl-line "#343335")
+  (set-face-background 'hl-line "#525252")
   (set-face-background 'region "grey35")
   (set-face-background 'isearch "steelblue4")
   (set-face-background 'lazy-highlight "grey25")
