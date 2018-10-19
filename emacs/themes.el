@@ -195,6 +195,7 @@
     (set-face-attribute 'cursor nil :background "#cc0000")
     (set-face-attribute 'show-paren-match nil :background base-color-darker-1)
     (set-face-attribute 'minibuffer-prompt nil :foreground base-color)
+    (set-face-background 'hl-line "darkgreen")
     (set-face-attribute 'mode-line nil :foreground "black" :background base-color-lighter-1)
     (set-face-attribute 'mode-line-inactive nil :foreground "black" :background base-color-darker-2 :box nil)
     (set-face-attribute 'org-hide nil :foreground "black" :background "black")
