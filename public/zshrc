@@ -805,6 +805,31 @@ function shorten_path_disambiguate_keep_last() {
 }
 
 
+### utility function for converting a video file to a low-quality gif
+function video2gif() {
+    local in=$1
+    local out=$2
+    if [[ -z "${in}" || ! -f "${in}" ]]; then
+        echo "no input file" 1>&2
+        return 1
+    fi
+    if [[ -z "${out}" || -f "${out}" ]]; then
+        echo "bad output file" 1>&2
+        return 1
+    fi
+    local base=${in%.*}
+    local palette="${base}.png"
+    if [[ -f "${palette}" ]]; then
+        echo "palette already exists" 1>&2
+        return 1
+    fi
+    ffmpeg -y -i "${in}" -vf fps=5,scale=500:-1:flags=lanczos,palettegen "${palette}"
+    ffmpeg -i "${in}" -i "${palette}" -filter_complex "fps=5,scale=500:-1:flags=lanczos[x];[x][1:v]paletteuse" "${out}"
+    rm -f "${palette}"
+    return 0
+}
+
+
 ### utility function for setting AWS access environment variables
 function awscreds() {
     local profile=$1
