@@ -216,7 +216,9 @@
             ))
 
 
+;;; XXX: This needs to be cloned manually from https://github.com/gcv/git-auto-commit-mode
 (use-package git-auto-commit-mode
+  :pin manual
   :config (progn
             (setq gac-automatically-push-p nil)
             (setq-default gac-debounce-interval 300)
@@ -470,6 +472,7 @@
 
 
 (use-package julia-mode
+  :pin melpa
   :config (progn
 
             (add-to-list 'display-buffer-alist '("\\*Julia\\*" (display-buffer-reuse-window display-buffer-same-window)))

@@ -151,7 +151,7 @@
   (package-install 'use-package))
 
 (setq use-package-always-ensure t)
-(setq use-package-always-pin 'melpa-stable)
+(setq use-package-always-pin "melpa-stable")
 
 
 ;;; ----------------------------------------------------------------------------
