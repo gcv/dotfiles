@@ -137,19 +137,21 @@
 (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 
-(package-initialize)
+(setq package-archive-priorities
+      '(("melpa-stable" . 40)
+        ;;("org" . 30)
+        ;;("marmalade" . 20)
+        ("gnu" . 10)
+        ("melpa" . 0)))
 
-;;; bootstrap use-package
-(setq package-pinned-packages
-      '((bind-key    . "melpa-stable")
-        (diminish    . "melpa-stable")
-        (use-package . "melpa-stable")))
+(package-initialize)
 
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 
 (setq use-package-always-ensure t)
+(setq use-package-always-pin 'melpa-stable)
 
 
 ;;; ----------------------------------------------------------------------------

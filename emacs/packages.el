@@ -5,38 +5,29 @@
 ;;; repository, order in this section matters!
 ;;; ----------------------------------------------------------------------------
 
-(use-package async    :pin melpa-stable)
-(use-package dash     :pin melpa-stable) ; a modern list library
-(use-package ht       :pin melpa-stable) ; hash tables
-(use-package s        :pin melpa-stable) ; string handling
-(use-package f        :pin melpa-stable) ; file handling
+(use-package async)
+(use-package dash)                       ; a modern list library
+(use-package ht)                         ; hash tables
+(use-package s)                          ; string handling
+(use-package f)                          ; file handling
 (use-package queue    :pin gnu)
-(use-package epl      :pin melpa-stable) ; package.el wrapper
-(use-package pfuture  :pin melpa-stable)
-(use-package pkg-info :pin melpa-stable) ; Emacs package
+(use-package epl)                       ; package.el wrapper
+(use-package pfuture)
+(use-package pkg-info)                  ; Emacs package
 
 
 ;;; ----------------------------------------------------------------------------
 ;;; real packages
-;;;
-;;; NB: Specify transitive dependency pins above the dependent's use-package
-;;; form.
 ;;; ----------------------------------------------------------------------------
 
-(add-to-list 'package-pinned-packages '(avy . "melpa-stable"))
-
 (use-package ace-window
-  :pin melpa-stable
   :config (progn
             (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l ?z ?x ?c ?v ?b ?n ?m))
             (global-set-key (kbd "C-M-o") 'ace-window)
             ))
 
 
-(add-to-list 'package-pinned-packages '(markup-faces . "melpa-stable"))
-
 (use-package adoc-mode
-  :pin melpa-stable
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.adoc$" . adoc-mode))
@@ -51,12 +42,10 @@
             ))
 
 
-(use-package ag
-  :pin melpa-stable)
+(use-package ag)
 
 
 (use-package avy
-  :pin melpa-stable
   :config (progn
             (global-set-key (kbd "M-j") 'avy-goto-char)
             (global-set-key (kbd "C-M-j") 'avy-goto-line)
@@ -64,7 +53,6 @@
 
 
 (use-package cider
-  :pin melpa-stable
   :after (clojure-mode)
   :config (progn
 
@@ -106,7 +94,6 @@
 
 
 (use-package clojure-mode
-  :pin melpa-stable
   :config (progn
 
             (defun /clojure-mode-hook ()
@@ -128,14 +115,12 @@
 
 
 (use-package cmake-mode
-  :pin melpa-stable
   :config (progn
             (setq cmake-tab-width 4)
             ))
 
 
 (use-package company                    ; "comp"lete "any"thing
-  :pin melpa-stable
   :diminish ""
   :config (progn
 
@@ -160,7 +145,6 @@
 
 
 (use-package company-web
-  :pin melpa-stable
   :after (:all company web-mode web-completion-data))
 
 
@@ -170,7 +154,6 @@
 
 
 (use-package deft
-  :pin melpa-stable
   :config (progn
             (setq deft-extension "org"
                   deft-directory "~/Notes/NV/"
@@ -179,12 +162,10 @@
 
 
 (use-package elisp-slime-nav
-  :pin melpa-stable
   :diminish "")
 
 
 (use-package emojify
-  :pin melpa-stable
   :config (progn
             ;; 'unicode currently broken on macOS
             (setq emojify-display-style 'image)
@@ -193,8 +174,7 @@
             ))
 
 
-(use-package eshell-autojump
-  :pin melpa-stable)
+(use-package eshell-autojump)
 
 
 (use-package flycheck
@@ -209,7 +189,6 @@
 
 
 (use-package fountain-mode              ; screenwriting
-  :pin melpa-stable
   :config (progn
             (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
             ))
@@ -238,7 +217,6 @@
 
 
 (use-package git-auto-commit-mode
-  :pin melpa-stable
   :config (progn
             (setq gac-automatically-push-p nil)
             (setq-default gac-debounce-interval 300)
@@ -272,7 +250,6 @@
 
 ;; http://www.emacswiki.org/emacs/GotoChg
 (use-package goto-chg
-  :pin melpa-stable
   :config (progn
             (when window-system (global-set-key (kbd "C-M-[") 'goto-last-change))
             (global-set-key (kbd "C-M-]") 'goto-last-change-reverse)
@@ -285,7 +262,6 @@
 
 
 (use-package haskell-mode
-  :pin melpa-stable
   :config (progn
 
             (defun /haskell-mode-hook ()
@@ -297,11 +273,7 @@
             ))
 
 
-(add-to-list 'package-pinned-packages '(helm-core . "melpa-stable"))
-(add-to-list 'package-pinned-packages '(popup . "melpa-stable"))
-
 (use-package helm
-  :pin melpa-stable
   :after (:all helm-core popup)
   :diminish ""
   :config (progn
@@ -383,12 +355,10 @@
 
 
 (use-package helm-ag
-  :pin melpa-stable
   :after (helm-core))
 
 
 (use-package helm-gtags
-  :pin melpa-stable
   :after (helm-core)
   :config (progn
 
@@ -415,7 +385,6 @@
 
 
 (use-package helm-projectile
-  :pin melpa-stable
   :after (:all helm-core projectile)
   :config (progn
             (helm-projectile-on)
@@ -423,7 +392,6 @@
 
 
 (use-package helm-swoop
-  :pin melpa-stable
   :after (helm-core)
   :config (progn
             (global-set-key (kbd "C-M-S-i") 'helm-swoop)
@@ -456,13 +424,11 @@
 
 
 (use-package hydra
-  :pin melpa-stable
   :config (progn
             ))
 
 
 (use-package intero
-  :pin melpa-stable
   :after (haskell-mode)
   :config (progn
             (intero-global-mode 1)
@@ -504,7 +470,6 @@
 
 
 (use-package julia-mode
-  :pin melpa-stable
   :config (progn
 
             (add-to-list 'display-buffer-alist '("\\*Julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
@@ -652,7 +617,6 @@
 
 
 (use-package ledger-mode
-  :pin melpa-stable
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.dat$" . ledger-mode))
@@ -683,13 +647,7 @@
             ))
 
 
-(add-to-list 'package-pinned-packages '(ghub . "melpa-stable"))
-(add-to-list 'package-pinned-packages '(git-commit . "melpa-stable"))
-(add-to-list 'package-pinned-packages '(magit-popup . "melpa-stable"))
-(add-to-list 'package-pinned-packages '(with-editor . "melpa-stable"))
-
 (use-package magit
-  :pin melpa-stable
   :config (progn
 
             (diminish 'magit-auto-revert-mode)
@@ -718,7 +676,6 @@
 
 
 (use-package markdown-mode
-  :pin melpa-stable
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
@@ -737,12 +694,10 @@
 
 
 (use-package material-theme
-  :pin melpa-stable
   :defer t)
 
 
 (use-package multiple-cursors
-  :pin melpa-stable
   :config (progn
             (global-set-key (kbd "C-?") 'mc/edit-lines)
             (global-set-key (kbd "C->") 'mc/mark-next-like-this)
@@ -769,8 +724,7 @@
 
 
 ;; turn on when built-in Org dependency is up-to-date
-;;(use-package ob-async
-;;  :pin melpa-stable)
+;;(use-package ob-async)
 
 
 (use-package ob-restclient
@@ -778,7 +732,6 @@
 
 
 (use-package olivetti                   ; focused writing mode
-  :pin melpa-stable
   :config (progn
 
             (defun /olivetti-mode-hook ()
@@ -830,7 +783,6 @@
 
 
 (use-package paredit
-  :pin melpa-stable
   :diminish " π"
   :config (progn
 
@@ -849,7 +801,6 @@
 
 
 (use-package perspective
-  :pin melpa-stable
   :config (progn
 
             (persp-mode)
@@ -906,7 +857,6 @@
 
 
 (use-package projectile
-  :pin melpa-stable
   :config (progn
 
             (projectile-global-mode)
@@ -953,10 +903,7 @@
             ))
 
 
-(add-to-list 'package-pinned-packages '(macrostep . "melpa-stable"))
-
 (use-package slime
-  :pin melpa-stable
   :config (progn
 
             (setq slime-net-coding-system 'utf-8-unix)
@@ -984,7 +931,6 @@
 
 
 (use-package slime-company
-  :pin melpa-stable
   :after (:all company slime)
   :config (progn
             ;; XXX: This is here instead of the slime :config section to make
@@ -994,7 +940,6 @@
 
 
 (use-package smex                       ; smart M-x completion
-  :pin melpa-stable
   :config (progn
             (setq smex-save-file (concat user-emacs-directory ".smex-items"))
             ;;(global-set-key (kbd "M-x") (lambda ()
@@ -1006,7 +951,6 @@
 
 
 (use-package solarized-theme
-  :pin melpa-stable
   :defer t)
 
 
@@ -1030,7 +974,6 @@
 
 
 (use-package treemacs
-  :pin melpa-stable
   :config (progn
 
             (setq treemacs-persist-file (expand-file-name "treemacs/treemacs-persist" user-emacs-directory))
@@ -1045,7 +988,6 @@
 
 
 (use-package tide                       ; TypeScript IDE
-  :pin melpa-stable
   :after (:all company flycheck typescript-mode)
   :diminish " Tide"
   :config (progn
@@ -1058,7 +1000,6 @@
 ;;; Installed purely because it's a tide dependency. web-mode provides superior
 ;;; TS indentation.
 (use-package typescript-mode
-  :pin melpa-stable
   :diminish " TS"
   :config (progn
 
@@ -1068,7 +1009,6 @@
 
 
 (use-package web-mode
-  :pin melpa-stable
   :after (:all flycheck tide)
   :config (progn
 
@@ -1094,12 +1034,10 @@
             ))
 
 
-(use-package wgrep
-  :pin melpa-stable)
+(use-package wgrep)
 
 
 (use-package which-key
-  :pin melpa-stable
   :diminish ""
   :config (progn
             (which-key-mode)
@@ -1110,10 +1048,8 @@
             ))
 
 
-(use-package yaml-mode
-  :pin melpa-stable)
+(use-package yaml-mode)
 
 
 (use-package zenburn-theme
-  :pin melpa-stable
   :defer t)
