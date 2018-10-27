@@ -509,7 +509,6 @@ function gpgd() {
     #  - written in shell script for convenience of installation, but
     #    the code does suffer for it
     #  - zsh only
-    #  - greadlink dependency on Mac OS
     #  - not ideal for larger encrypted directories: sync of encrypted
     #    archives will not allow any block optimizations, secure rm
     #    is fairly slow
@@ -527,20 +526,8 @@ function gpgd() {
         echo "no mktemp found" 1>&2
         return 1
     fi
-    local readlink
-    case $(uname) in
-        "Darwin")
-            if [[ -z $(command -v greadlink) ]]; then
-                echo "GNU readlink required; install coreutils from Homebrew" 1>&2
-                return 1
-            else
-                readlink="greadlink"
-            fi
-        ;;
-        "Linux")
-            readlink="readlink"
-        ;;
-    esac
+
+    function gpgd_readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
 
     function gpgd_help() {
         echo "usage:"
@@ -621,12 +608,12 @@ function gpgd() {
     }
 
     function gpgd_mount() {
-        local archive_file="$(${readlink} -f "${2}")"
+        local archive_file="$(gpgd_readlinkf "${2}")"
         if [[ ! -f "${archive_file}" ]]; then
             echo "archive required" 1>&2
             return 1
         fi
-        local mount_point_parent_directory="$(${readlink} -f "${3}")"
+        local mount_point_parent_directory="$(gpgd_readlinkf "${3}")"
         if [[ ! -w "${mount_point_parent_directory}" ]]; then
             echo "writeable mount point parent directory required" 1>&2
             return 1
@@ -678,7 +665,7 @@ function gpgd() {
     }
 
     function gpgd_umount() {
-        local mount_point="$(${readlink} -f "$2")"
+        local mount_point="$(gpgd_readlinkf "$2")"
         if [[ ! -d "${mount_point}" ]]; then
             echo "${mount_point} does not exist" 1>&2
             return 1
@@ -694,9 +681,9 @@ function gpgd() {
         local mount_point_parent_directory="$(dirname "${mount_point}")"
         local mount_point_basename="$(basename "${mount_point}")"
         local current_dir_raw="$(pwd)"
-        local current_dir="$(${readlink} -f "${current_dir_raw}")"
+        local current_dir="$(gpgd_readlinkf "${current_dir_raw}")"
         local archive_path_raw="$(cat "${mount_point}/.gpgd-archive-file")"
-        local archive_path="$(${readlink} -f "${archive_path_raw}")"
+        local archive_path="$(gpgd_readlinkf "${archive_path_raw}")"
         local archive_filename="$(basename "${archive_path}")"
         local archive_filename_noext="${archive_filename%.*}"
         if [[ ! -e "${archive_path}" ]]; then
