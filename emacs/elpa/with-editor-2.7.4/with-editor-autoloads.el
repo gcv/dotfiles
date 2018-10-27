@@ -3,9 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "with-editor" "with-editor.el" (23462 31715
-;;;;;;  666852 163000))
-;;; Generated autoloads from with-editor.el
+;;;### (autoloads nil "with-editor" "../../../../../.emacs.d/elpa/with-editor-2.7.4/with-editor.el"
+;;;;;;  "cd32684d1d75aa3b27459105cf073988")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/with-editor-2.7.4/with-editor.el
 
 (autoload 'with-editor-export-editor "with-editor" "\
 Teach subsequent commands to use current Emacs instance as editor.
@@ -82,8 +82,10 @@ else like the former.
 
 ;;;***
 
-;;;### (autoloads nil nil ("with-editor-pkg.el") (23462 31715 676596
-;;;;;;  730000))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/with-editor-2.7.4/with-editor-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/with-editor-2.7.4/with-editor-pkg.el"
+;;;;;;  "../../../../../.emacs.d/elpa/with-editor-2.7.4/with-editor.el")
+;;;;;;  (23508 57662 638103 409000))
 
 ;;;***
 

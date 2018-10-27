@@ -3,8 +3,10 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil nil ("magit-popup-pkg.el" "magit-popup.el")
-;;;;;;  (23462 31737 658179 731000))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/magit-popup-2.12.4/magit-popup-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/magit-popup-2.12.4/magit-popup-pkg.el"
+;;;;;;  "../../../../../.emacs.d/elpa/magit-popup-2.12.4/magit-popup.el")
+;;;;;;  (23508 57663 95164 937000))
 
 ;;;***
 

@@ -1,2 +1,2 @@
 ;;; -*- no-byte-compile: t -*-
-(define-package "wgrep" "2.1.10" "Writable grep buffer and apply the changes to files" 'nil :commit "7ef26c51feaef8a5ec0929737130ab8ba326983c" :url "http://github.com/mhayashi1120/Emacs-wgrep/raw/master/wgrep.el" :keywords '("grep" "edit" "extensions"))
+(define-package "wgrep" "2.1.10" "Writable grep buffer and apply the changes to files" 'nil :commit "7ef26c51feaef8a5ec0929737130ab8ba326983c" :keywords '("grep" "edit" "extensions") :authors '(("Masahiro Hayashi" . "mhayashi1120@gmail.com")) :maintainer '("Masahiro Hayashi" . "mhayashi1120@gmail.com") :url "http://github.com/mhayashi1120/Emacs-wgrep/raw/master/wgrep.el")

@@ -3,9 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "emojify" "emojify.el" (23263 33857 975416
-;;;;;;  412000))
-;;; Generated autoloads from emojify.el
+;;;### (autoloads nil "emojify" "../../../../../.emacs.d/elpa/emojify-1.0/emojify.el"
+;;;;;;  "eb7aad1f9da5678a4cb639df9cf4f6f2")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/emojify-1.0/emojify.el
 
 (autoload 'emojify-set-emoji-styles "emojify" "\
 Set the type of emojis that should be displayed.
@@ -82,8 +82,10 @@ This respects the `emojify-emoji-styles' variable.
 
 ;;;***
 
-;;;### (autoloads nil nil ("emojify-pkg.el") (23263 33857 972566
-;;;;;;  126000))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/emojify-1.0/emojify-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/emojify-1.0/emojify-pkg.el"
+;;;;;;  "../../../../../.emacs.d/elpa/emojify-1.0/emojify.el") (23508
+;;;;;;  57474 541672 554000))
 
 ;;;***
 

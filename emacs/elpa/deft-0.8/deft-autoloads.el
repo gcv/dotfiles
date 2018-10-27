@@ -3,8 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "deft" "deft.el" (23146 20095 944893 333000))
-;;; Generated autoloads from deft.el
+;;;### (autoloads nil "deft" "../../../../../.emacs.d/elpa/deft-0.8/deft.el"
+;;;;;;  "7a90ddace89769c48d904b4ac04b4b55")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/deft-0.8/deft.el
 
 (autoload 'deft-find-file "deft" "\
 Find FILE interactively using the minibuffer.
@@ -25,6 +26,12 @@ non-nil and title is not from filename, use it as the title.
 Switch to *Deft* buffer and load files.
 
 \(fn)" t nil)
+
+;;;***
+
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/deft-0.8/deft-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/deft-0.8/deft.el") (23508 57472
+;;;;;;  807218 616000))
 
 ;;;***
 

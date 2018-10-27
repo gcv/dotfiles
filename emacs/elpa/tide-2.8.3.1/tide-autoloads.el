@@ -3,8 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "tide" "tide.el" (23494 13648 169705 247000))
-;;; Generated autoloads from tide.el
+;;;### (autoloads nil "tide" "../../../../../.emacs.d/elpa/tide-2.8.3.1/tide.el"
+;;;;;;  "49f99a3341cd7d840e97aa758ffc1bc8")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/tide-2.8.3.1/tide.el
 
 (autoload 'company-tide "tide" "\
 
@@ -57,8 +58,10 @@ timeout.
 
 ;;;***
 
-;;;### (autoloads nil nil ("tide-lv.el" "tide-pkg.el") (23494 13648
-;;;;;;  52016 645000))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/tide-2.8.3.1/tide-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/tide-2.8.3.1/tide-lv.el" "../../../../../.emacs.d/elpa/tide-2.8.3.1/tide-pkg.el"
+;;;;;;  "../../../../../.emacs.d/elpa/tide-2.8.3.1/tide.el") (23508
+;;;;;;  57696 437439 352000))
 
 ;;;***
 

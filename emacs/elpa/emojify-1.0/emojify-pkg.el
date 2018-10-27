@@ -4,6 +4,10 @@
     (emacs "24.3"))
   :keywords
   '("multimedia" "convenience")
+  :authors
+  '(("Iqbal Ansari" . "iqbalansari02@yahoo.com"))
+  :maintainer
+  '("Iqbal Ansari" . "iqbalansari02@yahoo.com")
   :url "https://github.com/iqbalansari/emacs-emojify")
 ;; Local Variables:
 ;; no-byte-compile: t

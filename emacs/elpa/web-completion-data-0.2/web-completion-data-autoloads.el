@@ -3,8 +3,10 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil nil ("web-completion-data-pkg.el" "web-completion-data.el")
-;;;;;;  (22814 11384 0 0))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/web-completion-data-0.2/web-completion-data-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/web-completion-data-0.2/web-completion-data-pkg.el"
+;;;;;;  "../../../../../.emacs.d/elpa/web-completion-data-0.2/web-completion-data.el")
+;;;;;;  (23508 57468 116381 181000))
 
 ;;;***
 

@@ -3,9 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "olivetti" "olivetti.el" (23320 9553 372252
-;;;;;;  166000))
-;;; Generated autoloads from olivetti.el
+;;;### (autoloads nil "olivetti" "../../../../../.emacs.d/elpa/olivetti-1.6.1/olivetti.el"
+;;;;;;  "941d97335fe5c216056e55e768b90dbc")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/olivetti-1.6.1/olivetti.el
 
 (autoload 'turn-on-olivetti-mode "olivetti" "\
 Turn on `olivetti-mode' unconditionally.
@@ -22,6 +22,12 @@ When `olivetti-hide-mode-line' is non-nil, the mode line is also
 hidden.
 
 \(fn &optional ARG)" t nil)
+
+;;;***
+
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/olivetti-1.6.1/olivetti-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/olivetti-1.6.1/olivetti.el")
+;;;;;;  (23508 57675 519613 785000))
 
 ;;;***
 

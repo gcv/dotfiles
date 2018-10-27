@@ -3,7 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil nil ("markup-faces.el") (22814 11259 0 0))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/markup-faces-1.0.0/markup-faces-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/markup-faces-1.0.0/markup-faces.el")
+;;;;;;  (23508 57452 760294 154000))
 
 ;;;***
 

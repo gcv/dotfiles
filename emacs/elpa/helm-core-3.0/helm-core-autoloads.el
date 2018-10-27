@@ -3,8 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "helm" "helm.el" (23462 31748 468465 217000))
-;;; Generated autoloads from helm.el
+;;;### (autoloads nil "helm" "../../../../../.emacs.d/elpa/helm-core-3.0/helm.el"
+;;;;;;  "6204d0d8ca416a14db4fdf4a35ceee75")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/helm-core-3.0/helm.el
 
 (autoload 'helm-define-multi-key "helm" "\
 In KEYMAP, define key sequence KEY for function list FUNCTIONS.
@@ -221,8 +222,13 @@ Call `helm' only with ANY-SOURCES and ANY-BUFFER as args.
 
 ;;;***
 
-;;;### (autoloads nil nil ("helm-core-pkg.el" "helm-lib.el" "helm-multi-match.el"
-;;;;;;  "helm-source.el") (23462 31748 477717 877000))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/helm-core-3.0/helm-core-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/helm-core-3.0/helm-core-pkg.el"
+;;;;;;  "../../../../../.emacs.d/elpa/helm-core-3.0/helm-lib.el"
+;;;;;;  "../../../../../.emacs.d/elpa/helm-core-3.0/helm-multi-match.el"
+;;;;;;  "../../../../../.emacs.d/elpa/helm-core-3.0/helm-source.el"
+;;;;;;  "../../../../../.emacs.d/elpa/helm-core-3.0/helm.el") (23508
+;;;;;;  57489 958006 206000))
 
 ;;;***
 

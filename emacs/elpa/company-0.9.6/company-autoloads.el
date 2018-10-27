@@ -3,9 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "company" "company.el" (23215 63545 294570
-;;;;;;  15000))
-;;; Generated autoloads from company.el
+;;;### (autoloads nil "company" "../../../../../.emacs.d/elpa/company-0.9.6/company.el"
+;;;;;;  "807fa01c072229c14cc5062f997454b0")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company.el
 
 (autoload 'company-mode "company" "\
 \"complete anything\"; is an in-buffer completion framework.
@@ -74,9 +74,9 @@ inserted.
 
 ;;;***
 
-;;;### (autoloads nil "company-abbrev" "company-abbrev.el" (23215
-;;;;;;  63545 340101 698000))
-;;; Generated autoloads from company-abbrev.el
+;;;### (autoloads nil "company-abbrev" "../../../../../.emacs.d/elpa/company-0.9.6/company-abbrev.el"
+;;;;;;  "5c53bd58b979c8d570d3e6f0f4e35579")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-abbrev.el
 
 (autoload 'company-abbrev "company-abbrev" "\
 `company-mode' completion backend for abbrev.
@@ -85,9 +85,9 @@ inserted.
 
 ;;;***
 
-;;;### (autoloads nil "company-bbdb" "company-bbdb.el" (23215 63545
-;;;;;;  324575 189000))
-;;; Generated autoloads from company-bbdb.el
+;;;### (autoloads nil "company-bbdb" "../../../../../.emacs.d/elpa/company-0.9.6/company-bbdb.el"
+;;;;;;  "fec5aa48cc472cfddf2eeb9c66ecbd7a")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-bbdb.el
 
 (autoload 'company-bbdb "company-bbdb" "\
 `company-mode' completion backend for BBDB.
@@ -96,9 +96,9 @@ inserted.
 
 ;;;***
 
-;;;### (autoloads nil "company-css" "company-css.el" (23215 63545
-;;;;;;  291978 824000))
-;;; Generated autoloads from company-css.el
+;;;### (autoloads nil "company-css" "../../../../../.emacs.d/elpa/company-0.9.6/company-css.el"
+;;;;;;  "537159cbe157b676671148a1e62c2c5c")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-css.el
 
 (autoload 'company-css "company-css" "\
 `company-mode' completion backend for `css-mode'.
@@ -107,9 +107,9 @@ inserted.
 
 ;;;***
 
-;;;### (autoloads nil "company-dabbrev" "company-dabbrev.el" (23215
-;;;;;;  63545 309470 516000))
-;;; Generated autoloads from company-dabbrev.el
+;;;### (autoloads nil "company-dabbrev" "../../../../../.emacs.d/elpa/company-0.9.6/company-dabbrev.el"
+;;;;;;  "789a195f95ddb9581c6b48f67a1e2d6c")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-dabbrev.el
 
 (autoload 'company-dabbrev "company-dabbrev" "\
 dabbrev-like `company-mode' completion backend.
@@ -118,9 +118,9 @@ dabbrev-like `company-mode' completion backend.
 
 ;;;***
 
-;;;### (autoloads nil "company-dabbrev-code" "company-dabbrev-code.el"
-;;;;;;  (23215 63545 303921 5000))
-;;; Generated autoloads from company-dabbrev-code.el
+;;;### (autoloads nil "company-dabbrev-code" "../../../../../.emacs.d/elpa/company-0.9.6/company-dabbrev-code.el"
+;;;;;;  "48580f10fbb5c8b3aadae36f968ae8f5")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-dabbrev-code.el
 
 (autoload 'company-dabbrev-code "company-dabbrev-code" "\
 dabbrev-like `company-mode' backend for code.
@@ -131,9 +131,9 @@ comments or strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-elisp" "company-elisp.el" (23215 63545
-;;;;;;  346399 449000))
-;;; Generated autoloads from company-elisp.el
+;;;### (autoloads nil "company-elisp" "../../../../../.emacs.d/elpa/company-0.9.6/company-elisp.el"
+;;;;;;  "37dc6d9a70d7c716c823e52868eb1293")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-elisp.el
 
 (autoload 'company-elisp "company-elisp" "\
 `company-mode' completion backend for Emacs Lisp.
@@ -142,9 +142,9 @@ comments or strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-etags" "company-etags.el" (23215 63545
-;;;;;;  297474 552000))
-;;; Generated autoloads from company-etags.el
+;;;### (autoloads nil "company-etags" "../../../../../.emacs.d/elpa/company-0.9.6/company-etags.el"
+;;;;;;  "8594d62ca3f76d6bca1c70d3adc9dccb")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-etags.el
 
 (autoload 'company-etags "company-etags" "\
 `company-mode' completion backend for etags.
@@ -153,9 +153,9 @@ comments or strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-files" "company-files.el" (23215 63545
-;;;;;;  311941 42000))
-;;; Generated autoloads from company-files.el
+;;;### (autoloads nil "company-files" "../../../../../.emacs.d/elpa/company-0.9.6/company-files.el"
+;;;;;;  "52837a9678f74622a57d51960714b299")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-files.el
 
 (autoload 'company-files "company-files" "\
 `company-mode' completion backend existing file names.
@@ -166,9 +166,9 @@ File paths with spaces are only supported inside strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-gtags" "company-gtags.el" (23215 63545
-;;;;;;  271289 592000))
-;;; Generated autoloads from company-gtags.el
+;;;### (autoloads nil "company-gtags" "../../../../../.emacs.d/elpa/company-0.9.6/company-gtags.el"
+;;;;;;  "cf0fb8d3371d0d127d07578233d8ee6f")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-gtags.el
 
 (autoload 'company-gtags "company-gtags" "\
 `company-mode' completion backend for GNU Global.
@@ -177,9 +177,9 @@ File paths with spaces are only supported inside strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-ispell" "company-ispell.el" (23215
-;;;;;;  63545 342821 431000))
-;;; Generated autoloads from company-ispell.el
+;;;### (autoloads nil "company-ispell" "../../../../../.emacs.d/elpa/company-0.9.6/company-ispell.el"
+;;;;;;  "f44bf84e35b80953b17c66cb18ce4a75")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-ispell.el
 
 (autoload 'company-ispell "company-ispell" "\
 `company-mode' completion backend using Ispell.
@@ -188,9 +188,9 @@ File paths with spaces are only supported inside strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-keywords" "company-keywords.el" (23215
-;;;;;;  63545 318617 288000))
-;;; Generated autoloads from company-keywords.el
+;;;### (autoloads nil "company-keywords" "../../../../../.emacs.d/elpa/company-0.9.6/company-keywords.el"
+;;;;;;  "3176cb769384bf27bcde739af3c0cd5a")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-keywords.el
 
 (autoload 'company-keywords "company-keywords" "\
 `company-mode' backend for programming language keywords.
@@ -199,9 +199,9 @@ File paths with spaces are only supported inside strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-nxml" "company-nxml.el" (23215 63545
-;;;;;;  331013 600000))
-;;; Generated autoloads from company-nxml.el
+;;;### (autoloads nil "company-nxml" "../../../../../.emacs.d/elpa/company-0.9.6/company-nxml.el"
+;;;;;;  "2517783e0689458aff2c8cdcaabc1ac9")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-nxml.el
 
 (autoload 'company-nxml "company-nxml" "\
 `company-mode' completion backend for `nxml-mode'.
@@ -210,9 +210,9 @@ File paths with spaces are only supported inside strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-oddmuse" "company-oddmuse.el" (23215
-;;;;;;  63545 286481 331000))
-;;; Generated autoloads from company-oddmuse.el
+;;;### (autoloads nil "company-oddmuse" "../../../../../.emacs.d/elpa/company-0.9.6/company-oddmuse.el"
+;;;;;;  "4d585ed74b0f1654770bb4486c5554da")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-oddmuse.el
 
 (autoload 'company-oddmuse "company-oddmuse" "\
 `company-mode' completion backend for `oddmuse-mode'.
@@ -221,9 +221,9 @@ File paths with spaces are only supported inside strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-semantic" "company-semantic.el" (23215
-;;;;;;  63545 273821 684000))
-;;; Generated autoloads from company-semantic.el
+;;;### (autoloads nil "company-semantic" "../../../../../.emacs.d/elpa/company-0.9.6/company-semantic.el"
+;;;;;;  "905ad8450f74fcdff3855d8544a47bfe")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-semantic.el
 
 (autoload 'company-semantic "company-semantic" "\
 `company-mode' completion backend using CEDET Semantic.
@@ -232,9 +232,9 @@ File paths with spaces are only supported inside strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-tempo" "company-tempo.el" (23215 63545
-;;;;;;  306747 580000))
-;;; Generated autoloads from company-tempo.el
+;;;### (autoloads nil "company-tempo" "../../../../../.emacs.d/elpa/company-0.9.6/company-tempo.el"
+;;;;;;  "ef7bf243940ad89d1f44ecffcfa3949c")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-tempo.el
 
 (autoload 'company-tempo "company-tempo" "\
 `company-mode' completion backend for tempo.
@@ -243,9 +243,9 @@ File paths with spaces are only supported inside strings.
 
 ;;;***
 
-;;;### (autoloads nil "company-tng" "company-tng.el" (23215 63545
-;;;;;;  328118 46000))
-;;; Generated autoloads from company-tng.el
+;;;### (autoloads nil "company-tng" "../../../../../.emacs.d/elpa/company-0.9.6/company-tng.el"
+;;;;;;  "95a7d9be8c729d119fa6e332606f6643")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-tng.el
 
 (autoload 'company-tng-frontend "company-tng" "\
 When the user changes the selection at least once, this
@@ -262,9 +262,9 @@ Applies the default configuration to enable company-tng.
 
 ;;;***
 
-;;;### (autoloads nil "company-xcode" "company-xcode.el" (23215 63545
-;;;;;;  337621 337000))
-;;; Generated autoloads from company-xcode.el
+;;;### (autoloads nil "company-xcode" "../../../../../.emacs.d/elpa/company-0.9.6/company-xcode.el"
+;;;;;;  "0106fec3041ec311c0850ad16a5d099a")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-xcode.el
 
 (autoload 'company-xcode "company-xcode" "\
 `company-mode' completion backend for Xcode projects.
@@ -273,9 +273,9 @@ Applies the default configuration to enable company-tng.
 
 ;;;***
 
-;;;### (autoloads nil "company-yasnippet" "company-yasnippet.el"
-;;;;;;  (23215 63545 334971 568000))
-;;; Generated autoloads from company-yasnippet.el
+;;;### (autoloads nil "company-yasnippet" "../../../../../.emacs.d/elpa/company-0.9.6/company-yasnippet.el"
+;;;;;;  "b0537a76e047045c033f5f1756cc97d0")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/company-0.9.6/company-yasnippet.el
 
 (autoload 'company-yasnippet "company-yasnippet" "\
 `company-mode' backend for `yasnippet'.
@@ -304,9 +304,33 @@ shadow backends that come after it.  Recommended usages:
 
 ;;;***
 
-;;;### (autoloads nil nil ("company-capf.el" "company-clang.el" "company-cmake.el"
-;;;;;;  "company-eclim.el" "company-pkg.el" "company-template.el")
-;;;;;;  (23215 63545 321096 635000))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/company-0.9.6/company-abbrev.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-bbdb.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-capf.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-clang.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-cmake.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-css.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-dabbrev-code.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-dabbrev.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-eclim.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-elisp.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-etags.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-files.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-gtags.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-ispell.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-keywords.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-nxml.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-oddmuse.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-pkg.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-semantic.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-template.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-tempo.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-tng.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-xcode.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company-yasnippet.el"
+;;;;;;  "../../../../../.emacs.d/elpa/company-0.9.6/company.el")
+;;;;;;  (23508 57462 250863 888000))
 
 ;;;***
 

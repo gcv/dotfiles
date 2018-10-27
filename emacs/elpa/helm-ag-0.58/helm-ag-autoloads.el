@@ -3,8 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "helm-ag" "helm-ag.el" (22695 41805 0 0))
-;;; Generated autoloads from helm-ag.el
+;;;### (autoloads nil "helm-ag" "../../../../../.emacs.d/elpa/helm-ag-0.58/helm-ag.el"
+;;;;;;  "41fef80a34263aaf15d83a0aa0e8e470")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/helm-ag-0.58/helm-ag.el
 
 (autoload 'helm-ag-pop-stack "helm-ag" "\
 
@@ -55,6 +56,12 @@
 
 
 \(fn)" t nil)
+
+;;;***
+
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/helm-ag-0.58/helm-ag-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/helm-ag-0.58/helm-ag.el") (23508
+;;;;;;  57496 786443 581000))
 
 ;;;***
 

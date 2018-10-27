@@ -5,6 +5,10 @@
     (web-completion-data "0.1.0"))
   :keywords
   '("html" "company")
+  :authors
+  '(("Olexandr Sydorchuk" . "olexandr.syd@gmail.com"))
+  :maintainer
+  '("Olexandr Sydorchuk" . "olexandr.syd@gmail.com")
   :url "https://github.com/osv/company-web")
 ;; Local Variables:
 ;; no-byte-compile: t

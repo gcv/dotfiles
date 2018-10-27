@@ -3,9 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "leuven-theme" "leuven-theme.el" (23462 31740
-;;;;;;  439916 808000))
-;;; Generated autoloads from leuven-theme.el
+;;;### (autoloads nil "leuven-theme" "../../../../../.emacs.d/elpa/leuven-theme-20170919.952/leuven-theme.el"
+;;;;;;  "20c8f5f31e67687b2d49eb2cc58c05e6")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/leuven-theme-20170919.952/leuven-theme.el
 
 (when (and (boundp 'custom-theme-load-path) load-file-name) (add-to-list 'custom-theme-load-path (file-name-as-directory (file-name-directory load-file-name))))
 
@@ -13,8 +13,11 @@
 
 ;;;***
 
-;;;### (autoloads nil nil ("leuven-dark-theme.el" "leuven-theme-pkg.el")
-;;;;;;  (23462 31740 443981 223000))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/leuven-theme-20170919.952/leuven-dark-theme.el"
+;;;;;;  "../../../../../.emacs.d/elpa/leuven-theme-20170919.952/leuven-theme-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/leuven-theme-20170919.952/leuven-theme-pkg.el"
+;;;;;;  "../../../../../.emacs.d/elpa/leuven-theme-20170919.952/leuven-theme.el")
+;;;;;;  (23508 57661 854942 244000))
 
 ;;;***
 

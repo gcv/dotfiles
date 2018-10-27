@@ -1,13 +1,11 @@
 ;;; which-key-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
-(add-to-list 'load-path (directory-file-name
-                         (or (file-name-directory #$) (car load-path))))
-
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "which-key" "which-key.el" (0 0 0 0))
-;;; Generated autoloads from which-key.el
+;;;### (autoloads nil "which-key" "../../../../../.emacs.d/elpa/which-key-3.3.0/which-key.el"
+;;;;;;  "6e859567c3ffb8bdb41de49e9f6f9427")
+;;; Generated autoloads from ../../../../../.emacs.d/elpa/which-key-3.3.0/which-key.el
 
 (defvar which-key-mode nil "\
 Non-nil if Which-Key mode is enabled.
@@ -164,7 +162,11 @@ is selected interactively by mode in `minor-mode-map-alist'.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "which-key" '("which-key-")))
+;;;***
+
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/which-key-3.3.0/which-key-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/which-key-3.3.0/which-key.el")
+;;;;;;  (23508 57700 373802 553000))
 
 ;;;***
 
@@ -172,6 +174,5 @@ is selected interactively by mode in `minor-mode-map-alist'.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; which-key-autoloads.el ends here

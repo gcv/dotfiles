@@ -1,4 +1,4 @@
-This is haskell-mode.info, produced by makeinfo version 5.2 from
+This is haskell-mode.info, produced by makeinfo version 6.5 from
 haskell-mode.texi.
 
 This manual is for Haskell mode, version 16.1-git
@@ -58,7 +58,7 @@ File: haskell-mode.info,  Node: Introduction,  Next: Installation,  Prev: Top,  
 1 Introduction
 **************
 
-"Haskell Mode" is a major mode providing a convenient environment for
+“Haskell Mode” is a major mode providing a convenient environment for
 editing Haskell (http://www.haskell.org) programs.
 
    Some of its major features are:
@@ -278,7 +278,7 @@ File: haskell-mode.info,  Node: Syntax highlighting,  Next: Completion support, 
 4 Syntax highlighting
 *********************
 
-‘haskell-mode’ supports "syntax highlighting" via Emacs’ Font Lock minor
+‘haskell-mode’ supports “syntax highlighting” via Emacs’ Font Lock minor
 mode which should be enabled by default in current Emacsen.  *Note
 (emacs)Font Lock::, for more information on how to control
 ‘font-lock-mode’.
@@ -499,7 +499,7 @@ written by humans use indentation for block structuring.
 7.1 Rectangle Commands
 ======================
 
-GNU Emacs provides so-called "rectangle commands" which operate on
+GNU Emacs provides so-called “rectangle commands” which operate on
 rectangular areas of text, which are particularly useful for languages
 with a layout rule such as Haskell.  *Note (emacs)Rectangles::, to learn
 more about rectangle commands.
@@ -707,7 +707,7 @@ File: haskell-mode.info,  Node: Compilation,  Next: Inferior Haskell interpreter
 12 Compilation
 **************
 
-Haskell mode comes equipped with a specialized "Compilation mode"
+Haskell mode comes equipped with a specialized “Compilation mode”
 tailored to GHC’s compiler messages with optional support for Cabal
 projects.  *Note (emacs)Compilation Mode::, for more information about
 the basic commands provided by the Compilation mode which are available
@@ -991,7 +991,7 @@ save:
 ----------------------
 
 Now, every time you run ‘save-buffer’ (‘C-x C-s’), there is a hook that
-will run and generate Emacs *Note (emacs)Tags::.  for the whole project
+will run and generate Emacs *Note (emacs)Tags:: for the whole project
 directory.  The resulting file will be called ‘TAGS’.
 
    WARNING: You should be careful that your project root isn’t your home
@@ -2069,7 +2069,7 @@ Concept index
 * CUA mode:                              Indentation.         (line  49)
 * customizing:                           Installation.        (line  55)
 * customizing <1>:                       Interactive Haskell. (line  50)
-* ‘haskell-mode’:                        Editing Haskell Code.
+* haskell-mode:                          Editing Haskell Code.
                                                               (line   6)
 * indentation:                           Indentation.         (line   6)
 * layout rule:                           Indentation.         (line   6)
@@ -2158,28 +2158,28 @@ Variable index
 Tag Table:
 Node: Top683
 Node: Introduction2546
-Node: Installation4127
-Node: Editing Haskell Code6749
-Node: Syntax highlighting10509
-Node: Completion support12765
-Node: Unicode support14809
-Node: Indentation19481
-Node: External indentation22953
-Node: Autoformating23681
-Node: Module templates24309
-Node: Declaration scanning24739
-Node: Compilation28027
-Node: Inferior Haskell interpreter31040
-Node: Interactive Haskell31972
-Node: Editing Cabal files62609
-Node: Browsing Haddocks63356
-Node: Spell checking strings and comments66181
-Node: Aligning code67287
-Node: Rectangular commands69032
-Node: Getting Help and Reporting Bugs70579
-Node: Concept index71620
-Node: Function index72663
-Node: Variable index74681
+Node: Installation4131
+Node: Editing Haskell Code6753
+Node: Syntax highlighting10513
+Node: Completion support12773
+Node: Unicode support14817
+Node: Indentation19489
+Node: External indentation22965
+Node: Autoformating23693
+Node: Module templates24321
+Node: Declaration scanning24751
+Node: Compilation28039
+Node: Inferior Haskell interpreter31056
+Node: Interactive Haskell31988
+Node: Editing Cabal files62623
+Node: Browsing Haddocks63370
+Node: Spell checking strings and comments66195
+Node: Aligning code67301
+Node: Rectangular commands69046
+Node: Getting Help and Reporting Bugs70593
+Node: Concept index71634
+Node: Function index72673
+Node: Variable index74691
 
 End Tag Table
 

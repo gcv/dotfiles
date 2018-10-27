@@ -3,7 +3,9 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil nil ("eshell-autojump.el") (23041 22072 0 0))
+;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/eshell-autojump-0.2/eshell-autojump-autoloads.el"
+;;;;;;  "../../../../../.emacs.d/elpa/eshell-autojump-0.2/eshell-autojump.el")
+;;;;;;  (23508 57476 743227 279000))
 
 ;;;***
 
