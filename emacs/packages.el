@@ -16,7 +16,6 @@
 (use-package pkg-info :pin melpa-stable) ; Emacs package
 
 
-
 ;;; ----------------------------------------------------------------------------
 ;;; real packages
 ;;;

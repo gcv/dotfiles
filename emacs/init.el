@@ -40,12 +40,12 @@
 (load custom-file 'noerror)                                     ; customize: load customizations
 
 
-;; security
+;;; security
 (setq network-security-level 'high)
 (setq tls-checktrust t)
 
 
-;; control beeping
+;;; control beeping
 (setq ring-bell-function
       (lambda ()
         (unless (memq this-command
@@ -56,19 +56,19 @@
           (message "*beep*"))))
 
 
-;; Unicode and UTF-8
+;;; Unicode and UTF-8
 (set-language-environment "UTF-8")
 (prefer-coding-system 'utf-8)
 ;;(set-terminal-coding-system 'utf-8)
 ;;(set-keyboard-coding-system 'utf-8)
 
 
-;; enable useful commands
+;;; enable useful commands
 (put 'narrow-to-region 'disabled nil)
 (put 'erase-buffer 'disabled nil)
 
 
-;; history
+;;; history
 (savehist-mode 1)
 (setq history-length 250
       history-delete-duplicates t)
@@ -76,21 +76,20 @@
 (add-to-list 'savehist-additional-variables 'load-project-history)
 
 
-;; Emacs server
+;;; Emacs server
 (unless (file-exists-p (concat (getenv "TMPDIR") "emacs"
                                (number-to-string
                                 (user-real-uid)) "/server"))
   (server-start))
 
 
-;; exit safety
+;;; exit safety
 (when window-system
   (global-set-key (kbd "C-x C-c") (lambda ()
                                     (interactive)
                                     (if (y-or-n-p "Are you sure you want to exit Emacs? ")
                                         (save-buffers-kill-emacs)
                                       (message "Canceled exit")))))
-
 
 
 ;;; ----------------------------------------------------------------------------
@@ -124,7 +123,6 @@
 (add-subdirs-to-load-path (concat user-emacs-directory "site-lisp"))
 
 
-
 ;;; ----------------------------------------------------------------------------
 ;;; package system configuration
 ;;; ----------------------------------------------------------------------------
@@ -141,7 +139,7 @@
 
 (package-initialize)
 
-;; bootstrap use-package
+;;; bootstrap use-package
 (setq package-pinned-packages
       '((bind-key    . "melpa-stable")
         (diminish    . "melpa-stable")
@@ -154,12 +152,11 @@
 (setq use-package-always-ensure t)
 
 
-
 ;;; ----------------------------------------------------------------------------
-;;; buffers
+;;; buffer behavior and control
 ;;; ----------------------------------------------------------------------------
 
-;; boring buffers: stop showing these in various lists
+;;; boring buffers: stop showing these in various lists
 (setq boring-buffers
       (list "\\*buffer-selection\\*"
             "\\*Echo Area"
@@ -178,14 +175,13 @@
                         boring-buffers)))
 
 
-;; unique naming
+;;; unique naming
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 (setq uniquify-ignore-buffers-re "^\\*")
 
 
-;; bs (a nice built-in buffer switcher)
-
+;;; bs (a nice built-in buffer switcher)
 (require 'bs)
 
 (setq bs-attributes-list '(("" 1 1 left bs--get-marked-string)
@@ -224,22 +220,21 @@
                                     (bs--show-with-configuration "all-not-boring")))
 
 
-;; minibuffer configuration
-
+;;; minibuffer configuration
 ;;(setq enable-recursive-minibuffers nil)
 ;;(minibuffer-depth-indicate-mode 1)
 (setq max-mini-window-height 10)
 
-;; exit the minibuffer when clicking outside it
+;;; exit the minibuffer when clicking outside it
 (defun /mouse-leave-buffer-hook ()
   (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
     (abort-recursive-edit)))
 
 (add-hook 'mouse-leave-buffer-hook #'/mouse-leave-buffer-hook)
 
-;; tweak the minibuffer to always kill some annoying buffers on exit
-;; NB: This is now deprecated in favor filtering out boring-buffers, but
-;; it is pretty good sample code. And old.
+;;; tweak the minibuffer to always kill some annoying buffers on exit
+;;; NB: This is now deprecated in favor filtering out boring-buffers, but
+;;; it is pretty good sample code. And old.
 ;;(add-hook 'minibuffer-exit-hook
 ;;  (lambda ()
 ;;    (let ((remove-these-buffers (list "*Completions*"
@@ -251,9 +246,8 @@
 ;;            remove-these-buffers))))
 
 
-
 ;;; ----------------------------------------------------------------------------
-;;; backups
+;;; backups and sensitive-mode definition
 ;;; ----------------------------------------------------------------------------
 
 (define-minor-mode sensitive-mode
@@ -295,7 +289,6 @@
 (setq auto-save-list-file-prefix (concat user-emacs-directory "auto-save-list/.saves-"))
 
 
-
 ;;; ----------------------------------------------------------------------------
 ;;; window and frame control
 ;;; ----------------------------------------------------------------------------
@@ -311,18 +304,16 @@
       ;; org-mode needs a copy of this for when it might manipulate the frame title
       org-frame-title-format-backup frame-title-format)
 
-
 (setq display-buffer-reuse-frames t)         ; reuse windows in other frames
 (setq pop-up-windows nil)                    ; display-buffer: avoid splitting
 (setq even-window-heights nil)               ; display-buffer: avoid resizing
 (setq window-resize-pixelwise t)             ; smoother window resizing?
 
-
 (winner-mode 1)                              ; restore windows: C-c right-arrow
 (windmove-default-keybindings)               ; shift-arrow keys switch windows
 
 
-;; fix window splitting behavior when possible
+;;; fix window splitting behavior when possible
 (setq display-buffer-alist
       '(("\\*cider-repl .*"
          (display-buffer-reuse-window display-buffer-in-side-window)
@@ -336,8 +327,7 @@
          (display-buffer-same-window))))
 
 
-;; clicking in a different window should not move the cursor inside that window
-
+;;; clicking in a different window should not move the cursor inside that window
 (defun cv--mouse-set-point (orig-fn &rest args)
   (let* ((event (car args))
          (event-name (car event))
@@ -349,7 +339,6 @@
 
 (advice-add 'mouse-set-point :around #'cv--mouse-set-point)
 
-
 (defun cv--mouse-drag-region (orig-fn &rest args)
   (let* ((event (car args))
          (event-target-window (caadr event)))
@@ -360,12 +349,11 @@
 (advice-add 'mouse-drag-region :around #'cv--mouse-drag-region)
 
 
-;; window resizing keys
+;;; window resizing keys
 (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "S-C-<down>") 'shrink-window)
 (global-set-key (kbd "S-C-<up>") 'enlarge-window)
-
 
 
 ;;; ----------------------------------------------------------------------------
@@ -431,18 +419,15 @@
   (define-matching-insert "M-\"" ?\" ?\"))
 
 
-
 ;;; ----------------------------------------------------------------------------
 ;;; configure smaller built-in features and modes
 ;;; ----------------------------------------------------------------------------
 
-;; abbrev
-
+;;; abbrev
 (diminish 'abbrev-mode)
 
 
-;; grep
-
+;;; grep
 (setq-default grep-command "grep -nHr -e ")
 
 (setq grep-find-command
@@ -453,29 +438,24 @@
        "-prune -o -type f -print0 | xargs -0 grep -I -i -n -e "))
 
 
-;; man
-
-;; reuse the current window
-(setq Man-notify-method 'pushy)
+;;; man
+(setq Man-notify-method 'pushy)         ; reuse the current window
 
 
-;; spell checking
-
+;;; spell checking
 (setq ispell-program-name "aspell")
 (setq ispell-list-command "list")
 ;;(setq ispell-extra-args '("--sug-mode=fast"))
 
 
-;; completion
-
+;;; completion
 (setq hippie-expand-try-functions-list
       '(try-complete-abbrev
         try-complete-file-name
         try-expand-dabbrev))
 
 
-;; compressed files
-
+;;; compressed files
 (auto-compression-mode 1)
 (setq archive-zip-use-pkzip nil)
 (setq archive-zip-extract '("unzip" "-qq" "-c"))
@@ -488,16 +468,14 @@
 (add-to-list 'auto-mode-alist '("\\.xpi\\'" . archive-mode))
 
 
-;; gud (grand unified debugger)
-
+;;; gud (grand unified debugger)
 (global-set-key [f5] 'gud-step)
 (global-set-key [f6] 'gud-next)
 (global-set-key [f7] 'gud-up)
 (global-set-key [f8] 'gud-cont)
 
 
-;; compile-mode (also see display-buffer-alist customization)
-
+;;; compile-mode (also see display-buffer-alist customization)
 (setq compilation-scroll-output 'first-error)
 
 (defun cv--compile-goto-error (orig-fn &rest args)
@@ -507,8 +485,7 @@
 (advice-add 'compile-goto-error :around #'cv--compile-goto-error)
 
 
-;; linum: display fix with right-aligned padding
-
+;;; linum: display fix with right-aligned padding
 (defun cv--linum-update-window (orig-fn &rest args)
   (let* ((w (length (number-to-string
                      (count-lines (point-min) (point-max)))))
@@ -518,34 +495,29 @@
 (advice-add 'linum-update-window :around #'cv--linum-update-window)
 
 
-;; recentf
-
+;;; recentf
 (require 'recentf)
 
 (setq recentf-max-menu-items 250)
 (recentf-mode 1)
 
 
-;; imenu
-
+;;; imenu
 (setq imenu-auto-rescan t)
 
 
-;; visual-line-mode
-
+;;; visual-line-mode
 (diminish 'visual-line-mode " ν")
 
 
-;; subword-mode
-
+;;; subword-mode
 (defun /subword-mode-hook ()
   (diminish 'subword-mode))
 
 (add-hook 'subword-mode-hook #'/subword-mode-hook)
 
 
-;; dired
-
+;;; dired
 (put 'dired-find-alternate-file 'disabled nil)
 
 ;; quick hack for using GNU ls
@@ -580,21 +552,18 @@
 (add-hook 'dired-mode-hook #'/dired-mode-hook)
 
 
-;; ediff
-
+;;; ediff
 (require 'ediff)
 
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 (setq ediff-split-window-function 'split-window-horizontally)
 
 
-;; comint
-
+;;; comint
 (setq-default comint-input-ignoredups t)
 
 
-;; eshell
-
+;;; eshell
 (setq eshell-banner-message ""
       eshell-hist-ignoredups t
       eshell-save-history-index t)
@@ -607,7 +576,7 @@
          (propertize "@" 'face `(:foreground "lightgreen"))
          (propertize (system-name) 'face `(:foreground "blanchedalmond"))
          (propertize "]" 'face `(:foreground "lightgreen"))
-         ;; (propertize (if (= (user-uid) 0) " #" " ∴") 'face `(:foreground "lightgreen"))
+         ;;(propertize (if (= (user-uid) 0) " #" " ∴") 'face `(:foreground "lightgreen"))
          " "
          )))
 
@@ -665,9 +634,7 @@
 
 (add-hook 'eshell-mode-hook #'/eshell-mode-hook)
 
-
-;; TODO: Delete these after Emacs 25.3.
-
+;;; TODO: Delete these after Emacs 25.3.
 (defun eshell-next-prompt (n)
     "Move to end of Nth next prompt in the buffer.
 See `eshell-prompt-regexp'."
@@ -677,7 +644,6 @@ See `eshell-prompt-regexp'."
       (while (not (get-text-property (line-beginning-position) 'read-only) )
         (re-search-forward eshell-prompt-regexp nil t n)))
     (eshell-skip-prompt))
-
 (defun eshell-previous-prompt (n)
     "Move to end of Nth previous prompt in the buffer.
 See `eshell-prompt-regexp'."
@@ -686,8 +652,7 @@ See `eshell-prompt-regexp'."
     (eshell-next-prompt (- n)))
 
 
-;; ido mode
-
+;;; ido mode
 (setq ido-everywhere nil
       ido-auto-merge-work-directories-length -1 ; don't look for files in strange places
       ido-confirm-unique-completion t
@@ -707,8 +672,7 @@ See `eshell-prompt-regexp'."
 (global-set-key (kbd "C-x M-i") 'ido-insert-file)
 
 
-;; Gnus
-
+;;; Gnus
 (setq gnus-directory (concat user-emacs-directory "News/")
       gnus-startup-file (concat user-emacs-directory "News/.newsrc")
       message-directory (concat user-emacs-directory "Mail/")
@@ -728,8 +692,7 @@ See `eshell-prompt-regexp'."
       gnus-save-killed-list nil)
 
 
-;; term-mode
-
+;;; term-mode
 (require 'term)
 
 ;; term-suppress-hard-newline is an interesting animal. With normal term use, it
@@ -767,8 +730,7 @@ See `eshell-prompt-regexp'."
 (add-hook 'term-mode-hook #'/term-mode-hook)
 
 
-;; text-mode
-
+;;; text-mode
 (defun /text-mode-hook ()
   (when (string-equal major-mode "text-mode")
     (visual-line-mode)))
@@ -776,24 +738,21 @@ See `eshell-prompt-regexp'."
 (add-hook 'text-mode-hook #'/text-mode-hook)
 
 
-;; tex-mode
-
+;;; tex-mode
 (defun /latex-mode-hook ()
   (visual-line-mode))
 
 (add-hook 'latex-mode-hook #'/latex-mode-hook)
 
 
-;; css-mode
-
+;;; css-mode
 (add-to-list 'auto-mode-alist '("\\.sass$" . css-mode))
 (add-to-list 'auto-mode-alist '("\\.scss$" . css-mode))
 
 (setq-default css-indent-offset 2)
 
 
-;; ruby-mode
-
+;;; ruby-mode
 (defun /ruby-mode-hook ()
   (subword-mode)
   (define-key ruby-mode-map (kbd "C-m") 'newline-and-indent)
@@ -803,8 +762,7 @@ See `eshell-prompt-regexp'."
 (add-hook 'ruby-mode-hook #'/ruby-mode-hook)
 
 
-;; sh-mode (shell script)
-
+;;; sh-mode (shell scripts)
 (add-to-list 'auto-mode-alist '("zshrc" . sh-mode))
 
 (defun /sh-mode ()
@@ -813,15 +771,13 @@ See `eshell-prompt-regexp'."
 (add-hook 'sh-mode #'/sh-mode)
 
 
-;; nxml-mode
-
+;;; nxml-mode
 (add-to-list 'auto-mode-alist '("\\.xml$" . nxml-mode))
 (add-to-list 'auto-mode-alist '("\\.xsl$" . nxml-mode))
 (add-to-list 'auto-mode-alist '("\\.rng$" . nxml-mode))
 
 
-;; python-mode
-
+;;; python-mode
 (setq python-python-command "python2.7")
 
 (defun /python-mode-hook ()
@@ -838,8 +794,7 @@ See `eshell-prompt-regexp'."
 (add-hook 'python-mode-hook #'/python-mode-hook)
 
 
-;; cc-mode (C, C++, Objective-C)
-
+;;; cc-mode (C, C++, Objective-C)
 (defun /c-mode-common-hook ()
   (c-set-style "ellemtel")
   (local-set-key (kbd "C-m") 'newline-and-indent)
@@ -878,8 +833,7 @@ See `eshell-prompt-regexp'."
 (add-hook 'c++-mode-hook #'/c++-mode-hook)
 
 
-;; Common Lisp
-
+;;; Common Lisp
 (add-to-list 'auto-mode-alist '("\\.cl$" . lisp-mode))
 (add-to-list 'auto-mode-alist '("\\.asd$" . lisp-mode))
 
@@ -902,12 +856,11 @@ See `eshell-prompt-regexp'."
 (add-hook 'lisp-mode-hook #'/lisp-mode-hook)
 
 
-
 ;;; ----------------------------------------------------------------------------
 ;;; finish up
 ;;; ----------------------------------------------------------------------------
 
-;; load more startup files; order matters!
+;;; load more startup files; order matters!
 (let ((startup-files (list
                       "utils.el"
                       "interactives.el"
@@ -919,7 +872,6 @@ See `eshell-prompt-regexp'."
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
     (load-file (expand-file-name (concat "../" f) (file-truename user-emacs-directory)))))
-
 
 
 ;;; ----------------------------------------------------------------------------
