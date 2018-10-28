@@ -1,0 +1,15 @@
+* Emacs configuration
+
+Notes on this configuration:
+
+
+** Initial setup
+
+- symlink ~${HOME}/.emacs~ to ~public/emacs~
+- symlink ~${HOME}/.emacs.d~ to ~emacs~
+
+
+** Conventions
+
+- private functions have the prefix ~/~, e.g. ~/lisp-mode-hook~
+- advice functions should be named after the function they are advising, e.g., ~(advice-add 'mouse-set-point :around #'/mouse-set-point)~
