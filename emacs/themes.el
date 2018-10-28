@@ -1,6 +1,6 @@
 ;;; Good resource for making colors: https://www.w3schools.com/colors/colors_picker.asp
 
-(defun cv--theme-common ()
+(defun /theme-common ()
   (let ((base-font (cond ((member "Menlo" (font-family-list)) "Menlo")
                          ((member "Consolas" (font-family-list)) "Consolas")
                          (t nil))))
@@ -51,10 +51,10 @@
   (set-face-attribute 'markdown-code-face nil :background "black")
   (set-face-attribute 'company-tooltip-selection nil :background "#224983")
   (set-face-attribute 'company-tooltip-common-selection nil :background "#224983")
-  (cv--theme-common))
+  (/theme-common))
 
 
-(defun cv--theme-solarized-common ()
+(defun /theme-solarized-common ()
   (setq solarized-distinct-fringe-background t)
   (setq solarized-high-contrast-mode-line t)
   (setq solarized-use-less-bold nil)
@@ -72,8 +72,8 @@
   (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
   (set-face-attribute 'markdown-pre-face nil :background nil)
   (set-face-attribute 'markdown-code-face nil :background nil)
-  (cv--theme-solarized-common)
-  (cv--theme-common))
+  (/theme-solarized-common)
+  (/theme-common))
 
 
 (defun theme-solarized-dark ()
@@ -116,8 +116,8 @@
   (set-face-foreground 'org-level-1 "#7089a6")
   (set-face-foreground 'org-level-2 "#a9a9cc")
   (set-face-foreground 'org-level-3 "#8aba99")
-  (cv--theme-solarized-common)
-  (cv--theme-common))
+  (/theme-solarized-common)
+  (/theme-common))
 
 
 (defun theme-leuven ()
@@ -135,10 +135,10 @@
   (set-face-attribute 'js2-error nil :box nil)
   (set-face-attribute 'aw-background-face nil :foreground "gray60" :background nil)
   (set-face-attribute 'mode-line-inactive nil :background "#dbdcda" :box '(:line-width 1 :color "#f0f0ef"))
-  (cv--theme-common))
+  (/theme-common))
 
 
-(defun cv--theme-material-common ()
+(defun /theme-material-common ()
   (set-face-attribute 'cursor nil :background "#21bdff")
   (set-face-attribute 'org-level-1 nil :height 1.0 :box nil)
   (set-face-attribute 'org-level-2 nil :height 1.0 :box nil)
@@ -159,8 +159,8 @@
   (set-face-attribute 'markdown-inline-code-face nil :background "black" :foreground "#8bc34a")
   (set-face-attribute 'markdown-pre-face nil :background "black")
   (set-face-attribute 'markdown-code-face nil :background "black")
-  (cv--theme-material-common)
-  (cv--theme-common))
+  (/theme-material-common)
+  (/theme-common))
 
 
 (defun theme-material-light ()
@@ -172,8 +172,8 @@
   (set-face-attribute 'mode-line-inactive nil :box '(:line-width 1 :color "#eceff1"))
   (set-face-attribute 'markdown-pre-face nil :background nil)
   (set-face-attribute 'markdown-code-face nil :background nil)
-  (cv--theme-material-common)
-  (cv--theme-common))
+  (/theme-material-common)
+  (/theme-common))
 
 
 (defun theme-green-phosphor ()
@@ -208,4 +208,4 @@
     (set-face-attribute 'helm-selection nil :background base-color-lighter-1)
     (set-face-attribute 'isearch nil :background base-color-lighter-1 :foreground "black" :underline nil)
     (set-face-attribute 'lazy-highlight nil :background base-color-darker-1 :foreground "black" :underline nil))
-  (cv--theme-common))
+  (/theme-common))

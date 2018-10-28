@@ -34,17 +34,17 @@
                                      ((= 120 default-height) 100)
                                      (t (round (* 0.80 (face-attribute 'default :height))))))
            ;; XXX: centering-multiplier is necessary because
-           ;; cv--mode-line-fill-center does not adapt to different font sizes
-           ;; in the main buffer and the header. :(
+           ;; /mode-line-fill-center does not adapt to different font sizes in
+           ;; the main buffer and the header. :(
            (centering-multiplier (cond ((= 120 default-height) 2.3)
                                        ((= 150 default-height) 2.5)
                                        (t 2))))
       (set-face-attribute 'header-line nil :height header-line-height)
       (setq-default header-line-format
         (list `(:eval (let ((pwd (if (buffer-file-name)
-                                     (cv--display-dir (buffer-file-name) t)
+                                     (/display-dir (buffer-file-name) t)
                                    "")))
-                        (list (cv--mode-line-fill-center (/ (length pwd) ,centering-multiplier))
+                        (list (/mode-line-fill-center (/ (length pwd) ,centering-multiplier))
                               pwd))))))))
 
 
@@ -356,7 +356,7 @@ return 0
     (if (file-exists-p project-file)
         (progn
           (add-to-list 'load-project-history project-dir)
-          (cv--load-trusted-elisp-file project-file))
+          (/load-trusted-elisp-file project-file))
       (message (concatenate 'string project-file " not found")))))
 
 
@@ -390,7 +390,7 @@ return 0
   "If any packages installed with package.el aren't compiled yet, compile them."
   (interactive)
   (--each (f-directories package-user-dir)
-    (unless (cv--was-compiled-p it)
+    (unless (/was-compiled-p it)
       (byte-recompile-directory it 0))))
 
 
@@ -408,13 +408,13 @@ return 0
 (defun url-encode-region (start end)
   "URL-encode the region between START and END in current buffer."
   (interactive "r")
-  (cv--apply-fn-region #'url-hexify-string start end))
+  (/apply-fn-region #'url-hexify-string start end))
 
 
 (defun url-decode-region (start end)
   "URL-decode the region between START and END in current buffer."
   (interactive "r")
-  (cv--apply-fn-region #'url-unhex-string start end))
+  (/apply-fn-region #'url-unhex-string start end))
 
 
 (defun which-active-modes ()

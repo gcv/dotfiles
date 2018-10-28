@@ -85,15 +85,15 @@
 
 (add-hook 'org-mode-hook #'/org-mode-hook)
 
-(defun cv--org-kill-calendar-buffer (&rest args)
+(defun /org-kill-calendar-buffer (&rest args)
   (let ((buf (get-buffer "*Calendar*")))
     (when buf
       (kill-buffer buf))))
 
-(advice-add 'org-time-stamp-inactive :after #'cv--org-kill-calendar-buffer)
-(advice-add 'org-time-stamp-active :after #'cv--org-kill-calendar-buffer)
+(advice-add 'org-time-stamp-inactive :after #'/org-kill-calendar-buffer)
+(advice-add 'org-time-stamp-active :after #'/org-kill-calendar-buffer)
 
-(defun cv--org-toggle-heading (&rest args)
+(defun /org-toggle-heading (&rest args)
   (end-of-line))
 
-(advice-add 'org-toggle-heading :after #'cv--org-toggle-heading)
+(advice-add 'org-toggle-heading :after #'/org-toggle-heading)

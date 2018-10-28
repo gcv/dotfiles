@@ -83,12 +83,12 @@
 
             (add-hook 'cider-repl-mode-hook #'/cider-repl-mode-hook)
 
-            (defun cv--display-buffer-reuse-window-nil (orig-fn &rest args)
+            (defun /display-buffer-reuse-window-nil (orig-fn &rest args)
               (let ((display-buffer-overriding-action '(display-buffer-reuse-window . nil)))
                 (apply orig-fn args)))
 
-            (advice-add 'cider-switch-to-repl-buffer :around #'cv--display-buffer-reuse-window-nil)
-            (advice-add 'cider-switch-to-last-clojure-buffer :around #'cv--display-buffer-reuse-window-nil)
+            (advice-add 'cider-switch-to-repl-buffer :around #'/display-buffer-reuse-window-nil)
+            (advice-add 'cider-switch-to-last-clojure-buffer :around #'/display-buffer-reuse-window-nil)
 
             ))
 
@@ -200,18 +200,18 @@
 
             (when (eq window-system 'ns) (set-fringe-mode '(0 . 8)))
 
-            (define-fringe-bitmap 'cv--fringe-backslash (fringe-helper-convert
-                                                         "........"
-                                                         ".X......"
-                                                         ".XX....."
-                                                         "..XX...."
-                                                         "...XX..."
-                                                         "....XX.."
-                                                         ".....X.."
-                                                         "........"))
+            (define-fringe-bitmap '/fringe-backslash (fringe-helper-convert
+                                                      "........"
+                                                      ".X......"
+                                                      ".XX....."
+                                                      "..XX...."
+                                                      "...XX..."
+                                                      "....XX.."
+                                                      ".....X.."
+                                                      "........"))
 
-            (setcdr (assq 'continuation fringe-indicator-alist) '(nil cv--fringe-backslash))
-            ;;(setq visual-line-fringe-indicators '(nil cv--fringe-backslash))
+            (setcdr (assq 'continuation fringe-indicator-alist) '(nil /fringe-backslash))
+            ;;(setq visual-line-fringe-indicators '(nil /fringe-backslash))
 
             ))
 
@@ -404,7 +404,7 @@
   :pin melpa
   :config (progn
 
-            (defface cv--hlt-highlight
+            (defface /hlt-highlight
               '((((class color) (background light))
                  :background "darkseagreen2")
                 (((class color) (background dark))
@@ -412,7 +412,7 @@
                 (t :inverse-video t))
               "Custom highlighting background for hlt-highlight.")
 
-            (setq hlt-last-face 'cv--hlt-highlight)
+            (setq hlt-last-face '/hlt-highlight)
 
             (global-set-key (kbd "C-c H h") 'hlt-highlight)
             (global-set-key (kbd "C-c H u") 'hlt-unhighlight-region)
@@ -755,7 +755,7 @@
 
             (setq origami-show-fold-header t)
 
-            (defhydra cv--hydra-origami (:color red)
+            (defhydra /hydra-origami (:color red)
               "
   _o_pen node   _O_pen node rec    toggle _f_orward  _u_ndo
   _c_lose node  _C_lose node rec   toggle _a_ll      _r_edo
@@ -780,7 +780,7 @@
               ("R" origami-reset)
               )
 
-            (define-key origami-mode-map (kbd "C-h M-o") 'cv--hydra-origami/body)
+            (define-key origami-mode-map (kbd "C-h M-o") '/hydra-origami/body)
 
             ))
 
@@ -830,7 +830,7 @@
               (let ((live-buffers (-reject #'(lambda (b) (null (buffer-name b))) (persp-buffers (persp-curr)))))
                 (setf (persp-buffers (persp-curr)) live-buffers)))
 
-            (defun cv--persp-set-ido-buffers ()
+            (defun /persp-set-ido-buffers ()
               (when (boundp 'ido-temp-list)
                 (setq ido-temp-list
                       (remove-if (lambda (name)
@@ -842,9 +842,9 @@
                                     ido-ignore-buffers))
                                  ido-temp-list))))
 
-            (advice-add 'persp-set-ido-buffers :after #'cv--persp-set-ido-buffers)
+            (advice-add 'persp-set-ido-buffers :after #'/persp-set-ido-buffers)
 
-            (defun cv--persp-rename (orig-fn &rest args)
+            (defun /persp-rename (orig-fn &rest args)
               (let* ((new-name (car args))
                      (old-name (persp-name (persp-curr)))
                      (scratch-buf (get-buffer (format "*scratch* (%s)" old-name)))
@@ -854,7 +854,7 @@
                   (with-current-buffer scratch-buf
                     (rename-buffer new-scratch-name)))))
 
-            (advice-add 'persp-rename :around #'cv--persp-rename)
+            (advice-add 'persp-rename :around #'/persp-rename)
 
             ))
 
@@ -866,15 +866,15 @@
             (setq projectile-enable-caching nil)
             (setq projectile-tags-command "ctags -Re -f \"%s\" %s")
 
-            (setq cv--projectile-project-cache (make-hash-table))
+            (setq /projectile-project-cache (make-hash-table))
 
-            (defun cv--projectile-project-name ()
-              (if-let ((name (gethash (current-buffer) cv--projectile-project-cache)))
+            (defun /projectile-project-name ()
+              (if-let ((name (gethash (current-buffer) /projectile-project-cache)))
                   name
-                (puthash (current-buffer) (projectile-project-name) cv--projectile-project-cache)))
+                (puthash (current-buffer) (projectile-project-name) /projectile-project-cache)))
 
             (setq-default projectile-mode-line '(:eval (if (file-remote-p default-directory)
-                                                           (format " [%s]" (cv--projectile-project-name))
+                                                           (format " [%s]" (/projectile-project-name))
                                                          (format " [%s]" (projectile-project-name)))))
 
             ))

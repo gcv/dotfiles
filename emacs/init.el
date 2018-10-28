@@ -171,7 +171,7 @@
             "\\*helm"
             "\\*helm-mode"))
 
-(defun cv--boring-buffer? (buf)
+(defun /boring-buffer? (buf)
   (-all? #'null (mapcar #'(lambda (x)
                             (string-match-p x (buffer-name buf)))
                         boring-buffers)))
@@ -202,13 +202,13 @@
                (lambda (buf)
                  (with-current-buffer buf
                    (or (not (member buf (persp-buffers (persp-curr))))
-                       (not (cv--boring-buffer? buf))))))
+                       (not (/boring-buffer? buf))))))
              nil)
 
 (add-to-list 'bs-configurations
              '("all-not-boring" nil nil nil
                (lambda (buf)
-                 (not (cv--boring-buffer? buf)))))
+                 (not (/boring-buffer? buf)))))
 
 (global-set-key (kbd "C-x C-b") (lambda ()
                                   (interactive)
@@ -297,8 +297,8 @@
 
 (setq frame-title-format
       (list "%b"
-            '(:eval (if (fboundp 'cv--mode-line-abbrev-file-name)
-                        (cv--mode-line-abbrev-file-name)
+            '(:eval (if (fboundp '/mode-line-abbrev-file-name)
+                        (/mode-line-abbrev-file-name)
                       ""))
             '(:eval (if (and (fboundp 'persp-curr) (persp-curr))
                         (concatenate 'string " — " (persp-name (persp-curr)))
@@ -330,7 +330,7 @@
 
 
 ;;; clicking in a different window should not move the cursor inside that window
-(defun cv--mouse-set-point (orig-fn &rest args)
+(defun /mouse-set-point (orig-fn &rest args)
   (let* ((event (car args))
          (event-name (car event))
          (event-target-window (caadr event)))
@@ -339,16 +339,16 @@
         (apply orig-fn args)
       (set-frame-selected-window nil event-target-window))))
 
-(advice-add 'mouse-set-point :around #'cv--mouse-set-point)
+(advice-add 'mouse-set-point :around #'/mouse-set-point)
 
-(defun cv--mouse-drag-region (orig-fn &rest args)
+(defun /mouse-drag-region (orig-fn &rest args)
   (let* ((event (car args))
          (event-target-window (caadr event)))
     (if (eql event-target-window (frame-selected-window))
         (apply orig-fn args)
       (set-frame-selected-window nil event-target-window))))
 
-(advice-add 'mouse-drag-region :around #'cv--mouse-drag-region)
+(advice-add 'mouse-drag-region :around #'/mouse-drag-region)
 
 
 ;;; window resizing keys
@@ -480,21 +480,21 @@
 ;;; compile-mode (also see display-buffer-alist customization)
 (setq compilation-scroll-output 'first-error)
 
-(defun cv--compile-goto-error (orig-fn &rest args)
+(defun /compile-goto-error (orig-fn &rest args)
   (let ((display-buffer-overriding-action '(display-buffer-reuse-window (inhibit-same-window . nil))))
     (apply orig-fn args)))
 
-(advice-add 'compile-goto-error :around #'cv--compile-goto-error)
+(advice-add 'compile-goto-error :around #'/compile-goto-error)
 
 
 ;;; linum: display fix with right-aligned padding
-(defun cv--linum-update-window (orig-fn &rest args)
+(defun /linum-update-window (orig-fn &rest args)
   (let* ((w (length (number-to-string
                      (count-lines (point-min) (point-max)))))
          (linum-format (concat "%" (number-to-string w) "d ")))
     (apply orig-fn args)))
 
-(advice-add 'linum-update-window :around #'cv--linum-update-window)
+(advice-add 'linum-update-window :around #'/linum-update-window)
 
 
 ;;; recentf
@@ -585,7 +585,7 @@
 (setq eshell-prompt-regexp "^\\[.*?\\] ")
 
 (defun eshell/shortpwd ()
-  (cv--display-dir (eshell/pwd)))
+  (/display-dir (eshell/pwd)))
 
 (defun eshell/... ()
   (eshell/cd "../.."))

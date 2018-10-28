@@ -1,4 +1,4 @@
-(defun cv--mode-line-abbrev-file-name ()
+(defun /mode-line-abbrev-file-name ()
   "Take the current buffer's file name and return only the last four elements
    of its path."
   (let* ((bfn (or (buffer-file-name) ""))
@@ -8,26 +8,26 @@
     padded-string))
 
 
-(defun cv--simple-lazy-byte-compile (relative-file)
+(defun /simple-lazy-byte-compile (relative-file)
   (let ((file-src (concat user-emacs-directory "site-lisp/" relative-file ".el"))
         (file-bytecode (concat user-emacs-directory "site-lisp/" relative-file ".elc")))
     (unless (file-exists-p file-bytecode)
       (byte-compile-file file-src))))
 
 
-(defun cv--was-compiled-p (path)
+(defun /was-compiled-p (path)
   "Does the directory at 'path' contain any .elc files?"
   (--any-p (f-ext? it "elc") (f-files path)))
 
 
-(defun cv--string-from-file (filename)
+(defun /string-from-file (filename)
   "Reads the file into a string and returns it."
   (with-temp-buffer
     (insert-file-contents filename)
     (buffer-string)))
 
 
-(defun cv--write-symbols-to-file (symbols filename)
+(defun /write-symbols-to-file (symbols filename)
   "Writes the symbol-values of each symbol in the list of symbols
    to the given file."
   (save-excursion
@@ -41,7 +41,7 @@
       (kill-buffer))))
 
 
-(defun cv--load-trusted-elisp-file (filename)
+(defun /load-trusted-elisp-file (filename)
   "Loads trusted Elisp files. If a file is trusted, it is loaded.
    If it is not known, ask the user if the file's contents are
    trustworthy. If they are, mark the file as trusted and save
@@ -49,19 +49,19 @@
   (let ((trusted-elisp-files (concat user-emacs-directory "trusted-elisp-files.el")))
     (when (file-exists-p trusted-elisp-files)
       (load-file trusted-elisp-files))
-    (if (and (boundp 'cv--trusted-elisp-files) (member filename cv--trusted-elisp-files))
+    (if (and (boundp '/trusted-elisp-files) (member filename /trusted-elisp-files))
         (load-file filename)
       (if (yes-or-no-p (format "Do you trust the Elisp code in %s?" filename))
-          (progn (unless (boundp 'cv--trusted-elisp-files)
-                   (setq cv--trusted-elisp-files (list)))
-                 (add-to-list 'cv--trusted-elisp-files filename)
-                 (cv--write-symbols-to-file (list 'cv--trusted-elisp-files) trusted-elisp-files)
+          (progn (unless (boundp '/trusted-elisp-files)
+                   (setq /trusted-elisp-files (list)))
+                 (add-to-list '/trusted-elisp-files filename)
+                 (/write-symbols-to-file (list '/trusted-elisp-files) trusted-elisp-files)
                  (load-file filename)
                  (message "%s marked as trusted and loaded." filename))
         (message (format "%s ignored." filename))))))
 
 
-(cl-defun cv--display-dir (dir &optional (shorten-to-display t))
+(cl-defun /display-dir (dir &optional (shorten-to-display t))
   "Display a shortened directory name, where the home directory
    is shortened, as per convention, to ~, but also narrow to the
    display width if desired."
@@ -100,7 +100,7 @@
             (f-abbrev (apply #'f-join (append (list "/") (mapcar #'fun (-butlast split)) (list final))))))))))
 
 
-(defun cv--apply-fn-region (fn start end)
+(defun /apply-fn-region (fn start end)
   "Run a function over the region between START and END in current buffer."
   (save-excursion
     (let ((text (delete-and-extract-region start end)))
