@@ -43,6 +43,7 @@ ${BREW_HOME}/bin/brew install \
     autojump \
     exiftool \
     fdupes \
+    fzf \
     git \
     git-lfs \
     gnupg@1.4 \
