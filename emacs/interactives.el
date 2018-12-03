@@ -41,11 +41,25 @@
                                        (t 2))))
       (set-face-attribute 'header-line nil :height header-line-height)
       (setq-default header-line-format
-        (list `(:eval (let ((pwd (if (buffer-file-name)
-                                     (/display-dir (buffer-file-name) t)
-                                   "")))
-                        (list (/mode-line-fill-center (/ (length pwd) ,centering-multiplier))
-                              pwd))))))))
+        (list `(:eval (let* ((pwd (if (buffer-file-name)
+                                      (/display-dir (buffer-file-name) t)
+                                    ""))
+                             ;; which-function-mode
+                             (current-function (when which-func-table
+                                                 (replace-regexp-in-string
+                                                  "%" "%%"
+                                                  (or (gethash (selected-window) which-func-table) ""))))
+                             (full-text (cond ((and current-function (not (string= pwd "")) (not (string= current-function "")))
+                                               (concat pwd " — " current-function))
+                                              ((and current-function (string= pwd "") (not (string= current-function "")))
+                                               current-function)
+                                              (t pwd)))
+                             ;; only show the current function if it fits
+                             (actual-text (if (> (- (window-total-width) 10) (length full-text))
+                                              full-text
+                                            pwd)))
+                        (list (/mode-line-fill-center (/ (length actual-text) ,centering-multiplier))
+                              actual-text))))))))
 
 
 (defun m150 ()
