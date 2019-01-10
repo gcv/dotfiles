@@ -429,6 +429,10 @@
 (diminish 'abbrev-mode)
 
 
+;;; isearch
+(setq lazy-highlight-initial-delay 0.75)
+
+
 ;;; grep
 (setq-default grep-command "grep -nHr -e ")
 
