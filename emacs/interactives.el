@@ -29,7 +29,7 @@
   (if (or (and header-given (not header-on))
           (and (not header-given) header-line-format))
       (progn (setq-default header-line-format nil)
-             (when which-func-table (clrhash which-func-table)))
+             (when (and (boundp 'which-func-table) which-func-table) (clrhash which-func-table)))
     (let* ((default-height (face-attribute 'default :height))
            (header-line-height (cond ((= 150 default-height) 120)
                                      ((= 120 default-height) 100)
@@ -46,10 +46,11 @@
                                       (/display-dir (buffer-file-name) t)
                                     ""))
                              ;; which-function-mode
-                             (current-function (when which-func-table
-                                                 (replace-regexp-in-string
-                                                  "%" "%%"
-                                                  (or (gethash (selected-window) which-func-table) ""))))
+                             (current-function
+                              (when (and (boundp 'which-func-table) which-func-table)
+                                (replace-regexp-in-string
+                                 "%" "%%"
+                                 (or (gethash (selected-window) which-func-table) ""))))
                              (full-text (cond ((and current-function (not (string= pwd "")) (not (string= current-function "")))
                                                (concat pwd " — " current-function))
                                               ((and current-function (string= pwd "") (not (string= current-function "")))
