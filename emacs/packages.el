@@ -170,7 +170,10 @@
             ;; 'unicode currently broken on macOS
             (setq emojify-display-style 'image)
             (setq emojify-emoji-style (list 'unicode))
-            (global-emojify-mode)
+            ;; XXX: emojify-mode currently messes up fast typing in Emacs,
+            ;; especially in isearch mode. See
+            ;; https://github.com/iqbalansari/emacs-emojify/issues/43
+            ;;(global-emojify-mode)
             ))
 
 

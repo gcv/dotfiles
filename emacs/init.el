@@ -430,7 +430,7 @@
 
 
 ;;; isearch
-(setq lazy-highlight-initial-delay 0.75)
+(setq lazy-highlight-initial-delay 0.25)
 
 
 ;;; grep
