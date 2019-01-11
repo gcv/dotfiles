@@ -324,6 +324,12 @@ function findl() {
 }
 
 
+### Semi-portable GNU readlink -f replacement, requires Perl.
+function readlinkf() {
+    perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1";
+}
+
+
 ### Set up the EC2 environment.
 function ec2setup() {
     # variables
@@ -405,8 +411,9 @@ function rvm_on() {
 
 ### Turn on NVM.
 function nvm_on() {
-    export NVM_DIR="$HOME/.nvm"
+    export NVM_DIR=$(readlinkf "$HOME/.nvm")
     [[ -s "/opt/brew/opt/nvm/nvm.sh" ]] && source "/opt/brew/opt/nvm/nvm.sh"
+    path=($path ~/.yarn/bin)
 }
 
 
