@@ -192,7 +192,7 @@
         (blue-darker-1 "#627e9d")
         (blue-darker-2 "#58718d"))
     (set-face-attribute 'default nil :foreground base-color)
-    (set-face-attribute 'cursor nil :background "#cc0000")
+    (set-face-attribute 'cursor nil :background "#00cc00")
     (set-face-attribute 'show-paren-match nil :background base-color-darker-1)
     (set-face-attribute 'minibuffer-prompt nil :foreground base-color)
     (set-face-background 'hl-line "darkgreen")
