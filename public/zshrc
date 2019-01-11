@@ -409,6 +409,12 @@ function rvm_on() {
 }
 
 
+### Turn on rbenv.
+function rbenv_on() {
+    eval "$(rbenv init -)"
+}
+
+
 ### Turn on NVM.
 function nvm_on() {
     export NVM_DIR=$(readlinkf "$HOME/.nvm")
