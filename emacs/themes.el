@@ -140,8 +140,8 @@
 
 (defun /theme-material-common ()
   (set-face-attribute 'cursor nil :background "#21bdff")
-  (set-face-attribute 'org-level-1 nil :height 1.0 :box nil)
-  (set-face-attribute 'org-level-2 nil :height 1.0 :box nil)
+  (set-face-attribute 'org-level-1 nil :height 1.0 :box nil :background nil)
+  (set-face-attribute 'org-level-2 nil :height 1.0 :box nil :background nil)
   (set-face-attribute 'org-level-3 nil :height 1.0 :box nil))
 
 
