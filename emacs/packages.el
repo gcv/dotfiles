@@ -506,6 +506,7 @@
                 (if julia-buffer
                     (pop-to-buffer-same-window julia-buffer)
                   (ansi-term "julia" "julia")
+                  (read-only-mode -1)
                   (cv-inferior-julia-mode))))
 
             (defun cv--term-julia-buffer ()
