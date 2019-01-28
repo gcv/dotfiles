@@ -376,9 +376,9 @@
 
             (defun /helm-gtags-mode-hook ()
               (diminish-minor-mode 'helm-gtags-mode)
-              (local-set-key (kbd "C-c C-t r") 'helm-gtags-find-rtag)
-              (local-set-key (kbd "C-c C-t f") 'helm-gtags-parse-file)
-              (local-set-key (kbd "M-.") 'helm-gtags-find-tag)
+              (local-set-key (kbd "C-c C-t f") 'helm-gtags-select)
+              (local-set-key (kbd "C-c C-t s") 'helm-gtags-show-stack)
+              (local-set-key (kbd "M-.") 'helm-gtags-dwim)
               (local-set-key (kbd "M-,") 'helm-gtags-pop-stack)
               (local-set-key (kbd "M-*") 'helm-gtags-pop-stack))
 

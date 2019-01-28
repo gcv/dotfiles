@@ -792,6 +792,7 @@ See `eshell-prompt-regexp'."
   (setq show-trailing-whitespace t)
   (define-key python-mode-map (kbd "C-c C-z") nil)
   (subword-mode)
+  (helm-gtags-mode 1)
   (defconst python-block-pairs
     '(("else" "if" "elif" "while" "for" "try" "except")
       ("elif" "if" "elif")
