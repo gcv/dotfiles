@@ -636,6 +636,7 @@
   (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
   (local-set-key (kbd "C-c C-z") 'flip-windows)
   (local-set-key (kbd "<tab>") 'company-complete)
+  (eshell/alias "dir" "ls -a")
   (eshell/alias "v" "ls -la"))
 
 (add-hook 'eshell-mode-hook #'/eshell-mode-hook)
