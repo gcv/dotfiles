@@ -33,6 +33,7 @@
     (let* ((default-height (face-attribute 'default :height))
            (header-line-height (cond ((= 150 default-height) 120)
                                      ((= 120 default-height) 100)
+                                     ((= 100 default-height) 100)
                                      (t (round (* 0.80 (face-attribute 'default :height))))))
            ;; XXX: centering-multiplier is necessary because
            ;; /mode-line-fill-center does not adapt to different font sizes in
@@ -73,6 +74,12 @@
 (defun m120 ()
   (interactive)
   (set-font "Menlo" 120)
+  (toggle-header-line header-line-format))
+
+
+(defun m100 ()
+  (interactive)
+  (set-font "Menlo" 100)
   (toggle-header-line header-line-format))
 
 
