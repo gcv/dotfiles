@@ -170,6 +170,7 @@
   (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
   (set-face-attribute 'mode-line nil :box '(:line-width 1 :color "#90a4ae"))
   (set-face-attribute 'mode-line-inactive nil :box '(:line-width 1 :color "#eceff1"))
+  (set-face-attribute 'header-line nil :box nil)
   (set-face-attribute 'markdown-pre-face nil :background nil)
   (set-face-attribute 'markdown-code-face nil :background nil)
   (/theme-material-common)
