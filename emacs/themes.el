@@ -199,6 +199,7 @@
     (set-face-background 'hl-line "darkgreen")
     (set-face-attribute 'mode-line nil :foreground "black" :background base-color-lighter-1)
     (set-face-attribute 'mode-line-inactive nil :foreground "black" :background base-color-darker-2 :box nil)
+    (set-face-attribute 'header-line nil :foreground "black" :background base-color-darker-2)
     (set-face-attribute 'org-hide nil :foreground "black" :background "black")
     (set-face-attribute 'org-level-1 nil :foreground blue-lighter-3)
     (set-face-attribute 'org-level-2 nil :foreground blue-lighter-2)
