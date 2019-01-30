@@ -11,6 +11,9 @@
 ;;(require 'ob-sh)
 (require 'ob-sqlite)
 
+(require 'ox-md)
+(require 'ox-texinfo)
+
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (add-to-list 'auto-mode-alist '("\\.note$" . org-mode))
 
