@@ -1,5 +1,6 @@
 (put 'add-hook 'lisp-indent-function 1)
 (put 'setq-default 'lisp-indent-function 1)
+(put 'use-package 'lisp-indent-function 1)
 
 
 (diminish 'eldoc-mode)
