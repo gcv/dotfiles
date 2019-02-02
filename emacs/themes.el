@@ -208,6 +208,8 @@
     (set-face-attribute 'org-special-keyword nil :foreground "#007799")
     (set-face-attribute 'helm-source-header nil :foreground "black" :background base-color)
     (set-face-attribute 'helm-selection nil :background base-color-lighter-1)
+    (set-face-attribute 'markdown-pre-face nil :background nil)
+    (set-face-attribute 'markdown-code-face nil :background nil)
     (set-face-attribute 'isearch nil :background base-color-lighter-1 :foreground "black" :underline nil)
     (set-face-attribute 'lazy-highlight nil :background base-color-darker-1 :foreground "black" :underline nil))
   (/theme-common))
