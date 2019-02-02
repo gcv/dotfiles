@@ -739,6 +739,17 @@
 (use-package olivetti                   ; focused writing mode
   :config (progn
 
+            (defun olivetti-reset-width ()
+              (interactive)
+              (when (and (-contains? minor-mode-list 'olivetti-mode)
+                         (symbol-value 'olivetti-mode))
+                (let ((orig-width olivetti-body-width))
+                  (olivetti-set-width (+ 1 olivetti-body-width))
+                  (olivetti-set-width orig-width))
+                (shrink-window-horizontally 1)
+                (enlarge-window-horizontally 1)
+                (message "olivetti width reset")))
+
             (defun /olivetti-mode-hook ()
               (setq right-fringe-width 0
                     left-fringe-width 0)
