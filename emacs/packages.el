@@ -1039,6 +1039,11 @@
                   web-mode-css-indent-offset 2
                   web-mode-enable-auto-quoting nil)
 
+            (setq-default web-mode-comment-formats
+              '(("css" . "/*")
+                ("java" . "//")
+                ("javascript" . "//")))
+
             (defun /web-mode-hook ()
               (when (-contains? '("ts" "tsx") (file-name-extension buffer-file-name))
                 (tide-setup)

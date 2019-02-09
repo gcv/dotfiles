@@ -31,10 +31,13 @@
       (progn (setq-default header-line-format nil)
              (when (and (boundp 'which-func-table) which-func-table) (clrhash which-func-table)))
     (let* ((default-height (face-attribute 'default :height))
-           (header-line-height (cond ((= 150 default-height) 120)
-                                     ((= 120 default-height) 100)
-                                     ((= 100 default-height) 100)
-                                     (t (round (* 0.80 (face-attribute 'default :height))))))
+           ;; XXX: This makes the header line smaller than the default height.
+           ;; It's... not ideal.
+           ;; (header-line-height (cond ((= 150 default-height) 120)
+           ;;                           ((= 120 default-height) 100)
+           ;;                           ((= 100 default-height) 100)
+           ;;                           (t (round (* 0.80 (face-attribute 'default :height))))))
+           (header-line-height default-height)
            ;; XXX: centering-multiplier is necessary because
            ;; /mode-line-fill-center does not adapt to different font sizes in
            ;; the main buffer and the header. :(
