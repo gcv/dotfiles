@@ -883,6 +883,9 @@
 
 
 (use-package projectile
+  :init   (progn
+            (setq projectile-mode-line-prefix "")
+            )
   :config (progn
 
             (projectile-mode 1)
@@ -903,8 +906,6 @@
               (if (file-remote-p default-directory)
                   (format " [%s]" (/projectile-project-name))
                 (format " [%s]" (projectile-project-name))))
-
-            (setq projectile-mode-line-prefix " ")
 
             (setq projectile-mode-line-function '/projectile-mode-line)
 
