@@ -838,10 +838,11 @@
             (define-key persp-mode-map (kbd "C-c C-p p") 'persp-prev)
             (define-key persp-mode-map (kbd "C-c C-p <left>") 'persp-prev)
 
-            (defun persp-mode-cleanup-killed-buffers ()
-              (interactive)
-              (let ((live-buffers (-reject #'(lambda (b) (null (buffer-name b))) (persp-buffers (persp-curr)))))
-                (setf (persp-buffers (persp-curr)) live-buffers)))
+            ;; XXX: Do not use, this seems to mess up the state of perspectives-hash.
+            ;;(defun persp-mode-cleanup-killed-buffers ()
+            ;;  (interactive)
+            ;;  (let ((live-buffers (-reject #'(lambda (b) (null (buffer-name b))) (persp-buffers (persp-curr)))))
+            ;;    (setf (persp-buffers (persp-curr)) live-buffers)))
 
             (defun /persp-set-ido-buffers ()
               (when (boundp 'ido-temp-list)
