@@ -746,8 +746,10 @@
                 (let ((orig-width olivetti-body-width))
                   (olivetti-set-width (+ 1 olivetti-body-width))
                   (olivetti-set-width orig-width))
-                (shrink-window-horizontally 1)
-                (enlarge-window-horizontally 1)
+                ;;(shrink-window-horizontally 1)
+                ;;(enlarge-window-horizontally 1)
+                (split-window-right)
+                (winner-undo)
                 (message "olivetti width reset")))
 
             (defun /olivetti-mode-hook ()
