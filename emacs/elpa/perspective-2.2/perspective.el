@@ -1036,7 +1036,8 @@ restored."
     ;; open all files in a temporary perspective to avoid polluting "main"
     (persp-switch tmp-persp-name)
     (cl-loop for file in (persp--state-complete-files state-complete) do
-          (find-file file))
+          (when (file-exists-p file)
+            (find-file file)))
     ;; iterate over the frames
     (cl-loop for frame in (persp--state-complete-frames state-complete) do
           (incf frame-count)
