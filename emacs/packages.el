@@ -7,13 +7,13 @@
 
 (use-package async)
 (use-package dash)                       ; a modern list library
-(use-package ht)                         ; hash tables
-(use-package s)                          ; string handling
+(use-package epl)                        ; package.el wrapper
 (use-package f)                          ; file handling
-(use-package queue    :pin gnu)
-(use-package epl)                       ; package.el wrapper
+(use-package ht)                         ; hash tables
 (use-package pfuture)
-(use-package pkg-info)                  ; Emacs package
+(use-package pkg-info)
+(use-package queue :pin gnu)
+(use-package s)                          ; string handling
 
 
 ;;; ----------------------------------------------------------------------------
