@@ -38,6 +38,7 @@
 (setq org-goto-interface 'outline-path-completion)
 (setq org-cycle-emulate-tab 'white)
 (setq org-fontify-whole-heading-line t)
+(setq org-pretty-entities t)
 
 (setq org-src-fontify-natively t)
 (setq org-src-window-setup 'current-window)
