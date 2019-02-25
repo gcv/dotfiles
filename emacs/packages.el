@@ -161,6 +161,13 @@
             ))
 
 
+(use-package disk-usage
+  :pin gnu
+  :config (progn
+            (setq disk-usage--du-command "/opt/brew/bin/gdu")
+            ))
+
+
 (use-package elisp-slime-nav
   :diminish "")
 
