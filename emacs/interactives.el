@@ -471,3 +471,9 @@ return 0
 (defun hex-to-dec (hex)
   (interactive "sHex: ")
   (message (format "%d" (string-to-number hex 16))))
+
+
+(defun swap-two-frames ()
+  "Swap states of the first two frames in frame-list."
+  (interactive)
+  (/swap-frames (nth 0 (frame-list)) (nth 1 (frame-list))))

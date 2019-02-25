@@ -105,3 +105,11 @@
   (save-excursion
     (let ((text (delete-and-extract-region start end)))
       (insert (funcall fn text)))))
+
+
+(defun /swap-frames (a b)
+  "Swap window states of root windows of two frames."
+  (let ((state-a (window-state-get (frame-root-window a)))
+        (state-b (window-state-get (frame-root-window b))))
+    (window-state-put state-a (frame-root-window b))
+    (window-state-put state-b (frame-root-window a))))
