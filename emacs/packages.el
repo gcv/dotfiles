@@ -878,7 +878,10 @@
 (use-package projectile
   :config (progn
 
-            (projectile-global-mode)
+            (projectile-mode 1)
+
+            (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
             (setq projectile-enable-caching nil)
             (setq projectile-tags-command "ctags -Re -f \"%s\" %s")
 
@@ -889,9 +892,14 @@
                   name
                 (puthash (current-buffer) (projectile-project-name) /projectile-project-cache)))
 
-            (setq-default projectile-mode-line '(:eval (if (file-remote-p default-directory)
-                                                           (format " [%s]" (/projectile-project-name))
-                                                         (format " [%s]" (projectile-project-name)))))
+            (defun /projectile-mode-line ()
+              (if (file-remote-p default-directory)
+                  (format " [%s]" (/projectile-project-name))
+                (format " [%s]" (projectile-project-name))))
+
+            (setq projectile-mode-line-prefix " ")
+
+            (setq projectile-mode-line-function '/projectile-mode-line)
 
             ))
 
