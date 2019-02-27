@@ -496,3 +496,8 @@ target width."
                                 (window-height)))
                       horizontal))
     new-window))
+
+
+(defun timestamp ()
+  (interactive)
+  (insert (format-time-string "%Y-%m-%dT%H:%M:%S")))
