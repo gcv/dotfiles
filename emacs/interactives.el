@@ -501,3 +501,8 @@ target width."
 (defun timestamp ()
   (interactive)
   (insert (format-time-string "%Y-%m-%dT%H:%M:%S")))
+
+
+(defun insert-random-uuid ()
+  (interactive)
+  (shell-command "uuidgen" t))
