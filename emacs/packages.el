@@ -185,6 +185,11 @@
 (use-package eshell-autojump)
 
 
+(use-package expand-region
+  :config (progn
+            (global-set-key (kbd "C-S-SPC") 'er/expand-region)))
+
+
 (use-package flycheck
   :pin melpa
   :defer t)
