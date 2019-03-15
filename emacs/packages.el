@@ -443,6 +443,11 @@
             ))
 
 
+(use-package iedit
+  :config (progn
+            ))
+
+
 (use-package intero
   :after (haskell-mode)
   :config (progn
