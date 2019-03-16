@@ -444,18 +444,16 @@
 
 
 (use-package iedit
+  :init   (progn
+            (setq iedit-toggle-key-default nil)
+            )
   :config (progn
 
-            ;; credit: https://github.com/alphapapa/emacs-package-dev-handbook
-            (defun /iedit-mode (orig-fn)
-              "Call `iedit-mode' with function-local scope by default, or global scope if called with a universal prefix."
-              (interactive)
-              (pcase current-prefix-arg
-                ('nil (funcall orig-fn '(0)))
-                ('(4) (funcall orig-fn))
-                (_ (user-error "/iedit-mode called with prefix: %s" prefix))))
-
-            (advice-add #'iedit-mode :around #'/iedit-mode)
+            ;; manually set keys, because iedit overrides some important globals:
+            (let ((iedit-toggle-keybinding (kbd "C-;")))
+              (define-key global-map iedit-toggle-keybinding 'iedit-mode)
+              (define-key isearch-mode-map iedit-toggle-keybinding 'iedit-mode-from-isearch)
+              (define-key help-map iedit-toggle-keybinding 'iedit-mode-toggle-on-function))
 
             ))
 
