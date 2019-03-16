@@ -445,6 +445,18 @@
 
 (use-package iedit
   :config (progn
+
+            ;; credit: https://github.com/alphapapa/emacs-package-dev-handbook
+            (defun /iedit-mode (orig-fn)
+              "Call `iedit-mode' with function-local scope by default, or global scope if called with a universal prefix."
+              (interactive)
+              (pcase current-prefix-arg
+                ('nil (funcall orig-fn '(0)))
+                ('(4) (funcall orig-fn))
+                (_ (user-error "/iedit-mode called with prefix: %s" prefix))))
+
+            (advice-add #'iedit-mode :around #'/iedit-mode)
+
             ))
 
 
