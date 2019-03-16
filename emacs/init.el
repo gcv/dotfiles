@@ -30,8 +30,6 @@
 (setq ns-alternate-modifier 'none)                              ; leave Alt alone
 (when window-system (scroll-bar-mode -1))                       ; no scrollbars (bugs on Mac OS)
 (setq truncate-partial-width-windows nil)                       ; no more truncated lines
-(setq woman-use-own-frame nil)                                  ; stop opening useless frames
-(setq woman-fill-frame t)                                       ; frames display >72 characters
 (setq save-abbrevs nil)                                         ; don't use abbrev-mode
 (setq save-interprogram-paste-before-kill t)                    ; don't lose clipboard on kill
 (setq tags-revert-without-query t)                              ; minimize TAGS use annoyance
@@ -444,8 +442,10 @@
        "-prune -o -type f -print0 | xargs -0 grep -I -i -n -e "))
 
 
-;;; man
+;;; man and woman
 (setq Man-notify-method 'pushy)         ; reuse the current window
+(setq woman-use-own-frame nil)          ; stop opening useless frames
+(setq woman-fill-frame t)               ; frames display >72 characters
 
 
 ;;; spell checking
