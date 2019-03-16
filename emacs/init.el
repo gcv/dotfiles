@@ -70,9 +70,9 @@
 
 ;;; history
 (savehist-mode 1)
-(setq history-length 250
+(setq history-length 1000
       history-delete-duplicates t)
-(put 'file-name-history 'history-length 500)
+(put 'file-name-history 'history-length 1500)
 (add-to-list 'savehist-additional-variables 'load-project-history)
 
 
