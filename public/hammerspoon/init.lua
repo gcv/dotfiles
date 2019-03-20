@@ -9,6 +9,28 @@ hs.hotkey.bind(
 hs.alert("Reloading Hammerspoon configuration")
 
 
+-- alt-tab window switcher
+
+switcher_space = hs.window.switcher.new(
+   -- current Space only
+   hs.window.filter.new():setCurrentSpace(true)
+)
+
+hs.hotkey.bind(
+   {"alt"}, "tab",
+   function()
+      switcher_space:next()
+   end
+)
+
+hs.hotkey.bind(
+   {"alt", "shift"}, "tab",
+   function()
+      switcher_space:previous()
+   end
+)
+
+
 -- trying to isolate Spaces keyboard switching bug
 
 -- hs.hotkey.bind(
@@ -53,6 +75,7 @@ hs.hotkey.bind(
 
 
 -- iTunes
+
 hs.hotkey.bind(
    {"ctrl", "alt", "cmd"}, "p",
    function()
