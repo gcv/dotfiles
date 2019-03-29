@@ -2,6 +2,7 @@
 (require 'subr-x)
 
 (setq load-prefer-newer t)                                      ; deal with outdated .elc files
+(setq debug-on-error nil)                                       ; turn this on only when needed
 (setq-default indent-tabs-mode nil)                             ; replace tabs with spaces
 (transient-mark-mode -1)                                        ; turn off transient-mark mode
 (setq-default fill-column 80)                                   ; 80-character screens, not 70
