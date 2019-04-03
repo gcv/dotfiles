@@ -141,11 +141,11 @@
 
 (use-package company-lua
   :pin melpa
-  :after (:all company lua-mode))
+  :after (company lua-mode))
 
 
 (use-package company-web
-  :after (:all company web-mode web-completion-data))
+  :after (company web-mode))
 
 
 (use-package counsel                    ; Ivy / Swiper / Counsel
@@ -289,7 +289,6 @@
 
 
 (use-package helm
-  :after (:all helm-core popup)
   :diminish ""
   :config (progn
 
@@ -370,11 +369,11 @@
 
 
 (use-package helm-ag
-  :after (helm-core))
+  :after (helm))
 
 
 (use-package helm-gtags
-  :after (helm-core)
+  :after (helm)
   :config (progn
 
             (setq helm-gtags-path-style 'root
@@ -400,14 +399,14 @@
 
 
 (use-package helm-projectile
-  :after (:all helm-core projectile)
+  :after (helm projectile)
   :config (progn
             (helm-projectile-on)
             ))
 
 
 (use-package helm-swoop
-  :after (helm-core)
+  :after (helm)
   :config (progn
             (global-set-key (kbd "C-M-S-i") 'helm-swoop)
             (define-key isearch-mode-map (kbd "C-M-S-i") 'helm-swoop-from-isearch)))
@@ -987,7 +986,7 @@
 
 
 (use-package slime-company
-  :after (:all company slime)
+  :after (company slime)
   :config (progn
             ;; XXX: This is here instead of the slime :config section to make
             ;; sure it runs after the slime-company is available.
@@ -1044,12 +1043,10 @@
 
 
 (use-package tide                       ; TypeScript IDE
-  :after (:all company flycheck typescript-mode)
+  :after (company flycheck typescript-mode)
   :diminish " Tide"
   :config (progn
-
             (setq tide-node-executable "~/.nvm/versions/node/v8.10.0/bin/node")
-
             ))
 
 
@@ -1058,14 +1055,12 @@
 (use-package typescript-mode
   :diminish " TS"
   :config (progn
-
             (setq auto-mode-alist (delete '("\\.ts$" . typescript-mode) auto-mode-alist))
-
             ))
 
 
 (use-package web-mode
-  :after (:all flycheck tide)
+  :after (flycheck tide)
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
