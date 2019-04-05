@@ -852,6 +852,9 @@
 
             (setq persp-interactive-completion-function 'ido-completing-read)
 
+            (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
+            (add-hook 'kill-emacs-hook #'persp-state-save)
+
             ;; persp-mode does not use a prefix for defining keybindings, strange
             (define-key persp-mode-map (kbd "C-c C-p s") 'persp-switch)
             (define-key persp-mode-map (kbd "C-c M-p") 'persp-switch)

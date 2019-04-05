@@ -18,6 +18,7 @@ eshell/
 history
 network-security.data
 nrepl-history
+persp-state.el
 projectile-bookmarks.eld
 projectile.cache
 recentf
