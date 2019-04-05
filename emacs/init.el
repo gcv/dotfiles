@@ -30,6 +30,7 @@
 (setq ns-command-modifier 'meta)                                ; fix Cmd as Meta on Mac OS
 (setq ns-alternate-modifier 'none)                              ; leave Alt alone
 (when window-system (scroll-bar-mode -1))                       ; no scrollbars (bugs on Mac OS)
+(setq use-dialog-box nil)                                       ; turn off lame GUI dialogs
 (setq truncate-partial-width-windows nil)                       ; no more truncated lines
 (setq save-abbrevs nil)                                         ; don't use abbrev-mode
 (setq save-interprogram-paste-before-kill t)                    ; don't lose clipboard on kill
