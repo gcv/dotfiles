@@ -767,6 +767,7 @@ See `eshell-prompt-regexp'."
   (define-key ruby-mode-map (kbd "C-m") 'newline-and-indent)
   (define-key ruby-mode-map (kbd "M-,") 'pop-tag-mark)
   (helm-gtags-mode 1)
+  (setq ruby-insert-encoding-magic-comment nil)
   (setq show-trailing-whitespace t))
 
 (add-hook 'ruby-mode-hook #'/ruby-mode-hook)
