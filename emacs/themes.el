@@ -21,7 +21,15 @@
     (set-face-attribute 'aw-leading-char-face nil :foreground "red" :background nil
                         :family base-font :height 2.0 :weight 'bold)
     (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
-    (set-face-attribute 'term nil :foreground nil :background nil)))
+    (set-face-attribute 'term nil :foreground nil :background nil)
+    (set-face-attribute 'org-level-1 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
+    (set-face-attribute 'org-level-2 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
+    (set-face-attribute 'org-level-3 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
+    (set-face-attribute 'org-level-4 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
+    (set-face-attribute 'org-level-5 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
+    (set-face-attribute 'org-level-6 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
+    (set-face-attribute 'org-level-7 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
+    (set-face-attribute 'org-level-8 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)))
 
 
 (defun theme-zenburn ()
@@ -32,10 +40,14 @@
   (set-face-foreground 'default "#cbcbbb")
   (set-face-background 'cursor "grey60")
   (set-face-foreground 'bold "papayawhip")
-  (set-face-background 'mode-line "grey30")
-  (set-face-foreground 'mode-line "grey68")
-  (set-face-background 'mode-line-inactive "grey20")
-  (set-face-foreground 'mode-line-inactive "grey42")
+  (set-face-attribute 'mode-line nil
+                      :background "grey30"
+                      :foreground "grey68"
+                      :box '(:line-width 1 :color "grey30"))
+  (set-face-attribute 'mode-line-inactive nil
+                      :background "grey20"
+                      :foreground "grey42"
+                      :box '(:line-width 1 :color "grey20"))
   (set-face-background 'highlight "grey35")
   (set-face-underline 'highlight nil)
   (set-face-background 'hl-line "#525252")
@@ -68,6 +80,15 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'solarized-light t)
+  (set-face-attribute 'mode-line nil
+                      :box '(:line-width 2 :color "#e1e1e1")
+                      :foreground "black"
+                      :background "#e1e1e1"
+                      :overline nil)
+  (set-face-attribute 'mode-line-inactive nil
+                      :box '(:line-width 2 :color "#eee8d5")
+                      :background "#eee8d5"
+                      :overline nil)
   (set-face-attribute 'bold nil :foreground "navy")
   (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
   (set-face-attribute 'markdown-pre-face nil :background nil)
@@ -82,16 +103,21 @@
   (load-theme 'solarized-dark t)
   (set-face-background 'default "#081a25")
   (set-face-foreground 'default "#adad9c")
+  (set-face-attribute 'mode-line nil
+                      :box '(:line-width 2 :color "grey40")
+                      :foreground "#23313a"
+                      :background "grey40"
+                      :overline nil)
+  (set-face-attribute 'mode-line-inactive nil
+                      :box '(:line-width 2 :color "grey14")
+                      :foreground "#888888"
+                      :background "grey14"
+                      :overline nil)
   (set-face-attribute 'bold nil :foreground "papayawhip")
   (set-face-foreground 'isearch "#0f9999")
   (set-face-background 'isearch "grey12")
   (set-face-foreground 'lazy-highlight "#0a6666")
   (set-face-background 'lazy-highlight "grey12")
-  (set-face-foreground 'mode-line-inactive "#888888")
-  (set-face-background 'mode-line-inactive "grey14")
-  (set-face-foreground 'mode-line "#23313a")
-  (set-face-background 'mode-line "grey40")
-  (set-face-attribute 'mode-line nil :box nil)
   (set-face-foreground 'show-paren-match "black")
   (set-face-background 'show-paren-match "#2e5c99")
   (set-face-foreground 'js2-external-variable "#b37f47")
@@ -126,9 +152,8 @@
   (load-theme 'leuven t)
   (set-face-background 'default "#faffff")
   (set-face-attribute 'minibuffer-prompt nil :background nil)
-  (set-face-attribute 'org-level-1 nil :height 1.0 :background nil :overline nil)
-  (set-face-attribute 'org-level-2 nil :height 1.0 :background nil :foreground "#000099" :overline nil)
-  (set-face-attribute 'org-level-3 nil :height 1.0 :background nil :foreground "#0000cc" :overline nil)
+  (set-face-attribute 'org-level-2 nil :foreground "#000099")
+  (set-face-attribute 'org-level-3 nil :foreground "#0000cc")
   (set-face-attribute 'isearch nil :background "lightblue" :foreground nil :underline nil)
   (set-face-attribute 'lazy-highlight nil :background "#e6e6fa" :underline nil)
   (set-face-attribute 'trailing-whitespace nil :background "red")
@@ -139,10 +164,7 @@
 
 
 (defun /theme-material-common ()
-  (set-face-attribute 'cursor nil :background "#21bdff")
-  (set-face-attribute 'org-level-1 nil :height 1.0 :box nil :background nil)
-  (set-face-attribute 'org-level-2 nil :height 1.0 :box nil :background nil)
-  (set-face-attribute 'org-level-3 nil :height 1.0 :box nil))
+  (set-face-attribute 'cursor nil :background "#21bdff"))
 
 
 (defun theme-material-dark ()
@@ -150,9 +172,12 @@
   (disable-all-themes)
   (load-theme 'material t)
   ;; NB: :box '(:line-width -n) draws a box internally, without increasing the rendered size of the text!
-  (set-face-attribute 'mode-line nil :box '(:line-width 1 :color "#35575b"))
-  (set-face-attribute 'mode-line nil :background "#35575b")
-  (set-face-attribute 'mode-line-inactive nil :background "black")
+  (set-face-attribute 'mode-line nil
+                      :background "#35575b"
+                      :box '(:line-width 2 :color "#35575b"))
+  (set-face-attribute 'mode-line-inactive nil
+                      :background "black"
+                      :box '(:line-width 2 :color "black"))
   (set-face-attribute 'fringe nil :background "#35575b")
   (set-face-attribute 'vertical-border nil :foreground "#dcdccc")
   (set-face-attribute 'magit-diff-removed-highlight nil :foreground "red")
@@ -168,8 +193,10 @@
   (disable-all-themes)
   (load-theme 'material-light t)
   (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
-  (set-face-attribute 'mode-line nil :box '(:line-width 1 :color "#90a4ae"))
-  (set-face-attribute 'mode-line-inactive nil :box '(:line-width 1 :color "#eceff1"))
+  (set-face-attribute 'mode-line nil
+                      :box '(:line-width 1 :color "#90a4ae"))
+  (set-face-attribute 'mode-line-inactive nil
+                      :box '(:line-width 1 :color "#eceff1"))
   (set-face-attribute 'header-line nil :box nil)
   (set-face-attribute 'markdown-pre-face nil :background nil)
   (set-face-attribute 'markdown-code-face nil :background nil)
@@ -197,8 +224,14 @@
     (set-face-attribute 'show-paren-match nil :background base-color-darker-1)
     (set-face-attribute 'minibuffer-prompt nil :foreground base-color)
     (set-face-background 'hl-line "darkgreen")
-    (set-face-attribute 'mode-line nil :foreground "black" :background base-color-lighter-1)
-    (set-face-attribute 'mode-line-inactive nil :foreground "black" :background base-color-darker-2 :box nil)
+    (set-face-attribute 'mode-line nil
+                        :foreground "black"
+                        :background base-color-lighter-1
+                        :box `(:line-width 2 :color ,base-color-lighter-1))
+    (set-face-attribute 'mode-line-inactive nil
+                        :foreground "black"
+                        :background base-color-darker-2
+                        :box `(:line-width 2 :color ,base-color-darker-2))
     (set-face-attribute 'header-line nil :foreground "black" :background base-color-darker-2)
     (set-face-attribute 'org-hide nil :foreground "black" :background "black")
     (set-face-attribute 'org-level-1 nil :foreground blue-lighter-3)
