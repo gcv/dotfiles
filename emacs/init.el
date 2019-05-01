@@ -494,6 +494,7 @@
 
 
 ;;; linum: display fix with right-aligned padding
+;;; NB: linum-mode is deprecated in Emacs 26, use display-line-numbes-mode
 (defun /linum-update-window (orig-fn &rest args)
   (let* ((w (length (number-to-string
                      (count-lines (point-min) (point-max)))))
@@ -501,6 +502,13 @@
     (apply orig-fn args)))
 
 (advice-add 'linum-update-window :around #'/linum-update-window)
+
+
+;;; display-line-numbers-mode
+(setq display-line-numbers-width-start t)
+(setq display-line-numbers-type t)
+;;(setq display-line-numbers-type 'relative)
+;;(setq display-line-numbers-type 'visual)
 
 
 ;;; recentf
