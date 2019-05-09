@@ -142,6 +142,7 @@
   (set-face-foreground 'org-level-1 "#7089a6")
   (set-face-foreground 'org-level-2 "#a9a9cc")
   (set-face-foreground 'org-level-3 "#8aba99")
+  (set-face-attribute 'org-clock-overlay nil :background "grey50" :foreground "black")
   (/theme-solarized-common)
   (/theme-common))
 
