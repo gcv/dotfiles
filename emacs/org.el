@@ -88,6 +88,7 @@
   (define-key org-mode-map (kbd "M-C-S-<down>") 'org-shiftmetadown)
   (define-key org-mode-map (kbd "C-S-a") 'beginning-of-line)
   (define-key org-mode-map (kbd "C-S-e") 'end-of-line)
+  (define-key org-mode-map (kbd "C-c C-M-l") 'org-store-link-by-id)
   ;; turn off all archiving shortcuts
   (define-key org-mode-map (kbd "C-c $") nil) ;; default: org-archive-subtree
   (define-key org-mode-map (kbd "C-c C-x C-a") nil) ;; default: org-archive-subtree-default

@@ -506,3 +506,18 @@ target width."
 (defun insert-random-uuid ()
   (interactive)
   (shell-command "uuidgen" t))
+
+
+(defun org-store-link-by-id (&optional pt)
+  "Makes a unique ID for an heading structure, and saves it for insertion."
+  (interactive)
+  (org-with-point-at pt
+    (let ((heading (substring-no-properties (org-get-heading)))
+          (id (org-entry-get nil "custom_id")))
+      (if (and id (stringp id))
+          (push (list (concatenate 'string "#" id) heading) org-stored-links)
+        (let ((new-id (org-id-new)))
+          (org-entry-put pt "custom_id" new-id)
+          (org-id-add-location new-id (buffer-file-name (buffer-base-buffer)))
+          (push (list (concatenate 'string "#" new-id) heading) org-stored-links)))))
+  (message "Insert with org-insert-last-stored-link (C-c M-l)"))
