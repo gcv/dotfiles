@@ -905,6 +905,13 @@
             ))
 
 
+;;; Allows multiple major modes using indirect buffers. Needs a plugin which
+;;; defines. As of this writing: poly-org and poly-noweb have problems.
+;;; poly-markdown is pretty good.
+(use-package polymode)
+(use-package poly-markdown)
+
+
 (use-package poporg
   :pin melpa)
 
