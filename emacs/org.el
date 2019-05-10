@@ -46,8 +46,11 @@
 (setq org-agenda-ndays 30)
 (setq org-goto-interface 'outline-path-completion)
 (setq org-cycle-emulate-tab 'white)
+(setq org-cycle-separator-lines 0)
 (setq org-fontify-whole-heading-line t)
 (setq org-pretty-entities t)
+(setq org-catch-invisible-edits 'show-and-error)
+(setq org-list-demote-modify-bullet '(("-" . "+") ("+" . "*") ("*" . "-")))
 
 (setq org-src-fontify-natively t)
 (setq org-src-window-setup 'current-window)
