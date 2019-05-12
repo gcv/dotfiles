@@ -821,7 +821,7 @@
               ("R" origami-reset)
               )
 
-            (define-key origami-mode-map (kbd "C-h M-o") '/hydra-origami/body)
+            (define-key origami-mode-map (kbd "H-o") '/hydra-origami/body)
 
             ))
 
@@ -855,19 +855,10 @@
             (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
             (add-hook 'kill-emacs-hook #'persp-state-save)
 
-            ;; persp-mode does not use a prefix for defining keybindings, strange
-            (define-key persp-mode-map (kbd "C-c C-p s") 'persp-switch)
+            ;; keybindings; note H-p and C-c C-p are both valid prefixes
+            (define-key persp-mode-map (kbd "H-p") 'perspective-map)
+            (define-key persp-mode-map (kbd "C-c C-p") 'perspective-map)
             (define-key persp-mode-map (kbd "C-c M-p") 'persp-switch)
-            (define-key persp-mode-map (kbd "C-c C-p k") 'persp-remove-buffer)
-            (define-key persp-mode-map (kbd "C-c C-p c") 'persp-kill)
-            (define-key persp-mode-map (kbd "C-c C-p r") 'persp-rename)
-            (define-key persp-mode-map (kbd "C-c C-p a") 'persp-add-buffer)
-            (define-key persp-mode-map (kbd "C-c C-p A") 'persp-set-buffer)
-            (define-key persp-mode-map (kbd "C-c C-p i") 'persp-import)
-            (define-key persp-mode-map (kbd "C-c C-p n") 'persp-next)
-            (define-key persp-mode-map (kbd "C-c C-p <right>") 'persp-next)
-            (define-key persp-mode-map (kbd "C-c C-p p") 'persp-prev)
-            (define-key persp-mode-map (kbd "C-c C-p <left>") 'persp-prev)
 
             ;; XXX: Do not use, this seems to mess up the state of perspectives-hash.
             ;;(defun persp-mode-cleanup-killed-buffers ()
