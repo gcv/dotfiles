@@ -25,10 +25,6 @@
 ;;(setq global-auto-revert-non-file-buffers t)                  ; not ready for kqueue+directories
 ;;(setq auto-revert-use-notify nil)                             ; not ready for kqueue+directories
 ;;(global-hl-line-mode 1)                                       ; highlight the current line
-(setq ns-antialias-text t)                                      ; anti-aliased fonts on Mac OS
-(setq ns-pop-up-frames nil)                                     ; don't open files in new frame
-(setq ns-command-modifier 'meta)                                ; fix Cmd as Meta on Mac OS
-(setq ns-alternate-modifier 'none)                              ; leave Alt alone
 (when window-system (scroll-bar-mode -1))                       ; no scrollbars (bugs on Mac OS)
 (setq use-dialog-box nil)                                       ; turn off lame GUI dialogs
 (setq truncate-partial-width-windows nil)                       ; no more truncated lines
@@ -38,6 +34,23 @@
 
 (setq custom-file (concat user-emacs-directory "custom.el"))    ; customize: don't touch init.el
 (load custom-file 'noerror)                                     ; customize: load customizations
+
+
+;;; OS-specific configuration
+(pcase system-type
+  ('darwin
+   (setq ns-antialias-text t)                                   ; anti-aliased fonts on Mac OS
+   (setq ns-pop-up-frames nil)                                  ; don't open files in new frame
+   (setq ns-command-modifier 'meta)                             ; fix Cmd as Meta on Mac OS
+   (setq ns-alternate-modifier 'none)                           ; leave left Alt alone
+   (setq ns-right-command-modifier 'hyper)                      ; right Cmd should be Hyper
+   t)
+  ('windows-nt
+   ;; This is much more limited than the Darwin version. It does not have access
+   ;; to Fn keys, and does not distinguish between left and right Alt keys. :(
+   (setq w32-rwindow-modifier 'hyper)                           ; right Windows should be Hyper
+   t)
+  (_ "generic Unix" t))
 
 
 ;;; security
