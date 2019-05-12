@@ -21,6 +21,7 @@
     (set-face-attribute 'aw-leading-char-face nil :foreground "red" :background nil
                         :family base-font :height 2.0 :weight 'bold)
     (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
+    (set-face-attribute 'fixed-pitch nil :family base-font)
     (set-face-attribute 'term nil :foreground nil :background nil)
     (set-face-attribute 'org-level-1 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
     (set-face-attribute 'org-level-2 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
