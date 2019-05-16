@@ -168,6 +168,12 @@
             ))
 
 
+;;; Language Server Protocol implementation
+(use-package eglot
+  :config (progn
+            ))
+
+
 (use-package elisp-slime-nav
   :diminish "")
 
