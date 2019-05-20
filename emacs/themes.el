@@ -5,7 +5,7 @@
                          ((member "Consolas" (font-family-list)) "Consolas")
                          (t nil))))
     (set-face-attribute 'minibuffer-prompt nil :family base-font)
-    (set-face-attribute 'mode-line nil :family base-font)
+    (set-face-attribute 'mode-line nil :family base-font :underline nil)
     (set-face-attribute 'mode-line-buffer-id nil :foreground nil :background nil
                         :family base-font :weight 'bold :slant 'normal)
     (set-face-attribute 'org-code nil :family base-font :weight 'bold)
@@ -72,7 +72,6 @@
   (setq solarized-high-contrast-mode-line t)
   (setq solarized-use-less-bold nil)
   (setq solarized-use-more-italic nil)
-  (setq solarized-scale-org-headlines t)
   (setq solarized-use-variable-pitch nil)
   (setq solarized-scale-org-headlines nil))
 
@@ -85,10 +84,12 @@
                       :box '(:line-width 2 :color "#e1e1e1")
                       :foreground "black"
                       :background "#e1e1e1"
+                      :underline nil
                       :overline nil)
   (set-face-attribute 'mode-line-inactive nil
                       :box '(:line-width 2 :color "#eee8d5")
                       :background "#eee8d5"
+                      :underline nil
                       :overline nil)
   (set-face-attribute 'bold nil :foreground "navy")
   (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
