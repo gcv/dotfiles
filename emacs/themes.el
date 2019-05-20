@@ -5,7 +5,8 @@
                          ((member "Consolas" (font-family-list)) "Consolas")
                          (t nil))))
     (set-face-attribute 'minibuffer-prompt nil :family base-font)
-    (set-face-attribute 'mode-line nil :family base-font :underline nil)
+    (set-face-attribute 'mode-line nil :family base-font :underline nil :overline nil)
+    (set-face-attribute 'mode-line-inactive nil :underline nil :overline nil)
     (set-face-attribute 'mode-line-buffer-id nil :foreground nil :background nil
                         :family base-font :weight 'bold :slant 'normal)
     (set-face-attribute 'org-code nil :family base-font :weight 'bold)
@@ -83,14 +84,10 @@
   (set-face-attribute 'mode-line nil
                       :box '(:line-width 2 :color "#e1e1e1")
                       :foreground "black"
-                      :background "#e1e1e1"
-                      :underline nil
-                      :overline nil)
+                      :background "#e1e1e1")
   (set-face-attribute 'mode-line-inactive nil
                       :box '(:line-width 2 :color "#eee8d5")
-                      :background "#eee8d5"
-                      :underline nil
-                      :overline nil)
+                      :background "#eee8d5")
   (set-face-attribute 'bold nil :foreground "navy")
   (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
   (set-face-attribute 'markdown-pre-face nil :background nil)
@@ -108,13 +105,11 @@
   (set-face-attribute 'mode-line nil
                       :box '(:line-width 2 :color "grey40")
                       :foreground "#23313a"
-                      :background "grey40"
-                      :overline nil)
+                      :background "grey40")
   (set-face-attribute 'mode-line-inactive nil
                       :box '(:line-width 2 :color "grey14")
                       :foreground "#888888"
-                      :background "grey14"
-                      :overline nil)
+                      :background "grey14")
   (set-face-attribute 'bold nil :foreground "papayawhip")
   (set-face-foreground 'isearch "#0f9999")
   (set-face-background 'isearch "grey12")
