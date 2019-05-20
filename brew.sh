@@ -97,3 +97,7 @@ ${BREW_HOME}/bin/brew install \
     leiningen \
     maven \
     nvm
+
+
+# Borg Backup cask
+#${BREW_HOME}/bin/brew cask install borgbackup
