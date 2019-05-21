@@ -850,6 +850,12 @@
             ))
 
 
+(use-package pcre2el
+  :config (progn
+            (rxt-global-mode)
+            ))
+
+
 (use-package perspective
   :config (progn
 
