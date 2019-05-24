@@ -153,6 +153,14 @@
   :defer t)
 
 
+(use-package counsel-projectile
+  :pin melpa)
+
+
+(use-package counsel-tramp
+  :pin melpa)
+
+
 (use-package deft
   :config (progn
             (setq deft-extension "org"
@@ -474,9 +482,38 @@
 (use-package ivy                        ; Ivy / Swiper / Counsel
   :pin melpa
   :config (progn
+
             ;;(ivy-mode 1)
+
             ;;(setq projectile-completion-system 'ivy)
-            ;;(define-key ivy-minibuffer-map (kbd "C-m") 'ivy-alt-done) ; enter navigates into a directory
+
+            (setq ivy-height-alist
+                  '((swiper . 10)
+                    (t . (lambda (_caller) (/ (frame-height) 2)))))
+
+            (define-key ivy-minibuffer-map (kbd "C-m") 'ivy-alt-done) ; enter navigates into a directory
+
+            ))
+
+
+(use-package ivy-posframe
+  :pin melpa
+  :after (ivy)
+  :config (progn
+
+            (setq ivy-posframe-width nil
+                  ivy-posframe-min-width 65
+                  ivy-posframe-parameters
+                  '((left-fringe . 8)
+                    (right-fringe . 8)))
+
+            (setq ivy-display-functions-alist
+                  '((swiper . ivy-posframe-display-at-window-bottom-left)
+                    ;;(swiper . ivy-display-function-overlay)
+                    (t . ivy-posframe-display-at-window-center)))
+
+            (ivy-posframe-enable)
+
             ))
 
 
