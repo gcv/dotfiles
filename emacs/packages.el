@@ -217,7 +217,8 @@
   :pin melpa
   :config (progn
 
-            (when (eq window-system 'ns) (set-fringe-mode '(0 . 8)))
+            (when (or (eq window-system 'ns) (eq window-system 'mac))
+              (set-fringe-mode '(0 . 8)))
 
             (define-fringe-bitmap '/fringe-backslash (fringe-helper-convert
                                                       "........"

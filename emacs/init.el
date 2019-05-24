@@ -42,8 +42,11 @@
    (setq ns-antialias-text t)                                   ; anti-aliased fonts on Mac OS
    (setq ns-pop-up-frames nil)                                  ; don't open files in new frame
    (setq ns-command-modifier 'meta)                             ; fix Cmd as Meta on Mac OS
+   (setq mac-command-modifier 'meta)                            ; fix Cmd as Meta on Mac OS
    (setq ns-alternate-modifier 'none)                           ; leave left Alt alone
+   (setq mac-alternate-modifier 'none)                          ; leave left Alt alone
    (setq ns-right-command-modifier 'hyper)                      ; right Cmd should be Hyper
+   (setq mac-right-command-modifier 'hyper)                     ; right Cmd should be Hyper
    t)
   ('windows-nt
    ;; This is much more limited than the Darwin version. It does not have access
