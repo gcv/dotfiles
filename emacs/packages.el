@@ -518,6 +518,8 @@
                   '((swiper . 10)
                     (t . (lambda (_caller) (/ (frame-height) 2)))))
 
+            (global-set-key (kbd "C-c c r") 'ivy-resume)
+
             (define-key ivy-minibuffer-map (kbd "C-m") 'ivy-alt-done) ; enter navigates into a directory
 
             ))
