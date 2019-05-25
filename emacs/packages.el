@@ -518,6 +518,11 @@
                   '((swiper . 10)
                     (t . (lambda (_caller) (/ (frame-height) 2)))))
 
+            (setq ivy-re-builders-alist
+                  '((swiper . ivy--regex-plus)
+                    (counsel-M-x . ivy--regex-fuzzy)
+                    (t . ivy--regex-plus)))
+
             (global-set-key (kbd "C-c c r") 'ivy-resume)
 
             (define-key ivy-minibuffer-map (kbd "C-m") 'ivy-alt-done) ; enter navigates into a directory
@@ -532,14 +537,17 @@
 
             (setq ivy-posframe-width nil
                   ivy-posframe-min-width 65
+                  ivy-posframe-border-width 1
                   ivy-posframe-parameters
-                  '((left-fringe . 8)
-                    (right-fringe . 8)))
+                  '((left-fringe . 0)
+                    (right-fringe . 0)))
 
             (setq ivy-display-functions-alist
                   '((swiper . ivy-posframe-display-at-window-bottom-left)
                     ;;(swiper . ivy-display-function-overlay)
                     (t . ivy-posframe-display-at-window-center)))
+
+            (set-face-attribute 'ivy-posframe-cursor nil :inherit 'ivy-cursor)
 
             (ivy-posframe-enable)
 
