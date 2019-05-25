@@ -151,7 +151,7 @@
 (use-package counsel                    ; Ivy / Swiper / Counsel
   :pin melpa
   :config (progn
-            ;;(global-set-key (kbd "M-x") (lambda () (interactive (counsel-M-x ""))))
+            ;;(global-set-key (kbd "M-x") 'counsel-M-x)
             ;;(global-set-key (kbd "M-i") 'counsel-imenu)
             ;;(global-set-key (kbd "C-M-y") 'counsel-yank-pop)
             ))
@@ -167,7 +167,7 @@
               (interactive)
               (helm-projectile-off)
               (counsel-projectile-mode 1)
-              (global-set-key (kbd "M-x") (lambda () (interactive (counsel-M-x ""))))
+              (global-set-key (kbd "M-x") 'counsel-M-x)
               (global-set-key (kbd "M-i") 'counsel-imenu)
               (global-set-key (kbd "C-M-y") 'counsel-yank-pop))
 
@@ -511,6 +511,8 @@
             ;;(ivy-mode 1)
 
             ;;(setq projectile-completion-system 'ivy)
+
+            (setq ivy-initial-inputs-alist nil)
 
             (setq ivy-height-alist
                   '((swiper . 10)
