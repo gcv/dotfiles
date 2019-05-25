@@ -150,11 +150,28 @@
 
 (use-package counsel                    ; Ivy / Swiper / Counsel
   :pin melpa
-  :defer t)
+  :config (progn
+            ;;(global-set-key (kbd "M-x") (lambda () (interactive (counsel-M-x ""))))
+            ;;(global-set-key (kbd "M-i") 'counsel-imenu)
+            ;;(global-set-key (kbd "C-M-y") 'counsel-yank-pop)
+            ))
 
 
 (use-package counsel-projectile
-  :pin melpa)
+  :pin melpa
+  :config (progn
+
+            ;;(counsel-projectile-mode 1)
+
+            (defun /counsel ()
+              (interactive)
+              (helm-projectile-off)
+              (counsel-projectile-mode 1)
+              (global-set-key (kbd "M-x") (lambda () (interactive (counsel-M-x ""))))
+              (global-set-key (kbd "M-i") 'counsel-imenu)
+              (global-set-key (kbd "C-M-y") 'counsel-yank-pop))
+
+            ))
 
 
 (use-package counsel-tramp
@@ -312,6 +329,14 @@
             (setq helm-buffers-fuzzy-matching t
                   helm-M-x-fuzzy-match t
                   helm-imenu-fuzzy-match t)
+
+            (defun /helm ()
+              (interactive)
+              (counsel-projectile-mode -1)
+              (helm-projectile-on)
+              (global-set-key (kbd "M-x") 'helm-M-x)
+              (global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
+              (global-set-key (kbd "C-M-y") 'helm-show-kill-ring))
 
             (global-set-key (kbd "M-x") 'helm-M-x)
             (global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
