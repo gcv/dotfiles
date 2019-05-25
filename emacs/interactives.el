@@ -233,9 +233,18 @@
 (defun what-face (pos)
   (interactive "d")
   ;; see also: describe-char
-  (let ((face (or (get-char-property (point) 'read-face-name)
-                  (get-char-property (point) 'face))))
+  (let ((face (or (get-char-property pos 'read-face-name)
+                  (get-char-property pos 'face))))
     (if face (message "Face: %s" face) (message "No face at %d" pos))))
+
+
+(defun what-face-mouse (click-event)
+  "`describe-char' at CLICK-EVENT's position. CLICK-EVENT should be a mouse-click event."
+  (interactive "e")
+  (run-hooks 'mouse-leave-buffer-hook)
+  (let ((pos (cadr (event-start click-event))))
+    (describe-char pos)))
+;;(global-set-key (kbd "H-d <down-mouse-1>") #'what-face-mouse)
 
 
 (defun find-file-in-git-project ()
