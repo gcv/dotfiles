@@ -4,7 +4,7 @@
   (let ((base-font (cond ((member "Menlo" (font-family-list)) "Menlo")
                          ((member "Consolas" (font-family-list)) "Consolas")
                          (t nil))))
-    (set-face-attribute 'minibuffer-prompt nil :family base-font)
+    (set-face-attribute 'minibuffer-prompt nil :foreground nil :background nil :family base-font :weight 'bold)
     (set-face-attribute 'mode-line nil :family base-font :underline nil :overline nil)
     (set-face-attribute 'mode-line-inactive nil :underline nil :overline nil)
     (set-face-attribute 'mode-line-buffer-id nil :foreground nil :background nil
@@ -38,7 +38,8 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'zenburn t)
-  (set-face-background 'default "grey12")
+  ;;(set-face-background 'default "grey12")
+  (set-face-background 'default "grey20")
   (set-face-foreground 'default "#cbcbbb")
   (set-face-background 'cursor "grey60")
   (set-face-foreground 'bold "papayawhip")
@@ -149,7 +150,6 @@
   (disable-all-themes)
   (load-theme 'leuven t)
   (set-face-background 'default "#faffff")
-  (set-face-attribute 'minibuffer-prompt nil :background nil)
   (set-face-attribute 'org-level-2 nil :foreground "#000099")
   (set-face-attribute 'org-level-3 nil :foreground "#0000cc")
   (set-face-attribute 'isearch nil :background "lightblue" :foreground nil :underline nil)
@@ -220,7 +220,6 @@
     (set-face-attribute 'default nil :foreground base-color)
     (set-face-attribute 'cursor nil :background "#00cc00")
     (set-face-attribute 'show-paren-match nil :background base-color-darker-1)
-    (set-face-attribute 'minibuffer-prompt nil :foreground base-color)
     (set-face-background 'hl-line "darkgreen")
     (set-face-attribute 'mode-line nil
                         :foreground "black"

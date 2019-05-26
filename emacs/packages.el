@@ -535,8 +535,9 @@
   :after (ivy)
   :config (progn
 
-            (setq ivy-posframe-width nil
+            (setq ivy-posframe-width 65
                   ivy-posframe-min-width 65
+                  ivy-posframe-height 30
                   ivy-posframe-border-width 1
                   ivy-posframe-parameters
                   '((left-fringe . 0)
@@ -545,9 +546,13 @@
             (setq ivy-display-functions-alist
                   '((swiper . ivy-posframe-display-at-window-bottom-left)
                     ;;(swiper . ivy-display-function-overlay)
-                    (t . ivy-posframe-display-at-window-center)))
+                    ;;(t . ivy-posframe-display-at-frame-center)
+                    (t . ivy-posframe-display-at-window-center)
+                    ;;(t . ivy-posframe-display-at-point)
+                    ))
 
             (set-face-attribute 'ivy-posframe-cursor nil :inherit 'ivy-cursor)
+            (set-face-attribute 'ivy-posframe nil :foreground nil :background nil :inherit 'default)
 
             (ivy-posframe-enable)
 
