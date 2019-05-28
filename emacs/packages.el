@@ -537,7 +537,7 @@
 
             (setq ivy-posframe-width 65
                   ivy-posframe-min-width 65
-                  ivy-posframe-height 30
+                  ivy-posframe-height nil
                   ivy-posframe-border-width 1
                   ivy-posframe-parameters
                   '((left-fringe . 0)

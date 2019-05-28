@@ -38,8 +38,7 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'zenburn t)
-  ;;(set-face-background 'default "grey12")
-  (set-face-background 'default "grey20")
+  (set-face-background 'default "grey18")
   (set-face-foreground 'default "#cbcbbb")
   (set-face-background 'cursor "grey60")
   (set-face-foreground 'bold "papayawhip")
@@ -47,10 +46,12 @@
                       :background "grey30"
                       :foreground "grey68"
                       :box '(:line-width 1 :color "grey30"))
-  (set-face-attribute 'mode-line-inactive nil
-                      :background "grey20"
-                      :foreground "grey42"
-                      :box '(:line-width 1 :color "grey20"))
+  (let (;;(bg "grey20")
+        (bg "grey22"))
+    (set-face-attribute 'mode-line-inactive nil
+                        :background bg
+                        :foreground "grey42"
+                        :box '(:line-width 1 :color bg)))
   (set-face-background 'highlight "grey35")
   (set-face-underline 'highlight nil)
   (set-face-background 'hl-line "#525252")

@@ -403,7 +403,9 @@
 (global-set-key (kbd "C-M-n") 'up-list)
 (global-set-key (kbd "C-M-p") 'backward-down-list)
 (global-set-key (kbd "M-<up>") 'scroll-up-line)
+(global-set-key (kbd "H-<up>") 'scroll-up-line)
 (global-set-key (kbd "M-<down>") 'scroll-down-line)
+(global-set-key (kbd "H-<down>") 'scroll-down-line)
 
 (global-set-key (kbd "C-M-<backspace>") 'backward-kill-sexp)
 
