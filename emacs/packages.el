@@ -869,8 +869,7 @@
 
             (add-hook 'olivetti-mode-hook #'/olivetti-mode-hook)
 
-
-            (defun /olivetti-mode-reset (arg)
+            (defun /olivetti-mode-reset (&optional arg)
               (if (symbol-value 'olivetti-mode)
                   (olivetti-set-width (default-value 'olivetti-body-width))
                 (olivetti-set-width 1.0)))
