@@ -51,7 +51,7 @@
     (set-face-attribute 'mode-line-inactive nil
                         :background bg
                         :foreground "grey42"
-                        :box '(:line-width 1 :color bg)))
+                        :box `(:line-width 1 :color ,bg)))
   (set-face-background 'highlight "grey35")
   (set-face-underline 'highlight nil)
   (set-face-background 'hl-line "#525252")
