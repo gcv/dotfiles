@@ -244,3 +244,16 @@
     (set-face-attribute 'isearch nil :background base-color-lighter-1 :foreground "black" :underline nil)
     (set-face-attribute 'lazy-highlight nil :background base-color-darker-1 :foreground "black" :underline nil))
   (/theme-common))
+
+
+(defun theme-anti-zenburn ()
+  (interactive)
+  (load-theme 'anti-zenburn t)
+  (let (;;(bg "#d4d4d4")
+        (bg "#d9d9d9"))
+    (set-face-attribute 'mode-line nil
+                        :background bg
+                        :box `(:line-width 2 :color ,bg))
+    (set-face-attribute 'mode-line-inactive nil
+                        :box '(:line-width 2 :color "#c7c7c7")))
+  (/theme-common))

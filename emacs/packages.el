@@ -45,6 +45,9 @@
 (use-package ag)
 
 
+(use-package anti-zenburn-theme)
+
+
 (use-package avy
   :config (progn
             (global-set-key (kbd "M-j") 'avy-goto-char)
