@@ -336,6 +336,7 @@
             (defun /helm ()
               (interactive)
               (counsel-projectile-mode -1)
+              (projectile-mode 1)
               (helm-projectile-on)
               (global-set-key (kbd "M-x") 'helm-M-x)
               (global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
