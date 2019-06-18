@@ -14,7 +14,8 @@
     (set-face-attribute 'org-mode-line-clock nil :foreground nil :background nil)
     (set-face-attribute 'org-mode-line-clock nil :inherit 'unspecified)
     (set-face-attribute 'helm-source-header nil :foreground nil :background nil
-                        :family base-font :weight 'bold)
+                        :family base-font :weight 'bold :height 1.2
+                        :box `(:line-width 5 :color ,(face-attribute 'default :background)))
     (set-face-attribute 'helm-selection nil :underline nil)
     (set-face-attribute 'dired-header nil :foreground nil :background nil
                         :family base-font :weight 'bold)
