@@ -1,4 +1,7 @@
+;;; -*- mode: emacs-lisp; mode: rainbow; -*-
+
 ;;; Good resource for making colors: https://www.w3schools.com/colors/colors_picker.asp
+;;; Also try the mac-color-picker AppleScript wrapper.
 
 (defun /theme-common ()
   (let ((base-font (cond ((member "Menlo" (font-family-list)) "Menlo")
@@ -46,10 +49,11 @@
   (set-face-foreground 'default "#cbcbbb")
   (set-face-background 'cursor "grey60")
   (set-face-foreground 'bold "papayawhip")
-  (set-face-attribute 'mode-line nil
-                      :background "grey30"
-                      :foreground "grey68"
-                      :box '(:line-width 1 :color "grey30"))
+  (let ((bg "grey30"))
+    (set-face-attribute 'mode-line nil
+                        :background bg
+                        :foreground "grey68"
+                        :box `(:line-width 1 :color ,bg)))
   (let (;;(bg "grey20")
         (bg "grey22"))
     (set-face-attribute 'mode-line-inactive nil
@@ -86,13 +90,15 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'solarized-light t)
-  (set-face-attribute 'mode-line nil
-                      :box '(:line-width 2 :color "#e1e1e1")
-                      :foreground "black"
-                      :background "#e1e1e1")
-  (set-face-attribute 'mode-line-inactive nil
-                      :box '(:line-width 2 :color "#eee8d5")
-                      :background "#eee8d5")
+  (let ((bg "#e1e1e1"))
+    (set-face-attribute 'mode-line nil
+                        :background bg
+                        :foreground "black"
+                        :box `(:line-width 2 :color ,bg)))
+  (let ((bg "#eee8d5"))
+    (set-face-attribute 'mode-line-inactive nil
+                        :background bg
+                        :box `(:line-width 2 :color ,bg)))
   (set-face-attribute 'bold nil :foreground "navy")
   (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
   (/theme-solarized-common)
@@ -105,14 +111,16 @@
   (load-theme 'solarized-dark t)
   (set-face-background 'default "#081a25")
   (set-face-foreground 'default "#adad9c")
-  (set-face-attribute 'mode-line nil
-                      :box '(:line-width 2 :color "grey40")
-                      :foreground "#23313a"
-                      :background "grey40")
-  (set-face-attribute 'mode-line-inactive nil
-                      :box '(:line-width 2 :color "grey14")
-                      :foreground "#888888"
-                      :background "grey14")
+  (let ((bg "grey40"))
+    (set-face-attribute 'mode-line nil
+                        :background bg
+                        :foreground "#23313a"
+                        :box `(:line-width 2 :color ,bg)))
+  (let ((bg "grey14"))
+    (set-face-attribute 'mode-line-inactive nil
+                        :background bg
+                        :foreground "#888888"
+                        :box `(:line-width 2 :color ,bg)))
   (set-face-attribute 'bold nil :foreground "papayawhip")
   (set-face-foreground 'isearch "#0f9999")
   (set-face-background 'isearch "grey12")
@@ -159,7 +167,14 @@
   (set-face-attribute 'trailing-whitespace nil :background "red")
   (set-face-attribute 'js2-error nil :box nil)
   (set-face-attribute 'aw-background-face nil :foreground "gray60" :background nil)
-  (set-face-attribute 'mode-line-inactive nil :background "#dbdcda" :box '(:line-width 1 :color "#f0f0ef"))
+  (let ((bg "#335ea8"))
+    (set-face-attribute 'mode-line nil
+                        :background bg
+                        :box `(:line-width 2 :color ,bg)))
+  (let ((bg "#dbdcda"))
+    (set-face-attribute 'mode-line-inactive nil
+                        :background bg
+                        :box `(:line-width 2 :color ,bg)))
   (/theme-common))
 
 
@@ -172,12 +187,14 @@
   (disable-all-themes)
   (load-theme 'material t)
   ;; NB: :box '(:line-width -n) draws a box internally, without increasing the rendered size of the text!
-  (set-face-attribute 'mode-line nil
-                      :background "#35575b"
-                      :box '(:line-width 2 :color "#35575b"))
-  (set-face-attribute 'mode-line-inactive nil
-                      :background "black"
-                      :box '(:line-width 2 :color "black"))
+  (let ((bg "#35575b"))
+    (set-face-attribute 'mode-line nil
+                        :background bg
+                        :box `(:line-width 2 :color ,bg)))
+  (let ((bg "black"))
+    (set-face-attribute 'mode-line-inactive nil
+                        :background bg
+                        :box `(:line-width 2 :color ,bg)))
   (set-face-attribute 'fringe nil :background "#35575b")
   (set-face-attribute 'vertical-border nil :foreground "#dcdccc")
   (set-face-attribute 'magit-diff-removed-highlight nil :foreground "red")
@@ -190,10 +207,15 @@
   (disable-all-themes)
   (load-theme 'material-light t)
   (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
-  (set-face-attribute 'mode-line nil
-                      :box '(:line-width 1 :color "#90a4ae"))
-  (set-face-attribute 'mode-line-inactive nil
-                      :box '(:line-width 1 :color "#eceff1"))
+  (let ((bg ;; "#90a4ae"
+            "#aac2ce"))
+    (set-face-attribute 'mode-line nil
+                        :background bg
+                        :box `(:line-width 1 :color ,bg)))
+  (let ((bg "#eceff1"))
+    (set-face-attribute 'mode-line-inactive nil
+                        :background bg
+                        :box `(:line-width 1 :color ,bg)))
   (set-face-attribute 'header-line nil :box nil)
   (/theme-material-common)
   (/theme-common))
@@ -218,14 +240,16 @@
     (set-face-attribute 'cursor nil :background "#00cc00")
     (set-face-attribute 'show-paren-match nil :background base-color-darker-1)
     (set-face-background 'hl-line "darkgreen")
-    (set-face-attribute 'mode-line nil
-                        :foreground "black"
-                        :background base-color-lighter-1
-                        :box `(:line-width 2 :color ,base-color-lighter-1))
-    (set-face-attribute 'mode-line-inactive nil
-                        :foreground "black"
-                        :background base-color-darker-2
-                        :box `(:line-width 2 :color ,base-color-darker-2))
+    (let ((bg base-color-lighter-1))
+      (set-face-attribute 'mode-line nil
+                          :background bg
+                          :foreground "black"
+                          :box `(:line-width 2 :color ,bg)))
+    (let ((bg base-color-darker-2))
+      (set-face-attribute 'mode-line-inactive nil
+                          :background bg
+                          :foreground "black"
+                          :box `(:line-width 2 :color ,bg)))
     (set-face-attribute 'header-line nil :foreground "black" :background base-color-darker-2)
     (set-face-attribute 'org-hide nil :foreground "black" :background "black")
     (set-face-attribute 'org-level-1 nil :foreground blue-lighter-3)
