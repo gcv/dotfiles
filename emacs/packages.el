@@ -1047,6 +1047,16 @@
             ))
 
 
+(use-package rainbow-mode
+  :pin gnu
+  :diminish ""
+  :config (progn
+            (rainbow-mode 1)
+            (setq rainbow-ansi-colors t)
+            (setq rainbow-html-colors t)
+            (setq rainbow-latex-colors t)))
+
+
 (use-package restclient
   :pin melpa
   :config (progn
