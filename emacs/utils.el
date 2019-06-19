@@ -113,3 +113,15 @@
         (state-b (window-state-get (frame-root-window b))))
     (window-state-put state-a (frame-root-window b))
     (window-state-put state-b (frame-root-window a))))
+
+
+(defun /ns-color-to-hex (color)
+  "Convert NS format colors to standard hex notation."
+  (concat "#"
+          (mapconcat 'identity
+                     (mapcar (lambda (x)
+                               (let ((col (lsh (string-to-number x) -8)))
+                                 (if (< col 16)
+                                     (format "0%x" col)
+                                   (format "%x" col))))
+                             (split-string (s-replace "\"" "" color) ",")) "")))

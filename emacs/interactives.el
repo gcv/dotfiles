@@ -530,3 +530,22 @@ target width."
           (org-id-add-location new-id (buffer-file-name (buffer-base-buffer)))
           (push (list (concatenate 'string "#" new-id) heading) org-stored-links)))))
   (message "Insert with org-insert-last-stored-link (C-c M-l)"))
+
+
+(defun mac-color-picker (&optional list buffer-name)
+  "Call macOS color picker and insert the chosen color."
+  (interactive)
+  (let ((result
+         (do-applescript "tell application \"Finder\"
+activate
+set result to \"\"
+set x to (choose color)
+set result to item 1 of x as string
+set result to result & \",\"
+set result to result & item 2 of x as string
+set result to result & \",\"
+set result to result & item 3 of x as string
+return result
+end tell")))
+    (insert (/ns-color-to-hex result))
+    (do-applescript "tell application \"Emacs\" to activate")))
