@@ -533,6 +533,7 @@
 
 (use-package ivy-posframe
   :pin melpa
+  :diminish ""
   :after (ivy)
   :config (progn
 
@@ -544,18 +545,18 @@
                   '((left-fringe . 0)
                     (right-fringe . 0)))
 
-            (setq ivy-display-functions-alist
+            (setq ivy-posframe-display-functions-alist
                   '((swiper . ivy-posframe-display-at-window-bottom-left)
-                    ;;(swiper . ivy-display-function-overlay)
-                    ;;(t . ivy-posframe-display-at-frame-center)
-                    (t . ivy-posframe-display-at-window-center)
-                    ;;(t . ivy-posframe-display-at-point)
-                    ))
+                    ;;(swiper . nil)
+                    (complete-symbol . ivy-posframe-display-at-point)
+                    (counsel-M-x . ivy-posframe-display-at-window-center)
+                    ;;(t . ivy-posframe-display)
+                    (t . ivy-posframe-display-at-window-center)))
 
             (set-face-attribute 'ivy-posframe-cursor nil :inherit 'ivy-cursor)
             (set-face-attribute 'ivy-posframe nil :foreground nil :background nil :inherit 'default)
 
-            (ivy-posframe-enable)
+            (ivy-posframe-mode 1)
 
             ))
 
