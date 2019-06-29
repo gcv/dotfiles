@@ -152,9 +152,7 @@
 (use-package counsel                    ; Ivy / Swiper / Counsel
   :pin melpa
   :config (progn
-            ;;(global-set-key (kbd "M-x") 'counsel-M-x)
-            ;;(global-set-key (kbd "M-i") 'counsel-imenu)
-            ;;(global-set-key (kbd "C-M-y") 'counsel-yank-pop)
+            (global-set-key (kbd "C-x C-M-f") 'counsel-find-file)
             ))
 
 
