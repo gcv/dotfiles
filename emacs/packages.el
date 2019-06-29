@@ -140,6 +140,13 @@
             ))
 
 
+(use-package company-lsp
+  :pin melpa
+  :after (company lsp-mode)
+  :config (progn
+            ))
+
+
 (use-package company-lua
   :pin melpa
   :after (company lua-mode))
@@ -750,6 +757,34 @@
 (use-package leuven-theme
   :pin melpa
   :defer t)
+
+
+(use-package lsp-mode
+  :pin melpa
+  :config (progn
+
+            (setq lsp-enable-snippet nil)
+
+            (defun /lsp-mode-xref-keybindings (&optional arg)
+              (local-set-key (kbd "M-.") 'xref-find-definitions)
+              (local-set-key (kbd "M-,") 'xref-pop-marker-stack))
+
+            (advice-add 'lsp-mode :after #'/lsp-mode-xref-keybindings)
+
+            (lsp-register-client
+             (make-lsp-client :new-connection (lsp-tramp-connection "pyls")
+                              :major-modes '(python-mode)
+                              :remote? t
+                              :server-id 'pyls-remote))
+
+            ))
+
+
+(use-package lsp-ui
+  :pin melpa
+  :after (lsp-mode)
+  :config (progn
+            ))
 
 
 (use-package lua-mode

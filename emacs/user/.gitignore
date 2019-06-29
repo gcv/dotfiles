@@ -1,4 +1,5 @@
 *.elc
+.lsp-session*
 .mc-lists.el
 .org-id-locations
 .smex-items
