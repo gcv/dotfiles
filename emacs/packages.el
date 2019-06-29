@@ -7,6 +7,7 @@
 
 (use-package async)
 (use-package dash)                       ; a modern list library
+(use-package dash-functional)
 (use-package epl)                        ; package.el wrapper
 (use-package f)                          ; file handling
 (use-package ht)                         ; hash tables
