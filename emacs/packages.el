@@ -763,7 +763,10 @@
   :pin melpa
   :config (progn
 
-            (setq lsp-enable-snippet nil)
+            (setq lsp-enable-snippet nil
+                  lsp-enable-indentation nil
+                  lsp-before-save-edits nil
+                  lsp-enable-symbol-highlighting nil)
 
             (defun /lsp-mode-xref-keybindings (&optional arg)
               (local-set-key (kbd "M-.") 'xref-find-definitions)
@@ -784,6 +787,7 @@
   :pin melpa
   :after (lsp-mode)
   :config (progn
+            (setq lsp-ui-doc-delay 1.0)
             ))
 
 
