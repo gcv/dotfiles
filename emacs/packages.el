@@ -775,7 +775,7 @@
             (advice-add 'lsp-mode :after #'/lsp-mode-xref-keybindings)
 
             (lsp-register-client
-             (make-lsp-client :new-connection (lsp-tramp-connection "pyls")
+             (make-lsp-client :new-connection (lsp-tramp-connection "pyls 2>/dev/null")
                               :major-modes '(python-mode)
                               :remote? t
                               :server-id 'pyls-remote))
