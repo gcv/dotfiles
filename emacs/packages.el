@@ -673,8 +673,7 @@
 
             (defun cv-julia-send-top-level-form ()
               (interactive)
-              (let* ((inf-julia-buffer (cv--term-julia-buffer))
-)
+              (let* ((inf-julia-buffer (cv--term-julia-buffer)))
                 (when inf-julia-buffer
                   (let ((starting-point (point)))
                     (save-excursion
@@ -709,11 +708,22 @@
                           (term-send-input)
                         (comint-send-input)))))))
 
+            (defun cv-julia-send-line ()
+              (interactive)
+              (let* ((inf-julia-buffer (cv--term-julia-buffer)))
+                (when inf-julia-buffer
+                  (let ((line (s-trim (thing-at-point 'line t))))
+                    (save-excursion
+                      (with-current-buffer inf-julia-buffer
+                        (insert line)
+                        (term-send-input)))))))
+
             (defun /julia-mode-hook ()
               (subword-mode)
               (local-set-key (kbd "C-c C-z") 'cv-term-julia)
               (local-set-key (kbd "C-c C-c") 'cv-julia-send-top-level-form)
               (local-set-key (kbd "C-M-x") 'cv-julia-send-region)
+              (local-set-key (kbd "C-c C-l") 'cv-julia-send-line)
               (local-set-key (kbd "C-c C-k") 'cv-julia-send-buffer))
 
             (add-hook 'julia-mode-hook #'/julia-mode-hook)
