@@ -104,7 +104,10 @@
 
 (defun rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
-  (interactive "sNew name: ")
+  (interactive (list
+                (read-string
+                 "New name: "
+                 (file-name-nondirectory (buffer-file-name (current-buffer))))))
   (let ((name (buffer-name))
         (filename (buffer-file-name)))
     (cond ((not filename)
