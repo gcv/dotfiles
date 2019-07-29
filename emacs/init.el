@@ -112,28 +112,48 @@
 ;;; paths
 ;;; ----------------------------------------------------------------------------
 
-(defun add-to-system-path (path)
+(defun add-to-env (env path-raw &optional separator)
+  (let* ((path (expand-file-name path-raw))
+         (separator (if (endp separator) ":" separator))
+         (current-env-raw (or (getenv env) ""))
+         (current-env (if (string-equal current-env-raw "")
+                          (list)
+                        (split-string current-env-raw separator))))
+    (unless (member path current-env)
+      (setenv env (if (endp current-env)
+                      path
+                    (mapconcat 'identity (cons path current-env) separator))))
+    (getenv env)))
+
+(defun add-to-system-path (path-raw)
   "Add a path to the exec-path variable and the Emacs process' PATH environmental variable."
-  ;; exec-path
-  (unless (member path exec-path)
-    (add-to-list 'exec-path path))
-  ;; PATH
-  (let ((current-path (getenv "PATH")))
-    (unless (and (equal current-path "")
-                 (member path (split-string current-path ":")))
-      (setenv "PATH" (concat path ":" current-path))))
-  exec-path)
+  (let ((path (expand-file-name path-raw)))
+    (unless (member path exec-path)
+      (add-to-list 'exec-path path))
+    (add-to-env "PATH" path)
+    exec-path))
 
 (defun add-subdirs-to-load-path (dir)
   (let ((default-directory (concat dir "/")))
     (normal-top-level-add-subdirs-to-load-path)))
 
-(add-to-system-path (expand-file-name "~/.local/bin"))
-(add-to-system-path "/opt/brew/bin")
-(add-to-system-path "/opt/local/bin")
+(add-to-system-path "/bin")
+(add-to-system-path "/sbin")
+(add-to-system-path "/usr/bin")
+(add-to-system-path "/usr/sbin")
 (add-to-system-path "/usr/local/bin")
+(add-to-system-path "/usr/local/sbin")
+(add-to-system-path "/opt/brew/bin")
+(add-to-system-path "/opt/brew/sbin")
+(add-to-system-path "~/.nix-profile/bin")
+(add-to-system-path "~/.nix-profile/sbin")
+(add-to-system-path "~/.local/bin")
+(add-to-system-path "~/.local/sbin")
 
-(setenv "MANPATH" "/usr/share/man:/usr/local/share/man:/usr/X11/man:/opt/brew/share/man:/opt/local/man")
+(add-to-env "MANPATH" "/usr/share/man")
+(add-to-env "MANPATH" "/usr/local/share/man")
+(add-to-env "MANPATH" "/opt/brew/share/man")
+(add-to-env "MANPATH" "/Users/kostya/.nix-profile/share/man")
 
 (add-to-list 'load-path (concat user-emacs-directory "site-lisp"))
 (add-subdirs-to-load-path (concat user-emacs-directory "site-lisp"))
