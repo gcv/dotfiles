@@ -34,12 +34,19 @@ function path_reset() {
         ~/.local/bin ~/.local/sbin
         ~/.local/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
         ~/.local/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
+    )
+    local candidates=(
+        ~/.nix-profile/bin ~/.nix-profile/sbin
         ${homebrew_dir}/bin ${homebrew_dir}/sbin
-        /opt/local/bin /opt/local/sbin
+    )
+    local c
+    for c in ${candidates}; do
+        [[ -d "${c}" ]] && path+=("${c}")
+    done
+    path+=(
         /usr/local/bin /usr/local/sbin
         /usr/bin /usr/sbin
         /bin /sbin
-        $path
     )
 }
 path_reset
@@ -49,8 +56,8 @@ manpath+=(
     ~/.local/share/man
     ~/.local/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
     ~/.local/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
+    ~/.nix-profile/share/man
     /opt/brew/share/man
-    /opt/local/man
 )
 export MANPATH=${MANPATH}:                                 # append colon
 
@@ -86,10 +93,14 @@ function doctave() { docker run --rm -it -v "$PWD":/source schickling/octave }
     alias et='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -a "" -t' || \
     alias et='emacsclient -a "" -t'
 
-[[ ${UNAME} == "Linux" ]] && alias ls='ls --color'
-[[ ${UNAME} == "Darwin" && -x "/opt/brew/bin/gls" ]] && alias ls='gls --color'
+if [[ $(ls --color 2>/dev/null) ]]; then
+    # GNU ls probably available
+    alias ls='ls --color'
+elif [[ $(command -v gls) && $(gls --color 2>/dev/null) ]]; then
+    alias ls='gls --color'
+fi
 
- [[ ${UNAME} == "Darwin" ]] && function brewdeps() {
+[[ ${UNAME} == "Darwin" && $(command -v brew) ]] && function brewdeps() {
         function brewdeps_check() {
             echo -ne "\x1B[1;34m $1 \x1B[0m"; brew uses "$1" --installed | awk '{printf(" %s ", $0)}'; echo "";
         }
@@ -275,7 +286,7 @@ fi
 
 
 ### Turn on autojump (https://github.com/joelthelion/autojump).
-[[ ${UNAME} == "Darwin" && -f `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
+[[ ${UNAME} == "Darwin" && $(command -v brew) && -f `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
 [[ ${UNAME} == "Linux" && -f /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
 
 
