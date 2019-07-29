@@ -599,6 +599,8 @@
             (add-to-list 'display-buffer-alist '("\\*Julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
             (add-to-list 'display-buffer-alist '("\\*julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
 
+            (setq julia-indent-offset 3)
+
             (setq julia-prompt-regexp "julia> ")
 
             (define-minor-mode cv-inferior-julia-mode
