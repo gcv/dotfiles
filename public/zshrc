@@ -914,5 +914,33 @@ function s3cp() {
 }
 
 
+### Nix profile switcher
+function nix-profile() {
+    local profile=$1
+    local profile_dir="/nix/var/nix/profiles/per-user/${USER}"
+    local profile_link="${profile_dir}/profile"
+    if [[ ! -z "${profile}" && "${profile}" != "${USER}" ]]; then
+        profile_dir="/nix/var/nix/profiles/projects/${profile}"
+        profile_link="${profile_dir}/profile"
+        if [[ ! -d "${profile_dir}" ]]; then
+            mkdir -p "${profile_dir}"
+            nix-env -p "${profile_link}" -i nix # nss-cacert
+        fi
+    fi
+    if [[ -x "${profile_link}/bin/nix-env" ]]; then
+        nix-env --switch-profile "${profile_link}"
+        echo "${profile_link}"
+    else
+        echo "resulting profile invalid" 1>&2
+    fi
+}
+
+function _nix-profile() {
+    compadd $(print -l /nix/var/nix/profiles/**/profile | perl -pe 's/\/nix\/var\/nix\/profiles\/(.*)\/(.*)\/profile/\2/')
+}
+
+compdef _nix-profile nix-profile
+
+
 ######### yesterday we obeyed kings and bent our necks before emperors #########
 #########               but today we kneel only to truth               #########
