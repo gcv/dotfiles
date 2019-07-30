@@ -892,6 +892,14 @@
             ))
 
 
+(use-package nix-mode
+  :config (progn
+
+            (add-to-list 'auto-mode-alist '("\\.nix$" . nix-mode))
+
+            ))
+
+
 ;; turn on when built-in Org dependency is up-to-date
 ;;(use-package ob-async)
 
