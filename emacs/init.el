@@ -153,7 +153,7 @@
 (add-to-env "MANPATH" "/usr/share/man")
 (add-to-env "MANPATH" "/usr/local/share/man")
 (add-to-env "MANPATH" "/opt/brew/share/man")
-(add-to-env "MANPATH" "/Users/kostya/.nix-profile/share/man")
+(add-to-env "MANPATH" "~/.nix-profile/share/man")
 
 (add-to-list 'load-path (concat user-emacs-directory "site-lisp"))
 (add-subdirs-to-load-path (concat user-emacs-directory "site-lisp"))
