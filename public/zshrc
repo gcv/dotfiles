@@ -22,6 +22,14 @@ export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
 export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
 
 
+### Nix: turn it on.
+### The "correct" way is to source ~/.nix-profile/etc/profile.d/nix.sh, but
+### what's the fun in that?
+[[ -e ~/.nix-defexpr ]] && export NIX_PATH=nixpkgs=${HOME}/.nix-defexpr/channels/nixpkgs
+[[ -e ~/.nix-profile ]] && export NIX_SSL_CERT_FILE=${HOME}/.nix-profile/etc/ssl/certs/ca-bundle.crt
+[[ -e "/nix/var/nix/profiles/per-user/${USER}" ]] && export NIX_USER_PROFILE_DIR=/nix/var/nix/profiles/per-user/${USER}
+
+
 ### Paths include locally-installed packages under ~/.local as symbolic links to
 ### the active version:
 ###   ./configure --prefix=~/.local/package-version && make && make install
@@ -286,21 +294,29 @@ fi
 
 
 ### Turn on autojump (https://github.com/joelthelion/autojump).
-[[ ${UNAME} == "Darwin" && $(command -v brew) && -f `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
-[[ ${UNAME} == "Linux" && -f /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
+if [[ -f /usr/share/autojump/autojump.sh ]]; then
+    . /usr/share/autojump/autojump.sh
+elif [[ -f "${NIX_USER_PROFILE_DIR}/profile/etc/profile.d/autojump.sh" ]]; then
+    . "${NIX_USER_PROFILE_DIR}/profile/etc/profile.d/autojump.sh"
+elif [[ $(command -v brew) && -f `brew --prefix`/etc/autojump.sh ]]; then
+    . `brew --prefix`/etc/autojump.sh
+fi
 
 
 ### Turn on fzf (fuzzy finder) integration if found.
 if [[ $(command -v fzf) ]]; then
     export FZF_DEFAULT_OPTS='--layout=reverse --inline-info'
-    if [[ $(command -v brew) ]]; then
+    if [[ -d "${NIX_USER_PROFILE_DIR}/profile/share/fzf" ]]; then
+        source "${NIX_USER_PROFILE_DIR}/profile/share/fzf/completion.zsh" 2>/dev/null
+        source "${NIX_USER_PROFILE_DIR}/profile/share/fzf/key-bindings.zsh"
+    elif [[ $(command -v brew) ]]; then
         [[ $- == *i* ]] && source "$(brew --cellar)/fzf/$(fzf --version | awk '{print $1}')/shell/completion.zsh" 2>/dev/null
         source "$(brew --cellar)/fzf/$(fzf --version | awk '{print $1}')/shell/key-bindings.zsh"
-        # but change keybindings to be more palatable
-        bindkey '^R' history-incremental-search-backward # restore default
-        bindkey '\er' fzf-history-widget # Esc-r to use fzf's history search
-        bindkey '\et' fzf-file-widget # Esc-t to use fzf's file search
     fi
+    # change keybindings to be more palatable
+    bindkey '^R' history-incremental-search-backward # restore default
+    bindkey '\er' fzf-history-widget # Esc-r to use fzf's history search
+    bindkey '\et' fzf-file-widget # Esc-t to use fzf's file search
 fi
 
 
@@ -309,6 +325,12 @@ if [[ "${UNAME}" == "Darwin" && -f "/Applications/Docker.app/Contents/Resources/
     . /Applications/Docker.app/Contents/Resources/etc/docker.zsh-completion
     compinit -i
     compdef _docker docker
+fi
+
+
+### Turn on direnv integration if found.
+if [[ $(command -v direnv) ]]; then
+    eval "$(direnv hook zsh)"
 fi
 
 
@@ -914,12 +936,17 @@ function s3cp() {
 }
 
 
-### Nix profile switcher
+### Nix: profile switcher
 function nix-profile() {
+    # no args: print current profile link
+    # tab-completion should work
     local profile=$1
     local profile_dir="/nix/var/nix/profiles/per-user/${USER}"
     local profile_link="${profile_dir}/profile"
-    if [[ ! -z "${profile}" && "${profile}" != "${USER}" ]]; then
+    if [[ -z "${profile}" ]]; then
+        echo $(readlink ~/.nix-profile)
+        return 0
+    elif [[ "${profile}" != "${USER}" ]]; then
         profile_dir="/nix/var/nix/profiles/projects/${profile}"
         profile_link="${profile_dir}/profile"
         if [[ ! -d "${profile_dir}" ]]; then
@@ -940,6 +967,14 @@ function _nix-profile() {
 }
 
 compdef _nix-profile nix-profile
+
+
+### Nix: package file lister
+function nix-files() {
+    local cmd=$1
+    local cmd_path=$(readlinkf $(readlinkf $(which "${cmd}"))/../..)
+    print -l "${cmd_path}"/**
+}
 
 
 ######### yesterday we obeyed kings and bent our necks before emperors #########
