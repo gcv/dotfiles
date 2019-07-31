@@ -330,7 +330,7 @@ fi
 
 ### Turn on direnv integration if found.
 if [[ $(command -v direnv) ]]; then
-    eval "$(direnv hook zsh)"
+    eval "$($(readlink $(which direnv)) hook zsh)"
 fi
 
 
