@@ -17,6 +17,7 @@ elpa/archives
 elpa/gnupg/
 eshell/
 history
+ido.last
 network-security.data
 nrepl-history
 persp-state.el
