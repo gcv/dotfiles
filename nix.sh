@@ -20,6 +20,7 @@ nix-env -i \
     autojump \
     automake \
     awscli \
+    bat \
     cmake \
     coreutils \
     ctags \
@@ -32,6 +33,7 @@ nix-env -i \
     git \
     global \
     gnupg-1.4.23 \
+    gnutls \
     htop \
     jq \
     ledger \
