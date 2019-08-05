@@ -423,7 +423,9 @@ compdef _ec2setup ec2setup
 
 
 ### Turn on RVM.
-function rvm_on() {
+function rvm-on() {
+    echo "rvm is deprecated" 1>&2
+    return 1
     [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
     # autocompletion
     fpath=($fpath $HOME/.rvm/scripts/zsh/Completion)
@@ -443,15 +445,15 @@ function rvm_on() {
 
 
 ### Turn on rbenv.
-function rbenv_on() {
+function rbenv-on() {
     eval "$(rbenv init -)"
 }
 
 
 ### Turn on NVM.
-function nvm_on() {
+function nvm-on() {
     export NVM_DIR=$(readlinkf "$HOME/.nvm")
-    [[ -s "/opt/brew/opt/nvm/nvm.sh" ]] && source "/opt/brew/opt/nvm/nvm.sh"
+    [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
     path=($path ~/.yarn/bin)
 }
 
