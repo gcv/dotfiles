@@ -37,6 +37,7 @@ nix-env -i \
     htop \
     jq \
     ledger \
+    magic-wormhole \
     mosh \
     nmap \
     offlineimap \
