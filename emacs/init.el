@@ -160,6 +160,16 @@
 
 
 ;;; ----------------------------------------------------------------------------
+;;; nix
+;;; ----------------------------------------------------------------------------
+
+(when (file-exists-p "~/.nix-defexpr")
+  (setenv "NIX_PATH" (format "nixpkgs=%s/.nix-defexpr/channels/nixpkgs" (getenv "HOME"))))
+(when (file-exists-p "~/.nix-profile")
+  (setenv "NIX_SSL_CERT_FILE" (format "%s/.nix-profile/etc/ssl/certs/ca-bundle.crt" (getenv "HOME"))))
+
+
+;;; ----------------------------------------------------------------------------
 ;;; package system configuration
 ;;; ----------------------------------------------------------------------------
 
