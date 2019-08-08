@@ -419,6 +419,10 @@
 (global-unset-key (kbd "C-8"))
 (global-unset-key (kbd "C-9"))
 
+;; pop-global-mark is confusing, especially with perspectives
+(global-unset-key (kbd "C-x C-@"))
+(global-set-key (kbd "C-x C-SPC") 'pop-to-mark-command)
+
 (when window-system (global-unset-key (kbd "C-z")))
 (global-set-key (kbd "M-h") 'ns-do-hide-emacs)
 
