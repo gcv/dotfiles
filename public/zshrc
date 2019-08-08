@@ -953,7 +953,7 @@ function nix-profile() {
         profile_link="${profile_dir}/profile"
         if [[ ! -d "${profile_dir}" ]]; then
             mkdir -p "${profile_dir}"
-            nix-env -p "${profile_link}" -i nix # nss-cacert
+            nix-env -p "${profile_link}" -i nix nss-cacert
         fi
     fi
     if [[ -x "${profile_link}/bin/nix-env" ]]; then

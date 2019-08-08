@@ -585,7 +585,7 @@
 (put 'dired-find-alternate-file 'disabled nil)
 
 ;; quick hack for using GNU ls
-(when-let ((gnu-ls (executable-find "gls")))
+(when-let ((gnu-ls (executable-find "ls")))
   (setq insert-directory-program gnu-ls)
   (setq dired-listing-switches "-gGha")
   (setq dired-use-ls-dired t))
