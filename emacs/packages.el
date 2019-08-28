@@ -152,6 +152,10 @@
   :after (company lua-mode))
 
 
+(use-package company-terraform
+  :after (terraform-mode))
+
+
 (use-package company-web
   :after (company web-mode))
 
@@ -326,6 +330,10 @@
             (add-hook 'haskell-mode-hook #'/haskell-mode-hook)
 
             ))
+
+
+;; Hashicorp Configuration Language: dependency for terraform-mode
+(use-package hcl-mode)
 
 
 (use-package helm
@@ -1214,6 +1222,11 @@
   :pin melpa
   :config (progn
             (global-set-key (kbd "M-S-C-s") 'swiper)
+            ))
+
+
+(use-package terraform-mode
+  :config (progn
             ))
 
 
