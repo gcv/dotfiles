@@ -1199,7 +1199,10 @@
   :pin melpa
   :config (progn
 
+            (setq swift-mode:switch-case-offset 2)
+
             (defun /swift-mode-hook ()
+              (subword-mode)
               (local-unset-key (kbd "C-c C-z")))
 
             (add-hook 'swift-mode-hook #'/swift-mode-hook)
