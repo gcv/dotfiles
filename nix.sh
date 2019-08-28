@@ -33,7 +33,6 @@ nix-env -i \
     git \
     global \
     gnupg-1.4.23 \
-    gnutls \
     htop \
     jq \
     ledger \
