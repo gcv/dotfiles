@@ -633,8 +633,13 @@
 
 ;;; eshell
 (setq eshell-banner-message ""
+      eshell-history-size 10000
+      eshell-destroy-buffer-when-process-dies t
       eshell-hist-ignoredups t
       eshell-save-history-index t)
+
+(add-to-list 'eshell-visual-commands "htop")
+(add-to-list 'eshell-visual-commands "tmux")
 
 (setq eshell-prompt-function
       (lambda ()
@@ -699,7 +704,7 @@
   (local-set-key (kbd "C-c C-z") 'flip-windows)
   (local-set-key (kbd "<tab>") 'company-complete)
   (eshell/alias "dir" "ls -a")
-  (eshell/alias "v" "ls -la"))
+  (eshell/alias "v" "ls -laH"))
 
 (add-hook 'eshell-mode-hook #'/eshell-mode-hook)
 
