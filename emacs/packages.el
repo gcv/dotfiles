@@ -1265,6 +1265,10 @@
             ))
 
 
+(use-package vterm
+  :pin melpa)
+
+
 (use-package web-mode
   :after (flycheck tide)
   :config (progn
