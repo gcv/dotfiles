@@ -638,9 +638,6 @@
       eshell-hist-ignoredups t
       eshell-save-history-index t)
 
-(add-to-list 'eshell-visual-commands "htop")
-(add-to-list 'eshell-visual-commands "tmux")
-
 (setq eshell-prompt-function
       (lambda ()
         (concat
@@ -703,6 +700,8 @@
   (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
   (local-set-key (kbd "C-c C-z") 'flip-windows)
   (local-set-key (kbd "<tab>") 'company-complete)
+  (add-to-list 'eshell-visual-commands "htop")
+  (add-to-list 'eshell-visual-commands "tmux")
   (eshell/alias "dir" "ls -a")
   (eshell/alias "v" "ls -laH"))
 
