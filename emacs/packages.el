@@ -884,23 +884,6 @@
             ))
 
 
-(use-package multi-term
-  :pin melpa
-  :config (progn
-            (setq multi-term-program (executable-find "zsh"))
-            (setq multi-term-switch-after-close nil)
-            ;; rebind C-r to the terminal's native one
-            (setq term-bind-key-alist (remove* '"C-r" term-bind-key-alist :test 'equal :key 'car))
-            (add-to-list 'term-bind-key-alist '("C-r" . term-send-reverse-search-history))
-            (add-to-list 'term-bind-key-alist '("M-DEL" . term-send-backward-kill-word))
-            (when window-system (add-to-list 'term-bind-key-alist '("M-[" . multi-term-prev)))
-            (add-to-list 'term-bind-key-alist '("M-]" . multi-term-next))
-            (add-to-list 'term-bind-key-alist '("C-o" . flip-windows))
-            (add-to-list 'term-bind-key-alist '("C-M-o" . ace-window))
-            (add-to-list 'term-bind-key-alist '("C-c C-z" . flip-windows))
-            ))
-
-
 (use-package nix-mode
   :config (progn
 
