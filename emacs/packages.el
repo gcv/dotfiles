@@ -273,9 +273,8 @@
             ))
 
 
-;;; XXX: This needs to be cloned manually from https://github.com/gcv/git-auto-commit-mode
 (use-package git-auto-commit-mode
-  :pin manual
+  :pin melpa
   :config (progn
             (setq gac-automatically-push-p nil)
             (setq-default gac-debounce-interval 300)
