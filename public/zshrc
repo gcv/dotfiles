@@ -979,5 +979,12 @@ function nix-files() {
 }
 
 
+### Nix: package finder
+function nix-find() {
+    local str=$1
+    nix-env -f '<nixpkgs>' -qaP ".*${str}.*"
+}
+
+
 ######### yesterday we obeyed kings and bent our necks before emperors #########
 #########               but today we kneel only to truth               #########
