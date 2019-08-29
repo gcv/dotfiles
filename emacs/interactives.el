@@ -314,6 +314,7 @@
   (let* ((buffers (buffer-list (selected-frame)))
          (current (car buffers))
          (eshell-rx "\\*eshell.*\\*")
+         (vterm-rx "vterm\\(<.+>\\)?")
          (term-rx "\\*terminal<.+>\\*"))
     (cl-flet ((internal-switch (rx)
              (catch 'break
@@ -324,6 +325,8 @@
                        (select-window window)
                        (throw 'break t))))))))
       (cond ((internal-switch eshell-rx)
+             t)
+            ((internal-switch vterm-rx)
              t)
             ((internal-switch term-rx)
              t)

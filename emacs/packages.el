@@ -1266,7 +1266,21 @@
 
 
 (use-package vterm
-  :pin melpa)
+  :pin melpa
+  :config (progn
+
+            (defun /vterm-mode-hook ()
+              (local-set-key (kbd "C-c C-z") 'flip-windows)
+              (local-set-key (kbd "C-S-d") (lambda ()
+                                             (interactive)
+                                             (vterm--self-insert)
+                                             (let ((kill-buffer-query-functions nil))
+                                               (kill-buffer))))
+              (setq truncate-lines t))
+
+            (add-hook 'vterm-mode-hook #'/vterm-mode-hook)
+
+            ))
 
 
 (use-package web-mode
