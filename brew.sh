@@ -29,6 +29,16 @@ if [[ ! -d "$BREW_HOME" ]]; then
 fi
 
 
+${BREW_HOME}/bin/brew install \
+    libtool \
+    gnutls \
+    libvterm
+
+
+### not used because Nix should take care of everything else
+exit 0
+
+
 # system basics
 ${BREW_HOME}/bin/brew install \
     bash \
