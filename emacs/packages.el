@@ -638,6 +638,7 @@
                     (pop-to-buffer-same-window julia-buffer)
                   (ansi-term "julia" "julia")
                   (read-only-mode -1)
+                  (setq truncate-lines t)
                   (cv-inferior-julia-mode))))
 
             (defun cv--term-julia-buffer ()
