@@ -1253,8 +1253,19 @@
   :pin melpa
   :config (progn
 
+            (setq vterm-max-scrollback 10000)
+
+            (setq vterm-keymap-exceptions
+                  '("C-c" "C-x" "C-h" "M-x" "M-o" "C-v" "M-v" "C-y" "M-y"))
+
             (defun /vterm-mode-hook ()
               (local-set-key (kbd "C-c C-z") 'flip-windows)
+              (local-set-key (kbd "C-u") 'vterm--self-insert)
+              (local-set-key (kbd "C-g") 'vterm--self-insert)
+              (local-set-key (kbd "<prior>") 'scroll-down-command)  ; page up
+              (local-set-key (kbd "<next>") 'scroll-up-command)     ; page down
+              (local-set-key (kbd "C-<left>") (kbd "M-b"))
+              (local-set-key (kbd "C-<right>") (kbd "M-f"))
               (local-set-key (kbd "C-S-d") (lambda ()
                                              (interactive)
                                              (vterm--self-insert)
