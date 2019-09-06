@@ -890,6 +890,12 @@ function awscreds() {
     export AWS_REGION=$(aws --profile ${profile} configure get region)
 }
 
+function _awscreds() {
+    compadd $(cat ~/.aws/credentials | grep -e '\[.*\]' | perl -pe 's/[\[\]]//g')
+}
+
+compdef _awscreds awscreds
+
 
 ### utility function for uploading a file to S3 with a speed limit
 function s3cp() {
