@@ -211,6 +211,10 @@
             ))
 
 
+(use-package dumb-jump
+  :config (progn))
+
+
 (use-package elisp-slime-nav
   :diminish "")
 
