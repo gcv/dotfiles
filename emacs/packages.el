@@ -212,7 +212,15 @@
 
 
 (use-package dumb-jump
-  :config (progn))
+  :config (progn
+
+            (setq dumb-jump-selector 'popup)
+
+            (global-set-key (kbd "H-.") 'dumb-jump-go)
+            (global-set-key (kbd "H-,") 'dumb-jump-back)
+            (global-set-key (kbd "H->") 'dumb-jump-quick-look)
+
+            ))
 
 
 (use-package elisp-slime-nav
