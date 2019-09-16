@@ -1266,6 +1266,7 @@
               (local-set-key (kbd "<next>") 'scroll-up-command)     ; page down
               (local-set-key (kbd "C-<left>") (kbd "M-b"))
               (local-set-key (kbd "C-<right>") (kbd "M-f"))
+              (local-set-key (kbd "C-<backspace>") 'vterm-send-meta-backspace)
               (local-set-key (kbd "C-S-d") (lambda ()
                                              (interactive)
                                              (vterm--self-insert)

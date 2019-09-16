@@ -48,6 +48,7 @@ nix-env -i \
     texinfo \
     tmux \
     tree \
+    unrar \
     watch \
     wget \
     xz \
