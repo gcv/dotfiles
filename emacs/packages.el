@@ -1020,6 +1020,7 @@
 
 
 (use-package perspective
+  ;;:load-path "~/Code/perspective-el"
   :config (progn
 
             (persp-mode)
