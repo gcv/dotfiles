@@ -29,7 +29,6 @@
 
 
 (use-package adoc-mode
-  :defer t
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.adoc$" . adoc-mode))
@@ -44,7 +43,7 @@
             ))
 
 
-(use-package ag :defer t)
+(use-package ag)
 
 
 (use-package avy
@@ -55,7 +54,6 @@
 
 
 (use-package cider
-  :defer t
   :after (clojure-mode)
   :config (progn
 
@@ -97,7 +95,6 @@
 
 
 (use-package clojure-mode
-  :defer t
   :config (progn
 
             (defun /clojure-mode-hook ()
@@ -119,7 +116,6 @@
 
 
 (use-package cmake-mode
-  :defer t
   :config (progn
             (setq cmake-tab-width 4)
             ))
@@ -146,7 +142,6 @@
 
 (use-package company-lsp
   :pin melpa
-  :defer t
   :after (company lsp-mode)
   :config (progn
             ))
@@ -154,17 +149,14 @@
 
 (use-package company-lua
   :pin melpa
-  :defer t
   :after (company lua-mode))
 
 
 (use-package company-terraform
-  :defer t
   :after (terraform-mode))
 
 
 (use-package company-web
-  :defer t
   :after (company web-mode))
 
 
@@ -193,12 +185,10 @@
 
 
 (use-package counsel-tramp
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package deft
-  :defer t
   :config (progn
             (setq deft-extension "org"
                   deft-directory "~/Notes/NV/"
@@ -208,14 +198,12 @@
 
 (use-package disk-usage
   :pin gnu
-  :defer t
   :config (progn
             (setq disk-usage--du-command "/opt/brew/bin/gdu")
             ))
 
 
 (use-package direnv
-  :defer t
   :config (progn
             ;; It's faster to keep this minor mode disabled, and use
             ;; direnv-update-environment manually as needed.
@@ -258,7 +246,8 @@
 
 
 (use-package flycheck
-  :pin melpa)
+  :pin melpa
+  :defer t)
 
 
 (use-package flycheck-rust
@@ -268,7 +257,6 @@
 
 
 (use-package fountain-mode              ; screenwriting
-  :defer t
   :config (progn
             (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
             ))
@@ -299,7 +287,6 @@
 
 (use-package git-auto-commit-mode
   :pin melpa
-  :defer t
   :config (progn
             (setq gac-automatically-push-p nil)
             (setq-default gac-debounce-interval 300)
@@ -308,7 +295,6 @@
 
 (use-package golden-ratio
   :pin melpa
-  :defer t
   :diminish " φ"
   :config (progn
 
@@ -346,7 +332,6 @@
 
 
 (use-package haskell-mode
-  :defer t
   :config (progn
 
             (defun /haskell-mode-hook ()
@@ -359,7 +344,7 @@
 
 
 ;; Hashicorp Configuration Language: dependency for terraform-mode
-(use-package hcl-mode :defer t)
+(use-package hcl-mode)
 
 
 (use-package helm
@@ -452,12 +437,10 @@
 
 
 (use-package helm-ag
-  :defer t
   :after (helm))
 
 
 (use-package helm-gtags
-  :defer t
   :after (helm)
   :config (progn
 
@@ -484,7 +467,6 @@
 
 
 (use-package helm-projectile
-  :defer t
   :after (helm projectile)
   :config (progn
             (helm-projectile-on)
@@ -523,7 +505,9 @@
             ))
 
 
-(use-package hydra :defer t)
+(use-package hydra
+  :config (progn
+            ))
 
 
 (use-package iedit
@@ -542,7 +526,6 @@
 
 
 (use-package intero
-  :defer t
   :after (haskell-mode)
   :config (progn
             (intero-global-mode 1)
@@ -607,7 +590,6 @@
 
 (use-package js2-mode
   :pin melpa
-  :defer t
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
@@ -633,7 +615,6 @@
 
 (use-package julia-mode
   :pin melpa
-  :defer t
   :config (progn
 
             (add-to-list 'display-buffer-alist '("\\*Julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
@@ -795,7 +776,6 @@
 
 
 (use-package ledger-mode
-  :defer t
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.dat$" . ledger-mode))
@@ -840,7 +820,6 @@
 
 (use-package lsp-ui
   :pin melpa
-  :defer t
   :after (lsp-mode)
   :config (progn
             (setq lsp-ui-doc-delay 1.0)
@@ -849,7 +828,6 @@
 
 (use-package lua-mode
   :pin melpa
-  :defer t
   :config (progn
 
             (defun /lua-mode-hook ()
@@ -862,7 +840,6 @@
 
 
 (use-package magit
-  :defer t
   :config (progn
 
             (diminish 'magit-auto-revert-mode)
@@ -891,7 +868,6 @@
 
 
 (use-package markdown-mode
-  :defer t
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
@@ -923,7 +899,6 @@
 
 
 (use-package nix-mode
-  :defer t
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.nix$" . nix-mode))
@@ -936,12 +911,10 @@
 
 
 (use-package ob-restclient
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package olivetti                   ; focused writing mode
-  :defer t
   :config (progn
 
             (setq-default olivetti-body-width 90)
@@ -987,7 +960,6 @@
 
 (use-package origami
   :pin melpa
-  :defer t
   :after (hydra)
   :config (progn
 
@@ -1102,13 +1074,12 @@
 ;;; Allows multiple major modes using indirect buffers. Needs a plugin which
 ;;; defines. As of this writing: poly-org and poly-noweb have problems.
 ;;; poly-markdown is pretty good.
-(use-package polymode :defer t)
-(use-package poly-markdown :defer t)
+(use-package polymode)
+(use-package poly-markdown)
 
 
 (use-package poporg
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package projectile
@@ -1153,7 +1124,6 @@
 
 (use-package restclient
   :pin melpa
-  :defer t
   :config (progn
             (setq restclient-log-request nil)
             ))
@@ -1161,13 +1131,11 @@
 
 (use-package restclient-helm
   :pin melpa
-  :defer t
   :after (restclient))
 
 
 (use-package rust-mode
   :pin melpa
-  :defer t
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
@@ -1181,7 +1149,6 @@
 
 
 (use-package slime
-  :defer t
   :config (progn
 
             (setq slime-net-coding-system 'utf-8-unix)
@@ -1209,7 +1176,6 @@
 
 
 (use-package slime-company
-  :defer t
   :after (company slime)
   :config (progn
             ;; XXX: This is here instead of the slime :config section to make
@@ -1219,7 +1185,6 @@
 
 
 (use-package smex                       ; smart M-x completion
-  :defer t
   :config (progn
             (setq smex-save-file (concat user-emacs-directory ".smex-items"))
             ;;(global-set-key (kbd "M-x") (lambda ()
@@ -1236,7 +1201,6 @@
 
 (use-package swift-mode
   :pin melpa
-  :defer t
   :config (progn
 
             (setq swift-mode:switch-case-offset 2)
@@ -1256,11 +1220,11 @@
 
 
 (use-package terraform-mode
-  :defer t)
+  :config (progn
+            ))
 
 
 (use-package treemacs
-  :defer t
   :config (progn
 
             (setq treemacs-persist-file (expand-file-name "treemacs/treemacs-persist" user-emacs-directory))
@@ -1280,7 +1244,6 @@
 
 
 (use-package tide                       ; TypeScript IDE
-  :defer t
   :after (company flycheck typescript-mode)
   :diminish " Tide"
   :config (progn
@@ -1291,7 +1254,6 @@
 ;;; Installed purely because it's a tide dependency. web-mode provides superior
 ;;; TS indentation.
 (use-package typescript-mode
-  :defer t
   :diminish " TS"
   :config (progn
             (setq auto-mode-alist (delete '("\\.ts$" . typescript-mode) auto-mode-alist))
@@ -1300,7 +1262,6 @@
 
 (use-package vterm
   :pin melpa
-  :defer t
   :config (progn
 
             (setq vterm-max-scrollback 10000)
@@ -1330,7 +1291,6 @@
 
 
 (use-package web-mode
-  :defer t
   :after (flycheck tide)
   :config (progn
 
@@ -1361,11 +1321,10 @@
             ))
 
 
-(use-package wgrep :defer t)
+(use-package wgrep)
 
 
 (use-package which-key
-  :defer t
   :diminish ""
   :config (progn
             (which-key-mode)
@@ -1376,7 +1335,8 @@
             ))
 
 
-(use-package yaml-mode :defer t)
+(use-package yaml-mode)
 
 
-(use-package zenburn-theme :defer t)
+(use-package zenburn-theme
+  :defer t)
