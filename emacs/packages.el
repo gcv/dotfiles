@@ -1248,7 +1248,6 @@
   :after (company flycheck typescript-mode)
   :diminish " Tide"
   :config (progn
-            (setq tide-node-executable "~/.nvm/versions/node/v8.10.0/bin/node")
             ))
 
 
