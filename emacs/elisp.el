@@ -1,6 +1,8 @@
 (put 'add-hook 'lisp-indent-function 1)
 (put 'setq-default 'lisp-indent-function 1)
 (put 'use-package 'lisp-indent-function 1)
+(put 'cl-flet 'lisp-indent-function 1)
+(put 'cl-labels 'lisp-indent-function 1)
 
 
 (diminish 'eldoc-mode)
@@ -18,6 +20,7 @@
 
 (defun /lisp-interaction-mode-hook ()
   (paredit-mode 1)
+  (elisp-slime-nav-mode t)
   (define-key lisp-interaction-mode-map (kbd "C-x C-j") 'eval-print-last-sexp)
   (eldoc-mode))
 

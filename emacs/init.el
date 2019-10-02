@@ -919,14 +919,15 @@ See `eshell-prompt-regexp'."
 
 (defun /lisp-mode-hook ()
   (paredit-mode 1)
-  (setq lisp-indent-function 'common-lisp-indent-function)
+  ;; lisp-indent-function should be implicitly set to common-lisp-indent-function now:
+  ;;(setq-local lisp-indent-function 'common-lisp-indent-function)
   (define-key lisp-mode-map (kbd "C-m") 'newline-and-indent)
   ;;(define-key lisp-mode-map (kbd "C-.") 'slime-complete-symbol)
   (setq show-trailing-whitespace t)
   ;; fix loop macro indentation
-  (setq lisp-simple-loop-indentation 1)
-  (setq lisp-loop-keyword-indentation 6)
-  (setq lisp-loop-forms-indentation 6)
+  (setq-local lisp-simple-loop-indentation 1)
+  (setq-local lisp-loop-keyword-indentation 6)
+  (setq-local lisp-loop-forms-indentation 3)
   ;; make square brackets and parentheses equivalent for indentation
   (modify-syntax-entry ?\[ "(]" lisp-mode-syntax-table)
   (modify-syntax-entry ?\] ")[" lisp-mode-syntax-table))
