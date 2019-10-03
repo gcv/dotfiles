@@ -262,10 +262,19 @@ function makeScreenFillHotkeysForScreen(keyString, screenId)
          local f = win:frame()
          local screen = hs.screen.allScreens()[screenId]
          local max = screen:frame()
-         f.x = max.x
-         f.y = max.y
-         f.w = (max.w / 8) * 7
-         f.h = max.h
+         -- position 7/8 screen width frame on the left
+         -- bounce to the right if already on left
+         if (f.x == max.x and
+             f.y == max.y and
+             f.w == (max.w / 8) * 7 and
+             f.h == max.h) then
+            f.x = f.x + (max.w / 8)
+         else
+            f.x = max.x
+            f.y = max.y
+            f.w = (max.w / 8) * 7
+            f.h = max.h
+         end
          win:setFrame(f)
       end
    )
