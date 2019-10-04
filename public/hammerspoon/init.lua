@@ -355,7 +355,8 @@ hs.hotkey.bind(
               activate
            end tell]]
       )
-      local w = hs.window.frontmostWindow()
+      local w = hs.window.get("Untitled")
+      w:focus()
       w:centerOnScreen()
    end
 )
