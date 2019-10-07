@@ -91,7 +91,6 @@ ${BREW_HOME}/bin/brew install \
     automake \
     cmake \
     ctags \
-    global \
     swig
 
 

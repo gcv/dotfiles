@@ -440,32 +440,6 @@
   :after (helm))
 
 
-(use-package helm-gtags
-  :after (helm)
-  :config (progn
-
-            (setq helm-gtags-path-style 'root
-                  helm-gtags-ignore-case t
-                  helm-gtags-use-input-at-cursor t
-                  helm-gtags-display-style 'detail
-                  ;;helm-gtags-auto-update t
-                  helm-gtags-pulse-at-cursor t
-                  helm-gtags-direct-helm-completing t
-                  helm-gtags-fuzzy-match t)
-
-            (defun /helm-gtags-mode-hook ()
-              (diminish-minor-mode 'helm-gtags-mode)
-              (local-set-key (kbd "C-c C-t f") 'helm-gtags-select)
-              (local-set-key (kbd "C-c C-t s") 'helm-gtags-show-stack)
-              (local-set-key (kbd "M-.") 'helm-gtags-dwim)
-              (local-set-key (kbd "M-,") 'helm-gtags-pop-stack)
-              (local-set-key (kbd "M-*") 'helm-gtags-pop-stack))
-
-            (add-hook 'helm-gtags-mode-hook #'/helm-gtags-mode-hook)
-
-            ))
-
-
 (use-package helm-projectile
   :after (helm projectile)
   :config (progn
@@ -1028,8 +1002,9 @@
 
             (setq persp-interactive-completion-function 'ido-completing-read)
 
-            (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
-            (add-hook 'kill-emacs-hook #'persp-state-save)
+            (when (fboundp 'persp-state-save)
+              (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
+              (add-hook 'kill-emacs-hook #'persp-state-save))
 
             ;; keybindings; note H-p and C-c C-p are both valid prefixes
             (define-key persp-mode-map (kbd "H-p") 'perspective-map)

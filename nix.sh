@@ -31,7 +31,6 @@ nix-env -i \
     findutils \
     fzf \
     git \
-    global \
     gnupg-1.4.23 \
     htop \
     jq \

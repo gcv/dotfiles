@@ -832,7 +832,6 @@ See `eshell-prompt-regexp'."
   (subword-mode)
   (define-key ruby-mode-map (kbd "C-m") 'newline-and-indent)
   (define-key ruby-mode-map (kbd "M-,") 'pop-tag-mark)
-  (helm-gtags-mode 1)
   (setq ruby-insert-encoding-magic-comment nil)
   (setq show-trailing-whitespace t))
 
@@ -861,7 +860,6 @@ See `eshell-prompt-regexp'."
   (setq show-trailing-whitespace t)
   (define-key python-mode-map (kbd "C-c C-z") nil)
   (subword-mode)
-  (helm-gtags-mode 1)
   (defconst python-block-pairs
     '(("else" "if" "elif" "while" "for" "try" "except")
       ("elif" "if" "elif")
@@ -882,7 +880,6 @@ See `eshell-prompt-regexp'."
   (electric-indent-local-mode t)
   (c-toggle-auto-newline -1)
   (subword-mode)
-  (helm-gtags-mode 1)
   (setq show-trailing-whitespace t))
 
 (add-hook 'c-mode-common-hook #'/c-mode-common-hook)
