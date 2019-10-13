@@ -362,6 +362,22 @@ hs.hotkey.bind(
 )
 
 
+-- Ctrl-Alt-Cmd-d: Toggle Dark Mode
+
+hs.hotkey.bind(
+   {"ctrl", "alt", "cmd"}, "d",
+   function()
+      hs.osascript.applescript(
+         [[tell application "System Events"
+             tell appearance preferences
+               set dark mode to not dark mode
+             end tell
+           end tell]]
+      )
+   end
+)
+
+
 -- iTerm2: C-c C-z flips to Emacs.
 
 ctrlC = hs.hotkey.modal.new("ctrl", "c")
