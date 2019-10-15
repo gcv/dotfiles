@@ -143,6 +143,13 @@ function alterOrRestoreFrame(win, alterCb, restoreCb)
    end
 end
 
+function frameFillScreen(windowFrame, screenFrame)
+   windowFrame.x = screenFrame.x
+   windowFrame.y = screenFrame.y
+   windowFrame.w = screenFrame.w
+   windowFrame.h = screenFrame.h
+end
+
 function frameFillMostOfScreenUp(windowFrame, screenFrame)
    windowFrame.x = screenFrame.x + (screenFrame.w / 8)
    windowFrame.y = screenFrame.y
@@ -296,9 +303,22 @@ makeScreenFillHotkeysForScreen("2", 2)
 makeScreenFillHotkeysForScreen("3", 3)
 makeScreenFillHotkeysForScreen("4", 4)
 
--- full-screen on other display
+-- stretch fully but not full-screen on current display
 hs.hotkey.bind(
    {"ctrl", "alt", "cmd"}, "f",
+   function()
+      local win = hs.window.focusedWindow()
+      local f = win:frame()
+      local screen = win:screen()
+      local max = screen:frame()
+      frameFillScreen(f, max)
+      win:setFrame(f)
+   end
+)
+
+-- full-screen on other display
+hs.hotkey.bind(
+   {"ctrl", "alt", "cmd", "shift"}, "f",
    function()
       alterOrRestoreFrame(
          hs.window.focusedWindow(),
