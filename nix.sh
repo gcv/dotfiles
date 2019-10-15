@@ -41,6 +41,7 @@ nix-env -i \
     offlineimap \
     p7zip \
     pv \
+    rclone \
     rlwrap \
     silver-searcher \
     tectonic \
