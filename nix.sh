@@ -31,7 +31,7 @@ nix-env -i \
     findutils \
     fzf \
     git \
-    gnupg-1.4.23 \
+    gnupg \
     htop \
     jq \
     ledger \
