@@ -13,8 +13,6 @@ auto-save-list/
 backups/
 custom.el
 ede-projects.el
-elpa/archives
-elpa/gnupg/
 eshell/
 history
 ido.last
