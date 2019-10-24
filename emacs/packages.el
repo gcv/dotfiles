@@ -944,6 +944,12 @@
               (define-key paredit-mode-map (kbd "M-[") nil))
             (define-key paredit-mode-map (kbd "M-{") 'paredit-wrap-curly)
 
+            (defun /paredit-minibuffer-setup-hook ()
+              (when (memq this-command '(eval-expression pp-eval-expression))
+                (paredit-mode 1)))
+
+            (add-hook 'minibuffer-setup-hook #'/paredit-minibuffer-setup-hook)
+
             ))
 
 
