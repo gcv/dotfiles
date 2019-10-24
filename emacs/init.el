@@ -175,6 +175,8 @@
 
 (require 'package)
 
+(setq package-gnupghome-dir nil)
+
 (setq package-enable-at-startup nil)
 
 (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
