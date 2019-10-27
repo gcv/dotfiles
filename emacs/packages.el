@@ -977,27 +977,22 @@
 
 (use-package perspective
   ;;:load-path "~/Code/perspective-el"
+  :pin melpa
   :config (progn
 
             (persp-mode)
             (persp-turn-off-modestring)
 
-            (setq persp-interactive-completion-function 'ido-completing-read)
+            (setq persp-interactive-completion-function 'ido-completing-read
+                  persp-sort 'access)
 
-            (when (fboundp 'persp-state-save)
-              (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
-              (add-hook 'kill-emacs-hook #'persp-state-save))
+            (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
+            (add-hook 'kill-emacs-hook #'persp-state-save)
 
             ;; keybindings; note H-p and C-c C-p are both valid prefixes
             (define-key persp-mode-map (kbd "H-p") 'perspective-map)
             (define-key persp-mode-map (kbd "C-c C-p") 'perspective-map)
             (define-key persp-mode-map (kbd "C-c M-p") 'persp-switch)
-
-            ;; XXX: Do not use, this seems to mess up the state of perspectives-hash.
-            ;;(defun persp-mode-cleanup-killed-buffers ()
-            ;;  (interactive)
-            ;;  (let ((live-buffers (-reject #'(lambda (b) (null (buffer-name b))) (persp-buffers (persp-curr)))))
-            ;;    (setf (persp-buffers (persp-curr)) live-buffers)))
 
             (defun /persp-set-ido-buffers ()
               (when (boundp 'ido-temp-list)
@@ -1012,19 +1007,6 @@
                                  ido-temp-list))))
 
             (advice-add 'persp-set-ido-buffers :after #'/persp-set-ido-buffers)
-
-            ;; FIXME: Remove this once upstream perspective.el is patched.
-            ;; (defun /persp-rename (orig-fn &rest args)
-            ;;   (let* ((new-name (car args))
-            ;;          (old-name (persp-name (persp-curr)))
-            ;;          (scratch-buf (get-buffer (format "*scratch* (%s)" old-name)))
-            ;;          (new-scratch-name (format "*scratch* (%s)" new-name)))
-            ;;     (apply orig-fn args)
-            ;;     (when scratch-buf
-            ;;       (with-current-buffer scratch-buf
-            ;;         (rename-buffer new-scratch-name)))))
-            ;;
-            ;; (advice-add 'persp-rename :around #'/persp-rename)
 
             ))
 
