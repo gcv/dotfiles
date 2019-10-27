@@ -202,9 +202,10 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+(setq use-package-enable-imenu-support t
+      use-package-always-ensure t
+      use-package-always-pin "melpa-stable")
 (require 'use-package)
-(setq use-package-always-ensure t)
-(setq use-package-always-pin "melpa-stable")
 ;;(setq use-package-verbose t)
 (require 'use-package-git)
 
