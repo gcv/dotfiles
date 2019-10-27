@@ -103,9 +103,13 @@
 (when window-system
   (global-set-key (kbd "C-x C-c") (lambda ()
                                     (interactive)
-                                    (if (y-or-n-p "Are you sure you want to exit Emacs? ")
-                                        (save-buffers-kill-emacs)
-                                      (message "Canceled exit")))))
+                                    (if (not (y-or-n-p "Are you sure you want to exit Emacs? "))
+                                        (message "Canceled exit")
+                                      (when (and (fboundp #'persp-state-save)
+                                                 (y-or-n-p (format "Save perspectives to %s? " persp-state-default-file)))
+                                        (message "Saving perspectives")
+                                        (persp-state-save))
+                                      (save-buffers-kill-emacs)))))
 
 
 ;;; ----------------------------------------------------------------------------

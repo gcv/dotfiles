@@ -987,7 +987,8 @@
                   persp-sort 'access)
 
             (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
-            (add-hook 'kill-emacs-hook #'persp-state-save)
+            ;; useful, but I prefer a prompt on exit
+            ;;(add-hook 'kill-emacs-hook #'persp-state-save)
 
             ;; keybindings; note H-p and C-c C-p are both valid prefixes
             (define-key persp-mode-map (kbd "H-p") 'perspective-map)
