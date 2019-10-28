@@ -373,12 +373,7 @@
 
 ;;; fix window splitting behavior when possible
 (setq display-buffer-alist
-      '(("\\*cider-repl .*"
-         (display-buffer-reuse-window display-buffer-in-side-window)
-         (reusable-frames . visible)
-         (side . bottom)
-         (window-height . 0.2))
-        ("\\*compilation\\*"
+      '(("\\*compilation\\*"
          (display-buffer-reuse-window display-buffer-same-window))
         ;; default
         (".*"

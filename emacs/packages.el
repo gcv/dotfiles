@@ -57,6 +57,13 @@
   :after (clojure-mode)
   :config (progn
 
+            (add-to-list 'display-buffer-alist
+                         '("\\*cider-repl .*"
+                           (display-buffer-reuse-window display-buffer-in-side-window)
+                           (reusable-frames . visible)
+                           (side . bottom)
+                           (window-height . 0.2)))
+
             (setq cider-show-error-buffer t
                   cider-prompt-for-symbol nil
                   cider-repl-tab-command 'indent-for-tab-command
