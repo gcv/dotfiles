@@ -607,162 +607,32 @@
   :pin melpa
   :config (progn
 
-            (add-to-list 'display-buffer-alist '("\\*Julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
-            (add-to-list 'display-buffer-alist '("\\*julia\\*" (display-buffer-reuse-window display-buffer-same-window)))
+            (add-to-list 'display-buffer-alist '("\\*julia-repl\\*" (display-buffer-reuse-window display-buffer-same-window)))
 
             (setq julia-indent-offset 3)
 
             (setq julia-prompt-regexp "julia> ")
 
-            (define-minor-mode cv-inferior-julia-mode
-              "An inferior Julia mode running in an ansi-term buffer instead of comint."
-              :init-value nil
-              :lighter " Julia"
-              :keymap (make-sparse-keymap))
-
-            (define-key cv-inferior-julia-mode-map (kbd "<up>") 'term-send-prior)
-            (define-key cv-inferior-julia-mode-map (kbd "<down>") 'term-send-next)
-            (define-key cv-inferior-julia-mode-map (kbd "M-x") 'helm-M-x)
-            (define-key cv-inferior-julia-mode-map (kbd "C-c C-z") 'flip-windows)
-            (define-key cv-inferior-julia-mode-map (kbd "C-S-d")
-              (lambda ()
-                (interactive)
-                (term-interrupt-subjob)
-                (term-send-eof)
-                (sleep-for 0 500)
-                (kill-buffer)
-                (delete-window)))
-
-            (defun cv-term-julia ()
-              (interactive)
-              (let ((julia-buffer (get-buffer "*julia*")))
-                (if julia-buffer
-                    (pop-to-buffer-same-window julia-buffer)
-                  (ansi-term "julia" "julia")
-                  (read-only-mode -1)
-                  (setq truncate-lines t)
-                  (cv-inferior-julia-mode))))
-
-            (defun cv--term-julia-buffer ()
-              (or (get-buffer "*julia*") (get-buffer "*Julia*")))
-
-            (defun cv--term-julia-buffer-mode (buf)
-              (save-excursion
-                (with-current-buffer buf
-                  major-mode)))
-
-            (defun cv--term-julia-send-via-tmp-file (buf text-raw)
-              (let ((text (s-trim text-raw))
-                    (mode (cv--term-julia-buffer-mode buf))
-                    (tmpfile (make-temp-file
-                              (expand-file-name "julia-tmp"
-                                                (or small-temporary-file-directory
-                                                    temporary-file-directory)))))
-                (unwind-protect
-                    (progn
-                      (with-temp-file tmpfile
-                        (insert text))
-                      (save-excursion
-                        (with-current-buffer buf
-                          (unless (equal 'term-mode mode) (end-of-buffer))
-                          (insert "include(\"" tmpfile "\");")
-                          (if (equal 'term-mode mode)
-                              (term-send-input)
-                            (comint-send-input))
-                          ;; wait for the inclusion to succeed (i.e., the prompt prints)
-                          (let ((sleep-total 0))
-                            (while (and (< sleep-total 5000)
-                                        (not (string-equal "julia>" (current-word))))
-                              (sleep-for 0 20)
-                              (setf sleep-total (+ sleep-total 20)))))))
-                  ;; cleanup
-                  (delete-file tmpfile))))
-
-            (defun cv-julia-send-region ()
-              (interactive)
-              (let* ((inf-julia-buffer (cv--term-julia-buffer)))
-                (when (and inf-julia-buffer (use-region-p))
-                  (let ((text (buffer-substring-no-properties (region-beginning) (region-end))))
-                    (cv--term-julia-send-via-tmp-file inf-julia-buffer text)))))
-
-            (defun cv-julia-send-top-level-form ()
-              (interactive)
-              (let* ((inf-julia-buffer (cv--term-julia-buffer)))
-                (when inf-julia-buffer
-                  (let ((starting-point (point)))
-                    (save-excursion
-                      (beginning-of-line)
-                      (unless (= 1 starting-point) (left-char))
-                      (let* ((ending-raw (re-search-forward "\nend\n\n" nil t))
-                             ;; subtract two trailing newlines
-                             (ending (- (or ending-raw 0) 2))
-                             (beginning-raw (re-search-backward
-                                             (concat "\\(\nfunction\\)\\|"
-                                                     "\\(\ntype\\)")))
-                             ;; add one leading newline
-                             (beginning (+ beginning-raw 1)))
-                        (if (or (not (and ending-raw beginning-raw))
-                                (< starting-point beginning)
-                                (> starting-point ending))
-                            (message "no suitable top-level form found")
-                          (let ((text (buffer-substring-no-properties beginning ending)))
-                            (cv--term-julia-send-via-tmp-file inf-julia-buffer text)))))))))
-
-            (defun cv-julia-send-buffer ()
-              (interactive)
-              (let* ((filename buffer-file-name)
-                     (inf-julia-buffer (cv--term-julia-buffer))
-                     (mode (cv--term-julia-buffer-mode inf-julia-buffer)))
-                (when inf-julia-buffer
-                  (save-excursion
-                    (with-current-buffer inf-julia-buffer
-                      (unless (equal 'term-mode mode) (end-of-buffer))
-                      (insert "include(\"" filename "\");")
-                      (if (equal 'term-mode mode)
-                          (term-send-input)
-                        (comint-send-input)))))))
-
-            (defun cv-julia-send-line ()
-              (interactive)
-              (let* ((inf-julia-buffer (cv--term-julia-buffer)))
-                (when inf-julia-buffer
-                  (let ((line (s-trim (thing-at-point 'line t))))
-                    (save-excursion
-                      (with-current-buffer inf-julia-buffer
-                        (insert line)
-                        (term-send-input)))))))
-
             (defun /julia-mode-hook ()
               (subword-mode)
-              (local-set-key (kbd "C-c C-z") 'cv-term-julia)
-              (local-set-key (kbd "C-c C-c") 'cv-julia-send-top-level-form)
-              (local-set-key (kbd "C-M-x") 'cv-julia-send-region)
-              (local-set-key (kbd "C-c C-l") 'cv-julia-send-line)
-              (local-set-key (kbd "C-c C-k") 'cv-julia-send-buffer))
+              (local-set-key (kbd "C-c C-z") 'julia-snail)
+              (local-set-key (kbd "C-c C-c") 'julia-snail-send-top-level-form)
+              (local-set-key (kbd "C-M-x") 'julia-snail-send-region)
+              (local-set-key (kbd "C-c C-l") 'julia-snail-send-line)
+              (local-set-key (kbd "C-c C-k") 'julia-snail-send-buffer))
 
             (add-hook 'julia-mode-hook #'/julia-mode-hook)
 
-            (defun /inferior-julia-mode-hook ()
-              (local-set-key (kbd "C-a") 'comint-bol)
-              (local-set-key (kbd "M-p") 'comint-previous-matching-input-from-input)
-              (local-set-key (kbd "M-n") 'comint-next-matching-input-from-input)
-              (local-set-key (kbd "<up>") 'comint-previous-input)
-              (local-set-key (kbd "<down>") 'comint-next-input)
-              (local-set-key (kbd "C-r") 'helm-comint-input-ring)
-              (local-set-key (kbd "C-c C-z") 'flip-windows)
-              (local-set-key (kbd "C-S-d") (lambda ()
-                                             (interactive)
-                                             (comint-interrupt-subjob)
-                                             (end-of-buffer)
-                                             (insert "quit()")
-                                             (comint-send-input)
-                                             (sleep-for 0 100)
-                                             (kill-buffer)
-                                             (delete-window))))
+            (defun /julia-snail-mode-hook ()
+               (local-set-key (kbd "C-c C-z") 'flip-windows))
 
-            (add-hook 'inferior-julia-mode-hook #'/inferior-julia-mode-hook)
+            (add-hook 'julia-snail-mode-hook #'/julia-snail-mode-hook)
 
             ))
+
+
+;; (use-package julia-snail-mode
+;;   :load-path "~/Code/julia-snail")
 
 
 (use-package ledger-mode
