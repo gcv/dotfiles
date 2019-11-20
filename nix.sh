@@ -21,6 +21,7 @@ nix-env -i \
     automake \
     awscli \
     bat \
+    borgbackup \
     cmake \
     coreutils \
     ctags \
