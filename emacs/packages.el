@@ -215,7 +215,7 @@
 (use-package disk-usage
   :pin gnu
   :config (progn
-            (setq disk-usage--du-command "/opt/brew/bin/gdu")
+            (setq disk-usage--du-command "du")
             ))
 
 
