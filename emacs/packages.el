@@ -190,9 +190,20 @@
 
 (use-package deft
   :config (progn
-            (setq deft-extension "org"
-                  deft-directory "~/Notes/NV/"
+
+            (setq deft-extensions '( "org" "note" "txt" "tex")
+                  deft-directory "~/Notes/"
+                  deft-recursive t
                   deft-text-mode 'org-mode)
+
+            (global-set-key (kbd "C-c d") 'deft)
+
+            (defun /deft-current-window-width (orig-fn &rest args)
+              (let ((res (apply orig-fn args)))
+                (- res 1)))
+
+            (advice-add 'deft-current-window-width :around #'/deft-current-window-width)
+
             ))
 
 
