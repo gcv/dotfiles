@@ -204,6 +204,11 @@
 
             (advice-add 'deft-current-window-width :around #'/deft-current-window-width)
 
+            (defun /deft-complete ()
+              (kill-buffer deft-buffer))
+
+            (advice-add 'deft-complete :after #'/deft-complete)
+
             ))
 
 
