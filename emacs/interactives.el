@@ -400,6 +400,8 @@ return 0
           (/load-trusted-elisp-file project-file))
       (message (concatenate 'string project-file " not found")))))
 
+(add-to-list 'savehist-additional-variables 'load-project-history)
+
 
 (defun disable-all-themes ()
   (interactive)

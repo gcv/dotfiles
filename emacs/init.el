@@ -89,7 +89,6 @@
 (setq history-length 1000
       history-delete-duplicates t)
 (put 'file-name-history 'history-length 1500)
-(add-to-list 'savehist-additional-variables 'load-project-history)
 
 
 ;;; Emacs server
