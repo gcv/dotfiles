@@ -28,6 +28,14 @@
 
 
 (defun /ielm-mode-hook ()
+  ;; deal with comint-input-ring being buffer-local and therefore not subject to
+  ;; savehist-mode helpfulness
+  (add-hook 'kill-buffer-hook
+    (lambda () (setq ielm-comint-input-ring comint-input-ring))
+    nil t)
+  (when ielm-comint-input-ring
+    (setq comint-input-ring ielm-comint-input-ring))
+  ;; normal setup
   (paredit-mode 1)
   (eldoc-mode)
   (elisp-slime-nav-mode t)
@@ -36,4 +44,6 @@
                                  (comint-send-eof)
                                  (kill-buffer))))
 
+(defvar ielm-comint-input-ring nil) ; global copy of the buffer-local variable
+(add-to-list 'savehist-additional-variables 'ielm-comint-input-ring)
 (add-hook 'ielm-mode-hook #'/ielm-mode-hook)
