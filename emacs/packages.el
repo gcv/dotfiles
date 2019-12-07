@@ -163,7 +163,26 @@
 (use-package counsel                    ; Ivy / Swiper / Counsel
   :pin melpa
   :config (progn
+
             (global-set-key (kbd "C-x C-M-f") 'counsel-find-file)
+
+            (defun /counsel-switch-buffer ()
+              "Like counsel-switch-buffer, but perspective-aware."
+              (interactive)
+              (ivy-read "Switch to buffer: "
+                        (if (and (fboundp 'persp-buffers) persp-mode)
+                            (remove-if #'null (mapcar #'buffer-name (persp-current-buffers)))
+                          'internal-complete-buffer)
+                        :preselect (buffer-name (current-buffer))
+                        :keymap ivy-switch-buffer-map
+                        :action #'ivy--switch-buffer-action
+                        :matcher #'ivy--switch-buffer-matcher
+                        :caller 'counsel-switch-buffer
+                        :unwind #'counsel--switch-buffer-unwind
+                        :update-fn 'counsel--switch-buffer-update-fn))
+
+            (global-set-key (kbd "C-x C-M-b") '/counsel-switch-buffer)
+
             ))
 
 
@@ -556,6 +575,8 @@
                   '((swiper . ivy--regex-plus)
                     (counsel-M-x . ivy--regex-fuzzy)
                     (t . ivy--regex-plus)))
+
+            (setq ivy-ignore-buffers boring-buffers)
 
             (global-set-key (kbd "C-c c r") 'ivy-resume)
 
