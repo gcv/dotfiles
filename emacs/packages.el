@@ -576,7 +576,9 @@
                     (counsel-M-x . ivy--regex-fuzzy)
                     (t . ivy--regex-plus)))
 
-            (setq ivy-ignore-buffers boring-buffers)
+            (mapc #'(lambda (x)
+                      (add-to-list 'ivy-ignore-buffers x))
+                  boring-buffers)
 
             (global-set-key (kbd "C-c c r") 'ivy-resume)
 
