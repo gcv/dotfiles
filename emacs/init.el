@@ -266,16 +266,13 @@
                (lambda (buf)
                  (not (/boring-buffer? buf)))))
 
-(global-set-key (kbd "C-x C-b") (lambda ()
-                                  (interactive)
-                                  (if (and (fboundp 'persp-buffers) persp-mode)
+(global-set-key (kbd "C-x C-b") (lambda (arg)
+                                  ;; Call bs-show on buffers in current perspective.
+                                  ;; With prefix, or if persp-mode is off, call on buffers in all perspectives.
+                                  (interactive "P")
+                                  (if (and (fboundp 'persp-buffers) persp-mode (null arg))
                                       (bs--show-with-configuration "persp")
                                     (bs--show-with-configuration "all-not-boring"))))
-
-;;(global-set-key (kbd "C-x C-M-b") 'bs-show)
-(global-set-key (kbd "C-x C-M-b") (lambda ()
-                                    (interactive)
-                                    (bs--show-with-configuration "all-not-boring")))
 
 
 ;;; minibuffer configuration
