@@ -215,14 +215,15 @@
 
 ;;; boring buffers: stop showing these in various lists
 (setq boring-buffers
-      (list "\\*buffer-selection\\*"
-            "\\*Echo Area"
-            "\\*Minibuf"
+      (list "\\*Messages\\*"
             "\\*Calendar\\*"
             "\\*Completions\\*"
-            "\\*Quail Completions\\*"
-            "TAGS"
             "\\*ESS\\*"
+            "\\*Echo Area"
+            "\\*Minibuf"
+            "\\*Quail Completions\\*"
+            "\\*Shell Command Output\\*"
+            "\\*buffer-selection\\*"
             "\\*helm"
             "\\*helm-mode"))
 
