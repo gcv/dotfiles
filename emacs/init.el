@@ -740,9 +740,9 @@ See `eshell-prompt-regexp'."
 
 (ido-mode 'buffer)
 
-(mapcar #'(lambda (x)
-            (add-to-list 'ido-ignore-buffers x))
-        boring-buffers)
+(mapc #'(lambda (x)
+          (add-to-list 'ido-ignore-buffers x))
+      boring-buffers)
 
 (global-set-key (kbd "C-x M-f") 'ido-find-file)
 (global-set-key (kbd "C-x M-d") 'ido-dired)
