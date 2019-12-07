@@ -714,19 +714,19 @@
 
             (magit-define-popup-switch 'magit-log-popup ?f "Follow renames" "--follow")
 
-            (defun /magit-status-mode-hook ()
-              (define-key magit-status-mode-map (kbd "W")
-                (lambda ()
-                  (interactive)
-                  (if (member "-w" magit-diff-options)
-                      (setq magit-diff-options (remove "-w" magit-diff-options))
-                    (add-to-list 'magit-diff-options "-w"))
-                  (magit-refresh))))
-
-            (add-hook 'magit-status-mode-hook #'/magit-status-mode-hook)
-
             (remove-hook 'git-commit-setup-hook 'git-commit-turn-on-auto-fill)
             (remove-hook 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
+
+            (defun /magit-status-mode-hook ()
+              ;; Restore window configuration and clean up all Magit buffers.
+              ;; The default binding for "q" is #'magit-restore-window-configuration.
+              (local-set-key "q" (lambda ()
+                                   (interactive)
+                                   (let ((buffers (magit-mode-get-buffers)))
+                                     (magit-restore-window-configuration)
+                                     (mapc #'kill-buffer buffers)))))
+
+            (add-hook 'magit-status-mode-hook #'/magit-status-mode-hook)
 
             ))
 
