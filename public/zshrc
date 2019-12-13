@@ -445,12 +445,30 @@ function rvm-on() {
 
 
 ### Turn on rbenv.
+### Instructions:
+### - git clone git@github.com:rbenv/rbenv.git /opt/rbenv
+### - select a revision (tag) to use
+### - ln -s /opt/rbenv ~/.rbenv
+### - mkdir "$(rbenv root)"/plugins
+### - git clone git@github.com:rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
+### - select a revision (tag) of ruby-build to use
+### Direnv (.envrc) setup:
+### use rbenv
 function rbenv-on() {
     eval "$(rbenv init -)"
 }
 
 
 ### Turn on NVM.
+### Instructions:
+### - git clone git@github.com:nvm-sh/nvm.git /opt/nvm
+### - select a revision (tag) to use
+### - ln -s /opt/nvm ~/.nvm
+### Direnv (.envrc) setup:
+### NODE_VERSIONS=~/.nvm/versions/node
+### NODE_VERSION_PREFIX=v
+### use node 12
+### PATH_add ~/.yarn/bin
 function nvm-on() {
     export NVM_DIR=$(readlinkf "$HOME/.nvm")
     [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
