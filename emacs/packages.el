@@ -165,23 +165,7 @@
   :config (progn
 
             (global-set-key (kbd "C-x C-M-f") 'counsel-find-file)
-
-            (defun /counsel-switch-buffer ()
-              "Like counsel-switch-buffer, but perspective-aware."
-              (interactive)
-              (ivy-read "Switch to buffer: "
-                        (if (and (fboundp 'persp-buffers) persp-mode)
-                            (remove-if #'null (mapcar #'buffer-name (persp-current-buffers)))
-                          'internal-complete-buffer)
-                        :preselect (buffer-name (current-buffer))
-                        :keymap ivy-switch-buffer-map
-                        :action #'ivy--switch-buffer-action
-                        :matcher #'ivy--switch-buffer-matcher
-                        :caller 'counsel-switch-buffer
-                        :unwind #'counsel--switch-buffer-unwind
-                        :update-fn 'counsel--switch-buffer-update-fn))
-
-            (global-set-key (kbd "C-x C-M-b") '/counsel-switch-buffer)
+            (global-set-key (kbd "C-x C-M-b") 'persp-counsel-switch-buffer)
 
             ))
 
@@ -459,8 +443,7 @@
 
             (setq helm-echo-input-in-header-line t)
 
-            (dolist (boring-buffer-regex boring-buffers)
-              (add-to-list 'helm-boring-buffer-regexp-list boring-buffer-regex))
+            (setq helm-boring-buffer-regexp-list ignore-buffers)
 
             ;; the default C-x c is too close to C-x C-c
             (global-set-key (kbd "C-c h") 'helm-command-prefix)
@@ -576,9 +559,7 @@
                     (counsel-M-x . ivy--regex-fuzzy)
                     (t . ivy--regex-plus)))
 
-            (mapc #'(lambda (x)
-                      (add-to-list 'ivy-ignore-buffers x))
-                  boring-buffers)
+            (setq ivy-ignore-buffers ignore-buffers)
 
             (global-set-key (kbd "C-c c r") 'ivy-resume)
 
@@ -911,6 +892,12 @@
             (define-key persp-mode-map (kbd "C-c C-p") 'perspective-map)
             (define-key persp-mode-map (kbd "C-c M-p") 'persp-switch)
 
+            ;; By default, ido-temp-list filters out ido-ignore-buffers from the
+            ;; list displayed by ido-switch-buffer, but typing a name from the
+            ;; ignored list will still auto-complete it. The following advice
+            ;; turns off this behavior. It may make sense to include it in
+            ;; Perspective, but would be a breaking change to Perspective's
+            ;; current ido-mode integration.
             (defun /persp-set-ido-buffers ()
               (when (boundp 'ido-temp-list)
                 (setq ido-temp-list

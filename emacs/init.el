@@ -214,8 +214,10 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; boring buffers: stop showing these in various lists
-(setq boring-buffers
+;;; This variable is used as a master list
+(setq ignore-buffers
       (list "\\*Messages\\*"
+            "\\` "
             "\\*Calendar\\*"
             "\\*Completions\\*"
             "\\*ESS\\*"
@@ -226,11 +228,6 @@
             "\\*buffer-selection\\*"
             "\\*helm"
             "\\*helm-mode"))
-
-(defun /boring-buffer? (buf)
-  (-all? #'null (mapcar #'(lambda (x)
-                            (string-match-p x (buffer-name buf)))
-                        boring-buffers)))
 
 
 ;;; unique naming
@@ -253,26 +250,11 @@
 
 (setq bs-default-configuration "all")
 
-(add-to-list 'bs-configurations
-             '("persp" nil nil nil
-               (lambda (buf)
-                 (with-current-buffer buf
-                   (or (not (member buf (persp-buffers (persp-curr))))
-                       (not (/boring-buffer? buf))))))
-             nil)
-
-(add-to-list 'bs-configurations
-             '("all-not-boring" nil nil nil
-               (lambda (buf)
-                 (not (/boring-buffer? buf)))))
-
 (global-set-key (kbd "C-x C-b") (lambda (arg)
-                                  ;; Call bs-show on buffers in current perspective.
-                                  ;; With prefix, or if persp-mode is off, call on buffers in all perspectives.
                                   (interactive "P")
-                                  (if (and (fboundp 'persp-buffers) persp-mode (null arg))
-                                      (bs--show-with-configuration "persp")
-                                    (bs--show-with-configuration "all-not-boring"))))
+                                  (if (fboundp 'persp-bs-show)
+                                      (persp-bs-show arg)
+                                    (bs-show "all"))))
 
 
 ;;; minibuffer configuration
@@ -737,9 +719,7 @@ See `eshell-prompt-regexp'."
 
 (ido-mode 'buffer)
 
-(mapc #'(lambda (x)
-          (add-to-list 'ido-ignore-buffers x))
-      boring-buffers)
+(setq ido-ignore-buffers ignore-buffers)
 
 (global-set-key (kbd "C-x M-f") 'ido-find-file)
 (global-set-key (kbd "C-x M-d") 'ido-dired)
