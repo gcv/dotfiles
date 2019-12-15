@@ -842,6 +842,10 @@
             ))
 
 
+(use-package package-lint
+  :pin melpa)
+
+
 (use-package paredit
   :diminish " π"
   :config (progn
