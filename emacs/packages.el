@@ -11,6 +11,7 @@
 (use-package epl)                        ; package.el wrapper
 (use-package f)                          ; file handling
 (use-package ht)                         ; hash tables
+(use-package parsec :pin melpa)          ; parser generator
 (use-package pfuture)
 (use-package pkg-info)
 (use-package queue :pin gnu)
