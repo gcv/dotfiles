@@ -32,6 +32,7 @@ nix-env -i \
     findutils \
     fzf \
     git \
+    git-lfs \
     gnupg \
     htop \
     jq \
