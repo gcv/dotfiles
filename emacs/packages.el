@@ -1127,6 +1127,15 @@
             ))
 
 
+(use-package undo-fu
+  :pin melpa
+  :config (progn
+            (global-unset-key (kbd "C-z"))
+            (global-set-key (kbd "C-z") 'undo-fu-only-undo)
+            (global-set-key (kbd "C-S-z") 'undo-fu-only-redo)
+            ))
+
+
 (use-package vterm
   :pin melpa
   :config (progn
