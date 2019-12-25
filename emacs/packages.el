@@ -984,6 +984,17 @@
   :after (restclient))
 
 
+;;; Translate input sequences to Latin characters even when another input method
+;;; is enabled system-wide.
+(use-package reverse-im
+  :pin melpa
+  :config (progn
+            (setq reverse-im-modifiers '(control meta super hyper))
+            (setq reverse-im-input-methods '("russian-computer"))
+            ;;(reverse-im-mode 1)
+            ))
+
+
 (use-package rust-mode
   :pin melpa
   :config (progn
