@@ -247,6 +247,13 @@
             ))
 
 
+(use-package discover-my-major
+  :pin melpa
+  :config (progn
+            (global-set-key (kbd "C-h C-m") 'discover-my-major)
+            ))
+
+
 (use-package dumb-jump
   :config (progn
 
