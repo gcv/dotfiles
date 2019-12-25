@@ -440,7 +440,7 @@
                     (helm-exit-and-execute-action 'helm-switch-buffer-ace-window))))
 
             (helm-mode -1)
-            ;;; XXX: Weirdness ends here.
+            ;; XXX: Weirdness ends here.
 
             (setq helm-echo-input-in-header-line t)
 
@@ -450,7 +450,7 @@
             (global-set-key (kbd "C-c h") 'helm-command-prefix)
             (global-unset-key (kbd "C-x c"))
 
-            ;; tab fix?
+            ;; tab fix? not recommended
             ;;(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
 
             (custom-set-variables '(helm-minibuffer-history-key nil))
@@ -968,7 +968,8 @@
             (rainbow-mode 1)
             (setq rainbow-ansi-colors t)
             (setq rainbow-html-colors t)
-            (setq rainbow-latex-colors t)))
+            (setq rainbow-latex-colors t)
+            ))
 
 
 (use-package restclient
