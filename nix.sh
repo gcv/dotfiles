@@ -21,11 +21,12 @@ nix-env -i \
     automake \
     awscli \
     bat \
-    borgbackup \
+    borgbackup \ # keep this, duplicity, or restic?
     cmake \
     coreutils \
     ctags \
     direnv \
+    duplicity \ # keep this, borgbackup, or restic?
     exif \
     fdupes \
     ffmpeg \
@@ -44,6 +45,7 @@ nix-env -i \
     p7zip \
     pv \
     rclone \
+    restic \ # keep this, duplicity, or borgbackup?
     rlwrap \
     silver-searcher \
     tectonic \
