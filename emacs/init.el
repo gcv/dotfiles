@@ -22,6 +22,7 @@
 (setq inhibit-startup-screen t)                                 ; turn off the splash screen
 (setq initial-scratch-message nil)                              ; nothing in *scratch*
 (global-auto-revert-mode 1)                                     ; track externally changed files
+;;(setq auto-revert-verbose nil)                                ; but be quiet about it
 ;;(setq global-auto-revert-non-file-buffers t)                  ; not ready for kqueue+directories
 ;;(setq auto-revert-use-notify nil)                             ; not ready for kqueue+directories
 ;;(global-hl-line-mode 1)                                       ; highlight the current line
@@ -571,6 +572,9 @@
 
 ;;; dired
 (put 'dired-find-alternate-file 'disabled nil)
+
+(setq dired-recursive-deletes 'always
+      dired-recursive-copies 'always)
 
 ;; quick hack for using GNU ls
 (when-let ((gnu-ls (executable-find "ls")))
