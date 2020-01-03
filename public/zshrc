@@ -101,6 +101,9 @@ function doctave() { docker run --rm -it -v "$PWD":/source schickling/octave }
     alias et='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -a "" -t' || \
     alias et='emacsclient -a "" -t'
 
+[[ ${UNAME} == "Darwin" && -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ]] && \
+    alias firewall='sudo /usr/libexec/ApplicationFirewall/socketfilterfw'
+
 if [[ $(ls --color 2>/dev/null) ]]; then
     # GNU ls probably available
     alias ls='ls --color'
@@ -959,6 +962,15 @@ function s3cp() {
 
     pv -L ${speed} "${src}" | aws s3 cp --region="${region}" --storage-class="${storage_class}" - "${dst}"
 
+}
+
+
+### utility function: cycle firewall and add mosh-server
+function firewall-add-mosh() {
+    firewall --setglobalstate off
+    firewall --add $(readlinkf $(which mosh-server))
+    firewall --unblockapp $(readlinkf $(which mosh-server))
+    firewall --setglobalstate on
 }
 
 
