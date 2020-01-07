@@ -254,6 +254,10 @@
             ))
 
 
+(use-package doom-themes
+  :pin melpa)
+
+
 (use-package dumb-jump
   :config (progn
 
