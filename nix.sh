@@ -42,6 +42,7 @@ nix-env -i \
     mosh \
     nmap \
     offlineimap \
+    password-store \
     p7zip \
     pv \
     rclone \
