@@ -262,3 +262,11 @@
     (set-face-attribute 'isearch nil :background base-color-lighter-1 :foreground "black" :underline nil)
     (set-face-attribute 'lazy-highlight nil :background base-color-darker-1 :foreground "black" :underline nil))
   (/theme-common))
+
+
+(defun theme-wilmersdorf ()
+  (interactive)
+  (disable-all-themes)
+  (load-theme 'doom-wilmersdorf t)
+  (set-face-attribute 'fringe nil :background "#515462" :foreground "#c6c6c6")
+  (/theme-common))
