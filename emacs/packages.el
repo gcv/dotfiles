@@ -654,7 +654,7 @@
 
 (use-package julia-snail
   ;;:load-path "~/Code/julia-snail"
-  :hook julia-mode
+  :hook (julia-mode . julia-snail-mode)
   :config (progn
             (add-to-list 'display-buffer-alist '("\\*julia" (display-buffer-reuse-window display-buffer-same-window)))
             ))
