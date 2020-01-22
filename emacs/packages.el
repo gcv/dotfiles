@@ -639,32 +639,25 @@
   :pin melpa
   :config (progn
 
-            (add-to-list 'display-buffer-alist '("\\*julia-repl\\*" (display-buffer-reuse-window display-buffer-same-window)))
-
             (setq julia-indent-offset 3)
 
             (setq julia-prompt-regexp "julia> ")
 
             (defun /julia-mode-hook ()
               (subword-mode)
-              (local-set-key (kbd "C-c C-z") 'julia-snail)
-              (local-set-key (kbd "C-c C-c") 'julia-snail-send-top-level-form)
-              (local-set-key (kbd "C-M-x") 'julia-snail-send-region)
-              (local-set-key (kbd "C-c C-l") 'julia-snail-send-line)
-              (local-set-key (kbd "C-c C-k") 'julia-snail-send-buffer))
+              (setq show-trailing-whitespace t))
 
             (add-hook 'julia-mode-hook #'/julia-mode-hook)
-
-            (defun /julia-snail-mode-hook ()
-               (local-set-key (kbd "C-c C-z") 'flip-windows))
-
-            (add-hook 'julia-snail-mode-hook #'/julia-snail-mode-hook)
 
             ))
 
 
-;; (use-package julia-snail-mode
-;;   :load-path "~/Code/julia-snail")
+(use-package julia-snail
+  ;;:load-path "~/Code/julia-snail"
+  :hook julia-mode
+  :config (progn
+            (add-to-list 'display-buffer-alist '("\\*julia" (display-buffer-reuse-window display-buffer-same-window)))
+            ))
 
 
 (use-package ledger-mode
