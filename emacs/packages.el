@@ -277,10 +277,11 @@
 (use-package emojify
   :pin melpa
   :config (progn
-            ;; 'unicode currently broken on macOS
+            ;; 'unicode possibly broken on NextStep port?
             (setq emojify-display-style 'image)
             (setq emojify-emoji-style (list 'unicode))
-            (global-emojify-mode)
+            ;; NB: This mode does not seem to be needed for the Mac port.
+            ;;(global-emojify-mode)
             ))
 
 
