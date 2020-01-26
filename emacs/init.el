@@ -346,6 +346,7 @@
 (setq pop-up-windows nil)                    ; display-buffer: avoid splitting
 (setq even-window-heights nil)               ; display-buffer: avoid resizing
 (setq window-resize-pixelwise t)             ; smoother window resizing?
+(setq split-height-threshold 15)             ; for rare occasions
 
 (winner-mode 1)                              ; restore windows: C-c right-arrow
 (windmove-default-keybindings)               ; shift-arrow keys switch windows
