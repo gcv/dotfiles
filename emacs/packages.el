@@ -666,7 +666,20 @@
   ;;:load-path "~/Code/julia-snail"
   :hook (julia-mode . julia-snail-mode)
   :config (progn
-            (add-to-list 'display-buffer-alist '("\\*julia" (display-buffer-reuse-window display-buffer-same-window)))
+            ;; order matters, unfortunately:
+            (add-to-list 'display-buffer-alist
+                         ;; match buffers named "*julia" in general
+                         '("\\*julia"
+                           ;; actions:
+                           (display-buffer-reuse-window display-buffer-same-window)))
+            (add-to-list 'display-buffer-alist
+                         ;; when displaying buffers named "*julia" in REPL mode
+                         '((lambda (bufname _action)
+                             (and (string-match-p "\\*julia" bufname)
+                                  (with-current-buffer bufname
+                                    (bound-and-true-p julia-snail-repl-mode))))
+                           ;; actions:
+                           (display-buffer-reuse-window display-buffer-pop-up-window)))
             ))
 
 
@@ -1165,7 +1178,8 @@
                                              (interactive)
                                              (vterm--self-insert)
                                              (let ((kill-buffer-query-functions nil))
-                                               (kill-buffer))))
+                                               (kill-buffer)
+                                               (delete-window))))
               (setq truncate-lines t))
 
             (add-hook 'vterm-mode-hook #'/vterm-mode-hook)
