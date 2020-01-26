@@ -595,13 +595,22 @@
                   '((left-fringe . 0)
                     (right-fringe . 0)))
 
+            (defun /ivy-posframe-display-smart (str)
+              (if (or (< (window-total-width (with-ivy-window (selected-window)))
+                         ivy-posframe-width)
+                      (< (window-total-height (with-ivy-window (selected-window)))
+                         ;; XXX: This needs to match ivy-height-alist.
+                         (/ (frame-height) 2)))
+                  (ivy-posframe-display-at-frame-center str)
+                (ivy-posframe-display-at-window-center str)))
+
             (setq ivy-posframe-display-functions-alist
                   '((swiper . ivy-posframe-display-at-window-bottom-left)
                     ;;(swiper . nil)
                     (complete-symbol . ivy-posframe-display-at-point)
-                    (counsel-M-x . ivy-posframe-display-at-window-center)
+                    (counsel-M-x . /ivy-posframe-display-smart)
                     ;;(t . ivy-posframe-display)
-                    (t . ivy-posframe-display-at-window-center)))
+                    (t . /ivy-posframe-display-smart)))
 
             (set-face-attribute 'ivy-posframe-cursor nil :inherit 'ivy-cursor)
             (set-face-attribute 'ivy-posframe nil :foreground nil :background nil :inherit 'default)
