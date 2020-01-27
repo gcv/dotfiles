@@ -1,3 +1,6 @@
+;;; -*- lexical-binding: t; -*-
+
+
 ;;; fonts
 ;;; best choices:
 ;;; - Monaco (classic Mac, missing bold variant, missing many Unicode symbols, excellent at size 140)
@@ -557,3 +560,47 @@ return result
 end tell")))
     (insert (/ns-color-to-hex result))
     (do-applescript "tell application \"Emacs\" to activate")))
+
+
+;; This is a hack to show notes using posframe while recording a screencast.
+;; Save the notes in the list below. Use H-n to advance. That's it.
+(let* ((idx -1)
+       (notes (list "\n          One.        \n          Two.         \n         Three."
+                    "\n         Four.        \n\n        C-c C-z"
+                    "\n\n     Happy hacking!")))
+  (cl-defun screencast-posframe-notes (&optional arg)
+    (interactive "P")
+    (let* ((buf-name "*screencast-notes*")
+           (buf (get-buffer-create buf-name)))
+      (cond ((>= idx (length notes))
+             (setq idx -1)
+             (posframe-delete-frame buf)
+             (kill-buffer buf))
+            ;; argument or index is 0: reset and start over
+            ((or arg (= -1 idx))
+             (setq idx 0)
+             (posframe-delete-frame buf)
+             (posframe-show buf
+                            :internal-border-width 2
+                            :internal-border-color "white"
+                            :width 23
+                            :height 5
+                            :poshandler (lambda (info) (cons 20
+                                                             (- 0 20
+                                                                (plist-get info :mode-line-height)
+                                                                (plist-get info :minibuffer-height))))
+                            :font (font-spec :family "DejaVu Sans Mono"
+                                             :width 'normal
+                                             :size 20
+                                             :weight 'normal))
+             (screencast-posframe-notes)
+             )
+            ;; normal case: show the note
+            (t
+             (with-current-buffer buf
+               (text-mode)
+               (erase-buffer)
+               (insert (seq-elt notes idx))
+               (incf idx)))))))
+;;(global-set-key (kbd "H-n") #'screencast-posframe-notes)
+
