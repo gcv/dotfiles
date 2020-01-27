@@ -565,7 +565,7 @@
 
             (setq ivy-height-alist
                   '((swiper . 10)
-                    (t . (lambda (_caller) (/ (frame-height) 2.5)))))
+                    (t . (lambda (_caller) (/ (frame-height) 2)))))
 
             (setq ivy-re-builders-alist
                   '((swiper . ivy--regex-plus)
@@ -600,7 +600,7 @@
                          ivy-posframe-width)
                       (< (window-total-height (with-ivy-window (selected-window)))
                          ;; XXX: This needs to match ivy-height-alist.
-                         (/ (frame-height) 2.5)))
+                         (/ (frame-height) 2)))
                   (ivy-posframe-display-at-frame-center str)
                 (ivy-posframe-display-at-window-center str)))
 
