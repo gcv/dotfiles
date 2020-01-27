@@ -333,6 +333,40 @@
             ))
 
 
+(use-package gif-screencast
+  :pin melpa
+  :config (progn
+
+            ;; required on Mac
+            (setq gif-screencast-args '("-x")
+                  gif-screencast-cropping-program "mogrify"
+                  gif-screencast-capture-format "ppm")
+
+            ;; sanity
+            (setq gif-screencast-want-optimized t
+                  gif-screencast-autoremove-screenshots t)
+
+            (defun /gif-screencast ()
+              (interactive)
+              (if gif-screencast-mode
+                  (gif-screencast-stop)
+                (if (not (y-or-n-p "Start recording a screencast? "))
+                    (message "Canceled")
+                  (gif-screencast))))
+
+            ;;(global-set-key (kbd "H-s") #'/gif-screencast)
+
+            ;; use this redefinition on a high-DPI screen:
+            (defun gif-screencast--cropping-region ()
+              (let ((x (* 2 (car (frame-position))))
+                    (y (* 2 (cdr (frame-position))))
+                    (width (* 2 (car (alist-get 'outer-size (frame-geometry)))))
+                    (height (* 2 (cdr (alist-get 'outer-size (frame-geometry))))))
+                (format "%dx%d+%d+%d" width height x y)))
+
+            ))
+
+
 (use-package git-auto-commit-mode
   :pin melpa
   :config (progn
