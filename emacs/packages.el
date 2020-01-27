@@ -615,6 +615,16 @@
             ))
 
 
+(use-package ivy-xref
+  :pin melpa
+  :init (progn
+          (when (>= emacs-major-version 27)
+            (setq xref-show-definitions-function #'ivy-xref-show-defs))
+          (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+  :config (progn
+            ))
+
+
 (use-package ivy-posframe
   :pin melpa
   :diminish ""
