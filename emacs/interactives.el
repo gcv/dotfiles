@@ -543,6 +543,14 @@ target width."
   (message "Insert with org-insert-last-stored-link (C-c M-l)"))
 
 
+(defun destroy-symbol (sym)
+  "Destroy a symbol: combines FMAKUNBOUND, MAKUNBOUND, and UNINTERN."
+  (interactive "SSymbol: ")
+  (fmakunbound sym)
+  (makunbound sym)
+  (unintern sym))
+
+
 (defun mac-color-picker (&optional list buffer-name)
   "Call macOS color picker and insert the chosen color."
   (interactive)
@@ -603,4 +611,3 @@ end tell")))
                (insert (seq-elt notes idx))
                (incf idx)))))))
 ;;(global-set-key (kbd "H-n") #'screencast-posframe-notes)
-
