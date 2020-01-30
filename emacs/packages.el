@@ -621,6 +621,34 @@
 
             (define-key ivy-minibuffer-map (kbd "C-m") 'ivy-alt-done) ; enter navigates into a directory
 
+            ;;; Implement full-window Ivy selection (requires /ivy-height-smart above):
+            (defun ivy-display-function-window (text)
+              (let ((buffer (get-buffer-create "*ivy-candidates*"))
+                    (str (with-current-buffer (get-buffer-create " *Minibuf-1*")
+                           (let ((point (point))
+                                 (string (concat (buffer-string) "  " text)))
+                             (ivy-add-face-text-property (- point 1) point 'ivy-cursor string t)
+                             string))))
+                (with-current-buffer buffer
+                  (let ((inhibit-read-only t))
+                    (erase-buffer)
+                    (insert str)
+                    (goto-char (point-min))
+                    (setq-local cursor-type nil)))
+                (with-ivy-window
+                  (display-buffer
+                   buffer
+                   `((display-buffer-reuse-window
+                      display-buffer-below-selected)
+                     (window-height . ,(ivy--height (ivy-state-caller ivy-last))))))))
+
+            (defun ivy-display-function-window-cleanup ()
+              (kill-buffer "*ivy-candidates*"))
+
+            (add-hook 'minibuffer-exit-hook #'ivy-display-function-window-cleanup)
+
+            ;;(add-to-list 'ivy-display-functions-alist '(counsel-M-x . ivy-display-function-window))
+
             ))
 
 
