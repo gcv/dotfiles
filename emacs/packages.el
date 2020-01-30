@@ -597,9 +597,18 @@
 
             (setq ivy-initial-inputs-alist nil)
 
+            (defun /ivy-height-smart ()
+              (if (eq 'ivy-display-function-window ivy--display-function)
+                  (window-height)
+                (if (> (frame-height) 55)
+                    (round (/ (frame-height) 2.5))
+                  (round (/ (frame-height) 1.75)))))
+
             (setq ivy-height-alist
                   '((swiper . 10)
-                    (t . (lambda (_caller) (/ (frame-height) 2)))))
+                    (t . (lambda (_caller)
+                           ;; XXX: This needs to match /ivy-posframe-display-smart.
+                           (/ivy-height-smart)))))
 
             (setq ivy-re-builders-alist
                   '((swiper . ivy--regex-plus)
@@ -644,7 +653,7 @@
                          ivy-posframe-width)
                       (< (window-total-height (with-ivy-window (selected-window)))
                          ;; XXX: This needs to match ivy-height-alist.
-                         (/ (frame-height) 2)))
+                         (/ivy-height-smart)))
                   (ivy-posframe-display-at-frame-center str)
                 (ivy-posframe-display-at-window-center str)))
 
