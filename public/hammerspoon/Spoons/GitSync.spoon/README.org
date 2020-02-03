@@ -1,0 +1,110 @@
+* Git Sync Spoon — a Hammerspoon Plugin
+
+Git Sync Spoon (or GitSync.spoon) is a [[http://www.hammerspoon.org/][Hammerspoon]] [[https://www.hammerspoon.org/Spoons/][plugin, or Spoon]], for orchestrating automatic synchronization of local Git repositories with their remotes. It is intended as a private, Git-backed replacement for synchronization services like Dropbox and Syncthing.
+
+See [[https://github.com/simonthum/git-sync][git-sync]] for details of the underlying script. This Spoon provides a convenient wrapper for ~git-sync~ with the following features:
+- menu bar status display
+- timer operation for polling remote repositories
+- configuration for multiple repositories
+
+On the down side, Git Sync Spoon:
+- makes no attempt to use filesystem watchers (and likely never will), relying instead on time-interval polling
+- requires considerable Git proficiency to correctly set up remotes, track down conflicts, and generally deal with the local repository when something goes wrong
+
+It is generally designed for an expert Git user interested in a synchronization solution running through a (probably private) repository hosted on a service like [[https://gitlab.com][GitLab]].
+
+Git Sync Spoon came about as a result of frustration with other file sync systems:
+- Dropbox :: [[https://www.reddit.com/r/dropbox/comments/eu82o4/psa_the_new_dropbox_client_deletes_underlying/][Dropbox has been known to delete files /outside/ Dropbox]], so Dropbox users should make sure to have independent backups. From a feature perspective, Dropbox does not allow sync of multiple directories, and the workaround of placing a symlink inside Dropbox pointing to a location outside the Dropbox folder [[https://www.dropboxforum.com/t5/Files-folders/I-received-an-email-about-changes-to-symlinks-Any-ideas/td-p/366245][has been unceremoniously broken after a decade]].
+- Syncthing :: Syncthing is peer-to-peer, so continuous sync between multiple people requires maintaining a dedicated host for the purpose.
+- [[https://www.sparkleshare.org][SparkleShare]] :: Similar to Git Sync Spoon, and also backed by Git. Git Sync Spoon (1) is more a lightweight piece of software, at least for people who already use Hammerspoon, and (2) [[https://github.com/hbons/SparkleShare/issues/1716][makes no attempt to build its own conflict resolution on top of Git]].
+
+
+** Installation
+
+- Make sure you have Git installed.
+- Download the latest release zip file from https://github.com/gcv/git-sync-spoon/releases/.
+- Open the downloaded file, and Hammerspoon will automatically install it.
+- Edit your Hammerspoon configuration file (~~/.hammerspoon/init.lua~), and add the following line:
+
+#+BEGIN_SRC lua
+hs.loadSpoon("GitSync")
+#+END_SRC
+
+After editing the configuration file (see below), reload the Hammerspoon configuration.
+
+
+** Repositories
+
+Each repository intended for use with Git Sync Spoon must have the following setting turned on:
+
+#+BEGIN_SRC
+git config --bool branch.master.sync true
+#+END_SRC
+
+In addition, if you want all new files to be automatically added to the repository (recommended), additionally turn on the following setting:
+
+#+BEGIN_SRC
+git config --bool branch.master.syncNewFiles true
+#+END_SRC
+
+Substitute the branch you intend to sync for ~master~ in the above incantations.
+
+
+** Configuration
+
+Make sure whatever repositories you want to use with Git Sync Spoon are correctly configured, have a default upstream, and can push without prompting for a password or SSH key passphrase.
+
+Add a file to your ~XDG_CONFIG_HOME~ directory (probably ~~./config~) named ~GitSyncSpoon.lua~. A minimal configuration file looks like this:
+
+#+BEGIN_SRC lua
+repos = { "/path/to/repo-to-sync" }
+#+END_SRC
+
+This configures a single repository to synchronize upstream, with all default settings.
+
+A more complete configuration file looks like this:
+
+#+BEGIN_SRC lua
+-- default settings:
+enabled = true
+debug = false          -- when true, print messages to the Hammerspoon console
+git = "/usr/bin/git"   -- for Nix users: "~/.nix-profile/bin/git"
+interval = 300         -- default number of seconds between syncs
+
+-- repos is a Lua table consisting of either (1) strings indicating repository
+-- paths, or (2) tables consisting of finer-grained repository configuration.
+-- Right now, only path and interval are valid keys. If set for a repository,
+-- the interval overrides the default sync interval.
+repos = {
+   { path = "~/project1", interval = 600 },
+   "~/project2",
+   { path = "~/project3" }
+}
+#+END_SRC
+
+
+** Usage
+
+- Git Sync Spoon displays a menu icon when running.
+- Clicking the menu icon shows the list of repositories configured for sync. There should be a status icon next to each.
+
+| status icon | meaning          |
+|-------------+------------------|
+| ✓           | sync succeeded   |
+| !           | error            |
+| ⟳           | sync in progress |
+| ×           | sync stopped     |
+| •           | waiting for sync |
+
+- The menu icon turns grey when disabled.
+- The menu icon turns red when an error affects at least one repository. When this happens, go and try to manually run the sync script in the failing repository (~~/.hammerspoon/Spoons/GitSync.spoon/resources/git-sync~) and figure out what went wrong. If the script succeeds from the command line, but Git Sync Spoon runs still fail, set ~debug = true~ in the configuration file and look for messages on the Hammerspoon console.
+- Sync timers will be suspended when the system goes into sleep mode. This means the next sync should run when the timer runs its expected course (e.g.: suppose a sync runs at 300 second intervals, and the system goes to sleep 100 seconds into it — this means the next sync will run 200 seconds after the system wakes up).
+- After editing the configuration file, reload the Hammerspoon configuration, either from the Hammerspoon console or with a dedicated key binding to ~hs.reload()~.
+
+
+** Credits
+
+- This code uses and includes the [[https://github.com/simonthum/git-sync][git-sync]] script.
+- The menu icon is derived from the [[https://git-scm.com/downloads/logos][Git logo]] by [[https://twitter.com/jasonlong][Jason Long]].
+- This would not have been possible without the [[http://www.hammerspoon.org/][Hammerspoon]] platform.
+- After spending considerable time inventing new cursewords to thank CVS and Subversion for the data losses and waste of time they have inflicted on me over the years, my heartfelt gratitude for [[https://git-scm.com/][Git]]. It was not the first source control system which mostly works right (that would have been [[http://darcs.net][Darcs]]), but it was the first which took over the industry from all the broken ones.
