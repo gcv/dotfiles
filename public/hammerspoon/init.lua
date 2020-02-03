@@ -15,5 +15,5 @@ dofile("./itunes.lua")
 dofile("./emacs-and-term.lua")
 
 --- Spoons:
+hs.loadSpoon("GitSync")
 -- hs.loadSpoon("Shade")
--- hs.loadSpoon("GitSync")
