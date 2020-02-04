@@ -425,7 +425,7 @@
             ))
 
 
-;; Hashicorp Configuration Language: dependency for terraform-mode
+;;; Hashicorp Configuration Language: dependency for terraform-mode
 (use-package hcl-mode)
 
 
@@ -535,6 +535,22 @@
          ("C-M-S-i" . 'helm-swoop-from-isearch)))
 
 
+;; Replacement for built-in Help system.
+(use-package helpful
+  :pin melpa
+  :config (progn
+            (global-set-key (kbd "C-h f") #'helpful-callable)
+            (global-set-key (kbd "C-h v") #'helpful-variable)
+            (global-set-key (kbd "C-h o") #'helpful-symbol)
+            (global-set-key (kbd "C-h k") #'helpful-key)
+            (global-set-key (kbd "C-c C-d h") #'helpful-at-point)
+            (global-set-key (kbd "C-h F") #'helpful-function)
+            (global-set-key (kbd "C-h C") #'helpful-command)
+            (when (featurep 'counsel)
+              (setq counsel-describe-function-function #'helpful-callable)
+              (setq counsel-describe-variable-function #'helpful-variable))))
+
+
 (use-package highlight
   :pin melpa
   :config (progn
@@ -621,7 +637,7 @@
 
             (define-key ivy-minibuffer-map (kbd "C-m") 'ivy-alt-done) ; enter navigates into a directory
 
-            ;;; Implement full-window Ivy selection (requires /ivy-height-smart above):
+            ;; Implement full-window Ivy selection (requires /ivy-height-smart above):
             (defun ivy-display-function-window (text)
               (let ((buffer (get-buffer-create "*ivy-candidates*"))
                     (str (with-current-buffer (get-buffer-create " *Minibuf-1*")
@@ -643,7 +659,8 @@
                      (window-height . ,(ivy--height (ivy-state-caller ivy-last))))))))
 
             (defun ivy-display-function-window-cleanup ()
-              (kill-buffer "*ivy-candidates*"))
+              (when-let ((ivy-candidate-buf (get-buffer "*ivy-candidates*")))
+                (kill-buffer ivy-candidate-buf)))
 
             (add-hook 'minibuffer-exit-hook #'ivy-display-function-window-cleanup)
 
