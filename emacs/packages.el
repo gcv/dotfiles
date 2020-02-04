@@ -166,7 +166,7 @@
   :config (progn
 
             (global-set-key (kbd "C-x C-M-f") 'counsel-find-file)
-            (global-set-key (kbd "C-x C-M-b") 'persp-counsel-switch-buffer)
+            (global-set-key (kbd "C-x C-M-b") 'persp-ivy-switch-buffer)
 
             ))
 
