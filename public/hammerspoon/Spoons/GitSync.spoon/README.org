@@ -73,14 +73,28 @@ interval = 300         -- default number of seconds between syncs
 
 -- repos is a Lua table consisting of either (1) strings indicating repository
 -- paths, or (2) tables consisting of finer-grained repository configuration.
--- Right now, only path and interval are valid keys. If set for a repository,
--- the interval overrides the default sync interval.
+-- Right now, "path", "interval", and "excludes" are valid keys.
+-- If set for a repository, the interval overrides the default sync interval.
 repos = {
    { path = "~/project1", interval = 600 },
    "~/project2",
-   { path = "~/project3" }
+   { path = "~/project3" },
+   {
+     path = "~/project4",
+     interval = 240,
+     excludes = {
+       "path/in/project4/1",
+       "path/in/project4/2"
+     }
+   }
 }
 #+END_SRC
+
+The ~excludes~ repository setting requires special explanation. It allows some files or directories in the repository to avoid automatic commits. Normally, Git Sync Spoon produces automatically-generated commit messages. This is reasonable behavior in situations where having /some/ history is better than having none. However, it may be undesirable for some files or subdirectories, which benefit from manually-written commits.
+
+When enabled on a repository, the ~excludes~ option sets the ~assume-unchanged~ flag on all files already under Git control (and their children if directories) listed in ~excludes~, then proceeds to perform the sync, then unsets the ~assume-unchanged~ flag. This process occurs on each sync, which allows manual commits to still affect files under ~excludes~ (this is the key difference from ~.gitignore~). See [[https://www.git-scm.com/docs/git-update-index][Git ~update-index~ documentation]] for details of ~assume-unchanged~.
+
+A word of warning about a (probably) unexpected behavior here in the interaction of the ~syncNewFiles~ branch setting with ~excludes~. When ~syncNewFiles~ is ~true~, a new file under an ~excludes~ path will still be committed the first time. This happens because ~assume-unchanged~ can only be set on content already under Git control, but not to content which had never been ~git add~ed.
 
 
 ** Usage

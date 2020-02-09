@@ -12,14 +12,14 @@
 --- This is intended as a private, Git-backed replacement for synchronization
 --- services like Dropbox and Syncthing.
 ---
---- Download: https://github.com/gcv/git-sync-spoon/releases/download/1.0.0beta1/GitSync.spoon.zip
+--- Download: https://github.com/gcv/git-sync-spoon/releases/download/1.0.0beta2/GitSync.spoon.zip
 
 local obj = {}
 obj.__index = obj
 
 --- Metadata
 obj.name = "GitSync"
-obj.version = "1.0.0beta1"
+obj.version = "1.0.0beta2"
 obj.author = "gcv"
 obj.homepage = "https://github.com/gcv/git-sync.spoon"
 obj.license = "CC0"
@@ -94,7 +94,17 @@ function obj:init()
    for idx, repo in ipairs(self.conf.repos) do
       local path = "string" == type(repo) and repo or repo.path
       local interval = ("table" == type(repo) and repo.interval) and repo.interval or self.conf.interval
-      self.syncs[#self.syncs+1] = Sync.new(path, interval)
+      local excludes = ""
+      if "table" == type(repo) and repo.excludes then
+         if "table" == type(repo.excludes) then
+            -- join excludes using the bell character \a, since it's unlikely to
+            -- be used in file names, and both Lua and bash can handle it
+            excludes = table.concat(repo.excludes, "\a")
+         else
+            excludes = repo.excludes
+         end
+      end
+      self.syncs[#self.syncs+1] = Sync.new(path, interval, excludes)
    end
    if 0 == #self.syncs then
       self:notify("error", "No syncs defined. Check configuration.")

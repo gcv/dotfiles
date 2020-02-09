@@ -7,6 +7,9 @@
 # 2012 by Simon Thum
 # Licensed as: CC0
 #
+# Modified for Git Sync Spoon:
+# - 2020-02-08: Add GIT_SYNC_EXCLUDES support.
+#
 # This scrips intends to sync via git near-automatically
 # in "tracking" repositories where a nice history is not
 # crucial as having one.
@@ -251,6 +254,54 @@ fi
 __log_msg "Mode $mode"
 
 __log_msg "Using $remote_name/$branch_name"
+
+# deal with excludes (use functions here for local state and for ease of
+# unconditional teardown when the script exits)
+excludes
+excludes_setup()
+{
+    # XXX: Yes, this is nearly identical to excludes_teardown.
+    # bell character string separator
+    local IFS=$'\a'
+    # save globbing flag because it must be turned off
+    # required for Bash v<4 compatibility or "local -" would suffice
+    local restore
+    [[ $- = *f* ]] || restore='set +o noglob'
+    set -o noglob
+    # do the work
+    local excludes=(${GIT_SYNC_EXCLUDES})
+    if [ ! -z "${GIT_SYNC_EXCLUDES}" ] ; then
+        for f in "${excludes[@]}"; do
+            __log_msg "Excluding \"${f}\""
+            git ls-files "${f}" -z | xargs -0 git update-index --assume-unchanged
+        done
+    fi
+    # restore globbing flag
+    eval "$restore"
+}
+excludes_setup
+excludes_teardown()
+{
+    # XXX: Yes, this is nearly identical to excludes_setup.
+    # bell character string separator
+    local IFS=$'\a'
+    # save globbing flag because it must be turned off
+    # required for Bash v<4 compatibility or "local -" would suffice
+    local restore
+    [[ $- = *f* ]] || restore='set +o noglob'
+    set -o noglob
+    # do the work
+    local excludes=(${GIT_SYNC_EXCLUDES})
+    if [ ! -z "${GIT_SYNC_EXCLUDES}" ] ; then
+        for f in "${excludes[@]}"; do
+            __log_msg "Restoring assume-unchanged flag for \"${f}\""
+            git ls-files "${f}" -z | xargs -0 git update-index --no-assume-unchanged
+        done
+    fi
+    # restore globbing flag
+    eval "$restore"
+}
+trap excludes_teardown EXIT
 
 # check for intentionally unhandled file states
 if [ ! -z "$(check_initial_file_state)" ] ; then

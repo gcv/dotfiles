@@ -1,10 +1,11 @@
 local obj = { name = "Sync" }
 obj.__index = obj
 
-function obj.new(displayPath, interval)
+function obj.new(displayPath, interval, excludes)
    local self = {
       displayPath = displayPath,
       interval = interval,
+      excludes = excludes,
       lastSync = nil,
       status = nil,
       started = nil,
@@ -82,6 +83,7 @@ function obj:go()
    )
    local env = self.task:environment()
    env["PATH"] = self.app.conf.gitDirectory .. ":/usr/bin:/bin"
+   env["GIT_SYNC_EXCLUDES"] = self.excludes
    self.task:setEnvironment(env)
    self.task:setWorkingDirectory(realPath)
    self.task:start()
