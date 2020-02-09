@@ -12,14 +12,14 @@
 --- This is intended as a private, Git-backed replacement for synchronization
 --- services like Dropbox and Syncthing.
 ---
---- Download: https://github.com/gcv/git-sync-spoon/releases/download/1.0.0beta2/GitSync.spoon.zip
+--- Download: https://github.com/gcv/git-sync-spoon/releases/download/1.0.0beta3/GitSync.spoon.zip
 
 local obj = {}
 obj.__index = obj
 
 --- Metadata
 obj.name = "GitSync"
-obj.version = "1.0.0beta2"
+obj.version = "1.0.0beta3"
 obj.author = "gcv"
 obj.homepage = "https://github.com/gcv/git-sync.spoon"
 obj.license = "CC0"
@@ -247,7 +247,7 @@ function obj:versionCheck()
          if ver ~= obj.version then
             local n = hs.notify.new(
                function()
-                  hs.osascript.applescript("open location \"https://github.com/gcv/git-sync-spoon\"")
+                  hs.osascript.applescript("open location \"https://github.com/gcv/git-sync-spoon/releases\"")
                end,
                {
                   title = "Git Sync Spoon",

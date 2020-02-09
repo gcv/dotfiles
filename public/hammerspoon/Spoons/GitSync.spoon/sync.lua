@@ -38,6 +38,13 @@ end
 function obj:unpause()
    if self.app.conf.debug then print("GitSyncSpoon:", "unpausing sync", self.displayPath) end
    self.timer:start()
+   if self.app.conf.debug then
+      local nextTrigger = math.floor(self.timer:nextTrigger())
+      print("GitSyncSpoon:",
+            "current time:", os.date("%X", os.time()),
+            "next sync in:", nextTrigger,
+            "at time:", os.date("%X", math.floor(os.time() + nextTrigger)))
+   end
 end
 
 function obj:stop()
@@ -90,7 +97,7 @@ function obj:go()
 end
 
 function obj:display()
-   local fmt = "%H:%M:%S"
+   local fmt = "%X" -- equivalent to "%H:%M:%S"
    local resTitle = ""
    -- status
    if "ok" == self.status then
@@ -106,14 +113,14 @@ function obj:display()
    end
    -- path
    resTitle = resTitle .. " " .. self.displayPath
-   -- last sync
+   -- last and next sync
    if self.lastSync then
       resTitle = resTitle ..
          " (last: " .. os.date(fmt, self.lastSync) ..
-         "; next: " .. os.date(fmt, self.lastSync + self.interval) .. ")"
+         "; next: " .. os.date(fmt, math.floor(os.time() + self.timer:nextTrigger())) .. ")"
    elseif self.started then
       resTitle = resTitle ..
-         " (next: " .. os.date(fmt, self.started + self.interval) .. ")"
+         " (next: " .. os.date(fmt, math.floor(os.time() + self.timer:nextTrigger())) .. ")"
    end
    -- done
    return {
