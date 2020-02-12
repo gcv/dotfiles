@@ -503,7 +503,7 @@ function pve() {
     fi
     pushd ${pd}
     if [[ ! -f virtualenv.py ]]; then
-        curl -L -O 'https://raw.github.com/pypa/virtualenv/master/virtualenv.py'
+        curl -L -O 'https://raw.github.com/pypa/virtualenv/16.7.9/virtualenv.py'
     fi
     if [[ ! -d ${env_name} ]]; then
         echo "installing virtualenv"
@@ -539,8 +539,8 @@ function pve3() {
     local system_python
     if [[ -f `which python3` ]]; then
         system_python=`which python3`
-    elif [[ -f `which python3.5` ]]; then
-        system_python=`which python3.5`
+    elif [[ -f `which python3.7` ]]; then
+        system_python=`which python3.7`
     else
         echo "no system python3 found"
         return 1
