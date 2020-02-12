@@ -13,6 +13,7 @@
 static LineInfo *alloc_lineinfo() {
   LineInfo *info = malloc(sizeof(LineInfo));
   info->directory = NULL;
+  info->prompt_col = -1;
   return info;
 }
 void free_lineinfo(LineInfo *line) {
@@ -185,7 +186,7 @@ static char *get_row_directory(Term *term, int row) {
     return sbrow->info->directory;
     /* return term->dirs[0]; */
   } else {
-    LineInfo* line = term->lines[row];
+    LineInfo *line = term->lines[row];
     return line ? line->directory : NULL;
   }
 }
@@ -427,8 +428,7 @@ static void adjust_topline(Term *term, emacs_env *env) {
   size_t offset = get_col_offset(term, pos.row, pos.col);
   forward_char(env, env->make_integer(env, pos.col - offset));
 
-  bool following =
-      term->height == 1 + pos.row + term->linenum_added; // cursor at end?
+  bool following = term->height == 1 + pos.row;
 
   emacs_value windows = get_buffer_window_list(env);
   emacs_value swindow = selected_window(env);
@@ -436,11 +436,13 @@ static void adjust_topline(Term *term, emacs_env *env) {
   for (int i = 0; i < winnum; i++) {
     emacs_value window = nth(env, i, windows);
     if (eq(env, window, swindow)) {
-      if (following) {
-        // "Follow" the terminal output
-        recenter(env,
-                 env->make_integer(
-                     env, -1)); /* make current line at the screen bottom */
+      int win_body_height =
+          env->extract_integer(env, window_body_height(env, window));
+
+      /* recenter:If ARG is negative, it counts up from the bottom of the
+       * window.  (ARG should be less than the height of the window ) */
+      if (term->height - pos.row <= win_body_height) {
+        recenter(env, env->make_integer(env, pos.row - term->height));
       } else {
         recenter(env, env->make_integer(env, pos.row));
       }
@@ -623,7 +625,8 @@ static emacs_value render_text(emacs_env *env, Term *term, char *buffer,
 
   emacs_value fg = color_to_rgb_string(env, term, &cell->fg);
   emacs_value bg = color_to_rgb_string(env, term, &cell->bg);
-  emacs_value bold = cell->attrs.bold ? Qbold : Qnormal;
+  emacs_value bold =
+      cell->attrs.bold && !term->disable_bold_font ? Qbold : Qnormal;
   emacs_value underline = cell->attrs.underline ? Qt : Qnil;
   emacs_value italic = cell->attrs.italic ? Qitalic : Qnormal;
   emacs_value reverse = cell->attrs.reverse ? Qt : Qnil;
@@ -699,7 +702,7 @@ static void term_clear_scrollback(Term *term, emacs_env *env) {
 }
 static void term_process_key(Term *term, emacs_env *env, unsigned char *key,
                              size_t len, VTermModifier modifier) {
-    if (is_key(key, len, "<clear_scrollback>")) {
+  if (is_key(key, len, "<clear_scrollback>")) {
     term_clear_scrollback(term, env);
   } else if (is_key(key, len, "<start>")) {
     tcflow(term->pty_fd, TCOON);
@@ -784,6 +787,8 @@ static void term_process_key(Term *term, emacs_env *env, unsigned char *key,
     vterm_keyboard_key(term->vt, VTERM_KEY_KP_8, modifier);
   } else if (is_key(key, len, "<kp-9>")) {
     vterm_keyboard_key(term->vt, VTERM_KEY_KP_9, modifier);
+  } else if (is_key(key, len, "<kp-decimal>")) {
+    vterm_keyboard_key(term->vt, VTERM_KEY_KP_PERIOD, modifier);
   } else if (is_key(key, len, "j") && (modifier == VTERM_MOD_CTRL)) {
     vterm_keyboard_unichar(term->vt, '\n', 0);
   } else if (is_key(key, len, "SPC")) {
@@ -861,6 +866,11 @@ static int osc_callback(const char *command, size_t cmdlen, void *user) {
       }
       term->lines[i]->directory = malloc(cmdlen - 4 + 1);
       strcpy(term->lines[i]->directory, &buffer[4]);
+      if (i == term->cursor.row) {
+        term->lines[i]->prompt_col = term->cursor.col;
+      } else {
+        term->lines[i]->prompt_col = -1;
+      }
     }
     return 1;
   } else if (cmdlen > 4 && buffer[0] == '5' && buffer[1] == '1' &&
@@ -889,6 +899,7 @@ emacs_value Fvterm_new(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
   int rows = env->extract_integer(env, args[0]);
   int cols = env->extract_integer(env, args[1]);
   int sb_size = env->extract_integer(env, args[2]);
+  int disable_bold_font = env->is_not_nil(env, args[3]);
 
   term->vt = vterm_new(rows, cols);
   vterm_set_utf8(term->vt, 1);
@@ -912,6 +923,7 @@ emacs_value Fvterm_new(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
   term->width = cols;
   term->height = rows;
   term->height_resize = 0;
+  term->disable_bold_font = disable_bold_font;
   emacs_value newline = env->make_string(env, "\n", 1);
   for (int i = 0; i < term->height; i++) {
     insert(env, newline);
@@ -959,7 +971,7 @@ emacs_value Fvterm_update(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
       modifier = modifier | VTERM_MOD_CTRL;
 
     // Ignore the final zero byte
-    term_process_key(term, env,key, len - 1, modifier);
+    term_process_key(term, env, key, len - 1, modifier);
   }
 
   // Flush output
@@ -1040,7 +1052,7 @@ emacs_value Fvterm_get_pwd(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
 }
 
 emacs_value Fvterm_get_icrnl(emacs_env *env, ptrdiff_t nargs,
-                              emacs_value args[], void *data) {
+                             emacs_value args[], void *data) {
   Term *term = env->get_user_ptr(env, args[0]);
 
   if (term->pty_fd > 0) {
@@ -1053,6 +1065,37 @@ emacs_value Fvterm_get_icrnl(emacs_env *env, ptrdiff_t nargs,
       return Qnil;
   }
   return Qnil;
+}
+
+emacs_value Fvterm_get_prompt_point(emacs_env *env, ptrdiff_t nargs,
+                                    emacs_value args[], void *data) {
+  Term *term = env->get_user_ptr(env, args[0]);
+  int linenum = env->extract_integer(env, args[1]);
+  if (linenum >= term->linenum) {
+    linenum = term->linenum;
+  }
+  for (int l = linenum; l >= 1; l--) {
+    int cur_row = linenr_to_row(term, l);
+    LineInfo *info = get_lineinfo(term, cur_row);
+    if (info != NULL && info->prompt_col >= 0) {
+      goto_line(env, l);
+      size_t offset = get_col_offset(term, cur_row, info->prompt_col);
+      forward_char(env, env->make_integer(env, info->prompt_col - offset));
+
+      return point(env);
+    }
+  }
+  return Qnil;
+}
+
+emacs_value Fvterm_reset_cursor_point(emacs_env *env, ptrdiff_t nargs,
+                                      emacs_value args[], void *data) {
+  Term *term = env->get_user_ptr(env, args[0]);
+  int line = row_to_linenr(term, term->cursor.row);
+  goto_line(env, line);
+  size_t offset = get_col_offset(term, term->cursor.row, term->cursor.col);
+  forward_char(env, env->make_integer(env, term->cursor.col - offset));
+  return point(env);
 }
 
 int emacs_module_init(struct emacs_runtime *ert) {
@@ -1097,6 +1140,9 @@ int emacs_module_init(struct emacs_runtime *ert) {
   Frecenter = env->make_global_ref(env, env->intern(env, "recenter"));
   Fset_window_point =
       env->make_global_ref(env, env->intern(env, "set-window-point"));
+  Fwindow_body_height =
+      env->make_global_ref(env, env->intern(env, "window-body-height"));
+
   Fpoint = env->make_global_ref(env, env->intern(env, "point"));
   Fforward_char = env->make_global_ref(env, env->intern(env, "forward-char"));
   Fget_buffer_window_list =
@@ -1113,13 +1159,12 @@ int emacs_module_init(struct emacs_runtime *ert) {
   Feq = env->make_global_ref(env, env->intern(env, "eq"));
   Fvterm_get_color =
       env->make_global_ref(env, env->intern(env, "vterm--get-color"));
-  Fvterm_eval =
-      env->make_global_ref(env, env->intern(env, "vterm--eval"));
+  Fvterm_eval = env->make_global_ref(env, env->intern(env, "vterm--eval"));
 
   // Exported functions
   emacs_value fun;
   fun =
-      env->make_function(env, 3, 3, Fvterm_new, "Allocates a new vterm.", NULL);
+      env->make_function(env, 4, 4, Fvterm_new, "Allocates a new vterm.", NULL);
   bind_function(env, "vterm--new", fun);
 
   fun = env->make_function(env, 1, 5, Fvterm_update,
@@ -1144,6 +1189,13 @@ int emacs_module_init(struct emacs_runtime *ert) {
   fun = env->make_function(env, 2, 2, Fvterm_get_pwd,
                            "Get the working directory of at line n.", NULL);
   bind_function(env, "vterm--get-pwd-raw", fun);
+  fun = env->make_function(env, 2, 2, Fvterm_get_prompt_point,
+                           "Get the end postion of current prompt.", NULL);
+  bind_function(env, "vterm--get-prompt-point-internal", fun);
+  fun = env->make_function(env, 1, 1, Fvterm_reset_cursor_point,
+                           "Reset cursor postion.", NULL);
+  bind_function(env, "vterm--reset-point", fun);
+
 
   fun = env->make_function(env, 1, 1, Fvterm_get_icrnl,
                            "Gets the icrnl state of the pty", NULL);

@@ -86,6 +86,9 @@ emacs_value point(emacs_env *env) { return env->funcall(env, Fpoint, 0, NULL); }
 void set_window_point(emacs_env *env, emacs_value win, emacs_value point) {
   env->funcall(env, Fset_window_point, 2, (emacs_value[]){win, point});
 }
+emacs_value window_body_height(emacs_env *env, emacs_value win) {
+  return env->funcall(env, Fwindow_body_height, 1, (emacs_value[]){win});
+}
 
 bool eq(emacs_env *env, emacs_value e1, emacs_value e2) {
   emacs_value Qeq = env->funcall(env, Feq, 2, (emacs_value[]){e1, e2});
@@ -95,7 +98,6 @@ bool eq(emacs_env *env, emacs_value e1, emacs_value e2) {
 void forward_char(emacs_env *env, emacs_value n) {
   env->funcall(env, Fforward_char, 1, (emacs_value[]){n});
 }
-
 
 emacs_value get_buffer_window_list(emacs_env *env) {
   return env->funcall(env, Fget_buffer_window_list, 3,
@@ -126,7 +128,6 @@ void set_directory(emacs_env *env, emacs_value string) {
 void vterm_invalidate(emacs_env *env) {
   env->funcall(env, Fvterm_invalidate, 0, NULL);
 }
-emacs_value vterm_eval(emacs_env *env, emacs_value string){
+emacs_value vterm_eval(emacs_env *env, emacs_value string) {
   return env->funcall(env, Fvterm_eval, 1, (emacs_value[]){string});
-
 }

@@ -20,6 +20,7 @@ int plugin_is_GPL_compatible;
 typedef struct LineInfo {
   char *directory; /* working directory */
 
+  int prompt_col; /* end column of the prompt,if current line contains prompt */
 } LineInfo;
 
 typedef struct ScrollbackLine {
@@ -27,7 +28,6 @@ typedef struct ScrollbackLine {
   LineInfo *info;
   VTermScreenCell cells[];
 } ScrollbackLine;
-
 
 enum {
   VTERM_PROP_CURSOR_BLOCK = VTERM_PROP_CURSORSHAPE_BLOCK,
@@ -81,6 +81,7 @@ typedef struct Term {
   int width, height;
   int height_resize;
   bool resizing;
+  bool disable_bold_font;
 
   int pty_fd;
 } Term;
@@ -115,10 +116,15 @@ emacs_value Fvterm_set_size(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
 emacs_value Fvterm_set_pty_name(emacs_env *env, ptrdiff_t nargs,
                                 emacs_value args[], void *data);
 emacs_value Fvterm_get_icrnl(emacs_env *env, ptrdiff_t nargs,
-                              emacs_value args[], void *data);
+                             emacs_value args[], void *data);
 
-emacs_value Fvterm_get_pwd(emacs_env *env, ptrdiff_t nargs,
-                                emacs_value args[], void *data);
+emacs_value Fvterm_get_pwd(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
+                           void *data);
+
+emacs_value Fvterm_get_prompt_point(emacs_env *env, ptrdiff_t nargs,
+                                    emacs_value args[], void *data);
+emacs_value Fvterm_reset_cursor_point(emacs_env *env, ptrdiff_t nargs,
+                                      emacs_value args[], void *data);
 
 int emacs_module_init(struct emacs_runtime *ert);
 
