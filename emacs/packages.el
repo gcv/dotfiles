@@ -435,22 +435,35 @@
 
             (require 'helm-config)
 
+            ;;(global-set-key (kbd "M-x") 'helm-M-x)
+            ;;(global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
+            (global-set-key (kbd "C-M-y") 'helm-show-kill-ring)
+
+            ;; the default C-x c is too close to C-x C-c
+            (global-set-key (kbd "C-c h") 'helm-command-prefix)
+            (global-unset-key (kbd "C-x c"))
+            (global-set-key (kbd "C-x M-b") 'helm-mini)
+
             (setq helm-buffers-fuzzy-matching t
                   helm-M-x-fuzzy-match t
-                  helm-imenu-fuzzy-match t)
+                  helm-imenu-fuzzy-match t
+                  helm-echo-input-in-header-line t
+                  helm-split-window-in-side-p t
+                  helm-ff-file-name-history-use-recentf t
+                  ;; the buffer list mode string is not useful and too long
+                  helm-buffer-max-len-mode 0
+                  helm-buffer-max-length 35)
 
-            (defun /helm ()
-              (interactive)
-              (counsel-projectile-mode -1)
-              (projectile-mode 1)
-              (helm-projectile-on)
-              (global-set-key (kbd "M-x") 'helm-M-x)
-              (global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
-              (global-set-key (kbd "C-M-y") 'helm-show-kill-ring))
+            (setq helm-boring-buffer-regexp-list ignore-buffers)
 
-            (global-set-key (kbd "M-x") 'helm-M-x)
-            (global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
-            (global-set-key (kbd "C-M-y") 'helm-show-kill-ring)
+            (setq helm-mini-default-sources '(helm-source-buffers-list
+                                              helm-source-projectile-recentf-list
+                                              helm-source-buffer-not-found))
+
+            ;; tab fix? not recommended
+            ;;(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+
+            (custom-set-variables '(helm-minibuffer-history-key nil))
 
             (defun helm-find-file-ace-window (file)
               "Use ace-window to select a window to display file."
@@ -487,32 +500,6 @@
 
             (helm-mode -1)
             ;; XXX: Weirdness ends here.
-
-            (setq helm-echo-input-in-header-line t)
-
-            (setq helm-boring-buffer-regexp-list ignore-buffers)
-
-            ;; the default C-x c is too close to C-x C-c
-            (global-set-key (kbd "C-c h") 'helm-command-prefix)
-            (global-unset-key (kbd "C-x c"))
-
-            ;; tab fix? not recommended
-            ;;(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
-
-            (custom-set-variables '(helm-minibuffer-history-key nil))
-
-            (setq helm-split-window-in-side-p t
-                  helm-ff-file-name-history-use-recentf t)
-
-            ;; the buffer list mode string is not useful and too long
-            (setq helm-buffer-max-len-mode 0)
-            (setq helm-buffer-max-length 35)
-
-            ;; helm-mini is pretty useful
-            (global-set-key (kbd "C-x M-b") 'helm-mini)
-            (setq helm-mini-default-sources '(helm-source-buffers-list
-                                              helm-source-projectile-recentf-list
-                                              helm-source-buffer-not-found))
 
             ))
 
