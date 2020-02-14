@@ -91,6 +91,7 @@
       '((ivy-completion-in-region . ivy-display-function-overlay)
         (counsel-M-x . /ivy-display-function-window)
         (counsel-yank-pop . /ivy-display-function-window)
+        (counsel-ag . /ivy-display-function-window)
         (t . nil)))
 
 (setq ivy-posframe-display-functions-alist
