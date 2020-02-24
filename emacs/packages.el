@@ -8,12 +8,10 @@
 (use-package async)
 (use-package dash)                       ; a modern list library
 (use-package dash-functional)
-(use-package epl)                        ; package.el wrapper
 (use-package f)                          ; file handling
 (use-package ht)                         ; hash tables
 (use-package parsec :pin melpa)          ; parser generator
 (use-package pfuture)
-(use-package pkg-info)
 (use-package queue :pin gnu)
 (use-package s)                          ; string handling
 
@@ -198,13 +196,6 @@
 
             (advice-add 'deft-complete :after #'/deft-complete)
 
-            ))
-
-
-(use-package diredfl
-  :pin melpa
-  :config (progn
-            (diredfl-global-mode 1)
             ))
 
 
@@ -1029,16 +1020,16 @@
             ))
 
 
-(use-package smex                       ; smart M-x completion
-  :defer t
-  :config (progn
-            (setq smex-save-file (concat user-emacs-directory ".smex-items"))
-            ;;(global-set-key (kbd "M-x") (lambda ()
-            ;;                              (interactive)
-            ;;                              (or (boundp 'smex-cache)
-            ;;                                  (smex-initialize))
-            ;;                              (smex)))
-            ))
+;;; Deprecated in favor of Helm and Ivy, but keep here for reference.
+;; (use-package smex                       ; smart M-x completion
+;;   :config (progn
+;;             (setq smex-save-file (concat user-emacs-directory ".smex-items"))
+;;             ;;(global-set-key (kbd "M-x") (lambda ()
+;;             ;;                              (interactive)
+;;             ;;                              (or (boundp 'smex-cache)
+;;             ;;                                  (smex-initialize))
+;;             ;;                              (smex)))
+;;             ))
 
 
 (use-package solarized-theme
