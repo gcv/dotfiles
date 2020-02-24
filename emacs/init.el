@@ -205,7 +205,6 @@
       use-package-always-pin "melpa-stable")
 (require 'use-package)
 ;;(setq use-package-verbose t)
-(require 'use-package-git)
 
 
 ;;; ----------------------------------------------------------------------------
@@ -888,8 +887,6 @@ See `eshell-prompt-regexp'."
 ;;; Common Lisp
 (add-to-list 'auto-mode-alist '("\\.cl$" . lisp-mode))
 (add-to-list 'auto-mode-alist '("\\.asd$" . lisp-mode))
-
-(require 'refactor)                     ; custom Lisp symbol renaming
 
 (defun /lisp-mode-hook ()
   (paredit-mode 1)
