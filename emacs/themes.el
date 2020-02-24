@@ -8,7 +8,7 @@
 
 
 (defun /theme-face-spec (face &rest merge-attrs)
-  (let* ((attrs (a-merge (ignore-errors (face-all-attributes 'dc))
+  (let* ((attrs (a-merge (ignore-errors (face-all-attributes face (selected-frame)))
                          (apply #'a-alist merge-attrs))))
     `(,face ((t ,(-interleave (a-keys attrs) (a-vals attrs)))))))
 
@@ -246,5 +246,6 @@
   (load-theme 'doom-wilmersdorf t)
   (custom-theme-set-faces
    'doom-wilmersdorf
+   (/theme-face-spec 'mode-line :background "#515462")
    (/theme-face-spec 'fringe :background "#515462" :foreground "#c6c6c6"))
   (apply #'custom-theme-set-faces 'doom-wilmersdorf (/theme-common)))

@@ -129,7 +129,7 @@
 
 
 (use-package company                    ; "comp"lete "any"thing
-  :bind ("C-." 'company-complete)
+  :bind ("C-." . company-complete)
   :diminish ""
   :config (progn
 
@@ -167,7 +167,8 @@
          ("M-i" . counsel-imenu))
   :config (progn
 
-            (add-to-list 'ivy-re-builders-alist '(counsel-M-x . ivy--regex-fuzzy))
+            ;; XXX: This gets clobbered when counsel loads. @@
+            (setq ivy-initial-inputs-alist nil)
 
             (add-to-list 'ivy-display-functions-alist '(counsel-M-x . /ivy-display-function-window))
             (add-to-list 'ivy-display-functions-alist '(counsel-yank-pop . /ivy-display-function-window))
@@ -572,7 +573,7 @@
 
             (setq ivy-ignore-buffers ignore-buffers)
 
-            ;;(setq ivy-initial-inputs-alist nil)
+            (setq ivy-initial-inputs-alist nil)
 
             (setq ivy-posframe-width 65
                   ivy-posframe-min-width 65
