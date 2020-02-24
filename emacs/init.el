@@ -334,7 +334,7 @@
                         (/mode-line-abbrev-file-name)
                       ""))
             '(:eval (if (and (fboundp 'persp-curr) (persp-curr))
-                        (concatenate 'string " — " (persp-name (persp-curr)))
+                        (concat " — " (persp-name (persp-curr)))
                       "")))
       ;; org-mode needs a copy of this for when it might manipulate the frame title
       org-frame-title-format-backup frame-title-format)

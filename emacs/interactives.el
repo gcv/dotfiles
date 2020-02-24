@@ -396,12 +396,12 @@ return 0
                                                 :initial-input "~/"
                                                 :history load-project-history)
                            (read-directory-name "Load project: "))))
-         (project-file (concatenate 'string project-dir ".project.el")))
+         (project-file (concat project-dir ".project.el")))
     (if (file-exists-p project-file)
         (progn
           (add-to-list 'load-project-history project-dir)
           (/load-trusted-elisp-file project-file))
-      (message (concatenate 'string project-file " not found")))))
+      (message (concat project-file " not found")))))
 
 (add-to-list 'savehist-additional-variables 'load-project-history)
 
@@ -535,11 +535,11 @@ target width."
     (let ((heading (substring-no-properties (org-get-heading)))
           (id (org-entry-get nil "custom_id")))
       (if (and id (stringp id))
-          (push (list (concatenate 'string "#" id) heading) org-stored-links)
+          (push (list (concat "#" id) heading) org-stored-links)
         (let ((new-id (org-id-new)))
           (org-entry-put pt "custom_id" new-id)
           (org-id-add-location new-id (buffer-file-name (buffer-base-buffer)))
-          (push (list (concatenate 'string "#" new-id) heading) org-stored-links)))))
+          (push (list (concat "#" new-id) heading) org-stored-links)))))
   (message "Insert with org-insert-last-stored-link (C-c M-l)"))
 
 
