@@ -414,19 +414,17 @@
 
 (use-package helm
   :diminish ""
-  :defer t
+  :bind (("C-c h" . helm-command-prefix)
+         ;;("C-x M-b" . helm-mini)
+         ;;("M-x" . helm-M-x)
+         ;;("M-i" . helm-semantic-or-imenu)
+         ("C-M-y" . helm-show-kill-ring))
   :config (progn
 
             (require 'helm-config)
 
-            ;;(global-set-key (kbd "M-x") 'helm-M-x)
-            ;;(global-set-key (kbd "M-i") 'helm-semantic-or-imenu)
-            (global-set-key (kbd "C-M-y") 'helm-show-kill-ring)
-
             ;; the default C-x c is too close to C-x C-c
-            (global-set-key (kbd "C-c h") 'helm-command-prefix)
             (global-unset-key (kbd "C-x c"))
-            (global-set-key (kbd "C-x M-b") 'helm-mini)
 
             (setq helm-buffers-fuzzy-matching t
                   helm-M-x-fuzzy-match t
@@ -493,6 +491,7 @@
 
 
 (use-package helm-projectile
+  :defer nil                            ; must load eagerly
   :config (progn
             (helm-projectile-on)
             ))
@@ -501,19 +500,19 @@
 (use-package helm-swoop
   :bind (("C-M-S-i" . (lambda () (interactive) (helm-swoop :$query "")))
          :map isearch-mode-map
-         ("C-M-S-i" . 'helm-swoop-from-isearch)))
+         ("C-M-S-i" . helm-swoop-from-isearch)))
 
 
 ;; Replacement for built-in Help system.
 (use-package helpful
   :pin melpa
-  :bind (("C-h f" . 'helpful-callable)
-         ("C-h v" . 'helpful-variable)
-         ("C-h o" . 'helpful-symbol)
-         ("C-h k" . 'helpful-key)
-         ("C-c C-d h" . 'helpful-at-point)
-         ("C-h F" . 'helpful-function)
-         ("C-h C" . 'helpful-command))
+  :bind (("C-h f" . helpful-callable)
+         ("C-h v" . helpful-variable)
+         ("C-h o" . helpful-symbol)
+         ("C-h k" . helpful-key)
+         ("C-c C-d h" . helpful-at-point)
+         ("C-h F" . helpful-function)
+         ("C-h C" . helpful-command))
   :config (progn
             (when (featurep 'counsel)
               (setq counsel-describe-function-function #'helpful-callable)
@@ -552,17 +551,15 @@
 
 (use-package iedit
   :defer t
-  :init   (progn
-            (setq iedit-toggle-key-default nil)
-            )
+  :init (progn
+          (setq iedit-toggle-key-default nil)
+          )
   :config (progn
-
             ;; manually set keys, because iedit overrides some important globals:
             (let ((iedit-toggle-keybinding (kbd "C-;")))
               (define-key global-map iedit-toggle-keybinding 'iedit-mode)
               (define-key isearch-mode-map iedit-toggle-keybinding 'iedit-mode-from-isearch)
               (define-key help-map iedit-toggle-keybinding 'iedit-mode-toggle-on-function))
-
             ))
 
 
@@ -710,6 +707,7 @@
 
 (use-package julia-mode
   :pin melpa
+  :defer t
   :config (progn
 
             (setq julia-indent-offset 3)
@@ -898,7 +896,7 @@
   :pin melpa
   :after (hydra)
   :bind (:map origami-mode-map
-              ("H-o" . /hydra-origami/body))
+         ("H-o" . /hydra-origami/body))
   :config (progn
 
             (setq origami-show-fold-header t)
@@ -1021,14 +1019,14 @@
 
 
 (use-package projectile
-  :init   (progn
-            (setq projectile-mode-line-prefix "")
-            )
+  :bind (:map projectile-mode-map
+         ("C-c p" . projectile-command-map))
+  :init (progn
+          (setq projectile-mode-line-prefix "")
+          )
   :config (progn
 
             (projectile-mode 1)
-
-            (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
             (setq projectile-enable-caching nil)
             (setq projectile-tags-command "ctags -Re -f \"%s\" %s")
@@ -1210,8 +1208,8 @@
 
 (use-package undo-fu
   :pin melpa
-  :bind (("C-z" . 'undo-fu-only-undo)
-         ("C-S-z" . 'undo-fu-only-redo)))
+  :bind (("C-z" . undo-fu-only-undo)
+         ("C-S-z" . undo-fu-only-redo)))
 
 
 (use-package vterm
@@ -1280,6 +1278,7 @@
 
 
 (use-package which-key
+  :defer nil
   :diminish ""
   :config (progn
             (which-key-mode)
