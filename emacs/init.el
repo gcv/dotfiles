@@ -1,6 +1,3 @@
-(require 'cl)
-(require 'subr-x)
-
 (setq load-prefer-newer t)                                      ; deal with outdated .elc files
 (setq debug-on-error nil)                                       ; turn this on only when needed
 (setq-default indent-tabs-mode nil)                             ; replace tabs with spaces
@@ -105,7 +102,8 @@
                                     (interactive)
                                     (if (not (y-or-n-p "Are you sure you want to exit Emacs? "))
                                         (message "Canceled exit")
-                                      (when (and (fboundp #'persp-state-save)
+                                      (when (and (fboundp 'persp-state-save)
+                                                 (boundp 'persp-state-default-file)
                                                  (y-or-n-p (format "Save perspectives to %s? " persp-state-default-file)))
                                         (message "Saving perspectives")
                                         (persp-state-save))
@@ -118,13 +116,13 @@
 
 (defun add-to-env (env path-raw &optional separator)
   (let* ((path (expand-file-name path-raw))
-         (separator (if (endp separator) ":" separator))
+         (separator (if (null separator) ":" separator))
          (current-env-raw (or (getenv env) ""))
          (current-env (if (string-equal current-env-raw "")
                           (list)
                         (split-string current-env-raw separator))))
     (unless (member path current-env)
-      (setenv env (if (endp current-env)
+      (setenv env (if (null current-env)
                       path
                     (mapconcat 'identity (cons path current-env) separator))))
     (getenv env)))
@@ -447,13 +445,13 @@
                                   (fill-paragraph))
                               (message "Done.")))
 
-(macrolet ((define-matching-insert (key-chord open-character close-character)
-             `(global-set-key (kbd ,key-chord)
-                              (lambda ()
-                                (interactive)
-                                (insert ,open-character)
-                                (save-excursion
-                                  (insert ,close-character))))))
+(cl-macrolet ((define-matching-insert (key-chord open-character close-character)
+                `(global-set-key (kbd ,key-chord)
+                                 (lambda ()
+                                   (interactive)
+                                   (insert ,open-character)
+                                   (save-excursion
+                                     (insert ,close-character))))))
   (define-matching-insert "M-{" ?\{ ?\})
   (when window-system (define-matching-insert "M-[" ?\[ ?\]))
   (define-matching-insert "M-\"" ?\" ?\"))
@@ -475,8 +473,7 @@
 (setq-default grep-command "grep -nHr -e ")
 
 (setq grep-find-command
-      (concatenate
-       'string
+      (concat
        "find . \\( -path '*.svn' -o -path '*.git' -o -path '*.hg' \\)"
        " "
        "-prune -o -type f -print0 | xargs -0 grep -I -i -n -e "))
@@ -550,8 +547,6 @@
 
 
 ;;; recentf
-(require 'recentf)
-
 (setq recentf-max-menu-items 250)
 (recentf-mode 1)
 
@@ -578,10 +573,11 @@
       dired-recursive-copies 'always)
 
 ;; quick hack for using GNU ls
-(when-let ((gnu-ls (executable-find "ls")))
-  (setq insert-directory-program gnu-ls)
-  (setq dired-listing-switches "-gGha")
-  (setq dired-use-ls-dired t))
+(let ((gnu-ls (executable-find "ls")))
+  (when gnu-ls
+    (setq insert-directory-program gnu-ls)
+    (setq dired-listing-switches "-gGha")
+    (setq dired-use-ls-dired t)))
 
 (defun /dired-mode-hook ()
   (define-key dired-mode-map (kbd "<RET>")
@@ -610,8 +606,6 @@
 
 
 ;;; ediff
-(require 'ediff)
-
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 (setq ediff-split-window-function 'split-window-horizontally)
 
@@ -753,8 +747,6 @@ See `eshell-prompt-regexp'."
 
 
 ;;; term-mode
-(require 'term)
-
 ;; term-suppress-hard-newline is an interesting animal. With normal term use, it
 ;; seems to be better kept as t. Otherwise, it generates hard newlines whenever
 ;; terminal output wraps around the screen. However, GNU screen doesn't like t,
