@@ -209,15 +209,6 @@
             ))
 
 
-(use-package dired-git-info
-  :ensure t
-  :git "https://github.com/clemera/dired-git-info"
-  :config (progn
-            (with-eval-after-load 'dired
-              (define-key dired-mode-map ")" 'dired-git-info-mode))
-            ))
-
-
 (use-package disk-usage
   :pin gnu
   :config (progn
