@@ -3,78 +3,81 @@
 ;;; Good resource for making colors: https://www.w3schools.com/colors/colors_picker.asp
 ;;; Also try the mac-color-picker AppleScript wrapper.
 
+(require 'a)
+(require 'dash)
+
+
+(defun /theme-face-spec (face &rest merge-attrs)
+  (let* ((attrs (a-merge (ignore-errors (face-all-attributes 'dc))
+                         (apply #'a-alist merge-attrs))))
+    `(,face ((t ,(-interleave (a-keys attrs) (a-vals attrs)))))))
+
+
 (defun /theme-common ()
   (let ((base-font (cond ((member "Menlo" (font-family-list)) "Menlo")
                          ((member "Consolas" (font-family-list)) "Consolas")
                          (t nil))))
-    (set-face-attribute 'minibuffer-prompt nil :foreground nil :background nil :family base-font :weight 'bold)
-    (set-face-attribute 'mode-line nil :family base-font :underline nil :overline nil)
-    (set-face-attribute 'mode-line-inactive nil :underline nil :overline nil)
-    (set-face-attribute 'mode-line-buffer-id nil :foreground nil :background nil
-                        :family base-font :weight 'bold :slant 'normal)
-    (set-face-attribute 'org-code nil :family base-font :weight 'bold)
-    (set-face-attribute 'org-checkbox nil :box nil :background nil :foreground nil)
-    (set-face-attribute 'org-mode-line-clock nil :foreground nil :background nil)
-    (set-face-attribute 'org-mode-line-clock nil :inherit 'unspecified)
-    (set-face-attribute 'helm-source-header nil :foreground nil :background nil
-                        :family base-font :weight 'bold :height 1.2
-                        :box `(:line-width 5 :color ,(face-attribute 'default :background)))
-    (set-face-attribute 'helm-selection nil :underline nil)
-    (set-face-attribute 'dired-header nil :foreground nil :background nil
-                        :family base-font :weight 'bold)
-    (set-face-attribute 'bold nil :family base-font :foreground nil :weight 'bold)
-    (set-face-attribute 'aw-leading-char-face nil :foreground "red" :background nil
-                        :family base-font :height 2.0 :weight 'bold)
-    (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
-    (set-face-attribute 'fixed-pitch nil :family base-font)
-    (set-face-attribute 'term nil :foreground nil :background nil)
-    (set-face-attribute 'markdown-pre-face nil :background nil :weight 'bold)
-    (set-face-attribute 'markdown-code-face nil :background (face-attribute 'org-code :background))
-    (set-face-attribute 'markdown-inline-code-face nil :background nil :weight 'bold)
-    (set-face-attribute 'org-level-1 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
-    (set-face-attribute 'org-level-2 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
-    (set-face-attribute 'org-level-3 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
-    (set-face-attribute 'org-level-4 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
-    (set-face-attribute 'org-level-5 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
-    (set-face-attribute 'org-level-6 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
-    (set-face-attribute 'org-level-7 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)
-    (set-face-attribute 'org-level-8 nil :height 1.0 :background nil :overline nil :box nil :inherit nil)))
+    (list
+     (/theme-face-spec 'minibuffer-prompt :foreground nil :background nil :family base-font :weight 'bold)
+     (/theme-face-spec 'mode-line :family base-font :underline nil :overline nil)
+     (/theme-face-spec 'mode-line-inactive :underline nil :overline nil)
+     (/theme-face-spec 'mode-line-buffer-id :foreground nil :background nil :family base-font :weight 'bold :slant 'normal)
+     (/theme-face-spec 'org-code :family base-font :weight 'bold)
+     (/theme-face-spec 'org-checkbox :box nil :background nil :foreground nil)
+     (/theme-face-spec 'org-mode-line-clock :foreground nil :background nil)
+     (/theme-face-spec 'org-mode-line-clock :inherit 'unspecified)
+     (/theme-face-spec 'helm-source-header
+                       :foreground nil :background nil
+                       :family base-font :weight 'bold :height 1.2
+                       :box `(:line-width 5 :color ,(face-attribute 'default :background)))
+     (/theme-face-spec 'helm-selection :underline nil)
+     (/theme-face-spec 'dired-header :foreground nil :background nil :family base-font :weight 'bold)
+     (/theme-face-spec 'bold :family base-font :foreground nil :weight 'bold)
+     (/theme-face-spec 'aw-leading-char-face :foreground "red" :background nil :family base-font :height 2.0 :weight 'bold)
+     (/theme-face-spec 'aw-background-face :foreground "gray40" :background nil)
+     (/theme-face-spec 'fixed-pitch :family base-font)
+     (/theme-face-spec 'term :foreground nil :background nil)
+     (/theme-face-spec 'markdown-pre-face :background nil :weight 'bold)
+     (/theme-face-spec 'markdown-code-face :background (face-attribute 'org-code :background))
+     (/theme-face-spec 'markdown-inline-code-face :background nil :weight 'bold)
+     (/theme-face-spec 'org-level-1 :height 1.0 :background nil :overline nil :box nil :inherit nil)
+     (/theme-face-spec 'org-level-2 :height 1.0 :background nil :overline nil :box nil :inherit nil)
+     (/theme-face-spec 'org-level-3 :height 1.0 :background nil :overline nil :box nil :inherit nil)
+     (/theme-face-spec 'org-level-4 :height 1.0 :background nil :overline nil :box nil :inherit nil)
+     (/theme-face-spec 'org-level-5 :height 1.0 :background nil :overline nil :box nil :inherit nil)
+     (/theme-face-spec 'org-level-6 :height 1.0 :background nil :overline nil :box nil :inherit nil)
+     (/theme-face-spec 'org-level-7 :height 1.0 :background nil :overline nil :box nil :inherit nil)
+     (/theme-face-spec 'org-level-8 :height 1.0 :background nil :overline nil :box nil :inherit nil))))
 
 
 (defun theme-zenburn ()
   (interactive)
   (disable-all-themes)
   (load-theme 'zenburn t)
-  (set-face-background 'default "grey18")
-  (set-face-foreground 'default "#cbcbbb")
-  (set-face-background 'cursor "grey60")
-  (set-face-foreground 'bold "papayawhip")
-  (let ((bg "grey30"))
-    (set-face-attribute 'mode-line nil
-                        :background bg
-                        :foreground "grey68"
-                        :box `(:line-width 1 :color ,bg)))
-  (let (;;(bg "grey20")
-        (bg "grey22"))
-    (set-face-attribute 'mode-line-inactive nil
-                        :background bg
-                        :foreground "grey42"
-                        :box `(:line-width 1 :color ,bg)))
-  (set-face-background 'highlight "grey35")
-  (set-face-underline 'highlight nil)
-  (set-face-background 'hl-line "#525252")
-  (set-face-background 'region "grey35")
-  (set-face-background 'isearch "steelblue4")
-  (set-face-background 'lazy-highlight "grey25")
-  (set-face-background 'show-paren-match "#5f7f5f")
-  (set-face-background 'trailing-whitespace "#ff0000")
-  (set-face-attribute 'org-checkbox nil :background nil :foreground "blanchedalmond")
-  (set-face-foreground 'org-level-2 "#ccbbdd")
-  (set-face-foreground 'org-level-3 "#edcbab")
-  (set-face-foreground 'org-archived "grey50")
-  (set-face-attribute 'company-tooltip-selection nil :background "#224983")
-  (set-face-attribute 'company-tooltip-common-selection nil :background "#224983")
-  (/theme-common))
+  (custom-theme-set-faces
+   'zenburn
+   (/theme-face-spec 'default :background "grey18" :foreground "#cbcbbb")
+   (/theme-face-spec 'cursor :background "grey60")
+   (/theme-face-spec 'bold :foreground "papayawhip")
+   (let ((bg "grey30"))
+     (/theme-face-spec 'mode-line :background bg :foreground "grey68" :box `(:line-width 1 :color ,bg)))
+   (let (;;(bg "grey20")
+         (bg "grey22"))
+     (/theme-face-spec 'mode-line-inactive :background bg :foreground "grey42" :box `(:line-width 1 :color ,bg)))
+   (/theme-face-spec 'highlight :background "grey35" :underline nil)
+   (/theme-face-spec 'hl-line :background "#525252")
+   (/theme-face-spec 'region :background "grey35")
+   (/theme-face-spec 'isearch :background "steelblue4")
+   (/theme-face-spec 'lazy-highlight :background "grey25")
+   (/theme-face-spec 'show-paren-match :background "#5f7f5f")
+   (/theme-face-spec 'trailing-whitespace :background "#ff0000")
+   (/theme-face-spec 'org-checkbox :background nil :foreground "blanchedalmond")
+   (/theme-face-spec 'org-level-2 :foreground "#ccbbdd")
+   (/theme-face-spec 'org-level-3 :foreground "#edcbab")
+   (/theme-face-spec 'org-archived :foreground "grey50")
+   (/theme-face-spec 'company-tooltip-selection :background "#224983")
+   (/theme-face-spec 'company-tooltip-common-selection :background "#224983"))
+  (apply #'custom-theme-set-faces 'zenburn (/theme-common)))
 
 
 (defun /theme-solarized-common ()
@@ -90,135 +93,112 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'solarized-light t)
-  (let ((bg "#e1e1e1"))
-    (set-face-attribute 'mode-line nil
-                        :background bg
-                        :foreground "black"
-                        :box `(:line-width 2 :color ,bg)))
-  (let ((bg "#eee8d5"))
-    (set-face-attribute 'mode-line-inactive nil
-                        :background bg
-                        :box `(:line-width 2 :color ,bg)))
-  (set-face-attribute 'bold nil :foreground "navy")
-  (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
-  (/theme-solarized-common)
-  (/theme-common))
+  (custom-theme-set-faces
+   'solarized-light
+   (let ((bg "#e1e1e1"))
+     (/theme-face-spec 'mode-line :background bg :foreground "black" :box `(:line-width 2 :color ,bg)))
+   (let ((bg "#eee8d5"))
+     (/theme-face-spec 'mode-line-inactive :background bg :box `(:line-width 2 :color ,bg)))
+   (/theme-face-spec 'bold :foreground "navy")
+   (/theme-face-spec 'ido-only-match :foreground "#b589aa" :background nil))
+  (apply #'custom-theme-set-faces 'solarized-light (/theme-common))
+  (/theme-solarized-common))
 
 
 (defun theme-solarized-dark ()
   (interactive)
   (disable-all-themes)
   (load-theme 'solarized-dark t)
-  (set-face-background 'default "#081a25")
-  (set-face-foreground 'default "#adad9c")
-  (let ((bg "grey40"))
-    (set-face-attribute 'mode-line nil
-                        :background bg
-                        :foreground "#23313a"
-                        :box `(:line-width 2 :color ,bg)))
-  (let ((bg "grey14"))
-    (set-face-attribute 'mode-line-inactive nil
-                        :background bg
-                        :foreground "#888888"
-                        :box `(:line-width 2 :color ,bg)))
-  (set-face-attribute 'bold nil :foreground "papayawhip")
-  (set-face-foreground 'isearch "#0f9999")
-  (set-face-background 'isearch "grey12")
-  (set-face-foreground 'lazy-highlight "#0a6666")
-  (set-face-background 'lazy-highlight "grey12")
-  (set-face-foreground 'show-paren-match "black")
-  (set-face-background 'show-paren-match "#2e5c99")
-  (set-face-foreground 'js2-external-variable "#b37f47")
-  (set-face-foreground 'ido-first-match "#64b3b3")
-  (set-face-foreground 'ido-only-match nil)
-  (set-face-foreground 'font-lock-type-face "#3d9ccc")
-  (set-face-background 'font-lock-type-face nil)
-  (set-face-foreground 'font-lock-constant-face "#258c84")
-  (set-face-foreground 'font-lock-string-face "#1e781e")
-  (set-face-foreground 'font-lock-keyword-face "grey65")
-  (set-face-foreground 'font-lock-builtin-face "#995c8a")
-  (set-face-foreground 'font-lock-function-name-face "#669ccc")
-  (set-face-foreground 'font-lock-variable-name-face "#669ccc")
-  (set-face-foreground 'font-lock-preprocessor-face "#008877")
-  (set-face-attribute 'ido-only-match nil :foreground "#b589aa" :background nil)
-  (set-face-foreground 'org-date "#009999")
-  (set-face-background 'org-todo "#081a25")
-  (set-face-foreground 'org-todo "#995c8a")
-  (set-face-foreground 'org-done "#72cccc")
-  (set-face-foreground 'org-link "#007799")
-  (set-face-foreground 'org-table "#007799")
-  (set-face-foreground 'org-level-1 "#7089a6")
-  (set-face-foreground 'org-level-2 "#a9a9cc")
-  (set-face-foreground 'org-level-3 "#8aba99")
-  (set-face-attribute 'org-clock-overlay nil :background "grey50" :foreground "black")
-  (/theme-solarized-common)
-  (/theme-common))
+  (custom-theme-set-faces
+   'solarized-dark
+   (/theme-face-spec 'default :background "#081a25" :foreground "#adad9c")
+   (let ((bg "grey40"))
+     (/theme-face-spec 'mode-line :background bg :foreground "#23313a" :box `(:line-width 2 :color ,bg)))
+   (let ((bg "grey14"))
+     (/theme-face-spec 'mode-line-inactive :background bg :foreground "#888888" :box `(:line-width 2 :color ,bg)))
+   (/theme-face-spec 'bold :foreground "papayawhip")
+   (/theme-face-spec 'isearch :foreground "#0f9999" :background "grey12")
+   (/theme-face-spec 'lazy-highlight :foreground "#0a6666" :background "grey12")
+   (/theme-face-spec 'show-paren-match :foreground "black" :background "#2e5c99")
+   (/theme-face-spec 'js2-external-variable :foreground "#b37f47")
+   (/theme-face-spec 'ido-first-match :foreground "#64b3b3")
+   (/theme-face-spec 'ido-only-match :foreground nil)
+   (/theme-face-spec 'font-lock-type-face :foreground "#3d9ccc" :background nil)
+   (/theme-face-spec 'font-lock-constant-face :foreground "#258c84")
+   (/theme-face-spec 'font-lock-string-face :foreground "#1e781e")
+   (/theme-face-spec 'font-lock-keyword-face :foreground "grey65")
+   (/theme-face-spec 'font-lock-builtin-face :foreground "#995c8a")
+   (/theme-face-spec 'font-lock-function-name-face :foreground "#669ccc")
+   (/theme-face-spec 'font-lock-variable-name-face :foreground "#669ccc")
+   (/theme-face-spec 'font-lock-preprocessor-face :foreground "#008877")
+   (/theme-face-spec 'ido-only-match :foreground "#b589aa" :background nil)
+   (/theme-face-spec 'org-date :foreground "#009999")
+   (/theme-face-spec 'org-todo :foreground "#995c8a" :background "#081a25")
+   (/theme-face-spec 'org-done :foreground "#72cccc")
+   (/theme-face-spec 'org-link :foreground "#007799")
+   (/theme-face-spec 'org-table :foreground "#007799")
+   (/theme-face-spec 'org-level-1 :foreground "#7089a6")
+   (/theme-face-spec 'org-level-2 :foreground "#a9a9cc")
+   (/theme-face-spec 'org-level-3 :foreground "#8aba99")
+   (/theme-face-spec 'org-clock-overlay :background "grey50" :foreground "black"))
+  (apply #'custom-theme-set-faces 'solarized-dark (/theme-common))
+  (/theme-solarized-common))
 
 
 (defun theme-leuven ()
   (interactive)
   (disable-all-themes)
   (load-theme 'leuven t)
-  (set-face-background 'default "#faffff")
-  (set-face-attribute 'org-level-2 nil :foreground "#000099")
-  (set-face-attribute 'org-level-3 nil :foreground "#0000cc")
-  (set-face-attribute 'isearch nil :background "lightblue" :foreground nil :underline nil)
-  (set-face-attribute 'lazy-highlight nil :background "#e6e6fa" :underline nil)
-  (set-face-attribute 'trailing-whitespace nil :background "red")
-  (set-face-attribute 'js2-error nil :box nil)
-  (set-face-attribute 'aw-background-face nil :foreground "gray60" :background nil)
-  (let ((bg "#335ea8"))
-    (set-face-attribute 'mode-line nil
-                        :background bg
-                        :box `(:line-width 2 :color ,bg)))
-  (let ((bg "#dbdcda"))
-    (set-face-attribute 'mode-line-inactive nil
-                        :background bg
-                        :box `(:line-width 2 :color ,bg)))
-  (/theme-common))
-
-
-(defun /theme-material-common ()
-  (set-face-attribute 'cursor nil :background "#21bdff"))
+  (custom-theme-set-faces
+   'leuven
+   (/theme-face-spec 'default :background "#faffff")
+   (/theme-face-spec 'org-level-2 :foreground "#000099")
+   (/theme-face-spec 'org-level-3 :foreground "#0000cc")
+   (/theme-face-spec 'isearch :background "lightblue" :foreground nil :underline nil)
+   (/theme-face-spec 'lazy-highlight :background "#e6e6fa" :underline nil)
+   (/theme-face-spec 'trailing-whitespace :background "red")
+   (/theme-face-spec 'js2-error :box nil)
+   (/theme-face-spec 'aw-background-face :foreground "gray60" :background nil)
+   (let ((bg "#335ea8"))
+     (/theme-face-spec 'mode-line :background bg :box `(:line-width 2 :color ,bg)))
+   (let ((bg "#dbdcda"))
+     (/theme-face-spec 'mode-line-inactive :background bg :box `(:line-width 2 :color ,bg))))
+  (apply #'custom-theme-set-faces 'leuven (/theme-common)))
 
 
 (defun theme-material-dark ()
   (interactive)
   (disable-all-themes)
   (load-theme 'material t)
-  ;; NB: :box '(:line-width -n) draws a box internally, without increasing the rendered size of the text!
-  (let ((bg "#35575b"))
-    (set-face-attribute 'mode-line nil
-                        :background bg
-                        :box `(:line-width 2 :color ,bg)))
-  (let ((bg "black"))
-    (set-face-attribute 'mode-line-inactive nil
-                        :background bg
-                        :box `(:line-width 2 :color ,bg)))
-  (set-face-attribute 'fringe nil :background "#35575b")
-  (set-face-attribute 'vertical-border nil :foreground "#dcdccc")
-  (set-face-attribute 'magit-diff-removed-highlight nil :foreground "red")
-  (/theme-material-common)
-  (/theme-common))
+  (custom-theme-set-faces
+   'material
+   (/theme-face-spec 'cursor :background "#21bdff")
+   ;; NB: :box '(:line-width -n) draws a box internally, without increasing the rendered size of the text!
+   (let ((bg "#35575b"))
+     (/theme-face-spec 'mode-line :background bg :box `(:line-width 2 :color ,bg)))
+   (let ((bg "black"))
+     (/theme-face-spec 'mode-line-inactive :background bg :box `(:line-width 2 :color ,bg)))
+   (/theme-face-spec 'fringe :background "#35575b")
+   (/theme-face-spec 'vertical-border :foreground "#dcdccc")
+   (/theme-face-spec 'magit-diff-removed-highlight :foreground "red"))
+  (apply #'custom-theme-set-faces 'material (/theme-common)))
 
 
 (defun theme-material-light ()
   (interactive)
   (disable-all-themes)
   (load-theme 'material-light t)
-  (set-face-attribute 'aw-background-face nil :foreground "gray40" :background nil)
-  (let ((bg ;; "#90a4ae"
-            "#aac2ce"))
-    (set-face-attribute 'mode-line nil
-                        :background bg
-                        :box `(:line-width 1 :color ,bg)))
-  (let ((bg "#eceff1"))
-    (set-face-attribute 'mode-line-inactive nil
-                        :background bg
-                        :box `(:line-width 1 :color ,bg)))
-  (set-face-attribute 'header-line nil :box nil)
-  (/theme-material-common)
-  (/theme-common))
+  (custom-theme-set-faces
+   'material-light
+   (/theme-face-spec 'cursor :background "#21bdff")
+   (/theme-face-spec 'aw-background-face :foreground "gray40" :background nil)
+   (let ((bg ;; "#90a4ae"
+          "#aac2ce"))
+     (/theme-face-spec 'mode-line :background bg :box `(:line-width 1 :color ,bg)))
+   (let ((bg "#eceff1"))
+     (/theme-face-spec 'mode-line-inactive :background bg :box `(:line-width 1 :color ,bg)))
+   (/theme-face-spec 'header-line :box nil))
+  (apply #'custom-theme-set-faces 'material-light (/theme-common)))
 
 
 (defun theme-green-phosphor ()
@@ -236,37 +216,35 @@
         (blue-lighter-3 "#d0d8e2")
         (blue-darker-1 "#627e9d")
         (blue-darker-2 "#58718d"))
-    (set-face-attribute 'default nil :foreground base-color)
-    (set-face-attribute 'cursor nil :background "#00cc00")
-    (set-face-attribute 'show-paren-match nil :background base-color-darker-1)
-    (set-face-background 'hl-line "darkgreen")
-    (let ((bg base-color-lighter-1))
-      (set-face-attribute 'mode-line nil
-                          :background bg
-                          :foreground "black"
-                          :box `(:line-width 2 :color ,bg)))
-    (let ((bg base-color-darker-2))
-      (set-face-attribute 'mode-line-inactive nil
-                          :background bg
-                          :foreground "black"
-                          :box `(:line-width 2 :color ,bg)))
-    (set-face-attribute 'header-line nil :foreground "black" :background base-color-darker-2)
-    (set-face-attribute 'org-hide nil :foreground "black" :background "black")
-    (set-face-attribute 'org-level-1 nil :foreground blue-lighter-3)
-    (set-face-attribute 'org-level-2 nil :foreground blue-lighter-2)
-    (set-face-attribute 'org-level-3 nil :foreground blue-lighter-1)
-    (set-face-attribute 'org-level-4 nil :foreground blue)
-    (set-face-attribute 'org-special-keyword nil :foreground "#007799")
-    (set-face-attribute 'helm-source-header nil :foreground "black" :background base-color)
-    (set-face-attribute 'helm-selection nil :background base-color-lighter-1)
-    (set-face-attribute 'isearch nil :background base-color-lighter-1 :foreground "black" :underline nil)
-    (set-face-attribute 'lazy-highlight nil :background base-color-darker-1 :foreground "black" :underline nil))
-  (/theme-common))
+    (custom-theme-set-faces
+     'green-phosphor
+     (/theme-face-spec 'default :foreground base-color)
+     (/theme-face-spec 'cursor :background "#00cc00")
+     (/theme-face-spec 'show-paren-match :background base-color-darker-1)
+     (/theme-face-spec 'hl-line :background "darkgreen")
+     (let ((bg base-color-lighter-1))
+       (/theme-face-spec 'mode-line :background bg :foreground "black" :box `(:line-width 2 :color ,bg)))
+     (let ((bg base-color-darker-2))
+       (/theme-face-spec 'mode-line-inactive :background bg :foreground "black" :box `(:line-width 2 :color ,bg)))
+     (/theme-face-spec 'header-line :foreground "black" :background base-color-darker-2)
+     (/theme-face-spec 'org-hide :foreground "black" :background "black")
+     (/theme-face-spec 'org-level-1 :foreground blue-lighter-3)
+     (/theme-face-spec 'org-level-2 :foreground blue-lighter-2)
+     (/theme-face-spec 'org-level-3 :foreground blue-lighter-1)
+     (/theme-face-spec 'org-level-4 :foreground blue)
+     (/theme-face-spec 'org-special-keyword :foreground "#007799")
+     (/theme-face-spec 'helm-source-header :foreground "black" :background base-color)
+     (/theme-face-spec 'helm-selection :background base-color-lighter-1)
+     (/theme-face-spec 'isearch :background base-color-lighter-1 :foreground "black" :underline nil)
+     (/theme-face-spec 'lazy-highlight :background base-color-darker-1 :foreground "black" :underline nil)))
+  (apply #'custom-theme-set-faces 'green-phosphor (/theme-common)))
 
 
 (defun theme-wilmersdorf ()
   (interactive)
   (disable-all-themes)
   (load-theme 'doom-wilmersdorf t)
-  (set-face-attribute 'fringe nil :background "#515462" :foreground "#c6c6c6")
-  (/theme-common))
+  (custom-theme-set-faces
+   'doom-wilmersdorf
+   (/theme-face-spec 'fringe :background "#515462" :foreground "#c6c6c6"))
+  (apply #'custom-theme-set-faces 'doom-wilmersdorf (/theme-common)))
