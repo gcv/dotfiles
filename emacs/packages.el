@@ -23,16 +23,15 @@
 ;;; ----------------------------------------------------------------------------
 
 (use-package ace-window
+  :bind ("C-M-o" . ace-window)
   :config (progn
             (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l ?z ?x ?c ?v ?b ?n ?m))
-            (global-set-key (kbd "C-M-o") 'ace-window)
             ))
 
 
 (use-package adoc-mode
+  :mode "\\.adoc$"
   :config (progn
-
-            (add-to-list 'auto-mode-alist '("\\.adoc$" . adoc-mode))
 
             (defun /adoc-mode-hook ()
               (setq mode-name "AD")
@@ -44,18 +43,18 @@
             ))
 
 
-(use-package ag)
+(use-package ag
+  :defer t)
 
 
 (use-package avy
-  :config (progn
-            (global-set-key (kbd "M-j") 'avy-goto-char)
-            (global-set-key (kbd "C-M-j") 'avy-goto-line)
-            ))
+  :bind (("M-j" . avy-goto-char)
+         ("C-M-j" . avy-goto-line)))
 
 
 (use-package cider
   :after (clojure-mode)
+  :defer t
   :config (progn
 
             (add-to-list 'display-buffer-alist
@@ -393,6 +392,8 @@
 (use-package haskell-mode
   :config (progn
 
+            ;; consider installing Intero if Haskell becomes relevant
+
             (defun /haskell-mode-hook ()
               (turn-on-haskell-unicode-input-method)
               (turn-on-haskell-indentation))
@@ -560,13 +561,6 @@
             ))
 
 
-(use-package intero
-  :after (haskell-mode)
-  :config (progn
-            (intero-global-mode 1)
-            ))
-
-
 (use-package ivy                        ; Ivy / Swiper / Counsel
   :pin melpa
   :config (progn
@@ -715,6 +709,7 @@
 
 
 (use-package markdown-mode
+  :defer t
   :config (progn
 
             (add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
@@ -870,12 +865,6 @@
             ))
 
 
-(use-package pcre2el
-  :config (progn
-            (rxt-global-mode)
-            ))
-
-
 (use-package perspective
   ;;:load-path "~/Code/perspective-el"
   :pin melpa
@@ -922,8 +911,10 @@
 ;;; Allows multiple major modes using indirect buffers. Needs a plugin which
 ;;; defines. As of this writing: poly-org and poly-noweb have problems.
 ;;; poly-markdown is pretty good.
-(use-package polymode)
-(use-package poly-markdown)
+(use-package polymode
+  :defer t)
+(use-package poly-markdown
+  :defer t)
 
 
 (use-package poporg
@@ -976,11 +967,6 @@
   :config (progn
             (setq restclient-log-request nil)
             ))
-
-
-(use-package restclient-helm
-  :pin melpa
-  :after (restclient))
 
 
 ;;; Translate input sequences to Latin characters even when another input method
@@ -1080,11 +1066,11 @@
 
 
 (use-package terraform-mode
-  :config (progn
-            ))
+  :defer t)
 
 
 (use-package treemacs
+  :defer t
   :config (progn
 
             (setq treemacs-persist-file (expand-file-name "treemacs/treemacs-persist" user-emacs-directory))
@@ -1105,14 +1091,14 @@
 
 (use-package tide                       ; TypeScript IDE
   :after (company flycheck typescript-mode)
-  :diminish " Tide"
-  :config (progn
-            ))
+  :defer t
+  :diminish " Tide")
 
 
 ;;; Installed purely because it's a tide dependency. web-mode provides superior
 ;;; TS indentation.
 (use-package typescript-mode
+  :defer t
   :diminish " TS"
   :config (progn
             (setq auto-mode-alist (delete '("\\.ts$" . typescript-mode) auto-mode-alist))
@@ -1190,7 +1176,8 @@
             ))
 
 
-(use-package wgrep)
+(use-package wgrep
+  :defer t)
 
 
 (use-package which-key
@@ -1204,7 +1191,8 @@
             ))
 
 
-(use-package yaml-mode)
+(use-package yaml-mode
+  :defer t)
 
 
 (use-package zenburn-theme
