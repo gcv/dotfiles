@@ -5,6 +5,7 @@
 ;;; repository, order in this section matters!
 ;;; ----------------------------------------------------------------------------
 
+(use-package a)                          ; Clojure-style associative data
 (use-package async)
 (use-package dash)                       ; a modern list library
 (use-package dash-functional)
@@ -128,14 +129,12 @@
 
 
 (use-package company                    ; "comp"lete "any"thing
-  :defer t
+  :bind ("C-." 'company-complete)
   :diminish ""
   :config (progn
 
             (global-company-mode)
             (setq company-idle-delay nil)
-
-            (global-set-key (kbd "C-.") 'company-complete)
 
             (let ((company-backends (list 'company-slime
                                           'company-lua
