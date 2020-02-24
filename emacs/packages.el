@@ -53,7 +53,6 @@
 
 
 (use-package cider
-  :after (clojure-mode)
   :defer t
   :config (progn
 
@@ -102,6 +101,7 @@
 
 
 (use-package clojure-mode
+  :defer t
   :config (progn
 
             (defun /clojure-mode-hook ()
@@ -123,12 +123,14 @@
 
 
 (use-package cmake-mode
+  :defer t
   :config (progn
             (setq cmake-tab-width 4)
             ))
 
 
 (use-package company                    ; "comp"lete "any"thing
+  :defer t
   :diminish ""
   :config (progn
 
@@ -149,21 +151,19 @@
 
 (use-package company-lua
   :pin melpa
-  :after (company lua-mode))
+  :defer t)
 
 
 (use-package company-terraform
-  :after (terraform-mode))
+  :defer t)
 
 
 (use-package company-web
-  :after (company web-mode))
+  :defer t)
 
 
 (use-package counsel                    ; Ivy / Swiper / Counsel
-  :pin melpa
-  :config (progn
-            ))
+  :pin melpa)
 
 
 (use-package counsel-projectile
@@ -174,18 +174,18 @@
 
 
 (use-package counsel-tramp
-  :pin melpa)
+  :pin melpa
+  :defer t)
 
 
 (use-package deft
+  :bind ("C-c d" . deft)
   :config (progn
 
             (setq deft-extensions '( "org" "note" "txt" "tex")
                   deft-directory "~/Notes/"
                   deft-recursive t
                   deft-text-mode 'org-mode)
-
-            (global-set-key (kbd "C-c d") 'deft)
 
             (defun /deft-current-window-width (orig-fn &rest args)
               (let ((res (apply orig-fn args)))
@@ -210,12 +210,14 @@
 
 (use-package disk-usage
   :pin gnu
+  :defer t
   :config (progn
             (setq disk-usage--du-command "du")
             ))
 
 
 (use-package direnv
+  :defer t
   :config (progn
             ;; It's faster to keep this minor mode disabled, and use
             ;; direnv-update-environment manually as needed.
@@ -225,33 +227,31 @@
 
 (use-package discover-my-major
   :pin melpa
-  :config (progn
-            (global-set-key (kbd "C-h C-m") 'discover-my-major)
-            ))
+  :bind ("C-h C-m" . discover-my-major))
 
 
 (use-package doom-themes
-  :pin melpa)
+  :pin melpa
+  :defer t)
 
 
 (use-package dumb-jump
+  :bind (("H-." . dumb-jump-go)
+         ("H-," . dumb-jump-back)
+         ("H->" . dumb-jump-quick-look))
   :config (progn
-
             (setq dumb-jump-selector 'popup)
-
-            (global-set-key (kbd "H-.") 'dumb-jump-go)
-            (global-set-key (kbd "H-,") 'dumb-jump-back)
-            (global-set-key (kbd "H->") 'dumb-jump-quick-look)
-
             ))
 
 
 (use-package elisp-slime-nav
+  :defer t
   :diminish "")
 
 
 (use-package emojify
   :pin melpa
+  :defer t
   :config (progn
             ;; 'unicode possibly broken on NextStep port?
             (setq emojify-display-style 'image)
@@ -261,12 +261,12 @@
             ))
 
 
-(use-package eshell-autojump)
+(use-package eshell-autojump
+  :defer t)
 
 
 (use-package expand-region
-  :config (progn
-            (global-set-key (kbd "C-S-SPC") 'er/expand-region)))
+  :bind ("C-S-SPC" . er/expand-region))
 
 
 (use-package flycheck
@@ -276,14 +276,11 @@
 
 (use-package flycheck-rust
   :pin melpa
-  :after (flycheck)
   :defer t)
 
 
 (use-package fountain-mode              ; screenwriting
-  :config (progn
-            (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
-            ))
+  :mode "\\.fountain$")
 
 
 (use-package fringe-helper
@@ -311,6 +308,8 @@
 
 (use-package gif-screencast
   :pin melpa
+  :defer t
+  ;;:bind ("H-s" . /gif-screencast)
   :config (progn
 
             ;; required on Mac
@@ -330,8 +329,6 @@
                     (message "Canceled")
                   (gif-screencast))))
 
-            ;;(global-set-key (kbd "H-s") #'/gif-screencast)
-
             ;; use this redefinition on a high-DPI screen:
             (defun gif-screencast--cropping-region ()
               (let ((x (* 2 (car (frame-position))))
@@ -345,6 +342,7 @@
 
 (use-package git-auto-commit-mode
   :pin melpa
+  :defer t
   :config (progn
             (setq gac-automatically-push-p nil)
             (setq-default gac-debounce-interval 300)
@@ -353,6 +351,7 @@
 
 (use-package golden-ratio
   :pin melpa
+  :defer t
   :diminish " φ"
   :config (progn
 
@@ -378,10 +377,8 @@
 
 ;; http://www.emacswiki.org/emacs/GotoChg
 (use-package goto-chg
-  :config (progn
-            (when window-system (global-set-key (kbd "C-M-[") 'goto-last-change))
-            (global-set-key (kbd "C-M-]") 'goto-last-change-reverse)
-            ))
+  :bind (("C-M-[" . goto-last-change)
+         ("C-M-]" . goto-last-change-reverse)))
 
 
 (use-package green-phosphor-theme
@@ -390,6 +387,7 @@
 
 
 (use-package haskell-mode
+  :defer t
   :config (progn
 
             ;; consider installing Intero if Haskell becomes relevant
@@ -404,11 +402,13 @@
 
 
 ;;; Hashicorp Configuration Language: dependency for terraform-mode
-(use-package hcl-mode)
+(use-package hcl-mode
+  :defer t)
 
 
 (use-package helm
   :diminish ""
+  :defer t
   :config (progn
 
             (require 'helm-config)
@@ -483,18 +483,16 @@
 
 
 (use-package helm-ag
-  :after (helm))
+  :defer t)
 
 
 (use-package helm-projectile
-  :after (helm projectile)
   :config (progn
             (helm-projectile-on)
             ))
 
 
 (use-package helm-swoop
-  :after (helm)
   :bind (("C-M-S-i" . (lambda () (interactive) (helm-swoop :$query "")))
          :map isearch-mode-map
          ("C-M-S-i" . 'helm-swoop-from-isearch)))
@@ -503,14 +501,14 @@
 ;; Replacement for built-in Help system.
 (use-package helpful
   :pin melpa
+  :bind (("C-h f" . 'helpful-callable)
+         ("C-h v" . 'helpful-variable)
+         ("C-h o" . 'helpful-symbol)
+         ("C-h k" . 'helpful-key)
+         ("C-c C-d h" . 'helpful-at-point)
+         ("C-h F" . 'helpful-function)
+         ("C-h C" . 'helpful-command))
   :config (progn
-            (global-set-key (kbd "C-h f") #'helpful-callable)
-            (global-set-key (kbd "C-h v") #'helpful-variable)
-            (global-set-key (kbd "C-h o") #'helpful-symbol)
-            (global-set-key (kbd "C-h k") #'helpful-key)
-            (global-set-key (kbd "C-c C-d h") #'helpful-at-point)
-            (global-set-key (kbd "C-h F") #'helpful-function)
-            (global-set-key (kbd "C-h C") #'helpful-command)
             (when (featurep 'counsel)
               (setq counsel-describe-function-function #'helpful-callable)
               (setq counsel-describe-variable-function #'helpful-variable))))
@@ -518,6 +516,9 @@
 
 (use-package highlight
   :pin melpa
+  :bind (("C-c H h" . hlt-highlight)
+         ("C-c H u" . hlt-unhighlight-region)
+         ("C-c H U" . /hlt-remove-all-highlights-in-buffer))
   :config (progn
 
             (defface /hlt-highlight
@@ -530,23 +531,21 @@
 
             (setq hlt-last-face '/hlt-highlight)
 
-            (global-set-key (kbd "C-c H h") 'hlt-highlight)
-            (global-set-key (kbd "C-c H u") 'hlt-unhighlight-region)
-            (global-set-key (kbd "C-c H U") #'(lambda ()
-                                                (interactive)
-                                                (save-excursion
-                                                  (mark-whole-buffer)
-                                                  (hlt-unhighlight-region-for-face hlt-last-face))))
+            (defun /hlt-remove-all-highlights-in-buffer ()
+              (interactive)
+              (save-excursion
+                (mark-whole-buffer)
+                (hlt-unhighlight-region-for-face hlt-last-face)))
 
             ))
 
 
 (use-package hydra
-  :config (progn
-            ))
+  :defer t)
 
 
 (use-package iedit
+  :defer t
   :init   (progn
             (setq iedit-toggle-key-default nil)
             )
@@ -562,13 +561,12 @@
 
 
 (use-package ivy                        ; Ivy / Swiper / Counsel
-  :pin melpa
-  :config (progn
-            ))
+  :pin melpa)
 
 
 (use-package ivy-xref
   :pin melpa
+  :defer t
   :init (progn
           (when (>= emacs-major-version 27)
             (setq xref-show-definitions-function #'ivy-xref-show-defs))
@@ -580,7 +578,6 @@
 (use-package ivy-posframe
   :pin melpa
   :diminish ""
-  :after (ivy)
   :config (progn
             (ivy-posframe-mode 1)
             ))
@@ -588,10 +585,9 @@
 
 (use-package js2-mode
   :pin melpa
+  :mode (("\\.js$" . js2-mode)
+         ("\\.jsx$" . js2-jsx-mode))
   :config (progn
-
-            (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
-            (add-to-list 'auto-mode-alist '("\\.jsx$" . js2-jsx-mode))
 
             (setq js2-basic-offset 2
                   js-switch-indent-offset 2
@@ -650,9 +646,8 @@
 
 
 (use-package ledger-mode
+  :mode "\\.dat$"
   :config (progn
-
-            (add-to-list 'auto-mode-alist '("\\.dat$" . ledger-mode))
 
             (defun /ledger-mode-hook ()
               (local-set-key (kbd "C-c C-f") 'flush-to-fill-column))
@@ -669,6 +664,7 @@
 
 (use-package lua-mode
   :pin melpa
+  :mode "\\.lua$"
   :config (progn
 
             (defun /lua-mode-hook ()
@@ -681,6 +677,7 @@
 
 
 (use-package magit
+  :defer t
   :config (progn
 
             (diminish 'magit-auto-revert-mode)
@@ -732,20 +729,14 @@
 
 
 (use-package multiple-cursors
-  :config (progn
-            (global-set-key (kbd "C-?") 'mc/edit-lines)
-            (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-            (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-            (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
-            ))
+  :bind (("C-?" . mc/edit-lines)
+         ("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-c C-<" . mc/mark-all-like-this)))
 
 
 (use-package nix-mode
-  :config (progn
-
-            (add-to-list 'auto-mode-alist '("\\.nix$" . nix-mode))
-
-            ))
+  :mode "\\.nix$")
 
 
 ;; turn on when built-in Org dependency is up-to-date
@@ -753,10 +744,12 @@
 
 
 (use-package ob-restclient
-  :pin melpa)
+  :pin melpa
+  :defer t)
 
 
 (use-package olivetti                   ; focused writing mode
+  :defer t
   :config (progn
 
             (setq-default olivetti-body-width 90)
@@ -803,6 +796,8 @@
 (use-package origami
   :pin melpa
   :after (hydra)
+  :bind (:map origami-mode-map
+              ("H-o" . /hydra-origami/body))
   :config (progn
 
             (setq origami-show-fold-header t)
@@ -832,16 +827,16 @@
               ("R" origami-reset)
               )
 
-            (define-key origami-mode-map (kbd "H-o") '/hydra-origami/body)
-
             ))
 
 
 (use-package package-lint
-  :pin melpa)
+  :pin melpa
+  :defer t)
 
 
 (use-package paredit
+  :defer t
   :diminish " π"
   :config (progn
 
@@ -894,14 +889,14 @@
             (defun /persp-set-ido-buffers ()
               (when (boundp 'ido-temp-list)
                 (setq ido-temp-list
-                      (remove-if (lambda (name)
-                                   (cl-some
-                                    (lambda (ignore)
-                                      (cond ((stringp ignore) (string-match-p ignore name))
-                                            ((functionp ignore) (funcall ignore name))
-                                            (t (error "unknown ido-ignore-buffers type"))))
-                                    ido-ignore-buffers))
-                                 ido-temp-list))))
+                      (cl-remove-if (lambda (name)
+                                      (cl-some
+                                       (lambda (ignore)
+                                         (cond ((stringp ignore) (string-match-p ignore name))
+                                               ((functionp ignore) (funcall ignore name))
+                                               (t (error "unknown ido-ignore-buffers type"))))
+                                       ido-ignore-buffers))
+                                    ido-temp-list))))
 
             (advice-add 'persp-set-ido-buffers :after #'/persp-set-ido-buffers)
 
@@ -918,7 +913,8 @@
 
 
 (use-package poporg
-  :pin melpa)
+  :pin melpa
+  :defer t)
 
 
 (use-package projectile
@@ -953,6 +949,7 @@
 
 (use-package rainbow-mode
   :pin gnu
+  :defer t
   :diminish ""
   :config (progn
             (rainbow-mode 1)
@@ -964,6 +961,7 @@
 
 (use-package restclient
   :pin melpa
+  :defer t
   :config (progn
             (setq restclient-log-request nil)
             ))
@@ -973,6 +971,7 @@
 ;;; is enabled system-wide.
 (use-package reverse-im
   :pin melpa
+  :defer t
   :config (progn
             (setq reverse-im-modifiers '(control meta super hyper))
             (setq reverse-im-input-methods '("russian-computer"))
@@ -982,9 +981,8 @@
 
 (use-package rust-mode
   :pin melpa
+  :mode "\\.rs\\'"
   :config (progn
-
-            (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
 
             (defun /rust-mode-hook ()
               (flycheck-mode))
@@ -995,6 +993,7 @@
 
 
 (use-package slime
+  :defer t
   :config (progn
 
             (setq slime-net-coding-system 'utf-8-unix)
@@ -1022,7 +1021,7 @@
 
 
 (use-package slime-company
-  :after (company slime)
+  :defer t
   :config (progn
             ;; XXX: This is here instead of the slime :config section to make
             ;; sure it runs after the slime-company is available.
@@ -1031,6 +1030,7 @@
 
 
 (use-package smex                       ; smart M-x completion
+  :defer t
   :config (progn
             (setq smex-save-file (concat user-emacs-directory ".smex-items"))
             ;;(global-set-key (kbd "M-x") (lambda ()
@@ -1047,6 +1047,7 @@
 
 (use-package swift-mode
   :pin melpa
+  :defer t
   :config (progn
 
             (setq swift-mode:switch-case-offset 2)
@@ -1090,7 +1091,6 @@
 
 
 (use-package tide                       ; TypeScript IDE
-  :after (company flycheck typescript-mode)
   :defer t
   :diminish " Tide")
 
@@ -1107,15 +1107,13 @@
 
 (use-package undo-fu
   :pin melpa
-  :config (progn
-            (global-unset-key (kbd "C-z"))
-            (global-set-key (kbd "C-z") 'undo-fu-only-undo)
-            (global-set-key (kbd "C-S-z") 'undo-fu-only-redo)
-            ))
+  :bind (("C-z" . 'undo-fu-only-undo)
+         ("C-S-z" . 'undo-fu-only-redo)))
 
 
 (use-package vterm
   :pin melpa
+  :defer t
   :config (progn
 
             (setq vterm-max-scrollback 10000)
@@ -1146,13 +1144,11 @@
 
 
 (use-package web-mode
-  :after (flycheck tide)
+  :mode (("\\.html?\\'" . web-mode)
+         ("\\.erb\\'" . web-mode)
+         ("\\.ts?\\'" . web-mode)
+         ("\\.tsx\\'" . web-mode))
   :config (progn
-
-            (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-            (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-            (add-to-list 'auto-mode-alist '("\\.ts?\\'" . web-mode))
-            (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
 
             (setq web-mode-enable-current-element-highlight t
                   web-mode-markup-indent-offset 2
