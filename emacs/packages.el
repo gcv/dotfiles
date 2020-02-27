@@ -51,6 +51,11 @@
          ("C-M-j" . avy-goto-line)))
 
 
+;; configuration bisect utility
+(use-package bug-hunter
+  :pin "gnu")
+
+
 (use-package cider
   :defer t
   :config (progn
