@@ -280,6 +280,17 @@
 ;;                    (kill-buffer buf))))
 ;;            remove-these-buffers))))
 
+;;; advanced hack: disable GC in the minibuffer to keep display snappy for,
+;;; e.g., helm-M-x
+(defun /minibuffer-setup-hook ()
+  (setq gc-cons-threshold most-positive-fixnum))
+
+(defun /minibuffer-exit-hook ()
+  (setq gc-cons-threshold 800000))
+
+(add-hook 'minibuffer-setup-hook #'/minibuffer-setup-hook)
+(add-hook 'minibuffer-exit-hook #'/minibuffer-exit-hook)
+
 
 ;;; ----------------------------------------------------------------------------
 ;;; backups and sensitive-mode definition
@@ -911,7 +922,8 @@ See `eshell-prompt-regexp'."
 ;;; ----------------------------------------------------------------------------
 
 ;;; load more startup files; order matters!
-(let ((startup-files (list
+(let ((gc-cons-threshold most-positive-fixnum) ; disable GC for the load
+      (startup-files (list
                       "utils.el"
                       "interactives.el"
                       "packages.el"
