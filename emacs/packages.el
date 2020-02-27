@@ -175,6 +175,8 @@
             ;; XXX: This gets clobbered when counsel loads. @@
             (setq ivy-initial-inputs-alist nil)
 
+            (add-to-list 'ivy-re-builders-alist '(counsel-M-x . ivy--regex-fuzzy))
+
             (add-to-list 'ivy-display-functions-alist '(counsel-M-x . /ivy-display-function-window))
             (add-to-list 'ivy-display-functions-alist '(counsel-yank-pop . /ivy-display-function-window))
             (add-to-list 'ivy-display-functions-alist '(counsel-ag . /ivy-display-function-window))
@@ -278,6 +280,10 @@
 
 (use-package expand-region
   :bind ("C-S-SPC" . er/expand-region))
+
+
+(use-package flx
+  :defer nil)
 
 
 (use-package flycheck
@@ -570,6 +576,7 @@
 
 (use-package ivy                        ; Ivy / Swiper / Counsel
   :pin melpa
+  :after (flx)
   :bind (("C-c c r" . ivy-resume)
          :map ivy-minibuffer-map
          ("C-m" . ivy-alt-done)         ; enter navigates into a directory
