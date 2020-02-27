@@ -104,6 +104,7 @@
                                         (message "Canceled exit")
                                       (when (and (fboundp 'persp-state-save)
                                                  (boundp 'persp-state-default-file)
+                                                 persp-state-default-file
                                                  (y-or-n-p (format "Save perspectives to %s? " persp-state-default-file)))
                                         (message "Saving perspectives")
                                         (persp-state-save))
