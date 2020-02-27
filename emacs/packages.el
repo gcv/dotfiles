@@ -1193,7 +1193,10 @@
 
 (use-package tide                       ; TypeScript IDE
   :defer t
-  :diminish " Tide")
+  :diminish " Tide"
+  :config (progn
+            (setq tide-tsserver-start-method 'manual)
+            ))
 
 
 ;;; Installed purely because it's a tide dependency. web-mode provides superior
