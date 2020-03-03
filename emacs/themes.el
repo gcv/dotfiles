@@ -192,11 +192,12 @@
    'material-light
    (/theme-face-spec 'cursor :background "#21bdff")
    (/theme-face-spec 'aw-background-face :foreground "gray40" :background nil)
-   (let ((bg ;; "#90a4ae"
-          "#aac2ce"))
-     (/theme-face-spec 'mode-line :background bg :box `(:line-width 1 :color ,bg)))
-   (let ((bg "#eceff1"))
-     (/theme-face-spec 'mode-line-inactive :background bg :box `(:line-width 1 :color ,bg)))
+   (let ((fg "black")
+         (bg "#c5c8ca"))
+     (/theme-face-spec 'mode-line :foreground fg :background bg :box `(:line-width 1 :color ,bg)))
+   (let ((fg "gray30")
+         (bg "#d4d7d9"))
+     (/theme-face-spec 'mode-line-inactive :foreground fg :background bg :box `(:line-width 1 :color ,bg)))
    (/theme-face-spec 'header-line :box nil))
   (apply #'custom-theme-set-faces 'material-light (/theme-common)))
 
