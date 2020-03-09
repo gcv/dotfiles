@@ -561,7 +561,7 @@
 
 
 (use-package iedit
-  :defer t
+  :defer nil
   :init (progn
           (setq iedit-toggle-key-default nil)
           )
