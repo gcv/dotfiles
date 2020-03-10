@@ -64,7 +64,7 @@ __log_msg()
 # echo the git dir
 __gitdir()
 {
-	if [ "true" = "$(git rev-parse --is-inside-work-tree $PWD | head -1)" ]; then
+	if [ "true" = "$(git rev-parse --is-inside-work-tree "$PWD" | head -1)" ]; then
 		git rev-parse --git-dir $PWD 2>/dev/null
 	fi
 }
@@ -257,7 +257,6 @@ __log_msg "Using $remote_name/$branch_name"
 
 # deal with excludes (use functions here for local state and for ease of
 # unconditional teardown when the script exits)
-excludes
 excludes_setup()
 {
     # XXX: Yes, this is nearly identical to excludes_teardown.
