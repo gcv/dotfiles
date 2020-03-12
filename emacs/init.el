@@ -207,6 +207,14 @@
 (require 'use-package)
 ;;(setq use-package-verbose t)
 
+(defmacro use-feature (name &rest args)
+  "Like use-package but for built-in Emacs features."
+  (declare (indent defun))
+  `(use-package ,name
+     :straight nil
+     :ensure nil
+     ,@args))
+
 
 ;;; ----------------------------------------------------------------------------
 ;;; buffer behavior and control
