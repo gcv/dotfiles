@@ -202,6 +202,26 @@
   (apply #'custom-theme-set-faces 'material-light (/theme-common)))
 
 
+(defun theme-modus-operandi-light ()
+  (interactive)
+  (disable-all-themes)
+  (load-theme 'modus-operandi t)
+  (custom-theme-set-faces
+   'modus-operandi
+   (/theme-face-spec 'org-hide :foreground "#ffffff" :background "#ffffff"))
+  (apply #'custom-theme-set-faces 'modus-operandi (/theme-common)))
+
+
+(defun theme-modus-vivendi-dark ()
+  (interactive)
+  (disable-all-themes)
+  (load-theme 'modus-vivendi t)
+  (custom-theme-set-faces
+   'modus-vivendi
+   (/theme-face-spec 'org-hide :foreground "black" :background "black"))
+  (apply #'custom-theme-set-faces 'modus-vivendi (/theme-common)))
+
+
 (defun theme-green-phosphor ()
   (interactive)
   (disable-all-themes)

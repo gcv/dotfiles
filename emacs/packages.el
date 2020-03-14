@@ -839,6 +839,14 @@
   :defer t)
 
 
+(use-package modus-operandi-theme
+  :defer t)
+
+
+(use-package modus-vivendi-theme
+  :defer t)
+
+
 (use-package multiple-cursors
   :bind (("C-?" . mc/edit-lines)
          ("C->" . mc/mark-next-like-this)
