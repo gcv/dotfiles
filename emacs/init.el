@@ -359,23 +359,19 @@
       ;; org-mode needs a copy of this for when it might manipulate the frame title
       org-frame-title-format-backup frame-title-format)
 
+
+;;; fix window splitting behavior when possible
 (setq display-buffer-reuse-frames t)         ; reuse windows in other frames
-(setq pop-up-windows nil)                    ; display-buffer: avoid splitting
-(setq even-window-heights nil)               ; display-buffer: avoid resizing
+(setq even-window-sizes nil)                 ; display-buffer: avoid resizing
 (setq window-resize-pixelwise t)             ; smoother window resizing?
 (setq split-height-threshold 15)             ; for rare occasions
 
+(setq display-buffer-alist
+      '((".*"
+         (display-buffer-reuse-window display-buffer-same-window))))
+
 (winner-mode 1)                              ; restore windows: C-c right-arrow
 (windmove-default-keybindings)               ; shift-arrow keys switch windows
-
-
-;;; fix window splitting behavior when possible
-(setq display-buffer-alist
-      '(("\\*compilation\\*"
-         (display-buffer-reuse-window display-buffer-same-window))
-        ;; default
-        (".*"
-         (display-buffer-same-window))))
 
 
 ;;; clicking in a different window should not move the cursor inside that window
