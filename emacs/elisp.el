@@ -13,6 +13,7 @@
   (paredit-mode 1)
   (eldoc-mode)
   (elisp-slime-nav-mode t)
+  (define-key emacs-lisp-mode-map (kbd "C-c C-k") 'eval-buffer)
   (define-key emacs-lisp-mode-map (kbd "C-m") 'newline-and-indent))
 
 (add-hook 'emacs-lisp-mode-hook #'/emacs-lisp-mode-hook)
