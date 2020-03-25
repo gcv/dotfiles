@@ -822,6 +822,28 @@
   :defer t)
 
 
+(use-package mini-frame
+  :pin melpa
+  :defer t
+  :config (progn
+
+            ;; This is pretty cool overall, and a worthy alternative to
+            ;; ivy-posframe, especially since it supports non-Ivy minibuffer
+            ;; things. Things to look into:
+            ;; - mini-frame-ignore-commands should support regexps, so Helm can
+            ;;   be excluded without making a blacklist
+            ;; - very wide large screens are iffy, so positioning in-window
+            ;;   would be welcome
+
+            ;; (setq mini-frame-show-parameters
+            ;;       '((top . 10)
+            ;;         (left . 0.5)
+            ;;         (width . 0.7)
+            ;;         (height . 15)))
+
+            ))
+
+
 (use-package modus-operandi-theme
   :defer t)
 
