@@ -736,6 +736,7 @@
 
 (use-package julia-snail
   ;;:load-path "~/Code/julia-snail"
+  :pin melpa
   :hook (julia-mode . julia-snail-mode))
 
 
