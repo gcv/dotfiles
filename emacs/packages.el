@@ -587,13 +587,6 @@
 
             (setq ivy-initial-inputs-alist nil)
 
-            (setq ivy-posframe-width 65
-                  ivy-posframe-min-width 65
-                  ivy-posframe-height nil
-                  ivy-posframe-border-width 1
-                  ivy-posframe-parameters '((left-fringe . 0)
-                                            (right-fringe . 0)))
-
             ;; Automatic Ivy window sizing with ivy-posframe awareness.
             (defun /ivy-height-smart ()
               (if (display-graphic-p)
@@ -604,7 +597,6 @@
                       (round (/ (frame-height) 1.75))))
                 ;; non-graphic display
                 10))
-
 
             ;; Full-window Ivy selection (requires /ivy-height-smart).
             (defun /ivy-display-function-window (text)
@@ -666,6 +658,13 @@
   :config (progn
 
             (ivy-posframe-mode 1)
+
+            (setq ivy-posframe-width 65
+                  ivy-posframe-min-width 65
+                  ivy-posframe-height nil
+                  ivy-posframe-border-width 1
+                  ivy-posframe-parameters '((left-fringe . 0)
+                                            (right-fringe . 0)))
 
             (set-face-attribute 'ivy-posframe-cursor nil :inherit 'ivy-cursor)
             (set-face-attribute 'ivy-posframe nil :foreground nil :background nil :inherit 'default)
