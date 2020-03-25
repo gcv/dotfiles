@@ -551,6 +551,18 @@ target width."
   (unintern sym))
 
 
+(defun destroy-symbols-prefixed (sym-prefix)
+  "Destroy all symbols prefixed with SYM-PREFIX."
+  (interactive "sSymbol: ")
+  (when (y-or-n-p (format "Are you sure you want to blow away all symbols prefixed `%s'? " sym-prefix))
+    (mapatoms (lambda (sym)
+                (when (string-prefix-p sym-prefix (symbol-name sym))
+                  (fmakunbound sym)
+                  (makunbound sym)
+                  (unintern sym))))
+    (message "Done")))
+
+
 (defun mac-color-picker (&optional list buffer-name)
   "Call macOS color picker and insert the chosen color."
   (interactive)
