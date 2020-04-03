@@ -1,12 +1,13 @@
 ;;; olivetti.el --- Minor mode for a nice writing environment -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2014-2019 Free Software Foundation, Inc.
-;; Copyright (c) 2019 Paul W. Rankin
+;; Copyright (c) 2014-2019  Paul Wiliam Rankin
+;; Copyright (c) 2019       Free Software Foundation, Inc.
+;; Copyright (c) 2019-2020  Paul Wiliam Rankin
 
-;; Author: Paul W. Rankin <pwr@sdf.org>
+;; Author: William Rankin <code@william.bydasein.com>
 ;; Keywords: wp, text
-;; Package-Version: 1.8.1
-;; Version: 1.8.1
+;; Package-Version: 1.9.3
+;; Version: 1.9.3
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://gthub.com/rnkn/olivetti
 
@@ -31,8 +32,6 @@
 
 ;; A simple Emacs minor mode for a nice writing environment.
 
-;; Screenshot: https://f002.backblazeb2.com/file/pwr-share/olivetti.png
-
 ;; ## Features ##
 
 ;; - Set a desired text body width to automatically resize window margins to
@@ -56,7 +55,7 @@
 
 ;; ## Requirements ##
 
-;; - Emacs 24.5
+;; - Emacs 25.3
 
 ;; ## Installation ##
 
@@ -111,6 +110,12 @@
 
 
 ;;; Options
+
+(defcustom olivetti-mode-hook
+  nil
+  "Hook for `olivetti-mode', run after the mode is activated."
+  :type 'hook
+  :safe 'hook)
 
 (defcustom olivetti-body-width
   70
@@ -265,6 +270,17 @@ May return a float with many digits of precision."
            (eval (car (get 'olivetti-body-width 'standard-value)) t)))))
 
 
+;;; Keymap
+
+(defvar olivetti-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c }") #'olivetti-expand)
+    (define-key map (kbd "C-c {") #'olivetti-shrink)
+    (define-key map (kbd "C-c \\") #'olivetti-set-width)
+    map)
+  "Mode map for `olivetti-mode'.")
+
+
 ;;; Width Interaction
 
 (defun olivetti-set-width (n)
@@ -293,10 +309,11 @@ If prefixed with ARG, incrementally decrease."
     (setq olivetti-body-width (olivetti-safe-width n (selected-window))))
   (olivetti-set-all-margins)
   (message "Text body width set to %s" olivetti-body-width)
-  (set-transient-map
-   (let ((map (make-sparse-keymap)))
-     (define-key map "}" #'olivetti-expand)
-     (define-key map "{" #'olivetti-shrink) map)))
+  (unless overriding-terminal-local-map
+    (let ((keys (substring (this-single-command-keys) 0 -1))
+          (map (cdr olivetti-mode-map)))
+      (mapc (lambda (k) (setq map (assq k map))) keys)
+      (when (consp map) (set-transient-map (cdr map) t)))))
 
 (defun olivetti-shrink (&optional arg)
   "Incrementally decrease the value of `olivetti-body-width'.
@@ -308,14 +325,6 @@ If prefixed with ARG, incrementally increase."
 
 
 ;;; Mode Definition
-
-(defvar olivetti-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c }") #'olivetti-expand)
-    (define-key map (kbd "C-c {") #'olivetti-shrink)
-    (define-key map (kbd "C-c \\") #'olivetti-set-width)
-    map)
-  "Mode map for `olivetti-mode'.")
 
 (define-obsolete-function-alias 'turn-on-olivetti-mode
   #'olivetti-mode "1.7.0")
@@ -364,3 +373,10 @@ body width set with `olivetti-body-width'."
 (provide 'olivetti)
 
 ;;; olivetti.el ends here
+
+;; Local Variables:
+;; coding: utf-8
+;; fill-column: 80
+;; require-final-newline: t
+;; sentence-end-double-space: nil
+;; End:
