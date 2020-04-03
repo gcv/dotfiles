@@ -1,14 +1,14 @@
 ;;; perspective.el --- switch between named "perspectives" of the editor  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2008-2018 Natalie Weizenbaum <nex342@gmail.com>
+;; Copyright (C) 2008-2020 Natalie Weizenbaum <nex342@gmail.com>
 ;;
 ;; Licensed under the same terms as Emacs and under the MIT license.
 
 ;; Author: Natalie Weizenbaum <nex342@gmail.com>
 ;; URL: http://github.com/nex3/perspective-el
-;; Package-Version: 20191211.401
+;; Package-Version: 20200326.2358
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Version: 2.3
+;; Version: 2.6
 ;; Created: 2008-03-05
 ;; By: Natalie Weizenbaum <nex342@gmail.com>
 ;; Keywords: workspace, convenience, frames
@@ -19,22 +19,25 @@
 ;; workspaces in windows managers such as Awesome and XMonad (and
 ;; somewhat similar to multiple desktops in Gnome or Spaces in OS X).
 
-;; perspective.el provides multiple workspaces (or "perspectives") for
-;; each Emacs frame.  This makes it easy to work on many separate projects
-;; without getting lost in all the buffers.
+;; Perspective provides multiple workspaces (or "perspectives") for each Emacs
+;; frame. This makes it easy to work on many separate projects without getting
+;; lost in all the buffers.
 
 ;; Each perspective is composed of a window configuration and a set of
 ;; buffers.  Switching to a perspective activates its window
 ;; configuration, and when in a perspective only its buffers are
 ;; available by default.
 
-(require 'cl-lib)
-(require 'thingatpt)
-(require 'subr-x)                       ; hash-table-values
-
-(defvar ido-temp-list)
-
 ;;; Code:
+
+(require 'cl-lib)
+(require 'ido)
+(require 'rx)
+(require 'subr-x)
+(require 'thingatpt)
+
+
+;;; --- customization
 
 (defgroup perspective-mode 'nil
   "Customization for Perspective mode"
@@ -74,6 +77,12 @@ perspectives."
          (set-default sym value))
   :type 'key-sequence)
 
+(defcustom persp-interactive-completion-function
+  (if ido-mode 'ido-completing-read 'completing-read)
+  "Function used by Perspective to interactively complete user input."
+  :group 'perspective-mode
+  :type 'function)
+
 (defcustom persp-switch-wrap t
   "Whether `persp-next' and `persp-prev' should wrap."
   :group 'perspective-mode
@@ -98,6 +107,28 @@ save state when exiting Emacs."
   :group 'perspective-mode
   :type 'file)
 
+
+;;; --- implementation
+
+;;; XXX: Nasty kludge to deal with the byte compiler, eager macroexpansion, and
+;;; frame parameters being already set when this file is being compiled during a
+;;; package upgrade. This enumerates all frame-parameters starting with
+;;; persp--*, saves them in persp--kludge-save-frame-params, and then blanks
+;;; them out of the frame parameters. They will be restored in the matching
+;;; eval-when-compile form at the bottom of this source file. See
+;;; https://github.com/nex3/perspective-el/issues/93.
+(eval-when-compile
+  (defvar persp--kludge-save-frame-params)
+  (setq persp--kludge-save-frame-params
+        (cl-loop for kv in (frame-parameters nil)
+                 if (string-prefix-p "persp--" (symbol-name (car kv)))
+                 collect kv))
+  (modify-frame-parameters
+   nil
+   ;; Set persp-- frame parameters to nil. The expression below creates an alist
+   ;; where the keys are the relevant frame parameters and the values are nil.
+   (mapcar (lambda (x) (list (car x))) persp--kludge-save-frame-params)))
+
 (defmacro persp-let-frame-parameters (bindings &rest body)
   "Like `let', but for frame parameters.
 Temporariliy set frame parameters according to BINDINGS then eval BODY.
@@ -116,7 +147,6 @@ After BODY is evaluated, frame parameters are reset to their original values."
   name buffers killed local-variables
   (last-switch-time (current-time))
   (created-time (current-time))
-  (buffer-history buffer-name-history)
   (window-configuration (current-window-configuration))
   (point-marker (point-marker)))
 
@@ -132,6 +162,11 @@ After BODY is evaluated, frame parameters are reset to their original values."
   "Return F if BUF is in the current perspective. Used for
 filtering in buffer display modes like ibuffer."
   (not (persp-is-current-buffer buf)))
+
+(defun persp-valid-name-p (name)
+  "Return T if NAME is a valid perspective name."
+  (and (not (null name))
+       (not (string= "" name))))
 
 (defmacro with-current-perspective (&rest body)
   "Operate on BODY when we are in a perspective."
@@ -153,10 +188,6 @@ filtering in buffer display modes like ibuffer."
 
 (defalias 'persp-killed-p 'persp-killed
   "Return whether the perspective CL-X has been killed.")
-
-(defvar persp-interactive-completion-function
-  (if ido-mode 'ido-completing-read 'completing-read)
-  "The function which is used by perspective.el to interactively complete user input.")
 
 (defvar persp-before-switch-hook nil
   "A hook that's run before `persp-switch'.
@@ -180,6 +211,12 @@ Run with the perspective to be destroyed as `persp-curr'.")
 (defvar persp-activated-hook nil
   "A hook that's run after a perspective has been activated.
 Run with the activated perspective active.")
+
+(defvar persp-before-rename-hook nil
+  "A hook run immediately before renaming a perspective.")
+
+(defvar persp-after-rename-hook nil
+  "A hook run immediately after renaming a perspective.")
 
 (defvar persp-state-before-save-hook nil
   "A hook run immediately before saving persp state to disk.")
@@ -215,13 +252,15 @@ Run with the activated perspective active.")
 (define-key perspective-map (kbd "p") 'persp-prev)
 (define-key perspective-map (kbd "<left>") 'persp-prev)
 (define-key perspective-map persp-mode-prefix-key 'persp-switch-last)
+(define-key perspective-map (kbd "C-s") 'persp-state-save)
+(define-key perspective-map (kbd "C-l") 'persp-state-load)
 
 (defun perspectives-hash (&optional frame)
   "Return a hash containing all perspectives in FRAME.
 FRAME defaults to the currently selected frame. The keys are the
 perspectives' names. The values are persp structs, with the
-fields NAME, WINDOW-CONFIGURATION, BUFFERS, BUFFER-HISTORY,
-KILLED, POINT-MARKER, and LOCAL-VARIABLES.
+fields NAME, WINDOW-CONFIGURATION, BUFFERS, KILLED, POINT-MARKER,
+and LOCAL-VARIABLES.
 
 NAME is the name of the perspective.
 
@@ -231,9 +270,6 @@ saved (if this isn't the current perspective, this is when the
 perspective was last active).
 
 BUFFERS is a list of buffer objects that are associated with this
-perspective.
-
-BUFFER-HISTORY is the list of buffer history values for this
 perspective.
 
 KILLED is non-nil if the perspective has been killed.
@@ -346,7 +382,6 @@ perspective-local variables to `persp-curr'"
              (let ((name (car c)))
                (list name (symbol-value name))))
            (persp-local-variables (persp-curr))))
-    (setf (persp-buffer-history (persp-curr)) buffer-name-history)
     (setf (persp-window-configuration (persp-curr)) (current-window-configuration))
     (setf (persp-point-marker (persp-curr)) (point-marker))))
 
@@ -468,6 +503,11 @@ For example, (persp-intersperse '(1 2 3) 'a) gives '(1 a 2 a 3)."
     (define-key map [mode-line down-mouse-1] 'persp-mode-line-click)
     map))
 
+(defconst persp-header-line-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [header-line down-mouse-1] 'persp-mode-line-click)
+    map))
+
 (defun persp-mode-line-click (event)
   "Select the clicked perspective.
 EVENT is the click event triggering this function call."
@@ -492,13 +532,18 @@ Has no effect when `persp-show-modestring' is nil."
                    close)))))
 
 (defun persp-format-name (name)
-  "Format the perspective name given by NAME for display in the modeline."
+  "Format the perspective name given by NAME for display in the mode line or header line."
   (let ((string-name (format "%s" name)))
     (if (equal name (persp-current-name))
         (propertize string-name 'face 'persp-selected-face)
-      (propertize string-name
-                  'local-map persp-mode-line-map
-                  'mouse-face 'mode-line-highlight))))
+      (cond ((eq persp-show-modestring 'header)
+             (propertize string-name
+                         'local-map persp-header-line-map
+                         'mouse-face 'header-line-highlight))
+            ((eq persp-show-modestring t)
+             (propertize string-name
+                         'local-map persp-mode-line-map
+                         'mouse-face 'mode-line-highlight))))))
 
 (defun persp-get-quick (char &optional prev)
   "Return the name of the first perspective that begins with CHAR.
@@ -525,7 +570,7 @@ This is used for cycling between perspectives."
   "Switch to the perspective accessed before the current one."
   (interactive)
   (unless (persp-last)
-    (error "There is no last perspective"))
+    (persp-error "There is no last perspective"))
   (persp-switch (persp-name (persp-last))))
 
 (defun persp-switch (name &optional norecord)
@@ -540,7 +585,8 @@ perspective's local variables are set.
 If NORECORD is non-nil, do not update the
 `persp-last-switch-time' for the switched perspective."
   (interactive "i")
-  (if (null name) (setq name (persp-prompt (and (persp-last) (persp-name (persp-last))))))
+  (unless (persp-valid-name-p name)
+    (setq name (persp-prompt (and (persp-last) (persp-name (persp-last))))))
   (if (and (persp-curr) (equal name (persp-current-name))) name
     (let ((persp (gethash name (perspectives-hash))))
       (set-frame-parameter nil 'persp--last (persp-curr))
@@ -561,7 +607,6 @@ If NORECORD is non-nil, do not update the
   (persp-reset-windows)
   (persp-set-local-variables (persp-local-variables persp))
   (setf (persp-buffers persp) (persp-reactivate-buffers (persp-buffers persp)))
-  (setq buffer-name-history (persp-buffer-history persp))
   (set-window-configuration (persp-window-configuration persp))
   (when (marker-position (persp-point-marker persp))
     (goto-char (persp-point-marker persp)))
@@ -735,8 +780,12 @@ perspective and no others are killed."
 (defun persp-rename (name)
   "Rename the current perspective to NAME."
   (interactive "sNew name: ")
+  (unless (persp-valid-name-p name)
+    (persp-error "Invalid perspective name"))
   (if (gethash name (perspectives-hash))
       (persp-error "Perspective `%s' already exists" name)
+    ;; before hook
+    (run-hooks 'persp-before-rename-hook)
     ;; rename the perspective-specific *scratch* buffer
     (let* ((old-scratch-name (persp-scratch-buffer))
            (new-scratch-name (persp-scratch-buffer name))
@@ -748,7 +797,9 @@ perspective and no others are killed."
     (remhash (persp-current-name) (perspectives-hash))
     (puthash name (persp-curr) (perspectives-hash))
     (setf (persp-name (persp-curr)) name)
-    (persp-update-modestring)))
+    (persp-update-modestring)
+    ;; after hook
+    (run-hooks 'persp-after-rename-hook)))
 
 (cl-defun persp-all-get (name not-frame)
   "Returns the list of buffers for a perspective named NAME from any
@@ -862,7 +913,6 @@ See also `persp-add-buffer'."
          (frame (window-frame window))
          (old-buffer (window-buffer window)))
     ad-do-it
-
     (let ((buffer (window-buffer window)))
       (with-selected-frame frame
         (unless (persp-is-current-buffer buffer)
@@ -916,6 +966,7 @@ named collections of buffers and window configurations."
         (ad-activate 'recursive-edit)
         (ad-activate 'exit-recursive-edit)
         (add-hook 'after-make-frame-functions 'persp-init-frame)
+        (add-hook 'delete-frame-functions 'persp-delete-frame)
         (add-hook 'ido-make-buffer-list-hook 'persp-set-ido-buffers)
         (setq read-buffer-function 'persp-read-buffer)
         (mapc 'persp-init-frame (frame-list))
@@ -923,6 +974,7 @@ named collections of buffers and window configurations."
 
         (run-hooks 'persp-mode-hook))
     (ad-deactivate-regexp "^persp-.*")
+    (remove-hook 'delete-frame-functions 'persp-delete-frame)
     (remove-hook 'after-make-frame-functions 'persp-init-frame)
     (remove-hook 'ido-make-buffer-list-hook 'persp-set-ido-buffers)
     (setq read-buffer-function nil)
@@ -960,6 +1012,12 @@ By default, this uses the current frame."
        :window-configuration (current-window-configuration)
        :point-marker (point-marker)))))
 
+(defun persp-delete-frame (frame)
+  "Clean up perspectives in FRAME.
+By default this uses the current frame."
+  (with-selected-frame frame
+    (mapcar #'persp-kill (persp-names))))
+
 (defun persp-make-variable-persp-local (variable)
   "Make VARIABLE become perspective-local.
 This means that whenever a new perspective is switched into, the
@@ -988,6 +1046,7 @@ it. In addition, if one exists already, runs BODY in it immediately."
 
 (defun persp-set-ido-buffers ()
   "Restrict the ido buffer to the current perspective."
+  (defvar ido-temp-list)
   (let ((persp-names
          (remq nil (mapcar 'buffer-name (persp-current-buffers))))
         (indices (make-hash-table :test 'equal)))
@@ -1022,6 +1081,109 @@ perspective beginning with the given letter."
   (interactive)
   (setq persp-show-modestring t)
   (persp-update-modestring))
+
+(defun persp-other-buffer (&optional buffer visible-ok frame)
+  "A version of `other-buffer' which respects perspectives."
+  (let ((other (other-buffer buffer visible-ok frame)))
+    (if (member other (persp-current-buffers))
+	other
+      ;; In cases where `other-buffer' produces a buffer that is not
+      ;; part of the current perspective, select the current
+      ;; perspective's *scratch* buffer, similar to the behaviour of
+      ;; `other-buffer'.
+      (get-buffer-create (persp-scratch-buffer)))))
+
+;; Buffer switching integration: bs.el.
+;;;###autoload
+(defun persp-bs-show (arg)
+  "Invoke BS-SHOW with a configuration enabled for Perspective.
+With a prefix arg, show buffers in all perspectives.
+This respects ido-ignore-buffers, since we automatically add
+buffer filtering to ido-mode already (see use of
+PERSP-SET-IDO-BUFFERS)."
+  (interactive "P")
+  (unless (featurep 'bs)
+    (user-error "bs not loaded"))
+  (defvar ido-ignore-buffers)
+  (defvar bs-configurations)
+  (declare-function bs--show-with-configuration "bs.el")
+  (let* ((ignore-rx (when ido-ignore-buffers
+                      ;; convert a list of regexps to one
+                      (rx-to-string (append (list 'or)
+                                            (mapcar (lambda (rx) `(regexp ,rx))
+                                                    ido-ignore-buffers)))))
+         (bs-configurations (append bs-configurations
+                                    (list `("perspective" nil nil
+                                            ,ignore-rx persp-buffer-filter nil))
+                                    (list `("all-perspectives" nil nil
+                                            ,ignore-rx nil nil)))))
+    (if (and persp-mode (null arg))
+        (bs--show-with-configuration "perspective")
+      (bs--show-with-configuration "all-perspectives"))))
+
+;; Buffer switching integration: IBuffer.
+;;;###autoload
+(defun persp-ibuffer (arg)
+  "Invoke IBUFFER with a configuration enabled for Perspective.
+With a prefix arg, show buffers in all perspectives.
+This respects ido-ignore-buffers, since we automatically add
+buffer filtering to ido-mode already (see use of
+PERSP-SET-IDO-BUFFERS)."
+  (interactive "P")
+  (unless (featurep 'ibuffer)
+    (user-error "IBuffer not loaded"))
+  (defvar ido-ignore-buffers)
+  (defvar ibuffer-maybe-show-predicates)
+  (if (and persp-mode (null arg))
+      (let ((ibuffer-maybe-show-predicates (append ibuffer-maybe-show-predicates
+                                                   (list #'persp-buffer-filter)
+                                                   ido-ignore-buffers)))
+        (ibuffer))
+    (ibuffer)))
+
+(defun persp--switch-buffer-ivy-counsel-helper (arg ivy-params fallback)
+  (unless (featurep 'ivy)
+    (user-error "Ivy not loaded"))
+  (defvar ivy-switch-buffer-map)
+  (declare-function ivy-read "ivy.el")
+  (declare-function ivy--switch-buffer-matcher "ivy.el")
+  (declare-function ivy--switch-buffer-action "ivy.el")
+  (if (and persp-mode (null arg))
+      (apply #'ivy-read
+             (append
+              (list
+               (format "Switch to buffer (%s): " (persp-current-name))
+               (cl-remove-if #'null (mapcar #'buffer-name (persp-current-buffers)))
+               :preselect (buffer-name (persp-other-buffer (current-buffer)))
+               :keymap ivy-switch-buffer-map
+               :action #'ivy--switch-buffer-action
+               :matcher #'ivy--switch-buffer-matcher)
+              ivy-params))
+    (funcall fallback)))
+
+;; Buffer switching integration: Ivy.
+;;;###autoload
+(defun persp-ivy-switch-buffer (arg)
+  "A version of `ivy-switch-buffer' which respects perspectives."
+  (interactive "P")
+  (declare-function ivy-switch-buffer "ivy.el")
+  (persp--switch-buffer-ivy-counsel-helper arg nil #'ivy-switch-buffer))
+
+;; Buffer switching integration: Counsel.
+;;;###autoload
+(defun persp-counsel-switch-buffer (arg)
+  "A version of `counsel-switch-buffer' which respects perspectives."
+  (interactive "P")
+  (unless (featurep 'counsel)
+    (user-error "Counsel not loaded"))
+  (declare-function counsel-switch-buffer "counsel.el")
+  (declare-function counsel--switch-buffer-unwind "counsel.el")
+  (declare-function counsel--switch-buffer-update-fn "counsel.el")
+  (persp--switch-buffer-ivy-counsel-helper arg
+                                           (list :caller #'counsel-switch-buffer
+                                                 :unwind #'counsel--switch-buffer-unwind
+                                                 :update-fn #'counsel--switch-buffer-update-fn)
+                                           #'counsel-switch-buffer))
 
 ;; Symbols namespaced by persp--state (internal) and persp-state (user
 ;; functions) provide functionality which allows saving perspective state on
@@ -1189,7 +1351,7 @@ visible in a perspective as windows, they will be saved as
                              (expand-file-name persp-state-default-file)
                            nil)))))
     (unless target-file
-      (error "No target file specified"))
+      (user-error "No target file specified"))
     ;; overwrite the target file if:
     ;; - the file does not exist, or
     ;; - the file is not the one set in persp-state-default-file, or
@@ -1203,7 +1365,7 @@ visible in a perspective as windows, they will be saved as
                                   target-file))
                (not (or current-prefix-arg
                         (yes-or-no-p "Target file exists. Overwrite? "))))
-      (error "Cancelled persp-state-save"))
+      (user-error "Cancelled persp-state-save"))
     ;; before hook
     (run-hooks 'persp-state-before-save-hook)
     ;; actually save
@@ -1231,7 +1393,7 @@ restored."
                                 persp-state-default-file
                                 persp-state-default-file)))
   (unless (file-exists-p file)
-    (error "File not found"))
+    (user-error "File not found: %s" file))
   (persp-mode 1)
   ;; before hook
   (run-hooks 'persp-state-before-load-hook)
@@ -1252,19 +1414,8 @@ restored."
              (cl-incf frame-count)
              (when (> frame-count 1)
                (make-frame-command))
-             ;; XXX: The condition in binding frame-persp-table and
-             ;; frame-persp-order ensures backwards compatibility with the early
-             ;; pre-release format of persp-state files: the frame may be just a
-             ;; hash table (old version), or it may be an instance of
-             ;; persp--state-frame (released version). The special case can be
-             ;; removed in the future, as there should be very few or no files
-             ;; left in the old format.
-             (let* ((frame-persp-table (if (hash-table-p frame)
-                                           frame
-                                         (persp--state-frame-persps frame)))
-                    (frame-persp-order (if (hash-table-p frame)
-                                           (hash-table-keys frame)
-                                         (reverse (persp--state-frame-order frame)))))
+             (let* ((frame-persp-table (persp--state-frame-persps frame))
+                    (frame-persp-order (reverse (persp--state-frame-order frame))))
                ;; iterate over the perspectives in the frame in the appropriate order
                (cl-loop for persp in frame-persp-order do
                         (let ((state-single (gethash persp frame-persp-table)))
@@ -1284,6 +1435,19 @@ restored."
   (run-hooks 'persp-state-after-load-hook))
 
 (defalias 'persp-state-restore 'persp-state-load)
+
+
+;;; --- done
+
+;;; XXX: Undo nasty kludge necessary for cleanly compiling this source file by
+;;; restoring saved frame parameters, and removing the variable used to save
+;;; them.
+(eval-when-compile
+  (when (boundp 'persp--kludge-save-frame-params)
+    (modify-frame-parameters nil persp--kludge-save-frame-params)
+    (makunbound 'persp--kludge-save-frame-params)
+    (fmakunbound 'persp--kludge-save-frame-params)
+    (unintern 'persp--kludge-save-frame-params nil)))
 
 (provide 'perspective)
 

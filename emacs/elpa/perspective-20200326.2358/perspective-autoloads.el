@@ -26,6 +26,34 @@ named collections of buffers and window configurations.
 
 \(fn &optional ARG)" t nil)
 
+(autoload 'persp-bs-show "perspective" "\
+Invoke BS-SHOW with a configuration enabled for Perspective.
+With a prefix arg, show buffers in all perspectives.
+This respects ido-ignore-buffers, since we automatically add
+buffer filtering to ido-mode already (see use of
+PERSP-SET-IDO-BUFFERS).
+
+\(fn ARG)" t nil)
+
+(autoload 'persp-ibuffer "perspective" "\
+Invoke IBUFFER with a configuration enabled for Perspective.
+With a prefix arg, show buffers in all perspectives.
+This respects ido-ignore-buffers, since we automatically add
+buffer filtering to ido-mode already (see use of
+PERSP-SET-IDO-BUFFERS).
+
+\(fn ARG)" t nil)
+
+(autoload 'persp-ivy-switch-buffer "perspective" "\
+A version of `ivy-switch-buffer' which respects perspectives.
+
+\(fn ARG)" t nil)
+
+(autoload 'persp-counsel-switch-buffer "perspective" "\
+A version of `counsel-switch-buffer' which respects perspectives.
+
+\(fn ARG)" t nil)
+
 (autoload 'persp-state-save "perspective" "\
 Save the current perspective state to FILE.
 
