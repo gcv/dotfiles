@@ -10,7 +10,9 @@
 ;;; Generated autoloads from wgrep.el
 
 (autoload 'wgrep-setup "wgrep" "\
-Setup wgrep preparation.\n\n(fn)" nil nil)
+Setup wgrep preparation.
+
+\(fn)" nil nil)
 
 (add-hook 'grep-setup-hook 'wgrep-setup)
 
