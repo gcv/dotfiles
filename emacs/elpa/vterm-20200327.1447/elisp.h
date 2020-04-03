@@ -17,11 +17,16 @@ emacs_value Qunderline;
 emacs_value Qslant;
 emacs_value Qreverse;
 emacs_value Qstrike;
+emacs_value Qextend;
 emacs_value Qface;
 emacs_value Qbox;
 emacs_value Qbar;
 emacs_value Qhbar;
 emacs_value Qcursor_type;
+emacs_value Qemacs_major_version;
+emacs_value Qvterm_line_wrap;
+emacs_value Qrear_nonsticky;
+emacs_value Qvterm_prompt;
 
 // Emacs functions
 emacs_value Fsymbol_value;
@@ -41,6 +46,7 @@ emacs_value Fwindow_body_height;
 emacs_value Fpoint;
 
 emacs_value Fput_text_property;
+emacs_value Fadd_text_properties;
 emacs_value Fset;
 emacs_value Fvterm_flush_output;
 emacs_value Fget_buffer_window_list;
@@ -62,6 +68,8 @@ emacs_value list(emacs_env *env, emacs_value elements[], ptrdiff_t len);
 emacs_value nth(emacs_env *env, int idx, emacs_value list);
 void put_text_property(emacs_env *env, emacs_value string, emacs_value property,
                        emacs_value value);
+void add_text_properties(emacs_env *env, emacs_value string,
+                         emacs_value property);
 void erase_buffer(emacs_env *env);
 void insert(emacs_env *env, emacs_value string);
 void goto_char(emacs_env *env, int pos);
