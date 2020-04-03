@@ -16,7 +16,7 @@ Major mode for screenwriting in Fountain markup.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "fountain-mode" '("fountain-" "define-fountain-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "fountain-mode" '("fountain-" "define-fountain-font-lock-matcher")))
 
 ;;;***
 
