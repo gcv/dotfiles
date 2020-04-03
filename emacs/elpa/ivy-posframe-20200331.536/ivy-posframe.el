@@ -7,7 +7,7 @@
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; Maintainer: Naoya Yamashita <conao3@gmail.com>
 ;; URL: https://github.com/tumashu/ivy-posframe
-;; Package-Version: 20191226.637
+;; Package-Version: 20200331.536
 ;; Version: 0.1.0
 ;; Keywords: abbrev, convenience, matching, ivy
 ;; Package-Requires: ((emacs "26.0")(posframe "0.1.0")(ivy "0.11.0"))
@@ -377,6 +377,7 @@ selection, non-nil otherwise."
 (defvar avy-all-windows)
 (defvar avy-keys)
 (defvar avy-style)
+(defvar avy-pre-action)
 
 (defun ivy-posframe-avy ()
   "Jump to one of the current ivy candidates."
