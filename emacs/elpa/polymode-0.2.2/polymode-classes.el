@@ -1,8 +1,8 @@
 ;;; polymode-classes.el --- Core polymode classes -*- lexical-binding: t -*-
 ;;
-;; Copyright (C) 2013-2018, Vitalie Spinu
+;; Copyright (C) 2013-2019, Vitalie Spinu
 ;; Author: Vitalie Spinu
-;; URL: https://github.com/vspinu/polymode
+;; URL: https://github.com/polymode/polymode
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -19,9 +19,7 @@
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -32,11 +30,6 @@
 (require 'eieio)
 (require 'eieio-base)
 (require 'eieio-custom)
-
-;; FIXME: fix emacs eieo-named bug #22840 where they wrongly set name of the
-;; parent object in clone method
-
-(setq eieio-backward-compatibility nil)
 
 (defvar pm--object-counter 0)
 
@@ -490,8 +483,6 @@ called at the beginning of the head span."))
   "Inner chunkmodes with unknown (at definition time) mode of the
 body span. The body mode is determined dynamically by retrieving
 the name with the :mode-matcher.")
-
-(setq eieio-backward-compatibility t)
 
 (provide 'polymode-classes)
 ;;; polymode-classes.el ends here

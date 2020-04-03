@@ -1,8 +1,8 @@
 ;;; poly-lock.el --- Font lock sub-system for polymode -*- lexical-binding: t -*-
 ;;
-;; Copyright (C) 2013-2018, Vitalie Spinu
+;; Copyright (C) 2013-2019, Vitalie Spinu
 ;; Author: Vitalie Spinu
-;; URL: https://github.com/vspinu/polymode
+;; URL: https://github.com/polymode/polymode
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -19,9 +19,8 @@
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
+;;
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -185,7 +184,7 @@ Fontifies chunk-by chunk within the region BEG END."
   (unless (or poly-lock-fontification-in-progress
               pm-initialization-in-progress)
     (let* ((font-lock-dont-widen t)
-           ;; For now we fontify entire chunks at ones. This simplicity is
+           ;; For now we fontify entire chunks at once. This simplicity is
            ;; warranted in multi-mode use cases.
            (font-lock-extend-region-functions nil)
            ;; Fontification in one buffer can trigger fontification in another
@@ -203,7 +202,7 @@ Fontifies chunk-by chunk within the region BEG END."
                             (eieio-oref pm/chunkmode 'protect-font-lock))
                           ;; HACK: Some inner modes use syntax-table text
                           ;; property. If there is, for example, a comment
-                          ;; syntax somewhere in the innermode havoc is spelled
+                          ;; syntax somewhere in the body span, havoc is spelled
                           ;; in font-lock-fontify-syntactically-region which
                           ;; calls parse-partial-sexp. For example fortran block
                           ;; in ../poly-markdown/tests/input/markdown.md. We do
@@ -215,12 +214,12 @@ Fontifies chunk-by chunk within the region BEG END."
         (save-excursion
 
           ;; TEMPORARY HACK: extend to the next span boundary in code blocks
-          ;; (needed because re-display fontifies by chunks)
+          ;; (needed because re-display fontifies by small regions)
           (let ((end-span (pm-innermost-span end)))
             (if (car end-span)
                 (when (< (nth 1 end-span) end)
                   (setq end (nth 2 end-span)))
-              ;; in host chunks do as in poly-lock--extend-region
+              ;; in host extend to paragraphs as in poly-lock--extend-region
               (goto-char end)
               (when (search-forward "\n\n" nil t)
                 (setq end (min (1- (point)) (nth 2 end-span))))))
@@ -543,6 +542,7 @@ OLD-LEN are as in `after-change-functions'. When
                         prop)))
 
 (declare-function pm-get-adjust-face "polymode-methods")
+(defvar poly-lock--extra-span-props (when (fboundp 'set-face-extend) (list :extend t)))
 (defun poly-lock-adjust-span-face (span)
   "Adjust 'face property of SPAN..
 How adjustment is made is defined in :adjust-face slot of the
@@ -551,8 +551,8 @@ SPAN's chunkmode."
   (let ((face (pm-get-adjust-face (nth 3 span) (car span))))
     (let ((face (if (numberp face)
                     (unless (= face 0)
-                      (list (list :background
-                                  (poly-lock--adjusted-background face))))
+                      (list (append (list :background (poly-lock--adjusted-background face))
+                                    poly-lock--extra-span-props)))
                   face)))
       (when face
         (font-lock-append-text-property

@@ -1,8 +1,8 @@
 ;; polymode-core.el --- Core initialization and utilities for polymode -*- lexical-binding: t -*-
 ;;
-;; Copyright (C) 2013-2018, Vitalie Spinu
+;; Copyright (C) 2013-2019, Vitalie Spinu
 ;; Author: Vitalie Spinu
-;; URL: https://github.com/vspinu/polymode
+;; URL: https://github.com/polymode/polymode
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -19,9 +19,7 @@
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -104,6 +102,14 @@
 
 (defvar pm-hide-implementation-buffers t)
 (defvar-local pm--core-buffer-name nil)
+
+(defun pm--hidden-buffer-name ()
+  (generate-new-buffer-name (concat " " pm--core-buffer-name)))
+
+(defun pm--visible-buffer-name ()
+  (generate-new-buffer-name
+   (replace-regexp-in-string "^ +" "" pm--core-buffer-name)))
+
 
 
 ;;; CUSTOM
@@ -945,9 +951,16 @@ Parents' hooks are run first."
     selective-display
     text-scale-mode
     text-scale-mode-amount
+    ;; transient-mark-mode stores here the state of selection
+    ;; when the shift-select-mode is enabled
+    transient-mark-mode
     truncate-lines
     truncate-partial-width-windows
-    word-wrap)
+    word-wrap
+    ;; multiple-cursors stores here a command in a pre-command-hook
+    ;; and executes it for all cursors in a post-command-hook so we
+    ;; need to transfer in case the buffer was switched.
+    mc--this-command)
   "Variables transferred from old buffer on buffer switch.")
 
 (defvar polymode-move-these-minor-modes-from-base-buffer nil
@@ -956,7 +969,8 @@ Parents' hooks are run first."
   '(linum-mode
     visual-line-mode
     visual-fill-column-mode
-    writeroom-mode)
+    writeroom-mode
+    multiple-cursors-mode)
   "List of minor modes to move from the old buffer.")
 
 (defun pm-own-buffer-p (&optional buffer)
@@ -1021,7 +1035,7 @@ switch."
         (mkt (mark t)))
 
     (when pm-hide-implementation-buffers
-      (rename-buffer (generate-new-buffer-name (concat " " pm--core-buffer-name))))
+      (rename-buffer (pm--hidden-buffer-name)))
 
     (setq pm/current nil)
 
@@ -1045,9 +1059,7 @@ switch."
       (activate-mark))
 
     (when pm-hide-implementation-buffers
-      (rename-buffer
-       (generate-new-buffer-name
-        (replace-regexp-in-string "^ +" "" pm--core-buffer-name))))
+      (rename-buffer (pm--visible-buffer-name)))
 
     ;; avoid display jumps
     (goto-char point)
