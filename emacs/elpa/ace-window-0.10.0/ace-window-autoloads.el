@@ -1,11 +1,13 @@
 ;;; ace-window-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "ace-window" "../../../../../.emacs.d/elpa/ace-window-0.9.0/ace-window.el"
-;;;;;;  "dc524288c9cb4f80f0443b884a9cdf06")
-;;; Generated autoloads from ../../../../../.emacs.d/elpa/ace-window-0.9.0/ace-window.el
+;;;### (autoloads nil "ace-window" "ace-window.el" (0 0 0 0))
+;;; Generated autoloads from ace-window.el
 
 (autoload 'ace-select-window "ace-window" "\
 Ace select window.
@@ -22,16 +24,24 @@ Ace swap window.
 
 \(fn)" t nil)
 
-(autoload 'ace-maximize-window "ace-window" "\
-Ace maximize window.
+(autoload 'ace-delete-other-windows "ace-window" "\
+Ace delete other windows.
 
 \(fn)" t nil)
+
+(autoload 'ace-display-buffer "ace-window" "\
+Make `display-buffer' and `pop-to-buffer' select using `ace-window'.
+See sample config for `display-buffer-base-action' and `display-buffer-alist':
+https://github.com/abo-abo/ace-window/wiki/display-buffer.
+
+\(fn BUFFER ALIST)" nil nil)
 
 (autoload 'ace-window "ace-window" "\
 Select a window.
 Perform an action based on ARG described below.
 
 By default, behaves like extended `other-window'.
+See `aw-scope' which extends it to work with frames.
 
 Prefixed with one \\[universal-argument], does a swap between the
 selected window and the current window, so that the selected
@@ -58,11 +68,7 @@ Minor mode for showing the ace window key in the mode line.
 
 \(fn &optional ARG)" t nil)
 
-;;;***
-
-;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/ace-window-0.9.0/ace-window-autoloads.el"
-;;;;;;  "../../../../../.emacs.d/elpa/ace-window-0.9.0/ace-window.el")
-;;;;;;  (23508 57452 67400 210000))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ace-window" '("ace-window-mode" "aw-")))
 
 ;;;***
 
@@ -70,5 +76,6 @@ Minor mode for showing the ace window key in the mode line.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; ace-window-autoloads.el ends here
