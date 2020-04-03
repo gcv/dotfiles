@@ -268,5 +268,6 @@
   (custom-theme-set-faces
    'doom-wilmersdorf
    (/theme-face-spec 'mode-line :background "#515462")
+   (/theme-face-spec 'ivy-posframe-border :background "#515462")
    (/theme-face-spec 'fringe :background "#515462" :foreground "#c6c6c6"))
   (apply #'custom-theme-set-faces 'doom-wilmersdorf (/theme-common)))
