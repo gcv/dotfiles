@@ -11,8 +11,9 @@
  (autoload 'poly-markdown-mode "poly-markdown")
 
 (add-to-list 'auto-mode-alist '("\\.md\\'" . poly-markdown-mode))
+ (autoload 'poly-gfm-mode "poly-markdown")
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "poly-markdown" '("poly-markdown-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "poly-markdown" '("poly-")))
 
 ;;;***
 
