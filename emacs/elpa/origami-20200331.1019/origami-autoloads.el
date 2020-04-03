@@ -1,11 +1,13 @@
 ;;; origami-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "origami" "../../../../../.emacs.d/elpa/origami-20180101.1553/origami.el"
-;;;;;;  "999c0803480bdfb06bb61b4499e8f3ce")
-;;; Generated autoloads from ../../../../../.emacs.d/elpa/origami-20180101.1553/origami.el
+;;;### (autoloads nil "origami" "origami.el" (0 0 0 0))
+;;; Generated autoloads from origami.el
 
 (autoload 'origami-mode "origami" "\
 Minor mode to selectively hide/show text in the current buffer.
@@ -43,13 +45,19 @@ See `origami-mode' for more information on Origami mode.
 
 \(fn &optional ARG)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "origami" '("origami-")))
+
 ;;;***
 
-;;;### (autoloads nil nil ("../../../../../.emacs.d/elpa/origami-20180101.1553/origami-autoloads.el"
-;;;;;;  "../../../../../.emacs.d/elpa/origami-20180101.1553/origami-parsers.el"
-;;;;;;  "../../../../../.emacs.d/elpa/origami-20180101.1553/origami-pkg.el"
-;;;;;;  "../../../../../.emacs.d/elpa/origami-20180101.1553/origami.el")
-;;;;;;  (23508 57676 388674 783000))
+;;;### (autoloads nil "origami-parsers" "origami-parsers.el" (0 0
+;;;;;;  0 0))
+;;; Generated autoloads from origami-parsers.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "origami-parsers" '("origami-")))
+
+;;;***
+
+;;;### (autoloads nil nil ("origami-pkg.el") (0 0 0 0))
 
 ;;;***
 
@@ -57,5 +65,6 @@ See `origami-mode' for more information on Origami mode.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; origami-autoloads.el ends here
