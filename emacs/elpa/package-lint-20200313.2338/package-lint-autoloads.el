@@ -31,8 +31,9 @@ Display lint errors and warnings for the current buffer.
 Run `package-lint-buffer' on the files remaining on the command line.
 Use this only with -batch, it won't work interactively.
 
-When done, exit Emacs with status 0 if there were no errors nor warnings or 1
-otherwise.
+When done, exit Emacs with status 1 in case of any errors, otherwise exit
+with status 0.  The variable `package-lint-batch-fail-on-warnings' controls
+whether or not warnings alone produce a non-zero exit code.
 
 \(fn)" nil nil)
 

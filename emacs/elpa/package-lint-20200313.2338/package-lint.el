@@ -41,6 +41,7 @@
 (require 'finder)
 (require 'imenu)
 (require 'let-alist)
+(require 'rx)
 
 
 ;;; Compatibility
@@ -120,7 +121,13 @@ published in ELPA for use by older Emacsen.")
                       (removed-functions (let-alist (cdr version-data) .functions.removed)))
                   (cons version (package-lint--match-symbols removed-functions))))
               stdlib-changes)
-      "An alist of function/macro names and when they were removed from Emacs.")))
+      "An alist of function/macro names and when they were removed from Emacs.")
+
+    (defun package-lint--added-or-removed-function-p (sym)
+      "Predicate that returns t if SYM is a function added/removed in any known emacs version."
+      (cl-some (lambda (x) (funcall (cdr x) sym))
+               (append package-lint--functions-and-macros-added-alist
+                       package-lint--functions-and-macros-removed-alist)))))
 
 (defconst package-lint--sane-prefixes
   (rx
@@ -173,7 +180,7 @@ published in ELPA for use by older Emacsen.")
               (package-lint--check-libraries-available-in-emacs deps)
               (package-lint--check-libraries-removed-from-emacs)
               (package-lint--check-macros-functions-available-in-emacs deps)
-              (package-lint--check-macros-functions-removed-from-emacs)
+              (package-lint--check-macros-functions-removed-from-emacs deps)
               (package-lint--check-objects-by-regexp
                (concat "(" (regexp-opt '("format" "message" "error")) "\\s-")
                (apply-partially #'package-lint--check-format-string deps)))
@@ -181,7 +188,8 @@ published in ELPA for use by older Emacsen.")
             (package-lint--check-commentary-existence)
             (let ((definitions (package-lint--get-defs)))
               (package-lint--check-autoloads-on-private-functions definitions)
-              (package-lint--check-defs-prefix prefix definitions)
+              (when prefix
+                (package-lint--check-defs-prefix prefix definitions))
               (package-lint--check-symbol-separators definitions)))
           (package-lint--check-lonely-parens))))
     (sort package-lint--errors
@@ -204,7 +212,7 @@ POS defaults to `point'."
   (save-excursion
     (when pos
       (goto-char pos))
-    (package-lint--error (line-number-at-pos) (current-column) type message)))
+    (package-lint--error (line-number-at-pos) (- (point) (line-beginning-position)) type message)))
 
 (defun package-lint--error-at-bol (type message)
   "Construct a datum for error at the beginning of the current line with TYPE and MESSAGE."
@@ -230,7 +238,7 @@ POS defaults to `point'."
           (when seq
             (let ((message (package-lint--test-keyseq seq)))
               (when message
-                (package-lint--error-at-point 'warning message)))))))))
+                (package-lint--error-at-point 'error message)))))))))
 
 (defun package-lint--check-commentary-existence ()
   "Warn about nonexistent or empty commentary section."
@@ -553,7 +561,18 @@ type of the symbol, either FUNCTION or FEATURE."
                       sym (mapconcat #'number-to-string removed-in-version "."))))))))))
 
 (defconst package-lint--function-name-regexp
-  "\\(?:#'\\|(\\s-*?\\)\\(.*?\\)\\_>"
+  (rx
+   (seq
+    (or "#'"
+        (seq "(" (* (syntax whitespace))
+             (? (seq
+                 (or "funcall" "apply" "advice-add")
+                 (+
+                  (syntax whitespace))
+                 "'"))))
+    (group
+     (*\? nonl))
+    symbol-end))
   "Regexp to match function names.")
 
 (defun package-lint--check-macros-functions-available-in-emacs (valid-deps)
@@ -564,19 +583,28 @@ type of the symbol, either FUNCTION or FEATURE."
    package-lint--function-name-regexp
    'function))
 
-(defun package-lint--check-macros-functions-removed-from-emacs ()
-  "Warn about use of functions/macros that have been removed from Emacs."
+(defun package-lint--check-macros-functions-removed-from-emacs (valid-deps)
+  "Warn about use of functions/macros that have been removed from Emacs.
+If an Emacs version is specified in VALID-DEPS, don't warn about
+functions/macros that were removed and later re-added, as long as
+the Emacs dependency matches the re-addition."
   (package-lint--map-regexp-match
    package-lint--function-name-regexp
    (lambda (sym)
      (cl-block return
        (pcase-dolist (`(,removed-in-version . ,pred) package-lint--functions-and-macros-removed-alist)
          (when (funcall pred (intern sym))
-           (cl-return-from return
-             (list
-              'error
-              (format "`%s' was removed in Emacs version %s."
-                      sym (mapconcat #'number-to-string removed-in-version "."))))))))))
+           (let ((emacs-version-dep (or (cadr (assq 'emacs valid-deps)) '(0))))
+             (unless (cl-some (lambda (dep)
+                                (pcase-let ((`(,ver . ,pred) dep))
+                                  (and (version-list-<= ver emacs-version-dep)
+                                       (funcall pred (intern sym)))))
+                              package-lint--functions-and-macros-added-alist)
+               (cl-return-from return
+                 (list
+                  'error
+                  (format "`%s' was removed in Emacs version %s."
+                          sym (mapconcat #'number-to-string removed-in-version "."))))))))))))
 
 (defun package-lint--check-lexical-binding-is-on-first-line ()
   "Check that any `lexical-binding' declaration is on the first line of the file."
@@ -669,7 +697,7 @@ DESC is a struct as returned by `package-buffer-info'."
     (cond
      ((string= summary "")
       (package-lint--error-at-bob
-       'warning
+       'error
        "Package should have a non-empty summary."))
      (t
       (unless (let ((case-fold-search nil))
@@ -753,11 +781,17 @@ Valid definition names are:
   "Verify that symbol DEFINITIONS start with package PREFIX."
   (pcase-dolist (`(,name . ,position) definitions)
     (unless (package-lint--valid-definition-name-p name prefix position)
-      (package-lint--error-at-point
-       'error
-       (format "\"%s\" doesn't start with package's prefix \"%s\"."
-               name prefix)
-       position))))
+      (if (package-lint--added-or-removed-function-p (intern name))
+          (package-lint--error-at-point
+           'error
+           (format "Define compatibility functions with a prefix, e.g. \"%s--%s\", and use `defalias' where they exist."
+                   prefix name)
+           position)
+        (package-lint--error-at-point
+         'error
+         (format "\"%s\" doesn't start with package's prefix \"%s\"."
+                 name prefix)
+         position)))))
 
 (defun package-lint--check-minor-mode (def)
   "Offer up concerns about the minor mode definition DEF."
@@ -1039,6 +1073,15 @@ Current buffer is used if none is specified."
       (view-mode 1))
     (display-buffer buf)))
 
+(defgroup package-lint nil
+  "A linting library for elisp package authors"
+  :group 'development)
+
+(defcustom package-lint-batch-fail-on-warnings t
+  "When non-nil, make warnings fatal for `package-lint-batch-and-exit'."
+  :group 'package-lint
+  :type 'boolean)
+
 (defun package-lint-batch-and-exit-1 (filenames)
   "Internal helper function for `package-lint-batch-and-exit'.
 
@@ -1055,8 +1098,9 @@ The main loop is this separate function so it's easier to test."
         (with-temp-buffer
           (insert-file-contents file t)
           (emacs-lisp-mode)
-          (let ((checking-result (package-lint-buffer)))
-            (when checking-result
+          (let ((checking-result (package-lint-buffer))
+                (fail-on (cons 'error (when package-lint-batch-fail-on-warnings '(warning)))))
+            (when (cl-some (lambda (err) (memq (nth 2 err) fail-on)) checking-result)
               (setq success nil)
               (unless (equal last-directory file-directory)
                 (setq last-directory file-directory)
@@ -1070,8 +1114,9 @@ The main loop is this separate function so it's easier to test."
   "Run `package-lint-buffer' on the files remaining on the command line.
 Use this only with -batch, it won't work interactively.
 
-When done, exit Emacs with status 0 if there were no errors nor warnings or 1
-otherwise."
+When done, exit Emacs with status 1 in case of any errors, otherwise exit
+with status 0.  The variable `package-lint-batch-fail-on-warnings' controls
+whether or not warnings alone produce a non-zero exit code."
   (unless noninteractive
     (error "`package-lint-batch-and-exit' is to be used only with -batch"))
   (let ((success (package-lint-batch-and-exit-1 command-line-args-left)))
