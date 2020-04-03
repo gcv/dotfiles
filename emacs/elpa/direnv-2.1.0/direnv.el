@@ -1,9 +1,9 @@
-;;; direnv.el --- direnv support -*- lexical-binding: t; -*-
+;;; direnv.el --- Support for direnv -*- lexical-binding: t; -*-
 
 ;; Author: wouter bolsterlee <wouter@bolsterl.ee>
-;; Version: 2.0.0
-;; Package-Version: 2.0.0
-;; Package-Requires: ((emacs "24.4") (dash "2.12.0"))
+;; Version: 2.1.0
+;; Package-Version: 2.1.0
+;; Package-Requires: ((emacs "25") (dash "2.12.0"))
 ;; Keywords: direnv, environment, processes, unix, tools
 ;; URL: https://github.com/wbolster/emacs-direnv
 ;;
@@ -64,20 +64,28 @@ usually results in coloured output."
   :group 'direnv
   :type 'boolean)
 
-(defcustom direnv-non-file-modes '(eshell-mode dired-mode)
-  "List of modes where direnv will update even if the buffer has no file.
+(defcustom direnv-non-file-modes
+  '(comint-mode compilation-mode dired-mode eshell-mode magit-mode)
+  "Major modes where direnv will update even if the buffer is not a file.
 
-In these modes, direnv will use `default-directory' instead of
-`(file-name-directory (buffer-file-name (current-buffer)))'."
+In these modes, or modes derived from them, direnv will use
+  `default-directory'
+instead of
+  `(file-name-directory (buffer-file-name (current-buffer)))'."
   :group 'direnv
   :type '(repeat (symbol :tag "Major mode")))
+
+(defvar eshell-path-env)
 
 (defun direnv--directory ()
   "Return the relevant directory for the current buffer, or nil."
   (let* ((buffer (or (buffer-base-buffer) (current-buffer)))
+         (mode (with-current-buffer buffer major-mode))
          (file-name (buffer-file-name buffer)))
-    (cond (file-name (file-name-directory file-name))
-          ((member major-mode direnv-non-file-modes) default-directory))))
+    (cond (file-name
+           (file-name-directory file-name))
+          ((apply #'direnv--provided-mode-derived-p mode direnv-non-file-modes)
+           default-directory))))
 
 (defun direnv--export (directory)
   "Call direnv for DIRECTORY and return the parsed result."
@@ -99,7 +107,7 @@ In these modes, direnv will use `default-directory' instead of
                   (goto-char (point-max))
                   (re-search-backward "^{")
                   (json-read-object))
-              (unless (zerop (file-attribute-size (file-attributes stderr-tempfile)))
+              (unless (zerop (direnv--file-size stderr-tempfile))
                 (goto-char (point-max))
                 (unless (zerop (buffer-size))
                   (insert "\n\n"))
@@ -110,6 +118,12 @@ In these modes, direnv will use `default-directory' instead of
                   (warn "Error running direnv (exit code %d):\n%s\nOpen buffer ‘%s’ for full output."
                         exit-code (buffer-string) direnv--output-buffer-name))))))
       (delete-file stderr-tempfile))))
+
+(defun direnv--file-size (name)
+  "Get the file size for a file NAME."
+  (let ((attributes (file-attributes name)))
+    ;; Note: file-attribute-size is Emacs 26+
+    (nth 7 attributes)))
 
 (defun direnv--enable ()
   "Enable direnv mode."
@@ -125,9 +139,9 @@ In these modes, direnv will use `default-directory' instead of
   (with-current-buffer (window-buffer)
     (let ((directory-name (direnv--directory)))
       (when (and directory-name
-                 (file-directory-p directory-name)
+                 (not (file-remote-p directory-name))
                  (not (string-equal direnv--active-directory directory-name))
-                 (not (file-remote-p directory-name)))
+                 (file-directory-p directory-name))
         (direnv-update-directory-environment directory-name)))))
 
 (defun direnv--summarise-changes (items)
@@ -183,6 +197,17 @@ the environment changes."
         (message "direnv: %s (%s)" summary paths)
       (message "direnv: %s" summary))))
 
+(defun direnv--provided-mode-derived-p (mode &rest modes)
+  "Non-nil if MODE is derived from one of MODES.
+
+Same as ‘provided-mode-derived-p’ which is Emacs 26.1+ only."
+  (while (and (not (memq mode modes))
+              (setq mode (get mode 'derived-mode-parent))))
+  mode)
+
+(when (fboundp 'provided-mode-derived-p)
+  (defalias 'direnv--provided-mode-derived-p 'provided-mode-derived-p))
+
 ;;;###autoload
 (defun direnv-update-environment (&optional file-name force-summary)
   "Update the environment for FILE-NAME.
@@ -220,7 +245,10 @@ When FORCE-SUMMARY is non-nil or when called interactively, show a summary messa
             (value (cdr pair)))
         (setenv name value)
         (when (string-equal name "PATH")
-          (setq exec-path (append (parse-colon-path value) (list exec-directory))))))))
+          (setq exec-path (append (parse-colon-path value) (list exec-directory)))
+          ;; Prevent `eshell-path-env` getting out-of-sync with $PATH:
+          (when (derived-mode-p 'eshell-mode)
+            (setq eshell-path-env value)))))))
 
 ;;;###autoload
 (defun direnv-allow ()
