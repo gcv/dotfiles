@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 20200315.1920
+;; Package-Version: 20200402.1436
 ;; Package-X-Original-Version: 1.0
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -187,8 +187,9 @@ This function used as value for `resize-mini-frames' variable."
       (when (and (frame-live-p frame) (frame-visible-p frame))
         (select-frame-set-input-focus frame)))))
 
-(defun mini-frame--display-completions (buffer &rest _args)
-  "Display completions BUFFER in another child frame."
+(defun mini-frame--display-completions (buffer alist)
+  "Display completions BUFFER in another child frame.
+ALIST is passed to `window--display-buffer'."
   (let* ((parent-frame-parameters `((parent-frame . ,mini-frame-selected-frame)))
          (show-parameters (if (functionp mini-frame-completions-show-parameters)
                               (funcall mini-frame-completions-show-parameters)
@@ -214,7 +215,7 @@ This function used as value for `resize-mini-frames' variable."
                                 show-parameters)))
       (set-face-background 'fringe nil mini-frame-completions-frame))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
-    (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame)))
+    (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame alist)))
 
 (defun mini-frame--display (fn args)
   "Show mini-frame and call FN with ARGS."
@@ -314,11 +315,9 @@ This function used as value for `resize-mini-frames' variable."
   :global t
   (cond
    (mini-frame-mode
-    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
-    (advice-add 'read-string :around #'mini-frame-read-from-minibuffer))
+    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
-    (advice-remove 'read-string #'mini-frame-read-from-minibuffer)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
     (when (frame-live-p mini-frame-completions-frame)
