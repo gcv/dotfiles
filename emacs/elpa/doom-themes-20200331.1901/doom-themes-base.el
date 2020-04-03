@@ -391,9 +391,9 @@
     (circe-my-message-face :weight 'bold)
 
     ;; diff-hl
-    (diff-hl-change :foreground vc-modified)
-    (diff-hl-delete :foreground vc-deleted)
-    (diff-hl-insert :foreground vc-added)
+    (diff-hl-change :foreground vc-modified :background vc-modified)
+    (diff-hl-delete :foreground vc-deleted :background vc-deleted)
+    (diff-hl-insert :foreground vc-added :background vc-added)
 
     ;; diff-mode
     (diff-added   :inherit 'hl-line :foreground green)
@@ -787,6 +787,7 @@
     (lsp-face-highlight-textual :background dark-blue :foreground base8 :distant-foreground base0 :weight 'bold)
     (lsp-face-highlight-read    :background dark-blue :foreground base8 :distant-foreground base0 :weight 'bold)
     (lsp-face-highlight-write   :background dark-blue :foreground base8 :distant-foreground base0 :weight 'bold)
+    (lsp-ui-doc-background :inherit 'tooltip)
     (lsp-ui-peek-filename :inherit 'mode-line-buffer-id)
     (lsp-ui-peek-header :foreground fg :background (doom-lighten bg 0.1) :bold bold)
     (lsp-ui-peek-selection :foreground bg :background blue :bold bold)
@@ -937,6 +938,8 @@
     (solaire-default-face  :inherit 'default :background bg-alt)
     (solaire-hl-line-face  :inherit 'hl-line :background bg :extend t)
     (solaire-org-hide-face :foreground bg-alt)
+    (solaire-mode-line-face          :background bg     :foreground fg     :distant-foreground bg)
+    (solaire-mode-line-inactive-face :background bg-alt :foreground fg-alt :distant-foreground bg-alt)
 
     ;; spaceline
     (spaceline-highlight-face :background highlight)
@@ -1177,12 +1180,12 @@
     ;; (notmuch-hello-logo-background           :foreground fg)
     (notmuch-message-summary-face            :foreground grey :background nil)
     (notmuch-search-count                    :foreground comments)
-    (notmuch-search-date                     :foreground numbers :weight 'bold)
+    (notmuch-search-date                     :foreground numbers)
     (notmuch-search-flagged-face             :foreground (doom-blend red base4 0.5))
-    (notmuch-search-matching-authors         :foreground blue :weight 'bold)
-    (notmuch-search-non-matching-authors     :foreground blue)
+    (notmuch-search-matching-authors         :foreground blue)
+    (notmuch-search-non-matching-authors     :foreground fg)
     (notmuch-search-subject                  :foreground fg)
-    (notmuch-search-unread-face              :foreground base8)
+    (notmuch-search-unread-face              :weight 'bold)
     (notmuch-tag-added                       :foreground green :weight 'normal)
     (notmuch-tag-deleted                     :foreground red :weight 'normal)
     (notmuch-tag-face                        :foreground yellow :weight 'normal)
@@ -1284,6 +1287,11 @@
     (org-habit-overdue-face        :weight 'bold :background (doom-blend red bg-alt 0.5))
     (org-habit-overdue-future-face :weight 'bold :background (doom-blend red bg-alt 0.3))
 
+    ;; org-journal
+    (org-journal-highlight :foreground highlight)
+    (org-journal-calendar-entry-face :foreground magenta :slant 'italic)
+    (org-journal-calendar-scheduled-face :foreground red :slant 'italic)
+
     ;; org-pomodoro
     (org-pomodoro-mode-line :foreground red)
     (org-pomodoro-mode-line-overtime :foreground warning :weight 'bold)
@@ -1349,6 +1357,8 @@
 
 (defvar doom-themes-base-vars
   '((ansi-color-names-vector
+     (vconcat (mapcar #'doom-color '(bg red green yellow blue magenta cyan fg))))
+    (rustic-ansi-faces
      (vconcat (mapcar #'doom-color '(bg red green yellow blue magenta cyan fg))))
 
     (fci-rule-color (doom-color 'base5))

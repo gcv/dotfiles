@@ -120,6 +120,17 @@ determine the exact padding."
    (font-lock-doc-face
     :inherit 'font-lock-comment-face
     :foreground doc-comments)
+   (font-lock-keyword-face
+    :weight 'bold
+    :foreground keywords)
+   (font-lock-constant-face
+    :weight 'bold
+    :foreground constants)
+   (font-lock-function-name-face
+    :weight 'bold
+    :foreground functions)
+
+   (vertical-border :foreground base5)
 
    ;; Centaur tabs
    (centaur-tabs-active-bar-face :background magenta)

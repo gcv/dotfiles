@@ -22,9 +22,9 @@ Can be an integer to determine the exact padding."
   "A dark theme inspired by dark+ Theme by equinusocio"
 
   ;; name        default   256       16
-  ((bg         '("#1e1e1e" nil       nil))
-   (bg-alt     '("#252526" nil       nil))
-   (base0      '("#171F24" "black"   "black"))
+  ((bg         '("#1e1e1e" "#1e1e1e" nil))
+   (bg-alt     '("#252526" "#222222"  nil))
+   (base0      '("#171F24" "#111122"   "black"))
    (base1      '("#1C1C1C" "#1C1C1C" "brightblack"))
    (base2      '("#121212" "#626262" "brightblack"))
    (base3      '("#313131" "#3a3a3a" "brightblack"))
@@ -54,7 +54,7 @@ Can be an integer to determine the exact padding."
 
    ;; face categories -- required for all themes
    (highlight      base6)
-   (vertical-bar   base2)
+   (vertical-bar   bg-alt)
    (selection      base4)
    (builtin        magenta)
    (comments       green)
@@ -111,7 +111,7 @@ Can be an integer to determine the exact padding."
     :background modeline-bg-alt :foreground modeline-fg-alt
     :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-alt)))
 
-   (fringe :background base2)
+   (fringe :background bg-alt)
 
    ;; --- major-mode faces ------------------------
    ;; all-the-icons
@@ -186,6 +186,9 @@ Can be an integer to determine the exact padding."
    (js2-jsdoc-type             :foreground base8)
    (js2-jsdoc-value            :foreground cyan)
 
+   ;; lsp-mode
+   (lsp-lens-face              :foreground base7 :height 0.8)
+
    ;; rainbow-delimiters
    (rainbow-delimiters-depth-1-face :foreground magenta)
    (rainbow-delimiters-depth-2-face :foreground orange)
@@ -208,6 +211,8 @@ Can be an integer to determine the exact padding."
 
    ;; treemacs
    (treemacs-root-face :foreground fg :weight 'ultra-bold :height 1.2)
+   (doom-themes-treemacs-root-face :foreground fg :weight 'ultra-bold :height 1.2)
+   (doom-themes-treemacs-file-face :foreground fg)
    (treemacs-directory-face :foreground fg)
    (treemacs-git-modified-face :foreground blue)
 
