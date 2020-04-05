@@ -46,6 +46,7 @@ position.  Its argument is a plist of the following form:
    :minibuffer-height
    :mode-line-height
    :header-line-height
+   :tab-line-height
    :x-pixel-offset xxx
    :y-pixel-offset xxx)
 

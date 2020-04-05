@@ -5,8 +5,8 @@
 ;; Author: Feng Shu <tumashu@163.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/posframe
-;; Package-Version: 0.6.0
-;; Version: 0.6.0
+;; Package-Version: 0.7.0
+;; Version: 0.7.0
 ;; Keywords: convenience, tooltip
 ;; Package-Requires: ((emacs "26"))
 
@@ -148,7 +148,11 @@
   :prefix "posframe-")
 
 (defcustom posframe-mouse-banish (not (eq system-type 'darwin))
-  "Mouse will be moved to (0 , 0) when it is non-nil."
+  "Mouse will be moved to (0 , 0) when it is non-nil.
+
+This option is used to solve the problem of child frame getting
+focus, with the help of `posframe--redirect-posframe-focus',
+setting this option to `nil' will work well in *most* cases."
   :group 'posframe
   :type 'boolean)
 
@@ -383,6 +387,7 @@ position.  Its argument is a plist of the following form:
    :minibuffer-height
    :mode-line-height
    :header-line-height
+   :tab-line-height
    :x-pixel-offset xxx
    :y-pixel-offset xxx)
 
@@ -495,6 +500,9 @@ You can use `posframe-delete-all' to delete all posframes."
          (mode-line-height (window-mode-line-height))
          (minibuffer-height (window-pixel-height (minibuffer-window)))
          (header-line-height (window-header-line-height parent-window))
+         (tab-line-height (if (functionp 'window-tab-line-height)
+                              (window-tab-line-height)
+                            0))
          (frame-resize-pixelwise t)
          posframe)
 
@@ -559,6 +567,7 @@ You can use `posframe-delete-all' to delete all posframes."
           :mode-line-height ,mode-line-height
           :minibuffer-height ,minibuffer-height
           :header-line-height ,header-line-height
+          :tab-line-height ,tab-line-height
           :x-pixel-offset ,x-pixel-offset
           :y-pixel-offset ,y-pixel-offset))
        parent-frame-width parent-frame-height)
@@ -576,8 +585,8 @@ You can use `posframe-delete-all' to delete all posframes."
       ;; Force raise the current posframe.
       (raise-frame posframe--frame)
 
-      ;;Do not return anything.
-      nil)))
+      ;; Return posframe
+      posframe)))
 
 (defun posframe--get-font-height (position)
   "Get the font's height at POSITION."
@@ -595,6 +604,14 @@ You can use `posframe-delete-all' to delete all posframes."
       (setq posframe--last-font-height-info
             (cons position height))
       height)))
+
+(defun posframe--redirect-posframe-focus ()
+  "Redirect focus from the posframe to the parent frame. This prevents the
+posframe from catching keyboard input if the window manager selects it."
+  (when (eq (selected-frame) posframe--frame)
+    (redirect-frame-focus posframe--frame (frame-parent))))
+
+(add-hook 'focus-in-hook #'posframe--redirect-posframe-focus)
 
 (defun posframe--mouse-banish (frame)
   "Banish mouse to the (0 . 0) of FRAME.
@@ -629,7 +646,9 @@ WIDTH and MIN-WIDTH."
         (setq-local posframe--last-posframe-size
                     (list height min-height width min-width)))
     (fit-frame-to-buffer
-     posframe height min-height width min-width)))
+     posframe height min-height width min-width)
+    (setq-local posframe--last-posframe-size
+                (list height min-height width min-width))))
 
 (defun posframe--set-frame-position (posframe position
                                               parent-frame-width
@@ -680,9 +699,10 @@ WIDTH and MIN-WIDTH."
                   (run-with-timer
                    nil repeat
                    #'(lambda (frame height min-height width min-width)
-                       (when (and frame (frame-live-p frame))
-                         (fit-frame-to-buffer
-                          frame height min-height width min-width)))
+                       (let ((frame-resize-pixelwise t))
+                         (when (and frame (frame-live-p frame))
+                           (fit-frame-to-buffer
+                            frame height min-height width min-width))))
                    posframe height min-height width min-width)))))
 
 (defun posframe-refresh (buffer-or-name)
@@ -708,7 +728,8 @@ to do similar job:
      (erase-buffer)
      (insert \"ffffffffffffff\"))"
   (dolist (frame (frame-list))
-    (let ((buffer-info (frame-parameter frame 'posframe-buffer)))
+    (let ((buffer-info (frame-parameter frame 'posframe-buffer))
+          (frame-resize-pixelwise t))
       (when (or (equal buffer-or-name (car buffer-info))
                 (equal buffer-or-name (cdr buffer-info)))
         (with-current-buffer buffer-or-name
@@ -838,11 +859,13 @@ Optional argument FONT-HEIGHT ."
          (ymax (plist-get info :parent-frame-height))
          (position-info (plist-get info :position-info))
          (header-line-height (plist-get info :header-line-height))
+         (tab-line-height (plist-get info :tab-line-height))
          (x (+ (car (window-inside-pixel-edges window))
                (- (or (car (posn-x-y position-info)) 0)
                   (or (car (posn-object-x-y position-info)) 0))
                x-pixel-offset))
          (y-top (+ (cadr (window-pixel-edges window))
+                   tab-line-height
                    header-line-height
                    (- (or (cdr (posn-x-y position-info)) 0)
                       ;; Fix the conflict with flycheck
