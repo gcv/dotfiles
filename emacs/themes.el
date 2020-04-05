@@ -267,7 +267,10 @@
   (load-theme 'doom-wilmersdorf t)
   (custom-theme-set-faces
    'doom-wilmersdorf
-   (/theme-face-spec 'mode-line :background "#515462")
+   (let ((bg "#515462"))
+     (/theme-face-spec 'mode-line :background bg :box `(:line-width 1 :color ,bg)))
+   (let ((bg (face-attribute 'mode-line-inactive :background)))
+     (/theme-face-spec 'mode-line-inactive :box `(:line-width 1 :color ,bg)))
    (/theme-face-spec 'ivy-posframe-border :background "#515462")
    (/theme-face-spec 'fringe :background "#515462" :foreground "#c6c6c6"))
   (apply #'custom-theme-set-faces 'doom-wilmersdorf (/theme-common)))
