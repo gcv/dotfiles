@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 20200402.1436
+;; Package-Version: 20200403.932
 ;; Package-X-Original-Version: 1.0
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -291,6 +291,8 @@ ALIST is passed to `window--display-buffer'."
              display-buffer-alist))
           (completion-setup-hook
            (cons #'mini-frame--completions-setup completion-setup-hook))
+          (temp-buffer-window-show-hook
+           (cons #'mini-frame--completions-setup temp-buffer-window-show-hook))
           (delete-frame-functions
            (cons #'mini-frame--delete-frame delete-frame-functions))
           ;; FIXME which-key is not working in mini frame
