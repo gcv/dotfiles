@@ -3,7 +3,7 @@
 
 ;; URL: https://github.com/gcv/julia-snail
 ;; Package-Requires: ((emacs "26.2") (cl-lib "0.5") (dash "2.16.0") (julia-mode "0.3") (s "1.12.0") (parsec "0.1.3") (spinner "1.7.3") (vterm "0.0.1"))
-;; Version: 1.0.0rc2
+;; Version: 1.0.0rc3
 ;; Created: 2019-10-27
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -587,12 +587,12 @@ Julia include on the tmpfile, and then deleting the file."
 (defun julia-snail--module-at-point (&optional partial-module)
   "Return the current Julia module at point as an Elisp list, including PARTIAL-MODULE if given."
   (let ((partial-module (or partial-module
-                            (julia-snail-parser-query (current-buffer) (point) :module)
-                            '("Main")))
+                            (julia-snail-parser-query (current-buffer) (point) :module)))
         (module-for-file (julia-snail--module-for-file (buffer-file-name))))
-    (if module-for-file
-        (append module-for-file partial-module)
-      partial-module)))
+    (or (if module-for-file
+            (append module-for-file partial-module)
+          partial-module)
+        '("Main"))))
 
 
 ;;; --- xref implementation
