@@ -30,3 +30,6 @@ tramp
 treemacs/
 trusted-elisp-files.el
 url/
+
+# no-littering
+var/
