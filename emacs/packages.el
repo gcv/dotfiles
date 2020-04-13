@@ -995,7 +995,7 @@
             (persp-mode)
             (persp-turn-off-modestring)
 
-            (setq persp-interactive-completion-function 'ido-completing-read
+            (setq persp-interactive-completion-function 'completing-read
                   persp-sort 'access)
 
             (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
@@ -1053,6 +1053,8 @@
   :config (progn
 
             (projectile-mode 1)
+
+            (setq projectile-completion-system 'default)
 
             (setq projectile-enable-caching nil)
             (setq projectile-tags-command "ctags -Re -f \"%s\" %s")
