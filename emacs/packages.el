@@ -695,6 +695,11 @@
             ))
 
 
+(use-package ivy-prescient
+  :defer t
+  :after (ivy))
+
+
 (use-package ivy-xref
   :pin melpa
   :defer t
