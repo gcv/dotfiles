@@ -700,7 +700,10 @@
 
 (use-package ivy-prescient
   :defer t
-  :after (ivy))
+  :after (ivy)
+  :config (progn
+            (ivy-prescient-mode 1)
+            ))
 
 
 (use-package ivy-xref
