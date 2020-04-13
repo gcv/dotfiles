@@ -605,11 +605,13 @@
             ;; Automatic Ivy window sizing with ivy-posframe awareness.
             (defun /ivy-height-smart ()
               (if (display-graphic-p)
-                  (if (eq '/ivy-display-function-window ivy--display-function)
-                      (window-height)
-                    (if (> (frame-height) 55)
-                        (round (/ (frame-height) 2.5))
-                      (round (/ (frame-height) 1.75))))
+                  (if (bound-and-true-p mini-frame-mode)
+                      (a-get mini-frame-show-parameters 'height)
+                    (if (eq '/ivy-display-function-window ivy--display-function)
+                        (window-height)
+                      (if (> (frame-height) 55)
+                          (round (/ (frame-height) 2.5))
+                        (round (/ (frame-height) 1.75)))))
                 ;; non-graphic display
                 10))
 
