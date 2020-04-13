@@ -199,6 +199,13 @@
   :defer t)
 
 
+(use-package ctrlf
+  :defer t
+  :config (progn
+            (ctrlf-mode 1)
+            ))
+
+
 (use-package deft
   :bind ("C-c d" . deft)
   :config (progn
@@ -512,7 +519,11 @@
 (use-package helm-swoop
   :bind (("C-M-S-i" . (lambda () (interactive) (helm-swoop :$query "")))
          :map isearch-mode-map
-         ("C-M-S-i" . helm-swoop-from-isearch)))
+         ("C-M-S-i" . helm-swoop-from-isearch)
+         )
+  :config (progn
+            (setq helm-swoop-split-with-multiple-windows t)
+            ))
 
 
 ;; Replacement for built-in Help system.
@@ -1136,7 +1147,6 @@
 
 
 (use-package selectrum
-  :pin melpa
   :defer t
   :config (progn
             (when window-system
@@ -1145,7 +1155,6 @@
 
 
 (use-package selectrum-prescient
-  :pin melpa
   :defer t
   :config (progn
             (selectrum-prescient-mode 1)))
