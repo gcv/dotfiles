@@ -1166,7 +1166,8 @@
 (use-package selectrum-prescient
   :defer t
   :config (progn
-            (selectrum-prescient-mode 1)))
+            (selectrum-prescient-mode 1)
+            ))
 
 
 (use-package slime
