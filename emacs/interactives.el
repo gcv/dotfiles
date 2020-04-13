@@ -236,6 +236,39 @@
         (goto-char position))))
 
 
+(defun imenu* ()
+  "Custom imenu implementation. Cribbed from counsel-imenu, but useful outside Ivy/Counsel."
+  (interactive)
+  (unless (featurep 'imenu)
+    (require 'imenu nil t))
+  (let* ((imenu-auto-rescan t)
+         (imenu-auto-rescan-maxout (if current-prefix-arg
+                                       (buffer-size)
+                                     imenu-auto-rescan-maxout))
+         (imenu-space-replacement nil)
+         (items (imenu--make-index-alist t))
+         (items (delete (assoc "*Rescan*" items) items))
+         (items (if (eq major-mode 'emacs-lisp-mode)
+                    (let ((fns (cl-remove-if #'listp items :key #'cdr)))
+                      (if fns
+                          (nconc (cl-remove-if #'nlistp items :key #'cdr)
+                                 `(("Functions" ,@fns)))
+                        items))
+                  items))
+         (items (-flatten-n
+                 1
+                 (cl-loop for entry in items collect
+                          (if (listp (cdr entry))
+                              (cl-loop for subentry in (cdr entry) collect
+                                       (cons (concat (propertize (car entry) 'face 'bold) ": " (car subentry))
+                                             (cdr subentry)))
+                            entry))))
+         (selection (imenu-choose-buffer-index "Items: " items)))
+    (imenu selection)))
+
+(global-set-key (kbd "M-i") 'imenu*)
+
+
 (defun what-face (pos)
   (interactive "d")
   ;; see also: describe-char
