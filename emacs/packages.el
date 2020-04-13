@@ -837,11 +837,16 @@
             ;; - very wide large screens are iffy, so positioning in-window
             ;;   would be welcome
 
-            ;; (setq mini-frame-show-parameters
-            ;;       '((top . 10)
-            ;;         (left . 0.5)
-            ;;         (width . 0.7)
-            ;;         (height . 15)))
+            (when window-system
+              (mini-frame-mode 1))
+
+            (add-to-list 'mini-frame-ignore-commands 'edebug-eval-expression)
+
+            (setq mini-frame-show-parameters
+                  '((top . 20)
+                    (left . 0.5)
+                    (width . 0.7)
+                    (height . 15)))
 
             ))
 
@@ -1045,6 +1050,14 @@
   :defer t)
 
 
+(use-package prescient
+  :defer t
+  :config (progn
+            ;;(setq prescient-aggressive-file-save t)
+            (setq prescient-filter-method '(literal regexp initialism fuzzy))
+            (prescient-persist-mode 1)))
+
+
 (use-package projectile
   :bind (:map projectile-mode-map
          ("C-c p" . projectile-command-map))
@@ -1120,6 +1133,22 @@
             (add-hook 'rust-mode-hook #'/rust-mode-hook)
 
             ))
+
+
+(use-package selectrum
+  :pin melpa
+  :defer t
+  :config (progn
+            (when window-system
+              (setq selectrum-num-candidates-displayed 15))
+            ))
+
+
+(use-package selectrum-prescient
+  :pin melpa
+  :defer t
+  :config (progn
+            (selectrum-prescient-mode 1)))
 
 
 (use-package slime
