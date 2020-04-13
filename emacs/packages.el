@@ -202,7 +202,8 @@
 (use-package ctrlf
   :defer t
   :config (progn
-            (ctrlf-mode 1)
+            ;; waiting on https://github.com/raxod502/ctrlf/issues/41
+            ;;(ctrlf-mode 1)
             ))
 
 
