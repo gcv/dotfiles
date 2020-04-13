@@ -153,8 +153,8 @@
          (windows (delq nil (mapcar #'get-buffer-window buffers))))
     (if (and windows (> (length windows) 1))
         (progn
-          (let* ((w1 (first windows))
-                 (w2 (second windows))
+          (let* ((w1 (-first-item windows))
+                 (w2 (-second-item windows))
                  (b1 (window-buffer w1))
                  (b2 (window-buffer w2))
                  (s1 (window-start w1))
