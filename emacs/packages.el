@@ -166,10 +166,11 @@
 
 (use-package counsel                    ; Ivy / Swiper / Counsel
   :pin melpa
-  :bind (("M-x" . counsel-M-x)
-         ("C-x C-M-f" . counsel-find-file)
+  :bind (;;("M-x" . counsel-M-x)
+         ;;("C-x C-M-f" . counsel-find-file)
          ;;("C-M-y" . counsel-yank-pop)
-         ("M-i" . counsel-imenu))
+         ;;("M-i" . counsel-imenu)
+         )
   :config (progn
 
             ;; XXX: This gets clobbered when counsel loads. @@
@@ -642,22 +643,13 @@
             ))
 
 
-(use-package ivy-xref
-  :pin melpa
-  :defer t
-  :init (progn
-          (when (>= emacs-major-version 27)
-            (setq xref-show-definitions-function #'ivy-xref-show-defs))
-          (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)))
-
-
 (use-package ivy-posframe
   :pin melpa
   :defer nil                            ; must load eagerly
   :diminish ""
   :config (progn
 
-            (ivy-posframe-mode 1)
+            ;;(ivy-posframe-mode 1)
 
             (setq ivy-posframe-width 65
                   ivy-posframe-min-width 65
@@ -690,6 +682,15 @@
                     (t . /ivy-posframe-display-smart)))
 
             ))
+
+
+(use-package ivy-xref
+  :pin melpa
+  :defer t
+  :init (progn
+          (when (>= emacs-major-version 27)
+            (setq xref-show-definitions-function #'ivy-xref-show-defs))
+          (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)))
 
 
 (use-package js2-mode
