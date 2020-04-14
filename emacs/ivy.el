@@ -1,4 +1,4 @@
-(use-package counsel                    ; Ivy / Swiper / Counsel
+(use-package counsel
   :pin melpa
   :bind (("M-x" . counsel-M-x)
          ("C-x C-M-f" . counsel-find-file)
@@ -35,7 +35,7 @@
   :defer t)
 
 
-(use-package ivy                        ; Ivy / Swiper / Counsel
+(use-package ivy
   :pin melpa
   :after (flx)
   :bind (("C-c c r" . ivy-resume)
@@ -137,8 +137,8 @@
                 (ivy-posframe-display-at-window-center str)))
 
             (setq ivy-posframe-display-functions-alist
-                  '((swiper . ivy-posframe-display-at-window-bottom-left)
-                    ;;(swiper . nil)
+                  '(;;(swiper . ivy-posframe-display-at-window-bottom-left)
+                    (swiper . nil)
                     (complete-symbol . ivy-posframe-display-at-point)
                     (counsel-M-x . /ivy-posframe-display-smart)
                     (counsel-yank-pop . /ivy-display-function-window)
@@ -161,6 +161,6 @@
           (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)))
 
 
-(use-package swiper                     ; Ivy / Swiper / Counsel
+(use-package swiper
   :pin melpa
   :bind ("M-S-C-s" . swiper))
