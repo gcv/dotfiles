@@ -723,6 +723,16 @@ See `eshell-prompt-regexp'."
     (eshell-next-prompt (- n)))
 
 
+;;; icomplete mode
+;;; useless without Emacs 27 flex matching!
+;;(add-to-list 'completion-styles 'flex)
+(setq icomplete-show-matches-on-no-input t
+      icomplete-hide-common-prefix nil
+      icomplete-prospects-height 1)
+
+;;(icomplete-mode 1)
+
+
 ;;; ido mode
 (setq ido-everywhere nil
       ido-auto-merge-work-directories-length -1 ; don't look for files in strange places
