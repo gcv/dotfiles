@@ -725,6 +725,10 @@ See `eshell-prompt-regexp'."
 
 ;;; icomplete mode
 ;;; useless without Emacs 27 flex matching!
+;;; Unlikely to use it. It overrides behavior everywhere in the minibuffer.
+;;; Unless it can be selectively enabled like Ido can be (e.g., for buffer
+;;; operations), it is a little too intrusive. The same applies for global
+;;; ivy-mode and selectrum-mode.
 ;;(add-to-list 'completion-styles 'flex)
 (setq icomplete-show-matches-on-no-input t
       icomplete-hide-common-prefix nil
@@ -739,16 +743,15 @@ See `eshell-prompt-regexp'."
       ido-confirm-unique-completion t
       ido-enable-flex-matching t
       ido-default-buffer-method 'samewindow
-      ido-max-prospects 20)
+      ido-max-prospects 20
+      ido-ignore-buffers ignore-buffers)
 
 (ido-mode 'buffer)
 
-(setq ido-ignore-buffers ignore-buffers)
-
-;;(global-set-key (kbd "C-x M-f") 'ido-find-file)
-;;(global-set-key (kbd "C-x M-d") 'ido-dired)
-;;(global-set-key (kbd "C-x C-d") 'ido-dired)
-;;(global-set-key (kbd "C-x M-i") 'ido-insert-file)
+(global-set-key (kbd "C-x M-f") 'ido-find-file)
+(global-set-key (kbd "C-x M-d") 'ido-dired)
+(global-set-key (kbd "C-x C-d") 'ido-dired)
+(global-set-key (kbd "C-x M-i") 'ido-insert-file)
 
 
 ;;; Gnus
