@@ -1169,15 +1169,13 @@
 
             ;; waiting for https://github.com/raxod502/selectrum/issues/4
             ;;(selectrum-mode 1)
+            ;;(selectrum-prescient-mode 1)
 
             ))
 
 
 (use-package selectrum-prescient
-  :defer t
-  :config (progn
-            (selectrum-prescient-mode 1)
-            ))
+  :defer t)
 
 
 (use-package slime
