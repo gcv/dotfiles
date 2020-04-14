@@ -1,4 +1,14 @@
+(use-package ctrlf
+  :pin melpa
+  :defer t
+  :config (progn
+            ;; waiting on https://github.com/raxod502/ctrlf/issues/41
+            ;;(ctrlf-mode 1)
+            ))
+
+
 (use-package selectrum
+  :pin melpa
   :defer t
   :config (progn
 
