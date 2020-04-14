@@ -201,14 +201,6 @@
   :defer t)
 
 
-(use-package ctrlf
-  :defer t
-  :config (progn
-            ;; waiting on https://github.com/raxod502/ctrlf/issues/41
-            ;;(ctrlf-mode 1)
-            ))
-
-
 (use-package deft
   :bind ("C-c d" . deft)
   :config (progn
