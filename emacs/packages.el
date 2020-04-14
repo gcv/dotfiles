@@ -848,7 +848,7 @@
 
 (use-package mini-frame
   :pin melpa
-  :defer t
+  :defer nil
   :config (progn
 
             ;; This is pretty cool overall, and a worthy alternative to
@@ -862,6 +862,7 @@
             (when window-system
               (mini-frame-mode 1))
 
+            (add-to-list 'mini-frame-ignore-commands 'find-alternate-file)
             (add-to-list 'mini-frame-ignore-commands 'edebug-eval-expression)
             (add-to-list 'mini-frame-ignore-commands "ctrlf-.*")
             (add-to-list 'mini-frame-ignore-commands "helm-.*")
