@@ -755,8 +755,9 @@
   ;;:load-path "~/Code/perspective-el"
   :pin melpa
   :defer nil
-  :bind (;;("C-x b" . persp-switch-to-buffer*)
-         ;;("C-x k" . persp-kill-buffer*)
+  :bind (("C-c C-p" . perspective-map)
+         ("H-p" . perspective-map)
+         ("C-c M-p" . persp-switch)
          ("C-x C-M-b" . persp-ivy-switch-buffer))
   :config (progn
 
@@ -769,11 +770,6 @@
             (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
             ;; useful, but I prefer a prompt on exit
             ;;(add-hook 'kill-emacs-hook #'persp-state-save)
-
-            ;; keybindings; note H-p and C-c C-p are both valid prefixes
-            (define-key persp-mode-map (kbd "H-p") 'perspective-map)
-            (define-key persp-mode-map (kbd "C-c C-p") 'perspective-map)
-            (define-key persp-mode-map (kbd "C-c M-p") 'persp-switch)
 
             ;; By default, ido-temp-list filters out ido-ignore-buffers from the
             ;; list displayed by ido-switch-buffer, but typing a name from the
