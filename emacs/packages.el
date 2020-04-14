@@ -182,6 +182,8 @@
             (add-to-list 'ivy-display-functions-alist '(counsel-yank-pop . /ivy-display-function-window))
             (add-to-list 'ivy-display-functions-alist '(counsel-ag . /ivy-display-function-window))
 
+            (ivy-prescient-mode 1)
+
             ))
 
 
@@ -596,7 +598,7 @@
          )
   :config (progn
 
-            (ivy-mode 1)
+            ;;(ivy-mode 1)
 
             (setq ivy-ignore-buffers ignore-buffers)
 
@@ -701,11 +703,7 @@
 
 
 (use-package ivy-prescient
-  :defer t
-  :after (ivy)
-  :config (progn
-            (ivy-prescient-mode 1)
-            ))
+  :defer t)
 
 
 (use-package ivy-xref
