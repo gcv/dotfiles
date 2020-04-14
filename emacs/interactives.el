@@ -207,13 +207,13 @@
   (multi-occur-in-matching-buffers "." regexp t))
 
 
-(defun ido-goto-symbol ()
+(defun imenu-ido ()
   "Updates the imenu index and then uses ido to select a symbol to navigate to.
    From http://www.emacswiki.org/emacs/ImenuMode."
   (interactive)
   (imenu--make-index-alist)
-  (let ((name-and-pos '())
-        (symbol-names '()))
+  (let ((name-and-pos (list))
+        (symbol-names (list)))
     (cl-labels ((addsymbols (symbol-list)
                   (when (listp symbol-list)
                     (dolist (symbol symbol-list)
@@ -231,13 +231,14 @@
                           (add-to-list 'symbol-names name)
                           (add-to-list 'name-and-pos (cons name position))))))))
         (addsymbols imenu--index-alist))
-      (let* ((selected-symbol (ido-completing-read "Symbol: " symbol-names))
+    (let* ((selected-symbol (ido-completing-read "Symbol: " symbol-names
+                                                 nil nil nil 'imenu--history-list))
              (position (cdr (assoc selected-symbol name-and-pos))))
         (goto-char position))))
 
 
-(defun imenu* ()
-  "Custom imenu implementation. Cribbed from counsel-imenu, but useful outside Ivy/Counsel."
+(defun imenu-cr ()
+  "Custom imenu implementation using completing-read. Cribbed from counsel-imenu, but useful outside Ivy."
   (interactive)
   (unless (featurep 'imenu)
     (require 'imenu nil t))
@@ -266,8 +267,6 @@
          (selection (imenu-choose-buffer-index "Items: " items)))
     (imenu selection)))
 
-(global-set-key (kbd "M-i") 'imenu*)
-
 
 (defun what-face (pos)
   (interactive "d")
@@ -287,8 +286,8 @@
 
 
 (defun find-file-in-git-project ()
-  "Deprecated in favor of projectile-mode."
   (interactive)
+  (user-error "Deprecated in favor of projectile-mode.")
   (let ((project-root (or (locate-dominating-file default-directory ".git-project-root")
                           (locate-dominating-file default-directory ".git/")
                           (locate-dominating-file default-directory ".project.el"))))
@@ -444,12 +443,14 @@ return 0
   (mapcar #'disable-theme custom-enabled-themes))
 
 
+(defvar switch-theme-history nil)
 (defun switch-theme (theme)
   (interactive
    (list
     (intern (ido-completing-read "Load custom theme: "
                                  (mapcar 'symbol-name
-                                         (custom-available-themes))))))
+                                         (custom-available-themes))
+                                 nil t nil 'switch-theme-history))))
   (disable-all-themes)
   (load-theme theme t))
 
@@ -458,11 +459,10 @@ return 0
   (interactive "P")
   (if global
       (progn
-        (global-linum-mode (if global-linum-mode -1 1))
+        (global-display-line-numbers-mode (if global-display-line-numbers-mode -1 1))
         (global-hl-line-mode (if global-hl-line-mode -1 1)))
-    (progn
-      (linum-mode (if linum-mode -1 1))
-      (hl-line-mode (if hl-line-mode -1 1)))))
+    (display-line-numbers-mode (if display-line-numbers-mode -1 1))
+    (hl-line-mode (if hl-line-mode -1 1))))
 
 
 (defun ensure-packages-compiled ()
