@@ -61,13 +61,14 @@
 
 ;;; control beeping
 (setq ring-bell-function
-      (lambda ()
-        (unless (memq this-command
-                      '(isearch-abort
-                        abort-recursive-edit
-                        exit-minibuffer
-                        keyboard-quit))
-          (message "*beep*"))))
+      ;; (lambda ()
+      ;;   (unless (memq this-command
+      ;;                 '(isearch-abort
+      ;;                   abort-recursive-edit
+      ;;                   exit-minibuffer
+      ;;                   keyboard-quit))
+      ;;     (message "*beep*")))
+      #'ignore)
 
 
 ;;; Unicode and UTF-8
