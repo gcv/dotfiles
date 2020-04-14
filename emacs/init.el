@@ -731,7 +731,7 @@ See `eshell-prompt-regexp'."
       ido-default-buffer-method 'samewindow
       ido-max-prospects 20)
 
-;;(ido-mode 'buffer)
+(ido-mode 'buffer)
 
 (setq ido-ignore-buffers ignore-buffers)
 

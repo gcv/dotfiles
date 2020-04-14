@@ -166,10 +166,10 @@
 
 (use-package counsel                    ; Ivy / Swiper / Counsel
   :pin melpa
-  :bind (;;("M-x" . counsel-M-x)
+  :bind (("M-x" . counsel-M-x)
          ;;("C-x C-M-f" . counsel-find-file)
          ;;("C-M-y" . counsel-yank-pop)
-         ;;("M-i" . counsel-imenu)
+         ("M-i" . counsel-imenu)
          )
   :config (progn
 
@@ -437,7 +437,7 @@
 (use-package helm
   :diminish ""
   :bind (("C-c h" . helm-command-prefix)
-         ;;("C-x M-b" . helm-mini)
+         ("C-x M-b" . helm-mini)
          ;;("M-x" . helm-M-x)
          ;;("M-i" . helm-semantic-or-imenu)
          ("C-M-y" . helm-show-kill-ring))
@@ -667,7 +667,7 @@
   :diminish ""
   :config (progn
 
-            ;;(ivy-posframe-mode 1)
+            (ivy-posframe-mode 1)
 
             (setq ivy-posframe-width 65
                   ivy-posframe-min-width 65
@@ -848,7 +848,7 @@
 
 (use-package mini-frame
   :pin melpa
-  :defer nil
+  :defer t
   :config (progn
 
             ;; This is pretty cool overall, and a worthy alternative to
@@ -859,8 +859,8 @@
             ;; - very wide large screens are iffy, so positioning in-window
             ;;   would be welcome
 
-            (when window-system
-              (mini-frame-mode 1))
+            ;;(when window-system
+            ;;  (mini-frame-mode 1))
 
             (add-to-list 'mini-frame-ignore-commands 'find-alternate-file)
             (add-to-list 'mini-frame-ignore-commands 'edebug-eval-expression)
@@ -1021,13 +1021,15 @@
   ;;:load-path "~/Code/perspective-el"
   :pin melpa
   :defer nil
-  :bind (("C-x C-M-b" . persp-ivy-switch-buffer))
+  :bind (;;("C-x b" . persp-switch-to-buffer*)
+         ;;("C-x k" . persp-kill-buffer*)
+         ("C-x C-M-b" . persp-ivy-switch-buffer))
   :config (progn
 
             (persp-mode)
             (persp-turn-off-modestring)
 
-            (setq persp-interactive-completion-function 'completing-read
+            (setq persp-interactive-completion-function 'ido-completing-read
                   persp-sort 'access)
 
             (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
