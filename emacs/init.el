@@ -85,7 +85,7 @@
 
 ;;; history
 (savehist-mode 1)
-(setq history-length 1000
+(setq history-length 250
       history-delete-duplicates t)
 (put 'file-name-history 'history-length 1500)
 
