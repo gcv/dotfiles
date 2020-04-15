@@ -39,6 +39,18 @@
   :group 'helm-el-package
   :type 'boolean)
 
+
+(defcustom helm-el-package-upgrade-on-start nil
+  "Show package upgrades on startup when non nil."
+  :group 'helm-el-package
+  :type 'boolean)
+
+(defcustom helm-el-package-autoremove-on-start nil
+  "Try to autoremove no more needed packages on startup.
+See `package-autoremove'."
+  :group 'helm-el-package
+  :type 'boolean)
+
 ;; internals vars
 (defvar helm-el-package--show-only 'all)
 (defvar helm-el-package--initialized-p nil)
@@ -60,8 +72,12 @@
         (inhibit-read-only t))
     (when (null package-alist)
       (setq helm-el-package--show-only 'all))
-    (when (setq helm-el-package--removable-packages
-                (package--removable-packages))
+    (unless (consp package-selected-packages)
+      (helm-aif (package--find-non-dependencies)
+          (setq package-selected-packages it)))
+    (when (and (setq helm-el-package--removable-packages
+                     (package--removable-packages))
+               helm-el-package-autoremove-on-start)
       (package-autoremove))
     (unwind-protect
          (progn
@@ -91,7 +107,8 @@
                    (message "Refreshing packages list done, [%d] package(s) to upgrade"
                             (length helm-el-package--upgrades))
                  (message "Refreshing packages list done, no upgrades available"))
-             (setq helm-el-package--show-only (if helm-el-package--upgrades
+             (setq helm-el-package--show-only (if (and helm-el-package-upgrade-on-start
+                                                       helm-el-package--upgrades)
                                                   'upgrade
                                                 helm-el-package-initial-filter))))
       (kill-buffer "*Packages*"))))

@@ -868,14 +868,6 @@ engine beeing completely different and also much faster.
 
 \(fn)" t nil)
 
-(autoload 'helm-occur-mode "helm-occur" "\
-Major mode to provide actions in helm moccur saved buffer.
-
-Special commands:
-\\{helm-occur-mode-map}
-
-\(fn)" t nil)
-
 (autoload 'helm-occur-from-isearch "helm-occur" "\
 Invoke `helm-occur' from isearch.
 

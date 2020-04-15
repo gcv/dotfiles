@@ -47,7 +47,9 @@
                                  helm-imenu-help-message
                                  helm-colors-help-message
                                  helm-semantic-help-message
-                                 helm-kmacro-help-message))
+                                 helm-kmacro-help-message
+                                 helm-kill-ring-help-message)
+  "A list of help messages (strings) used by `helm-documentation'.")
 
 (defvar helm-documentation-buffer-name "*helm documentation*")
 
@@ -101,7 +103,16 @@ pattern.
 **** Search inside buffers
 
 If you enter a space and a pattern prefixed by \"@\", Helm searches for text
-matching this pattern \*inside* the buffer (i.e. not in the name of the buffer).
+matching this pattern *inside* the buffer (i.e. not in the name of the buffer).
+
+Negation are supported i.e. \"!\".
+
+When you specify more than one of such patterns, it will match
+buffers with contents matching each of these patterns i.e. AND,
+not OR.  That's mean that if you specify \"@foo @bar\" the
+contents of buffer will have to be matched by foo AND bar.  If
+you specify \"@foo @!bar\" it means the contents of buffer have
+to be matched by foo but NOT bar.
 
 If you enter a pattern prefixed with an escaped \"@\", Helm searches for a
 buffer matching \"@pattern\" but does not search inside.
@@ -313,6 +324,15 @@ depending of `helm-selection':
 
 Called with a prefix arg open menu unconditionally.
 
+*** Sort directory contents
+
+When listing a directory without narrowing its contents, i.e. when pattern ends with \"/\",
+you can sort alphabetically, by newest or by size by using respectively
+\\<helm-find-files-map>\\[helm-ff-sort-alpha], \\[helm-ff-sort-by-newest] or \\[helm-ff-sort-by-size].
+NOTE:
+When starting back narrowing i.e. entering something in minibuffer after \"/\" sorting is done
+again with fuzzy sorting and no more with sorting methods previously selected.
+
 *** Find file at point
 
 Helm uses `ffap' partially or completely to find file at point depending on the
@@ -493,7 +513,7 @@ On completion:
 
 *** Use the wildcard to select multiple files
 
-Use of wilcard is supported to run an action over a set of files.
+Use of wildcard is supported to run an action over a set of files.
 
 Example: You can copy all the files with \".el\" extension by using \"*.el\" and
 then run copy action.
@@ -516,7 +536,7 @@ When using an action that involves an external backend (e.g. grep), using \"**\"
 is not recommended (even thought it works fine) because it will be slower to
 select all the files.  You are better off leaving the backend to do it, it will
 be faster.  However, if you know you have not many files it is reasonable to use
-this, also using not recursive wilcard (e.g. \"*.el\") is perfectly fine for
+this, also using not recursive wildcard (e.g. \"*.el\") is perfectly fine for
 this.
 
 The \"**\" feature is active by default in the option `helm-file-globstar'.  It
@@ -712,7 +732,7 @@ See [[Use the wildcard to select multiple files]] for details.
 
 You can bookmark the `helm-find-files' session with `\\[helm-ff-bookmark-set]'.
 You can later retrieve these bookmarks by calling `helm-filtered-bookmarks'
-or, from the current `helm-find-files' session, by hitting `\\[helm-find-files-toggle-to-bookmark]'.
+or, from the current `helm-find-files' session, by hitting `\\[helm-find-files-switch-to-bookmark]'.
 
 *** Grep files from `helm-find-files'
 
@@ -1063,7 +1083,7 @@ You can toggle the view of deleted files, see commands below.
      "* Helm `%s' read file name completion
 
 This is `%s' read file name completion that have been \"helmized\"
-because you have enabled [[Helm mode][helm-mode]]'.
+because you have enabled [[Helm mode][helm-mode]].
 Don't confuse this with `helm-find-files' which is a native helm command,
 see [[Helm functions vs helmized Emacs functions]].
 
@@ -1627,7 +1647,7 @@ marking it (`C-c u' or `RET') .
 
 ** Tips
 
-*** You can get help on any command with persistent action (\\[helm-execute-persistent-action])
+*** You can get help on any command with persistent action (\\<helm-map>\\[helm-execute-persistent-action])
 
 *** Prefix arguments
 

@@ -337,7 +337,7 @@ When only `add-text-properties' is available APPEND is ignored."
   :set (lambda (var val)
          (set var val)
          (if val
-             (advice-add 'push-mark :override #'helm--advice-push-mark)
+             (advice-add 'push-mark :override #'helm--advice-push-mark '((depth . 100)))
            (advice-remove 'push-mark #'helm--advice-push-mark))))
 
 ;; This the version of Emacs-27 written by Stefan
@@ -540,12 +540,17 @@ e.g helm.el$
 
 ;;; Help routines.
 ;;
+(defvar helm-help-mode-before-hook nil
+  "A hook that run before helm-help starts.")
+(defvar helm-help-mode-after-hook nil
+  "A hook that run when helm-help exits.")
 (defun helm-help-internal (bufname insert-content-fn)
   "Show long message during `helm' session in BUFNAME.
 INSERT-CONTENT-FN is the function that insert
 text to be displayed in BUFNAME."
   (let ((winconf (current-frame-configuration))
         (hframe (selected-frame)))
+    (helm-log-run-hook 'helm-help-mode-before-hook)
     (with-selected-frame helm-initial-frame
       (select-frame-set-input-focus helm-initial-frame)
       (unwind-protect
@@ -562,6 +567,7 @@ text to be displayed in BUFNAME."
              (buffer-disable-undo)
              (helm-help-event-loop))
         (raise-frame hframe)
+        (helm-log-run-hook 'helm-help-mode-after-hook)
         (setq helm-suspend-update-flag nil)
         (set-frame-configuration winconf)))))
 
@@ -717,7 +723,7 @@ end a printable representation of hashtable itself."
   "Return a regexp which matches any of the regexps in REGEXP-LIST."
   (if regexp-list
       (concat "\\(?:" (helm--string-join regexp-list "\\)\\|\\(?:") "\\)")
-    "\\<\\>"))                          ; Match nothing
+    "\\`\\'"))                          ; Match nothing
 
 (defun helm-skip-entries (seq black-regexp-list &optional white-regexp-list)
   "Remove entries which matches one of REGEXP-LIST from SEQ."
@@ -792,8 +798,7 @@ ARGS is (cand1 cand2 ...) or ((disp1 . real1) (disp2 . real2) ...)
 (defun helm-append-at-nth (seq elm index)
   "Append ELM at INDEX in SEQ."
   (let ((len (length seq)))
-    (cond ((> index len) (setq index len))
-          ((< index 0) (setq index 0)))
+    (setq index (min (max index 0) len))
     (if (zerop index)
         (append elm seq)
       (cl-loop for i in seq
@@ -801,6 +806,12 @@ ARGS is (cand1 cand2 ...) or ((disp1 . real1) (disp2 . real2) ...)
                when (= count index)
                if (listp elm) append elm
                else collect elm))))
+
+(defun helm-take-first-elements (seq n)
+  "Return the first N elements of SEQ if SEQ is longer than N.
+It is used for narrowing list of candidates to the
+`helm-candidate-number-limit'."
+  (if (> (length seq) n) (cl-subseq seq 0 n) seq))
 
 (defun helm-source-by-name (name &optional sources)
   "Get a Helm source in SOURCES by NAME.
@@ -999,7 +1010,7 @@ Example:
 
 (defun helm-describe-class (class)
   "Display documentation of Eieio CLASS, a symbol or a string."
-  (advice-add 'cl--print-table :override #'helm-source--cl--print-table)
+  (advice-add 'cl--print-table :override #'helm-source--cl--print-table '((depth . 100)))
   (unwind-protect
        (let ((helm-describe-function-function 'describe-function))
          (helm-describe-function class))
@@ -1364,6 +1375,10 @@ I.e. when using `helm-next-line' and friends in BODY."
 (defun helm--prepare-completion-styles (&optional nomode styles)
   "Return a suitable list of styles for `completion-styles'.
 
+When `helm-completion-style' is not `emacs' the Emacs vanilla default
+`completion-styles' is used except for `helm-dynamic-completion' which
+use inconditionally `emacs' as value for `helm-completion-style'.
+ 
 If styles are specified in `helm-completion-styles-alist' for a
 particular mode, use these styles unless NOMODE is non nil.
 If STYLES is specified as a list of styles suitable for
@@ -1425,14 +1440,22 @@ Example:
 When argument NOMODE is non nil don't use `completion-styles' as
 specified in `helm-completion-styles-alist' for specific modes.
 When STYLES is specified use these `completion-styles', see
-`helm--prepare-completion-styles'."
+`helm--prepare-completion-styles'.
+Also `helm-completion-style' settings have no effect here, `emacs'
+being used inconditionally as value."
   (lambda ()
-    (let* ((completion-styles
+    (let* (;; Force usage of emacs style otherwise
+           ;; helm--prepare-completion-styles will reset
+           ;; completion-styles to default value i.e. (basic partial
+           ;; emacs22).
+           (helm-completion-style 'emacs)
+           (completion-styles
             (helm--prepare-completion-styles nomode styles))
            (completion-flex-nospace t)
            (nosort (eq metadata 'nosort))
            (compsfn (lambda (str pred _action)
-                      (let* ((comps (completion-all-completions
+                      (let* ((completion-ignore-case (helm-set-case-fold-search))
+                             (comps (completion-all-completions
                                      str
                                      (if (functionp collection)
                                          (funcall collection str pred t)
@@ -1520,6 +1543,7 @@ that match whole STRING.
 
 This is needed to provide compatibility for both emacs-25 and emacs-24.5
 as emacs-25 version of `ansi-color-apply' is partially broken."
+  (require 'ansi-color)
   (let ((start 0)
         codes end escape-sequence
         result colorized-substring)
