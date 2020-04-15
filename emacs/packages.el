@@ -817,6 +817,7 @@
 
 
 (use-package projectile
+  :defer nil                            ; must load eagerly
   :bind (:map projectile-mode-map
          ("C-c p" . projectile-command-map))
   :init (progn
