@@ -725,11 +725,12 @@ See `eshell-prompt-regexp'."
 
 
 ;;; icomplete mode
-;;; useless without Emacs 27 flex matching!
-;;; Unlikely to use it. It overrides behavior everywhere in the minibuffer.
-;;; Unless it can be selectively enabled like Ido can be (e.g., for buffer
-;;; operations), it is a little too intrusive. The same applies for global
-;;; ivy-mode and selectrum-mode.
+;;; Pretty cool with Emacs 27 flex matching and fido-mode, but I am unlikely to
+;;; use it. It overrides behavior everywhere in the minibuffer. Unless it can be
+;;; selectively enabled like Ido can be (e.g., for buffer operations), it is a
+;;; little too intrusive. The same applies for global ivy-mode and
+;;; selectrum-mode.
+;;; Also, there is no case-insensitive matching?
 ;;(add-to-list 'completion-styles 'flex)
 (setq icomplete-show-matches-on-no-input t
       icomplete-hide-common-prefix nil
