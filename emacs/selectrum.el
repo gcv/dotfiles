@@ -17,6 +17,11 @@
             ;;  (let ((completing-read-function #'selectrum-completing-read))
             ;;    (mini-frame-read-from-minibuffer
             ;;     (lambda () (call-interactively #'execute-extended-command)))))
+            ;;
+            ;; Something to explore with Emacs 27: icomplete, icomplete-vertical
+            ;; (external package), and whether it has a dedicated
+            ;; completing-read implementation. That will probably be adequate
+            ;; for my needs.
 
             ;;(when window-system
             ;;  (mini-frame-mode 1))
