@@ -852,12 +852,13 @@ This will occur in the context of the Main module, just as it would at the REPL.
 
 (defun julia-snail-send-region ()
   "Send the region (requires transient-mark) to the Julia REPL and evaluate it.
-This occurs in the context of the current module."
+Normally, this occurs in the context of the current module.
+If a prefix arg is used, this instead occurs in the context of Main."
   (interactive)
   (if (null (use-region-p))
       (user-error "No region selected")
     (let ((text (buffer-substring-no-properties (region-beginning) (region-end)))
-          (module (julia-snail--module-at-point)))
+          (module (if current-prefix-arg :Main (julia-snail--module-at-point))))
       (julia-snail--send-to-server-via-tmp-file
         module
         text
@@ -933,6 +934,20 @@ Useful if something seems to wrong."
                                       (current-buffer))))))
       (julia-snail--clear-proc-caches process-buf))))
 
+(defun julia-snail-update-module-cache ()
+  "Update cache of implicit modules referenced in current source file.
+This is not necessary when files are loaded into the Julia
+environment using `julia-snail-send-buffer-file', but it is
+useful for a workflow using Revise.jl. It makes xref and
+autocompletion aware of the available modules."
+  (interactive)
+  (let* ((filename (expand-file-name buffer-file-name))
+         (module (or (julia-snail--module-for-file filename) '("Main")))
+         (includes (julia-snail-parser-includes (current-buffer))))
+    (julia-snail--module-merge-includes filename includes)
+    (message "Caches updated: parent module %s"
+             (julia-snail--construct-module-path module))))
+
 
 ;;; --- keymaps
 
@@ -946,6 +961,7 @@ Useful if something seems to wrong."
     (define-key map (kbd "C-c C-r") #'julia-snail-send-region)
     (define-key map (kbd "C-c C-l") #'julia-snail-send-line)
     (define-key map (kbd "C-c C-k") #'julia-snail-send-buffer-file)
+    (define-key map (kbd "C-c C-m u") #'julia-snail-update-module-cache)
     map))
 
 (defvar julia-snail-repl-mode-map
