@@ -26,6 +26,22 @@ named collections of buffers and window configurations.
 
 \(fn &optional ARG)" t nil)
 
+(autoload 'persp-switch-to-buffer* "perspective" "\
+Like `switch-to-buffer', restricted to the current perspective.
+This respects ido-ignore-buffers, since we automatically add
+buffer filtering to ido-mode already (see use of
+PERSP-SET-IDO-BUFFERS).
+
+\(fn BUFFER-OR-NAME)" t nil)
+
+(autoload 'persp-kill-buffer* "perspective" "\
+Like `kill-buffer', restricted to the current perspective.
+This respects ido-ignore-buffers, since we automatically add
+buffer filtering to ido-mode already (see use of
+PERSP-SET-IDO-BUFFERS).
+
+\(fn BUFFER-OR-NAME)" t nil)
+
 (autoload 'persp-bs-show "perspective" "\
 Invoke BS-SHOW with a configuration enabled for Perspective.
 With a prefix arg, show buffers in all perspectives.
