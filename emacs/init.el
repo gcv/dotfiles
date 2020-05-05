@@ -216,6 +216,15 @@
      :ensure nil
      ,@args))
 
+;; quelpa installation:
+(unless (and (package-installed-p 'quelpa)
+             (package-installed 'quelpa-use-package))
+  (package-refresh-contents)
+  (package-install 'quelpa)
+  (package-install 'quelpa-use-package))
+(setq quelpa-stable-p t
+      quelpa-checkout-melpa-p nil)
+
 
 ;;; ----------------------------------------------------------------------------
 ;;; buffer behavior and control
