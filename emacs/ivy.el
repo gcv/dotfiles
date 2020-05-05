@@ -161,6 +161,10 @@
           (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)))
 
 
+(use-package flx
+  :defer nil)
+
+
 (use-package swiper
   :pin melpa
   :bind ("M-S-C-s" . swiper))

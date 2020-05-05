@@ -218,7 +218,7 @@
 
 ;; quelpa installation:
 (unless (and (package-installed-p 'quelpa)
-             (package-installed 'quelpa-use-package))
+             (package-installed-p 'quelpa-use-package))
   (package-refresh-contents)
   (package-install 'quelpa)
   (package-install 'quelpa-use-package))

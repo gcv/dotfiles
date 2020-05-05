@@ -248,10 +248,6 @@
   :bind ("C-S-SPC" . er/expand-region))
 
 
-(use-package flx
-  :defer nil)
-
-
 (use-package flycheck
   :pin melpa
   :defer t)
