@@ -1,35 +1,8 @@
-*.elc
-.lsp-session*
-.mc-lists.el
-.org-id-locations
-.smex-items
+# ignore everything
+*
 
-Mail
-News
+# except the emoji database
+!emojis
 
-ac-comphist.dat
-anything-c-adaptive-history
-auto-save-list/
-backups/
-custom.el
-ede-projects.el
-eshell/
-history
-ido.last
-network-security.data
-nrepl-history
-persp-state.el
-projectile-bookmarks.eld
-projectile.cache
-recentf
-semanticdb/
-server
-srecode-map.el
-swank/
-tramp
-treemacs/
-trusted-elisp-files.el
-url/
-
-# no-littering
-var/
+# and the no-littering configuration directory
+!etc
