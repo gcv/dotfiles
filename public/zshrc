@@ -138,6 +138,10 @@ HISTFILE=~/.history
 SAVEHIST=10000
 
 
+### shell command timing
+REPORTTIME=10
+
+
 ### history options
 setopt extended_history           # saves timestamps on history
 setopt hist_ignore_space          # do not save command entries which start with a space
