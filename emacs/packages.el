@@ -228,16 +228,18 @@
   :diminish "")
 
 
-(use-package emojify
-  :pin melpa
-  :defer t
-  :config (progn
-            ;; 'unicode possibly broken on NextStep port?
-            (setq emojify-display-style 'image)
-            (setq emojify-emoji-style (list 'unicode))
-            ;; NB: This mode does not seem to be needed for the Mac port.
-            ;;(global-emojify-mode)
-            ))
+;;; Deprecated, since set-fontset-font invocations with appropriate fonts should
+;;; now work.
+;; (use-package emojify
+;;   :pin melpa
+;;   :defer t
+;;   :config (progn
+;;             ;; 'unicode possibly broken on NextStep port?
+;;             (setq emojify-display-style 'image)
+;;             (setq emojify-emoji-style (list 'unicode))
+;;             ;; NB: This mode does not seem to be needed for the Mac port.
+;;             ;;(global-emojify-mode)
+;;             ))
 
 
 (use-package eshell-autojump
