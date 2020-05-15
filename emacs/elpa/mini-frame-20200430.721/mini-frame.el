@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 20200414.832
+;; Package-Version: 20200430.721
 ;; Package-X-Original-Version: 1.0
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -118,11 +118,18 @@ If nil, leave focus as is."
   :type 'function)
 
 (defcustom mini-frame-resize t
-  "Resize mini frame.
-If non-nil, set `resize-mini-frames' option to `mini-frame--resize-mini-frame'
-which will fit frame to buffer vertically only.
+  "How to resize mini-frame.
+A value of nil means don't autotomatically resize mini-frame.
+A value of t means autotomatically resize mini-frame.
+A value of `grow-only' means let mini-frame grow only.
+
+If non-nil, `resize-mini-frames' will be set to
+`mini-frame--resize-mini-frame' function.
+
 Option `resize-mini-frames' is available on Emacs 27 and later."
-  :type 'boolean)
+  :type '(choice (const :tag "Don't resize" nil)
+                 (const :tag "Resize" t)
+                 (const :tag "Grow only" grow-only)))
 
 (defcustom mini-frame-resize-max-height nil
   "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
@@ -155,7 +162,11 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 (defun mini-frame--resize-mini-frame (frame)
   "Resize FRAME vertically only.
 This function used as value for `resize-mini-frames' variable."
-  (fit-frame-to-buffer frame mini-frame-resize-max-height nil nil nil 'vertically)
+  (fit-frame-to-buffer frame
+                       mini-frame-resize-max-height
+                       (when (eq mini-frame-resize 'grow-only)
+                         (frame-parameter frame 'height))
+                       nil nil 'vertically)
   (when (and (frame-live-p mini-frame-completions-frame)
              (frame-visible-p mini-frame-completions-frame))
     (let ((show-parameters (if (functionp mini-frame-completions-show-parameters)
@@ -187,6 +198,17 @@ This function used as value for `resize-mini-frames' variable."
       (when (and (frame-live-p frame) (frame-visible-p frame))
         (select-frame-set-input-focus frame)))))
 
+(defconst mini-frame--common-parameters
+  '((visibility . nil)
+    (user-position . t)
+    (user-size . t)
+    (keep-ratio . t)
+    (undecorated . t)
+    (desktop-dont-save . t)
+    (internal-border-width . 3)
+    (drag-internal-border . t))
+  "Common frame parameters for mini-frame and completions frame.")
+
 (defun mini-frame--display-completions (buffer alist)
   "Display completions BUFFER in another child frame.
 ALIST is passed to `window--display-buffer'."
@@ -202,20 +224,17 @@ ALIST is passed to `window--display-buffer'."
     (if (frame-live-p mini-frame-completions-frame)
         (modify-frame-parameters mini-frame-completions-frame parent-frame-parameters)
       (setq mini-frame-completions-frame
-            (make-frame (append '((visibility . nil)
-                                  (auto-hide-function . mini-frame--hide-completions)
-                                  (user-position . t)
-                                  (user-size . t)
-                                  (keep-ratio . t)
-                                  (minibuffer . nil)
-                                  (undecorated . t)
-                                  (internal-border-width . 3)
-                                  (drag-internal-border . t))
+            (make-frame (append '((auto-hide-function . mini-frame--hide-completions)
+                                  (minibuffer . nil))
+                                mini-frame--common-parameters
                                 parent-frame-parameters
                                 show-parameters)))
       (set-face-background 'fringe nil mini-frame-completions-frame))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
-    (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame alist)))
+    (make-frame-visible mini-frame-completions-frame)
+    (let ((w (frame-selected-window mini-frame-completions-frame)))
+      (prog1 (window--display-buffer buffer w 'frame alist)
+        (set-window-dedicated-p w 'soft)))))
 
 (defun mini-frame--display (fn args)
   "Show mini-frame and call FN with ARGS."
@@ -238,14 +257,8 @@ ALIST is passed to `window--display-buffer'."
       (progn
         (setq mini-frame-selected-frame selected-frame)
         (setq mini-frame-frame
-              (make-frame (append '((visibility . nil)
-                                    (minibuffer . only)
-                                    (undecorated . t)
-                                    (keep-ratio . t)
-                                    (user-position . t)
-                                    (user-size . t)
-                                    (internal-border-width . 3)
-                                    (drag-internal-border . t))
+              (make-frame (append '((minibuffer . only))
+                                  mini-frame--common-parameters
                                   parent-frame-parameters
                                   show-parameters)))
         (set-face-background 'fringe nil mini-frame-frame)))
@@ -269,6 +282,9 @@ ALIST is passed to `window--display-buffer'."
     (when (frame-live-p mini-frame-completions-frame)
       (make-frame-invisible mini-frame-completions-frame))
     (select-frame-set-input-focus mini-frame-selected-frame))))
+
+(defvar which-key-popup-type)
+(defvar ivy-fixed-height-minibuffer)
 
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame (if needed) and call FN with ARGS."
@@ -301,7 +317,9 @@ ALIST is passed to `window--display-buffer'."
           (delete-frame-functions
            (cons #'mini-frame--delete-frame delete-frame-functions))
           ;; FIXME which-key is not working in mini frame
-          (which-key-popup-type 'frame))
+          (which-key-popup-type 'frame)
+          (ivy-fixed-height-minibuffer nil))
+      (ignore ivy-fixed-height-minibuffer)
       (ignore resize-mini-frames)
       (ignore which-key-popup-type)
       (unwind-protect
