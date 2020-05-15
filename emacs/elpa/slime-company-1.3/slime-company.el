@@ -4,9 +4,9 @@
 ;;
 ;; Author: Ole Arndt <anwyn@sugarshark.com>
 ;; Keywords: convenience, lisp, abbrev
-;; Package-Version: 1.1
-;; Version: 1.1
-;; Package-Requires: ((slime "2.13") (company "0.9.0"))
+;; Package-Version: 1.3
+;; Version: 1.3
+;; Package-Requires: ((emacs "24.4") (slime "2.13") (company "0.9.0"))
 ;;
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@
 (require 'company)
 (require 'cl-lib)
 (require 'eldoc)
+(require 'subr-x)
 
 (eval-when-compile
   (require 'cl))
@@ -85,6 +86,8 @@ In addition to displaying the arglist slime-company will also do one of:
   Works best if you also call `delete-horizontal-space' before closing
   parentheses to remove excess whitespace.
 - call an arbitrary function with the completion string as the first parameter.
+  Do not call company-complete inside this function, company doesn't like to
+  be invoked recursively.
 "
   :group 'slime-company
   :type '(choice
@@ -101,12 +104,12 @@ In addition to displaying the arglist slime-company will also do one of:
           (function :tag "Custom function" nil)))
 
 (defcustom slime-company-completion 'simple
-  "Which Slime completion to use: `simple' or `fuzzy'.
+  "Which Slime completion method to use: `simple' or `fuzzy'.
 
 `simple' just displays the completion candidate,
 `fuzzy' also displays the classification flags as an annotation,
 alignment of annotations via `company-tooltip-align-annotations'
-is recommended.
+is recommended. This method also can complete package names.
 "
   :group 'slime-company
   :type '(choice
@@ -126,12 +129,34 @@ be active in derived modes as well."
   :group 'slime-company
   :type '(repeat symbol))
 
-(defun slime-company-just-one-space (_)
-  (just-one-space))
+(defun slime-company-just-one-space (completion-string)
+  (unless (string-suffix-p ":" completion-string)
+    (just-one-space)))
 
 (defsubst slime-company-active-p ()
   "Test if the slime-company backend should be active in the current buffer."
   (apply #'derived-mode-p slime-company-major-modes))
+
+(define-derived-mode slime-company-doc-mode help-mode "Doc"
+  "Documentation mode for slime-company."
+  (setq font-lock-defaults
+        '((("^\\([^ ]\\{4,\\}\\)\\b" . (1 font-lock-function-name-face t))
+           ("^[ 	]*\\b\\([A-Z][A-Za-z0-9_ 	%\\*\\-]+:\\)\\([ 	]\\|$\\)"
+            . (1 font-lock-doc-face))
+           ("^\\([A-Z][A-Za-z ]+:\\)\\([ 	]\\|$\\)"
+            . (1 font-lock-doc-face t))
+           ("(\\(FUNCTION\\|VALUES\\|OR\\|EQL\\|LAMBDA\\)\\b"
+            . (1 font-lock-keyword-face))
+           ("[	 (]+\\(&[A-Z0-9\\-]+\\)\\b" . (1 font-lock-type-face))
+           ("[	 (]+\\(:[A-Z0-9\\-]+\\)\\b" . (1 font-lock-builtin-face))
+           ("\\b\\(T\\|t\\|NIL\\|nil\\|NULL\\|null\\)\\b" . (1 font-lock-constant-face))
+           ("\\b[+-]?[0-9/\\.]+[sdeSDE]?\\+?[0-9]*\\b" . font-lock-constant-face)
+           ("#[xX][+-]?[0-9A-F/]+\\b" . font-lock-constant-face)
+           ("#[oO][+-]?[0-7/]+\\b" . font-lock-constant-face)
+           ("#[bB][+-]?[01/]+\\b" . font-lock-constant-face)
+           ("#[0-9]+[rR][+-]?[0-9A-Z/]+\\b" . font-lock-constant-face)
+           ("\\b\\([A-Z0-9:+%<>#*\\.\\-]\\{2,\\}\\)\\b"
+            . (1 font-lock-variable-name-face))))))
 
 ;;; ----------------------------------------------------------------------------
 ;;; * Activation
@@ -227,11 +252,22 @@ be active in derived modes as well."
         (slime-message "%s" (slime-company--format arglist))))))
 
 (defun slime-company--doc-buffer (candidate)
-  (let ((doc (slime-eval `(swank:describe-symbol ,candidate))))
+  (let* ((pkg-name (when (string-suffix-p ":" candidate)
+                     (format "#:%s" (string-remove-suffix ":" candidate))))
+         (doc (if pkg-name
+                  (slime-eval `(swank::describe-to-string
+                                (cl:find-package
+                                 (cl:symbol-name (cl:read-from-string ,pkg-name)))))
+                (slime-eval `(swank:describe-symbol ,candidate)))))
     (with-current-buffer (company-doc-buffer)
-      (insert doc)
-      (goto-char (point-min))
-      (current-buffer))))
+       (slime-company-doc-mode)
+       (setq buffer-read-only nil)
+       (insert doc)
+       (goto-char (point-min))
+       (current-buffer))))
+
+(defun slime-company--quickhelp-string (candidate)
+  (slime-eval `(swank:documentation-symbol ,candidate)))
 
 (defun slime-company--location (candidate)
   (let ((source-buffer (current-buffer)))
@@ -246,8 +282,20 @@ be active in derived modes as well."
 
 (defun slime-company--post-completion (candidate)
   (slime-company--echo-arglist candidate)
-  (when slime-company-after-completion
+  (when (functionp slime-company-after-completion)
     (funcall slime-company-after-completion candidate)))
+
+(defun slime-company--in-string-or-comment ()
+  "Return non-nil if point is within a string or comment.
+In the REPL we disregard anything not in the current input area."
+  (save-restriction
+    (when (derived-mode-p 'slime-repl-mode)
+      (narrow-to-region slime-repl-input-start-mark (point)))
+    (let* ((sp (syntax-ppss))
+           (beg (nth 8 sp)))
+      (when (or (eq (char-after beg) ?\")
+                (nth 4 sp))
+        beg))))
 
 ;;; ----------------------------------------------------------------------------
 ;;; * Company backend function
@@ -261,7 +309,7 @@ be active in derived modes as well."
      (when (and (slime-company-active-p)
                 (slime-connected-p)
                 (or slime-company-complete-in-comments-and-strings
-                    (null (company-in-string-or-comment))))
+                    (null (slime-company--in-string-or-comment))))
        (company-grab-symbol)))
     (candidates
      (slime-company--fetch-candidates-async (substring-no-properties arg)))
@@ -271,6 +319,8 @@ be active in derived modes as well."
      (concat " " (get-text-property 0 'flags arg)))
     (doc-buffer
      (slime-company--doc-buffer (substring-no-properties arg)))
+    (quickhelp-string
+     (slime-company--quickhelp-string (substring-no-properties arg)))
     (location
      (slime-company--location (substring-no-properties arg)))
     (post-completion
