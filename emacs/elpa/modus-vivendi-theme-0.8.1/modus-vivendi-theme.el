@@ -4,8 +4,8 @@
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
 ;; URL: https://gitlab.com/protesilaos/modus-themes
-;; Package-Version: 0.7.0
-;; Version: 0.7.0
+;; Package-Version: 0.8.1
+;; Version: 0.8.1
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: faces, theme, accessibility
 
@@ -43,9 +43,13 @@
 ;;     modus-vivendi-theme-slanted-constructs
 ;;     modus-vivendi-theme-bold-constructs
 ;;     modus-vivendi-theme-proportional-fonts
+;;     modus-vivendi-theme-rainbow-headings
+;;     modus-vivendi-theme-section-headings
 ;;     modus-vivendi-theme-scale-headings
 ;;     modus-vivendi-theme-visible-fringes
 ;;     modus-vivendi-theme-distinct-org-blocks
+;;     modus-vivendi-theme-3d-modeline
+;;     modus-vivendi-theme-subtle-diffs
 ;;
 ;; The default scale is as follows (it can be customised as well):
 ;;
@@ -60,6 +64,7 @@
 ;; notify me of any missing package or change you would like to see.
 ;;
 ;;     ace-window
+;;     ag
 ;;     alert
 ;;     all-the-icons
 ;;     annotate
@@ -78,6 +83,7 @@
 ;;     centaur-tabs
 ;;     change-log and log-view (`vc-print-log' and `vc-print-root-log')
 ;;     cider
+;;     color-rg
 ;;     column-enforce-mode
 ;;     company-mode
 ;;     company-posframe
@@ -89,10 +95,12 @@
 ;;     counsel-org-capture-string
 ;;     cov
 ;;     csv-mode
+;;     ctrlf
 ;;     custom (M-x customize)
 ;;     dap-mode
 ;;     dashboard (emacs-dashboard)
 ;;     deadgrep
+;;     debbugs
 ;;     define-word
 ;;     deft
 ;;     diff-hl
@@ -112,6 +120,7 @@
 ;;     easy-kill
 ;;     ebdb
 ;;     ediff
+;;     eglot
 ;;     eldoc-box
 ;;     elfeed
 ;;     elfeed-score
@@ -134,11 +143,13 @@
 ;;     flymake
 ;;     flyspell
 ;;     flyspell-correct
+;;     flx
 ;;     freeze-it
 ;;     frog-menu
 ;;     focus
 ;;     fold-this
 ;;     font-lock (generic syntax highlighting)
+;;     forge
 ;;     fountain (fountain-mode)
 ;;     geiser
 ;;     git
@@ -151,17 +162,22 @@
 ;;     helm-ls-git
 ;;     helm-switch-shell
 ;;     helm-xref
+;;     helpful
 ;;     highlight-blocks
 ;;     highlight-defined
 ;;     highlight-escape-sequences (`hes-mode')
 ;;     highlight-numbers
+;;     highlight-symbol
 ;;     highlight-thing
 ;;     hl-fill-column
 ;;     hl-line-mode
 ;;     hl-todo
 ;;     hydra
+;;     ibuffer
+;;     icomplete
 ;;     ido-mode
 ;;     iedit
+;;     iflipb
 ;;     imenu-list
 ;;     info
 ;;     info-colors
@@ -180,6 +196,8 @@
 ;;     lsp-mode
 ;;     lsp-ui
 ;;     magit
+;;     magit-imerge
+;;     man
 ;;     markdown-mode
 ;;     markup-faces (`adoc-mode')
 ;;     mentor
@@ -190,7 +208,9 @@
 ;;     mu4e-conversation
 ;;     multiple-cursors
 ;;     neotree
+;;     no-emoji
 ;;     num3-mode
+;;     orderless
 ;;     org
 ;;     org-journal
 ;;     org-noter
@@ -203,11 +223,16 @@
 ;;     outline-mode
 ;;     outline-minor-faces
 ;;     package (M-x list-packages)
+;;     page-break-lines
 ;;     paradox
 ;;     paren-face
+;;     parrot
 ;;     pass
 ;;     persp-mode
 ;;     perspective
+;;     phi-grep
+;;     phi-search
+;;     pomidor
 ;;     powerline
 ;;     powerline-evil
 ;;     proced
@@ -215,6 +240,7 @@
 ;;     rainbow-blocks
 ;;     rainbow-identifiers
 ;;     rainbow-delimiters
+;;     rcirc
 ;;     regexp-builder (also known as `re-builder')
 ;;     rg
 ;;     ripgrep
@@ -231,28 +257,42 @@
 ;;     smartparens
 ;;     smerge
 ;;     speedbar
+;;     spell-fu
 ;;     stripes
 ;;     suggest
+;;     switch-window
 ;;     swiper
+;;     swoop
 ;;     sx
 ;;     symbol-overlay
+;;     tab-bar-mode
+;;     tab-line-mode
 ;;     syslog-mode
+;;     trashed
 ;;     telephone-line
 ;;     term
+;;     tomatinho
 ;;     transient (pop-up windows like Magit's)
 ;;     treemacs
+;;     tuareg
 ;;     undo-tree
 ;;     vc (built-in mode line status for version control)
 ;;     vc-annotate (C-x v g)
+;;     vimish-fold
+;;     visible-mark
 ;;     visual-regexp
 ;;     volatile-highlights
+;;     vterm
+;;     wcheck-mode
 ;;     web-mode
 ;;     wgrep
 ;;     which-function-mode
 ;;     which-key
 ;;     whitespace-mode
 ;;     window-divider-mode
+;;     winum
 ;;     writegood-mode
+;;     woman
 ;;     xah-elisp-mode
 ;;     xref
 ;;     xterm-color (and ansi-colors)
@@ -260,6 +300,8 @@
 ;;     ztree
 
 ;;; Code:
+
+
 
 (deftheme modus-vivendi
   "Dark theme that conforms with the highest accessibility
@@ -341,6 +383,14 @@ between foreground and background is >= 7:1)."
   "Use proportional fonts (variable-pitch) in headings."
   :type 'boolean)
 
+(defcustom modus-vivendi-theme-rainbow-headings nil
+  "Use more saturated colours for headings."
+  :type 'boolean)
+
+(defcustom modus-vivendi-theme-section-headings nil
+  "Use a background and an overline in headings."
+  :type 'boolean)
+
 (defcustom modus-vivendi-theme-scale-headings nil
   "Use font scaling for headings."
   :type 'boolean)
@@ -368,6 +418,89 @@ between foreground and background is >= 7:1)."
 (defcustom modus-vivendi-theme-distinct-org-blocks nil
   "Use a distinct background for `org-mode' source blocks."
   :type 'boolean)
+
+(defcustom modus-vivendi-theme-3d-modeline nil
+  "Use a three-dimensional style for the active mode line."
+  :type 'boolean)
+
+(defcustom modus-vivendi-theme-subtle-diffs nil
+  "Use fewer/dim backgrounds in `diff-mode', `ediff',`magit'."
+  :type 'boolean)
+
+;; Helper functions that are meant to ease the implementation of the
+;; above customisation options.
+(defun modus-vivendi-theme-heading-foreground (subtle rainbow)
+  "Apply foreground value to headings.
+SUBTLE is the default aesthetic.
+RAINBOW is the saturated one."
+  (if modus-vivendi-theme-rainbow-headings
+      (list :foreground rainbow)
+    (list :foreground subtle)))
+
+(defun modus-vivendi-theme-heading-block (bg fg)
+  "Conditionally extend heading styles.
+Apply BG to background and FG to overline."
+  (if modus-vivendi-theme-section-headings
+      (list :background bg :overline fg)
+    (list :background nil :overline nil)))
+
+(defun modus-vivendi-theme-org-todo-block (bgbox fgbox fg)
+  "Conditionally extend the styles of Org keywords.
+BGBOX applies to the background.
+FGBOX applies to the foreground and the border.
+FG is used when no block style is in effect."
+  (if modus-vivendi-theme-section-headings
+      (list :background bgbox :foreground fgbox :box (list :color fgbox))
+    (list :foreground fg)))
+
+(defun modus-vivendi-theme-org-src-block (bgsrc bg)
+  "Conditionally set the styles of Org source blocks.
+BGSRC applies to a distinct background.  BG is used to keep
+blocks the same background as the rest of the buffer."
+  (if modus-vivendi-theme-distinct-org-blocks
+      (list :background bgsrc :extend t)
+    (list :background bg)))
+
+(defun modus-vivendi-theme-modeline-box (col3d col &optional btn int)
+  "Control the box properties of the mode line.
+COL3D is the border that is intended for the three-dimensional modeline.
+COL applies to the two-dimensional modeline.
+Optional BTN provides the 3d button style.
+Optional INT defines a border width."
+  (let* ((style (if btn 'released-button nil))
+         (int (if int int 1)))
+    (if modus-vivendi-theme-3d-modeline
+        (list :line-width int :color col3d :style style)
+      (list :line-width 1 :color col :style nil))))
+
+(defun modus-vivendi-theme-modeline-props (bg3d fg3d &optional bg fg)
+  "Control the background and foreground of the mode line.
+BG is the modeline's background.
+FG is the modeline's foreground.
+BG3D and FG3D apply to the three-dimensional modeline style."
+  (if modus-vivendi-theme-3d-modeline
+      (list :background bg3d :foreground fg3d)
+    (list :background bg :foreground fg)))
+
+(defun modus-vivendi-theme-diffs (subtle-bg subtle-fg intense-bg intense-fg)
+  "Colour combinations for `modus-vivendi-theme-subtle-diffs'.
+
+SUBTLE-BG should be similar or the same as the main background
+SUBTLE-FG should be an appropriate accent value
+INTENSE-BG should be one of the dedicated backgrounds for diffs
+INTENSE-FG should be one of the dedicated foregrounds for diffs"
+  (if modus-vivendi-theme-subtle-diffs
+      (list :background subtle-bg :foreground subtle-fg)
+    (list :background intense-bg :foreground intense-fg)))
+
+(defun modus-vivendi-theme-scale (amount)
+  "Scale heading by AMOUNT.
+
+AMOUNT is a customisation option."
+  (when modus-vivendi-theme-scale-headings
+    (list :height amount)))
+
+
 
 ;; Define colour palette.  Each colour must have a >= 7:1 contrast
 ;; ratio relative to the foreground/background colour it is rendered
@@ -399,7 +532,7 @@ between foreground and background is >= 7:1)."
       ;; must be combined with: `bg-main', `bg-alt', `bg-dim'
       (red-alt "#f4923b") (green-alt "#58dd13")
       (yellow-alt "#e5f040") (blue-alt "#72a4ff")
-      (magenta-alt "#ed92f8") (cyan-alt "#4ae8fc")
+      (magenta-alt "#f78fe7") (cyan-alt "#4ae8fc")
       ;; same purpose as above, just slight differences
       ;;
       ;; must be combined with: `bg-main', `bg-alt', `bg-dim'
@@ -412,6 +545,12 @@ between foreground and background is >= 7:1)."
       (red-nuanced "#ffcccc") (green-nuanced "#b0f0b0")
       (yellow-nuanced "#e0e0bb") (blue-nuanced "#ccccff")
       (magenta-nuanced "#eeccee") (cyan-nuanced "#aaeeee")
+      ;; styles for slightly accented background
+      ;;
+      ;; must be combined with any of the above foreground values
+      (red-nuanced-bg "#180505") (green-nuanced-bg "#061206")
+      (yellow-nuanced-bg "#18140a") (blue-nuanced-bg "#070722")
+      (magenta-nuanced-bg "#160616") (cyan-nuanced-bg "#091620")
       ;; styles for elements that should draw attention to themselves
       ;;
       ;; must be combined with: `bg-main'
@@ -446,16 +585,16 @@ between foreground and background is >= 7:1)."
       ;; styles that are meant exclusively for the mode line
       ;;
       ;; must be combined with: `bg-active', `bg-inactive'
-      (red-active "#ffaa20") (green-active "#70e030")
+      (red-active "#ffa49e") (green-active "#70e030")
       (yellow-active "#efdf00") (blue-active "#00ccff")
       (magenta-active "#d0acff") (cyan-active "#00ddc0")
       ;; styles that are meant exclusively for the fringes
       ;;
       ;; must have a minimum contrast ratio of 1.5:1 with `bg-inactive'
-      ;; and be combined with `fg-main'
-      (red-fringe-bg "#a00000") (green-fringe-bg "#006600")
-      (yellow-fringe-bg "#775500") (blue-fringe-bg "#3228bb")
-      (magenta-fringe-bg "#990099") (cyan-fringe-bg "#005599")
+      ;; and be combined with `fg-main' or `fg-dim'
+      (red-fringe-bg "#8f0040") (green-fringe-bg "#006000")
+      (yellow-fringe-bg "#6f4a00") (blue-fringe-bg "#3a30ab")
+      (magenta-fringe-bg "#692089") (cyan-fringe-bg "#0068a0")
 
       ;; styles reserved for specific faces
       ;;
@@ -474,8 +613,16 @@ between foreground and background is >= 7:1)."
       ;; though only for styling special elements, such as underlining
       ;; the current tab
       ;;
+      ;; `fg-escape-char-construct' and `fg-escape-char-backslash' can
+      ;; be combined `bg-main', `bg-dim', `bg-alt'
+      ;;
+      ;; `fg-lang-error', `fg-lang-warning', `fg-lang-note' can be
+      ;; combined with `bg-main', `bg-dim', `bg-alt'
+      ;;
       ;; `fg-mark', `fg-mark-del', `fg-mark-other' can be combined with
       ;; `bg-main', `bg-dim', `bg-alt', `bg-hl-line'
+      ;;
+      ;; `fg-unfocused' must be combined with `fg-main'
       ;;
       ;; the window divider colours apply to faces with just an fg value
       ;;
@@ -483,23 +630,43 @@ between foreground and background is >= 7:1)."
       (bg-hl-line "#151823")
       (bg-paren-match "#6e3a50")
       (bg-region "#3c3c3c")
+
       (bg-tab-active "#484848")
       (bg-tab-inactive "#2f2f2f")
       (fg-tab-active "#99efff")
+
+      (fg-escape-char-construct "#e7a59a")
+      (fg-escape-char-backslash "#abab00")
+
+      (fg-lang-error "#ef8690")
+      (fg-lang-warning "#b0aa00")
+      (fg-lang-note "#9d9def")
+
       (fg-window-divider-inner "#646464")
       (fg-window-divider-outer "#969696")
+
+      (fg-unfocused "#93959b")
+
       (fg-header "#dddddd") (bg-header "#2a2a2a")
       (fg-whitespace "#a4959f") (bg-whitespace "#170016")
+
       (fg-diff-heading "#dadffe") (bg-diff-heading "#304466")
       (fg-diff-added "#94ba94") (bg-diff-added "#0a280a")
       (fg-diff-changed "#b0ba9f") (bg-diff-changed "#2a2000")
       (fg-diff-removed "#c6adaa") (bg-diff-removed "#40160f")
+
       (fg-diff-refine-added "#e0f6e0") (bg-diff-refine-added "#005a36")
       (fg-diff-refine-changed "#ffffcc") (bg-diff-refine-changed "#585800")
       (fg-diff-refine-removed "#ffd9eb") (bg-diff-refine-removed "#852828")
+
       (fg-diff-focus-added "#b4ddb4") (bg-diff-focus-added "#203d20")
       (fg-diff-focus-changed "#d0daaf") (bg-diff-focus-changed "#4a3a10")
       (fg-diff-focus-removed "#eebdba") (bg-diff-focus-removed "#5e2526")
+
+      (fg-diff-neutral-0 "#fcfcfc") (bg-diff-neutral-0 "#575757")
+      (fg-diff-neutral-1 "#dddddd") (bg-diff-neutral-1 "#454545")
+      (fg-diff-neutral-2 "#bfbfbf") (bg-diff-neutral-2 "#313131")
+
       (fg-mark "#60cfa2") (bg-mark "#002f2f")
       (fg-mark-del "#ff99aa") (bg-mark-del "#5a0000")
       (fg-mark-other "#f0aa20") (bg-mark-other "#3f2210")
@@ -557,12 +724,12 @@ between foreground and background is >= 7:1)."
    `(modus-theme-active-magenta ((,class (:background ,magenta-active :foreground ,bg-active))))
    `(modus-theme-active-cyan ((,class (:background ,cyan-active :foreground ,bg-active))))
    ;;; for fringe indicators
-   `(modus-theme-fringe-red ((,class (:background ,red-fringe-bg :foreground ,fg-main))))
-   `(modus-theme-fringe-green ((,class (:background ,green-fringe-bg :foreground ,fg-main))))
-   `(modus-theme-fringe-yellow ((,class (:background ,yellow-fringe-bg :foreground ,fg-main))))
-   `(modus-theme-fringe-blue ((,class (:background ,blue-fringe-bg :foreground ,fg-main))))
-   `(modus-theme-fringe-magenta ((,class (:background ,magenta-fringe-bg :foreground ,fg-main))))
-   `(modus-theme-fringe-cyan ((,class (:background ,cyan-fringe-bg :foreground ,fg-main))))
+   `(modus-theme-fringe-red ((,class (:background ,red-fringe-bg :foreground ,fg-dim))))
+   `(modus-theme-fringe-green ((,class (:background ,green-fringe-bg :foreground ,fg-dim))))
+   `(modus-theme-fringe-yellow ((,class (:background ,yellow-fringe-bg :foreground ,fg-dim))))
+   `(modus-theme-fringe-blue ((,class (:background ,blue-fringe-bg :foreground ,fg-dim))))
+   `(modus-theme-fringe-magenta ((,class (:background ,magenta-fringe-bg :foreground ,fg-dim))))
+   `(modus-theme-fringe-cyan ((,class (:background ,cyan-fringe-bg :foreground ,fg-dim))))
    ;;; special base values that are closer to the grayscale than
    ;;; the accents defined above
    `(modus-theme-special-cold ((,class (:background ,bg-special-cold :foreground ,fg-special-cold))))
@@ -590,16 +757,16 @@ between foreground and background is >= 7:1)."
    `(fringe ((,class (:background
                       ,(if modus-vivendi-theme-visible-fringes bg-inactive bg-main)
                       :foreground ,fg-main))))
+   `(vertical-border ((,class (:foreground ,fg-window-divider-inner))))
    ;;;; basic and/or ungrouped styles
    `(error ((,class (:foreground ,red :weight bold))))
-   `(escape-glyph ((,class (:inherit modus-theme-refine-blue :weight bold))))
+   `(escape-glyph ((,class (:foreground ,fg-escape-char-construct))))
    `(header-line ((,class (:background ,bg-header :foreground ,fg-header))))
-   `(homoglyph ((,class (:foreground ,yellow-alt-other))))
+   `(homoglyph ((,class (:foreground ,fg-escape-char-construct))))
    `(ibuffer-locked-buffer ((,class (:foreground ,yellow-alt-other))))
    `(italic ((,class (:foreground ,fg-special-cold :slant italic))))
-   `(no-emoji ((,class (:foreground ,fg-special-mild :weight bold))))
-   `(nobreak-hyphen ((,class (:inherit modus-theme-special-cold))))
-   `(nobreak-space ((,class (:inherit modus-theme-special-cold :underline t))))
+   `(nobreak-hyphen ((,class (:foreground ,fg-escape-char-construct))))
+   `(nobreak-space ((,class (:foreground ,fg-escape-char-construct :underline t))))
    `(minibuffer-prompt ((,class (:foreground ,cyan-alt))))
    `(mm-command-output ((,class (:foreground ,red-alt-other))))
    `(mm-uu-extract ((,class (:background ,bg-dim :foreground ,fg-special-mild))))
@@ -608,6 +775,9 @@ between foreground and background is >= 7:1)."
    `(success ((,class (:foreground ,green :weight bold))))
    `(trailing-whitespace ((,class (:background ,red-intense-bg))))
    `(warning ((,class (:foreground ,yellow :weight bold))))
+   ;;;; ag
+   `(ag-hit-face ((,class (:foreground ,fg-special-cold))))
+   `(ag-match-face ((,class (:inherit modus-theme-special-calm))))
    ;;;; alert
    `(alert-high-face ((,class (:foreground ,red-alt :weight bold))))
    `(alert-low-face ((,class (:foreground ,fg-special-mild))))
@@ -678,11 +848,11 @@ between foreground and background is >= 7:1)."
    `(apt-sources-list-type ((,class (:foreground ,magenta))))
    `(apt-sources-list-uri ((,class (:foreground ,blue))))
    ;;;; artbollocks-mode
-   `(artbollocks-face ((,class (:background ,bg-alt :foreground ,magenta-alt-other :underline t))))
-   `(artbollocks-lexical-illusions-face ((,class (:inherit modus-theme-refine-magenta :underline t))))
-   `(artbollocks-passive-voice-face ((,class (:background ,bg-alt :foreground ,cyan-alt-other :underline t))))
-   `(artbollocks-weasel-words-face ((,class (:background ,bg-alt :foreground ,yellow-alt-other :underline t))))
-   ;;;; auctex and TeX
+   `(artbollocks-face ((,class (:foreground ,cyan-nuanced :underline (:color ,fg-lang-note :style line)))))
+   `(artbollocks-lexical-illusions-face ((,class (:background ,bg-alt :foreground ,red-alt :underline t))))
+   `(artbollocks-passive-voice-face ((,class (:foreground ,yellow-nuanced :underline (:color ,fg-lang-warning :style line)))))
+   `(artbollocks-weasel-words-face ((,class (:foreground ,red-nuanced :underline (:color ,fg-lang-error :style line)))))
+   ;;;; auctex and Tex
    `(font-latex-bold-face ((,class (:foreground ,fg-special-calm :weight bold))))
    `(font-latex-doctex-documentation-face ((,class (:foreground ,fg-special-cold :slant ,modus-theme-slant))))
    `(font-latex-doctex-preprocessor-face ((,class (:foreground ,magenta-alt :weight ,modus-theme-bold))))
@@ -691,29 +861,24 @@ between foreground and background is >= 7:1)."
    `(font-latex-script-char-face ((,class (:foreground ,cyan-alt-other))))
    `(font-latex-sectioning-0-face ((,class (:inherit ,modus-theme-variable-pitch
                                                      :foreground ,blue-nuanced :weight bold
-                                                     ,@(when modus-vivendi-theme-scale-headings
-                                                         (list :height modus-vivendi-theme-scale-4))))))
+                                                     ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(font-latex-sectioning-1-face ((,class (:inherit ,modus-theme-variable-pitch
                                                      :foreground ,blue-nuanced :weight bold
-                                                     ,@(when modus-vivendi-theme-scale-headings
-                                                         (list :height modus-vivendi-theme-scale-3))))))
+                                                     ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-3)))))
    `(font-latex-sectioning-2-face ((,class (:inherit ,modus-theme-variable-pitch
                                                      :foreground ,blue-nuanced :weight bold
-                                                     ,@(when modus-vivendi-theme-scale-headings
-                                                         (list :height modus-vivendi-theme-scale-2))))))
+                                                     ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-2)))))
    `(font-latex-sectioning-3-face ((,class (:inherit ,modus-theme-variable-pitch
                                                      :foreground ,blue-nuanced :weight bold
-                                                     ,@(when modus-vivendi-theme-scale-headings
-                                                         (list :height modus-vivendi-theme-scale-1))))))
+                                                     ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-1)))))
    `(font-latex-sectioning-4-face ((,class (:inherit ,modus-theme-variable-pitch
                                                      :foreground ,blue-nuanced :weight bold))))
    `(font-latex-sectioning-5-face ((,class (:inherit ,modus-theme-variable-pitch
                                                      :foreground ,blue-nuanced))))
    `(font-latex-sedate-face ((,class (:foreground ,magenta-alt-other :weight ,modus-theme-bold))))
    `(font-latex-slide-title-face ((,class (:inherit ,modus-theme-variable-pitch
-                                                     :foreground ,cyan-nuanced :weight bold
-                                                     ,@(when modus-vivendi-theme-scale-headings
-                                                         (list :height modus-vivendi-theme-scale-4))))))
+                                                    :foreground ,cyan-nuanced :weight bold
+                                                    ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(font-latex-string-face ((,class (:foreground ,blue-alt))))
    `(font-latex-subscript-face ((,class (:height 0.95))))
    `(font-latex-superscript-face ((,class (:height 0.95))))
@@ -790,8 +955,7 @@ between foreground and background is >= 7:1)."
    `(cfw:face-sunday ((,class (:background ,bg-alt :foreground ,magenta-alt-other :weight bold))))
    `(cfw:face-title ((,class (:inherit ,modus-theme-variable-pitch
                                        :foreground ,fg-special-warm :weight bold
-                                       ,@(when modus-vivendi-theme-scale-headings
-                                           (list :height modus-vivendi-theme-scale-4))))))
+                                       ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(cfw:face-today ((,class (:foreground ,blue :weight bold))))
    `(cfw:face-today-title ((,class (:inherit modus-theme-special-mild :box t))))
    `(cfw:face-toolbar ((,class (:background ,bg-active :foreground ,bg-active))))
@@ -849,7 +1013,7 @@ between foreground and background is >= 7:1)."
    `(cider-stacktrace-filter-inactive-face ((,class (:foreground ,cyan-alt))))
    `(cider-stacktrace-fn-face ((,class (:foreground ,fg-main :weight bold))))
    `(cider-stacktrace-ns-face ((,class (:foreground ,fg-alt :slant italic))))
-   `(cider-stacktrace-promoted-button-face ((,class (box (:line-width 3 :color ,fg-alt :style released-button)) :foreground ,red)))
+   `(cider-stacktrace-promoted-button-face ((,class (:box (:line-width 3 :color ,fg-alt :style released-button)) :foreground ,red)))
    `(cider-stacktrace-suppressed-button-face ((,class (:box (:line-width 3 :color ,fg-alt :style pressed-button))
                                                       :background ,bg-alt :foreground ,fg-alt)))
    `(cider-test-error-face ((,class (:inherit modus-theme-subtle-red))))
@@ -857,6 +1021,21 @@ between foreground and background is >= 7:1)."
    `(cider-test-success-face ((,class (:inherit modus-theme-intense-green))))
    `(cider-traced-face ((,class (:box (:line-width -1 :color ,cyan :style nil) :background ,bg-dim))))
    `(cider-warning-highlight-face ((,class (:foreground ,yellow :underline t))))
+   ;;;; color-rg
+   `(color-rg-font-lock-column-number ((,class (:foreground ,magenta-alt-other))))
+   `(color-rg-font-lock-command ((,class (:foreground ,fg-main :weight bold))))
+   `(color-rg-font-lock-file ((,class (:foreground ,fg-special-cold :weight bold))))
+   `(color-rg-font-lock-flash ((,class (:inherit modus-theme-intense-blue))))
+   `(color-rg-font-lock-function-location ((,class (:inherit modus-theme-special-calm))))
+   `(color-rg-font-lock-header-line-directory ((,class (:foreground ,blue-active))))
+   `(color-rg-font-lock-header-line-edit-mode ((,class (:foreground ,magenta-active))))
+   `(color-rg-font-lock-header-line-keyword ((,class (:foreground ,green-active))))
+   `(color-rg-font-lock-header-line-text ((,class (:foreground ,fg-active))))
+   `(color-rg-font-lock-line-number ((,class (:foreground ,fg-special-warm))))
+   `(color-rg-font-lock-mark-changed ((,class (:foreground ,blue :weight bold))))
+   `(color-rg-font-lock-mark-deleted ((,class (:foreground ,red :weight bold))))
+   `(color-rg-font-lock-match ((,class (:inherit modus-theme-special-calm))))
+   `(color-rg-font-lock-position-splitter ((,class (:foreground ,fg-alt))))
    ;;;; column-enforce-mode
    `(column-enforce-face ((,class (:inherit modus-theme-refine-yellow))))
    ;;;; company-mode
@@ -882,18 +1061,17 @@ between foreground and background is >= 7:1)."
    `(company-posframe-metadata ((,class (:background ,bg-inactive :foreground ,fg-inactive))))
    ;;;; compilation feedback
    `(compilation-column-number ((,class (:foreground ,magenta-alt-other))))
-   `(compilation-error ((,class (:foreground ,red :weight bold))))
+   `(compilation-error ((,class (:foreground ,red :weight ,modus-theme-bold))))
    `(compilation-info ((,class (:foreground ,fg-special-cold))))
    `(compilation-line-number ((,class (:foreground ,fg-special-warm))))
-   `(compilation-mode-line-exit ((,class (:foreground ,blue-active :weight bold))))
-   `(compilation-mode-line-fail ((,class (:foreground ,red-active :weight bold))))
-   `(compilation-mode-line-run ((,class (:foreground ,magenta-active :weight bold))))
-   `(compilation-warning ((,class (:foreground ,yellow :weight bold))))
+   `(compilation-mode-line-exit ((,class (:foreground ,blue-active :weight ,modus-theme-bold))))
+   `(compilation-mode-line-fail ((,class (:foreground ,red-active :weight ,modus-theme-bold))))
+   `(compilation-mode-line-run ((,class (:foreground ,magenta-active :weight ,modus-theme-bold))))
+   `(compilation-warning ((,class (:foreground ,yellow :weight ,modus-theme-bold))))
    ;;;; completions
    `(completions-annotations ((,class (:foreground ,fg-special-cold :slant ,modus-theme-slant))))
    `(completions-common-part ((,class (:foreground ,cyan-alt-other))))
    `(completions-first-difference ((,class (:foreground ,blue-alt-other :weight bold))))
-   `(icomplete-first-match ((,class (:foreground ,magenta :weight bold))))
    ;;;; counsel
    `(counsel-active-mode ((,class (:foreground ,magenta-alt-other))))
    `(counsel-application-name ((,class (:foreground ,red-alt-other))))
@@ -931,6 +1109,10 @@ between foreground and background is >= 7:1)."
    `(cov-none-face ((,class (:foreground ,cyan-intense))))
    ;;;; csv-mode
    `(csv-separator-face ((,class (:background ,bg-special-cold :foreground ,fg-main))))
+   ;;;; ctrlf
+   `(ctrlf-highlight-active ((,class (:inherit modus-theme-intense-green :weight bold))))
+   `(ctrlf-highlight-line ((,class (:background ,bg-hl-line))))
+   `(ctrlf-highlight-passive ((,class (:inherit modus-theme-refine-cyan))))
    ;;;; custom (M-x customize)
    `(custom-button ((,class (:box (:line-width 2 :color nil :style released-button)
                                   :background ,bg-active :foreground ,fg-main))))
@@ -953,7 +1135,7 @@ between foreground and background is >= 7:1)."
    `(custom-variable-tag ((,class (:foreground ,cyan :weight bold))))
    ;;;; dap-mode
    `(dap-mouse-eval-thing-face ((,class (:box (:line-width -1 :color ,blue-active :style nil)
-                                            :background ,bg-active :foreground ,fg-main))))
+                                              :background ,bg-active :foreground ,fg-main))))
    `(dap-result-overlay-face ((,class (:box (:line-width -1 :color ,bg-active :style nil)
                                             :background ,bg-active :foreground ,fg-main))))
    `(dap-ui-breakpoint-verified-fringe ((,class (:foreground ,green-active :weight bold))))
@@ -977,6 +1159,19 @@ between foreground and background is >= 7:1)."
    `(deadgrep-meta-face ((,class (:foreground ,fg-alt))))
    `(deadgrep-regexp-metachar-face ((,class (:foreground ,yellow-intense :weight bold))))
    `(deadgrep-search-term-face ((,class (:foreground ,green-intense :weight bold))))
+   ;;;; debbugs
+   `(debbugs-gnu-archived ((,class (:inverse-video t))))
+   `(debbugs-gnu-done ((,class (:foreground ,fg-alt))))
+   `(debbugs-gnu-forwarded ((,class (:foreground ,fg-special-warm))))
+   `(debbugs-gnu-handled ((,class (:foreground ,green))))
+   `(debbugs-gnu-new ((,class (:foreground ,red))))
+   `(debbugs-gnu-pending ((,class (:foreground ,cyan))))
+   `(debbugs-gnu-stale-1 ((,class (:foreground ,yellow-nuanced))))
+   `(debbugs-gnu-stale-2 ((,class (:foreground ,yellow))))
+   `(debbugs-gnu-stale-3 ((,class (:foreground ,yellow-alt))))
+   `(debbugs-gnu-stale-4 ((,class (:foreground ,yellow-alt-other))))
+   `(debbugs-gnu-stale-5 ((,class (:foreground ,red-alt))))
+   `(debbugs-gnu-tagged ((,class (:foreground ,magenta-alt))))
    ;;;; define-word
    `(define-word-face-1 ((,class (:foreground ,yellow))))
    `(define-word-face-2 ((,class (:foreground ,fg-main))))
@@ -997,24 +1192,38 @@ between foreground and background is >= 7:1)."
    `(diff-hl-dired-insert ((,class (:inherit diff-hl-insert))))
    `(diff-hl-dired-unknown ((,class (:inherit dired-ignored))))
    `(diff-hl-insert ((,class (:inherit modus-theme-fringe-green))))
-   `(diff-hl-reverted-hunk-highlight ((,class (:inherit modus-theme-intense-blue))))
+   `(diff-hl-reverted-hunk-highlight ((,class (:inherit modus-theme-fringe-magenta :weight bold))))
    ;;;; diff-mode
-   `(diff-added ((,class (:inherit modus-theme-diff-focus-added))))
-   `(diff-changed ((,class (:inherit modus-theme-diff-focus-changed))))
-   `(diff-context ((,class (:foreground ,fg-alt))))
+   `(diff-added ((,class ,(modus-vivendi-theme-diffs
+                           bg-main green
+                           bg-diff-focus-added fg-diff-focus-added))))
+   `(diff-changed ((,class ,(modus-vivendi-theme-diffs
+                             bg-main yellow
+                             bg-diff-focus-changed fg-diff-focus-changed))))
+   `(diff-context ((,class (:foreground ,fg-unfocused))))
    `(diff-file-header ((,class (:foreground ,blue :weight bold))))
    `(diff-function ((,class (:foreground ,fg-special-cold))))
    `(diff-header ((,class (:foreground ,blue-nuanced))))
-   `(diff-hunk-header ((,class (:inherit modus-theme-diff-heading :weight bold))))
+   `(diff-hunk-header ((,class ,(modus-vivendi-theme-diffs
+                                 bg-alt blue-alt
+                                 bg-diff-heading fg-diff-heading))))
    `(diff-index ((,class (:foreground ,blue-alt :weight bold))))
-   `(diff-indicator-added ((,class (:inherit diff-added))))
-   `(diff-indicator-changed ((,class (:inherit diff-changed))))
-   `(diff-indicator-removed ((,class (:inherit diff-removed))))
-   `(diff-nonexistent ((,class (:inherit modus-theme-intense-neutral :weight bold))))
-   `(diff-refine-added ((,class (:inherit modus-theme-diff-refine-added))))
-   `(diff-refine-changed ((,class (:inherit modus-theme-diff-refine-changed))))
-   `(diff-refine-removed ((,class (:inherit modus-theme-diff-refine-removed))))
-   `(diff-removed ((,class (:inherit modus-theme-diff-focus-removed))))
+   `(diff-indicator-added ((,class (:inherit modus-theme-diff-focus-added))))
+   `(diff-indicator-changed ((,class (:inherit modus-theme-diff-focus-changed))))
+   `(diff-indicator-removed ((,class (:inherit modus-theme-diff-focus-removed))))
+   `(diff-nonexistent ((,class (:inherit modus-theme-neutral :weight bold))))
+   `(diff-refine-added ((,class ,(modus-vivendi-theme-diffs
+                                  bg-diff-added fg-diff-added
+                                  bg-diff-refine-added fg-diff-refine-added))))
+   `(diff-refine-changed ((,class ,(modus-vivendi-theme-diffs
+                                    bg-diff-changed fg-diff-changed
+                                    bg-diff-refine-changed fg-diff-refine-changed))))
+   `(diff-refine-removed ((,class ,(modus-vivendi-theme-diffs
+                                    bg-diff-removed fg-diff-removed
+                                    bg-diff-refine-removed fg-diff-refine-removed))))
+   `(diff-removed ((,class ,(modus-vivendi-theme-diffs
+                             bg-main red
+                             bg-diff-focus-removed fg-diff-focus-removed))))
    ;;;; dim-autoload
    `(dim-autoload-cookie-line ((,class (:foreground ,fg-alt :slant ,modus-theme-slant))))
    ;;;; dired
@@ -1028,9 +1237,9 @@ between foreground and background is >= 7:1)."
    `(dired-symlink ((,class (:foreground ,blue-alt :underline t))))
    `(dired-warning ((,class (:foreground ,yellow :weight bold))))
    ;;;; dired-async
-   `(dired-async-failures ((,class (:foreground ,red-active :weight bold))))
-   `(dired-async-message ((,class (:foreground ,green-active :weight bold))))
-   `(dired-async-mode-message ((,class (:foreground ,cyan-active :weight bold))))
+   `(dired-async-failures ((,class (:foreground ,red-active :weight ,modus-theme-bold))))
+   `(dired-async-message ((,class (:foreground ,green-active :weight ,modus-theme-bold))))
+   `(dired-async-mode-message ((,class (:foreground ,cyan-active :weight ,modus-theme-bold))))
    ;;;; dired-git
    `(dired-git-branch-else ((,class (:foreground ,magenta-alt :weight bold))))
    `(dired-git-branch-master ((,class (:foreground ,magenta-alt-other :weight bold))))
@@ -1142,38 +1351,48 @@ between foreground and background is >= 7:1)."
    `(ebdb-role-defunct ((,class (:foreground ,fg-alt))))
    `(eieio-custom-slot-tag-face ((,class (:foreground ,red-alt))))
    ;;;; ediff
-   `(ediff-current-diff-A ((,class (:inherit modus-theme-special-warm))))
-   `(ediff-current-diff-Ancestor ((,class (:background ,bg-alt :foreground ,fg-main))))
-   `(ediff-current-diff-B ((,class (:inherit modus-theme-special-cold))))
-   `(ediff-current-diff-C ((,class (:inherit modus-theme-special-mild))))
-   `(ediff-even-diff-A ((,class (:inherit modus-theme-subtle-yellow))))
-   `(ediff-even-diff-Ancestor ((,class (:background ,bg-inactive :foreground ,fg-main))))
-   `(ediff-even-diff-B ((,class (:inherit modus-theme-subtle-cyan))))
-   `(ediff-even-diff-C ((,class (:inherit modus-theme-subtle-green))))
-   `(ediff-fine-diff-A ((,class (:inherit modus-theme-intense-yellow))))
-   `(ediff-fine-diff-Ancestor ((,class (:inherit modus-theme-intense-magenta))))
-   `(ediff-fine-diff-B ((,class (:inherit modus-theme-intense-cyan))))
-   `(ediff-fine-diff-C ((,class (:inherit modus-theme-intense-green))))
-   `(ediff-odd-diff-A ((,class (:inherit modus-theme-refine-yellow))))
-   `(ediff-odd-diff-Ancestor ((,class (:background ,bg-active :foreground ,fg-main))))
-   `(ediff-odd-diff-B ((,class (:inherit modus-theme-refine-cyan))))
-   `(ediff-odd-diff-C ((,class (:inherit modus-theme-refine-green))))
+   `(ediff-current-diff-A ((,class ,(modus-vivendi-theme-diffs
+                                     bg-alt red
+                                     bg-diff-removed fg-diff-removed))))
+   `(ediff-current-diff-Ancestor ((,class ,(modus-vivendi-theme-diffs
+                                            bg-alt fg-special-cold
+                                            bg-special-cold fg-special-cold))))
+   `(ediff-current-diff-B ((,class ,(modus-vivendi-theme-diffs
+                                     bg-alt green
+                                     bg-diff-added fg-diff-added))))
+   `(ediff-current-diff-C ((,class ,(modus-vivendi-theme-diffs
+                                     bg-alt yellow
+                                     bg-diff-changed fg-diff-changed))))
+   `(ediff-even-diff-A ((,class (:background ,bg-diff-neutral-1 :foreground ,fg-diff-neutral-1))))
+   `(ediff-even-diff-Ancestor ((,class (:background ,bg-diff-neutral-2 :foreground ,fg-diff-neutral-1))))
+   `(ediff-even-diff-B ((,class (:background ,bg-diff-neutral-1 :foreground ,fg-diff-neutral-1))))
+   `(ediff-even-diff-C ((,class (:background ,bg-diff-neutral-2 :foreground ,fg-diff-neutral-2))))
+   `(ediff-fine-diff-A ((,class (:background ,bg-diff-focus-removed :foreground ,fg-diff-focus-removed))))
+   `(ediff-fine-diff-Ancestor ((,class (:inherit modus-theme-refine-cyan))))
+   `(ediff-fine-diff-B ((,class (:background ,bg-diff-focus-added :foreground ,fg-diff-focus-added))))
+   `(ediff-fine-diff-C ((,class (:background ,bg-diff-focus-changed :foreground ,fg-diff-focus-changed))))
+   `(ediff-odd-diff-A ((,class (:background ,bg-diff-neutral-2 :foreground ,fg-diff-neutral-2))))
+   `(ediff-odd-diff-Ancestor ((,class (:background ,bg-diff-neutral-0 :foreground ,fg-diff-neutral-0))))
+   `(ediff-odd-diff-B ((,class (:background ,bg-diff-neutral-2 :foreground ,fg-diff-neutral-2))))
+   `(ediff-odd-diff-C ((,class (:background ,bg-diff-neutral-1 :foreground ,fg-diff-neutral-1))))
+   ;;;; eglot
+   `(eglot-mode-line ((,class (:foreground ,magenta-active :weight ,modus-theme-bold))))
    ;;;; eldoc-box
    `(eldoc-box-body ((,class (:background ,bg-alt :foreground ,fg-main))))
    `(eldoc-box-border ((,class (:background ,fg-alt))))
    ;;;; elfeed
-   `(elfeed-log-date-face ((,class (:foreground ,blue))))
-   `(elfeed-log-debug-level-face ((,class (:inherit modus-theme-intense-magenta))))
-   `(elfeed-log-error-level-face ((,class (:inherit modus-theme-intense-red))))
-   `(elfeed-log-info-level-face ((,class (:inherit modus-theme-subtle-cyan))))
-   `(elfeed-log-warn-level-face ((,class (:inherit modus-theme-subtle-yellow))))
-   `(elfeed-search-date-face ((,class (:foreground ,fg-special-cold))))
-   `(elfeed-search-feed-face ((,class (:foreground ,cyan))))
-   `(elfeed-search-filter-face ((,class (:foreground ,fg-special-cold))))
-   `(elfeed-search-last-update-face ((,class (:foreground ,fg-special-calm))))
-   `(elfeed-search-tag-face ((,class (:foreground ,fg-special-mild))))
+   `(elfeed-log-date-face ((,class (:foreground ,cyan-alt))))
+   `(elfeed-log-debug-level-face ((,class (:foreground ,magenta))))
+   `(elfeed-log-error-level-face ((,class (:foreground ,red))))
+   `(elfeed-log-info-level-face ((,class (:foreground ,green))))
+   `(elfeed-log-warn-level-face ((,class (:foreground ,yellow))))
+   `(elfeed-search-date-face ((,class (:foreground ,cyan))))
+   `(elfeed-search-feed-face ((,class (:foreground ,blue))))
+   `(elfeed-search-filter-face ((,class (:foreground ,magenta-active))))
+   `(elfeed-search-last-update-face ((,class (:foreground ,green-active))))
+   `(elfeed-search-tag-face ((,class (:foreground ,cyan-alt-other))))
    `(elfeed-search-title-face ((,class (:foreground ,fg-main))))
-   `(elfeed-search-unread-count-face ((,class (:foreground ,fg-special-warm))))
+   `(elfeed-search-unread-count-face ((,class (:foreground ,blue-active))))
    `(elfeed-search-unread-title-face ((,class (:weight bold))))
    ;;;; elfeed-score
    `(elfeed-score-date-face ((,class (:foreground ,blue))))
@@ -1249,7 +1468,7 @@ between foreground and background is >= 7:1)."
    `(eshell-ls-special ((,class (:foreground ,magenta :weight bold))))
    `(eshell-ls-symlink ((,class (:foreground ,cyan :underline t))))
    `(eshell-ls-unreadable ((,class (:background ,bg-inactive :foreground ,fg-inactive))))
-   `(eshell-prompt ((,class (:foreground ,cyan-alt-other :weight bold))))
+   `(eshell-prompt ((,class (:foreground ,cyan-alt-other :weight ,modus-theme-bold))))
    ;;;; evil-mode
    `(evil-ex-commands ((,class (:foreground ,magenta-alt-other))))
    `(evil-ex-info ((,class (:foreground ,cyan-alt-other))))
@@ -1291,52 +1510,72 @@ between foreground and background is >= 7:1)."
    `(fancy-dabbrev-preview-face ((,class (:foreground ,fg-alt :underline t))))
    `(fancy-dabbrev-selection-face ((,class (:inherit modus-theme-intense-cyan :weight bold))))
    ;;;; flycheck
-   `(flycheck-error ((,class (:foreground ,red :underline t))))
+   `(flycheck-error
+     ((,(append '((supports :underline (:style wave))) class)
+       (:foreground ,red-nuanced :underline (:color ,fg-lang-error :style wave)))
+      (,class (:foreground ,red-nuanced :underline (:color ,fg-lang-error :style line)))))
    `(flycheck-error-list-checker-name ((,class (:foreground ,magenta-active))))
    `(flycheck-error-list-column-number ((,class (:foreground ,fg-special-cold))))
-   `(flycheck-error-list-error ((,class (:inherit error))))
+   `(flycheck-error-list-error ((,class (:foreground ,red :weight ,modus-theme-bold))))
    `(flycheck-error-list-filename ((,class (:foreground ,blue))))
    `(flycheck-error-list-highlight ((,class (:inherit modus-theme-special-warm))))
    `(flycheck-error-list-id ((,class (:foreground ,magenta-alt-other))))
    `(flycheck-error-list-id-with-explainer ((,class (:inherit flycheck-error-list-id :box t))))
-   `(flycheck-error-list-info ((,class (:foreground ,green))))
+   `(flycheck-error-list-info ((,class (:foreground ,cyan))))
    `(flycheck-error-list-line-number ((,class (:foreground ,fg-special-warm))))
    `(flycheck-error-list-warning ((,class (:foreground ,yellow))))
    `(flycheck-fringe-error ((,class (:inherit modus-theme-fringe-red))))
-   `(flycheck-fringe-info ((,class (:inherit modus-theme-fringe-green))))
+   `(flycheck-fringe-info ((,class (:inherit modus-theme-fringe-cyan))))
    `(flycheck-fringe-warning ((,class (:inherit modus-theme-fringe-yellow))))
-   `(flycheck-info ((,class (:foreground ,green :underline t))))
+   `(flycheck-info
+     ((,(append '((supports :underline (:style wave))) class)
+       (:foreground ,blue-nuanced :underline (:color ,fg-lang-note :style wave)))
+      (,class (:foreground ,blue-nuanced :underline (:color ,fg-lang-note :style line)))))
    `(flycheck-verify-select-checker ((,class (:box (:line-width 1 :color nil :style released-button)))))
-   `(flycheck-warning ((,class (:foreground ,yellow :underline t))))
+   `(flycheck-warning
+     ((,(append '((supports :underline (:style wave))) class)
+       (:foreground ,yellow-nuanced :underline (:color ,fg-lang-warning :style wave)))
+      (,class (:foreground ,yellow-nuanced :underline (:color ,fg-lang-warning :style line)))))
    ;;;; flycheck-indicator
    `(flycheck-indicator-disabled ((,class (:foreground ,fg-inactive :slant ,modus-theme-slant))))
-   `(flycheck-indicator-error ((,class (:foreground ,red-active :weight bold))))
-   `(flycheck-indicator-info ((,class (:foreground ,blue-active :weight bold))))
-   `(flycheck-indicator-running ((,class (:foreground ,magenta-active :weight bold))))
-   `(flycheck-indicator-success ((,class (:foreground ,green-active :weight bold))))
-   `(flycheck-indicator-warning ((,class (:foreground ,yellow-active :weight bold))))
+   `(flycheck-indicator-error ((,class (:foreground ,red-active :weight ,modus-theme-bold))))
+   `(flycheck-indicator-info ((,class (:foreground ,blue-active :weight ,modus-theme-bold))))
+   `(flycheck-indicator-running ((,class (:foreground ,magenta-active :weight ,modus-theme-bold))))
+   `(flycheck-indicator-success ((,class (:foreground ,green-active :weight ,modus-theme-bold))))
+   `(flycheck-indicator-warning ((,class (:foreground ,yellow-active :weight ,modus-theme-bold))))
    ;;;; flycheck-posframe
    `(flycheck-posframe-background-face ((,class (:background ,bg-alt))))
    `(flycheck-posframe-border-face ((,class (:foreground ,fg-alt))))
    `(flycheck-posframe-error-face ((,class (:foreground ,red :weight bold))))
    `(flycheck-posframe-face ((,class (:foreground ,fg-main :slant ,modus-theme-slant))))
-   `(flycheck-posframe-info-face ((,class (:foreground ,green :weight bold))))
+   `(flycheck-posframe-info-face ((,class (:foreground ,cyan :weight bold))))
    `(flycheck-posframe-warning-face ((,class (:foreground ,yellow :weight bold))))
    ;;;; flymake
-   `(flymake-error ((,class (:foreground ,red :underline t))))
-   `(flymake-note ((,class (:foreground ,green :underline t))))
-   `(flymake-warning ((,class (:foreground ,yellow :underline t))))
+   `(flymake-error
+     ((,(append '((supports :underline (:style wave))) class)
+       (:foreground ,red-nuanced :underline (:color ,fg-lang-error :style wave)))
+      (,class (:foreground ,red-nuanced :underline (:color ,fg-lang-error :style line)))))
+   `(flymake-note
+     ((,(append '((supports :underline (:style wave))) class)
+       (:foreground ,blue-nuanced :underline (:color ,fg-lang-note :style wave)))
+      (,class (:foreground ,blue-nuanced :underline (:color ,fg-lang-note :style line)))))
+   `(flymake-warning
+     ((,(append '((supports :underline (:style wave))) class)
+       (:foreground ,yellow-nuanced :underline (:color ,fg-lang-warning :style wave)))
+      (,class (:foreground ,yellow-nuanced :underline (:color ,fg-lang-warning :style line)))))
    ;;;; flyspell
    `(flyspell-duplicate
      ((,(append '((supports :underline (:style wave))) class)
-       (:foreground ,yellow :underline (:style wave)))
-      (,class (:foreground ,yellow :underline t))))
+       (:foreground ,fg-lang-warning :underline (:style wave)))
+      (,class (:foreground ,fg-lang-warning :underline t))))
    `(flyspell-incorrect
      ((,(append '((supports :underline (:style wave))) class)
-       (:foreground ,red :underline (:style wave)))
-      (,class (:foreground ,red :underline t))))
+       (:foreground ,fg-lang-error :underline (:style wave)))
+      (,class (:foreground ,fg-lang-error :underline t))))
    ;;;; flyspell-correct
    `(flyspell-correct-highlight-face ((,class (:inherit modus-theme-refine-green))))
+   ;;;; flx
+   `(flx-highlight-face ((,class (:inherit modus-theme-intense-magenta))))
    ;;;; freeze-it
    `(freeze-it-show ((,class (:background ,bg-dim :foreground ,fg-special-warm))))
    ;;;; frog-menu
@@ -1347,7 +1586,7 @@ between foreground and background is >= 7:1)."
    `(frog-menu-posframe-background-face ((,class (:background ,bg-dim))))
    `(frog-menu-prompt-face ((,class (:foreground ,cyan))))
    ;;;; focus
-   `(focus-unfocused ((,class (:foreground ,fg-alt))))
+   `(focus-unfocused ((,class (:foreground ,fg-unfocused))))
    ;;;; fold-this
    `(fold-this-overlay ((,class (:inherit modus-theme-special-mild))))
    ;;;; font-lock
@@ -1360,12 +1599,20 @@ between foreground and background is >= 7:1)."
    `(font-lock-keyword-face ((,class (:foreground ,magenta-alt-other :weight ,modus-theme-bold))))
    `(font-lock-negation-char-face ((,class (:foreground ,yellow :weight ,modus-theme-bold))))
    `(font-lock-preprocessor-face ((,class (:foreground ,magenta))))
-   `(font-lock-regexp-grouping-backslash ((,class (:foreground ,green :weight bold))))
-   `(font-lock-regexp-grouping-construct ((,class (:foreground ,magenta :weight bold))))
+   `(font-lock-regexp-grouping-backslash ((,class (:foreground ,fg-escape-char-backslash :weight bold))))
+   `(font-lock-regexp-grouping-construct ((,class (:foreground ,fg-escape-char-construct :weight bold))))
    `(font-lock-string-face ((,class (:foreground ,blue-alt))))
    `(font-lock-type-face ((,class (:foreground ,magenta-alt))))
    `(font-lock-variable-name-face ((,class (:foreground ,cyan))))
    `(font-lock-warning-face ((,class (:foreground ,yellow-active :weight bold))))
+   ;;;; forge
+   `(forge-post-author ((,class (:foreground ,fg-main :weight bold))))
+   `(forge-post-date ((,class (:foreground ,fg-special-cold))))
+   `(forge-topic-closed ((,class (:foreground ,fg-alt))))
+   `(forge-topic-merged ((,class (:foreground ,fg-alt))))
+   `(forge-topic-open ((,class (:foreground ,fg-special-mild))))
+   `(forge-topic-unmerged ((,class (:foreground ,magenta :slant ,modus-theme-slant))))
+   `(forge-topic-unread ((,class (:foreground ,fg-main :weight bold))))
    ;;;; fountain-mode
    `(fountain-character ((,class (:foreground ,magenta-alt-other))))
    `(fountain-comment ((,class (:foreground ,fg-alt :slant ,modus-theme-slant))))
@@ -1380,24 +1627,19 @@ between foreground and background is >= 7:1)."
    `(fountain-scene-heading ((,class (:foreground ,fg-special-calm :weight bold))))
    `(fountain-section-heading ((,class (:inherit ,modus-theme-variable-pitch
                                                  :foreground ,fg-main :weight bold
-                                                 ,@(when modus-vivendi-theme-scale-headings
-                                                     (list :height modus-vivendi-theme-scale-4))))))
+                                                 ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(fountain-section-heading-1 ((,class (:inherit ,modus-theme-variable-pitch
                                                    :foreground ,fg-main :weight bold
-                                                   ,@(when modus-vivendi-theme-scale-headings
-                                                       (list :height modus-vivendi-theme-scale-4))))))
+                                                   ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(fountain-section-heading-2 ((,class (:inherit ,modus-theme-variable-pitch
                                                    :foreground ,fg-special-warm :weight bold
-                                                   ,@(when modus-vivendi-theme-scale-headings
-                                                       (list :height modus-vivendi-theme-scale-3))))))
+                                                   ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-3)))))
    `(fountain-section-heading-3 ((,class (:inherit ,modus-theme-variable-pitch
                                                    :foreground ,fg-special-cold :weight bold
-                                                   ,@(when modus-vivendi-theme-scale-headings
-                                                       (list :height modus-vivendi-theme-scale-2))))))
+                                                   ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-2)))))
    `(fountain-section-heading-4 ((,class (:inherit ,modus-theme-variable-pitch
                                                    :foreground ,fg-special-mild :weight bold
-                                                   ,@(when modus-vivendi-theme-scale-headings
-                                                       (list :height modus-vivendi-theme-scale-1))))))
+                                                   ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-1)))))
    `(fountain-section-heading-5 ((,class (:inherit ,modus-theme-variable-pitch
                                                    :foreground ,fg-special-calm :weight bold))))
    `(fountain-synopsis ((,class (:foreground ,green))))
@@ -1416,12 +1658,12 @@ between foreground and background is >= 7:1)."
    `(geiser-font-lock-xref-header ((,class (:weight bold))))
    `(geiser-font-lock-xref-link ((,class (:inherit link))))
    ;;;; git-commit
-   `(git-commit-comment-action ((,class (:foreground ,fg-special-calm))))
-   `(git-commit-comment-branch-local ((,class (:foreground ,cyan))))
-   `(git-commit-comment-branch-remote ((,class (:foreground ,blue))))
-   `(git-commit-comment-detached ((,class (:foreground ,yellow))))
-   `(git-commit-comment-file ((,class (:foreground ,blue))))
-   `(git-commit-comment-heading ((,class (:foreground ,fg-main :weight bold))))
+   `(git-commit-comment-action ((,class (:foreground ,fg-special-calm :slant ,modus-theme-slant))))
+   `(git-commit-comment-branch-local ((,class (:foreground ,cyan :slant ,modus-theme-slant))))
+   `(git-commit-comment-branch-remote ((,class (:foreground ,blue :slant ,modus-theme-slant))))
+   `(git-commit-comment-detached ((,class (:foreground ,yellow :slant ,modus-theme-slant))))
+   `(git-commit-comment-file ((,class (:foreground ,blue :slant ,modus-theme-slant))))
+   `(git-commit-comment-heading ((,class (:foreground ,fg-main :weight bold :slant ,modus-theme-slant))))
    `(git-commit-keyword ((,class (:foreground ,magenta))))
    `(git-commit-known-pseudo-header ((,class (:foreground ,fg-special-warm :weight bold))))
    `(git-commit-nonempty-second-line ((,class (:inherit modus-theme-refine-yellow :weight bold))))
@@ -1596,8 +1838,7 @@ between foreground and background is >= 7:1)."
    `(helm-time-zone-current ((,class (:foreground ,green))))
    `(helm-time-zone-home ((,class (:foreground ,magenta))))
    `(helm-source-header ((,class (:foreground ,red-alt :weight bold
-                                              ,@(when modus-vivendi-theme-scale-headings
-                                                  (list :height modus-vivendi-theme-scale-4))))))
+                                              ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(helm-top-columns ((,class (:inherit helm-header))))
    `(helm-ucs-char ((,class (:foreground ,yellow-alt-other))))
    `(helm-visible-mark ((,class (:inherit modus-theme-subtle-cyan))))
@@ -1616,6 +1857,9 @@ between foreground and background is >= 7:1)."
    ;;;; helm-xref
    `(helm-xref-file-name ((,class (:foreground ,fg-special-cold :weight bold))))
    `(helm-xref-file-name ((,class (:foreground ,fg-special-warm))))
+   ;;;; helpful
+   `(helpful-heading  ((,class (:inherit ,modus-theme-variable-pitch :foreground ,fg-main :weight bold
+                                         ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    ;;;; highlight region or ad-hoc regexp
    `(hi-black-b ((,class (:background ,fg-main :foreground ,bg-main))))
    `(hi-blue ((,class (:background ,bg-alt :foreground ,blue :underline t))))
@@ -1649,10 +1893,12 @@ between foreground and background is >= 7:1)."
    `(highlight-defined-special-form-name-face ((,class (:foreground ,magenta-alt-other))))
    `(highlight-defined-variable-name-face ((,class (:foreground ,cyan))))
    ;;;; highlight-escape-sequences (`hes-mode')
-   `(hes-escape-backslash-face ((,class (:foreground ,green :weight bold))))
-   `(hes-escape-sequence-face ((,class (:foreground ,magenta :weight bold))))
+   `(hes-escape-backslash-face ((,class (:foreground ,fg-escape-char-construct :weight bold))))
+   `(hes-escape-sequence-face ((,class (:foreground ,fg-escape-char-backslash :weight bold))))
    ;;;; highlight-numbers
    `(highlight-numbers-number ((,class (:foreground ,blue-alt-other))))
+   ;;;; highlight-symbol
+   `(highlight-symbol-face ((,class (:inherit modus-theme-special-mild))))
    ;;;; highlight-thing
    `(highlight-thing ((,class (:background ,bg-alt :foreground ,cyan))))
    ;;;; hl-fill-column
@@ -1660,13 +1906,16 @@ between foreground and background is >= 7:1)."
    ;;;; hl-todo
    `(hl-todo ((,class (:foreground ,red-alt-other :weight bold))))
    ;;;; hydra
-   `(hydra-face-amaranth ((,class (:foreground ,yellow-intense :weight bold))))
-   `(hydra-face-blue ((,class (:foreground ,blue-intense :weight bold))))
-   `(hydra-face-pink ((,class (:foreground ,magenta-intense :weight bold))))
-   `(hydra-face-red ((,class (:foreground ,red-intense :weight bold))))
-   `(hydra-face-teal ((,class (:foreground ,cyan-intense :weight bold))))
+   `(hydra-face-amaranth ((,class (:foreground ,yellow :weight bold))))
+   `(hydra-face-blue ((,class (:foreground ,blue-alt :weight bold))))
+   `(hydra-face-pink ((,class (:foreground ,magenta-alt :weight bold))))
+   `(hydra-face-red ((,class (:foreground ,red :weight bold))))
+   `(hydra-face-teal ((,class (:foreground ,cyan :weight bold))))
+   ;;;; icomplete
+   `(icomplete-first-match ((,class (:foreground ,magenta :weight bold))))
+   ;;;; icomplete-vertical
+   `(icomplete-vertical-separator ((,class (:foreground ,fg-alt))))
    ;;;; ido-mode
-   `(flx-highlight-face ((,class (:inherit modus-theme-intense-magenta))))
    `(ido-first-match ((,class (:foreground ,magenta :weight bold))))
    `(ido-incomplete-regexp ((,class (:inherit error))))
    `(ido-indicator ((,class (:inherit modus-theme-subtle-yellow))))
@@ -1676,6 +1925,9 @@ between foreground and background is >= 7:1)."
    ;;;; iedit
    `(iedit-occurrence ((,class (:inherit modus-theme-refine-blue))))
    `(iedit-read-only-occurrence ((,class (:inherit modus-theme-intense-yellow))))
+   ;;;; iflipb
+   `(iflipb-current-buffer-face ((,class (:foreground ,cyan-alt :weight bold))))
+   `(iflipb-other-buffer-face ((,class (:foreground ,fg-alt))))
    ;;;; imenu-list
    `(imenu-list-entry-face-0 ((,class (:foreground ,magenta-alt-other))))
    `(imenu-list-entry-face-1 ((,class (:foreground ,cyan-alt-other))))
@@ -1722,8 +1974,7 @@ between foreground and background is >= 7:1)."
                                    :inherit modus-theme-refine-blue))))
    `(ioccur-regexp-face ((,class (:inherit modus-theme-intense-magenta :weight bold))))
    `(ioccur-title-face ((,class (:foreground ,red-alt :weight bold
-                                             ,@(when modus-vivendi-theme-scale-headings
-                                                 (list :height modus-vivendi-theme-scale-4))))))
+                                             ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    ;;;; isearch, occur, and the like
    `(isearch ((,class (:inherit modus-theme-intense-green :weight bold))))
    `(isearch-fail ((,class (:inherit modus-theme-refine-red))))
@@ -1798,7 +2049,10 @@ between foreground and background is >= 7:1)."
    `(kaocha-runner-warning-face ((,class (:foreground ,yellow))))
    ;;;; keycast
    `(keycast-command ((,class (:foreground ,blue-active :weight bold))))
-   `(keycast-key ((,class (:inherit modus-theme-active-blue))))
+   `(keycast-key ((,class (:box ,(modus-vivendi-theme-modeline-box blue-intense blue-active t -3)
+                                ,@(modus-vivendi-theme-modeline-props
+                                   blue-active bg-main
+                                   blue-active bg-active)))))
    ;;;; line numbers (display-line-numbers-mode and global variant)
    `(line-number ((,class (:background ,bg-dim :foreground ,fg-alt))))
    `(line-number-current-line ((,class (:background ,bg-active :foreground ,fg-active :weight bold))))
@@ -1856,19 +2110,29 @@ between foreground and background is >= 7:1)."
    `(magit-blame-margin ((,class (:inherit magit-blame-highlight))))
    `(magit-blame-name ((,class (:foreground ,fg-main))))
    `(magit-blame-summary ((,class (:foreground ,fg-main))))
-   `(magit-branch-current ((,class (:foreground ,magenta-alt-other))))
-   `(magit-branch-local ((,class (:foreground ,blue-alt-other))))
+   `(magit-branch-current ((,class (:foreground ,blue-alt-other :box t))))
+   `(magit-branch-local ((,class (:foreground ,blue-alt))))
    `(magit-branch-remote ((,class (:foreground ,magenta-alt))))
-   `(magit-branch-remote-head ((,class (:foreground ,magenta :box t))))
+   `(magit-branch-remote-head ((,class (:foreground ,magenta-alt-other :box t))))
    `(magit-branch-upstream ((,class (:slant italic))))
    `(magit-cherry-equivalent ((,class (:background ,bg-main :foreground ,magenta-intense))))
    `(magit-cherry-unmatched ((,class (:background ,bg-main :foreground ,cyan-intense))))
-   `(magit-diff-added ((,class (:inherit modus-theme-diff-added))))
-   `(magit-diff-added-highlight ((,class (:inherit modus-theme-diff-focus-added))))
-   `(magit-diff-base ((,class (:inherit modus-theme-diff-changed))))
-   `(magit-diff-base-highlight ((,class (:inherit modus-theme-diff-focus-changed))))
-   `(magit-diff-context ((,class (:foreground ,fg-alt))))
-   `(magit-diff-context-highlight ((,class (:background ,bg-inactive :foreground ,fg-inactive))))
+   `(magit-diff-added ((,class ,(modus-vivendi-theme-diffs
+                                 bg-main green
+                                 bg-diff-added fg-diff-added))))
+   `(magit-diff-added-highlight ((,class ,(modus-vivendi-theme-diffs
+                                           bg-dim green
+                                           bg-diff-focus-added fg-diff-focus-added))))
+   `(magit-diff-base ((,class ,(modus-vivendi-theme-diffs
+                                bg-main yellow
+                                bg-diff-changed fg-diff-changed))))
+   `(magit-diff-base-highlight ((,class ,(modus-vivendi-theme-diffs
+                                          bg-dim yellow
+                                          bg-diff-focus-changed fg-diff-focus-changed))))
+   `(magit-diff-context ((,class (:foreground ,fg-unfocused))))
+   `(magit-diff-context-highlight ((,class ,(modus-vivendi-theme-diffs
+                                             bg-dim fg-dim
+                                             bg-inactive fg-inactive))))
    `(magit-diff-file-heading ((,class (:foreground ,fg-special-cold :weight bold))))
    `(magit-diff-file-heading-highlight ((,class (:inherit modus-theme-special-cold :weight bold))))
    `(magit-diff-file-heading-selection ((,class (:background ,bg-alt :foreground ,cyan))))
@@ -1878,13 +2142,23 @@ between foreground and background is >= 7:1)."
    `(magit-diff-hunk-region ((,class (:weight bold))))
    `(magit-diff-lines-boundary ((,class (:background ,fg-main))))
    `(magit-diff-lines-heading ((,class (:inherit modus-theme-refine-magenta))))
-   `(magit-diff-removed ((,class (:inherit modus-theme-diff-removed))))
-   `(magit-diff-removed-highlight ((,class (:inherit modus-theme-diff-focus-removed))))
+   `(magit-diff-removed ((,class ,(modus-vivendi-theme-diffs
+                                   bg-main red
+                                   bg-diff-removed fg-diff-removed))))
+   `(magit-diff-removed-highlight ((,class ,(modus-vivendi-theme-diffs
+                                             bg-dim red
+                                             bg-diff-focus-removed fg-diff-focus-removed))))
    `(magit-diffstat-added ((,class (:foreground ,green))))
    `(magit-diffstat-removed ((,class (:foreground ,red))))
    `(magit-dimmed ((,class (:foreground ,fg-alt))))
    `(magit-filename ((,class (:foreground ,fg-special-cold))))
    `(magit-hash ((,class (:foreground ,fg-special-warm))))
+   `(magit-head ((,class (:inherit magit-branch-local))))
+   `(magit-header-line ((,class (:foreground ,cyan-active :weight bold))))
+   `(magit-header-line-key ((,class (:foreground ,blue-active :weight bold))))
+   `(magit-header-line-log-select ((,class (:foreground ,fg-main :weight bold))))
+   `(magit-keyword ((,class (:foreground ,magenta))))
+   `(magit-keyword-squash ((,class (:foreground ,yellow-alt-other :weight bold))))
    `(magit-log-author ((,class (:foreground ,cyan))))
    `(magit-log-date ((,class (:foreground ,magenta))))
    `(magit-log-graph ((,class (:foreground ,fg-dim))))
@@ -1906,7 +2180,7 @@ between foreground and background is >= 7:1)."
    `(magit-refname-stash ((,class (:foreground ,fg-alt))))
    `(magit-refname-wip ((,class (:foreground ,fg-alt))))
    `(magit-section ((,class (:background ,bg-dim :foreground ,fg-main))))
-   `(magit-section-heading ((,class (:foreground ,cyan-active))))
+   `(magit-section-heading ((,class (:foreground ,cyan-alt-other :weight bold))))
    `(magit-section-heading-selection ((,class (:inherit modus-theme-refine-cyan :weight bold))))
    `(magit-section-highlight ((,class (:background ,bg-alt))))
    `(magit-sequence-done ((,class (:foreground ,green-alt))))
@@ -1925,6 +2199,12 @@ between foreground and background is >= 7:1)."
    `(magit-signature-revoked ((,class (:background ,bg-main :foreground ,magenta-intense))))
    `(magit-signature-untrusted ((,class (:background ,bg-main :foreground ,cyan-intense))))
    `(magit-tag ((,class (:foreground ,yellow-alt-other))))
+   ;;;; magit-imerge
+   `(magit-imerge-overriding-value ((,class (:foreground ,red-alt :weight bold))))
+   ;;;; man
+   `(Man-overstrike ((,class (:foreground ,magenta :weight bold))))
+   `(Man-reverse ((,class (:inherit modus-theme-subtle-magenta))))
+   `(Man-underline ((,class (:foreground ,cyan :underline t))))
    ;;;; markdown-mode
    `(markdown-blockquote-face ((,class (:background ,bg-dim :foreground ,fg-special-warm :slant ,modus-theme-slant))))
    `(markdown-bold-face ((,class (:weight bold))))
@@ -2020,14 +2300,20 @@ between foreground and background is >= 7:1)."
    `(message-header-subject ((,class (:foreground ,magenta-alt-other :weight bold))))
    `(message-header-to ((,class (:foreground ,magenta-alt :weight bold))))
    `(message-header-xheader ((,class (:foreground ,blue-alt-other))))
-   `(message-mml ((,class (:foreground ,green-alt))))
+   `(message-mml ((,class (:foreground ,green-alt-other))))
    `(message-separator ((,class (:background ,bg-alt :foreground ,fg-special-warm))))
    ;;;; modeline
-   `(mode-line ((,class (:box (:line-width 1 :color ,fg-inactive) :background ,bg-active :foreground ,fg-active))))
+   `(mode-line ((,class (:box ,(modus-vivendi-theme-modeline-box bg-inactive fg-inactive t)
+                              ,@(modus-vivendi-theme-modeline-props
+                                 bg-active fg-dim
+                                 bg-active fg-active)))))
    `(mode-line-buffer-id ((,class (:weight bold))))
    `(mode-line-emphasis ((,class (:foreground ,blue-active :weight bold))))
    `(mode-line-highlight ((,class (:inherit modus-theme-active-blue :box (:line-width -1 :style pressed-button)))))
-   `(mode-line-inactive ((,class (:box (:color ,bg-inactive) :background ,bg-inactive :foreground ,fg-inactive))))
+   `(mode-line-inactive ((,class (:box ,(modus-vivendi-theme-modeline-box bg-active bg-active)
+                                       ,@(modus-vivendi-theme-modeline-props
+                                          bg-dim fg-inactive
+                                          bg-inactive fg-inactive)))))
    ;;;; mood-line
    `(mood-line-modified ((,class (:foreground ,magenta-active))))
    `(mood-line-status-error ((,class (:foreground ,red-active :weight bold))))
@@ -2110,8 +2396,15 @@ between foreground and background is >= 7:1)."
    `(neo-vc-unlocked-changes-face ((,class (:inherit modus-theme-refine-blue))))
    `(neo-vc-up-to-date-face ((,class (:foreground ,fg-alt))))
    `(neo-vc-user-face ((,class (:foreground ,magenta))))
+   ;;;; no-emoji
+   `(no-emoji ((,class (:foreground ,cyan))))
    ;;;; num3-mode
    `(num3-face-even ((,class (:background ,bg-alt :weight bold))))
+   ;;;; orderless
+   `(orderless-match-face-0 ((,class (:foreground ,blue-alt :weight bold))))
+   `(orderless-match-face-1 ((,class (:foreground ,magenta-alt :weight bold))))
+   `(orderless-match-face-2 ((,class (:foreground ,green-alt-other :weight bold))))
+   `(orderless-match-face-3 ((,class (:foreground ,yellow-alt-other :weight bold))))
    ;;;; org
    `(org-agenda-calendar-event ((,class (:foreground ,blue-alt))))
    `(org-agenda-calendar-sexp ((,class (:foreground ,cyan-alt))))
@@ -2119,18 +2412,15 @@ between foreground and background is >= 7:1)."
    `(org-agenda-column-dateline ((,class (:inherit modus-theme-subtle-neutral))))
    `(org-agenda-current-time ((,class (:inherit modus-theme-intense-cyan))))
    `(org-agenda-date ((,class (:inherit ,modus-theme-variable-pitch :foreground ,fg-main
-                                        ,@(when modus-vivendi-theme-scale-headings
-                                            (list :height modus-vivendi-theme-scale-4))))))
+                                        ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(org-agenda-date-today ((,class (:inherit ,modus-theme-variable-pitch :background ,cyan-subtle-bg
                                               :foreground ,fg-main :weight bold
-                                              ,@(when modus-vivendi-theme-scale-headings
-                                                  (list :height modus-vivendi-theme-scale-4))))))
+                                              ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(org-agenda-date-weekend ((,class (:inherit ,modus-theme-variable-pitch :foreground ,fg-alt
-                                                ,@(when modus-vivendi-theme-scale-headings
-                                                    (list :height modus-vivendi-theme-scale-4))))))
+                                                ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(org-agenda-diary ((,class (:background ,bg-main :foreground ,fg-main))))
    `(org-agenda-dimmed-todo-face ((,class (:inherit modus-theme-subtle-neutral))))
-   `(org-agenda-done ((,class (:foreground ,green))))
+   `(org-agenda-done ((,class (,@(modus-vivendi-theme-org-todo-block green-nuanced-bg green-nuanced green)))))
    `(org-agenda-filter-category ((,class (:background ,bg-active :foreground ,fg-main :box t))))
    `(org-agenda-filter-effort ((,class (:background ,bg-active :foreground ,fg-main :box t))))
    `(org-agenda-filter-regexp ((,class (:background ,bg-active :foreground ,fg-main :box t))))
@@ -2138,20 +2428,21 @@ between foreground and background is >= 7:1)."
    `(org-agenda-restriction-lock ((,class (:background ,bg-dim :foreground ,fg-dim))))
    `(org-agenda-structure ((,class (:inherit ,modus-theme-variable-pitch
                                              :foreground ,fg-special-mild
-                                             ,@(when modus-vivendi-theme-scale-headings
-                                           (list :height modus-vivendi-theme-scale-3))))))
+                                             ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-3)))))
    `(org-archived ((,class (:background ,bg-alt :foreground ,fg-alt))))
-   `(org-block ((,class (,@(and (>= emacs-major-version 27) '(:extend t))
-                         :background ,(if modus-vivendi-theme-distinct-org-blocks bg-dim bg-main)
-                         :foreground ,fg-main))))
+   `(org-block ((,class (,@(modus-vivendi-theme-org-src-block bg-dim bg-main) :foreground ,fg-main))))
    `(org-block-begin-line ((,class (,@(and (>= emacs-major-version 27)
                                            modus-vivendi-theme-distinct-org-blocks
                                            '(:extend t))
                                     :background ,bg-alt :foreground ,fg-special-mild))))
    `(org-block-end-line ((,class (:inherit org-block-begin-line))))
    `(org-checkbox ((,class (:weight bold))))
-   `(org-checkbox-statistics-done ((,class (:foreground ,green :weight bold))))
-   `(org-checkbox-statistics-todo ((,class (:foreground ,yellow :weight bold))))
+   `(org-checkbox-statistics-done ((,class (:foreground ,green
+                                                        ,@(modus-vivendi-theme-heading-block
+                                                           green-nuanced-bg green-nuanced)))))
+   `(org-checkbox-statistics-todo ((,class (:foreground ,yellow
+                                                        ,@(modus-vivendi-theme-heading-block
+                                                           yellow-nuanced-bg yellow-nuanced)))))
    `(org-clock-overlay ((,class (:inherit modus-theme-special-cold))))
    `(org-code ((,class (:foreground ,magenta))))
    `(org-column ((,class (:background ,bg-alt))))
@@ -2161,7 +2452,7 @@ between foreground and background is >= 7:1)."
    `(org-default ((,class (:background ,bg-main :foreground ,fg-main))))
    `(org-document-info ((,class (:foreground ,fg-special-cold))))
    `(org-document-title ((,class (:foreground ,fg-special-cold :weight bold))))
-   `(org-done ((,class (:foreground ,green))))
+   `(org-done ((,class (,@(modus-vivendi-theme-org-todo-block green-nuanced-bg green-nuanced green)))))
    `(org-drawer ((,class (:foreground ,cyan-alt))))
    `(org-ellipsis ((,class (:foreground nil)))) ; inherits from the heading's colour
    `(org-footnote ((,class (:foreground ,blue-alt :underline t))))
@@ -2174,52 +2465,61 @@ between foreground and background is >= 7:1)."
    `(org-habit-overdue-future-face ((,class (:inherit modus-theme-refine-red))))
    `(org-habit-ready-face ((,class (:inherit modus-theme-intense-blue))))
    `(org-habit-ready-future-face ((,class (:inherit modus-theme-refine-blue))))
-   `(org-headline-done ((,class (:foreground ,green-nuanced))))
+   `(org-headline-done ((,class (:foreground ,green-nuanced
+                                             ,@(modus-vivendi-theme-heading-block
+                                                green-nuanced-bg green-nuanced)))))
    `(org-hide ((,class (:foreground ,fg-main))))
    `(org-latex-and-related ((,class (:foreground ,magenta-refine-fg))))
-   `(org-level-1 ((,class (:inherit ,modus-theme-variable-pitch
-                           :foreground ,fg-main :weight bold
-                                       ,@(when modus-vivendi-theme-scale-headings
-                                           (list :height modus-vivendi-theme-scale-4))))))
-   `(org-level-2 ((,class (:inherit ,modus-theme-variable-pitch
-                           :foreground ,fg-special-warm :weight bold
-                                       ,@(when modus-vivendi-theme-scale-headings
-                                          (list :height modus-vivendi-theme-scale-3))))))
-   `(org-level-3 ((,class (:inherit ,modus-theme-variable-pitch
-                           :foreground ,fg-special-cold :weight bold
-                                       ,@(when modus-vivendi-theme-scale-headings
-                                          (list :height modus-vivendi-theme-scale-2))))))
-   `(org-level-4 ((,class (:inherit ,modus-theme-variable-pitch
-                           :foreground ,fg-special-mild :weight bold
-                                       ,@(when modus-vivendi-theme-scale-headings
-                                          (list :height modus-vivendi-theme-scale-1))))))
-   `(org-level-5 ((,class (:inherit ,modus-theme-variable-pitch
-                           :foreground ,fg-special-calm :weight bold))))
-   `(org-level-6 ((,class (:inherit ,modus-theme-variable-pitch
-                           :foreground ,yellow-nuanced :weight bold))))
-   `(org-level-7 ((,class (:inherit ,modus-theme-variable-pitch
-                           :foreground ,red-nuanced :weight bold))))
-   `(org-level-8 ((,class (:inherit ,modus-theme-variable-pitch
-                           :foreground ,fg-dim :weight bold))))
+   `(org-level-1 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                    ,@(modus-vivendi-theme-heading-foreground fg-main magenta-alt-other)
+                                    ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)
+                                    ,@(modus-vivendi-theme-heading-block magenta-nuanced-bg magenta-nuanced)))))
+   `(org-level-2 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                    ,@(modus-vivendi-theme-heading-foreground fg-special-warm magenta-alt)
+                                    ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-3)
+                                    ,@(modus-vivendi-theme-heading-block red-nuanced-bg red-nuanced)))))
+   `(org-level-3 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                    ,@(modus-vivendi-theme-heading-foreground fg-special-cold blue)
+                                    ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-2)
+                                    ,@(modus-vivendi-theme-heading-block blue-nuanced-bg blue-nuanced)))))
+   `(org-level-4 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                    ,@(modus-vivendi-theme-heading-foreground fg-special-mild cyan-alt-other)
+                                    ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-1)
+                                    ,@(modus-vivendi-theme-heading-block cyan-nuanced-bg cyan-nuanced)))))
+   `(org-level-5 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                    ,@(modus-vivendi-theme-heading-foreground fg-special-calm green-alt)
+                                    ,@(modus-vivendi-theme-heading-block green-nuanced-bg green-nuanced)))))
+   `(org-level-6 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                    ,@(modus-vivendi-theme-heading-foreground yellow-nuanced yellow-alt-other)
+                                    ,@(modus-vivendi-theme-heading-block yellow-nuanced-bg yellow-nuanced)))))
+   `(org-level-7 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                    ,@(modus-vivendi-theme-heading-foreground red-nuanced red-alt)
+                                    ,@(modus-vivendi-theme-heading-block red-nuanced-bg red-nuanced)))))
+   `(org-level-8 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                    ,@(modus-vivendi-theme-heading-foreground fg-dim magenta)
+                                    ,@(modus-vivendi-theme-heading-block bg-alt fg-alt)))))
    `(org-link ((,class (:inherit link))))
    `(org-list-dt ((,class (:weight bold))))
    `(org-macro ((,class (:inherit org-latex-and-related))))
    `(org-meta-line ((,class (:foreground ,fg-alt :slant ,modus-theme-slant))))
    `(org-mode-line-clock ((,class (:background ,bg-main :foreground ,fg-main))))
    `(org-mode-line-clock-overrun ((,class (:inherit modus-theme-active-red))))
-   `(org-priority ((,class (:foreground ,magenta))))
-   `(org-quote ((,class (:inherit org-block :foreground ,fg-special-cold))))
+   `(org-priority ((,class (,@(modus-vivendi-theme-org-todo-block blue-nuanced-bg blue-nuanced magenta)
+                            ,@(modus-vivendi-theme-heading-foreground magenta blue-alt)))))
+   `(org-quote ((,class (,@(modus-vivendi-theme-org-src-block bg-dim bg-main)
+                         :foreground ,fg-special-cold :slant ,modus-theme-slant))))
    `(org-scheduled ((,class (:foreground ,fg-special-cold))))
    `(org-scheduled-previously ((,class (:foreground ,fg-special-warm))))
    `(org-scheduled-today ((,class (:foreground ,yellow-alt-other))))
    `(org-sexp-date ((,class (:inherit org-date))))
-   `(org-special-keyword ((,class (:foreground ,cyan-alt))))
+   `(org-special-keyword ((,class (,@(modus-vivendi-theme-org-todo-block cyan-nuanced-bg cyan-nuanced cyan-alt)))))
    `(org-table ((,class (:foreground ,fg-special-cold))))
    `(org-tag ((,class (:foreground ,magenta-nuanced :weight normal))))
    `(org-tag-group ((,class (:foreground ,cyan-nuanced :weight bold))))
    `(org-target ((,class (:underline t))))
    `(org-time-grid ((,class (:foreground ,cyan-nuanced))))
-   `(org-todo ((,class (:foreground ,magenta-alt-other))))
+   `(org-todo ((,class (,@(modus-vivendi-theme-org-todo-block magenta-nuanced-bg magenta-nuanced magenta-alt-other)
+                        ,@(modus-vivendi-theme-heading-foreground magenta-alt-other red-alt-other)))))
    `(org-upcoming-deadline ((,class (:foreground ,red-alt-other))))
    `(org-upcoming-distant-deadline ((,class (:foreground ,red-nuanced))))
    `(org-verbatim ((,class (:background ,bg-alt :foreground ,fg-special-calm))))
@@ -2251,33 +2551,36 @@ between foreground and background is >= 7:1)."
    `(origami-fold-header-face ((,class (:background ,bg-dim :foreground ,fg-dim :box t))))
    `(origami-fold-replacement-face ((,class (:background ,bg-alt :foreground ,fg-alt))))
    ;;;; outline-mode
-   `(outline-1 ((,class (:inherit ,modus-theme-variable-pitch
-                                  :foreground ,fg-main :weight bold
-                                  ,@(when modus-vivendi-theme-scale-headings
-                                      (list :height modus-vivendi-theme-scale-4))))))
-   `(outline-2 ((,class (:inherit ,modus-theme-variable-pitch
-                                  :foreground ,fg-special-warm :weight bold
-                                  ,@(when modus-vivendi-theme-scale-headings
-                                      (list :height modus-vivendi-theme-scale-3))))))
-   `(outline-3 ((,class (:inherit ,modus-theme-variable-pitch
-                                  :foreground ,fg-special-cold :weight bold
-                                  ,@(when modus-vivendi-theme-scale-headings
-                                      (list :height modus-vivendi-theme-scale-2))))))
-   `(outline-4 ((,class (:inherit ,modus-theme-variable-pitch
-                                  :foreground ,fg-special-mild :weight bold
-                                  ,@(when modus-vivendi-theme-scale-headings
-                                      (list :height modus-vivendi-theme-scale-1))))))
-   `(outline-5 ((,class (:inherit ,modus-theme-variable-pitch
-                                  :foreground ,fg-special-calm :weight bold))))
-   `(outline-6 ((,class (:inherit ,modus-theme-variable-pitch
-                                  :foreground ,yellow-nuanced :weight bold))))
-   `(outline-7 ((,class (:inherit ,modus-theme-variable-pitch
-                                  :foreground ,red-nuanced :weight bold))))
-   `(outline-8 ((,class (:inherit ,modus-theme-variable-pitch
-                                  :foreground ,fg-dim :weight bold))))
-   ;;;; outline-minor-faces (applies backgrounds to `outline-minor-mode')
-   `(outline-minor-0 ((,class (,@(and (>= emacs-major-version 27) '(:extend t))
-                               :background ,bg-alt :weight bold))))
+   `(outline-1 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                  ,@(modus-vivendi-theme-heading-foreground fg-main magenta-alt-other)
+                                  ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)
+                                  ,@(modus-vivendi-theme-heading-block magenta-nuanced-bg magenta-nuanced)))))
+   `(outline-2 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                  ,@(modus-vivendi-theme-heading-foreground fg-special-warm magenta-alt)
+                                  ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-3)
+                                  ,@(modus-vivendi-theme-heading-block red-nuanced-bg red-nuanced)))))
+   `(outline-3 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                  ,@(modus-vivendi-theme-heading-foreground fg-special-cold blue)
+                                  ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-2)
+                                  ,@(modus-vivendi-theme-heading-block blue-nuanced-bg blue-nuanced)))))
+   `(outline-4 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                  ,@(modus-vivendi-theme-heading-foreground fg-special-mild cyan-alt-other)
+                                  ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-1)
+                                  ,@(modus-vivendi-theme-heading-block cyan-nuanced-bg cyan-nuanced)))))
+   `(outline-5 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                  ,@(modus-vivendi-theme-heading-foreground fg-special-calm green-alt)
+                                  ,@(modus-vivendi-theme-heading-block green-nuanced-bg green-nuanced)))))
+   `(outline-6 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                  ,@(modus-vivendi-theme-heading-foreground yellow-nuanced yellow-alt-other)
+                                  ,@(modus-vivendi-theme-heading-block yellow-nuanced-bg yellow-nuanced)))))
+   `(outline-7 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                  ,@(modus-vivendi-theme-heading-foreground red-nuanced red-alt)
+                                  ,@(modus-vivendi-theme-heading-block red-nuanced-bg red-nuanced)))))
+   `(outline-8 ((,class (:inherit ,modus-theme-variable-pitch :weight bold
+                                  ,@(modus-vivendi-theme-heading-foreground fg-dim magenta)
+                                  ,@(modus-vivendi-theme-heading-block bg-alt fg-alt)))))
+   ;;;; outline-minor-faces
+   `(outline-minor-0 ((,class (:background ,bg-alt))))
    ;;;; package (M-x list-packages)
    `(package-description ((,class (:foreground ,fg-special-cold))))
    `(package-help-section-name ((,class (:foreground ,magenta-alt-other :weight bold))))
@@ -2293,6 +2596,8 @@ between foreground and background is >= 7:1)."
    `(package-status-installed ((,class (:foreground ,fg-special-warm))))
    `(package-status-new ((,class (:foreground ,green :weight bold))))
    `(package-status-unsigned ((,class (:foreground ,red-alt :weight bold))))
+   ;;;; page-break-lines
+   `(page-break-lines ((,class (:inherit default :foreground ,fg-window-divider-outer))))
    ;;;; paradox
    `(paradox-archive-face ((,class (:foreground ,fg-special-mild))))
    `(paradox-comment-face ((,class (:foreground ,fg-alt :slant ,modus-theme-slant))))
@@ -2308,6 +2613,8 @@ between foreground and background is >= 7:1)."
    `(paradox-starred-face ((,class (:foreground ,magenta-alt))))
    ;;;; paren-face
    `(parenthesis ((,class (:foreground ,fg-alt))))
+   ;;;; parrot
+   `(parrot-rotate-rotation-highlight-face ((,class (:inherit modus-theme-refine-magenta))))
    ;;;; pass
    `(pass-mode-directory-face ((,class (:foreground ,fg-special-cold :weight bold))))
    `(pass-mode-entry-face ((,class (:background ,bg-main :foreground ,fg-main))))
@@ -2318,6 +2625,23 @@ between foreground and background is >= 7:1)."
    `(persp-face-lighter-nil-persp ((,class (:foreground ,fg-active :weight bold))))
    ;;;; perspective
    `(persp-selected-face ((,class (:foreground ,blue-active :weight bold))))
+   ;;;; phi-grep
+   `(phi-grep-heading-face  ((,class (:foreground ,red-alt :weight bold
+                                                  ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
+   `(phi-grep-line-number-face ((,class (:foreground ,fg-special-warm))))
+   `(phi-grep-match-face ((,class (:inherit modus-theme-special-calm))))
+   `(phi-grep-modified-face ((,class (:inherit modus-theme-refine-yellow))))
+   `(phi-grep-overlay-face ((,class (:inherit modus-theme-refine-blue))))
+   ;;;; phi-search
+   `(phi-replace-preview-face ((,class (:inherit modus-theme-intense-magenta))))
+   `(phi-search-failpart-face ((,class (:inherit modus-theme-refine-red))))
+   `(phi-search-match-face ((,class (:inherit modus-theme-refine-cyan))))
+   `(phi-search-selection-face ((,class (:inherit modus-theme-intense-green :weight bold))))
+   ;;;; pomidor
+   `(pomidor-break-face ((,class (:foreground ,blue-alt-other))))
+   `(pomidor-overwork-face ((,class (:foreground ,red-alt-other))))
+   `(pomidor-skip-face ((,class (:foreground ,fg-alt :slant ,modus-theme-slant))))
+   `(pomidor-work-face ((,class (:foreground ,green-alt-other))))
    ;;;; powerline
    `(powerline-active0 ((,class (:background ,fg-inactive :foreground ,bg-inactive))))
    `(powerline-active1 ((,class (:background ,bg-active :foreground ,fg-active))))
@@ -2383,16 +2707,27 @@ between foreground and background is >= 7:1)."
    `(rainbow-delimiters-depth-9-face ((,class (:foreground ,yellow-alt))))
    `(rainbow-delimiters-mismatched-face ((,class (:foreground ,red-alt :weight bold))))
    `(rainbow-delimiters-unmatched-face ((,class (:foreground ,red :weight bold))))
+   ;;;; rcirc
+   `(rcirc-bright-nick ((,class (:foreground ,magenta-alt :weight bold))))
+   `(rcirc-dim-nick ((,class (:foreground ,fg-alt))))
+   `(rcirc-my-nick ((,class (:foreground ,magenta :weight bold))))
+   `(rcirc-nick-in-message ((,class (:foreground ,blue))))
+   `(rcirc-nick-in-message-full-line ((,class (:foreground ,fg-special-mild :weight bold))))
+   `(rcirc-other-nick ((,class (:foreground ,fg-special-cold :weight bold))))
+   `(rcirc-prompt ((,class (:foreground ,cyan-alt-other :weight bold))))
+   `(rcirc-server ((,class (:foreground ,fg-special-warm))))
+   `(rcirc-timestamp ((,class (:foreground ,fg-inactive))))
+   `(rcirc-url ((,class (:foreground ,blue :underline t))))
    ;;;; regexp-builder (re-builder)
    `(reb-match-0 ((,class (:inherit modus-theme-intense-blue))))
    `(reb-match-1 ((,class (:inherit modus-theme-intense-magenta))))
    `(reb-match-2 ((,class (:inherit modus-theme-intense-green))))
    `(reb-match-3 ((,class (:inherit modus-theme-intense-red))))
-   `(reb-regexp-grouping-backslash ((,class (:foreground ,green :weight bold))))
-   `(reb-regexp-grouping-construct ((,class (:foreground ,magenta :weight bold))))
+   `(reb-regexp-grouping-backslash ((,class (:foreground ,fg-escape-char-backslash :weight bold))))
+   `(reb-regexp-grouping-construct ((,class (:foreground ,fg-escape-char-construct :weight bold))))
    ;;;; rg (rg.el)
    `(rg-column-number-face ((,class (:foreground ,magenta-alt-other))))
-   `(rg-context-face ((,class (:foreground ,fg-alt))))
+   `(rg-context-face ((,class (:foreground ,fg-unfocused))))
    `(rg-error-face ((,class (:foreground ,red :weight bold))))
    `(rg-file-tag-face ((,class (:foreground ,fg-special-cold))))
    `(rg-filename-face ((,class (:foreground ,fg-special-cold :weight bold))))
@@ -2404,7 +2739,7 @@ between foreground and background is >= 7:1)."
    `(rg-toggle-on-face ((,class (:foreground ,cyan-active :weight bold))))
    `(rg-warning-face ((,class (:foreground ,yellow :weight bold))))
    ;;;; ripgrep
-   `(ripgrep-context-face ((,class (:foreground ,fg-alt))))
+   `(ripgrep-context-face ((,class (:foreground ,fg-unfocused))))
    `(ripgrep-error-face ((,class (:foreground ,red :weight bold))))
    `(ripgrep-hit-face ((,class (:foreground ,cyan))))
    `(ripgrep-match-face ((,class (:inherit modus-theme-special-calm))))
@@ -2437,13 +2772,12 @@ between foreground and background is >= 7:1)."
    `(sallet-recentf-file-path ((,class (:foreground ,fg-special-mild))))
    `(sallet-regexp-match ((,class (:inherit modus-theme-refine-magenta))))
    `(sallet-source-header ((,class (:foreground ,red-alt :weight bold
-                                                ,@(when modus-vivendi-theme-scale-headings
-                                                    (list :height modus-vivendi-theme-scale-4))))))
+                                                ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
    `(sallet-substring-match ((,class (:inherit modus-theme-refine-blue))))
    ;;;; selectrum
-   `(selectrum-current-candidate ((,class (:inherit modus-theme-intense-cyan :weight bold))))
-   `(selectrum-primary-highlight ((,class (:inherit modus-theme-refine-blue :weight bold))))
-   `(selectrum-secondary-highlight ((,class (:inherit modus-theme-refine-magenta :weight bold))))
+   `(selectrum-current-candidate ((,class (:inherit modus-theme-intense-cyan))))
+   `(selectrum-primary-highlight ((,class (:foreground ,magenta-alt :weight bold))))
+   `(selectrum-secondary-highlight ((,class (:foreground ,blue-alt-other :weight bold))))
    ;;;; sesman
    `(sesman-browser-button-face ((,class (:foreground ,blue-alt-other :underline t))))
    `(sesman-browser-highligh-face ((,class (:inherit modus-theme-subtle-blue))))
@@ -2457,10 +2791,10 @@ between foreground and background is >= 7:1)."
    `(show-paren-match ((,class (:background ,bg-paren-match :foreground ,fg-main))))
    `(show-paren-match-expression ((,class (:inherit modus-theme-special-calm))))
    `(show-paren-mismatch ((,class (:inherit modus-theme-intense-red))))
-   ;;;; skewer-mode
-   `(skewer-error-face ((,class (:foreground ,red :underline t))))
    ;;;; side-notes
    `(side-notes ((,class (:background ,bg-dim :foreground ,fg-dim))))
+   ;;;; skewer-mode
+   `(skewer-error-face ((,class (:foreground ,red :underline t))))
    ;;;; smart-mode-line
    `(sml/charging ((,class (:foreground ,green-active))))
    `(sml/discharging ((,class (:foreground ,red-active))))
@@ -2497,14 +2831,23 @@ between foreground and background is >= 7:1)."
    `(sp-wrap-overlay-opening-pair ((,class (:inherit sp-pair-overlay-face))))
    `(sp-wrap-tag-overlay-face ((,class (:inherit sp-pair-overlay-face))))
    ;;;; smerge
-   `(smerge-base ((,class (:inherit modus-theme-special-warm))))
-   `(smerge-lower ((,class (:inherit modus-theme-subtle-green))))
-   `(smerge-markers ((,class (:inherit modus-theme-special-cold))))
-   `(smerge-refined-added ((,class (:inherit modus-theme-intense-green))))
-   `(smerge-refined-changed ((,class (:inherit modus-theme-intense-yellow))))
-   `(smerge-refined-removed ((,class (:inherit modus-theme-intense-red))))
-   `(smerge-refined-upper ((,class (:inherit modus-theme-intense-red))))
-   `(smerge-upper ((,class (:inherit modus-theme-subtle-red))))
+   `(smerge-base ((,class ,(modus-vivendi-theme-diffs
+                            bg-main yellow
+                            bg-diff-focus-changed fg-diff-focus-changed))))
+   `(smerge-lower ((,class ,(modus-vivendi-theme-diffs
+                             bg-main green
+                             bg-diff-focus-added fg-diff-focus-added))))
+   `(smerge-markers ((,class (:background ,bg-diff-neutral-2 :foreground ,fg-diff-neutral-2))))
+   `(smerge-refined-added ((,class ,(modus-vivendi-theme-diffs
+                                     bg-diff-added fg-diff-added
+                                     bg-diff-refine-added fg-diff-refine-added))))
+   `(smerge-refined-changed ((,class nil)))
+   `(smerge-refined-removed ((,class ,(modus-vivendi-theme-diffs
+                                       bg-diff-removed fg-diff-removed
+                                       bg-diff-refine-removed fg-diff-refine-removed))))
+   `(smerge-upper ((,class ,(modus-vivendi-theme-diffs
+                             bg-main red
+                             bg-diff-focus-removed fg-diff-focus-removed))))
    ;;;; speedbar
    `(speedbar-button-face ((,class (:inherit link))))
    `(speedbar-directory-face ((,class (:foreground ,blue :weight bold))))
@@ -2513,10 +2856,18 @@ between foreground and background is >= 7:1)."
    `(speedbar-selected-face ((,class (:foreground ,cyan :weight bold))))
    `(speedbar-separator-face ((,class (:inherit modus-theme-intense-neutral))))
    `(speedbar-tag-face ((,class (:foreground ,yellow-alt-other))))
+   ;;;; spell-fu
+   `(spell-fu-incorrect-face
+     ((,(append '((supports :underline (:style wave))) class)
+       (:foreground ,fg-lang-error :underline (:style wave)))
+      (,class (:foreground ,fg-lang-error :underline t))))
    ;;;; stripes
    `(stripes ((,class (:background ,bg-alt))))
    ;;;; success
    `(suggest-heading ((,class (:foreground ,yellow-alt-other :weight bold))))
+   ;;;; switch-window
+   `(switch-window-background ((,class (:background ,bg-dim))))
+   `(switch-window-label ((,class (:height 3.0 :foreground ,blue-intense))))
    ;;;; swiper
    `(swiper-background-match-face-1 ((,class (:inherit modus-theme-subtle-neutral))))
    `(swiper-background-match-face-2 ((,class (:inherit modus-theme-subtle-cyan))))
@@ -2528,6 +2879,15 @@ between foreground and background is >= 7:1)."
    `(swiper-match-face-2 ((,class (:inherit swiper-line-face))))
    `(swiper-match-face-3 ((,class (:inherit swiper-line-face))))
    `(swiper-match-face-4 ((,class (:inherit swiper-line-face))))
+   ;;;; swoop
+   `(swoop-face-header-format-line ((,class (:foreground ,red-alt :weight bold
+                                                         ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-3)))))
+   `(swoop-face-line-buffer-name ((,class (:foreground ,blue-alt :weight bold
+                                                       ,@(modus-vivendi-theme-scale modus-vivendi-theme-scale-4)))))
+   `(swoop-face-line-number ((,class (:foreground ,fg-special-warm))))
+   `(swoop-face-target-line ((,class (:inherit modus-theme-intense-blue
+                                               ,@(and (>= emacs-major-version 27) '(:extend t))))))
+   `(swoop-face-target-words ((,class (:inherit modus-theme-refine-cyan))))
    ;;;; sx
    `(sx-inbox-item-type ((,class (:foreground ,magenta-alt-other))))
    `(sx-inbox-item-type-unread ((,class (:inherit sx-inbox-item-type :weight bold))))
@@ -2576,6 +2936,13 @@ between foreground and background is >= 7:1)."
    `(syslog-ip ((,class (:foreground ,fg-special-mild :weight bold :underline t))))
    `(syslog-su ((,class (:foreground ,red-alt :weight bold))))
    `(syslog-warn ((,class (:foreground ,yellow :weight bold))))
+   ;;;; trashed
+   `(trashed-deleted ((,class (:background ,bg-mark-del :foreground ,fg-mark-del :weight bold))))
+   `(trashed-directory ((,class (:foreground ,blue))))
+   `(trashed-mark ((,class (:foreground ,blue-alt :weight bold))))
+   `(trashed-marked ((,class (:background ,bg-mark-other :foreground ,fg-mark-other :weight bold))))
+   `(trashed-restored ((,class (:background ,bg-mark :foreground ,fg-mark :weight bold))))
+   `(trashed-symlink ((,class (:foreground ,blue-alt :underline t))))
    ;;;; telephone-line
    `(telephone-line-accent-active ((,class (:background ,fg-inactive :foreground ,bg-inactive))))
    `(telephone-line-accent-inactive ((,class (:background ,bg-active :foreground ,fg-active))))
@@ -2601,6 +2968,10 @@ between foreground and background is >= 7:1)."
    `(term-color-red ((,class (:background ,red :foreground ,red))))
    `(term-color-yellow ((,class (:background ,yellow :foreground ,yellow))))
    `(term-underline ((,class (:underline t))))
+   ;;;; tomatinho
+   `(tomatinho-ok-face ((,class (:foreground ,blue-intense))))
+   `(tomatinho-pause-face ((,class (:foreground ,yellow-intense))))
+   `(tomatinho-reset-face ((,class (:foreground ,fg-alt))))
    ;;;; transient
    `(transient-active-infix ((,class (:inherit modus-theme-special-mild))))
    `(transient-argument ((,class (:foreground ,green :weight bold))))
@@ -2638,6 +3009,29 @@ between foreground and background is >= 7:1)."
    `(treemacs-root-unreadable-face ((,class (:inherit treemacs-root-face :strike-through t))))
    `(treemacs-tags-face ((,class (:foreground ,blue-alt))))
    `(treemacs-tags-face ((,class (:foreground ,magenta-alt))))
+   ;;;; tuareg
+   `(caml-types-def-face ((,class (:inherit modus-theme-subtle-red))))
+   `(caml-types-expr-face ((,class (:inherit modus-theme-subtle-green))))
+   `(caml-types-occ-face ((,class (:inherit modus-theme-subtle-green))))
+   `(caml-types-scope-face ((,class (:inherit modus-theme-subtle-blue))))
+   `(caml-types-typed-face ((,class (:inherit modus-theme-subtle-magenta))))
+   `(tuareg-font-double-semicolon-face ((,class (:foreground ,red-alt))))
+   `(tuareg-font-lock-attribute-face ((,class (:foreground ,magenta))))
+   `(tuareg-font-lock-constructor-face ((,class (:foreground ,fg-main))))
+   `(tuareg-font-lock-error-face ((,class (:inherit modus-theme-intense-red :weight bold))))
+   `(tuareg-font-lock-extension-node-face ((,class (:background ,bg-alt :foreground ,magenta))))
+   `(tuareg-font-lock-governing-face ((,class (:foreground ,fg-main :weight bold))))
+   `(tuareg-font-lock-infix-extension-node-face ((,class (:foreground ,magenta))))
+   `(tuareg-font-lock-interactive-directive-face ((,class (:foreground ,fg-special-cold))))
+   `(tuareg-font-lock-interactive-error-face ((,class (:foreground ,red :weight bold))))
+   `(tuareg-font-lock-interactive-output-face ((,class (:foreground ,blue-alt-other))))
+   `(tuareg-font-lock-label-face ((,class (:foreground ,cyan-alt-other))))
+   `(tuareg-font-lock-line-number-face ((,class (:foreground ,fg-special-warm))))
+   `(tuareg-font-lock-module-face ((,class (:foreground ,magenta-alt))))
+   `(tuareg-font-lock-multistage-face ((,class (:background ,bg-alt :foreground ,blue :weight bold))))
+   `(tuareg-font-lock-operator-face ((,class (:foreground ,red-alt))))
+   `(tuareg-opam-error-face ((,class (:foreground ,red :weight bold))))
+   `(tuareg-opam-pkg-variable-name-face ((,class (:foreground ,cyan :slant ,modus-theme-slant))))
    ;;;; undo-tree
    `(undo-tree-visualizer-active-branch-face ((,class (:foreground ,fg-main :weight bold))))
    `(undo-tree-visualizer-current-face ((,class (:foreground ,blue-intense))))
@@ -2645,15 +3039,25 @@ between foreground and background is >= 7:1)."
    `(undo-tree-visualizer-register-face ((,class (:foreground ,magenta-intense))))
    `(undo-tree-visualizer-unmodified-face ((,class (:foreground ,green-intense))))
    ;;;; vc
-   `(vc-conflict-state ((,class (:foreground ,red-active :weight bold))))
+   `(vc-conflict-state ((,class (:foreground ,red-active :weight ,modus-theme-bold))))
    `(vc-edited-state ((,class (:foreground ,fg-special-warm))))
    `(vc-locally-added-state ((,class (:foreground ,cyan-active))))
-   `(vc-locked-state ((,class (:foreground ,magenta-active :weight bold))))
-   `(vc-missing-state ((,class (:foreground ,yellow-active :weight bold))))
-   `(vc-needs-update-state ((,class (:foreground ,fg-special-mild :weight bold))))
+   `(vc-locked-state ((,class (:foreground ,magenta-active :weight ,modus-theme-bold))))
+   `(vc-missing-state ((,class (:foreground ,yellow-active :weight ,modus-theme-bold))))
+   `(vc-needs-update-state ((,class (:foreground ,fg-special-mild :weight ,modus-theme-bold))))
    `(vc-removed-state ((,class (:foreground ,red-active))))
    `(vc-state-base ((,class (:foreground ,fg-active))))
    `(vc-up-to-date-state ((,class (:foreground ,fg-special-cold))))
+   ;;;; vimish-fold
+   `(vimish-fold-fringe ((,class (:foreground ,cyan-active))))
+   `(vimish-fold-mouse-face ((,class (:inherit modus-theme-intense-blue))))
+   `(vimish-fold-overlay ((,class (:background ,bg-alt :foreground ,fg-special-cold))))
+   ;;;; visible-mark
+   `(visible-mark-active ((,class (:background ,blue-intense-bg))))
+   `(visible-mark-face1 ((,class (:background ,cyan-intense-bg))))
+   `(visible-mark-face2 ((,class (:background ,yellow-intense-bg))))
+   `(visible-mark-forward-face1 ((,class (:background ,magenta-intense-bg))))
+   `(visible-mark-forward-face2 ((,class (:background ,green-intense-bg))))
    ;;;; visual-regexp
    `(vr/group-0 ((,class (:inherit modus-theme-intense-blue))))
    `(vr/group-1 ((,class (:inherit modus-theme-intense-magenta))))
@@ -2664,6 +3068,20 @@ between foreground and background is >= 7:1)."
    ;;;; volatile-highlights
    `(vhl/default-face ((,class (,@(and (>= emacs-major-version 27) '(:extend t))
                                 :background ,bg-alt :foreground ,blue-nuanced))))
+   ;;;; vterm
+   `(vterm-color-black ((,class (:background "black" :foreground "black"))))
+   `(vterm-color-blue ((,class (:background ,blue :foreground ,blue))))
+   `(vterm-color-cyan ((,class (:background ,cyan :foreground ,cyan))))
+   `(vterm-color-default ((,class (:background ,bg-main :foreground ,fg-main))))
+   `(vterm-color-green ((,class (:background ,green :foreground ,green))))
+   `(vterm-color-inverse-video ((,class (:background ,bg-main :inverse-video t))))
+   `(vterm-color-magenta ((,class (:background ,magenta :foreground ,magenta))))
+   `(vterm-color-red ((,class (:background ,red :foreground ,red))))
+   `(vterm-color-underline ((,class (:foreground ,fg-special-warm :underline t))))
+   `(vterm-color-white ((,class (:background "white" :foreground "white"))))
+   `(vterm-color-yellow ((,class (:background ,yellow :foreground ,yellow))))
+   ;;;; wcheck-mode
+   `(wcheck-default-face ((,class (:foreground ,red :underline t))))
    ;;;; web-mode
    `(web-mode-annotation-face ((,class (:inherit web-mode-comment-face))))
    `(web-mode-annotation-html-face ((,class (:inherit web-mode-comment-face))))
@@ -2771,10 +3189,17 @@ between foreground and background is >= 7:1)."
    `(window-divider ((,class (:foreground ,fg-window-divider-inner))))
    `(window-divider-first-pixel ((,class (:foreground ,fg-window-divider-outer))))
    `(window-divider-last-pixel ((,class (:foreground ,fg-window-divider-outer))))
+   ;;;; winum
+   `(winum-face ((,class (:foreground ,cyan-active :weight ,modus-theme-bold))))
    ;;;; writegood-mode
-   `(writegood-duplicates-face ((,class (:background ,bg-alt :foreground ,red-alt-other :underline t))))
-   `(writegood-passive-voice-face ((,class (:background ,bg-alt :foreground ,cyan-alt-other :underline t))))
-   `(writegood-weasels-face ((,class (:background ,bg-alt :foreground ,yellow-alt-other :underline t))))
+   `(writegood-duplicates-face ((,class (:background ,bg-alt :foreground ,red-alt :underline t))))
+   `(writegood-passive-voice-face ((,class (:foreground ,yellow-nuanced :underline (:color ,fg-lang-warning :style line)))))
+   `(writegood-weasels-face ((,class (:foreground ,red-nuanced :underline (:color ,fg-lang-error :style line)))))
+   ;;;; woman
+   `(woman-addition ((,class (:foreground ,magenta-alt-other))))
+   `(woman-bold ((,class (:foreground ,magenta :weight bold))))
+   `(woman-italic ((,class (:foreground ,cyan :slant italic))))
+   `(woman-unknown ((,class (:foreground ,yellow :slant italic))))
    ;;;; xah-elisp-mode
    `(xah-elisp-at-symbol ((,class (:foreground ,red-alt :weight bold))))
    `(xah-elisp-cap-variable ((,class (:foreground ,red-alt-other))))
@@ -2799,15 +3224,40 @@ between foreground and background is >= 7:1)."
    `(ztreep-leaf-face ((,class (:foreground ,cyan))))
    `(ztreep-node-count-children-face ((,class (:foreground ,fg-special-warm))))
    `(ztreep-node-face ((,class (:foreground ,fg-main))))
+   (when (>= emacs-major-version 27) ; EXPERIMENTAL this form is subject to review
+     (custom-theme-set-faces
+      'modus-vivendi
+      ;;;; tab-bar-mode
+      `(tab-bar ((,class (:background ,bg-alt :foreground ,fg-alt))))
+      `(tab-bar-tab ((,class (:box (:line-width 1 :color ,fg-window-divider-inner)
+                                   :background ,bg-tab-active :foreground ,fg-main))))
+      `(tab-bar-tab-inactive ((,class (:box (:line-width 1 :color ,bg-tab-active)
+                                            :background ,bg-tab-inactive :foreground ,fg-dim))))
+      ;;;; tab-line-mode
+      `(tab-line ((,class (:height 0.95 :background ,bg-active :foreground ,fg-active))))
+      `(tab-line-close-highlight ((,class (:foreground ,red-active))))
+      `(tab-line-highlight ((,class (:background ,bg-tab-active :foreground ,fg-main))))
+      `(tab-line-tab ((,class (:box (:line-width 1 :color ,fg-window-divider-inner)
+                                    :background ,bg-tab-active :foreground ,fg-main))))
+      `(tab-line-tab-current ((,class (:box (:line-width 1 :color ,fg-window-divider-inner)
+                                            :background ,bg-tab-active :foreground ,fg-main))))
+      `(tab-line-tab-inactive ((,class (:box (:line-width 1 :color ,bg-tab-active)
+                                             :background ,bg-tab-inactive :foreground ,fg-dim))))))
    ;;; Theme Variables
    (custom-theme-set-variables
     'modus-vivendi
     ;;;; ansi-colors
     `(ansi-color-faces-vector [default bold shadow italic underline success warning error])
     `(ansi-color-names-vector [,bg-main ,red ,green ,yellow ,blue ,magenta ,cyan ,fg-main])
+    ;;;; flymake fringe indicators
+    `(flymake-error-bitmap '(flymake-double-exclamation-mark modus-theme-fringe-red))
+    `(flymake-warning-bitmap '(exclamation-mark modus-theme-fringe-yellow))
+    `(flymake-note-bitmap '(exclamation-mark modus-theme-fringe-cyan))
     ;;;; ibuffer
     `(ibuffer-deletion-face 'dired-flagged)
+    `(ibuffer-filter-group-name-face 'dired-mark)
     `(ibuffer-marked-face 'dired-marked)
+    `(ibuffer-title-face 'dired-header)
     ;;;; hl-todo
     `(hl-todo-keyword-faces
       '(("HOLD" . ,yellow-alt)
@@ -2857,7 +3307,7 @@ between foreground and background is >= 7:1)."
 ;;;###autoload
 (when load-file-name
   (add-to-list 'custom-theme-load-path
-    (file-name-as-directory (file-name-directory load-file-name))))
+               (file-name-as-directory (file-name-directory load-file-name))))
 
 (provide-theme 'modus-vivendi)
 
