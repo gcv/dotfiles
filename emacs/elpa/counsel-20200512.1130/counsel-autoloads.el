@@ -55,6 +55,11 @@ to `ivy-highlight-face'.
 
 \(fn)" t nil)
 
+(autoload 'counsel-describe-symbol "counsel" "\
+Forward to `describe-symbol'.
+
+\(fn)" t nil)
+
 (autoload 'counsel-set-variable "counsel" "\
 Set a variable SYM, with completion.
 
