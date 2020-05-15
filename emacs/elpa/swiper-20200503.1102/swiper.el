@@ -4,7 +4,7 @@
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/swiper
-;; Package-Version: 20200319.1334
+;; Package-Version: 20200503.1102
 ;; Version: 0.13.0
 ;; Package-Requires: ((emacs "24.5") (ivy "0.13.0"))
 ;; Keywords: matching
@@ -469,6 +469,7 @@ such as `scroll-conservatively' are set to a high value.")
   (unless (swiper-font-lock-ensure-p)
     (unless (or (> (buffer-size) 100000) (null font-lock-mode))
       (if (fboundp 'font-lock-ensure)
+          ;; Added in Emacs 25.1.
           (font-lock-ensure)
         (with-no-warnings (font-lock-fontify-buffer))))))
 
@@ -505,8 +506,6 @@ such as `scroll-conservatively' are set to a high value.")
      " "
      (buffer-substring beg end))))
 
-(declare-function outline-show-all "outline")
-
 (defvar swiper-use-visual-line-p
   (lambda (n-lines)
     (and visual-line-mode
@@ -528,6 +527,7 @@ numbers; replaces calculating the width from buffer line count."
           (when (eq major-mode 'org-mode)
             (require 'outline)
             (if (fboundp 'outline-show-all)
+                ;; Added in Emacs 25.1.
                 (outline-show-all)
               (with-no-warnings
                 (show-all))))
@@ -735,7 +735,22 @@ When capture groups are present in the input, print them instead of lines."
   (when (bound-and-true-p evil-mode)
     (evil-set-jump)))
 
-(declare-function char-fold-to-regexp "char-fold")
+(defun swiper--normalize-regex (re)
+  "Normalize the swiper regex RE.
+Add a space after a leading `^' if needed and apply
+`search-default-mode' if bound."
+  (replace-regexp-in-string
+   "^\\(?:\\\\(\\)?\\^"
+   (concat "\\&" (if (eq 'swiper (ivy-state-caller ivy-last)) " " ""))
+   (if (functionp (bound-and-true-p search-default-mode))
+       (mapconcat
+        (lambda (x)
+          (if (string-match-p "\\`[^$\\^]+\\'" x)
+              (funcall search-default-mode x)
+            x))
+        (split-string re "\\b") "")
+     re)
+   t))
 
 (defun swiper--re-builder (str)
   "Transform STR into a swiper regex.
@@ -743,45 +758,14 @@ This is the regex used in the minibuffer where candidates have
 line numbers.  For the buffer, use `ivy--regex' instead."
   (let* ((re-builder (ivy-alist-setting ivy-re-builders-alist))
          (str (replace-regexp-in-string "\\\\n" "\n" str))
-         (re (cond
-               ((equal str "")
-                "")
-               ((equal str "^")
-                (setq ivy--subexps 0)
-                ".")
-               ((= (aref str 0) ?^)
-                (let* ((re (funcall re-builder (substring str 1)))
-                       (re (if (listp re)
-                               (mapconcat (lambda (x)
-                                            (format "\\(%s\\)" (car x)))
-                                          (cl-remove-if-not #'cdr re)
-                                          ".*?")
-                             re)))
-                  (cond
-                    ((string= re "$")
-                     (if (eq (ivy-state-caller ivy-last) 'swiper)
-                         "^ $"
-                       "^$"))
-                    ((zerop ivy--subexps)
-                     (prog1 (format "^ ?\\(%s\\)" re)
-                       (setq ivy--subexps 1)))
-                    (t
-                     (format "^ %s" re)))))
-               ((fboundp (bound-and-true-p search-default-mode))
-                (if (string-match "\\`\\\\_<\\(.+\\)\\\\_>\\'" str)
-                    (concat
-                     "\\_<"
-                     (funcall search-default-mode (match-string 1 str))
-                     "\\_>")
-                  (let ((subs (ivy--split str)))
-                    (setq ivy--subexps (length subs))
-                    (mapconcat
-                     (lambda (s) (format "\\(%s\\)" (funcall search-default-mode s)))
-                     subs
-                     ".*?"))))
-               (t
-                (funcall re-builder str)))))
-    re))
+         (re (funcall re-builder str)))
+    (if (consp re)
+        (mapcar
+         (lambda (x)
+           (cons (swiper--normalize-regex (car x))
+                 (cdr x)))
+         re)
+      (swiper--normalize-regex re))))
 
 (defvar swiper-history nil
   "History for `swiper'.")
@@ -1608,8 +1592,7 @@ When not running `swiper-isearch' already, start it."
              swiper-faces
            swiper-background-faces)
          (lambda (beg end face _priority)
-           (ivy-add-face-text-property
-            beg end face str)))
+           (add-face-text-property beg end face nil str)))
         (cl-incf i)))
     str))
 
