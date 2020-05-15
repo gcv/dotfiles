@@ -4,7 +4,7 @@
 
 ;; Author: Fabrice Niessen <(concat "fniessen" at-sign "pirilampo.org")>
 ;; URL: https://github.com/fniessen/emacs-leuven-theme
-;; Version: 20200102.2050
+;; Version: 20200513.1933
 ;; Keywords: color theme
 
 ;; This file is part of GNU Emacs.
@@ -20,7 +20,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -47,7 +47,8 @@ The theme has to be reloaded after changing anything in this group."
 
 (defcustom leuven-scale-outline-headlines t
   "Scale `outline' (and `org') level-1 headlines.
-This can be nil for unscaled, t for using the theme default, or a scaling number."
+This can be nil for unscaled, t for using the theme default, or a scaling
+number."
   :type '(choice
           (const :tag "Unscaled" nil)
           (const :tag "Default provided by theme" t)
@@ -56,12 +57,12 @@ This can be nil for unscaled, t for using the theme default, or a scaling number
 
 (defcustom leuven-scale-org-agenda-structure t
   "Scale Org agenda structure lines, like dates.
-This can be nil for unscaled, t for using the theme default, or a scaling number."
+This can be nil for unscaled, t for using the theme default, or a scaling
+number."
   :type '(choice
           (const :tag "Unscaled" nil)
           (const :tag "Default provided by theme" t)
-          (number :tag "Set scaling"))
-  :group 'leuven)
+          (number :tag "Set scaling")))
 
 (defun leuven-scale-font (control default-height)
   "Function for splicing optional font heights into face descriptions.
@@ -84,8 +85,8 @@ more...")
       ;; Leuven generic colors.
       (cancel '(:slant italic :strike-through t :foreground "#A9A9A9"))
       (clock-line '(:box (:line-width 1 :color "#335EA8") :foreground "black" :background "#EEC900"))
-      (code-block '(:foreground "#000088" :background "#FFFFE0" :extend t))
-      (code-inline '(:foreground "#006400" :background "#FDFFF7" :extend t))
+      (code-block '(:foreground "#000088" :background "#FFFFE0"))
+      (code-inline '(:foreground "#006400" :background "#FDFFF7"))
       (column '(:height 1.0 :weight normal :slant normal :underline nil :strike-through nil :foreground "#E6AD4F" :background "#FFF2DE"))
       (completion-inline '(:weight normal :foreground "#C0C0C0" :inherit hl-line)) ; Like Google.
       (completion-other-candidates '(:weight bold :foreground "black" :background "#EBF4FE"))
@@ -103,12 +104,12 @@ more...")
       (function-param '(:foreground "#247284"))
       (grep-file-name '(:weight bold :foreground "#2A489E")) ; Used for grep hits.
       (grep-line-number '(:weight bold :foreground "#A535AE"))
-      (highlight-blue '(:background "#E6ECFF" :extend t))
-      (highlight-blue2 '(:background "#E4F1F9" :extend t))
-      (highlight-gray '(:background "#E4E4E3" :extend t))
-      (highlight-green '(:background "#D5F1CF" :extend t))
-      (highlight-red '(:background "#FFC8C8" :extend t))
-      (highlight-yellow '(:background "#F6FECD" :extend t))
+      (highlight-blue '(:background "#E6ECFF"))
+      (highlight-blue2 '(:background "#E4F1F9"))
+      (highlight-gray '(:background "#E4E4E3"))
+      (highlight-green '(:background "#D5F1CF"))
+      (highlight-red '(:background "#FFC8C8"))
+      (highlight-yellow '(:background "#F6FECD"))
       (link '(:weight normal :underline t :foreground "#006DAF"))
       (link-no-underline '(:weight normal :foreground "#006DAF"))
       (mail-header-name '(:family "Sans Serif" :weight normal :foreground "#A3A3A2"))
@@ -121,17 +122,17 @@ more...")
       (mail-unread-high '(:weight bold :foreground "#135985"))
       (marked-line '(:foreground "#AA0000" :background "#FFAAAA"))
       (match '(:weight bold :background "#FFFF00")) ; occur patterns + match in helm for files + match in Org files.
-      (ol1 `(,@(leuven-scale-font leuven-scale-outline-headlines 1.3) :weight bold :overline "#A7A7A7" :foreground "#3C3C3C" :background "#F0F0F0" :extend t))
-      (ol2 '(:height 1.0 :weight bold :overline "#123555" :foreground "#123555" :background "#E5F4FB" :extend t))
-      (ol3 '(:height 1.0 :weight bold :foreground "#005522" :background "#EFFFEF" :extend t))
-      (ol4 '(:height 1.0 :weight bold :slant normal :foreground "#EA6300" :extend t))
-      (ol5 '(:height 1.0 :weight bold :slant normal :foreground "#E3258D" :extend t))
-      (ol6 '(:height 1.0 :weight bold :slant italic :foreground "#0077CC" :extend t))
-      (ol7 '(:height 1.0 :weight bold :slant italic :foreground "#2EAE2C" :extend t))
-      (ol8 '(:height 1.0 :weight bold :slant italic :foreground "#FD8008" :extend t))
+      (ol1 `(,@(leuven-scale-font leuven-scale-outline-headlines 1.3) :weight bold :overline "#A7A7A7" :foreground "#3C3C3C" :background "#F0F0F0"))
+      (ol2 '(:height 1.0 :weight bold :overline "#123555" :foreground "#123555" :background "#E5F4FB"))
+      (ol3 '(:height 1.0 :weight bold :foreground "#005522" :background "#EFFFEF"))
+      (ol4 '(:height 1.0 :weight bold :slant normal :foreground "#EA6300"))
+      (ol5 '(:height 1.0 :weight bold :slant normal :foreground "#E3258D"))
+      (ol6 '(:height 1.0 :weight bold :slant italic :foreground "#0077CC"))
+      (ol7 '(:height 1.0 :weight bold :slant italic :foreground "#2EAE2C"))
+      (ol8 '(:height 1.0 :weight bold :slant italic :foreground "#FD8008"))
       (paren-matched '(:background "#C0E8C3")) ; Or take that green for region?
       (paren-unmatched '(:weight bold :underline "red" :foreground "black" :background "#FFA5A5"))
-      (region '(:background "#8ED3FF" :extend t))
+      (region '(:background "#8ED3FF"))
       (shadow '(:foreground "#7F7F7F"))
       (string '(:foreground "#008000")) ; or #D0372D
       (subject '(:family "Sans Serif" :weight bold :foreground "black"))
@@ -195,7 +196,6 @@ more...")
    `(font-lock-comment-face ((,class (:slant italic :foreground "#8D8D84")))) ; #696969
    `(font-lock-constant-face ((,class (:foreground "#D0372D"))))
    `(font-lock-doc-face ((,class (:foreground "#036A07"))))
-   ;; `(font-lock-doc-string-face ((,class (:foreground "#008000")))) ; XEmacs only, but is used for HTML exports from org2html (and not interactively)
    `(font-lock-function-name-face ((,class (:weight normal :foreground "#006699"))))
    `(font-lock-keyword-face ((,class (:bold nil :foreground "#0000FF")))) ; #3654DC
    `(font-lock-preprocessor-face ((,class (:foreground "#808080"))))
@@ -314,15 +314,15 @@ more...")
    `(smerge-refined-change ((,class (:background "#AAAAFF"))))
 
    ;; Ediff.
-   `(ediff-current-diff-A ((,class (:background "#FFDDDD" :extend t))))
-   `(ediff-current-diff-B ((,class (:background "#DDFFDD" :extend t))))
-   `(ediff-current-diff-C ((,class (:background "cyan" :extend t))))
-   `(ediff-even-diff-A ((,class (:background "light grey" :extend t))))
-   `(ediff-even-diff-B ((,class (:background "light grey" :extend t))))
-   `(ediff-fine-diff-A ((,class (:background "#FFAAAA" :extend t))))
-   `(ediff-fine-diff-B ((,class (:background "#55FF55" :extend t))))
-   `(ediff-odd-diff-A ((,class (:background "light grey" :extend t))))
-   `(ediff-odd-diff-B ((,class (:background "light grey" :extend t))))
+   `(ediff-current-diff-A ((,class (:background "#FFDDDD"))))
+   `(ediff-current-diff-B ((,class (:background "#DDFFDD"))))
+   `(ediff-current-diff-C ((,class (:background "cyan"))))
+   `(ediff-even-diff-A ((,class (:background "light grey"))))
+   `(ediff-even-diff-B ((,class (:background "light grey"))))
+   `(ediff-fine-diff-A ((,class (:background "#FFAAAA"))))
+   `(ediff-fine-diff-B ((,class (:background "#55FF55"))))
+   `(ediff-odd-diff-A ((,class (:background "light grey"))))
+   `(ediff-odd-diff-B ((,class (:background "light grey"))))
 
    ;; Flyspell.
    (if (version< emacs-version "24.4")
@@ -431,7 +431,7 @@ more...")
    ;; `(completions-common-part ((,class (:foreground "red" :weight bold))))
    ;; `(completions-first-difference ((,class (:foreground "green" :weight bold))))
    `(compilation-error ((,class (:weight bold :foreground "red")))) ; Used for grep error messages.
-   `(compilation-info ((,class ,grep-file-name)))
+   `(compilation-info ((,class (:weight bold :foreground "#6784d7"))))
    `(compilation-line-number ((,class ,grep-line-number)))
    `(compilation-warning ((,class (:weight bold :foreground "orange"))))
    `(compilation-mode-line-exit ((,class (:weight bold :foreground "green")))) ; :exit[matched]
@@ -655,6 +655,7 @@ more...")
    `(linum ((,class (:foreground "#9A9A9A" :background "#EDEDED"))))
    `(log-view-file ((,class (:foreground "#0000CC" :background "#EAF2F5"))))
    `(log-view-message ((,class (:foreground "black" :background "#EDEA74"))))
+   `(lsp-ui-doc-background ((,class (:background "#F6FECD"))))
    `(lui-button-face ((,class ,link)))
    `(lui-highlight-face ((,class (:box '(:line-width 1 :color "#CC0000") :foreground "#CC0000" :background "#FFFF88")))) ; my nickname
    `(lui-time-stamp-face ((,class (:foreground "purple"))))
@@ -675,6 +676,7 @@ more...")
    `(magit-item-mark ((,class ,marked-line)))
    `(magit-log-head-label ((,class (:box (:line-width 1 :color "blue" :style nil)))))
    `(magit-log-tag-label ((,class (:box (:line-width 1 :color "#00CC00" :style nil)))))
+   `(magit-section-highlight ((,class (:background  "#F6FECD"))))
    `(magit-section-title ((,class (:family "Sans Serif" :height 1.8 :weight bold :foreground "cornflower blue" :inherit nil))))
    `(makefile-space-face ((,class (:background "hot pink"))))
    `(makefile-targets ((,class (:weight bold :foreground "blue"))))
@@ -746,9 +748,9 @@ more...")
    `(org-archived ((,class (:foreground "gray70"))))
    `(org-beamer-tag ((,class (:box (:line-width 1 :color "#FABC18") :foreground "#2C2C2C" :background "#FFF8D0"))))
    `(org-block ((,class ,code-block)))
-   `(org-block-background ((,class (:background "#FFFFE0" :extend t)))) ;; :inherit fixed-pitch))))
-   `(org-block-begin-line ((,class (:underline "#A7A6AA" :foreground "#555555" :background "#E2E1D5" :extend t))))
-   `(org-block-end-line ((,class (:overline "#A7A6AA" :foreground "#555555" :background "#E2E1D5" :extend t))))
+   `(org-block-background ((,class (:background "#FFFFE0")))) ;; :inherit fixed-pitch))))
+   `(org-block-begin-line ((,class (:underline "#A7A6AA" :foreground "#555555" :background "#E2E1D5"))))
+   `(org-block-end-line ((,class (:overline "#A7A6AA" :foreground "#555555" :background "#E2E1D5"))))
    `(org-checkbox ((,class (:weight bold :box (:line-width 1 :style pressed-button) :foreground "#123555" :background "#A3A3A3"))))
    `(org-clock-overlay ((,class (:foreground "white" :background "SkyBlue4"))))
    `(org-code ((,class ,code-inline)))
@@ -761,12 +763,12 @@ more...")
    `(org-document-info-keyword ((,class (:foreground "#008ED1" :background "#EAEAFF"))))
    `(org-document-title ((,class (:height 1.8 :weight bold :foreground "black"))))
    `(org-done ((,class (:weight bold :box (:line-width 1 :color "#BBBBBB") :foreground "#BBBBBB" :background "#F0F0F0"))))
-   `(org-drawer ((,class (:foreground "light sky blue"))))
+   `(org-drawer ((,class (:weight bold :foreground "#00BB00" :background "#EAFFEA" :extend nil))))
    `(org-ellipsis ((,class (:underline nil :foreground "#999999")))) ; #FFEE62
    `(org-example ((,class (:foreground "blue" :background "#EAFFEA"))))
    `(org-footnote ((,class (:underline t :foreground "#008ED1"))))
    `(org-formula ((,class (:foreground "chocolate1"))))
-   `(org-headline-done ((,class (:height 1.0 :weight normal :strike-through t :foreground "#ADADAD"))))
+   `(org-headline-done ((,class (:height 1.0 :weight normal :foreground "#ADADAD"))))
    `(org-hide ((,class (:foreground "#E2E2E2"))))
    `(org-inlinetask ((,class (:box (:line-width 1 :color "#EBEBEB") :foreground "#777777" :background "#FFFFD6"))))
    `(org-latex-and-related ((,class (:foreground "#336699" :background "white"))))
@@ -1048,17 +1050,10 @@ more...")
   (add-to-list 'custom-theme-load-path
                (file-name-as-directory (file-name-directory load-file-name))))
 
-;;;###autoload
-(when (string-match "/etc/themes/$"
-                    (file-name-directory (or load-file-name (buffer-file-name))))
-  (message "To stay up-to-date, you should better install and use leuven-theme from MELPA.")
-  (sit-for 2))
-
 (provide-theme 'leuven)
 
 ;; This is for the sake of Emacs.
 ;; Local Variables:
-;; no-byte-compile: t
 ;; time-stamp-end: "$"
 ;; time-stamp-format: "%:y%02m%02d.%02H%02M"
 ;; time-stamp-start: "Version: "

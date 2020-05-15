@@ -1,4 +1,4 @@
-(define-package "leuven-theme" "20200122.1934" "Awesome Emacs color theme on white background" 'nil :keywords
+(define-package "leuven-theme" "20200513.1742" "Awesome Emacs color theme on white background" 'nil :keywords
   '("color" "theme")
   :authors
   '(("Fabrice Niessen <(concat \"fniessen\" at-sign \"pirilampo.org\")>"))
