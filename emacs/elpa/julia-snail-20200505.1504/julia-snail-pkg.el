@@ -1,4 +1,4 @@
-(define-package "julia-snail" "20200419.1607" "Julia Snail"
+(define-package "julia-snail" "20200505.1504" "Julia Snail"
   '((emacs "26.2")
     (cl-lib "0.5")
     (dash "2.16.0")
