@@ -156,8 +156,8 @@ published in ELPA for use by older Emacsen.")
   "Return non-nil if the current buffer corresponds to the package's main file."
   (or (null package-lint-main-file)
       (null (buffer-file-name))
-      (eq (file-truename (expand-file-name package-lint-main-file))
-          (file-truename (buffer-file-name)))))
+      (string= (file-truename (expand-file-name package-lint-main-file))
+               (file-truename (buffer-file-name)))))
 
 (defun package-lint--check-all ()
   "Return a list of errors/warnings for the current buffer."
@@ -175,7 +175,6 @@ published in ELPA for use by older Emacsen.")
                   (let ((desc (package-lint--check-package-el-can-parse)))
                     (when desc
                       (package-lint--check-package-summary desc)
-                      ;; TODO: check provide form present even if this is not the main file
                       (package-lint--check-provide-form desc)
                       (package-lint--check-no-emacs-in-package-name desc)))
                   (setq deps (package-lint--check-dependency-list))
@@ -188,18 +187,25 @@ published in ELPA for use by older Emacsen.")
                             "\\(-mode\\)?\\(-pkg\\)?\\'" ""
                             (file-name-sans-extension
                              (file-name-nondirectory package-lint-main-file))))
-              (if (string-match-p "-pkg\\.el\\'" package-lint-main-file)
-                  (let ((expr (read (current-buffer))))
-                    (if (eq (car-safe expr) 'define-package)
-                        (setq deps (package-desc-reqs (apply #'package-desc-from-define (cdr expr))))
-                      (package-lint--error-at-bob 'error (format "Malformed package descriptor file \"%s\"" package-lint-main-file))))
-                (with-temp-buffer
-                  ;; TODO: warn if there are Package-Requires headers here
-                  (insert-file-contents (expand-file-name package-lint-main-file))
-                  (condition-case _err
-                      (setq deps (package-desc-reqs (package-lint--liberal-package-buffer-info)))
+              (let ((main-file package-lint-main-file))
+                (if (string-match-p "-pkg\\.el\\'" main-file)
+                    (let ((expr (with-temp-buffer
+                                  (insert-file-contents (expand-file-name main-file))
+                                  (read (current-buffer)))))
+                      (if (eq (car-safe expr) 'define-package)
+                          (setq deps (package-desc-reqs (apply #'package-desc-from-define (cdr expr))))
+                        (package-lint--error-at-bob 'error (format "Malformed package descriptor file \"%s\"" main-file))))
+                  (when (package-lint--goto-header "Package-Requires")
+                    (package-lint--error-at-bol 'error "Package-Requires outside the main file have no effect."))
+                  (package-lint--check-provide-form-secondary-file)
+                  (condition-case err
+                      (with-temp-buffer
+                        (insert-file-contents (expand-file-name main-file))
+                        (setq deps (package-desc-reqs (package-lint--liberal-package-buffer-info))))
                     (error
-                     (package-lint--error-at-bob 'error (format "Error parsing main package file \"%s\"" package-lint-main-file)))))))
+                     (package-lint--error-at-bob
+                      'error
+                      (format "Error parsing main package file \"%s\": %s" main-file err)))))))
 
             ;; Source code checks
             (package-lint--check-keywords-list)
@@ -781,6 +787,15 @@ DESC is a struct as returned by `package-buffer-info'."
        'error
        (format "There is no (provide '%s) form." name)))))
 
+(defun package-lint--check-provide-form-secondary-file ()
+  "Check there is a provide form."
+  ;; We don't require that the provided feature have a name consistent
+  ;; with the overall package prefix, but this check may later be added.
+  (unless (package-lint--provided-feature)
+    (package-lint--error-at-bob
+     'error
+     "There is no `provide' form.")))
+
 (defun package-lint--check-no-emacs-in-package-name (desc)
   "Check that the package name doesn't contain \"emacs\".
 DESC is a struct as returned by `package-buffer-info'."
@@ -1101,6 +1116,8 @@ where TYPE is either 'warning or 'error.
 
 Current buffer is used if none is specified."
   (with-current-buffer (or buffer (current-buffer))
+    (unless (derived-mode-p 'emacs-lisp-mode)
+      (error "Buffer must be in emacs-lisp-mode"))
     (package-lint--check-all)))
 
 ;;;###autoload
@@ -1174,15 +1191,16 @@ whether or not warnings alone produce a non-zero exit code."
 ;;;###autoload
 (defun package-lint-looks-like-a-package-p ()
   "Return non-nil if the current buffer appears to be intended as a package."
-  (save-match-data
-    (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char (point-min))
-        (re-search-forward
-         (concat lm-header-prefix
-                 (rx (or "Version" "Package-Version" "Package-Requires")))
-         nil t)))))
+  (or package-lint-main-file
+      (save-match-data
+        (save-excursion
+          (save-restriction
+            (widen)
+            (goto-char (point-min))
+            (re-search-forward
+             (concat lm-header-prefix
+                     (rx (or "Version" "Package-Version" "Package-Requires")))
+             nil t))))))
 
 (provide 'package-lint)
 ;; Local Variables:
