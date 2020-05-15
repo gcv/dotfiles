@@ -5,7 +5,7 @@
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
 ;; URL: https://gitlab.com/ideasman42/emacs-undo-fu
-;; Package-Version: 20200330.2330
+;; Package-Version: 20200512.19
 ;; Version: 0.3
 ;; Package-Requires: ((emacs "24.3"))
 
@@ -101,20 +101,27 @@ Instead, explicitly call `undo-fu-disable-checkpoint'."
   (setq undo-fu--in-region nil)
   (undo-fu--checkpoint-unset))
 
+(defmacro undo-fu--with-advice (fn-orig where fn-advice &rest body)
+  "Execute BODY with advice temporarily enabled."
+  `
+  (let ((fn-advice-var ,fn-advice))
+    (unwind-protect
+      (progn
+        (advice-add ,fn-orig ,where fn-advice-var)
+        ,@body)
+      (advice-remove ,fn-orig fn-advice-var))))
+
 (defmacro undo-fu--with-message-suffix (suffix &rest body)
   "Add text after the message output.
-Argument SUFFIX is the text to add at the end of the message.
+Argument SUFFIX is the text to add at the start of the message.
 Optional argument BODY runs with the message suffix."
   (declare (indent 1))
-  (let ((message-orig (cl-gensym "--message-suffix-")))
-    `
-    (cl-letf*
-      (
-        (,message-orig (symbol-function 'message))
-        ((symbol-function 'message)
-          (lambda (arg &rest args)
-            (apply ,message-orig (append (list (concat arg "%s")) args (list ,suffix))))))
-      ,@body)))
+  `
+  (undo-fu--with-advice 'message
+    :around
+    (lambda (fn-orig arg &rest args)
+      (apply fn-orig (append (list (concat arg "%s")) args (list ,suffix))))
+    ,@body))
 
 (defun undo-fu--undo-enabled-or-error ()
   "Raise a user error when undo is disabled."
@@ -352,6 +359,12 @@ Optional argument ARG the number of steps to undo."
           'undo-fu-disable-checkpoint
           'keyboard-quit)))
 
+    ;; Special case, for first execution, `was-undo-or-redo' may be true
+    ;; based on saved undo history, yet the `undo-fu--checkpoint' can be nil.
+    ;; In this case it's simplest to behave as if the last command was not undo.
+    (when (and was-undo-or-redo undo-fu--respect (null undo-fu--checkpoint))
+      (setq was-undo-or-redo nil))
+
     ;; Reset the option to not respect the checkpoint
     ;; after running non-undo related commands.
     (unless undo-fu--respect
@@ -400,7 +413,7 @@ Optional argument ARG the number of steps to undo."
                 (if undo-fu--respect
                   ""
                   " (unconstrained)")
-                (if undo-fu--in-region
+                (if (or (not undo-fu--respect) undo-fu--in-region)
                   (undo steps)
                   (undo-only steps)))
               t)
