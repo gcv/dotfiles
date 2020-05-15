@@ -1,4 +1,4 @@
-(define-package "julia-mode" "20200331.1658" "Major mode for editing Julia source code"
+(define-package "julia-mode" "20200504.1726" "Major mode for editing Julia source code"
   '((emacs "24.3"))
   :keywords
   '("languages")
