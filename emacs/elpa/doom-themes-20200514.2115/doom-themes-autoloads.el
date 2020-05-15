@@ -78,11 +78,27 @@
 
 ;;;***
 
+;;;### (autoloads nil "doom-gruvbox-light-theme" "doom-gruvbox-light-theme.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from doom-gruvbox-light-theme.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "doom-gruvbox-light-theme" '("doom-gruvbox-light")))
+
+;;;***
+
 ;;;### (autoloads nil "doom-gruvbox-theme" "doom-gruvbox-theme.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from doom-gruvbox-theme.el
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "doom-gruvbox-theme" '("doom-gruvbox")))
+
+;;;***
+
+;;;### (autoloads nil "doom-henna-theme" "doom-henna-theme.el" (0
+;;;;;;  0 0 0))
+;;; Generated autoloads from doom-henna-theme.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "doom-henna-theme" '("doom-henna")))
 
 ;;;***
 

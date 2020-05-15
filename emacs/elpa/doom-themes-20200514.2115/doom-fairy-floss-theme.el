@@ -1,81 +1,81 @@
-;;; doom-solarized-dark-theme.el --- inspired by VS Code Solarized Dark -*- no-byte-compile: t; -*-
+;;; doom-fairy-floss-theme.el --- inspired by sailorhg Fairy Floss -*- no-byte-compile: t; -*-
 (require 'doom-themes)
 
 ;;
-(defgroup doom-solarized-dark-theme nil
-  "Options for doom-themes"
+(defgroup doom-fairy-floss-theme nil
+  "Options for doom-themes."
   :group 'doom-themes)
 
-(defcustom doom-solarized-dark-brighter-modeline nil
+(defcustom doom-fairy-floss-brighter-modeline nil
   "If non-nil, more vivid colors will be used to style the mode-line."
-  :group 'doom-solarized-dark-theme
+  :group 'doom-fairy-floss-theme
   :type 'boolean)
 
-(defcustom doom-solarized-dark-brighter-comments nil
+(defcustom doom-fairy-floss-brighter-comments nil
   "If non-nil, comments will be highlighted in more vivid colors."
-  :group 'doom-solarized-dark-theme
+  :group 'doom-fairy-floss-theme
   :type 'boolean)
 
-(defcustom doom-solarized-dark-comment-bg doom-solarized-dark-brighter-comments
+(defcustom doom-fairy-floss-comment-bg doom-fairy-floss-brighter-comments
   "If non-nil, comments will have a subtle, darker background. Enhancing their
 legibility."
-  :group 'doom-solarized-dark-theme
+  :group 'doom-fairy-floss-theme
   :type 'boolean)
 
-(defcustom doom-solarized-dark-padded-modeline doom-themes-padded-modeline
+(defcustom doom-fairy-floss-padded-modeline doom-themes-padded-modeline
   "If non-nil, adds a 4px padding to the mode-line. Can be an integer to
 determine the exact padding."
-  :group 'doom-solarized-dark-theme
+  :group 'doom-fairy-floss-theme
   :type '(choice integer boolean))
 
 ;;
-(def-doom-theme doom-solarized-dark
-  "A dark theme inspired by VS Code Solarized Dark"
+(def-doom-theme doom-fairy-floss
+  "A candy colored theme inspired by Sublime's Fairy Floss"
 
   ;; name        default   256       16
-  ((bg         '("#002b36" nil       nil            ))
-   (bg-alt     '("#00212B" nil       nil           ))
-   (base0      '("#073642" "black"   "black"       ))
-   (base1      '("#03282F" "#1e1e1e" "brightblack" ))
-   (base2      '("#00212C" "#2e2e2e" "brightblack" ))
-   (base3      '("#13383C" "#262626" "brightblack" ))
-   (base4      '("#56697A" "#3f3f3f" "brightblack" ))
-   (base5      '("#405A61" "#525252" "brightblack" ))
-   (base6      '("#96A7A9" "#6b6b6b" "brightblack" ))
-   (base7      '("#788484" "#979797" "brightblack" ))
-   (base8      '("#626C6C" "#dfdfdf" "white"       ))
-   (fg-alt     '("#657b83" "#2d2d2d" "white"       ))
-   (fg         '("#839496" "#bfbfbf" "brightwhite" ))
+  ((bg         '("#5a5475" nil       nil           ))
+   (bg-alt     '("#343145" nil       nil           ))
+   (base0      '("#464258" "black"   "black"       ))
+   (base1      '("#514C66" "#1e1e1e" "brightblack" ))
+   (base2      '("#6A6483" "#2e2e2e" "brightblack" ))
+   (base3      '("#9673D3" "#262626" "brightblack" ))
+   (base4      '("#A0A0C0" "#3f3f3f" "brightblack" ))
+   (base5      '("#B8A2CE" "#525252" "brightblack" ))
+   (base6      '("#726C8A" "#6b6b6b" "brightblack" ))
+   (base7      '("#5B576C" "#979797" "brightblack" ))
+   (base8      '("#716799" "#dfdfdf" "white"       ))
+   (fg-alt     '("#B5B2Bd" "#2d2d2d" "white"       ))
+   (fg         '("#F8F8F0" "#bfbfbf" "brightwhite" ))
 
-   (grey       base4)
-   (red        '("#dc322f" "#ff6655" "red"          ))
-   (orange     '("#cb4b16" "#dd8844" "brightred"    ))
-   (green      '("#859900" "#99bb66" "green"        ))
-   (teal       '("#35a69c" "#33aa99" "brightgreen"  ))
-   (yellow     '("#b58900" "#ECBE7B" "yellow"       ))
-   (blue       '("#268bd2" "#51afef" "brightblue"   ))
-   (dark-blue  '("#3F88AD" "#2257A0" "blue"         ))
-   (magenta    '("#d33682" "#c678dd" "magenta"      ))
-   (violet     '("#6c71c4" "#a9a1e1" "brightmagenta"))
-   (cyan       '("#2aa198" "#46D9FF" "brightcyan"   ))
-   (dark-cyan  '("#204052" "#5699AF" "cyan"         ))
+   (grey       '("#656565" "#515154" "brightblack"  ))
+   (red        '("#CC6666" "#CC6666" "red"          ))
+   (orange     '("#E6C000" "#E6C000" "brightred"    ))
+   (green      '("#C2FFDF" "#C2FFDF" "green"        ))
+   (yellow     '("#FFEA00" "#FFEA00" "yellow"       ))
+   (blue       '("#55b3cc" "#55b3cc" "brightblue"   ))
+   (teal       '("#8295D6" "#8295D6" "brightgreen"  ))
+   (dark-blue  '("#167be2" "#3F88AD" "blue"         ))
+   (magenta    '("#FFB8D1" "#FFB8D1" "magenta"      ))
+   (violet     '("#C5A3FF" "#C5A3FF" "brightmagenta"))
+   (cyan       '("#96CBFE" "#C2FFDF" "brightcyan"   ))
+   (dark-cyan  '("#204052" "#204052" "cyan"         ))
 
    ;; face categories -- required for all themes
-   (highlight      blue)
+   (highlight      violet)
    (vertical-bar   (doom-darken base1 0.5))
    (selection      dark-blue)
    (builtin        blue)
-   (comments       (if doom-solarized-dark-brighter-comments blue base5))
-   (doc-comments   teal)
-   (constants      magenta)
-   (functions      blue)
-   (keywords       green)
-   (methods        cyan)
+   (comments       (if doom-fairy-floss-brighter-comments cyan orange))
+   (doc-comments   violet)
+   (constants      violet)
+   (functions      green)
+   (keywords       cyan)
+   (methods        green)
    (operators      orange)
-   (type           yellow)
-   (strings        cyan)
-   (variables      violet)
-   (numbers        magenta)
+   (type           cyan)
+   (strings        yellow)
+   (variables      magenta)
+   (numbers        violet)
    (region         base0)
    (error          red)
    (warning        yellow)
@@ -86,10 +86,10 @@ determine the exact padding."
 
    ;; custom categories
    (hidden     `(,(car bg) "black" "black"))
-   (-modeline-bright doom-solarized-dark-brighter-modeline)
+   (-modeline-bright doom-fairy-floss-brighter-modeline)
    (-modeline-pad
-    (when doom-solarized-dark-padded-modeline
-      (if (integerp doom-solarized-dark-padded-modeline) doom-solarized-dark-padded-modeline 4)))
+    (when doom-fairy-floss-padded-modeline
+      (if (integerp doom-fairy-floss-padded-modeline) doom-fairy-floss-padded-modeline 4)))
 
    (modeline-fg     nil)
    (modeline-fg-alt base5)
@@ -107,38 +107,40 @@ determine the exact padding."
 
 
   ;; --- extra faces ------------------------
-  ((company-tooltip-selection     :background dark-cyan)
+  (
+   (company-tooltip-selection     :background base3)
    (elscreen-tab-other-screen-face :background "#353a42" :foreground "#1e2022")
 
    ((line-number &override) :foreground base4)
    ((line-number-current-line &override) :foreground fg)
 
-   (helm-selection :inherit 'bold
-                   :background selection
-                   :distant-foreground bg
-                   :extend t)
-
    (font-lock-comment-face
     :foreground comments
-    :background (if doom-solarized-dark-comment-bg (doom-lighten bg 0.05)))
+    :background (if doom-fairy-floss-comment-bg (doom-lighten bg 0.05)))
    (font-lock-doc-face
     :inherit 'font-lock-comment-face
     :foreground doc-comments)
    (font-lock-keyword-face
-    :weight 'bold
+    :slant 'italic
     :foreground keywords)
-   (font-lock-constant-face
-    :weight 'bold
-    :foreground constants)
 
    ;; Centaur tabs
    (centaur-tabs-active-bar-face :background blue)
    (centaur-tabs-modified-marker-selected :inherit 'centaur-tabs-selected
-                                          :foreground blue)
+					  :foreground blue)
    (centaur-tabs-modified-marker-unselected :inherit 'centaur-tabs-unselected
-                                            :foreground blue)
+					    :foreground blue)
    ;; Doom modeline
    (doom-modeline-bar :background blue)
+
+   ;; highlight-thing highlight-symbol
+   (highlight-symbol-face :background region :distant-foreground fg-alt)
+
+   ;; highlight-thing
+   (highlight-thing :background region :distant-foreground fg-alt)
+
+   ;; hl-line
+   (hl-line :background base2)
 
    (mode-line
     :background modeline-bg :foreground modeline-fg
@@ -147,7 +149,7 @@ determine the exact padding."
     :background modeline-bg-inactive :foreground modeline-fg-alt
     :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-inactive)))
    (mode-line-emphasis
-    :foreground (if -modeline-bright base8 highlight))
+    :foreground (if -modeline-bright cyan highlight))
 
    (solaire-mode-line-face
     :inherit 'mode-line
@@ -173,23 +175,30 @@ determine the exact padding."
    ((markdown-bold-face &override)   :foreground fg)
    ((markdown-italic-face &override) :foreground fg-alt)
 
+   ;; magit
+   (magit-diff-removed                :foreground (doom-darken red 0.2) :background (doom-blend red base5 0.1))
+   (magit-diff-removed-highlight      :foreground red                   :background (doom-blend red base5 0.2) :weight 'bold)
+
    ;; outline (affects org-mode)
-   ((outline-1 &override) :foreground blue)
+   ((outline-1 &override) :foreground orange)
    ((outline-2 &override) :foreground green)
    ((outline-3 &override) :foreground teal)
-   ((outline-4 &override) :foreground (doom-darken blue 0.2))
+   ((outline-4 &override) :foreground (doom-darken orange 0.2))
    ((outline-5 &override) :foreground (doom-darken green 0.2))
    ((outline-6 &override) :foreground (doom-darken teal 0.2))
-   ((outline-7 &override) :foreground (doom-darken blue 0.4))
+   ((outline-7 &override) :foreground (doom-darken orange 0.4))
    ((outline-8 &override) :foreground (doom-darken green 0.4))
 
    ;; org-mode
    ((org-block &override) :background base0)
-   ((org-block-begin-line &override) :foreground comments :background base0)
-   (org-hide :foreground hidden)
+   ((org-block-begin-line &override) :background base0)
+   (org-scheduled         :foreground green)
+   (org-scheduled-previously :foreground yellow)
+   (org-scheduled-today   :foreground orange)
+   (org-hide              :foreground hidden)
    (solaire-org-hide-face :foreground hidden))
   ;; --- extra variables ---------------------
   ;; ()
   )
 
-;;; doom-solarized-dark-theme.el ends here
+;;; doom-fairy-floss-theme.el ends here

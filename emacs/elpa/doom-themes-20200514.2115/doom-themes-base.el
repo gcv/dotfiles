@@ -669,6 +669,16 @@
     ;; highlight-numbers-mode
     (highlight-numbers-number :inherit 'bold :foreground numbers)
 
+    ;; highlight-symbol
+    (highlight-symbol-face
+     (&dark  :background (doom-lighten region 0.1) :distant-foreground fg-alt)
+     (&light :background (doom-darken region 0.1) :distant-foreground fg-alt))
+    
+    ;; highlight-thing
+    (highlight-thing
+     (&dark  :background (doom-lighten region 0.1) :distant-foreground fg-alt)
+     (&light :background (doom-darken region 0.1) :distant-foreground fg-alt))
+
     ;; hlinum
     (linum-highlight-face :foreground fg :distant-foreground nil :weight 'normal)
 
@@ -795,6 +805,10 @@
     (lsp-ui-peek-peek :background (doom-darken bg 0.1))
     (lsp-ui-peek-highlight :inherit 'lsp-ui-peek-header :background region :foreground bg :box t)
     (lsp-ui-peek-line-number :foreground success)
+    (lsp-ui-sideline-code-action :foreground (doom-blend highlight bg 0.85))
+    (lsp-ui-sideline-current-symbol :inherit 'highlight)
+    (lsp-ui-sideline-symbol-info :foreground (doom-blend comments bg 0.85)
+                                 :background bg-alt :extend t)
 
     ;; magit
     (magit-bisect-bad        :foreground red)
@@ -1255,7 +1269,6 @@
     (org-special-keyword :foreground doc-comments)
     (org-table           :foreground violet)
     (org-tag             :foreground doc-comments :weight 'normal)
-    (org-ref-cite-face   :foreground yellow :weight 'light :underline t)
     (org-latex-and-related :foreground base8 :weight 'bold)
     (org-todo            :foreground green :bold 'inherit)
     (org-verbatim        :foreground green)
@@ -1295,6 +1308,13 @@
     ;; org-pomodoro
     (org-pomodoro-mode-line :foreground red)
     (org-pomodoro-mode-line-overtime :foreground warning :weight 'bold)
+
+    ;; org-ref
+    (org-ref-acronym-face    :foreground violet)
+    (org-ref-cite-face       :foreground yellow :weight 'light :underline t)
+    (org-ref-glossary-face   :foreground magenta)
+    (org-ref-label-face      :foreground blue)
+    (org-ref-ref-face        :inherit 'link :foreground red)
 
     ;; pkgbuild-mode
     (pkgbuild-error-face :underline `(:style wave :color ,red))
