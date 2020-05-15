@@ -10,10 +10,15 @@ capable, fast, and it can seamlessly handle large outputs.
 ## Warning
 
 This package is in active development and, while being stable enough to be used
-as a daily-driver, it is currently in early **alpha** stage. Moreover,
-emacs-libvterm deals directly with some low-level operations, hence, bugs in the
-code can lead to segmentation faults and crashes. If that happens, please
-[report the problem](https://github.com/akermu/emacs-libvterm/issues/new).
+as a daily-driver, it is currently in early **alpha** stage. This means that
+occasionally the public interface will change (for example names of options or
+functions). A list of recent breaking changes is in
+[appendix](#breaking-changes). Moreover, emacs-libvterm deals directly with some
+low-level operations, hence, bugs in the code can lead to segmentation faults
+and crashes. If that happens, please [report the
+problem](https://github.com/akermu/emacs-libvterm/issues/new).
+
+
 
 # Installation
 
@@ -27,10 +32,13 @@ Before installing emacs-libvterm, you need to make sure you have installed
  3. libtool-bin (related issues:
     [#66](https://github.com/akermu/emacs-libvterm/issues/66)
     [#85](https://github.com/akermu/emacs-libvterm/issues/85#issuecomment-491845136))
- 4. OPTIONAL: [libvterm](https://github.com/neovim/libvterm). This library can
-    be found in the official repositories of most distributions (e.g., Arch,
-    Debian, Fedora, Gentoo, openSUSE, Ubuntu). If not available, it will be
-    downloaded during the compilation process.
+ 4. OPTIONAL: [libvterm](https://github.com/neovim/libvterm) (>= 0.1). This
+    library can be found in the official repositories of most distributions
+    (e.g., Arch, Debian, Fedora, Gentoo, openSUSE, Ubuntu). If not available, it
+    will be downloaded during the compilation process. Some distributions (e.g.
+    Ubuntu 18.04) have versions of libvterm that are too old. If you find
+    compilation errors related to `VTERM_COLOR`, you should not use your system
+    libvterm.
 
 ## From MELPA
 
@@ -59,12 +67,12 @@ Clone the repository:
 git clone https://github.com/akermu/emacs-libvterm.git
 ```
 
-In case you want to use the version of libvterm already installed on your
-system, change `cmake ..` with `cmake -DUSE_SYSTEM_LIBVTERM=yes ..` in the
-following instructions. If `-DUSE_SYSTEM_LIBVTERM` is not explicitly set to
-`yes` (or if it is set to `no`), emacs-libvterm will download the latest version
-available of libvterm (from [here](https://github.com/neovim/libvterm)), compile
-it, and use it.
+By default, vterm will try to find if libvterm is installed. If it is not found,
+emacs-libvterm will download the latest version available of libvterm (from
+[here](https://github.com/neovim/libvterm)), compile it, and use it. If you
+always want to use the vendored version as opposed to the one on you system, set
+`USE_SYSTEM_LIBVTERM` to `no`. To do this, change `cmake ..` with `cmake
+-DUSE_SYSTEM_LIBVTERM=no ..` in the following instructions.
 
 Build the module with:
 
@@ -118,6 +126,10 @@ to work (see,
 
 Pull requests to improve support for Ubuntu are welcome (e.g., simplyfing the
 installation).
+
+Some releases of Ubuntu (e.g., 18.04) ship with a old version of libvterm that
+can lead to compilation errors. If you experience these errors, see the
+[FAQ](#frequently-asked-questions-and-problems) for a solution.
 
 ## GNU Guix
 
@@ -194,6 +206,10 @@ When you enable `vterm-copy-mode`, the terminal buffer behaves like a normal
 to toggle `vterm-copy-mode` is `C-c C-t`. When a region is selected, it is
 possible to copy the text and leave `vterm-copy-mode` with the enter key.
 
+If no region is selected when the enter key is pressed it will copy the current
+line from start to end. If `vterm-copy-exclude-prompt` is true it will skip
+the prompt and not include it in the copy.
+
 ## `vterm-clear-scrollback`
 
 `vterm-clear-scrollback` does exactly what the name suggests: it clears the
@@ -221,6 +237,12 @@ fi
 These aliases take advantage of the fact that `vterm` can execute `elisp`
 commands, as explained below.
 
+If it possible to automatically clear the scrollback when the screen is cleared
+by setting the variable `vterm-clear-scrollback-when-clearing`: When
+`vterm-clear-scrollback-when-clearing` is non nil, `C-l` clears both the screen
+and the scrollback. When is nil, `C-l` only clears the screen. The opposite
+behavior can be achieved by using the universal prefix (ie, calling `C-u C-l`).
+
 # Customization
 
 ## `vterm-shell`
@@ -246,6 +268,55 @@ This string is directly passed to CMake, so it uses the same syntax. At the
 moment, it main use is for compiling vterm using the system libvterm instead of
 the one downloaded from GitHub. You can find all the arguments and flags
 available with `cmake -LA` in the build directory.
+
+## `vterm-copy-exclude-prompt`
+
+Controls whether or not to exclude the prompt when copying a line in
+`vterm-copy-mode`. Using the universal prefix before calling
+`vterm-copy-mode-done` will invert the value for that call, allowing you to
+temporarily override the setting.
+
+The variable `vterm-copy-use-vterm-prompt` determines whether to use the vterm
+prompt tracking, if false it use the regexp in `vterm-copy-prompt-regexp` to
+search for the prompt. If not found, it copies the whole line.
+
+## `vterm-buffer-name-string`
+
+When `vterm-buffer-name-string` is not nil, vterm renames automatically its own
+buffers with `vterm-buffer-name-string`. This string can contain the character
+`%s`, which is substituted with the _title_ (as defined by the shell, see
+below). A possible value for `vterm-buffer-name-string` is `vterm %s`, according
+to which all the vterm buffers will be named "vterm TITLE".
+
+This requires some shell-side configuration to print the title. For example to
+set the name "HOSTNAME:PWD", use can you the following:
+
+For `zsh`
+```zsh
+autoload -U add-zsh-hook
+add-zsh-hook -Uz chpwd (){ print -Pn "\e]2;%m:%2~\a" }
+```
+For `bash`,
+```bash
+PROMPT_COMMAND='echo -ne "\033]0;\h:\w\007"'
+```
+For `fish`,
+```fish
+function fish_title
+    hostname
+    echo ":"
+    pwd
+end
+```
+See [zsh and bash](http://tldp.org/HOWTO/Xterm-Title-4.html) and [fish
+documentations](https://fishshell.com/docs/current/#programmable-title).
+
+## `vterm-always-compile-module`
+
+Vterm needs `vterm-module` to work. This can be compiled externally, or `vterm`
+will ask the user whether to build the module when `vterm` is first called. To
+avoid this question and always compile the module, set
+`vterm-always-compile-module` to `t`.
 
 ## Keybindings
 
@@ -346,7 +417,13 @@ end
 
 Directory tracking works on remote servers too. In case the hostname of your
 remote machine does not match the actual hostname needed to connect to that
-server, change `$(hostname)` with the correct one.
+server, change `$(hostname)` with the correct one. For example, if the correct
+hostname is `foo` and the username is `bar`, you should have something like
+```bash
+HOSTNAME=foo
+USER=baz
+vterm_printf "51;A$USER@$HOSTNAME:$(pwd)"
+```
 
 ## Message passing
 
@@ -479,7 +556,55 @@ Then you can open any file from inside your shell.
 open_file_below ~/Documents
 ```
 
+## Frequently Asked Questions and Problems
+
+### The package does not compile, I have errors related to `VTERM_COLOR`.
+
+The version of `libvterm` installed on your system is too old. You should let
+`emacs-libvterm` download `libvterm` for you. If you are compiling from Emacs,
+you can do this by setting:
+```emacs-lisp
+(setq vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=no")
+```
+and compile again. If you are compiling with CMake, use the flag
+`-DUSE_SYSTEM_LIBVTERM=no`.
+
+### `<C-backspace>` doesn't kill previous word.
+
+This can be fixed by rebinding the key to what `C-w` does:
+```emacs-lisp
+(define-key vterm-mode-map (kbd "<C-backspace>")
+    (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
+```
+
+### `counsel-yank-pop` doesn't work.
+
+Add this piece of code to your configuration file to make `counsel` use
+the correct function to yank in vterm buffers.
+```emacs-lisp
+(defun vterm-counsel-yank-pop-action (orig-fun &rest args)
+  (if (equal major-mode 'vterm-mode)
+      (let ((inhibit-read-only t)
+            (yank-undo-function (lambda (_start _end) (vterm-undo))))
+        (cl-letf (((symbol-function 'insert-for-yank)
+               (lambda (str) (vterm-send-string str t))))
+            (apply orig-fun args)))
+    (apply orig-fun args)))
+
+(advice-add 'counsel-yank-pop-action :around #'vterm-counsel-yank-pop-action)
+```
+
 ## Related packages
 
-- [vterm-toggle](https://github.com/jixiuf/vterm-toggle): Toggles between a vterm and the current buffer
+- [vterm-toggle](https://github.com/jixiuf/vterm-toggle): Toggles between a
+  vterm and the current buffer
 - [multi-libvterm](https://github.com/suonlight/multi-libvterm): Multiterm for emacs-libvterm
+
+## Appendix
+
+### Breaking changes
+
+* `vterm-clear-scrollback` was renamed to `vterm-clear-scrollback-when-clearning`.
+* `vterm-set-title-functions` was removed. In its place, there is a new custom
+  option `vterm-buffer-name-string`. See
+  [vterm-buffer-name-string](vterm-buffer-name-string) for documentation.

@@ -20,7 +20,8 @@ int plugin_is_GPL_compatible;
 typedef struct LineInfo {
   char *directory; /* working directory */
 
-  int prompt_col; /* end column of the prompt,if current line contains prompt */
+  int prompt_col; /* end column of the prompt, if the current line contains the
+                   * prompt */
 } LineInfo;
 
 typedef struct ScrollbackLine {
@@ -74,7 +75,7 @@ typedef struct Term {
   char *elisp_code;
   bool elisp_code_changed;
 
-  /* the size of dirs almost = window height,value = directory of that line */
+  /* the size of dirs almost = window height, value = directory of that line */
   LineInfo **lines;
   int lines_len;
 
@@ -82,6 +83,8 @@ typedef struct Term {
   int height_resize;
   bool resizing;
   bool disable_bold_font;
+  bool disable_underline;
+  bool disable_inverse_video;
 
   int pty_fd;
 } Term;
@@ -92,8 +95,8 @@ static emacs_value render_text(emacs_env *env, Term *term, char *string,
                                int len, VTermScreenCell *cell);
 static emacs_value render_fake_newline(emacs_env *env, Term *term);
 static emacs_value render_prompt(emacs_env *env, emacs_value text);
-static emacs_value color_to_rgb_string(emacs_env *env, Term *term,
-                                       VTermColor *color);
+static emacs_value cell_rgb_color(emacs_env *env, Term *term,
+                                  VTermScreenCell *cell, bool is_foreground);
 
 static int term_settermprop(VTermProp prop, VTermValue *val, void *user_data);
 
@@ -102,7 +105,7 @@ static void term_flush_output(Term *term, emacs_env *env);
 static void term_process_key(Term *term, emacs_env *env, unsigned char *key,
                              size_t len, VTermModifier modifier);
 static void invalidate_terminal(Term *term, int start_row, int end_row);
-static void refresh_size(Term *term);
+
 void term_finalize(void *object);
 
 emacs_value Fvterm_new(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
