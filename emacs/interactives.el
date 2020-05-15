@@ -19,9 +19,15 @@
                         'unicode
                         (font-spec :family "DejaVu Sans Mono"
                                    :width 'normal
-                                   :size (/ height 10)
+                                   :size (/ height 10.0)
                                    :weight 'normal))
-    (set-fontset-font "fontset-default" 'unicode font-family)))
+    (set-fontset-font "fontset-default" 'unicode font-family))
+  ;; Emoji support:
+  (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji" :size (/ height 13.5)))
+  ;; These probably need size adjustment, not sure about factors:
+  (set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
+  (set-fontset-font t 'symbol "Segoe UI Emoji" nil 'append)
+  (set-fontset-font t 'symbol "Symbola" nil 'append))
 
 
 (cl-defun toggle-header-line (&optional (header-on t header-given))

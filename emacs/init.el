@@ -76,11 +76,6 @@
 (prefer-coding-system 'utf-8)
 ;;(set-terminal-coding-system 'utf-8)
 ;;(set-keyboard-coding-system 'utf-8)
-;; Emoji support:
-(set-fontset-font t 'symbol "Apple Color Emoji")
-(set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
-(set-fontset-font t 'symbol "Segoe UI Emoji" nil 'append)
-(set-fontset-font t 'symbol "Symbola" nil 'append)
 
 
 ;;; enable useful commands
