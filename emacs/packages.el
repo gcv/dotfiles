@@ -164,6 +164,11 @@
   :defer t)
 
 
+(use-package crux
+  :pin melpa
+  :defer t)
+
+
 (use-package deft
   :bind ("C-c d" . deft)
   :config (progn
