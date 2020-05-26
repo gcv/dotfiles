@@ -180,8 +180,6 @@
 
 (setq package-gnupghome-dir nil)
 
-(setq package-enable-at-startup nil)
-
 (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
 ;;(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 ;;(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/") t)
@@ -950,8 +948,7 @@ See `eshell-prompt-regexp'."
 ;;; ----------------------------------------------------------------------------
 
 ;;; load more startup files; order matters!
-(let ((gc-cons-threshold most-positive-fixnum) ; disable GC for the load
-      (startup-files (list
+(let ((startup-files (list
                       "utils.el"
                       "interactives.el"
                       "packages.el"
@@ -965,6 +962,9 @@ See `eshell-prompt-regexp'."
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
     (load-file (expand-file-name (concat "../" f) (file-truename user-emacs-directory)))))
+
+;; reset normal garbage collection limits (disabled in early-init.el)
+(setq gc-cons-threshold 800000)
 
 
 ;;; ----------------------------------------------------------------------------
