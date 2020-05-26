@@ -5,7 +5,6 @@ Notes on this configuration:
 
 ** Initial setup
 
-- symlink ~${HOME}/.emacs~ to ~public/emacs~
 - symlink ~${HOME}/.emacs.d~ to ~emacs~
 
 

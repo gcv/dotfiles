@@ -1,18 +1,19 @@
+(when (version< emacs-version "27.0")
+  (load-file (expand-file-name "early-init.el" user-emacs-directory)))
+
 (setq load-prefer-newer t)                                      ; deal with outdated .elc files
 (setq debug-on-error nil)                                       ; turn this on only when needed
 (setq-default indent-tabs-mode nil)                             ; replace tabs with spaces
 (transient-mark-mode -1)                                        ; turn off transient-mark mode
 (setq-default fill-column 80)                                   ; 80-character screens, not 70
 (setq sentence-end-double-space nil)                            ; one space between sentences
-(show-paren-mode t)                                             ; show matching parens
+(show-paren-mode 1)                                             ; show matching parens
 (setq parens-require-spaces nil)                                ; m-( should not insert spaces
 (setq scroll-step 1)                                            ; stop scrolling by half-screens
-(column-number-mode t)                                          ; show column numbers
+(column-number-mode 1)                                          ; show column numbers
 (setq require-final-newline t)                                  ; newline required at end of file
 (fset 'yes-or-no-p 'y-or-n-p)                                   ; substitute y-or-n for yes-or-no
 ;;(setq make-backup-files nil)                                  ; supress backup "~" files
-(when window-system (tool-bar-mode -1))                         ; remove the toolbar
-(unless window-system (menu-bar-mode -1))                       ; remove the menu bar in terminal
 (blink-cursor-mode -1)                                          ; traditional steady cursor
 ;;(setq-default show-trailing-whitespace t)                     ; always show trailing whitespace
 (setq font-lock-verbose nil)                                    ; silence slow compile messages
@@ -22,8 +23,6 @@
 ;;(setq auto-revert-verbose nil)                                ; but be quiet about it
 ;;(setq global-auto-revert-non-file-buffers t)                  ; not ready for kqueue+directories
 ;;(setq auto-revert-use-notify nil)                             ; not ready for kqueue+directories
-;;(global-hl-line-mode 1)                                       ; highlight the current line
-(when window-system (scroll-bar-mode -1))                       ; no scrollbars (bugs on Mac OS)
 (setq use-dialog-box nil)                                       ; turn off lame GUI dialogs
 (setq truncate-partial-width-windows nil)                       ; no more truncated lines
 (setq save-abbrevs nil)                                         ; don't use abbrev-mode
