@@ -1,8 +1,5 @@
 # ignore everything
 *
 
-# except the emoji database
-!emojis
-
-# and the no-littering configuration directory
+# except the no-littering configuration directory
 !etc
