@@ -621,6 +621,14 @@ end tell")))
     (do-applescript "tell application \"Emacs\" to activate")))
 
 
+(defun display-ansi-colors ()
+  "When opening a file with ANSI color codes, this modifies the buffer to actually show them."
+  (interactive)
+  (require 'ansi-color)
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region (point-min) (point-max))))
+
+
 ;; This is a hack to show notes using posframe while recording a screencast.
 ;; Save the notes in the list below. Use H-n to advance. That's it.
 (let* ((idx -1)
