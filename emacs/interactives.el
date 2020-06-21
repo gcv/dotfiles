@@ -6,6 +6,7 @@
 ;;; - Monaco (classic Mac, missing bold variant, missing many Unicode symbols, excellent at size 140)
 ;;; - Menlo (has bold variant, better Unicode coverage than Monaco, excellent at size 120)
 ;;; - DejaVu Sans Mono (almost identical to Menlo, distinctions on 0-*~, sometimes better for smaller line spacing)
+;;; - Roboto Mono
 ;;; - Noto Mono
 ;;; decent choices (have Unicode or character problems): Consolas, Inconsolata, Anonymous Pro
 ;;; note about fontsets:
