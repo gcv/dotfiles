@@ -1031,6 +1031,8 @@
                 ("javascript" . "//")))
 
             (defun /web-mode-hook ()
+              (unless (-contains? (flycheck-checker-get 'typescript-tide 'modes) 'web-mode)
+                (flycheck-add-mode 'typescript-tide 'web-mode))
               (when (-contains? '("ts" "tsx") (file-name-extension buffer-file-name))
                 (tide-setup)
                 (flycheck-mode))
