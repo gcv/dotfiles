@@ -12,7 +12,6 @@
   (setq show-trailing-whitespace t)
   (paredit-mode 1)
   (eldoc-mode)
-  (elisp-slime-nav-mode t)
   (define-key emacs-lisp-mode-map (kbd "C-c C-k") 'eval-buffer)
   (define-key emacs-lisp-mode-map (kbd "C-m") 'newline-and-indent))
 
@@ -21,7 +20,6 @@
 
 (defun /lisp-interaction-mode-hook ()
   (paredit-mode 1)
-  (elisp-slime-nav-mode t)
   (define-key lisp-interaction-mode-map (kbd "C-x C-j") 'eval-print-last-sexp)
   (eldoc-mode))
 
@@ -39,7 +37,6 @@
   ;; normal setup
   (paredit-mode 1)
   (eldoc-mode)
-  (elisp-slime-nav-mode t)
   (local-set-key (kbd "C-S-d") (lambda ()
                                  (interactive)
                                  (comint-send-eof)

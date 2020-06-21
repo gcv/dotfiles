@@ -228,11 +228,6 @@
             ))
 
 
-(use-package elisp-slime-nav
-  :defer t
-  :diminish "")
-
-
 ;;; Deprecated, since set-fontset-font invocations with appropriate fonts should
 ;;; now work.
 ;; (use-package emojify
