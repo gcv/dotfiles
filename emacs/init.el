@@ -58,6 +58,10 @@
 (setq tls-checktrust t)
 
 
+;;; https://consoledonottrack.com
+(setenv "DO_NOT_TRACK" "1")
+
+
 ;;; control beeping
 (setq ring-bell-function
       ;; (lambda ()
