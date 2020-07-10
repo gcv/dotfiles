@@ -42,14 +42,15 @@
               ;; match mini-frame height
               (setq selectrum-num-candidates-displayed 15))
 
-            ;; Use Selectrum instead of Ivy in terminal.
-            (unless window-system
-              (selectrum-mode 1))
-
-            (selectrum-prescient-mode 1)
+            ;;(selectrum-mode 1)
 
             ))
 
 
 (use-package selectrum-prescient
-  :defer t)
+  :defer t
+  :config (progn
+
+            (selectrum-prescient-mode 1)
+
+            ))
