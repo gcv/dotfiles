@@ -1,5 +1,6 @@
 (use-package counsel
   :pin melpa
+  :if window-system
   :bind (("M-x" . counsel-M-x)
          ("C-x C-M-f" . counsel-find-file)
          ;;("C-M-y" . counsel-yank-pop)
@@ -37,6 +38,7 @@
 
 (use-package ivy
   :pin melpa
+  :if window-system
   :after (flx)
   :bind (("C-c c r" . ivy-resume)
          :map ivy-minibuffer-map
@@ -52,7 +54,7 @@
 
             ;; Automatic Ivy window sizing with ivy-posframe awareness.
             (defun /ivy-height-smart ()
-              (if (display-graphic-p)
+              (if window-system
                   (if (bound-and-true-p mini-frame-mode)
                       (a-get mini-frame-show-parameters 'height)
                     (if (eq '/ivy-display-function-window ivy--display-function)
@@ -109,6 +111,7 @@
 
 (use-package ivy-posframe
   :pin melpa
+  :if window-system
   :defer nil                            ; must load eagerly
   :diminish ""
   :config (progn
@@ -167,4 +170,5 @@
 
 (use-package swiper
   :pin melpa
+  :if window-system
   :bind ("M-S-C-s" . swiper))
