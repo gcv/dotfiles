@@ -94,10 +94,10 @@ function dlatex() { docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v 
 # latexmk -c or -C to clean up
 function doctave() { docker run --rm -it -v "$PWD":/source schickling/octave }
 
+alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs -nw'
 [[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
     alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n' || \
     alias ec='emacsclient -n'
-
 [[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
     alias et='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -a "" -t' || \
     alias et='emacsclient -a "" -t'
