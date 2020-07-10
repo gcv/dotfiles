@@ -962,7 +962,7 @@ See `eshell-prompt-regexp'."
                       "modeline.el"
                       "helm.el"
                       "ivy.el"
-                      ;;"selectrum.el"
+                      "selectrum.el"
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
     (load-file (expand-file-name (concat "../" f) (file-truename user-emacs-directory)))))

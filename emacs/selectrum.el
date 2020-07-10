@@ -1,12 +1,3 @@
-(use-package ctrlf
-  :pin melpa
-  :defer t
-  :config (progn
-            ;; waiting on https://github.com/raxod502/ctrlf/issues/41
-            ;;(ctrlf-mode 1)
-            ))
-
-
 (use-package mini-frame
   :pin melpa
   :defer t
@@ -51,8 +42,11 @@
               ;; match mini-frame height
               (setq selectrum-num-candidates-displayed 15))
 
-            ;;(selectrum-mode 1)
-            ;;(selectrum-prescient-mode 1)
+            ;; Use Selectrum instead of Ivy in terminal.
+            (unless window-system
+              (selectrum-mode 1))
+
+            (selectrum-prescient-mode 1)
 
             ))
 
