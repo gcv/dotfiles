@@ -25,7 +25,7 @@
 
             ;; TODO: Look into simplifying this with Emacs 27.
             (setq mini-frame-show-parameters
-                  '((top . 20)
+                  '((top . 100)
                     (left . 0.5)
                     (width . 0.7)
                     (height . 15)))
