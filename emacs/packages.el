@@ -1017,6 +1017,7 @@
          ("\\.erb\\'" . web-mode)
          ("\\.ts?\\'" . web-mode)
          ("\\.tsx\\'" . web-mode))
+  :after (tide)
   :config (progn
 
             (setq web-mode-enable-current-element-highlight t
