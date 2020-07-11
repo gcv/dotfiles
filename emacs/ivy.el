@@ -1,6 +1,5 @@
 (use-package counsel
   :pin melpa
-  :if window-system
   :bind (("M-x" . counsel-M-x)
          ("C-x C-M-f" . counsel-find-file)
          ;;("C-M-y" . counsel-yank-pop)
@@ -38,7 +37,6 @@
 
 (use-package ivy
   :pin melpa
-  :if window-system
   :after (flx)
   :bind (("C-c c r" . ivy-resume)
          :map ivy-minibuffer-map
@@ -71,7 +69,7 @@
                     (str (with-current-buffer (get-buffer-create " *Minibuf-1*")
                            (let ((point (point))
                                  (string (concat (buffer-string) "  " text)))
-                             (ivy-add-face-text-property (- point 1) point 'ivy-cursor string t)
+                             (add-face-text-property (- point 1) point 'ivy-cursor t string)
                              string))))
                 (with-current-buffer buffer
                   (let ((inhibit-read-only t))
@@ -82,8 +80,7 @@
                 (with-ivy-window
                   (display-buffer
                    buffer
-                   `((display-buffer-reuse-window
-                      display-buffer-below-selected)
+                   `((display-buffer-reuse-window display-buffer-below-selected)
                      (window-height . ,(ivy--height (ivy-state-caller ivy-last))))))))
 
             (defun /ivy-display-function-window-cleanup ()
@@ -170,5 +167,4 @@
 
 (use-package swiper
   :pin melpa
-  :if window-system
   :bind ("M-S-C-s" . swiper))
