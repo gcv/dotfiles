@@ -1,5 +1,6 @@
 (use-package mini-frame
   :pin melpa
+  :if window-system
   :defer t
   :config (progn
 
@@ -43,14 +44,10 @@
               (setq selectrum-num-candidates-displayed 15))
 
             ;;(selectrum-mode 1)
+            (selectrum-prescient-mode 1)
 
             ))
 
 
 (use-package selectrum-prescient
-  :defer t
-  :config (progn
-
-            (selectrum-prescient-mode 1)
-
-            ))
+  :commands (selectrum-prescient-mode))
