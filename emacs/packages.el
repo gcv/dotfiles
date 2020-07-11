@@ -490,7 +490,7 @@
 
 
 (use-package julia-snail
-  :load-path "~/Code/julia-snail"
+  ;;:load-path "~/Code/julia-snail"
   :pin melpa
   :hook (julia-mode . julia-snail-mode))
 
@@ -719,7 +719,7 @@
 
 
 (use-package perspective
-  :load-path "~/Code/perspective-el"
+  ;;:load-path "~/Code/perspective-el"
   :pin melpa
   :defer nil
   :bind (("C-c C-p" . perspective-map)
