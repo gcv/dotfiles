@@ -580,7 +580,7 @@
 
 (use-package minibuffer-line
   :pin gnu
-  :defer t
+  :defer nil
   :config (progn
 
             (setq minibuffer-line-refresh-interval 5)
