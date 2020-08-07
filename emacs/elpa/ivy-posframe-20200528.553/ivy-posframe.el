@@ -7,7 +7,8 @@
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; Maintainer: Naoya Yamashita <conao3@gmail.com>
 ;; URL: https://github.com/tumashu/ivy-posframe
-;; Package-Version: 20200331.536
+;; Package-Version: 20200528.553
+;; Package-Commit: 44749562a9e68bd43ccaa225b31311476fab1251
 ;; Version: 0.1.0
 ;; Keywords: abbrev, convenience, matching, ivy
 ;; Package-Requires: ((emacs "26.0")(posframe "0.1.0")(ivy "0.11.0"))
@@ -84,7 +85,7 @@
 ;; (require 'ivy-posframe)
 ;; ;; Different command can use different display function.
 ;; (setq ivy-posframe-display-functions-alist
-;;       '((swiper          . nil)
+;;       '((swiper          . ivy-display-function-fallback)
 ;;         (complete-symbol . ivy-posframe-display-at-point)
 ;;         (counsel-M-x     . ivy-posframe-display-at-window-bottom-left)
 ;;         (t               . ivy-posframe-display)))
@@ -104,7 +105,7 @@
 ;;                                   (t      . 40)))
 ;;
 ;; (setq ivy-posframe-display-functions-alist
-;;       '((swiper          . nil)
+;;       '((swiper          . ivy-display-function-fallback)
 ;;         (complete-symbol . ivy-posframe-display-at-point)
 ;;         (counsel-M-x     . ivy-posframe-display-at-window-bottom-left)
 ;;         (t               . ivy-posframe-display)))
@@ -452,23 +453,47 @@ selection, non-nil otherwise."
 (defun ivy-posframe-swiper-avy ()
   "Jump to one of the current swiper candidates."
   (interactive)
-  (unless (require 'avy nil 'noerror)
-    (error "Package avy isn't installed"))
-  (unless (string= ivy-text "")
-    (let ((candidate (ivy-posframe--swiper-avy-candidate)))
-      (if (eq (cdr candidate) (ivy-posframe--window))
-          (let ((cand-text (with-current-buffer ivy-posframe-buffer
-                             (save-excursion
-                               (goto-char (car candidate))
-                               (buffer-substring-no-properties
-                                (line-beginning-position)
-                                (line-end-position))))))
-            (ivy-set-index (cl-position cand-text ivy--old-cands :test #'string=))
-            (ivy--exhibit)
-            (ivy-done)
-            (ivy-call))
-        (ivy-quit-and-run
-          (avy-action-goto (avy-candidate-beg candidate)))))))
+  (if (not (string-match-p "^ivy-posframe-display"
+                           (symbol-name ivy--display-function)))
+      ;; if swiper is not use ivy-posframe's display function.
+      ;; call `swiper-avy'.
+
+      ;; FIXME: This assume all ivy-posframe display functions are
+      ;; prefixed with ivy-posframe-display.
+      (swiper-avy)
+    (unless (require 'avy nil 'noerror)
+      (error "Package avy isn't installed"))
+    (unless (require 'avy nil 'noerror)
+      (error "Package avy isn't installed"))
+    (cl-case (length ivy-text)
+      (0
+       (user-error "Need at least one char of input"))
+      (1
+       (let ((swiper-min-highlight 1))
+         (swiper--update-input-ivy))))
+    (unless (string= ivy-text "")
+      (let ((candidate (ivy-posframe--swiper-avy-candidate)))
+        (cond ((eq (cdr candidate) (ivy-posframe--window))
+               (let ((cand-text (with-current-buffer ivy-posframe-buffer
+                                  (save-excursion
+                                    (goto-char (car candidate))
+                                    (buffer-substring
+                                     (line-beginning-position)
+                                     (line-end-position))))))
+                 (ivy-set-index
+                  ;; cand-text may include "> ", using a hack way
+                  ;; to deal with it.
+                  (or (cl-some (lambda (n)
+                                 (cl-position (substring cand-text n) ivy--old-cands :test #'string=))
+                               '(0 1 2 3 4))
+                      0))
+                 (ivy--exhibit)
+                 (ivy-done)
+                 (ivy-call)))
+              ((or (consp candidate)
+                   (number-or-marker-p candidate))
+               (ivy-quit-and-run
+                 (avy-action-goto (avy-candidate-beg candidate)))))))))
 
 ;;; Variables
 
