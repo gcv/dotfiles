@@ -5,7 +5,8 @@
 ;; Author: Tom Willemse <tom@ryuslash.org>
 ;; Created: Jan 9, 2012
 ;; Version: 4.6.0
-;; Package-Version: 20200322.2007
+;; Package-Version: 20200801.748
+;; Package-Commit: 5755d36c03ef217064df62fd6da4b14ee070f513
 ;; Keywords: vc
 ;; URL: https://github.com/ryuslash/git-auto-commit-mode
 
@@ -36,6 +37,8 @@
 ;; Git repository.
 
 ;;; Code:
+
+(require 'subr-x)
 
 (defgroup git-auto-commit-mode nil
   "Customization options for `git-auto-commit-mode'."
@@ -76,6 +79,18 @@ If non-nil a git push will be executed after each commit."
        :group 'git-auto-commit-mode
        :type 'string)
 
+(defcustom gac-commit-additional-flag ""
+    "Flag to add to the git commit command."
+    :tag "git commit flag"
+    :group 'git-auto-commit-mode
+    :type 'string)
+
+(defcustom gac-silent-message-p nil
+    "Should git output be output to the message area?"
+    :tag "Quiet message output"
+    :group 'git-auto-commit-mode
+    :type 'boolean)
+
 
 (defcustom gac-debounce-interval nil
   "Debounce automatic commits to avoid hammering Git.
@@ -107,14 +122,9 @@ It can be:
 (defun gac-relative-file-name (filename)
   "Find the path to FILENAME relative to the git directory."
   (let* ((git-dir
-          (replace-regexp-in-string
-           "\n+$" "" (shell-command-to-string
-                      "git rev-parse --show-toplevel")))
-         (relative-file-name
-          (replace-regexp-in-string
-           "^/" "" (replace-regexp-in-string
-                    git-dir "" filename))))
-    relative-file-name))
+          (string-trim-right
+           (shell-command-to-string "git rev-parse --show-toplevel"))))
+    (file-relative-name filename git-dir)))
 
 (defun gac-password (proc string)
   "Ask the user for a password when necessary.
@@ -167,10 +177,13 @@ Default to FILENAME."
                     (file-name-nondirectory buffer-file)))
          (commit-msg (gac--commit-msg buffer-file))
          (default-directory (file-name-directory buffer-file)))
-    (shell-command
+    (funcall (if gac-silent-message-p
+                 #'call-process-shell-command
+                 #'shell-command)
      (concat "git add " gac-add-additional-flag " " (shell-quote-argument filename)
              gac-shell-and
-             "git commit -m " (shell-quote-argument commit-msg)))))
+             "git commit -m " (shell-quote-argument commit-msg)
+             " " gac-commit-additional-flag))))
 
 (defun gac-push (buffer)
   "Push commits to the current upstream.
