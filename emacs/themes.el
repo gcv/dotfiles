@@ -7,6 +7,12 @@
 (require 'dash)
 
 
+;;; XXX: Emacs 27 breaks custom-theme-set-faces.
+;;; https://emacs.stackexchange.com/a/52804
+(unless (version< emacs-version "27.0")
+  (setq custom--inhibit-theme-enable nil))
+
+
 (defun /theme-face-spec (face &rest merge-attrs)
   (let* ((attrs (a-merge (ignore-errors (face-all-attributes face (selected-frame)))
                          (apply #'a-alist merge-attrs))))
