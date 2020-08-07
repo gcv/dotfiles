@@ -122,8 +122,6 @@ determine the exact padding."
    ((line-number &override) :foreground base7)
    ((line-number-current-line &override) :foreground fg)
 
-   (hl-line :background "black")
-
    (font-lock-operator-face
     :foreground operators)
 
@@ -264,7 +262,6 @@ determine the exact padding."
 
    ;; org-mode
    (org-hide              :foreground hidden)
-   (solaire-org-hide-face :foreground hidden)
    (org-code              :foreground blue)
    (org-table             :foreground fg-alt)
 
@@ -284,7 +281,6 @@ determine the exact padding."
    (web-mode-html-tag-bracket-face :foreground teal)
    (web-mode-keyword-face          :foreground teal)
    (web-mode-block-control-face    :foreground red)
-   (web-mode-block-delimiter-face  :foreground teal)
    (web-mode-variable-name-face    :foreground (doom-lighten green 0.5))
 
    ;; typescript

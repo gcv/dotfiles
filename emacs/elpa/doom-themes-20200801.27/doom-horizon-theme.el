@@ -73,7 +73,7 @@
     (vertical-bar   base0)
     (selection      violet)
     (builtin        violet)
-    (comments       hor-highlight-bright)
+    (comments       (if doom-horizon-brighter-comments magenta hor-highlight-bright))
     (doc-comments   yellow)
     (constants      orange)
     (functions      teal)
@@ -126,7 +126,7 @@
     (font-lock-comment-face
       :inherit 'italic
       :foreground comments
-      :background (if doom-horizon-comment-bg (doom-lighten bg 0.05)))
+      :background (if doom-horizon-comment-bg (doom-lighten bg 0.03)))
     (font-lock-doc-face
       :inherit 'font-lock-comment-face
       :foreground doc-comments)
@@ -196,7 +196,6 @@
     (org-hide :foreground hidden)
     (org-link :inherit 'underline :foreground yellow)
     (org-agenda-done :foreground cyan)
-    (solaire-org-hide-face :foreground hidden)
     (solaire-header-line-face :background bg-alt :foreground fg)
     (header-line :background base2 :foreground fg)
 
@@ -231,7 +230,7 @@
     (company-box-background    :background base0 :foreground fg)
     (company-tooltip-common    :foreground red :weight 'bold)
     (company-tooltip-selection :background hor-highlight :foreground fg)
-    
+
    ;; treemacs
    (treemacs-root-face :foreground fg :weight 'bold :height 1.2)
    (doom-themes-treemacs-root-face :foreground fg :weight 'ultra-bold :height 1.2)
@@ -241,11 +240,16 @@
 
    ;; js2-mode
    (js2-object-property        :foreground red)
-   
+
    ;; rjsx-mode
    (rjsx-tag :foreground red)
    (rjsx-tag-bracket-face :foreground red)
    (rjsx-attr :foreground cyan :slant 'italic :weight 'medium)
+
+   ;; web-mode
+   (web-mode-html-tag-bracket-face :foreground red)
+   (web-mode-html-tag-face         :foreground red)
+   (web-mode-html-attr-name-face   :foreground orange)
     ))
 
 

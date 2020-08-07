@@ -1,7 +1,7 @@
-(define-package "doom-themes" "20200514.2115" "an opinionated pack of modern color-themes"
+(define-package "doom-themes" "20200801.27" "an opinionated pack of modern color-themes"
   '((emacs "25.1")
     (cl-lib "0.5"))
-  :keywords
+  :commit "e803fc4ac8cf7118e2d1544d8241b848b5e79e9f" :keywords
   '("dark" "light" "blue" "atom" "one" "theme" "neotree" "icons" "faces" "nova")
   :authors
   '(("Henrik Lissner <http://github/hlissner>"))
