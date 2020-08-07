@@ -1,6 +1,6 @@
-(define-package "material-theme" "1.2" "A Theme based on the colors of the Google Material Design"
+(define-package "material-theme" "1.3" "A Theme based on the colors of the Google Material Design"
   '((emacs "24.1"))
-  :keywords
+  :commit "2710e61ecee1bbec943538305c26af4fe4fca68a" :keywords
   '("themes")
   :authors
   '(("Christoph Paulik" . "cpaulik@gmail.com"))
