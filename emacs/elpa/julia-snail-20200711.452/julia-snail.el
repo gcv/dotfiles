@@ -3,7 +3,7 @@
 
 ;; URL: https://github.com/gcv/julia-snail
 ;; Package-Requires: ((emacs "26.2") (cl-lib "0.5") (dash "2.16.0") (julia-mode "0.3") (s "1.12.0") (parsec "0.1.3") (spinner "1.7.3") (vterm "0.0.1"))
-;; Version: 1.0.0rc3
+;; Version: 1.0.0rc4
 ;; Created: 2019-10-27
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -106,12 +106,6 @@
   (make-hash-table :test #'equal))
 
 (defvar julia-snail--cache-proc-implicit-file-module
-  (make-hash-table :test #'equal))
-
-(defvar julia-snail--cache-proc-names-base
-  (make-hash-table :test #'equal))
-
-(defvar julia-snail--cache-proc-names-core
   (make-hash-table :test #'equal))
 
 (defvar julia-snail--cache-proc-basedir
@@ -231,17 +225,28 @@ MODULE can be:
        (modify-syntax-entry ?. "_")
        (modify-syntax-entry ?@ "_")
        (modify-syntax-entry ?= " ")
+       (modify-syntax-entry ?$ " ")
        ,@body)))
+
+(defun julia-snail--bslash-before-p (pos)
+  (char-equal (char-before pos) ?\\))
 
 (defun julia-snail--identifier-at-point ()
   "Return identifier at point using Snail-specific syntax table."
   (julia-snail--with-syntax-table
-    (thing-at-point 'symbol t)))
+    (let ((identifier (thing-at-point 'symbol t))
+          (start (car (bounds-of-thing-at-point 'symbol))))
+      (if (julia-snail--bslash-before-p start)
+          (concat "\\" identifier)
+        identifier))))
 
 (defun julia-snail--identifier-at-point-bounds ()
   "Return the bounds of the identifier at point using Snail-specific syntax table."
   (julia-snail--with-syntax-table
-    (bounds-of-thing-at-point 'symbol)))
+    (let ((bounds (bounds-of-thing-at-point 'symbol)))
+      (if (julia-snail--bslash-before-p (car bounds))
+          `(,(- (car bounds) 1) . ,(cdr bounds))
+        bounds))))
 
 (defmacro julia-snail--wait-while (condition increment maximum)
   "Synchronously wait for CONDITION to evaluate to true.
@@ -290,8 +295,6 @@ MAXIMUM: max timeout, ms."
   "Clear connection-specific internal Snail xref, completion, and module caches."
   (when process-buf
     (remhash process-buf julia-snail--cache-proc-implicit-file-module)
-    (remhash process-buf julia-snail--cache-proc-names-base)
-    (remhash process-buf julia-snail--cache-proc-names-core)
     (remhash process-buf julia-snail--cache-proc-basedir)))
 
 (defun julia-snail--repl-cleanup ()
@@ -695,77 +698,45 @@ Julia include on the tmpfile, and then deleting the file."
 
 ;;; --- completion implementation
 
-(defun julia-snail--completions-keywords ()
-  "Julia completion keywords."
-  (list "abstract type" "begin" "catch" "do" "else" "elseif" "end"
-        "false" "finally" "for" "function" "if" "let" "macro" "module"
-        "mutable struct" "nothing" "primitive type" "quote" "struct"
-        "true" "try" "undef" "while"))
-
-(defun julia-snail--completions-base ()
-  "Julia completion Base module names."
-  (let ((process-buf (get-buffer (julia-snail--process-buffer-name julia-snail-repl-buffer))))
-    ;; return (cached) list of Base names
-    (if-let ((cached-base (gethash process-buf julia-snail--cache-proc-names-base)))
-        cached-base
-      (puthash process-buf
-               (julia-snail--send-to-server
-                 :Main
-                 "Main.JuliaSnail.lsnames(Main.Base, all=false, imported=true, include_modules=true, recursive=true)"
-                 :async nil)
-               julia-snail--cache-proc-names-base))))
-
-(defun julia-snail--completions-core ()
-  "Julia completion Core module names."
-  (let ((process-buf (get-buffer (julia-snail--process-buffer-name julia-snail-repl-buffer))))
-    ;; return (cached) list of Core names
-    (if-let ((cached-core (gethash process-buf julia-snail--cache-proc-names-core)))
-        cached-core
-      (puthash process-buf
-               (julia-snail--send-to-server
-                 :Main
-                 "Main.JuliaSnail.lsnames(Main.Core, all=false, imported=true, include_modules=true, recursive=false)"
-                 :async nil)
-               julia-snail--cache-proc-names-core))))
-
-(defun julia-snail--completions (identifier)
-  "Completions helper for IDENTIFIER."
+(defun julia-snail--repl-completions (identifier)
   (let* ((module (julia-snail--module-at-point))
-         (ns (-last-item module)))
-    (append
-     (julia-snail--completions-keywords)
-     (julia-snail--completions-base)
-     (julia-snail--completions-core)
-     ;; handle a variable referencing a module
-     (when (and identifier (s-ends-with? "." identifier))
-       (let ((dotless (replace-regexp-in-string (rx "." string-end) "" identifier)))
-         (mapcar
-          (lambda (c) (s-prepend identifier c))
-          (let ((res (julia-snail--send-to-server
-                       module
-                       (format "Main.JuliaSnail.lsnames(%s, all=true, imported=false, include_modules=false, recursive=false)" dotless)
-                       :display-error-buffer-on-failure? nil
-                       :async nil)))
-            (if (eq :nothing res)
-                (list)
-              res)))))
-     ;; the main list of names
-     (julia-snail--send-to-server
-       module
-       (format "Main.JuliaSnail.lsnames(%s, all=true, imported=true, include_modules=true, recursive=true)" ns)
-       :async nil))))
+         (res (julia-snail--send-to-server
+                :Main
+                (format "try; JuliaSnail.replcompletion(\"%1$s\", %2$s); catch; JuliaSnail.replcompletion(\"%1$s\", Main); end"
+                        identifier
+                        (s-join "." module))
+                :async nil)))
+    (if (eq :nothing res)
+        (list)
+      res)))
 
-(defun julia-snail-completion-at-point ()
-  "Implementation for Emacs `completion-at-point' system."
+(defun julia-snail-repl-completion-at-point ()
+  "Implementation for Emacs `completion-at-point' system using REPL.REPLCompletions as the provider."
   (let ((identifier (julia-snail--identifier-at-point))
-        (bounds (julia-snail--identifier-at-point-bounds)))
+        (bounds (julia-snail--identifier-at-point-bounds))
+        (split-on "\\.")
+        (prefix "")
+        start)
     (when bounds
-      (list (car bounds)
+      ;; If identifier starts with a backslash we need to add an extra "\\" to
+      ;; make sure that the string which arrives to the completion provider on the server starts with "\\".
+      (when (s-equals-p (substring identifier 0 1) "\\")
+        (setq prefix "\\"))
+      ;; check if identifier at point is inside a string and attach the opening quotes so
+      ;; we get path completion.
+      (when (char-equal (char-before (car bounds)) ?\")
+        (setq identifier (concat "\\\"" identifier))
+        ;; TODO: add support for Windows paths (splitting on "\\" when appropriate)
+        (setq split-on "/"))
+      ;; If identifier is not a string, we split on "." so that completions of
+      ;; the form Module.f -> Module.func work (since
+      ;; `julia-snail--repl-completions' will return only "func" in this case)
+      (setq start (- (cdr bounds) (length (car (last (s-split split-on identifier))))))
+      (list start
             (cdr bounds)
             (completion-table-dynamic
-             (lambda (_) (julia-snail--completions identifier)))
-            :exclusive 'yes))))
-
+             (lambda (_) (julia-snail--repl-completions (concat prefix identifier))))
+            :exclusive 'no))))
 
 ;;; --- eldoc implementation
 
@@ -997,8 +968,8 @@ autocompletion aware of the available modules."
           (julia-snail--enable)
           (add-hook 'xref-backend-functions #'julia-snail-xref-backend nil t)
           (add-function :before-until (local 'eldoc-documentation-function) #'julia-snail-eldoc)
-          (add-hook 'completion-at-point-functions #'julia-snail-completion-at-point nil t))
-      (remove-hook 'completion-at-point-functions #'julia-snail-completion-at-point t)
+          (add-hook 'completion-at-point-functions #'julia-snail-repl-completion-at-point nil t))
+      (remove-hook 'completion-at-point-functions #'julia-snail-repl-completion-at-point t)
       (remove-function (local 'eldoc-documentation-function) #'julia-snail-eldoc)
       (remove-hook 'xref-backend-functions #'julia-snail-xref-backend t)
       (julia-snail--disable))))
