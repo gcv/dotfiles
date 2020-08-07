@@ -5,6 +5,7 @@
          ;;("M-x" . helm-M-x)
          ;;("M-i" . helm-semantic-or-imenu)
          ("C-M-y" . helm-show-kill-ring))
+  :custom (helm-ff-keep-cached-candidates nil)
   :config (progn
 
             (require 'helm-config)
