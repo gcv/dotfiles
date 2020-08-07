@@ -8,6 +8,9 @@
   :custom (helm-ff-keep-cached-candidates nil)
   :config (progn
 
+            ;; XXX: Seems to be necessary to avoid loading order errors in Helm 3.6.4?
+            (require 'tramp)
+
             (require 'helm-config)
 
             ;; the default C-x c is too close to C-x C-c
