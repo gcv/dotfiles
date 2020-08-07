@@ -578,6 +578,30 @@
   :defer t)
 
 
+(use-package minibuffer-line
+  :pin gnu
+  :defer t
+  :config (progn
+
+            (setq minibuffer-line-refresh-interval 5)
+
+            (defun /minibuffer-line-justify-right (text)
+              "Return a string of `window-width' length with TEXT right-aligned."
+              (with-selected-window (minibuffer-window)
+                (format (format "%%%ds" (- (window-width) 1))
+                        text)
+                ))
+
+            (setq minibuffer-line-format
+                  '("" (:eval (/minibuffer-line-justify-right
+                               (concat ;; (system-name) " | " (format-time-string "%F %R")
+                                (format-time-string "%R"))))))
+
+            (minibuffer-line-mode 1)
+
+            ))
+
+
 (use-package modus-operandi-theme
   :defer t)
 
