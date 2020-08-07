@@ -23,6 +23,12 @@ If the process in that buffer died, ask to restart.
 
 \(fn)" t nil)
 
+(autoload 'crux-visit-shell-buffer "crux" "\
+Create or visit a shell buffer.
+If the process in that buffer died, ask to restart.
+
+\(fn)" t nil)
+
 (autoload 'crux-indent-rigidly-and-copy-to-clipboard "crux" "\
 Indent region between BEGIN and END by ARG columns and copy to clipboard.
 
@@ -62,6 +68,13 @@ Passes ARG to command `kill-whole-line' when provided.
 Kill line backwards and adjust the indentation.
 
 \(fn)" t nil)
+
+(autoload 'crux-kill-and-join-forward "crux" "\
+If at end of line, join with following; otherwise kill line.
+Passes ARG to command `kill-line' when provided.
+Deletes whitespace at join.
+
+\(fn &optional ARG)" t nil)
 
 (autoload 'crux-move-beginning-of-line "crux" "\
 Move point back to indentation of beginning of line.
@@ -201,6 +214,12 @@ Repeated invocations toggle between the two most recently open buffers.
 
 \(fn)" t nil)
 
+(autoload 'crux-other-window-or-switch-buffer "crux" "\
+Call `other-window' if more than one window is visible.
+Switch to most recent buffer otherwise.
+
+\(fn)" t nil)
+
 (autoload 'crux-kill-other-buffers "crux" "\
 Kill all buffers but the current one.
 Doesn't mess with special buffers.
@@ -253,7 +272,7 @@ abort completely with `C-g'.
 
 \(fn P)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "crux" '("crux-" "move-to-mode-line-start")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "crux" '("crux-")))
 
 ;;;***
 

@@ -1,10 +1,11 @@
 ;;; crux.el --- A Collection of Ridiculously Useful eXtensions -*- lexical-binding: t -*-
 ;;
-;; Copyright © 2015-2018 Bozhidar Batsov
+;; Copyright © 2015-2020 Bozhidar Batsov
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: https://github.com/bbatsov/crux
-;; Package-Version: 20181108.827
+;; Package-Version: 20200803.1528
+;; Package-Commit: 519629b79e618cc52c763d3bc68cf0d10a14fd22
 ;; Version: 0.4.0-snapshot
 ;; Keywords: convenience
 ;; Package-Requires: ((seq "1.11"))
@@ -59,8 +60,25 @@
   :type 'list
   :group 'crux)
 
+(defcustom crux-line-start-regex-alist
+  '((term-mode . "^[^#$%>\n]*[#$%>] ")
+    (eshell-mode . "^[^$\n]*$ ")
+    (org-mode . "^\\(\*\\|[[:space:]]*\\)* ")
+    (default . "^[[:space:]]*"))
+  "Alist of major modes and line starts.
+
+The key is a major mode.  The value is a regular expression
+matching the characters to be skipped over.  If no major mode is
+found, use the regex specified by the default key.
+
+Used by crux functions like `crux-move-beginning-of-line' to skip
+over whitespace, prompts, and markup at the beginning of the line."
+  :type 'list
+  :group 'crux)
+
+
 (defcustom crux-shell (getenv "SHELL")
-  "The default shell to run with `crux-visit-term-buffer'."
+  "The default shell to run with `crux-ansi-term'."
   :type 'string
   :group 'crux)
 
@@ -100,6 +118,45 @@
   :type 'list
   :group 'crux)
 
+
+(defcustom crux-term-func
+  #'crux-ansi-term
+  "The function used to start the term buffer if it's not already running.
+
+It will be called with a two arguments: the shell to start and the
+expected name of the shell buffer."
+  :type 'symbol
+  :group 'crux)
+
+(defcustom crux-shell-func
+  #'crux-eshell
+  "The function used to start the term buffer if it's not already running.
+
+It will be called with a two arguments: the shell to start and the
+expected name of the shell buffer."
+  :type 'symbol
+  :group 'crux)
+
+(defcustom crux-move-visually
+  nil
+  "Wheter move-related commands should take visual lines into account or not."
+  :type 'boolean
+  :group 'crux
+  :package-version '(crux . "0.4.0"))
+
+(defun crux-ansi-term (buffer-name)
+  "Use ansi-term for `crux-visit-term-buffer'"
+  (ansi-term crux-shell buffer-name))
+
+(defun crux-eshell (buffer-name)
+  "Use eshell for `crux-visit-term-buffer'"
+  (let ((eshell-buffer-name (format "*%s*" buffer-name)))
+    (eshell buffer-name)))
+
+(defun crux-shell (buffer-name)
+  "Use eshell for `crux-visit-term-buffer'"
+  (shell (format "*%s*" buffer-name)))
+
 ;;;###autoload
 (defun crux-open-with (arg)
   "Open visited file in default external program.
@@ -124,8 +181,12 @@ With a prefix ARG always prompt for command to use."
   (with-current-buffer buffer-or-name
     major-mode))
 
-(defvar crux-term-buffer-name "ansi"
-  "The default `ansi-term' name used by `crux-visit-term-buffer'.
+(defvar crux-term-buffer-name "ansi-term"
+  "The default buffer name used by `crux-visit-term-buffer'.
+This variable can be set via .dir-locals.el to provide multi-term support.")
+
+(defvar crux-shell-buffer-name "shell"
+  "The default buffer name used by `crux-visit-shell-buffer'.
 This variable can be set via .dir-locals.el to provide multi-term support.")
 
 (defun crux-start-or-switch-to (function buffer-name)
@@ -145,12 +206,26 @@ the current buffer."
 If the process in that buffer died, ask to restart."
   (interactive)
   (crux-start-or-switch-to (lambda ()
-                             (ansi-term crux-shell (concat crux-term-buffer-name "-term")))
-                           (format "*%s-term*" crux-term-buffer-name))
+                             (apply crux-term-func (list crux-term-buffer-name)))
+                           (format "*%s*" crux-term-buffer-name))
   (when (and (null (get-buffer-process (current-buffer)))
              (y-or-n-p "The process has died.  Do you want to restart it? "))
     (kill-buffer-and-window)
     (crux-visit-term-buffer)))
+
+;;;###autoload
+(defun crux-visit-shell-buffer ()
+  "Create or visit a shell buffer.
+If the process in that buffer died, ask to restart."
+  (interactive)
+  (crux-start-or-switch-to (lambda ()
+                             (apply crux-shell-func (list crux-shell-buffer-name)))
+                           (format "*%s*" crux-shell-buffer-name))
+  (when (and (null (get-buffer-process (current-buffer)))
+             (not (eq major-mode 'eshell)) ; eshell has no process
+             (y-or-n-p "The process has died.  Do you want to restart it? "))
+    (kill-buffer-and-window)
+    (crux-visit-shell-buffer)))
 
 ;;;###autoload
 (defun crux-indent-rigidly-and-copy-to-clipboard (begin end arg)
@@ -219,7 +294,7 @@ With a prefix ARG open line above the current line."
 Passes ARG to command `kill-whole-line' when provided."
   (interactive "p")
   (kill-whole-line arg)
-  (move-to-mode-line-start))
+  (crux-move-to-mode-line-start))
 
 ;;;###autoload
 (defun crux-kill-line-backwards ()
@@ -228,26 +303,28 @@ Passes ARG to command `kill-whole-line' when provided."
   (kill-line 0)
   (indent-according-to-mode))
 
-(defvar crux-line-start-regex-term-mode "^[^#$%>\n]*[#$%>] "
-  "Match terminal prompts.
+;;;###autoload
+(defun crux-kill-and-join-forward (&optional arg)
+  "If at end of line, join with following; otherwise kill line.
+Passes ARG to command `kill-line' when provided.
+Deletes whitespace at join."
+  (interactive "P")
+  (if (and (eolp) (not (bolp)))
+      (delete-indentation 1)
+    (kill-line arg)))
 
-Used by crux functions like crux-move-beginning-of-line to skip over the prompt")
-
-(defvar crux-line-start-regex-eshell-mode "^[^$\n]*$ " "Match eshell prompt.
-
-Used by crux functions like crux-move-beginning-of-line to skip over the prompt")
-
-(defvar crux-line-start-regex "^[[:space:]]*" "Match whitespace in from of line.
-
-Used by crux functions like crux-move-beginning-of-line to skip over whitespace")
-
-(defun move-to-mode-line-start ()
+(defun crux-move-to-mode-line-start ()
   "Move to the beginning, skipping mode specific line start regex."
   (interactive)
-  (move-beginning-of-line nil)
-  (let ((line-start-regex (cond ((eq major-mode 'term-mode) crux-line-start-regex-term-mode)
-                                ((eq major-mode 'eshell-mode) crux-line-start-regex-eshell-mode)
-                                (t crux-line-start-regex))))
+
+  (if crux-move-visually
+      (beginning-of-visual-line nil)
+    (move-beginning-of-line nil))
+
+  (let ((line-start-regex (cdr (seq-find
+                                (lambda (e) (derived-mode-p (car e)))
+                                crux-line-start-regex-alist
+                                (assoc 'default crux-line-start-regex-alist)))))
     (search-forward-regexp line-start-regex (line-end-position) t)))
 
 ;;;###autoload
@@ -270,7 +347,7 @@ point reaches the beginning or end of the buffer, stop there."
       (forward-line (1- arg))))
 
   (let ((orig-point (point)))
-    (move-to-mode-line-start)
+    (crux-move-to-mode-line-start)
     (when (= orig-point (point))
       (move-beginning-of-line 1))))
 
@@ -567,6 +644,15 @@ Repeated invocations toggle between the two most recently open buffers."
   (switch-to-buffer (other-buffer (current-buffer) 1)))
 
 ;;;###autoload
+(defun crux-other-window-or-switch-buffer ()
+  "Call `other-window' if more than one window is visible.
+Switch to most recent buffer otherwise."
+  (interactive)
+  (if (one-window-p)
+      (switch-to-buffer nil)
+    (other-window 1)))
+
+;;;###autoload
 (defun crux-kill-other-buffers ()
   "Kill all buffers but the current one.
 Doesn't mess with special buffers."
@@ -602,7 +688,7 @@ Doesn't mess with special buffers."
 (defun crux-find-shell-init-file ()
   "Edit the shell init file in another window."
   (interactive)
-  (let* ((shell (car (reverse (split-string (getenv "SHELL") "/" t))))
+  (let* ((shell (file-name-nondirectory (getenv "SHELL")))
          (shell-init-file (cond
                            ((string= "zsh" shell) crux-shell-zsh-init-files)
                            ((string= "bash" shell) crux-shell-bash-init-files)
