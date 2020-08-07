@@ -101,6 +101,7 @@
 (declare-function dired-get-filename 'dired)
 (declare-function term-emulate-terminal 'term)
 (defvar eshell-preoutput-filter-functions)
+(defvar git-commit-post-finish-hook)
 
 ;;; Options
 
@@ -176,7 +177,7 @@ please see https://github.com/magit/magit/wiki/Emacsclient."))))
 
 (defcustom with-editor-sleeping-editor "\
 sh -c '\
-echo \"WITH-EDITOR: $$ OPEN $0 IN $(pwd)\"; \
+printf \"WITH-EDITOR: $$ OPEN $0\\037 IN $(pwd)\\n\"; \
 sleep 604800 & sleep=$!; \
 trap \"kill $sleep; exit 0\" USR1; \
 trap \"kill $sleep; exit 1\" USR2; \
@@ -579,6 +580,48 @@ the appropriate editor environment variable."
 (advice-add 'start-file-process :around
             'start-file-process--with-editor-process-filter)
 
+(cl-defun make-process--with-editor-process-filter
+    (fn &rest keys &key name buffer command coding noquery stop
+        connection-type filter sentinel stderr file-handler
+        &allow-other-keys)
+  "When called inside a `with-editor' form and the Emacsclient
+cannot be used, then give the process the filter function
+`with-editor-process-filter'.  To avoid overriding the filter
+being added here you should use `with-editor-set-process-filter'
+instead of `set-process-filter' inside `with-editor' forms.
+
+When the `default-directory' is located on a remote machine and
+FILE-HANDLER is non-nil, then also manipulate COMMAND in order
+to set the appropriate editor environment variable."
+  (if (or (not file-handler) (not with-editor--envvar))
+      (apply fn keys)
+    (when (file-remote-p default-directory)
+      (unless (equal (car command) "env")
+        (push "env" command))
+      (push (concat with-editor--envvar "=" with-editor-sleeping-editor)
+            (cdr command)))
+    (let* ((filter (if filter
+                       (lambda (process output)
+                         (funcall filter process output)
+                         (with-editor-process-filter process output t))
+                     #'with-editor-process-filter))
+           (process (funcall fn
+                             :name name
+                             :buffer buffer
+                             :command command
+                             :coding coding
+                             :noquery noquery
+                             :stop stop
+                             :connection-type connection-type
+                             :filter filter
+                             :sentinel sentinel
+                             :stderr stderr
+                             :file-handler file-handler)))
+      (process-put process 'default-dir default-directory)
+      process)))
+
+(advice-add #'make-process :around #'make-process--with-editor-process-filter)
+
 (defun with-editor-set-process-filter (process filter)
   "Like `set-process-filter' but keep `with-editor-process-filter'.
 Give PROCESS the new FILTER but keep `with-editor-process-filter'
@@ -587,7 +630,7 @@ if that was added earlier by the advised `start-file-process'.
 Do so by wrapping the two filter functions using a lambda, which
 becomes the actual filter.  It calls `with-editor-process-filter'
 first, passing t as NO-STANDARD-FILTER.  Then it calls FILTER,
-which may or may not insert the text into the PROCESS' buffer."
+which may or may not insert the text into the PROCESS's buffer."
   (set-process-filter
    process
    (if (eq (process-filter process) 'with-editor-process-filter)
