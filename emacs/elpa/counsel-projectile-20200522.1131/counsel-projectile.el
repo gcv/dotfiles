@@ -4,7 +4,8 @@
 
 ;; Author: Eric Danan
 ;; URL: https://github.com/ericdanan/counsel-projectile
-;; Package-Version: 20200430.2133
+;; Package-Version: 20200522.1131
+;; Package-Commit: 77392cbbc42e98fc137b43f1db1b111ba6e2dd75
 ;; Keywords: project, convenience
 ;; Version: 0.3.1
 ;; Package-Requires: ((counsel "0.13.0") (projectile "2.0.0"))
@@ -400,9 +401,8 @@ non-nil, use completion based on context."
                 :action counsel-projectile-find-file-action
                 :caller 'counsel-projectile-find-file))))
 
-(ivy-set-display-transformer
- 'counsel-projectile-find-file
- 'counsel-projectile-find-file-transformer)
+(ivy-configure 'counsel-projectile-find-file
+ :display-transformer-fn #'counsel-projectile-find-file-transformer)
 
 ;;;###autoload
 (defun counsel-projectile-find-file-dwim (&optional arg)
@@ -492,9 +492,8 @@ With a prefix ARG, invalidate the cache first."
               :action counsel-projectile-find-dir-action
               :caller 'counsel-projectile-find-dir)))
 
-(ivy-set-display-transformer
- 'counsel-projectile-find-dir
- 'counsel-projectile-find-dir-transformer)
+(ivy-configure 'counsel-projectile-find-dir
+ :display-transformer-fn #'counsel-projectile-find-dir-transformer)
 
 ;;* counsel-projectile-switch-to-buffer
 
@@ -573,7 +572,7 @@ names as in `ivy--buffer-list', and remove current buffer if
   "Transform candidate STR when switching project buffers.
 
 This simply applies the same transformer as in `ivy-switch-buffer', which is `ivy-switch-buffer-transformer' by default but could have been modified e.g. by the ivy-rich package."
-  (funcall (plist-get ivy--display-transformers-list 'ivy-switch-buffer)
+  (funcall (ivy-alist-setting ivy--display-transformers-alist 'ivy-switch-buffer)
            str))
 
 ;;;###autoload
@@ -595,9 +594,8 @@ This simply applies the same transformer as in `ivy-switch-buffer', which is `iv
               :keymap counsel-projectile-switch-to-buffer-map
               :caller 'counsel-projectile-switch-to-buffer)))
 
-(ivy-set-display-transformer
- 'counsel-projectile-switch-to-buffer
- 'counsel-projectile-switch-to-buffer-transformer)
+(ivy-configure 'counsel-projectile-switch-to-buffer
+ :display-transformer-fn #'counsel-projectile-switch-to-buffer-transformer)
 
 ;;* counsel-projectile-grep
 
@@ -721,10 +719,11 @@ called with a prefix argument."
                             (swiper--cleanup))
                   :caller 'counsel-projectile-grep)))))
 
-(cl-pushnew 'counsel-projectile-grep ivy-highlight-grep-commands)
-(counsel-set-async-exit-code 'counsel-projectile-grep 1 "No matches found")
-(ivy-set-occur 'counsel-projectile-grep 'counsel-projectile-grep-occur)
-(ivy-set-display-transformer 'counsel-projectile-grep  'counsel-projectile-grep-transformer)
+(ivy-configure 'counsel-projectile-grep
+  :display-transformer-fn #'counsel-projectile-grep-transformer
+  :occur #'counsel-projectile-grep-occur
+  :grep-p t
+  :exit-codes '(1 "No matches found"))
 
 ;;;###autoload
 (defun counsel-projectile-git-grep (&optional cmd)
@@ -798,9 +797,10 @@ is called with a prefix argument."
                         (projectile-ignored-files-rel)
                         (projectile-ignored-directories-rel))
                        " "))
+           (counsel-ag-command counsel-ag-base-command)
            (counsel-ag-base-command
-            (format counsel-ag-base-command
-                    (concat ignored " %s"))))
+            (let ((counsel-ag-command counsel-ag-base-command))
+              (counsel--format-ag-command ignored "%s"))))
       (ivy-add-actions
        'counsel-ag
        counsel-projectile-ag-extra-actions)
@@ -808,7 +808,10 @@ is called with a prefix argument."
                   (projectile-project-root)
                   options
                   (projectile-prepend-project-name
-                   (concat (car (split-string counsel-ag-base-command)) ": "))))))
+                   (concat (car (if (listp counsel-ag-base-command)
+                                    counsel-ag-base-command
+                                  (split-string counsel-ag-base-command)))
+                           ": "))))))
 
 ;;* counsel-projectile-rg
 
@@ -863,10 +866,10 @@ is called with a prefix argument."
                         (projectile--globally-ignored-file-suffixes-glob)
                         (projectile-ignored-files-rel)
                         (projectile-ignored-directories-rel))
-                       " "))
+                       " "))        
            (counsel-rg-base-command
-            (format counsel-rg-base-command
-                    (concat ignored " %s"))))
+            (let ((counsel-ag-command counsel-rg-base-command))
+              (counsel--format-ag-command ignored "%s"))))
       (ivy-add-actions
        'counsel-rg
        counsel-projectile-rg-extra-actions)
@@ -874,7 +877,10 @@ is called with a prefix argument."
                   (projectile-project-root)
                   options
                   (projectile-prepend-project-name
-                   (concat (car (split-string counsel-rg-base-command)) ": "))))))
+                   (concat (car (if (listp counsel-rg-base-command)
+                                    counsel-rg-base-command
+                                  (split-string counsel-rg-base-command)))
+                           ": "))))))
 
 ;;* counsel-projectile-org-capture
 
@@ -1540,9 +1546,8 @@ If not inside a project, call `counsel-projectile-switch-project'."
               :keymap counsel-projectile-map
               :caller 'counsel-projectile)))
 
-(ivy-set-display-transformer
- 'counsel-projectile
- 'counsel-projectile-transformer)
+(ivy-configure 'counsel-projectile
+ :display-transformer-fn #'counsel-projectile-transformer)
 
 ;;* counsel-projectile-mode
 
