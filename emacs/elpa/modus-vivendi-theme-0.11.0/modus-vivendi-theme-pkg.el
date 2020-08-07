@@ -1,0 +1,2 @@
+;;; -*- no-byte-compile: t -*-
+(define-package "modus-vivendi-theme" "0.11.0" "Accessible dark theme (WCAG AAA)" '((emacs "26.1")) :commit "c376b08059028737390f41fb82f64d748c42970c" :keywords '("faces" "theme" "accessibility") :authors '(("Protesilaos Stavrou" . "info@protesilaos.com")) :maintainer '("Protesilaos Stavrou" . "info@protesilaos.com") :url "https://gitlab.com/protesilaos/modus-themes")
