@@ -979,8 +979,8 @@
 
 
 (use-package tide                       ; TypeScript IDE
-  :defer t
   :diminish " Tide"
+  :commands (tide-mode)
   :config (progn
             (setq tide-tsserver-start-method 'manual)
             ))
@@ -1041,7 +1041,6 @@
          ("\\.erb\\'" . web-mode)
          ("\\.ts?\\'" . web-mode)
          ("\\.tsx\\'" . web-mode))
-  :after (tide)
   :config (progn
 
             (setq web-mode-enable-current-element-highlight t
@@ -1053,9 +1052,13 @@
             (setq-default web-mode-comment-formats
               '(("css" . "/*")
                 ("java" . "//")
-                ("javascript" . "//")))
+                ("javascript" . "//")
+                ("jsx" . "//")
+                ("typescript" . "//")
+                ("tsx" . "//")))
 
             (defun /web-mode-hook ()
+              (subword-mode 1)
               (unless (-contains? (flycheck-checker-get 'typescript-tide 'modes) 'web-mode)
                 (flycheck-add-mode 'typescript-tide 'web-mode))
               (when (-contains? '("ts" "tsx") (file-name-extension buffer-file-name))
