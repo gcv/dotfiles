@@ -26,6 +26,10 @@ Replaces `completing-read-multiple'. For PROMPT, TABLE,
 PREDICATE, REQUIRE-MATCH, INITIAL-INPUT, HIST, DEF, and
 INHERIT-INPUT-METHOD, see `completing-read-multiple'.
 
+The option `selectrum-completing-read-multiple-show-help' can be
+used to control insertion of additional usage information into
+the prompt.
+
 \(fn PROMPT TABLE &optional PREDICATE REQUIRE-MATCH INITIAL-INPUT HIST DEF INHERIT-INPUT-METHOD)" nil nil)
 
 (autoload 'selectrum-completion-in-region "selectrum" "\
@@ -57,16 +61,6 @@ PREDICATE, see `read-file-name'.
 
 \(fn PROMPT &optional DIR DEFAULT-FILENAME MUSTMATCH INITIAL PREDICATE)" nil nil)
 
-(autoload 'selectrum-read-directory-name "selectrum" "\
-Read directory name using Selectrum.
-Same as `read-directory-name' except it handles default
-candidates a bit better (in particular you can immediately press
-\\[selectrum-select-current-candidate] to use the current
-directory). For PROMPT, DIR, DEFAULT-DIRNAME, MUSTMATCH, and
-INITIAL, see `read-directory-name'.
-
-\(fn PROMPT &optional DIR DEFAULT-DIRNAME MUSTMATCH INITIAL)" nil nil)
-
 (autoload 'selectrum--fix-dired-read-dir-and-switches "selectrum" "\
 Make \\[dired] do the \"right thing\" with its default candidate.
 By default \\[dired] uses `read-file-name' internally, which
@@ -74,8 +68,8 @@ causes Selectrum to provide you with the first file inside the
 working directory as the default candidate. However, it would
 arguably be more semantically appropriate to use
 `read-directory-name', and this is especially important for
-Selectrum since this causes it to provide you with the working
-directory itself as the default candidate.
+Selectrum since this causes it to select the working directory
+initially.
 
 To test that this advice is working correctly, type \\[dired] and
 accept the default candidate. You should have opened the working
@@ -133,7 +127,7 @@ ARGS are standard as in all `:around' advice.
 \(fn FUNC &rest ARGS)" nil nil)
 
 (define-minor-mode selectrum-mode "\
-Minor mode to use Selectrum for `completing-read'." :global t (if selectrum-mode (progn (selectrum-mode -1) (setq selectrum-mode t) (setq selectrum--old-completing-read-function (default-value (quote completing-read-function))) (setq-default completing-read-function (function selectrum-completing-read)) (setq selectrum--old-read-buffer-function (default-value (quote read-buffer-function))) (setq-default read-buffer-function (function selectrum-read-buffer)) (setq selectrum--old-read-file-name-function (default-value (quote read-file-name-function))) (setq-default read-file-name-function (function selectrum-read-file-name)) (setq selectrum--old-completion-in-region-function (default-value (quote completion-in-region-function))) (setq-default completion-in-region-function (function selectrum-completion-in-region)) (advice-add (function completing-read-multiple) :override (function selectrum-completing-read-multiple)) (advice-add (function read-directory-name) :override (function selectrum-read-directory-name)) (advice-add (quote dired-read-dir-and-switches) :around (function selectrum--fix-dired-read-dir-and-switches)) (advice-add (quote read-library-name) :override (function selectrum-read-library-name)) (advice-add (function minibuffer-message) :around (function selectrum--fix-minibuffer-message)) (advice-add (quote set-minibuffer-message) :after (function selectrum--fix-set-minibuffer-message)) (define-key minibuffer-local-map [remap previous-matching-history-element] (quote selectrum-select-from-history))) (when (equal (default-value (quote completing-read-function)) (function selectrum-completing-read)) (setq-default completing-read-function selectrum--old-completing-read-function)) (when (equal (default-value (quote read-buffer-function)) (function selectrum-read-buffer)) (setq-default read-buffer-function selectrum--old-read-buffer-function)) (when (equal (default-value (quote read-file-name-function)) (function selectrum-read-file-name)) (setq-default read-file-name-function selectrum--old-read-file-name-function)) (when (equal (default-value (quote completion-in-region-function)) (function selectrum-completion-in-region)) (setq-default completion-in-region-function selectrum--old-completion-in-region-function)) (advice-remove (function completing-read-multiple) (function selectrum-completing-read-multiple)) (advice-remove (function read-directory-name) (function selectrum-read-directory-name)) (advice-remove (quote dired-read-dir-and-switches) (function selectrum--fix-dired-read-dir-and-switches)) (advice-remove (quote read-library-name) (function selectrum-read-library-name)) (advice-remove (function minibuffer-message) (function selectrum--fix-minibuffer-message)) (advice-remove (quote set-minibuffer-message) (function selectrum--fix-set-minibuffer-message)) (when (eq (lookup-key minibuffer-local-map [remap previous-matching-history-element]) (function selectrum-select-from-history)) (define-key minibuffer-local-map [remap previous-matching-history-element] nil))))
+Minor mode to use Selectrum for `completing-read'." :global t (if selectrum-mode (progn (selectrum-mode -1) (setq selectrum-mode t) (setq selectrum--old-completing-read-function (default-value (quote completing-read-function))) (setq-default completing-read-function (function selectrum-completing-read)) (setq selectrum--old-read-buffer-function (default-value (quote read-buffer-function))) (setq-default read-buffer-function (function selectrum-read-buffer)) (setq selectrum--old-read-file-name-function (default-value (quote read-file-name-function))) (setq-default read-file-name-function (function selectrum-read-file-name)) (setq selectrum--old-completion-in-region-function (default-value (quote completion-in-region-function))) (setq-default completion-in-region-function (function selectrum-completion-in-region)) (advice-add (function completing-read-multiple) :override (function selectrum-completing-read-multiple)) (advice-add (quote dired-read-dir-and-switches) :around (function selectrum--fix-dired-read-dir-and-switches)) (advice-add (quote read-library-name) :override (function selectrum-read-library-name)) (advice-add (function minibuffer-message) :around (function selectrum--fix-minibuffer-message)) (advice-add (quote set-minibuffer-message) :after (function selectrum--fix-set-minibuffer-message)) (define-key minibuffer-local-map [remap previous-matching-history-element] (quote selectrum-select-from-history))) (when (equal (default-value (quote completing-read-function)) (function selectrum-completing-read)) (setq-default completing-read-function selectrum--old-completing-read-function)) (when (equal (default-value (quote read-buffer-function)) (function selectrum-read-buffer)) (setq-default read-buffer-function selectrum--old-read-buffer-function)) (when (equal (default-value (quote read-file-name-function)) (function selectrum-read-file-name)) (setq-default read-file-name-function selectrum--old-read-file-name-function)) (when (equal (default-value (quote completion-in-region-function)) (function selectrum-completion-in-region)) (setq-default completion-in-region-function selectrum--old-completion-in-region-function)) (advice-remove (function completing-read-multiple) (function selectrum-completing-read-multiple)) (advice-remove (quote dired-read-dir-and-switches) (function selectrum--fix-dired-read-dir-and-switches)) (advice-remove (quote read-library-name) (function selectrum-read-library-name)) (advice-remove (function minibuffer-message) (function selectrum--fix-minibuffer-message)) (advice-remove (quote set-minibuffer-message) (function selectrum--fix-set-minibuffer-message)) (when (eq (lookup-key minibuffer-local-map [remap previous-matching-history-element]) (function selectrum-select-from-history)) (define-key minibuffer-local-map [remap previous-matching-history-element] nil))))
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "selectrum" '("selectrum-")))
 

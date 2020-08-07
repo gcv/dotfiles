@@ -5,11 +5,12 @@
 ;; Author: Radon Rosborough <radon.neon@gmail.com>
 ;; Homepage: https://github.com/raxod502/prescient.el
 ;; Keywords: extensions
-;; Package-Version: 4.1
-;; Package-Commit: aa3110281a0622fa7b5da115cefb71a319b5b1a0
+;; Package-Version: 5.0
+;; Package-Commit: 3f53946e6aa97c1e1783be74e5b71dfbd4b54fcc
 ;; Created: 8 Dec 2019
-;; Package-Requires: ((emacs "25.1") (prescient "4.1") (selectrum "1.0"))
-;; Version: 4.1
+;; Package-Requires: ((emacs "25.1") (prescient "5.0") (selectrum "1.0"))
+;; SPDX-License-Identifier: MIT
+;; Version: 5.0
 
 ;;; Commentary:
 
