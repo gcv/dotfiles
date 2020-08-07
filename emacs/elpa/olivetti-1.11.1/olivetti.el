@@ -4,12 +4,13 @@
 ;; Copyright (c) 2019       Free Software Foundation, Inc.
 ;; Copyright (c) 2019-2020  Paul Wiliam Rankin
 
-;; Author: William Rankin <code@william.bydasein.com>
+;; Author: William Rankin <william@bydasein.com>
 ;; Keywords: wp, text
-;; Package-Version: 1.9.5
-;; Version: 1.10.0-beta
+;; Package-Version: 1.11.1
+;; Package-Commit: 57ca8e70bc9ee975f0e2a60bfc4121064dadd2e0
+;; Version: 1.11.1
 ;; Package-Requires: ((emacs "24.5"))
-;; URL: https://gthub.com/rnkn/olivetti
+;; URL: https://github.com/rnkn/olivetti
 
 ;; This file is not part of GNU Emacs.
 
@@ -55,23 +56,34 @@
 
 ;; ## Requirements ##
 
-;; - Emacs 25.3
+;; - Emacs 24.5
 
 ;; ## Installation ##
 
-;; The latest stable release of Olivetti is available via [MELPA-stable]
-;; and can be installed with:
+;; The latest stable release of Olivetti is available via
+;; [MELPA-stable]. First, add MELPA-stable to your package archives:
 
-;;     M-x package-install RET olivetti RET
+;;     M-x customize-option RET package-archives RET
 
-;; Alternately, download the [latest release], move this file into your
-;; load-path and add to your .emacs/init.el file:
+;; Insert an entry named melpa-stable with the URL https://stable.melpa.org/packages/.
+
+;; You can then find the latest stable version of olivetti in the
+;; list returned by:
+
+;;     M-x list-packages RET
+
+;; If you prefer the latest but perhaps unstable version, do the above
+;; using [MELPA].
+
+;; ## Advanced Installation ##
+
+;; Download the [latest release], move this file into your load-path and
+;; add to your init.el file:
 
 ;;     (require 'olivetti)
 
-;; If you prefer the latest but perhaps unstable version, install via
-;; [MELPA], or clone the repository into your load-path and require as
-;; above:
+;; If you wish to contribute to or alter Olivetti's code, clone the
+;; repository into your load-path and require as above:
 
 ;;     git clone https://github.com/rnkn/olivetti.git
 
@@ -111,15 +123,24 @@
 
 (defvar-local olivetti--visual-line-mode
   nil
-  "Non-nil if `visual-line-mode' is active when `olivetti-mode' is turned on.")
+  "Value of `visual-line-mode' when when `olivetti-mode' is enabled.")
+
+(defvar-local olivetti--min-margins
+  '(0 . 0)
+  "Cons cell of minimum width in columns for left and right margins.
+
+The `min-margins' window parameter is set to this value, which is
+only used when splitting windows and has no effect on interactive
+operation.")
 
 
 ;;; Options
 
-(defcustom olivetti-mode-hook
-  nil
+(defcustom olivetti-mode-on-hook
+  '(visual-line-mode)
   "Hook for `olivetti-mode', run after the mode is activated."
   :type 'hook
+  :options '(visual-line-mode)
   :safe 'hook)
 
 (defcustom olivetti-body-width
@@ -155,13 +176,30 @@ This option does not affect file contents."
   :type '(choice (const :tag "No lighter" "") string)
   :safe 'stringp)
 
+(make-obsolete-variable 'olivetti-enable-visual-line-mode
+                        'olivetti-mode-on-hook "1.11.0" 'set)
+
+(defcustom olivetti-enable-visual-line-mode
+  t
+  "When non-nil, `visual-line-mode' is enabled with `olivetti-mode'.
+
+This option is obsolete; use `olivetti-mode-on-hook' instead.
+Setting this option automatically adds or removes
+`visual-line-mode' to that hook."
+  :type 'boolean
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (if value
+             (add-hook 'olivetti-mode-on-hook 'visual-line-mode)
+           (remove-hook 'olivetti-mode-on-hook 'visual-line-mode))))
+
 (defcustom olivetti-recall-visual-line-mode-entry-state
   t
   "Recall the state of `visual-line-mode' upon exiting.
 
-When non-nil, if `visual-line-mode' is inactive upon activating
-`olivetti-mode', then `visual-line-mode' will be deactivated upon
-exiting. The reverse is not true."
+When non-nil, remember if `visual-line-mode' was enabled or not
+upon activating `olivetti-mode' and restore that state upon
+exiting."
   :type 'boolean
   :safe 'booleanp)
 
@@ -196,19 +234,17 @@ For compatibility with `text-scale-mode', if
 `face-remapping-alist' includes a :height property on the default
 face, scale N by that factor if it is a fraction, by (height/100)
 if it is an integer, and otherwise scale by 1 (i.e. return N)."
-  (let
-      ((height (plist-get (cadr (assq 'default face-remapping-alist)) :height)))
-    (cond
-     ((integerp height) (* n (/ height 100.0)))
-     ((floatp height) (* n height))
-     (t (* n 1)))))
+  (let ((height (plist-get (cadr (assq 'default face-remapping-alist)) :height)))
+    (cond ((integerp height) (* n (/ height 100.0)))
+          ((floatp height)   (* n height))
+          (t                 (* n 1)))))
 
 (defun olivetti-reset-window (window)
   "Remove Olivetti's parameters and margins from WINDOW."
   (when (eq (window-parameter window 'split-window) 'olivetti-split-window)
     (set-window-parameter window 'split-window nil))
-  (set-window-margins window nil)
-  (set-window-parameter window 'min-margins nil))
+  (set-window-parameter window 'min-margins nil)
+  (set-window-margins window nil))
 
 (defun olivetti-reset-all-windows ()
   "Call `olivetti-reset-windows' on all windows in current frame."
@@ -241,25 +277,27 @@ care that the maximum size is 0."
       (mapc #'olivetti-set-window (get-buffer-window-list nil nil window-or-frame))
     ;; WINDOW-OR-FRAME passed below *must* be a window
     (with-selected-window window-or-frame
+      (olivetti-reset-window window-or-frame)
       (when olivetti-mode
-        ;; (olivetti-reset-window window-or-frame)
-        (let ((width (olivetti-safe-width olivetti-body-width window-or-frame))
-              (frame (window-frame window-or-frame))
+        (let ((frame        (window-frame window-or-frame))
+              (body-width   (olivetti-safe-width olivetti-body-width window-or-frame))
               (window-width (window-total-width window-or-frame))
-              (fringes (window-fringes window-or-frame))
+              (fringes      (window-fringes window-or-frame))
               left-fringe right-fringe margin-total left-margin right-margin)
-          (cond ((integerp width)
-                 (setq width (olivetti-scale-width width)))
-                ((floatp width)
-                 (setq width (* window-width width))))
-          (setq left-fringe (/ (car fringes) (float (frame-char-width frame)))
+          (cond ((integerp body-width)
+                 (setq body-width (olivetti-scale-width body-width)))
+                ((floatp body-width)
+                 (setq body-width (* window-width body-width))))
+          (setq left-fringe  (/ (car fringes)  (float (frame-char-width frame)))
                 right-fringe (/ (cadr fringes) (float (frame-char-width frame))))
-          (setq margin-total (max (/ (- window-width width) 2) 0)
-                left-margin (max (round (- margin-total left-fringe)) 0)
+          (setq margin-total (max (/     (- window-width body-width) 2) 0)
+                left-margin  (max (round (- margin-total left-fringe))  0)
                 right-margin (max (round (- margin-total right-fringe)) 0))
           (set-window-margins window-or-frame left-margin right-margin))
         (set-window-parameter window-or-frame 'split-window 'olivetti-split-window)
-        (set-window-parameter window-or-frame 'min-margins (cons 0 0))))))
+        (set-window-parameter window-or-frame 'min-margins
+                              (cons (max (car olivetti--min-margins) 0)
+                                    (max (cdr olivetti--min-margins) 0)))))))
 
 (defun olivetti-set-buffer-windows ()
   "Balance window margins in all windows displaying current buffer.
@@ -315,12 +353,20 @@ If prefixed with ARG, incrementally increase."
 
 ;;; Keymap
 
-(defvar olivetti-mode-map (make-sparse-keymap)
+(defvar olivetti-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c }") #'olivetti-expand)
+    (define-key map (kbd "C-c {") #'olivetti-shrink)
+    (define-key map (kbd "C-c |") #'olivetti-set-width)
+    (define-key map (kbd "C-c \\") #'olivetti-set-width)
+    ;; This code is taken from https://github.com/joostkremers/visual-fill-column
+    (when (bound-and-true-p mouse-wheel-mode)
+      (define-key map (vector 'left-margin mouse-wheel-down-event) 'mwheel-scroll)
+      (define-key map (vector 'left-margin mouse-wheel-up-event) 'mwheel-scroll)
+      (define-key map (vector 'right-margin mouse-wheel-down-event) 'mwheel-scroll)
+      (define-key map (vector 'right-margin mouse-wheel-up-event) 'mwheel-scroll))
+    map)
   "Mode map for `olivetti-mode'.")
-
-(define-key olivetti-mode-map (kbd "C-c }") #'olivetti-expand)
-(define-key olivetti-mode-map (kbd "C-c {") #'olivetti-shrink)
-(define-key olivetti-mode-map (kbd "C-c \\") #'olivetti-set-width)
 
 
 ;;; Mode Definition
@@ -356,7 +402,6 @@ body width set with `olivetti-body-width'."
         (setq-local split-window-preferred-function
                     #'olivetti-split-window-sensibly)
         (setq olivetti--visual-line-mode visual-line-mode)
-        (unless olivetti--visual-line-mode (visual-line-mode 1))
         (olivetti-set-buffer-windows))
     (remove-hook 'window-configuration-change-hook
                  #'olivetti-set-buffer-windows t)
@@ -364,12 +409,12 @@ body width set with `olivetti-body-width'."
                  #'olivetti-set-window t)
     (remove-hook 'text-scale-mode-hook
                  #'olivetti-set-window t)
-    (olivetti-reset-all-windows)
-    (when (and olivetti-recall-visual-line-mode-entry-state
-               (not olivetti--visual-line-mode))
-      (visual-line-mode 0))
-    (kill-local-variable 'split-window-preferred-function)
-    (kill-local-variable 'olivetti--visual-line-mode)))
+    (olivetti-set-buffer-windows)
+    (when olivetti-recall-visual-line-mode-entry-state
+      (visual-line-mode (if olivetti--visual-line-mode 1 0)))
+    (mapc #'kill-local-variable '(split-window-preferred-function
+                                  olivetti--visual-line-mode
+                                  olivetti--min-margins))))
 
 
 
