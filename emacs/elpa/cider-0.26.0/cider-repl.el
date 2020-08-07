@@ -52,6 +52,8 @@
 (require 'cider-util)
 (require 'cider-resolve)
 
+(declare-function cider-inspect "cider-inspector")
+
 (eval-when-compile
   (defvar paredit-version)
   (defvar paredit-space-for-delimiter-predicates))
@@ -109,7 +111,7 @@ focused.  Otherwise the buffer is displayed and focused."
 
 (defcustom cider-repl-use-pretty-printing t
   "Control whether results in the REPL are pretty-printed or not.
-The REPL will use the printer specified in `cider-pprint-fn'.
+The REPL will use the printer specified in `cider-print-fn'.
 The `cider-toggle-pretty-printing' command can be used to interactively
 change the setting's value."
   :type 'boolean
@@ -117,7 +119,7 @@ change the setting's value."
 
 (make-obsolete-variable 'cider-repl-pretty-print-width 'cider-print-options "0.21")
 
-(defcustom cider-repl-use-content-types t
+(defcustom cider-repl-use-content-types nil
   "Control whether REPL results are presented using content-type information.
 The `cider-repl-toggle-content-types' command can be used to interactively
 change the setting's value."
@@ -170,7 +172,7 @@ you'd like to use the default Emacs behavior use
 
 (defvar cider-repl-require-repl-utils-code
   '((clj . "(clojure.core/apply clojure.core/require clojure.main/repl-requires)")
-    (cljs . "(use '[cljs.repl :only [apropos dir doc find-doc print-doc pst source]])")))
+    (cljs . "(require '[cljs.repl :refer [apropos dir doc find-doc print-doc pst source]])")))
 
 (defcustom cider-repl-init-code (list (cdr (assoc 'clj cider-repl-require-repl-utils-code)))
   "Clojure code to evaluate when starting a REPL.
@@ -362,6 +364,13 @@ present."
 
 (defun cider-repl--banner ()
   "Generate the welcome REPL buffer banner."
+  (cond
+   ((cider--clojure-version) (cider-repl--clojure-banner))
+   ((cider--babashka-version) (cider-repl--babashka-banner))
+   (t (cider-repl--basic-banner))))
+
+(defun cider-repl--clojure-banner ()
+  "Generate the welcome REPL buffer banner for Clojure(Script)."
   (format ";; Connected to nREPL server - nrepl://%s:%s
 ;; CIDER %s, nREPL %s
 ;; Clojure %s, Java %s
@@ -378,6 +387,33 @@ present."
           (cider--nrepl-version)
           (cider--clojure-version)
           (cider--java-version)))
+
+(defun cider-repl--babashka-banner ()
+  "Generate the welcome REPL buffer banner for Babashka."
+  (format ";; Connected to nREPL server - nrepl://%s:%s
+;; CIDER %s, babashka.nrepl %s
+;; Babashka %s
+;;     Docs: (doc function-name)
+;;           (find-doc part-of-name)
+;;   Source: (source function-name)
+;;  Javadoc: (javadoc java-object-or-class)
+;;     Exit: <C-c C-q>
+;;  Results: Stored in vars *1, *2, *3, an exception in *e;
+"
+          (plist-get nrepl-endpoint :host)
+          (plist-get nrepl-endpoint :port)
+          (cider--version)
+          (cider--babashka-nrepl-version)
+          (cider--babashka-version)))
+
+(defun cider-repl--basic-banner ()
+  "Generate a basic banner with minimal info."
+  (format ";; Connected to nREPL server - nrepl://%s:%s
+;; CIDER %s
+"
+          (plist-get nrepl-endpoint :host)
+          (plist-get nrepl-endpoint :port)
+          (cider--version)))
 
 (defun cider-repl--help-banner ()
   "Generate the help banner."
@@ -398,7 +434,6 @@ present."
 ;;   Java method)
 ;; * Press <\\[cider-doc]> to view the documentation for something (e.g.
 ;;   a var, a Java method)
-;; * Enable `eldoc-mode' to display function & method signatures in the minibuffer.
 ;; * Print CIDER's refcard and keep it close to your keyboard.
 ;;
 ;; CIDER is super customizable - try <M-x customize-group cider> to
@@ -553,7 +588,7 @@ This will not work on non-current prompts."
 Takes one argument, a namespace name.
 For convenience, three functions are already provided for this purpose:
 `cider-repl-prompt-lastname', `cider-repl-prompt-abbreviated', and
-`cider-repl-prompt-default'"
+`cider-repl-prompt-default'."
   :type '(choice (const :tag "Full namespace" cider-repl-prompt-default)
                  (const :tag "Abbreviated namespace" cider-repl-prompt-abbreviated)
                  (const :tag "Last name in namespace" cider-repl-prompt-lastname)
@@ -665,6 +700,43 @@ namespaces.  STRING is REPL's output."
   "Hook run on output string before it is inserted into the REPL buffer.
 Each functions takes a string and must return a modified string.  Also see
 `cider-run-chained-hook'.")
+
+(defcustom cider-repl-buffer-size-limit nil
+  "The max size of the REPL buffer.
+Setting this to nil removes the limit."
+  :group 'cider
+  :type 'integer
+  :package-version '(cider . "0.26.0"))
+
+(defun cider-start-of-next-prompt (point)
+  "Return the position of the first char of the next prompt from POINT."
+  (let ((next-prompt-or-input (next-single-char-property-change point 'field)))
+    (if (eq (get-char-property next-prompt-or-input 'field) 'cider-repl-prompt)
+        next-prompt-or-input
+      (next-single-char-property-change next-prompt-or-input 'field))))
+
+(defun cider-repl-trim-top-of-buffer (buffer)
+  "Trims REPL output from beginning of BUFFER.
+Trims by one fifth of `cider-repl-buffer-size-limit'.
+Also clears remaining partial input or results."
+  (with-current-buffer buffer
+    (let* ((to-trim (ceiling (* cider-repl-buffer-size-limit 0.2)))
+           (start-of-next-prompt (cider-start-of-next-prompt to-trim))
+           (inhibit-read-only t))
+      (cider-repl--clear-region (point-min) start-of-next-prompt))))
+
+(defun cider-repl-trim-buffer ()
+  "Trim the currently visited REPL buffer partially from the top.
+See also `cider-repl-clear-buffer'."
+  (interactive)
+  (if cider-repl-buffer-size-limit
+      (cider-repl-trim-top-of-buffer (current-buffer))
+    (user-error "The variable `cider-repl-buffer-size-limit' is not set")))
+
+(defun cider-repl-maybe-trim-buffer (buffer)
+  "Clears portion of printed output in BUFFER when `cider-repl-buffer-size-limit' is exceeded."
+  (when (> (buffer-size) cider-repl-buffer-size-limit)
+    (cider-repl-trim-top-of-buffer buffer)))
 
 (defun cider-repl--emit-output (buffer string face)
   "Using BUFFER, emit STRING as output font-locked using FACE.
@@ -877,7 +949,9 @@ nREPL ops, it may be convenient to prevent inserting a prompt.")
        (cider-repl-emit-stderr buffer err))
      (lambda (buffer)
        (when show-prompt
-         (cider-repl-emit-prompt buffer)))
+         (cider-repl-emit-prompt buffer))
+       (when cider-repl-buffer-size-limit
+         (cider-repl-maybe-trim-buffer buffer)))
      nrepl-err-handler
      (lambda (buffer value content-type)
        (if-let* ((content-attrs (cadr content-type))
@@ -1011,6 +1085,13 @@ text property `cider-old-input'."
   (setq cider-repl-use-content-types (not cider-repl-use-content-types))
   (message "Content-type support in REPL %s."
            (if cider-repl-use-content-types "enabled" "disabled")))
+
+(defun cider-repl-toggle-clojure-font-lock ()
+  "Toggle pretty-printing in the REPL."
+  (interactive)
+  (setq cider-repl-use-clojure-font-lock (not cider-repl-use-clojure-font-lock))
+  (message "Clojure font-locking in REPL %s."
+           (if cider-repl-use-clojure-font-lock "enabled" "disabled")))
 
 (defun cider-repl-switch-to-other ()
   "Switch between the Clojure and ClojureScript REPLs for the current project."
@@ -1481,16 +1562,21 @@ constructs."
 (declare-function cider-version "cider")
 (declare-function cider-test-run-loaded-tests "cider-test")
 (declare-function cider-test-run-project-tests "cider-test")
+(declare-function cider-sideloader-start "cider-eval")
 (cider-repl-add-shortcut "clear-output" #'cider-repl-clear-output)
 (cider-repl-add-shortcut "clear" #'cider-repl-clear-buffer)
 (cider-repl-add-shortcut "clear-banners" #'cider-repl-clear-banners)
 (cider-repl-add-shortcut "clear-help-banner" #'cider-repl-clear-help-banner)
+(cider-repl-add-shortcut "trim" #'cider-repl-trim-buffer)
 (cider-repl-add-shortcut "ns" #'cider-repl-set-ns)
-(cider-repl-add-shortcut "toggle-pretty" #'cider-repl-toggle-pretty-printing)
+(cider-repl-add-shortcut "toggle-pprint" #'cider-repl-toggle-pretty-printing)
+(cider-repl-add-shortcut "toggle-font-lock" #'cider-repl-toggle-clojure-font-lock)
+(cider-repl-add-shortcut "toggle-content-types" #'cider-repl-toggle-content-types)
 (cider-repl-add-shortcut "browse-ns" (lambda () (interactive) (cider-browse-ns (cider-current-ns))))
 (cider-repl-add-shortcut "classpath" #'cider-classpath)
 (cider-repl-add-shortcut "history" #'cider-repl-history)
 (cider-repl-add-shortcut "trace-ns" #'cider-toggle-trace-ns)
+(cider-repl-add-shortcut "sideloader-start" #'cider-sideloader-start)
 (cider-repl-add-shortcut "undef" #'cider-undef)
 (cider-repl-add-shortcut "refresh" #'cider-ns-refresh)
 (cider-repl-add-shortcut "reload" #'cider-ns-reload)
@@ -1656,6 +1742,8 @@ constructs."
         "--"
         ["Set REPL ns" cider-repl-set-ns]
         ["Toggle pretty printing" cider-repl-toggle-pretty-printing]
+        ["Toggle Clojure font-lock" cider-repl-toggle-clojure-font-lock]
+        ["Toggle rich content types" cider-repl-toggle-content-types]
         ["Require REPL utils" cider-repl-require-repl-utils]
         "--"
         ["Browse classpath" cider-classpath]
@@ -1669,6 +1757,7 @@ constructs."
         ["Previous prompt" cider-repl-previous-prompt]
         ["Clear output" cider-repl-clear-output]
         ["Clear buffer" cider-repl-clear-buffer]
+        ["Trim buffer" cider-repl-trim-buffer]
         ["Clear banners" cider-repl-clear-banners]
         ["Clear help banner" cider-repl-clear-help-banner]
         ["Kill input" cider-repl-kill-input]

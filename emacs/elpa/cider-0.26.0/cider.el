@@ -11,8 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: http://www.github.com/clojure-emacs/cider
-;; Version: 0.24.0
-;; Package-Requires: ((emacs "25") (clojure-mode "5.9") (parseedn "0.1") (pkg-info "0.4") (queue "0.2") (spinner "1.7") (seq "2.16") (sesman "0.3.2"))
+;; Version: 0.26.0
+;; Package-Requires: ((emacs "25") (clojure-mode "5.11") (parseedn "0.1") (pkg-info "0.4") (queue "0.2") (spinner "1.7") (seq "2.16") (sesman "0.3.2"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -87,12 +87,12 @@
 (require 'seq)
 (require 'sesman)
 
-(defconst cider-version "0.24.0"
+(defconst cider-version "0.26.0"
   "Fallback version used when it cannot be extracted automatically.
 Normally it won't be used, unless `pkg-info' fails to extract the
 version from the CIDER package or library.")
 
-(defconst cider-codename "India"
+(defconst cider-codename "Nesebar"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -382,13 +382,13 @@ Throws an error if PROJECT-TYPE is unknown."
 ;; We inject the newest known version of nREPL just in case
 ;; your version of Boot or Leiningen is bundling an older one.
 (cider-add-to-alist 'cider-jack-in-dependencies
-                    "nrepl" "0.6.0")
+                    "nrepl" "0.8.0")
 
 (defvar cider-jack-in-cljs-dependencies nil
   "List of dependencies where elements are lists of artifact name and version.
 Added to `cider-jack-in-dependencies' when doing `cider-jack-in-cljs'.")
 (put 'cider-jack-in-cljs-dependencies 'risky-local-variable t)
-(cider-add-to-alist 'cider-jack-in-cljs-dependencies "cider/piggieback" "0.4.2")
+(cider-add-to-alist 'cider-jack-in-cljs-dependencies "cider/piggieback" "0.5.0")
 
 (defvar cider-jack-in-dependencies-exclusions nil
   "List of exclusions for jack in dependencies.
@@ -404,7 +404,7 @@ Elements of the list are artifact name and list of exclusions to apply for the a
 (defconst cider-latest-clojure-version "1.10.1"
   "Latest supported version of Clojure.")
 
-(defconst cider-required-middleware-version "0.24.0"
+(defconst cider-required-middleware-version "0.25.3"
   "The CIDER nREPL version that's known to work properly with CIDER.")
 
 (defcustom cider-jack-in-auto-inject-clojure nil
@@ -659,10 +659,6 @@ Generally you should not disable this unless you run into some faulty check."
   (unless (cider-library-present-p "cider.piggieback")
     (user-error "Piggieback 0.4.x (aka cider/piggieback) is not available.  See https://docs.cider.mx/cider/basics/clojurescript for details")))
 
-(defun cider-check-nashorn-requirements ()
-  "Check whether we can start a Nashorn ClojureScript REPL."
-  (cider-verify-piggieback-is-present))
-
 (defun cider-check-node-requirements ()
   "Check whether we can start a Node ClojureScript REPL."
   (cider-verify-piggieback-is-present)
@@ -692,6 +688,12 @@ Generally you should not disable this unless you run into some faulty check."
   (cider-verify-piggieback-is-present)
   (unless (cider-library-present-p "adzerk.boot-cljs-repl")
     (user-error "The Boot ClojureScript REPL is not available.  Please check https://github.com/adzerk-oss/boot-cljs-repl/blob/master/README.md for details")))
+
+(defun cider-check-krell-requirements ()
+  "Check whether we can start a Krell ClojureScript REPL."
+  (cider-verify-piggieback-is-present)
+  (unless (cider-library-present-p "krell.repl")
+    (user-error "The Krell ClojureScript REPL is not available.  Please check https://github.com/vouch-opensource/krell for details")))
 
 (defun cider-check-shadow-cljs-requirements ()
   "Check whether we can start a shadow-cljs REPL."
@@ -814,13 +816,13 @@ The supplied string will be wrapped in a do form if needed."
        (format "(do %s)" form)))))
 
 (defvar cider-cljs-repl-types
-  '((nashorn "(do (require 'cljs.repl.nashorn) (cider.piggieback/cljs-repl (cljs.repl.nashorn/repl-env)))"
-             cider-check-nashorn-requirements)
-    (figwheel "(do (require 'figwheel-sidecar.repl-api) (figwheel-sidecar.repl-api/start-figwheel!) (figwheel-sidecar.repl-api/cljs-repl))"
+  '((figwheel "(do (require 'figwheel-sidecar.repl-api) (figwheel-sidecar.repl-api/start-figwheel!) (figwheel-sidecar.repl-api/cljs-repl))"
               cider-check-figwheel-requirements)
     (figwheel-main cider-figwheel-main-init-form cider-check-figwheel-main-requirements)
     (figwheel-connected "(figwheel-sidecar.repl-api/cljs-repl)"
                         cider-check-figwheel-requirements)
+    (browser "(do (require 'cljs.repl.browser) (cider.piggieback/cljs-repl (cljs.repl.browser/repl-env)))"
+             cider-check-node-requirements)
     (node "(do (require 'cljs.repl.node) (cider.piggieback/cljs-repl (cljs.repl.node/repl-env)))"
           cider-check-node-requirements)
     (weasel "(do (require 'weasel.repl.websocket) (cider.piggieback/cljs-repl (weasel.repl.websocket/repl-env :ip \"127.0.0.1\" :port 9001)))"
@@ -829,6 +831,15 @@ The supplied string will be wrapped in a do form if needed."
           cider-check-boot-requirements)
     (shadow cider-shadow-cljs-init-form cider-check-shadow-cljs-requirements)
     (shadow-select cider-shadow-select-cljs-init-form cider-check-shadow-cljs-requirements)
+    (krell "(require '[clojure.edn :as edn]
+         '[clojure.java.io :as io]
+         '[cider.piggieback]
+         '[krell.api :as krell]
+         '[krell.repl])
+(def config (edn/read-string (slurp (io/file \"build.edn\"))))
+(krell/build config)
+(apply cider.piggieback/cljs-repl (krell.repl/repl-env) (mapcat identity config))"
+           cider-check-krell-requirements)
     (custom cider-custom-cljs-repl-init-form nil))
   "A list of supported ClojureScript REPLs.
 
@@ -863,14 +874,15 @@ This affects commands like `cider-jack-in-cljs'.  Generally it's
 intended to be set via .dir-locals.el for individual projects, as its
 relatively unlikely you'd like to use the same type of REPL in each project
 you're working on."
-  :type '(choice (const :tag "Nashorn"  nashorn)
-                 (const :tag "Figwheel" figwheel)
+  :type '(choice (const :tag "Figwheel" figwheel)
                  (const :tag "Figwheel Main" figwheel-main)
+                 (const :tag "Browser"  browser)
                  (const :tag "Node"     node)
                  (const :tag "Weasel"   weasel)
                  (const :tag "Boot"     boot)
                  (const :tag "Shadow"   shadow)
                  (const :tag "Shadow w/o Server" shadow-select)
+                 (const :tag "Krell"    krell)
                  (const :tag "Custom"   custom))
   :group 'cider
   :safe #'symbolp
@@ -1221,6 +1233,12 @@ non-nil, don't start if ClojureScript requirements are not met."
   :safe #'booleanp
   :version '(cider . "0.22.0"))
 
+(defvar cider--jack-in-nrepl-params-history nil
+  "History list for user-specified jack-in nrepl command params.")
+
+(defvar cider--jack-in-cmd-history nil
+  "History list for user-specified jack-in commands.")
+
 (defun cider--powershell-encode-command (cmd-params)
   "Base64 encode the powershell command and jack-in CMD-PARAMS for clojure-cli."
   (let* ((quoted-params (replace-regexp-in-string "\"" "\"\"" cmd-params))
@@ -1241,8 +1259,9 @@ non-nil, don't start if ClojureScript requirements are not met."
         (with-current-buffer (or (plist-get params :--context-buffer)
                                  (current-buffer))
           (let* ((command-params (if (plist-get params :do-prompt)
-                                     (read-string (format "nREPL server command: %s " command-params)
-                                                  command-params)
+                                     (read-string "nREPL server command: "
+                                                  command-params
+                                                  'cider--jack-in-nrepl-params-history)
                                    command-params))
                  (cmd-params (if cider-inject-dependencies-at-jack-in
                                  (cider-inject-jack-in-dependencies command-global-opts command-params project-type)
@@ -1258,7 +1277,7 @@ non-nil, don't start if ClojureScript requirements are not met."
                                                                 cmd-params))))
                     (plist-put params :jack-in-cmd (if (or cider-edit-jack-in-command
                                                            (plist-get params :edit-jack-in-command))
-                                                       (read-string "jack-in command: " cmd t)
+                                                       (read-string "jack-in command: " cmd 'cider--jack-in-cmd-history)
                                                      cmd))))
               (user-error "`cider-jack-in' is not allowed without a Clojure project"))))
       (user-error "The %s executable isn't on your `exec-path'" command))))

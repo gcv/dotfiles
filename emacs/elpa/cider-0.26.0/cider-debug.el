@@ -44,7 +44,7 @@
 
 ;;; Customization
 (defgroup cider-debug nil
-  "Presentation and behaviour of the cider debugger."
+  "Presentation and behavior of the cider debugger."
   :prefix "cider-debug-"
   :group 'cider
   :package-version '(cider . "0.10.0"))
@@ -202,6 +202,7 @@ Can be toggled at any time with `\\[cider-debug-toggle-locals]'."
     (?n "next" "next")
     (?i "in" "in")
     (?o "out" "out")
+    (?O "force-out" nil)
     (?h "here" "here")
     (?e "eval" "eval")
     (?p "inspect" "inspect")
@@ -325,7 +326,15 @@ of `cider-interactive-eval' in debug sessions."
     (tool-bar-add-item "exit" #'cider-debug-mode-send-reply :quit :label "Quit")
     tool-bar-map))
 
-(defvar cider--debug-mode-map)
+(defvar cider--debug-mode-map
+  (let ((map (make-sparse-keymap)))
+    ;; Bind the `:here` command to both h and H, because it behaves differently
+    ;; if invoked with an uppercase letter.
+    (define-key map "h" #'cider-debug-move-here)
+    (define-key map "H" #'cider-debug-move-here)
+    (define-key map "L" #'cider-debug-toggle-locals)
+    map)
+  "The active keymap during a debugging session.")
 
 (define-minor-mode cider--debug-mode
   "Mode active during debug sessions.
@@ -381,11 +390,6 @@ In order to work properly, this mode must be activated by
     (when nrepl-ongoing-sync-request
       (ignore-errors (exit-recursive-edit)))))
 
-;;; Bind the `:here` command to both h and H, because it behaves differently if
-;;; invoked with an uppercase letter.
-(define-key cider--debug-mode-map "h" #'cider-debug-move-here)
-(define-key cider--debug-mode-map "H" #'cider-debug-move-here)
-
 (defun cider--debug-remove-overlays (&optional buffer)
   "Remove CIDER debug overlays from BUFFER if variable `cider--debug-mode' is nil."
   (when (or (not buffer) (buffer-live-p buffer))
@@ -409,6 +413,7 @@ In order to work properly, this mode must be activated by
     ["Continue" (cider-debug-mode-send-reply ":continue") :keys "c"]
     ["Continue non-stop" (cider-debug-mode-send-reply ":continue-all") :keys "C"]
     ["Move out of sexp" (cider-debug-mode-send-reply ":out") :keys "o"]
+    ["Forced move out of sexp" (cider-debug-mode-send-reply ":out" nil true) :keys "O"]
     ["Quit" (cider-debug-mode-send-reply ":quit") :keys "q"]
     "--"
     ["Evaluate in current scope" (cider-debug-mode-send-reply ":eval") :keys "e"]
@@ -619,7 +624,10 @@ is a coordinate measure in sexps."
               (save-excursion
                 ;; Get to the proper line & column in the file
                 (forward-line (- line (line-number-at-pos)))
-                (move-to-column column)
+                ;; Column numbers in the response start from 1.
+                ;; Convert to Emacs system which starts from 0
+                ;; Inverse of `cider-column-number-at-pos'.
+                (move-to-column (max 0 (1- column)))
                 ;; Check if it worked
                 (when (cider--debug-position-for-code code)
                   ;; Find the desired sexp.

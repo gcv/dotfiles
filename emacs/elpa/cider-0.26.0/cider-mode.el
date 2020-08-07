@@ -39,6 +39,7 @@
 (require 'cider-doc) ; required only for the menu
 (require 'cider-profile) ; required only for the menu
 (require 'cider-completion)
+(require 'cider-inspector)
 (require 'subr-x)
 (require 'cider-compat)
 
@@ -167,7 +168,7 @@ the related commands `cider-repl-clear-buffer' and
      (cider-nrepl-send-request
       `("op" "undef"
         "ns" ,(cider-current-ns)
-        "symbol" ,sym)
+        "sym" ,sym)
       (cider-interactive-eval-handler (current-buffer))))))
 
 ;;; cider-run
@@ -329,7 +330,8 @@ If invoked with a prefix ARG eval the expression after inserting it."
     ["Close ancillary buffers" cider-close-ancillary-buffers
      :active (seq-remove #'null cider-ancillary-buffers)]
     ("nREPL" :active (cider-connected-p)
-     ["Describe nrepl session" cider-describe-nrepl-session]
+     ["List nREPL middleware" cider-list-nrepl-middleware]
+     ["Describe nREPL session" cider-describe-nrepl-session]
      ["Toggle message logging" nrepl-toggle-message-logging]))
   "Menu for CIDER mode.")
 
@@ -340,6 +342,7 @@ If invoked with a prefix ARG eval the expression after inserting it."
     ["Eval top-level sexp to comment" cider-eval-defun-to-comment]
     ["Eval top-level sexp and pretty-print to comment" cider-pprint-eval-defun-to-comment]
     "--"
+    ["Eval current list" cider-eval-list-at-point]
     ["Eval current sexp" cider-eval-sexp-at-point]
     ["Eval current sexp to point" cider-eval-sexp-up-to-point]
     ["Eval current sexp in context" cider-eval-sexp-at-point-in-context]
@@ -360,6 +363,8 @@ If invoked with a prefix ARG eval the expression after inserting it."
     ["Interrupt evaluation" cider-interrupt]
     "--"
     ["Insert last sexp in REPL" cider-insert-last-sexp-in-repl]
+    ["Insert last sexp in REPL and eval" (cider-insert-last-sexp-in-repl t)
+     :keys "\\[universal-argument] \\[cider-insert-last-sexp-in-repl]"]
     ["Insert top-level sexp in REPL" cider-insert-defun-in-repl]
     ["Insert region in REPL" cider-insert-region-in-repl]
     ["Insert ns form in REPL" cider-insert-ns-form-in-repl]

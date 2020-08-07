@@ -264,6 +264,17 @@ Set to nil for no limit."
   :group 'cider
   :package-version '(cider . "0.21.0"))
 
+(defcustom cider-print-buffer-size (* 4 1024)
+  "The size in bytes of each value/output chunk when using print streaming.
+Smaller values mean smaller data chunks and faster feedback, but they also mean
+smaller results that can be font-locked as Clojure in the REPL buffers, as only
+a single chunk result can be font-locked.
+
+The default value in nREPL is 1024."
+  :type 'integer
+  :group 'cider
+  :package-version '(cider . "0.25.0"))
+
 (defun cider--print-fn ()
   "Return the value to send in the nrepl.middleware.print/print slot."
   (pcase cider-print-fn
@@ -313,6 +324,8 @@ is included in the request if non-nil."
                  `(("nrepl.middleware.print/print" ,(cider--print-fn))))
                (when cider-print-quota
                  `(("nrepl.middleware.print/quota" ,cider-print-quota)))
+               (when cider-print-buffer-size
+                 `(("nrepl.middleware.print/buffer-size" ,cider-print-buffer-size)))
                (unless (nrepl-dict-empty-p print-options)
                  `(("nrepl.middleware.print/options" ,print-options))))))
 
@@ -417,6 +430,8 @@ contain a `candidates' key, it is returned as is."
           (update :ns str)
           (update :name str)
           (update :file (comp str clojure.java.io/resource))
+          (cond-> (:macro m) (update :macro str))
+          (cond-> (:special-form m) (update :special-form str))
           (assoc :arglists-str (str (:arglists info)))
           (clojure.walk/stringify-keys)))))
 ")
@@ -433,9 +448,10 @@ Used only when the info nREPL middleware is not available."
 When multiple matching vars are returned you'll be prompted to select one,
 unless ALL is truthy."
   (when (and var (not (string= var "")))
-    (let ((var-info (if (cider-nrepl-op-supported-p "info")
-                        (cider-sync-request:info var)
-                      (cider-fallback-eval:info var))))
+    (let ((var-info (cond
+                     ((cider-nrepl-op-supported-p "info") (cider-sync-request:info var))
+                     ((cider-nrepl-op-supported-p "lookup") (cider-sync-request:lookup var))
+                     (t (cider-fallback-eval:info var)))))
       (if all var-info (cider--var-choice var-info)))))
 
 (defun cider-member-info (class member)
@@ -527,12 +543,21 @@ resolve those to absolute paths."
       (cider-sync-request:classpath)
     (cider-fallback-eval:classpath)))
 
-(defun cider-sync-request:complete (str context)
-  "Return a list of completions for STR using nREPL's \"complete\" op.
+(defun cider-sync-request:completion (prefix)
+  "Return a list of completions for PREFIX using nREPL's \"completion\" op."
+  (when-let* ((dict (thread-first `("op" "completions"
+                                    "ns" ,(cider-current-ns)
+                                    "prefix" ,prefix)
+                      (cider-nrepl-send-sync-request (cider-current-repl)
+                                                     'abort-on-input))))
+    (nrepl-dict-get dict "completions")))
+
+(defun cider-sync-request:complete (prefix context)
+  "Return a list of completions for PREFIX using nREPL's \"complete\" op.
 CONTEXT represents a completion context for compliment."
   (when-let* ((dict (thread-first `("op" "complete"
                                     "ns" ,(cider-current-ns)
-                                    "symbol" ,str
+                                    "prefix" ,prefix
                                     "context" ,context
                                     ,@(when cider-enhanced-cljs-completion-p '("enhanced-cljs-completion?" "t")))
                       (cider-nrepl-send-sync-request (cider-current-repl)
@@ -549,7 +574,7 @@ CONTEXT represents a completion context for compliment."
   "Send \"info\" op with parameters SYMBOL or CLASS and MEMBER."
   (let ((var-info (thread-first `("op" "info"
                                   "ns" ,(cider-current-ns)
-                                  ,@(when symbol `("symbol" ,symbol))
+                                  ,@(when symbol `("sym" ,symbol))
                                   ,@(when class `("class" ,class))
                                   ,@(when member `("member" ,member)))
                     (cider-nrepl-send-sync-request (cider-current-repl)))))
@@ -557,11 +582,22 @@ CONTEXT represents a completion context for compliment."
         nil
       var-info)))
 
+(defun cider-sync-request:lookup (symbol &optional lookup-fn)
+  "Send \"lookup\" op request with parameters SYMBOL and LOOKUP-FN."
+  (let ((var-info (thread-first `("op" "lookup"
+                                  "ns" ,(cider-current-ns)
+                                  ,@(when symbol `("sym" ,symbol))
+                                  ,@(when lookup-fn `("lookup-fn" ,lookup-fn)))
+                    (cider-nrepl-send-sync-request (cider-current-repl)))))
+    (if (member "lookup-error" (nrepl-dict-get var-info "status"))
+        nil
+      var-info)))
+
 (defun cider-sync-request:eldoc (symbol &optional class member)
   "Send \"eldoc\" op with parameters SYMBOL or CLASS and MEMBER."
   (when-let* ((eldoc (thread-first `("op" "eldoc"
                                      "ns" ,(cider-current-ns)
-                                     ,@(when symbol `("symbol" ,symbol))
+                                     ,@(when symbol `("sym" ,symbol))
                                      ,@(when class `("class" ,class))
                                      ,@(when member `("member" ,member)))
                        (cider-nrepl-send-sync-request (cider-current-repl)
@@ -574,7 +610,7 @@ CONTEXT represents a completion context for compliment."
   "Send \"eldoc-datomic-query\" op with parameter SYMBOL."
   (when-let* ((eldoc (thread-first `("op" "eldoc-datomic-query"
                                      "ns" ,(cider-current-ns)
-                                     ,@(when symbol `("symbol" ,symbol)))
+                                     ,@(when symbol `("sym" ,symbol)))
                        (cider-nrepl-send-sync-request nil 'abort-on-input))))
     (if (member "no-eldoc" (nrepl-dict-get eldoc "status"))
         nil

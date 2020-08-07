@@ -75,6 +75,7 @@
 (require 'cl-lib)
 (require 'nrepl-dict)
 (require 'queue)
+(require 'sesman)
 (require 'tramp)
 
 
@@ -181,6 +182,7 @@ To be used for tooling calls (i.e. completion, eldoc, etc)")
 (defconst nrepl-server-buffer-name-template "*nrepl-server %s*")
 (defconst nrepl-tunnel-buffer-name-template "*nrepl-tunnel %s*")
 
+(declare-function cider-format-connection-params "cider-connection")
 (defun nrepl-make-buffer-name (template params &optional dup-ok)
   "Generate a buffer name using TEMPLATE and PARAMS.
 TEMPLATE and PARAMS are as in `cider-format-connection-params'.  If
@@ -419,7 +421,7 @@ should take a single argument, a dict representing the message.  See
 `nrepl--dispatch-response' for an example.
 
 These functions are called before the message's own callbacks, so that they
-can affect the behaviour of the callbacks.  Errors signaled by these
+can affect the behavior of the callbacks.  Errors signaled by these
 functions are demoted to messages, so that they don't prevent the
 callbacks from running.")
 
@@ -729,6 +731,7 @@ to the REPL."
     (message msg)))
 
 (defvar cider-buffer-ns)
+(defvar cider-print-quota)
 (defvar cider-special-mode-truncate-lines)
 (declare-function cider-need-input "cider-client")
 (declare-function cider-set-buffer-ns "cider-mode")
@@ -963,6 +966,10 @@ Optional argument TOOLING Tooling is set to t if wanting the tooling session fro
   "Perform :ls-sessions request for CONNECTION."
   (nrepl-send-sync-request '("op" "ls-sessions") connection))
 
+(defun nrepl-sync-request:ls-middleware (connection)
+  "Perform :ls-middleware request for CONNECTION."
+  (nrepl-send-sync-request '("op" "ls-middleware") connection))
+
 (defun nrepl-sync-request:eval (input connection &optional ns tooling)
   "Send the INPUT to the nREPL server synchronously.
 The request is dispatched via CONNECTION.
@@ -978,6 +985,10 @@ session."
 (defun nrepl-sessions (connection)
   "Get a list of active sessions on the nREPL server using CONNECTION."
   (nrepl-dict-get (nrepl-sync-request:ls-sessions connection) "sessions"))
+
+(defun nrepl-middleware (connection)
+  "Get a list of middleware on the nREPL server using CONNECTION."
+  (nrepl-dict-get (nrepl-sync-request:ls-middleware connection) "middleware"))
 
 
 ;;; Server
@@ -1298,6 +1309,7 @@ it into the buffer."
         (pp object (current-buffer))
         (insert "\n")))))
 
+(declare-function cider--gather-connect-params "cider-connection")
 (defun nrepl-messages-buffer (conn)
   "Return or create the buffer for CONN.
 The default buffer name is *nrepl-messages connection*."

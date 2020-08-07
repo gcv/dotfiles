@@ -41,7 +41,8 @@
 ;; clojure-mode and CIDER
 (require 'cider-compat)
 (require 'clojure-mode)
-(require 'nrepl-dict)
+
+(declare-function cider-sync-request:macroexpand "cider-macroexpansion")
 
 (defalias 'cider-pop-back 'pop-tag-mark)
 
@@ -128,9 +129,22 @@ instead."
 Ignores the REPL prompt.  If LOOK-BACK is non-nil, move backwards trying to
 find a symbol if there isn't one at point."
   (or (when-let* ((str (thing-at-point 'symbol)))
+        ;; resolve ns-aliased keywords
+        (when (string-match-p "^::.+" str)
+          (setq str (or (ignore-errors (cider-sync-request:macroexpand "macroexpand-1" str)) "")))
         (unless (text-property-any 0 (length str) 'field 'cider-repl-prompt str)
-          ;; Remove font-locking and trailing . from constructors like Record.
-          (string-remove-suffix "." (substring-no-properties str))))
+          ;; remove font-locking
+          (setq str (substring-no-properties str))
+          (if (member str '("." ".."))
+              str
+            ;; Remove prefix quotes, and trailing . from constructors like Record.
+            (thread-last str
+              ;; constructors (Foo.)
+              (string-remove-suffix ".")
+              ;; quoted symbols ('sym)
+              (string-remove-prefix "'")
+              ;; var references (#'inc 2)
+              (string-remove-prefix "#'")))))
       (when look-back
         (save-excursion
           (ignore-errors
@@ -153,6 +167,20 @@ instead."
                             (narrow-to-region (point) (point-max))
                             (bounds-of-thing-at-point 'sexp)))
                      (bounds-of-thing-at-point 'sexp))))
+    (funcall (if bounds #'list #'buffer-substring-no-properties)
+             (car b) (cdr b))))
+
+(defun cider-list-at-point (&optional bounds)
+  "Return the list (compound form) at point as a string, otherwise nil.
+If BOUNDS is non-nil, return a list of its starting and ending position
+instead."
+  (when-let* ((b (or (and (equal (char-after) ?\()
+                          (member (char-before) '(?\' ?\, ?\@))
+                          ;; hide stuff before ( to avoid quirks with '( etc.
+                          (save-restriction
+                            (narrow-to-region (point) (point-max))
+                            (bounds-of-thing-at-point 'list)))
+                     (bounds-of-thing-at-point 'list))))
     (funcall (if bounds #'list #'buffer-substring-no-properties)
              (car b) (cdr b))))
 
@@ -303,6 +331,9 @@ This buffer is not designed to display anything to the user.  For that, use
         (with-current-buffer (cider--make-buffer-for-mode mode)
           (erase-buffer)
           (insert string)
+          ;; don't try to font-lock unbalanced Clojure code
+          (when (eq mode 'clojure-mode)
+            (check-parens))
           (font-lock-fontify-region (point-min) (point-max))
           (buffer-string))
       string)))
@@ -319,7 +350,11 @@ Unless you specify a BUFFER it will default to the current one."
 
 (defun cider-font-lock-as-clojure (string)
   "Font-lock STRING as Clojure code."
-  (cider-font-lock-as 'clojure-mode string))
+  ;; If something goes wrong (e.g. the code is not balanced)
+  ;; we simply return the string.
+  (condition-case nil
+      (cider-font-lock-as 'clojure-mode string)
+    (error string)))
 
 ;; Button allowing use of `font-lock-face', ignoring any inherited `face'
 (define-button-type 'cider-plain-button
@@ -439,7 +474,7 @@ to."
                                    section-id))))
     (buffer-string)))
 
-(defconst cider-refcard-url "https://github.com/clojure-emacs/cider/raw/%s/doc/cider-refcard.pdf"
+(defconst cider-refcard-url "https://github.com/clojure-emacs/cider/raw/%s/refcard/cider-refcard.pdf"
   "The URL to CIDER's refcard.")
 
 (defun cider--github-version ()
@@ -751,6 +786,9 @@ Return buffer column number at position POS."
 KIND can be the symbols `ns', `var', `emph', `fn', or a face name."
   (propertize text 'face (pcase kind
                            (`fn 'font-lock-function-name-face)
+                           (`method 'font-lock-function-name-face)
+                           (`special-form 'font-lock-keyword-face)
+                           (`macro 'font-lock-keyword-face)
                            (`var 'font-lock-variable-name-face)
                            (`ns 'font-lock-type-face)
                            (`emph 'font-lock-keyword-face)

@@ -1,6 +1,6 @@
 ;;; cider-browse-spec.el --- CIDER spec browser
 
-;; Copyright © 2017 Juan Monetta, Bozhidar Batsov and CIDER contributors
+;; Copyright © 2017-2020 Juan Monetta, Bozhidar Batsov and CIDER contributors
 
 ;; Author: Juan Monetta <jpmonettas@gmail.com>
 
@@ -36,6 +36,7 @@
 
 (require 'cider-client)
 (require 'cider-compat)
+(require 'cider-popup)
 (require 'cider-util)
 (require 'cl-lib)
 (require 'nrepl-dict)

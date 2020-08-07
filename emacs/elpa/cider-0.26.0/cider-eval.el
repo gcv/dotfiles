@@ -67,7 +67,7 @@ The following values are possible t or 'always, 'except-in-repl,
 'only-in-repl.  Any other value, including nil, will cause the stacktrace
 not to be automatically shown.
 
-Irespective of the value of this variable, the `cider-error-buffer' is
+Irrespective of the value of this variable, the `cider-error-buffer' is
 always generated in the background.  Use `cider-selector' to
 navigate to this buffer."
   :type '(choice (const :tag "always" t)
@@ -77,7 +77,7 @@ navigate to this buffer."
   :group 'cider)
 
 (defcustom cider-auto-jump-to-error t
-  "Control the cursor jump behaviour in compilation error buffer.
+  "Control the cursor jump behavior in compilation error buffer.
 When non-nil automatically jump to error location during interactive
 compilation.  When set to 'errors-only, don't jump to warnings.
 When set to nil, don't jump at all."
@@ -100,6 +100,13 @@ ns forms manually themselves."
   :type 'boolean
   :group 'cider
   :package-version '(cider . "0.15.0"))
+
+(defcustom cider-auto-inspect-after-eval t
+  "Controls whether to auto-update the inspector buffer after eval.
+Only applies when the *cider-inspect* buffer is currently visible."
+  :type 'boolean
+  :group 'cider
+  :package-version '(cider . "0.25.0"))
 
 (defcustom cider-save-file-on-load 'prompt
   "Controls whether to prompt to save the file when loading a buffer.
@@ -178,6 +185,54 @@ When invoked with a prefix ARG the command doesn't prompt for confirmation."
   (when-let* ((error-win (get-buffer-window cider-error-buffer)))
     (save-excursion
       (quit-window nil error-win))))
+
+
+;;; Sideloader
+
+(defvar cider-sideloader-dir (file-name-directory load-file-name))
+
+(defun cider-provide-file (file)
+  "Provide FILE in a format suitable for sideloading."
+  (let ((file (expand-file-name file cider-sideloader-dir)))
+    (if (file-exists-p file)
+        (with-current-buffer (find-file-noselect file)
+          (base64-encode-string (substring-no-properties (buffer-string))))
+      ;; if we can't find the file we should return an empty string
+      (base64-encode-string ""))))
+
+(defun cider-sideloader-lookup-handler ()
+  "Make a sideloader-lookup handler."
+  (lambda (response)
+    (nrepl-dbind-response response (id status type name)
+      (if status
+          (when (member "sideloader-lookup" status)
+            (cider-request:sideloader-provide id type name))))))
+
+(defun cider-request:sideloader-start (&optional connection)
+  "Perform the nREPL \"sideloader-start\" op.
+If CONNECTION is nil, use `cider-current-repl'."
+  (cider-ensure-op-supported "sideloader-start")
+  (cider-nrepl-send-request `("op" "sideloader-start")
+                            (cider-sideloader-lookup-handler)
+                            connection))
+
+(defun cider-request:sideloader-provide (id type file &optional connection)
+  "Perform the nREPL \"sideloader-provide\" op for ID, TYPE and FILE.
+If CONNECTION is nil, use `cider-current-repl'."
+  (cider-nrepl-send-request `("id" ,id
+                              "op" "sideloader-provide"
+                              "type" ,type
+                              "name" ,file
+                              "content" ,(cider-provide-file file))
+                            (cider-sideloader-lookup-handler)
+                            connection))
+
+(defun cider-sideloader-start (&optional connection)
+  "Start nREPL's sideloader.
+If CONNECTION is nil, use `cider-current-repl'."
+  (interactive)
+  (message "Starting nREPL's sideloader")
+  (cider-request:sideloader-start connection))
 
 
 ;;; Dealing with compilation (evaluation) errors and warnings
@@ -302,6 +357,11 @@ It delegates the actual error content to the eval or op handler."
       (cider-default-err-op-handler)
     (cider-default-err-eval-handler)))
 
+;; The format of the error messages emitted by Clojure's compiler changed in
+;; Clojure 1.10.  That's why we're trying to match error messages to both the
+;; old and the new format, by utilizing a combination of two different regular
+;; expressions.
+
 (defconst cider-clojure-1.10-error `(sequence
                                      "Syntax error "
                                      (minimal-match (zero-or-more anything))
@@ -333,9 +393,11 @@ It delegates the actual error content to the eval or op handler."
                                   (optional ":" (group-n 4 (one-or-more digit)))
                                   " - "))
 
-(defconst cider-clojure-compilation-regexp (rx bol (or (eval cider-clojure-1.9-error)
-                                                       (eval cider-clojure-warning)
-                                                       (eval cider-clojure-1.10-error))))
+
+(defconst cider-clojure-compilation-regexp (eval
+                                            `(rx bol (or ,cider-clojure-1.9-error
+                                                         ,cider-clojure-warning
+                                                         ,cider-clojure-1.10-error))))
 
 
 (defvar cider-compilation-regexp
@@ -501,11 +563,15 @@ REPL buffer.  This is controlled via
             (cider--make-fringe-overlay (point)))
         (scan-error nil)))))
 
+(declare-function cider-inspect-last-result "cider-inspector")
 (defun cider-interactive-eval-handler (&optional buffer place)
   "Make an interactive eval handler for BUFFER.
 PLACE is used to display the evaluation result.
 If non-nil, it can be the position where the evaluated sexp ends,
-or it can be a list with (START END) of the evaluated region."
+or it can be a list with (START END) of the evaluated region.
+Update the cider-inspector buffer with the evaluation result
+when `cider-auto-inspect-after-eval' is non-nil."
+
   (let* ((eval-buffer (current-buffer))
          (beg (car-safe place))
          (end (or (car-safe (cdr-safe place)) place))
@@ -525,7 +591,12 @@ or it can be a list with (START END) of the evaluated region."
                                  (lambda (_buffer err)
                                    (cider-emit-interactive-eval-err-output err)
                                    (cider-handle-compilation-errors err eval-buffer))
-                                 '())))
+                                 (when (and cider-auto-inspect-after-eval
+                                            (boundp 'cider-inspector-buffer)
+                                            (windowp (get-buffer-window cider-inspector-buffer 'visible)))
+                                   (lambda (buffer)
+                                     (cider-inspect-last-result)
+                                     (select-window (get-buffer-window buffer)))))))
 
 (defun cider-load-file-handler (&optional buffer done-handler)
   "Make a load file handler for BUFFER.
@@ -579,6 +650,20 @@ comment prefix to use."
                                  (cider-emit-interactive-eval-err-output err))
                                '()))
 
+(defun cider-maybe-insert-multiline-comment (result comment-prefix continued-prefix comment-postfix)
+  "Insert eval RESULT at current location if RESULT is not empty.
+RESULT will be preceded by COMMENT-PREFIX.
+CONTINUED-PREFIX is inserted for each additional line of output.
+COMMENT-POSTFIX is inserted after final text output."
+  (unless (string= result "")
+    (let ((lines (split-string result "[\n]+" t)))
+      ;; only the first line gets the normal comment-prefix
+      (insert (concat comment-prefix (pop lines)))
+      (dolist (elem lines)
+        (insert (concat "\n" continued-prefix elem)))
+      (unless (string= comment-postfix "")
+        (insert comment-postfix)))))
+
 (defun cider-eval-pprint-with-multiline-comment-handler (buffer location comment-prefix continued-prefix comment-postfix)
   "Make a handler for evaluating and inserting results in BUFFER.
 The inserted text is pretty-printed and region will be commented.
@@ -597,13 +682,7 @@ COMMENT-POSTFIX is the text to output after the last line."
        (with-current-buffer buffer
          (save-excursion
            (goto-char (marker-position location))
-           (let ((lines (split-string res "[\n]+" t)))
-             ;; only the first line gets the normal comment-prefix
-             (insert (concat comment-prefix (pop lines)))
-             (dolist (elem lines)
-               (insert (concat "\n" continued-prefix elem)))
-             (unless (string= comment-postfix "")
-               (insert comment-postfix))))))
+           (cider-maybe-insert-multiline-comment res comment-prefix continued-prefix comment-postfix))))
      nil
      nil
      (lambda (_buffer warning)
@@ -726,6 +805,14 @@ buffer."
                             (cider-eval-print-handler)
                             nil
                             (cider--nrepl-pr-request-map))))
+
+(defun cider-eval-list-at-point (&optional output-to-current-buffer)
+  "Evaluate the list (eg. a function call, surrounded by parens) around point.
+If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
+  (interactive "P")
+  (save-excursion
+    (goto-char (cadr (cider-list-at-point 'bounds)))
+    (cider-eval-last-sexp output-to-current-buffer)))
 
 (defun cider-eval-sexp-at-point (&optional output-to-current-buffer)
   "Evaluate the expression around point.
@@ -1086,6 +1173,7 @@ passing arguments."
     (define-key map (kbd "n") #'cider-eval-ns-form)
     (define-key map (kbd "d") #'cider-eval-defun-at-point)
     (define-key map (kbd "e") #'cider-eval-last-sexp)
+    (define-key map (kbd "l") #'cider-eval-list-at-point)
     (define-key map (kbd "v") #'cider-eval-sexp-at-point)
     (define-key map (kbd "o") #'cider-eval-sexp-up-to-point)
     (define-key map (kbd ".") #'cider-read-and-eval-defun-at-point)
@@ -1100,6 +1188,7 @@ passing arguments."
     (define-key map (kbd "C-n") #'cider-eval-ns-form)
     (define-key map (kbd "C-d") #'cider-eval-defun-at-point)
     (define-key map (kbd "C-f") #'cider-eval-last-sexp)
+    (define-key map (kbd "C-l") #'cider-eval-list-at-point)
     (define-key map (kbd "C-v") #'cider-eval-sexp-at-point)
     (define-key map (kbd "C-o") #'cider-eval-sexp-up-to-point)
     (define-key map (kbd "C-.") #'cider-read-and-eval-defun-at-point)
