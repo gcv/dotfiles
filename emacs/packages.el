@@ -588,9 +588,11 @@
             (defun /minibuffer-line-justify-right (text)
               "Return a string of `window-width' length with TEXT right-aligned."
               (with-selected-window (minibuffer-window)
-                (format (format "%%%ds" (- (window-width) 1))
-                        text)
-                ))
+                (let ((offset (if (or (not window-system)
+                                      (zerop (mod (frame-native-width) (frame-char-width))))
+                                  1
+                                2)))
+                  (format (format "%%%ds" (- (window-width) offset)) text))))
 
             (setq minibuffer-line-format
                   '("" (:eval (/minibuffer-line-justify-right
