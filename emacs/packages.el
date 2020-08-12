@@ -601,6 +601,9 @@
 
             (minibuffer-line-mode 1)
 
+            (set-face-attribute 'minibuffer-line nil :inherit 'unspecified)
+            (set-face-attribute 'minibuffer-line nil :foreground "dark gray")
+
             ))
 
 
