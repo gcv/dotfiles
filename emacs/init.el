@@ -94,9 +94,10 @@
 
 
 ;;; Emacs server
-(unless (file-exists-p (concat (getenv "TMPDIR") "emacs"
-                               (number-to-string
-                                (user-real-uid)) "/server"))
+(unless (or (bound-and-true-p server-process)
+            (file-exists-p (concat (getenv "TMPDIR") "emacs"
+                                   (number-to-string
+                                    (user-real-uid)) "/server")))
   (server-start))
 
 
