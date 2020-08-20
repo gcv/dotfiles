@@ -14,6 +14,8 @@ fi
 # - zsh
 # - git
 # - sqlite
+# The following are similar:
+# - croc and magic-wormhole
 nix-env -i \
     aspell \
     autoconf \
@@ -23,6 +25,7 @@ nix-env -i \
     bat \
     cmake \
     coreutils \
+    croc \
     ctags \
     direnv \
     exif \
