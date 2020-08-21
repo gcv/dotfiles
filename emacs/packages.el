@@ -1046,7 +1046,6 @@
          ("\\.erb\\'" . web-mode)
          ("\\.ts?\\'" . web-mode)
          ("\\.tsx\\'" . web-mode))
-  :after (flycheck)
   :config (progn
 
             (setq web-mode-enable-current-element-highlight t
@@ -1064,11 +1063,12 @@
                 ("tsx" . "//")))
 
             (defun /web-mode-hook ()
+              (require 'flycheck)
               (subword-mode 1)
-              (unless (-contains? (flycheck-checker-get 'typescript-tide 'modes) 'web-mode)
-                (flycheck-add-mode 'typescript-tide 'web-mode))
               (when (-contains? '("ts" "tsx") (file-name-extension buffer-file-name))
                 (tide-setup)
+                (unless (-contains? (flycheck-checker-get 'typescript-tide 'modes) 'web-mode)
+                  (flycheck-add-mode 'typescript-tide 'web-mode))
                 (flycheck-mode))
               (local-set-key (kbd "C-m") 'newline-and-indent))
 
