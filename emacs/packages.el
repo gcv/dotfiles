@@ -906,6 +906,7 @@
                   (concat common-lisp-hyperspec-root "/Data/Map_Sym.txt"))
 
             (add-to-list 'slime-contribs 'slime-fancy)
+            (add-to-list 'slime-contribs 'slime-asdf)
             (add-to-list 'slime-contribs 'slime-quicklisp)
 
             (require 'slime-company)
@@ -915,14 +916,16 @@
             ;;
             ;;(add-hook 'slime-mode-hook #'/slime-mode-hook)
 
-            ;;(defun /slime-repl-mode-hook ()
-            ;;  (paredit-mode 1)
-            ;;  (define-key slime-repl-mode-map "[" 'paredit-open-square)
-            ;;  (define-key slime-repl-mode-map "]" 'paredit-close-square)
-            ;;  (define-key slime-repl-mode-map "{" 'paredit-open-curly)
-            ;;  (define-key slime-repl-mode-map "}" 'paredit-close-curly))
-            ;;
-            ;;(add-hook 'slime-repl-mode-hook #'/slime-repl-mode-hook)
+            (defun /slime-repl-mode-hook ()
+              (paredit-mode 1)
+              (define-key slime-repl-mode-map (kbd "<backspace>") 'paredit-backward-delete)
+              (define-key slime-repl-mode-map (kbd "C-c C-z") 'flip-windows)
+              (define-key slime-repl-mode-map "[" 'paredit-open-square)
+              (define-key slime-repl-mode-map "]" 'paredit-close-square)
+              (define-key slime-repl-mode-map "{" 'paredit-open-curly)
+              (define-key slime-repl-mode-map "}" 'paredit-close-curly))
+
+            (add-hook 'slime-repl-mode-hook #'/slime-repl-mode-hook)
 
             ))
 
