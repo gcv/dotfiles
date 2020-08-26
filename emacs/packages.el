@@ -896,10 +896,19 @@
 
             (setq slime-net-coding-system 'utf-8-unix)
             (setq inferior-lisp-program "sbcl")
+            ;; Alternatively:
+            ;;(setq slime-lisp-implementations
+            ;;      '((cmucl ("cmucl" "-quiet"))
+            ;;        (sbcl ("/opt/sbcl/bin/sbcl") :coding-system utf-8-unix)))
 
             (setq common-lisp-hyperspec-root "~/Files/Common Lisp/CL HyperSpec 7.0/HyperSpec")
             (setq common-lisp-hyperspec-symbol-table
                   (concat common-lisp-hyperspec-root "/Data/Map_Sym.txt"))
+
+            (add-to-list 'slime-contribs 'slime-fancy)
+            (add-to-list 'slime-contribs 'slime-quicklisp)
+
+            (require 'slime-company)
 
             ;;(defun /slime-mode-hook ()
             ;;  (setq slime-truncate-lines nil))
@@ -921,9 +930,12 @@
 (use-package slime-company
   :defer t
   :config (progn
-            ;; XXX: This is here instead of the slime :config section to make
-            ;; sure it runs after the slime-company is available.
-            (slime-setup '(slime-fancy slime-company))
+
+            ;; XXX: For some reason, the documented activation method does not work:
+            ;;(add-to-list 'slime-contribs 'slime-company)
+            (dolist (h '(slime-mode-hook slime-repl-mode-hook sldb-mode-hook))
+              (add-hook h 'slime-company-maybe-enable))
+
             ))
 
 
