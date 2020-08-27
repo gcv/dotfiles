@@ -1,36 +1,35 @@
 (when (version< emacs-version "27.0")
   (load-file (expand-file-name "early-init.el" user-emacs-directory)))
 
-(setq load-prefer-newer t)                                      ; deal with outdated .elc files
-(setq debug-on-error nil)                                       ; turn this on only when needed
-(setq-default indent-tabs-mode nil)                             ; replace tabs with spaces
-(transient-mark-mode -1)                                        ; turn off transient-mark mode
-(setq-default fill-column 80)                                   ; 80-character screens, not 70
-(setq sentence-end-double-space nil)                            ; one space between sentences
-(show-paren-mode 1)                                             ; show matching parens
-(setq parens-require-spaces nil)                                ; m-( should not insert spaces
-(setq scroll-step 1)                                            ; stop scrolling by half-screens
-(column-number-mode 1)                                          ; show column numbers
-(setq require-final-newline t)                                  ; newline required at end of file
-(fset 'yes-or-no-p 'y-or-n-p)                                   ; substitute y-or-n for yes-or-no
-;;(setq make-backup-files nil)                                  ; supress backup "~" files
-(blink-cursor-mode -1)                                          ; traditional steady cursor
-;;(setq-default show-trailing-whitespace t)                     ; always show trailing whitespace
-(setq font-lock-verbose nil)                                    ; silence slow compile messages
-(setq inhibit-startup-screen t)                                 ; turn off the splash screen
-(setq initial-scratch-message nil)                              ; nothing in *scratch*
-(global-auto-revert-mode 1)                                     ; track externally changed files
-;;(setq auto-revert-verbose nil)                                ; but be quiet about it
-;;(setq global-auto-revert-non-file-buffers t)                  ; not ready for kqueue+directories
-;;(setq auto-revert-use-notify nil)                             ; not ready for kqueue+directories
-(setq use-dialog-box nil)                                       ; turn off lame GUI dialogs
-(setq truncate-partial-width-windows nil)                       ; no more truncated lines
-(setq save-abbrevs nil)                                         ; don't use abbrev-mode
-(setq save-interprogram-paste-before-kill t)                    ; don't lose clipboard on kill
-(setq tags-revert-without-query t)                              ; minimize TAGS use annoyance
-
 (setq custom-file (concat user-emacs-directory "custom.el"))    ; customize: don't touch init.el
 (load custom-file 'noerror)                                     ; customize: load customizations
+
+(setq debug-on-error nil)                                       ; turn this on only when needed
+(setq fill-column 80)                                           ; 80-character screens, not 70
+(setq font-lock-verbose nil)                                    ; silence slow compile messages
+(setq gnutls-verify-error t)                                    ; enable all TLS checks
+(setq indent-tabs-mode nil)                                     ; replace tabs with spaces
+(setq inhibit-startup-screen t)                                 ; turn off the splash screen
+(setq initial-scratch-message nil)                              ; nothing in *scratch*
+(setq load-prefer-newer t)                                      ; deal with outdated .elc files
+(setq network-security-level 'high)                             ; security!
+(setq parens-require-spaces nil)                                ; m-( should not insert spaces
+(setq require-final-newline t)                                  ; newline required at end of file
+(setq ring-bell-function #'ignore)                              ; control beeping
+(setq save-abbrevs nil)                                         ; don't use abbrev-mode
+(setq save-interprogram-paste-before-kill t)                    ; don't lose clipboard on kill
+(setq scroll-step 1)                                            ; stop scrolling by half-screens
+(setq sentence-end-double-space nil)                            ; one space between sentences
+(setq tags-revert-without-query t)                              ; minimize TAGS use annoyance
+(setq truncate-partial-width-windows nil)                       ; no more truncated lines
+(setq use-dialog-box nil)                                       ; turn off lame GUI dialogs
+
+(fset 'yes-or-no-p 'y-or-n-p)                                   ; substitute y-or-n for yes-or-no
+
+(blink-cursor-mode -1)                                          ; traditional steady cursor
+(column-number-mode 1)                                          ; show column numbers
+(global-auto-revert-mode 1)                                     ; track externally changed files
+(show-paren-mode 1)                                             ; show matching parens
 
 
 ;;; OS-specific configuration
@@ -53,25 +52,8 @@
   (_ "generic Unix" t))
 
 
-;;; security
-(setq network-security-level 'high)
-(setq tls-checktrust t)
-
-
 ;;; https://consoledonottrack.com
 (setenv "DO_NOT_TRACK" "1")
-
-
-;;; control beeping
-(setq ring-bell-function
-      ;; (lambda ()
-      ;;   (unless (memq this-command
-      ;;                 '(isearch-abort
-      ;;                   abort-recursive-edit
-      ;;                   exit-minibuffer
-      ;;                   keyboard-quit))
-      ;;     (message "*beep*")))
-      #'ignore)
 
 
 ;;; Unicode and UTF-8
