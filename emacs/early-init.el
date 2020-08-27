@@ -1,5 +1,5 @@
-(setq package-user-dir "~/.emacs.d/elpa/")
-(setq user-emacs-directory "~/.emacs.d/user/")
+(setq package-user-dir (file-truename "~/.emacs.d/elpa/"))
+(setq user-emacs-directory (file-truename "~/.emacs.d/user/"))
 
 (tool-bar-mode -1)                                              ; remove the toolbar
 (scroll-bar-mode -1)                                            ; no scrollbars (bugs on Mac OS)
