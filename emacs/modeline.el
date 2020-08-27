@@ -55,14 +55,15 @@
                                                       '((:slant italic))))))
                                        (propertize formatted-branch-name 'face f))
                                    ""))
-                       (ctr (if (eq 'eshell-mode major-mode)
-                                (eshell/shortpwd)
-                              (format-mode-line (list clean-modes vc-state)))))
+                       (full-modes (if (eq 'eshell-mode major-mode)
+                                       (eshell/shortpwd)
+				     (list clean-modes vc-state)))
+		       (ctr (format-mode-line full-modes)))
                   ;; only show the center mode (and version control) info if there's enough room
                   (if (and (> (window-total-width) (+ 30 (length ctr) (length (buffer-name)))))
                       (list (/mode-line-fill-center (/ (length ctr) 2))
                             " "
-                            ctr)
+                            full-modes)
                     "")))
         '(:eval (let* ((pos (format-mode-line (list (list -3 (propertize "%P" 'help-echo "Position in buffer"))
                                                     "/"
