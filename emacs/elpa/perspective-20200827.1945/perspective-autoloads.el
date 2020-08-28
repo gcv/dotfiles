@@ -24,6 +24,11 @@ Toggle perspective mode.
 When active, keeps track of multiple 'perspectives',
 named collections of buffers and window configurations.
 
+If called interactively, enable Persp mode if ARG is positive,
+and disable it if ARG is zero or negative.  If called from Lisp,
+also enable the mode if ARG is omitted or nil, and toggle it if
+ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
 (autoload 'persp-switch-to-buffer* "perspective" "\
@@ -99,7 +104,7 @@ restored.
 
 \(fn FILE)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "perspective" '("persp" "quick-perspective-keys" "with-" "make-persp" "check-persp")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "perspective" '("check-persp" "make-persp" "persp" "quick-perspective-keys" "with-")))
 
 ;;;***
 
