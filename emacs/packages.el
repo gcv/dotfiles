@@ -779,8 +779,23 @@
                   persp-sort 'access)
 
             (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
-            ;; useful, but I prefer a prompt on exit
-            ;;(add-hook 'kill-emacs-hook #'persp-state-save)
+
+	    ;; Remove posframes before saving (seems to reduce
+	    ;; likelihood of extra frame state, even though
+	    ;; Perspective tries to lock it out):
+	    (defun /persp-state-before-save-hook ()
+	      (posframe-delete-all))
+
+	    (add-hook 'persp-state-before-save-hook #'/persp-state-before-save-hook)
+
+	    ;; Prompt to save perspectives on exit.
+	    (defun /persp-kill-emacs-hook ()
+	      (interactive)
+	      (when (and (boundp 'persp-state-default-file)
+			 (y-or-n-p (format "Save perspectives to %s? " persp-state-default-file)))
+		(persp-state-save)))
+
+            (add-hook 'kill-emacs-hook #'/persp-kill-emacs-hook)
 
             ;; By default, ido-temp-list filters out ido-ignore-buffers from the
             ;; list displayed by ido-switch-buffer, but typing a name from the

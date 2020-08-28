@@ -4,6 +4,7 @@
 (setq custom-file (concat user-emacs-directory "custom.el"))    ; customize: don't touch init.el
 (load custom-file 'noerror)                                     ; customize: load customizations
 
+(setq confirm-kill-emacs 'yes-or-no-p)                          ; ask before exiting
 (setq debug-on-error nil)                                       ; turn this on only when needed
 (setq fill-column 80)                                           ; 80-character screens, not 70
 (setq font-lock-verbose nil)                                    ; silence slow compile messages
@@ -81,21 +82,6 @@
                                    (number-to-string
                                     (user-real-uid)) "/server")))
   (server-start))
-
-
-;;; exit safety
-(when window-system
-  (global-set-key (kbd "C-x C-c") (lambda ()
-                                    (interactive)
-                                    (if (not (y-or-n-p "Are you sure you want to exit Emacs? "))
-                                        (message "Canceled exit")
-                                      (when (and (fboundp 'persp-state-save)
-                                                 (boundp 'persp-state-default-file)
-                                                 persp-state-default-file
-                                                 (y-or-n-p (format "Save perspectives to %s? " persp-state-default-file)))
-                                        (message "Saving perspectives")
-                                        (persp-state-save))
-                                      (save-buffers-kill-emacs)))))
 
 
 ;;; ----------------------------------------------------------------------------
