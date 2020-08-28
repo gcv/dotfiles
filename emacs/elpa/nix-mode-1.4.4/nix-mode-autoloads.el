@@ -10,9 +10,7 @@
 ;;; Generated autoloads from nix.el
 
 (autoload 'pcomplete/nix "nix" "\
-Completion for the nix command.
-
-\(fn)" nil nil)
+Completion for the nix command." nil nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix" '("nix-")))
 
@@ -29,9 +27,7 @@ Completion for the nix command.
 ;;; Generated autoloads from nix-drv-mode.el
 
 (autoload 'nix-drv-mode "nix-drv-mode" "\
-Pretty print Nix’s .drv files.
-
-\(fn)" t nil)
+Pretty print Nix’s .drv files." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-drv-mode" '("nix-drv-mode")))
 
@@ -70,14 +66,10 @@ Pretty print Nix’s .drv files.
 ;;; Generated autoloads from nix-mode.el
 
 (autoload 'nix-mode-format "nix-mode" "\
-Format the entire `nix-mode' buffer.
-
-\(fn)" t nil)
+Format the entire `nix-mode' buffer." t nil)
 
 (autoload 'nix-indent-line "nix-mode" "\
-Indent current line in a Nix expression.
-
-\(fn)" t nil)
+Indent current line in a Nix expression." t nil)
 
 (autoload 'nix-indent-region "nix-mode" "\
 Indent on a whole region. Enabled by default.
@@ -151,6 +143,8 @@ Prettify mode for all modes that support font-locking.
 
 \(fn &optional ARG)" t nil)
 
+(put 'nix-prettify-global-mode 'globalized-minor-mode t)
+
 (defvar nix-prettify-global-mode nil "\
 Non-nil if Nix-Prettify-Global mode is enabled.
 See the `nix-prettify-global-mode' command
@@ -183,9 +177,7 @@ See `nix-prettify-mode' for more information on Nix-Prettify mode.
 ;;; Generated autoloads from nix-repl.el
 
 (autoload 'nix-repl "nix-repl" "\
-Load the Nix-REPL.
-
-\(fn)" t nil)
+Load the Nix-REPL." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-repl" '("nix-")))
 
@@ -235,6 +227,20 @@ FILE is the file to build from.
 ATTR is the attribute to build.
 
 \(fn FILE ATTR)" t nil)
+
+(autoload 'nix-eshell-with-packages "nix-shell" "\
+Create an Eshell buffer that has the shell environment in it.
+PACKAGES a list of packages to pull in.
+PKGS-FILE a file to use to get the packages.
+
+\(fn PACKAGES &optional PKGS-FILE)" nil nil)
+
+(autoload 'nix-eshell "nix-shell" "\
+Create an Eshell buffer that has the shell environment in it.
+FILE the .nix expression to create a shell for.
+ATTR attribute to instantiate in NIX-FILE.
+
+\(fn FILE &optional ATTR)" t nil)
 
 (autoload 'nix-shell-with-string "nix-shell" "\
 A nix-shell emulator in Emacs from a string.

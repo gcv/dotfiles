@@ -2,7 +2,7 @@
 
 ;; Maintainer: Matthew Bauer <mjbauer95@gmail.com>
 ;; Homepage: https://github.com/NixOS/nix-mode
-;; Version: 1.4.2
+;; Version: 1.4.4
 ;; Keywords: nix, languages, tools, unix
 ;; Package-Requires: ((emacs "25"))
 
@@ -100,7 +100,9 @@ very large Nix files (all-packages.nix)."
     "true" "false" "null"
     "isNull" "toString"
     "fetchTarball" "import"
-    "map" "removeAttrs"))
+    "map" "removeAttrs"
+    "toString" "derivationStrict" "placeholder" "scopedImport" "fromTOML"
+    "fetchTarball" "fetchGit" "fetchTree" "fetchMercurial"))
 
 (defconst nix-warning-keywords
   '("assert" "abort" "throw"))
