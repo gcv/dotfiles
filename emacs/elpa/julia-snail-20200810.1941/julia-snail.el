@@ -56,6 +56,16 @@
   :safe 'stringp
   :type 'string)
 
+(defcustom julia-snail-extra-args nil
+  "Extra arguments to pass to the Julia binary, e.g. '--sysimage /path/to/image'."
+  :tag "Extra arguments (string or list of strings)"
+  :group 'julia-snail
+  :safe (lambda (obj) (or (null obj) (stringp obj) (listp obj)))
+  :type '(choice (const :tag "None" nil)
+                 (string :tag "Single string")
+                 (repeat :tag "List of strings" string)))
+(make-variable-buffer-local 'julia-snail-extra-args)
+
 (defcustom julia-snail-port 10011
   "Default Snail server port."
   :tag "Snail server port"
@@ -255,11 +265,12 @@ MAXIMUM: max timeout, ms."
   (let ((sleep-total (gensym))
         (incr (gensym))
         (max (gensym)))
-    `(let ((,sleep-total 0)
-           (,incr ,increment)
-           (,max ,maximum))
+    `(let ((,sleep-total 0.0)
+           ;; convert arguments from milliseconds to seconds for sit-for
+           (,incr (/ ,increment 1000.0))
+           (,max (/ ,maximum 1000.0)))
        (while (and (< ,sleep-total ,max) ,condition)
-         (sleep-for 0 ,incr)
+         (sit-for ,incr)
          (setf ,sleep-total (+ ,sleep-total ,incr))))))
 
 (defun julia-snail--capture-basedir (buf)
@@ -327,9 +338,12 @@ MAXIMUM: max timeout, ms."
         ;; problem and supposedly fixes it, but it does not work for me with
         ;; Julia 1.0.4.
         ;; TODO: Follow-up on https://github.com/JuliaLang/julia/issues/33752
+        (message "Starting Julia process and loading Snail...")
         (julia-snail--send-to-repl
           (format "JuliaSnail.start(%d);" julia-snail-port)
           :repl-buf repl-buf
+          ;; wait a while in case dependencies need to be downloaded
+          :polling-timeout (* 5 60 1000)
           :async nil)
         ;; connect to the server
         (let ((netstream (let ((attempt 0)
@@ -340,7 +354,7 @@ MAXIMUM: max timeout, ms."
                              (message "Snail connecting to Julia process, attempt %d/5..." attempt)
                              (condition-case nil
                                  (setq stream (open-network-stream "julia-process" process-buf "localhost" julia-snail-port))
-                               (error (when (< attempt max-attempts) (sleep-for 0 500)))))
+                               (error (when (< attempt max-attempts) (sit-for 0.75)))))
                            stream)))
           (if netstream
               (with-current-buffer repl-buf
@@ -377,7 +391,9 @@ MAXIMUM: max timeout, ms."
     (str
      &key
      (repl-buf (get-buffer julia-snail-repl-buffer))
-     (async t))
+     (async t)
+     (polling-interval 20)
+     (polling-timeout julia-snail-async-timeout))
   "Insert str directly into the REPL buffer. When :async is nil,
 wait for the REPL prompt to return, otherwise return immediately."
   (declare (indent defun))
@@ -388,7 +404,7 @@ wait for the REPL prompt to return, otherwise return immediately."
     (vterm-send-return)
     (unless async
       ;; wait for the inclusion to succeed (i.e., the prompt prints)
-      (julia-snail--wait-while (not (string-equal "julia>" (current-word))) 20 julia-snail-async-timeout))))
+      (julia-snail--wait-while (not (string-equal "julia>" (current-word))) polling-interval polling-timeout))))
 
 (cl-defun julia-snail--send-to-server
     (module
@@ -768,8 +784,12 @@ To create multiple REPLs, give these variables distinct values (e.g.:
           (setf (buffer-local-value 'julia-snail--repl-go-back-target repl-buf) source-buf)
           (pop-to-buffer repl-buf))
       ;; run Julia in a vterm and load the Snail server file
-      (let* ((vterm-shell (format "%s -L %s" julia-snail-executable julia-snail--server-file))
+      (let* ((extra-args (if (listp julia-snail-extra-args)
+                             (mapconcat 'identity julia-snail-extra-args " ")
+                           julia-snail-extra-args))
+             (vterm-shell (format "%s %s -L %s" julia-snail-executable extra-args julia-snail--server-file))
              (vterm-buf (generate-new-buffer julia-snail-repl-buffer)))
+        (pop-to-buffer vterm-buf)
         (with-current-buffer vterm-buf
           ;; XXX: Set the error color to red to work around breakage relating to
           ;; some color themes and terminal combinations, see
@@ -782,8 +802,7 @@ To create multiple REPLs, give these variables distinct values (e.g.:
             ;; variables in that initialization.
             (setq julia-snail-port (buffer-local-value 'julia-snail-port source-buf))
             (setq julia-snail--repl-go-back-target source-buf))
-          (julia-snail-repl-mode))
-        (pop-to-buffer vterm-buf)))))
+          (julia-snail-repl-mode))))))
 
 (defun julia-snail-send-line ()
   "Copy the line at the current point into the REPL and run it.

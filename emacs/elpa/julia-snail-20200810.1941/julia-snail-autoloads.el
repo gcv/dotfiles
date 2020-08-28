@@ -15,18 +15,26 @@ The following buffer-local variables control it:
 - `julia-snail-repl-buffer' (default: *julia*)
 - `julia-snail-port' (default: 10011)
 To create multiple REPLs, give these variables distinct values (e.g.:
-*julia my-project-1* and 10012).
-
-\(fn)" t nil)
+*julia my-project-1* and 10012)." t nil)
 
 (autoload 'julia-snail-mode "julia-snail" "\
 A minor mode for interactive Julia development. Should only be turned on in source buffers.
+
+If called interactively, enable Julia-Snail mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
 
 \(fn &optional ARG)" t nil)
 
 (autoload 'julia-snail-repl-mode "julia-snail" "\
 A minor mode for interactive Julia development. Should only be
 turned on in REPL buffers.
+
+If called interactively, enable Julia-Snail-Repl mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
 
 \(fn &optional ARG)" t nil)
 
