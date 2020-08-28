@@ -344,6 +344,7 @@
             ))
 
 
+;;; Obsoleted by zoom.
 (use-package golden-ratio
   :pin melpa
   :defer t
@@ -1128,3 +1129,21 @@
 
 (use-package zenburn-theme
   :defer t)
+
+
+;;; This supersedes golden-ratio-mode.
+(use-package zoom
+  :pin melpa
+  :diminish " φ²"
+  :custom
+  ;;(zoom-size '(0.618 . 0.618))
+  (zoom-size #'/zoom-size)
+  (zoom-ignored-major-modes '(magit-key-mode which-key-mode))
+  (zoom-ignored-buffer-names '("*buffer-selection*"))
+  :config (progn
+
+            (defun /zoom-size ()
+              (cond ((> (frame-pixel-width) 1120) '(90 . 0.75))
+                    (t '(0.618 . 0.618))))
+
+            ))
