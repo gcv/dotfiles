@@ -11,7 +11,7 @@
 
 (defmacro selectrum--when-compile (cond &rest body) "\
 Like `when', but COND is evaluated at compile time.
-If it's nil, BODY is not even compiled." (declare (indent 1)) (when (eval cond) (\` (progn (\,@ body)))))
+If it's nil, BODY is not even compiled." (declare (indent 1)) (when (eval cond) `(progn ,@body)))
 
 (autoload 'selectrum-completing-read "selectrum" "\
 Read choice using Selectrum. Can be used as `completing-read-function'.
@@ -84,42 +84,19 @@ FUNC and ARGS are standard as in any `:around' advice.
 (autoload 'selectrum-read-library-name "selectrum" "\
 Read and return a library name.
 Similar to `read-library-name' except it handles `load-path'
-shadows correctly.
-
-\(fn)" nil nil)
-
-(autoload 'selectrum--fix-set-minibuffer-message "selectrum" "\
-Move the minibuffer message overlay to the right place.
-This advice fixes the overlay placed by `set-minibuffer-message',
-which is different from the one placed by `minibuffer-message'.
-
-By default the overlay is placed at the end, but in the case of
-Selectrum this means after all the candidates. We want to move it
-instead to just after the user input.
-
-To test that this advice is working correctly, type \\[find-file]
-and enter \"/sudo::\", then authenticate. The overlay indicating
-that authentication was successful should appear right after the
-user input area, not at the end of the candidate list.
-
-This is an `:after' advice for `set-minibuffer-message'.
-
-\(fn &rest _)" nil nil)
+shadows correctly." nil nil)
 
 (autoload 'selectrum--fix-minibuffer-message "selectrum" "\
-Move the minibuffer message overlay to the right place.
-This advice fixes the overlay placed by `minibuffer-message',
-which is different from the one placed by
-`set-minibuffer-message'.
-
-By default the overlay is placed at the end, but in the case of
-Selectrum this means after all the candidates. We want to move it
-instead to just after the user input.
+Ensure the cursor stays at the front of the minibuffer message.
+This advice adjusts where the cursor gets placed for the overlay
+of `minibuffer-message' and ensures the overlay gets displayed at
+the right place without blocking the display of candidates.
 
 To test that this advice is working correctly, type \\[find-file]
-twice in a row. The overlay indicating that recursive minibuffers
-are not allowed should appear right after the user input area,
-not at the end of the candidate list.
+twice in a row with `enable-recursive-minibuffers' set to nil.
+The overlay indicating that recursive minibuffers are not allowed
+should appear right after the user input area, not at the end of
+the candidate list and the cursor should stay at the front.
 
 This is an `:around' advice for `minibuffer-message'. FUNC and
 ARGS are standard as in all `:around' advice.
@@ -127,7 +104,7 @@ ARGS are standard as in all `:around' advice.
 \(fn FUNC &rest ARGS)" nil nil)
 
 (define-minor-mode selectrum-mode "\
-Minor mode to use Selectrum for `completing-read'." :global t (if selectrum-mode (progn (selectrum-mode -1) (setq selectrum-mode t) (setq selectrum--old-completing-read-function (default-value (quote completing-read-function))) (setq-default completing-read-function (function selectrum-completing-read)) (setq selectrum--old-read-buffer-function (default-value (quote read-buffer-function))) (setq-default read-buffer-function (function selectrum-read-buffer)) (setq selectrum--old-read-file-name-function (default-value (quote read-file-name-function))) (setq-default read-file-name-function (function selectrum-read-file-name)) (setq selectrum--old-completion-in-region-function (default-value (quote completion-in-region-function))) (setq-default completion-in-region-function (function selectrum-completion-in-region)) (advice-add (function completing-read-multiple) :override (function selectrum-completing-read-multiple)) (advice-add (quote dired-read-dir-and-switches) :around (function selectrum--fix-dired-read-dir-and-switches)) (advice-add (quote read-library-name) :override (function selectrum-read-library-name)) (advice-add (function minibuffer-message) :around (function selectrum--fix-minibuffer-message)) (advice-add (quote set-minibuffer-message) :after (function selectrum--fix-set-minibuffer-message)) (define-key minibuffer-local-map [remap previous-matching-history-element] (quote selectrum-select-from-history))) (when (equal (default-value (quote completing-read-function)) (function selectrum-completing-read)) (setq-default completing-read-function selectrum--old-completing-read-function)) (when (equal (default-value (quote read-buffer-function)) (function selectrum-read-buffer)) (setq-default read-buffer-function selectrum--old-read-buffer-function)) (when (equal (default-value (quote read-file-name-function)) (function selectrum-read-file-name)) (setq-default read-file-name-function selectrum--old-read-file-name-function)) (when (equal (default-value (quote completion-in-region-function)) (function selectrum-completion-in-region)) (setq-default completion-in-region-function selectrum--old-completion-in-region-function)) (advice-remove (function completing-read-multiple) (function selectrum-completing-read-multiple)) (advice-remove (quote dired-read-dir-and-switches) (function selectrum--fix-dired-read-dir-and-switches)) (advice-remove (quote read-library-name) (function selectrum-read-library-name)) (advice-remove (function minibuffer-message) (function selectrum--fix-minibuffer-message)) (advice-remove (quote set-minibuffer-message) (function selectrum--fix-set-minibuffer-message)) (when (eq (lookup-key minibuffer-local-map [remap previous-matching-history-element]) (function selectrum-select-from-history)) (define-key minibuffer-local-map [remap previous-matching-history-element] nil))))
+Minor mode to use Selectrum for `completing-read'." :global t (if selectrum-mode (progn (selectrum-mode -1) (setq selectrum-mode t) (setq selectrum--old-completing-read-function (default-value 'completing-read-function)) (setq-default completing-read-function #'selectrum-completing-read) (setq selectrum--old-read-buffer-function (default-value 'read-buffer-function)) (setq-default read-buffer-function #'selectrum-read-buffer) (setq selectrum--old-read-file-name-function (default-value 'read-file-name-function)) (setq-default read-file-name-function #'selectrum-read-file-name) (setq selectrum--old-completion-in-region-function (default-value 'completion-in-region-function)) (setq-default completion-in-region-function #'selectrum-completion-in-region) (advice-add #'completing-read-multiple :override #'selectrum-completing-read-multiple) (advice-add 'dired-read-dir-and-switches :around #'selectrum--fix-dired-read-dir-and-switches) (advice-add 'read-library-name :override #'selectrum-read-library-name) (advice-add #'minibuffer-message :around #'selectrum--fix-minibuffer-message) (define-key minibuffer-local-map [remap previous-matching-history-element] 'selectrum-select-from-history)) (when (equal (default-value 'completing-read-function) #'selectrum-completing-read) (setq-default completing-read-function selectrum--old-completing-read-function)) (when (equal (default-value 'read-buffer-function) #'selectrum-read-buffer) (setq-default read-buffer-function selectrum--old-read-buffer-function)) (when (equal (default-value 'read-file-name-function) #'selectrum-read-file-name) (setq-default read-file-name-function selectrum--old-read-file-name-function)) (when (equal (default-value 'completion-in-region-function) #'selectrum-completion-in-region) (setq-default completion-in-region-function selectrum--old-completion-in-region-function)) (advice-remove #'completing-read-multiple #'selectrum-completing-read-multiple) (advice-remove 'dired-read-dir-and-switches #'selectrum--fix-dired-read-dir-and-switches) (advice-remove 'read-library-name #'selectrum-read-library-name) (advice-remove #'minibuffer-message #'selectrum--fix-minibuffer-message) (when (eq (lookup-key minibuffer-local-map [remap previous-matching-history-element]) #'selectrum-select-from-history) (define-key minibuffer-local-map [remap previous-matching-history-element] nil))))
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "selectrum" '("selectrum-")))
 
@@ -149,6 +126,11 @@ or call the function `selectrum-helm-mode'.")
 
 (autoload 'selectrum-helm-mode "selectrum-helm" "\
 Minor mode to use Selectrum to implement Helm commands.
+
+If called interactively, enable Selectrum-Helm mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
 
 \(fn &optional ARG)" t nil)
 
