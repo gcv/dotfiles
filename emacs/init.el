@@ -471,7 +471,10 @@
 ;;; ----------------------------------------------------------------------------
 
 ;;; abbrev
-(diminish 'abbrev-mode)
+(defun /abbrev-mode-hook ()
+  (diminish 'abbrev-mode))
+
+(add-hook 'abbrev-mode-hook #'/abbrev-mode-hook)
 
 
 ;;; isearch
@@ -479,7 +482,7 @@
 
 
 ;;; grep
-(setq-default grep-command "grep -nHr -e ")
+(setq grep-command "grep -nHr -e ")
 
 (setq grep-find-command
       (concat
@@ -565,7 +568,10 @@
 
 
 ;;; visual-line-mode
-(diminish 'visual-line-mode " ν")
+(defun /visual-line-mode-hook ()
+  (diminish 'visual-line-mode " ν"))
+
+(add-hook 'visual-line-mode-hook #'/visual-line-mode-hook)
 
 
 ;;; subword-mode
@@ -620,7 +626,7 @@
 
 
 ;;; comint
-(setq-default comint-input-ignoredups t)
+(setq comint-input-ignoredups t)
 
 
 ;;; eshell
@@ -824,7 +830,7 @@ See `eshell-prompt-regexp'."
 (add-to-list 'auto-mode-alist '("\\.sass$" . css-mode))
 (add-to-list 'auto-mode-alist '("\\.scss$" . css-mode))
 
-(setq-default css-indent-offset 2)
+(setq css-indent-offset 2)
 
 
 ;;; ruby-mode

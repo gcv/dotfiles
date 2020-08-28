@@ -192,6 +192,20 @@
             ))
 
 
+;;; XXX: This package is supposed to support changing lighters for major modes
+;;; in a more sophisticated way than (setq mode-name "..."), and has hooks into
+;;; use-package, but does not seem to work. For example, (delight 'markdown-mode
+;;; " MD" :major) does not work, though the documentation says it should.
+;;; Varying the last argument does nothing. Leaving this comment here in case I
+;;; forget and go back looking for it again.
+;; (use-package delight
+;;   :defer t)
+
+
+(use-package diminish
+  :defer t)
+
+
 (use-package disk-usage
   :pin gnu
   :defer t
