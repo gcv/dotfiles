@@ -4,8 +4,8 @@
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: https://github.com/bbatsov/crux
-;; Package-Version: 20200803.1528
-;; Package-Commit: 519629b79e618cc52c763d3bc68cf0d10a14fd22
+;; Package-Version: 20200817.1534
+;; Package-Commit: 139eb6f1504b6885c86c658fd33c6d59bfac0a8c
 ;; Version: 0.4.0-snapshot
 ;; Keywords: convenience
 ;; Package-Requires: ((seq "1.11"))
@@ -248,7 +248,7 @@ Position the cursor at its beginning, according to the current mode."
   (if electric-indent-inhibit
       ;; We can't use `indent-according-to-mode' in languages like Python,
       ;; as there are multiple possible indentations with different meanings.
-      (let* ((indent-end (progn (move-to-mode-line-start) (point)))
+      (let* ((indent-end (progn (crux-move-to-mode-line-start) (point)))
              (indent-start (progn (move-beginning-of-line nil) (point)))
              (indent-chars (buffer-substring indent-start indent-end)))
         (forward-line -1)
@@ -661,6 +661,16 @@ Doesn't mess with special buffers."
     (seq-each
      #'kill-buffer
      (delete (current-buffer) (seq-filter #'buffer-file-name (buffer-list))))))
+
+;;;###autoload
+(defun crux-kill-buffer-truename ()
+  "Kill absolute path of file visited in current buffer."
+  (interactive)
+  (if buffer-file-name
+      (let ((truename (file-truename buffer-file-name)))
+        (kill-new truename)
+        (message "Added %s to kill ring." truename))
+    (message "Buffer is not visiting a file.")))
 
 ;;;###autoload
 (defun crux-create-scratch-buffer ()

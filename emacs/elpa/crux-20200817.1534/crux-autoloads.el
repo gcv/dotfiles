@@ -19,15 +19,11 @@ With a prefix ARG always prompt for command to use.
 
 (autoload 'crux-visit-term-buffer "crux" "\
 Create or visit a terminal buffer.
-If the process in that buffer died, ask to restart.
-
-\(fn)" t nil)
+If the process in that buffer died, ask to restart." t nil)
 
 (autoload 'crux-visit-shell-buffer "crux" "\
 Create or visit a shell buffer.
-If the process in that buffer died, ask to restart.
-
-\(fn)" t nil)
+If the process in that buffer died, ask to restart." t nil)
 
 (autoload 'crux-indent-rigidly-and-copy-to-clipboard "crux" "\
 Indent region between BEGIN and END by ARG columns and copy to clipboard.
@@ -36,9 +32,7 @@ Indent region between BEGIN and END by ARG columns and copy to clipboard.
 
 (autoload 'crux-smart-open-line-above "crux" "\
 Insert an empty line above the current line.
-Position the cursor at its beginning, according to the current mode.
-
-\(fn)" t nil)
+Position the cursor at its beginning, according to the current mode." t nil)
 
 (autoload 'crux-smart-open-line "crux" "\
 Insert an empty line after the current line.
@@ -49,14 +43,10 @@ With a prefix ARG open line above the current line.
 \(fn ARG)" t nil)
 
 (autoload 'crux-smart-kill-line "crux" "\
-Kill to the end of the line and kill whole line on the next call.
-
-\(fn)" t nil)
+Kill to the end of the line and kill whole line on the next call." t nil)
 
 (autoload 'crux-top-join-line "crux" "\
-Join the current line with the line beneath it.
-
-\(fn)" t nil)
+Join the current line with the line beneath it." t nil)
 
 (autoload 'crux-kill-whole-line "crux" "\
 A simple wrapper around command `kill-whole-line' that respects indentation.
@@ -65,9 +55,7 @@ Passes ARG to command `kill-whole-line' when provided.
 \(fn &optional ARG)" t nil)
 
 (autoload 'crux-kill-line-backwards "crux" "\
-Kill line backwards and adjust the indentation.
-
-\(fn)" t nil)
+Kill line backwards and adjust the indentation." t nil)
 
 (autoload 'crux-kill-and-join-forward "crux" "\
 If at end of line, join with following; otherwise kill line.
@@ -90,9 +78,7 @@ point reaches the beginning or end of the buffer, stop there.
 \(fn ARG)" t nil)
 
 (autoload 'crux-indent-defun "crux" "\
-Indent the current defun.
-
-\(fn)" t nil)
+Indent the current defun." t nil)
 
 (autoload 'crux-duplicate-current-line-or-region "crux" "\
 Duplicates the current line or region ARG times.
@@ -109,14 +95,10 @@ there's a region, all lines that region covers will be duplicated.
 \(fn ARG)" t nil)
 
 (autoload 'crux-rename-file-and-buffer "crux" "\
-Rename current buffer and if the buffer is visiting a file, rename it too.
-
-\(fn)" t nil)
+Rename current buffer and if the buffer is visiting a file, rename it too." t nil)
 
 (autoload 'crux-delete-file-and-buffer "crux" "\
-Kill the current buffer and deletes the file it is visiting.
-
-\(fn)" t nil)
+Kill the current buffer and deletes the file it is visiting." t nil)
 
 (autoload 'crux-copy-file-preserve-attributes "crux" "\
 Copy the current file-visiting buffer's file to a destination.
@@ -138,24 +120,16 @@ When invoke with C-u, the newly created file will be visited.
 \(fn VISIT)" t nil)
 
 (autoload 'crux-view-url "crux" "\
-Open a new buffer containing the contents of URL.
-
-\(fn)" t nil)
+Open a new buffer containing the contents of URL." t nil)
 
 (autoload 'crux-cleanup-buffer-or-region "crux" "\
-Cleanup a region if selected, otherwise the whole buffer.
-
-\(fn)" t nil)
+Cleanup a region if selected, otherwise the whole buffer." t nil)
 
 (autoload 'crux-eval-and-replace "crux" "\
-Replace the preceding sexp with its value.
-
-\(fn)" t nil)
+Replace the preceding sexp with its value." t nil)
 
 (autoload 'crux-recompile-init "crux" "\
-Byte-compile all your dotfiles again.
-
-\(fn)" t nil)
+Byte-compile all your dotfiles again." t nil)
 
 (autoload 'crux-sudo-edit "crux" "\
 Edit currently visited file as root.
@@ -170,9 +144,7 @@ buffer is not visiting a file.
 Find file as root if necessary.
 
 Meant to be used as `find-file-hook'.
-See also `crux-reopen-as-root-mode'.
-
-\(fn)" nil nil)
+See also `crux-reopen-as-root-mode'." nil nil)
 
 (defvar crux-reopen-as-root-mode nil "\
 Non-nil if Crux-Reopen-As-Root mode is enabled.
@@ -188,17 +160,18 @@ or call the function `crux-reopen-as-root-mode'.")
 Automatically reopen files as root if we can't write to them
 as the current user.
 
+If called interactively, enable Crux-Reopen-As-Root mode if ARG
+is positive, and disable it if ARG is zero or negative.  If
+called from Lisp, also enable the mode if ARG is omitted or nil,
+and toggle it if ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
 (autoload 'crux-insert-date "crux" "\
-Insert a timestamp according to locale's date and time format.
-
-\(fn)" t nil)
+Insert a timestamp according to locale's date and time format." t nil)
 
 (autoload 'crux-recentf-find-file "crux" "\
-Find a recent file using `completing-read'.
-
-\(fn)" t nil)
+Find a recent file using `completing-read'." t nil)
 
 (autoload 'crux-transpose-windows "crux" "\
 Transpose the buffers shown in two windows.
@@ -210,41 +183,30 @@ transpositions to execute in sequence.
 
 (autoload 'crux-switch-to-previous-buffer "crux" "\
 Switch to previously open buffer.
-Repeated invocations toggle between the two most recently open buffers.
-
-\(fn)" t nil)
+Repeated invocations toggle between the two most recently open buffers." t nil)
 
 (autoload 'crux-other-window-or-switch-buffer "crux" "\
 Call `other-window' if more than one window is visible.
-Switch to most recent buffer otherwise.
-
-\(fn)" t nil)
+Switch to most recent buffer otherwise." t nil)
 
 (autoload 'crux-kill-other-buffers "crux" "\
 Kill all buffers but the current one.
-Doesn't mess with special buffers.
+Doesn't mess with special buffers." t nil)
 
-\(fn)" t nil)
+(autoload 'crux-kill-buffer-truename "crux" "\
+Kill absolute path of file visited in current buffer." t nil)
 
 (autoload 'crux-create-scratch-buffer "crux" "\
-Create a new scratch buffer.
-
-\(fn)" t nil)
+Create a new scratch buffer." t nil)
 
 (autoload 'crux-find-user-init-file "crux" "\
-Edit the `user-init-file', in another window.
-
-\(fn)" t nil)
+Edit the `user-init-file', in another window." t nil)
 
 (autoload 'crux-find-user-custom-file "crux" "\
-Edit the `custom-file', in another window.
-
-\(fn)" t nil)
+Edit the `custom-file', in another window." t nil)
 
 (autoload 'crux-find-shell-init-file "crux" "\
-Edit the shell init file in another window.
-
-\(fn)" t nil)
+Edit the shell init file in another window." t nil)
 
 (autoload 'crux-upcase-region "crux" "\
 `upcase-region' when `transient-mark-mode' is on and region is active.
