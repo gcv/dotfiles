@@ -22,6 +22,11 @@ or call the function `mini-frame-mode'.")
 (autoload 'mini-frame-mode "mini-frame" "\
 Show minibuffer in child frame on read-from-minibuffer.
 
+If called interactively, enable Mini-Frame mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "mini-frame" '("mini-frame-")))
