@@ -182,7 +182,7 @@
   "Like use-package but for built-in Emacs features."
   (declare (indent defun))
   `(use-package ,name
-     :straight nil
+     ;;:straight nil
      :ensure nil
      ,@args))
 
@@ -860,6 +860,14 @@ See `eshell-prompt-regexp'."
       ("finally" "try" "except"))))
 
 (add-hook 'python-mode-hook #'/python-mode-hook)
+
+
+;;; js-mode (JavaScript, separate configuration from js2-mode)
+(use-feature js
+  :custom
+  (js-indent-level 2)
+  (js-chain-indent t)
+  (js-jsx-syntax t))
 
 
 ;;; cc-mode (C, C++, Objective-C)
