@@ -7,8 +7,9 @@
 (require 'dash)
 
 
-;;; XXX: Emacs 27 breaks custom-theme-set-faces.
-;;; https://emacs.stackexchange.com/a/52804
+;;; XXX: Emacs 27 breaks custom-theme-set-faces. Apparently the
+;;; default value of custom--inhibit-theme-enable changed since 26.3.
+;;; See also https://emacs.stackexchange.com/a/52804
 (unless (version< emacs-version "27.0")
   (setq custom--inhibit-theme-enable nil))
 
@@ -60,29 +61,37 @@
   (interactive)
   (disable-all-themes)
   (load-theme 'zenburn t)
-  (custom-theme-set-faces
-   'zenburn
-   (/theme-face-spec 'default :background "grey18" :foreground "#cbcbbb")
-   (/theme-face-spec 'cursor :background "grey60")
-   (/theme-face-spec 'bold :foreground "papayawhip")
-   (let ((bg "grey30"))
-     (/theme-face-spec 'mode-line :background bg :foreground "grey68" :box `(:line-width 1 :color ,bg)))
-   (let (;;(bg "grey20")
-         (bg "grey22"))
-     (/theme-face-spec 'mode-line-inactive :background bg :foreground "grey42" :box `(:line-width 1 :color ,bg)))
-   (/theme-face-spec 'highlight :background "grey35" :underline nil)
-   (/theme-face-spec 'hl-line :background "#525252")
-   (/theme-face-spec 'region :background "grey35")
-   (/theme-face-spec 'isearch :background "steelblue4")
-   (/theme-face-spec 'lazy-highlight :background "grey25")
-   (/theme-face-spec 'show-paren-match :background "#5f7f5f")
-   (/theme-face-spec 'trailing-whitespace :background "#ff0000")
-   (/theme-face-spec 'org-checkbox :background nil :foreground "blanchedalmond")
-   (/theme-face-spec 'org-level-2 :foreground "#ccbbdd")
-   (/theme-face-spec 'org-level-3 :foreground "#edcbab")
-   (/theme-face-spec 'org-archived :foreground "grey50")
-   (/theme-face-spec 'company-tooltip-selection :background "#224983")
-   (/theme-face-spec 'company-tooltip-common-selection :background "#224983"))
+  (let ((bg-ml "grey30")
+	(fg-ml "grey68"))
+   (custom-theme-set-faces
+    'zenburn
+    (/theme-face-spec 'default :background "grey18" :foreground "#cbcbbb")
+    (/theme-face-spec 'cursor :background "grey60")
+    (/theme-face-spec 'bold :foreground "papayawhip")
+    (/theme-face-spec 'mode-line :background bg-ml :foreground fg-ml :box `(:line-width 1 :color ,bg-ml))
+    (/theme-face-spec 'tab-bar :background bg-ml :foreground fg-ml :box `(:line-width 3 :color ,bg-ml))
+    (/theme-face-spec 'tab-bar-tab :background "grey40" :foreground fg-ml :weight 'bold :box nil :overline t)
+    (/theme-face-spec 'tab-bar-tab-inactive :background bg-ml :foreground fg-ml :overline nil :underline nil)
+    (/theme-face-spec 'tab-line :background "grey40" :box `(:line-width 1 :color "grey40"))
+    (/theme-face-spec 'tab-line-tab :background "grey50" :box nil)
+    (/theme-face-spec 'tab-line-tab-current :background "grey60")
+    (/theme-face-spec 'tab-line-tab-inactive :background "grey40")
+    (let (;;(bg "grey20")
+          (bg "grey22"))
+      (/theme-face-spec 'mode-line-inactive :background bg :foreground "grey42" :box `(:line-width 1 :color ,bg)))
+    (/theme-face-spec 'highlight :background "grey35" :underline nil)
+    (/theme-face-spec 'hl-line :background "#525252")
+    (/theme-face-spec 'region :background "grey35")
+    (/theme-face-spec 'isearch :background "steelblue4")
+    (/theme-face-spec 'lazy-highlight :background "grey25")
+    (/theme-face-spec 'show-paren-match :background "#5f7f5f")
+    (/theme-face-spec 'trailing-whitespace :background "#ff0000")
+    (/theme-face-spec 'org-checkbox :background nil :foreground "blanchedalmond")
+    (/theme-face-spec 'org-level-2 :foreground "#ccbbdd")
+    (/theme-face-spec 'org-level-3 :foreground "#edcbab")
+    (/theme-face-spec 'org-archived :foreground "grey50")
+    (/theme-face-spec 'company-tooltip-selection :background "#224983")
+    (/theme-face-spec 'company-tooltip-common-selection :background "#224983")))
   (apply #'custom-theme-set-faces 'zenburn (/theme-common)))
 
 
