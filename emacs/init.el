@@ -866,8 +866,7 @@ See `eshell-prompt-regexp'."
 (use-feature js
   :custom
   (js-indent-level 2)
-  (js-chain-indent t)
-  (js-jsx-syntax t))
+  (js-chain-indent t))
 
 
 ;;; cc-mode (C, C++, Objective-C)
