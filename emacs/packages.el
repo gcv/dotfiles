@@ -134,7 +134,8 @@
 
 
 (use-package company                    ; "comp"lete "any"thing
-  :bind ("C-." . company-complete)
+  :bind (("C-." . company-complete)
+	 ("TAB" . company-indent-or-complete-common))
   :diminish ""
   :config (progn
 
