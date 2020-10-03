@@ -265,6 +265,11 @@
   :bind ("C-S-SPC" . er/expand-region))
 
 
+(use-package fennel-mode
+  :pin melpa
+  :mode "\\.fnl$")
+
+
 (use-package flycheck
   :pin melpa
   :defer t)
