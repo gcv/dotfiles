@@ -651,7 +651,14 @@
   :defer t)
 
 
-(use-package olivetti                   ; focused writing mode
+;;; Focused writing mode.
+;;; Another writing-assistance package to consider
+;;; [[https://github.com/rnkn/binder][Binder]], by the same author.
+;;; Binder has a few problems, specifically that it has global
+;;; single-project state. And it's also interesting that the author
+;;; has GitHub Issues (tickets) turned off for both Binder and
+;;; Olivetti.
+(use-package olivetti
   :defer t
   :config (progn
 
