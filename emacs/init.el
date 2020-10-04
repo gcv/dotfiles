@@ -6,10 +6,8 @@
 
 (setq confirm-kill-emacs 'yes-or-no-p)                          ; ask before exiting
 (setq debug-on-error nil)                                       ; turn this on only when needed
-(setq fill-column 80)                                           ; 80-character screens, not 70
 (setq font-lock-verbose nil)                                    ; silence slow compile messages
 (setq gnutls-verify-error t)                                    ; enable all TLS checks
-(setq indent-tabs-mode nil)                                     ; replace tabs with spaces
 (setq inhibit-startup-screen t)                                 ; turn off the splash screen
 (setq initial-scratch-message nil)                              ; nothing in *scratch*
 (setq load-prefer-newer t)                                      ; deal with outdated .elc files
@@ -24,6 +22,8 @@
 (setq tags-revert-without-query t)                              ; minimize TAGS use annoyance
 (setq truncate-partial-width-windows nil)                       ; no more truncated lines
 (setq use-dialog-box nil)                                       ; turn off lame GUI dialogs
+(setq-default indent-tabs-mode nil)                             ; replace tabs with spaces
+(setq-default fill-column 80)                                   ; 80-character screens, not 70
 
 (fset 'yes-or-no-p 'y-or-n-p)                                   ; substitute y-or-n for yes-or-no
 
