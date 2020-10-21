@@ -88,7 +88,7 @@
 
 
 (use-package helm-swoop
-  :bind (("C-M-S-i" . (lambda () (interactive) (helm-swoop :$query "")))
+  :bind (("C-M-S-i" . (lambda () (interactive) (helm-swoop :query "")))
          :map isearch-mode-map
          ("C-M-S-i" . helm-swoop-from-isearch)
          )
