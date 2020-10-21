@@ -2,6 +2,7 @@
 
   (require 'org-crypt)
   (require 'org-clock)
+  (require 'org-tempo)
 
   (require 'ob-C)
   (require 'ob-R)
