@@ -62,7 +62,8 @@
   (disable-all-themes)
   (load-theme 'zenburn t)
   (let ((bg-ml "grey30")
-	(fg-ml "grey68"))
+	(fg-ml "grey68")
+        (candidate-hl "#f0dfaf"))
    (custom-theme-set-faces
     'zenburn
     (/theme-face-spec 'default :background "grey18" :foreground "#cbcbbb")
@@ -90,6 +91,8 @@
     (/theme-face-spec 'org-level-2 :foreground "#ccbbdd")
     (/theme-face-spec 'org-level-3 :foreground "#edcbab")
     (/theme-face-spec 'org-archived :foreground "grey50")
+    (/theme-face-spec 'selectrum-current-candidate :foreground candidate-hl :underline candidate-hl)
+    (/theme-face-spec 'selectrum-primary-highlight :foreground candidate-hl)
     (/theme-face-spec 'company-tooltip-selection :background "#224983")
     (/theme-face-spec 'company-tooltip-common-selection :background "#224983")))
   (apply #'custom-theme-set-faces 'zenburn (/theme-common)))
