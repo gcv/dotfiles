@@ -1001,6 +1001,13 @@
   :defer t)
 
 
+;;; Package showing how to render SVG with updates, in any buffer.
+;;; Example: (svg-clock-insert 50).
+(use-package svg-clock
+  :pin gnu
+  :defer t)
+
+
 (use-package swift-mode
   :pin melpa
   :defer t
