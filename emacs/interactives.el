@@ -12,7 +12,7 @@
 ;;; note about fontsets:
 ;;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Modifying-Fontsets.html
 ;;; shows how to use a specific font for a different codepoint range
-(defun set-font (font-family height)
+(defun set-font (font-family height emoji-factor)
   (interactive "sFont family: \nnHeight: ")
   (set-face-attribute 'default nil :family font-family :height height)
   (if (member font-family (list "Consolas" "Inconsolata" "Anonymous Pro"))
@@ -24,7 +24,7 @@
                                    :weight 'normal))
     (set-fontset-font "fontset-default" 'unicode font-family))
   ;; Emoji support:
-  (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji" :size (/ height 13.5)))
+  (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji" :size (/ height emoji-factor)))
   ;; These probably need size adjustment, not sure about factors:
   (set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
   (set-fontset-font t 'symbol "Segoe UI Emoji" nil 'append)
@@ -80,19 +80,37 @@
 
 (defun m150 ()
   (interactive)
-  (set-font "Menlo" 150)
+  (set-font "Menlo" 150 13.5)
   (toggle-header-line header-line-format))
 
 
 (defun m120 ()
   (interactive)
-  (set-font "Menlo" 120)
+  (set-font "Menlo" 120 13.5)
   (toggle-header-line header-line-format))
 
 
 (defun m100 ()
   (interactive)
-  (set-font "Menlo" 100)
+  (set-font "Menlo" 100 13.5)
+  (toggle-header-line header-line-format))
+
+
+(defun j100 ()
+  (interactive)
+  (set-font "JuliaMono" 100 15.5)
+  (toggle-header-line header-line-format))
+
+
+(defun j120 ()
+  (interactive)
+  (set-font "JuliaMono" 120 15.0)
+  (toggle-header-line header-line-format))
+
+
+(defun j150 ()
+  (interactive)
+  (set-font "JuliaMono" 150 15.0)
   (toggle-header-line header-line-format))
 
 
