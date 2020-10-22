@@ -8,7 +8,7 @@
 ;; Keywords: extensions
 ;; Package-Requires: ((emacs "25.1"))
 ;; SPDX-License-Identifier: MIT
-;; Version: 2.0
+;; Version: 3.0
 
 ;;; Commentary:
 
@@ -239,21 +239,24 @@ with the string the user inserted."
 
 Possible values are:
 
-- \\='matches: Show the total number of matches.
-- \\='current/matches: Show the index of current match and the total number of
-  matches.
+- `matches': Show the total number of matches.
+- `current/matches': Show the index of current match and the
+  total number of matches.
 - nil: Show nothing."
   :type '(choice
           (const :tag "Disabled" nil)
-          (const :tag "Count matches" 'matches)
+          (const :tag "Count matches" matches)
           (const :tag "Count matches and show current match"
-                 'current/matches)))
+                 current/matches)))
 
 (defcustom selectrum-show-indices nil
-  "Non-nil means to number the candidates (starting from 1).
-This allows you to select one directly by providing a prefix
-argument to `selectrum-select-current-candidate'."
-  :type 'boolean)
+  "Non-nil means to add indices to the displayed candidates.
+If this is a function, it should take in the row number of the
+displayed candidate (starting from 1) as a parameter and it
+should return the string to be displayed representing the index
+of the candidate. If this is some other non-nil value, it is
+treated as if it were (lambda (i) (format \"%2d \" i))."
+  :type '(choice function boolean))
 
 (defcustom selectrum-completing-read-multiple-show-help t
   "Non-nil means to show help for `selectrum-completing-read-multiple'.
@@ -336,6 +339,12 @@ setting."
                                       whitespace))
                        (string :tag "Indicator string")
                        (face :tag "Indicator face"))))
+
+(defcustom selectrum-extend-current-candidate-highlight nil
+  "Whether to extend highlighting of the current candidate until the margin.
+
+Nil (the default) means to only highlight the displayed text."
+  :type 'boolean)
 
 ;;;; Utility functions
 
@@ -504,6 +513,9 @@ input changes, and is subsequently passed to
 
 (defvar selectrum--current-candidate-index nil
   "Index of currently selected candidate, or nil if no candidates.")
+
+(defvar selectrum--first-index-displayed nil
+  "Index of the first displayed candidate.")
 
 (defvar selectrum--previous-input-string nil
   "Previous user input string in the minibuffer.
@@ -781,19 +793,20 @@ PRED defaults to `minibuffer-completion-predicate'."
       (overlay-put selectrum--count-overlay
                    'priority 1)
       (setq input (or selectrum--visual-input input))
-      (let* ((first-index-displayed
-              (if selectrum--current-candidate-index
-                  (selectrum--clamp
-                   ;; Adding one here makes it look slightly better, as
-                   ;; there are guaranteed to be more candidates shown
-                   ;; below the selection than above.
-                   (1+ (- selectrum--current-candidate-index
-                          (max 1 (/ selectrum-num-candidates-displayed 2))))
-                   0
-                   (max (- (length selectrum--refined-candidates)
-                           selectrum-num-candidates-displayed)
-                        0))
-                0))
+      (setq selectrum--first-index-displayed
+            (if selectrum--current-candidate-index
+                (selectrum--clamp
+                 ;; Adding one here makes it look slightly better, as
+                 ;; there are guaranteed to be more candidates shown
+                 ;; below the selection than above.
+                 (1+ (- selectrum--current-candidate-index
+                        (max 1 (/ selectrum-num-candidates-displayed 2))))
+                 0
+                 (max (- (length selectrum--refined-candidates)
+                         selectrum-num-candidates-displayed)
+                      0))
+              0))
+      (let* ((first-index-displayed selectrum--first-index-displayed)
              (displayed-candidates
               (seq-take
                (nthcdr
@@ -809,8 +822,7 @@ PRED defaults to `minibuffer-completion-predicate'."
         (let ((text (selectrum--candidates-display-string
                      displayed-candidates
                      input
-                     highlighted-index
-                     first-index-displayed))
+                     highlighted-index))
               (default nil))
           (if (or (and highlighted-index
                        (< highlighted-index 0))
@@ -958,8 +970,7 @@ The specific details of the formatting are determined by
 
 (defun selectrum--candidates-display-string (candidates
                                              input
-                                             highlighted-index
-                                             first-index-displayed)
+                                             highlighted-index)
   "Get string to display CANDIDATES.
 INPUT is the current user input. CANDIDATES are the candidates
 for display. HIGHLIGHTED-INDEX is the currently selected index
@@ -988,7 +999,9 @@ candidate."
                  candidate)))
               (right-margin (get-text-property
                              0 'selectrum-candidate-display-right-margin
-                             candidate)))
+                             candidate))
+              (formatting-current-candidate
+               (equal index highlighted-index)))
           ;; Add the ability to interact with candidates via the mouse.
           (add-text-properties
            0 (length displayed-candidate)
@@ -1008,7 +1021,7 @@ candidate."
                    (selectrum-insert-current-candidate ,(1+ index))))
               keymap))
            displayed-candidate)
-          (when (equal index highlighted-index)
+          (when formatting-current-candidate
             (setq displayed-candidate
                   (copy-sequence displayed-candidate))
             ;; Avoid trampling highlighting done by
@@ -1037,28 +1050,22 @@ candidate."
                'append displayed-candidate)))
           (insert "\n")
           (when selectrum-show-indices
-            (let* ((abs-index (+ index first-index-displayed))
-                   (num (number-to-string (1+ abs-index)))
-                   (num-digits
-                    (length
-                     (number-to-string
-                      selectrum--total-num-candidates))))
+            (let* ((display-fn (if (functionp selectrum-show-indices)
+                                   selectrum-show-indices
+                                 (lambda (i) (format "%2d " i))))
+                   (curr-index (substring-no-properties
+                                (funcall display-fn (1+ index)))))
               (insert
-               (propertize
-                (concat
-                 (make-string (- num-digits (length num)) ? )
-                 num " ")
-                'face
-                'minibuffer-prompt))))
+               (propertize curr-index 'face 'minibuffer-prompt))))
           (insert displayed-candidate)
-          (when right-margin
+          (cond
+           (right-margin
             (insert
              (concat
               (propertize
                " "
                'face
-               (when (and right-margin
-                          (equal index highlighted-index))
+               (when formatting-current-candidate
                  'selectrum-current-candidate)
                'display
                `(space :align-to (- right-fringe
@@ -1066,9 +1073,17 @@ candidate."
                                     selectrum-right-margin-padding)))
               (propertize right-margin
                           'face
-                          (when (and right-margin
-                                     (equal index highlighted-index))
-                            'selectrum-current-candidate))))))
+                          (when formatting-current-candidate
+                            'selectrum-current-candidate)))))
+           ((and selectrum-extend-current-candidate-highlight
+                 formatting-current-candidate)
+            (insert
+             (propertize
+              " "
+              'face 'selectrum-current-candidate
+              'display
+              `(space :align-to (- right-fringe
+                                   selectrum-right-margin-padding)))))))
         (cl-incf index))
       (buffer-string))))
 
@@ -1130,7 +1145,8 @@ into the user input area to start with."
           (max (if (and selectrum--match-required-p
                         (cond (minibuffer-completing-file-name
                                (not (file-exists-p
-                                     (minibuffer-contents))))
+                                     (substitute-in-file-name
+                                      (minibuffer-contents)))))
                               (t
                                (not (string-empty-p
                                      (minibuffer-contents))))))
@@ -1213,23 +1229,34 @@ plus CANDIDATE."
               result))
     (exit-minibuffer)))
 
+(defun selectrum--index-for-arg (arg)
+  "Get candidate index for interactive argument ARG.
+This is a helper function for commands which allow choosing a
+candidate via prefix argument."
+  (if arg
+      (min
+       (+ (prefix-numeric-value arg)
+          (1- selectrum--first-index-displayed))
+       (1- (length selectrum--refined-candidates)))
+    selectrum--current-candidate-index))
+
 (defun selectrum-select-current-candidate (&optional arg)
   "Exit minibuffer, picking the currently selected candidate.
 If there are no candidates, return the current user input, unless
 a match is required, in which case do nothing.
 
-Give a prefix argument ARG to select the candidate at that index
-\(counting from one, clamped to fall within the candidate list).
-Zero means to select the current user input."
+Give a prefix argument ARG to select the nth displayed candidate.
+Zero means to select the current user input. See
+`selectrum-show-indices' which can be used to show candidate
+indices."
   (interactive "P")
-  (let ((index (if arg
-                   (min (1- (prefix-numeric-value arg))
-                        (1- (length selectrum--refined-candidates)))
-                 selectrum--current-candidate-index)))
+  (let ((index (selectrum--index-for-arg arg)))
     (when (or (not selectrum--match-required-p)
               (and index (>= index 0))
               (and minibuffer-completing-file-name
-                   (file-exists-p (minibuffer-contents)))
+                   (file-exists-p
+                    (substitute-in-file-name
+                     (minibuffer-contents))))
               (string-empty-p
                (minibuffer-contents)))
       (selectrum--exit-with
@@ -1246,37 +1273,51 @@ ignores the currently selected candidate, if one exists."
       selectrum--start-of-input-marker
       selectrum--end-of-input-marker))))
 
+(defvar selectrum--crm-separator-alist
+  '((":\\|,\\|\\s-" . ",")
+    ("[ \t]*:[ \t]*" . ":")
+    ("[ \t]*,[ \t]*" . ",")
+    (" " . " "))
+  "Values of `crm-separator' mapped to separator strings.
+If current `crm-separator' has a mapping the separator gets
+inserted automatically when using
+`selectrum-insert-current-candidate'.")
+
 (defun selectrum-insert-current-candidate (&optional arg)
   "Insert current candidate into user input area.
 
-With optional prefix argument ARG, insert the candidate at that
-index (counting from one, clamped to fall within the candidate
-list). A null or non-positive ARG inserts the candidate corresponding to
-`selectrum--current-candidate-index'."
+Give a prefix argument ARG to select the nth displayed candidate.
+Zero means to select the current user input. See
+`selectrum-show-indices' which can be used to show candidate
+indices."
   (interactive "P")
-  (when-let ((index (if (and arg
-                             selectrum--refined-candidates
-                             (> (prefix-numeric-value arg) 0))
-                        (min (1- (prefix-numeric-value arg))
-                             (1- (length selectrum--refined-candidates)))
-                      selectrum--current-candidate-index)))
-    (if (or (not selectrum--crm-p)
-            (not (re-search-backward crm-separator
-                                     (minibuffer-prompt-end) t)))
-        (delete-region selectrum--start-of-input-marker
-                       selectrum--end-of-input-marker)
-      (goto-char (match-end 0))
-      (delete-region (point) selectrum--end-of-input-marker))
-    (let* ((candidate (nth index
-                           selectrum--refined-candidates))
+  (if-let ((index (selectrum--index-for-arg arg))
+           (candidate (selectrum--get-candidate index))
            (full (selectrum--get-full candidate)))
-      (insert full)
-      (unless (eq t minibuffer-history-variable)
-        (add-to-history minibuffer-history-variable full))
-      (apply
-       #'run-hook-with-args
-       'selectrum-candidate-inserted-hook
-       candidate selectrum--read-args))))
+      (progn
+        (if (not selectrum--crm-p)
+            (progn
+              (delete-region selectrum--start-of-input-marker
+                             selectrum--end-of-input-marker)
+              (insert full))
+          (goto-char
+           (if (re-search-backward crm-separator
+                                   (minibuffer-prompt-end) t)
+               (match-end 0)
+
+             (minibuffer-prompt-end)))
+          (delete-region (point) selectrum--end-of-input-marker)
+          (insert full)
+          (when-let ((match
+                      (assoc crm-separator selectrum--crm-separator-alist)))
+            (insert (cdr match))))
+        (apply
+         #'run-hook-with-args
+         'selectrum-candidate-inserted-hook
+         candidate selectrum--read-args))
+    (unless completion-fail-discreetly
+      (ding)
+      (minibuffer-message "No match"))))
 
 (defun selectrum-select-from-history ()
   "Select a candidate from the minibuffer history.
@@ -1343,6 +1384,7 @@ Otherwise, just eval BODY."
            (lambda (var)
              `(,var ,var))
            '(selectrum--current-candidate-index
+             selectrum--first-index-displayed
              selectrum--previous-input-string
              selectrum--last-command
              selectrum--last-prefix-arg)))
@@ -1426,10 +1468,20 @@ semantics of `cl-defun'."
              (prompt (selectrum--remove-default-from-prompt prompt))
              ;; <https://github.com/raxod502/selectrum/issues/99>
              (icomplete-mode nil)
-             (selectrum-active-p t))
-        (read-from-minibuffer
-         prompt nil selectrum-minibuffer-map nil
-         (or history 'minibuffer-history))))))
+             (selectrum-active-p t)
+             (res (read-from-minibuffer
+                   prompt nil selectrum-minibuffer-map nil
+                   (or history 'minibuffer-history))))
+        (cond (minibuffer-completion-table
+               ;; Behave like completing-read-default which strips the text
+               ;; properties but keeps them when submitting the empty prompt
+               ;; to get the default (see #180, #107).
+               (if (and selectrum--previous-input-string
+                        (string-empty-p selectrum--previous-input-string)
+                        (equal res selectrum--default-candidate))
+                   selectrum--default-candidate
+                 (substring-no-properties res)))
+              (t res))))))
 
 ;;;###autoload
 (defun selectrum-completing-read
@@ -1440,18 +1492,17 @@ semantics of `cl-defun'."
 For PROMPT, COLLECTION, PREDICATE, REQUIRE-MATCH, INITIAL-INPUT,
 HIST, DEF, and INHERIT-INPUT-METHOD, see `completing-read'."
   (ignore initial-input inherit-input-method)
-  (substring-no-properties
-   (selectrum-read
-    prompt nil
-    ;; Don't pass `initial-input'. We use it internally but it's
-    ;; deprecated in `completing-read' and doesn't work well with the
-    ;; Selectrum paradigm except in specific cases that we control.
-    :default-candidate (or (car-safe def) def)
-    :require-match (eq require-match t)
-    :history hist
-    :may-modify-candidates t
-    :minibuffer-completion-table collection
-    :minibuffer-completion-predicate predicate)))
+  (selectrum-read
+   prompt nil
+   ;; Don't pass `initial-input'. We use it internally but it's
+   ;; deprecated in `completing-read' and doesn't work well with the
+   ;; Selectrum paradigm except in specific cases that we control.
+   :default-candidate (or (car-safe def) def)
+   :require-match (eq require-match t)
+   :history hist
+   :may-modify-candidates t
+   :minibuffer-completion-table collection
+   :minibuffer-completion-predicate predicate))
 
 (defvar selectrum--old-completing-read-function nil
   "Previous value of `completing-read-function'.")
@@ -1498,14 +1549,18 @@ the prompt."
                  (goto-char (minibuffer-prompt-end))
                  (when (search-backward ":" nil t)
                    (insert
-                    (apply #'propertize
-                           (format " [add more using %s and %s]"
-                                   (substitute-command-keys
-                                    "\\[selectrum-insert-current-candidate]")
-                                   (if (equal crm-separator "[ \t]*,[ \t]*")
-                                       "\",\""
-                                     "crm-separator"))
-                           (text-properties-at (point)))))))))
+                    (apply
+                     #'propertize
+                     (format " [add more using %s%s]"
+                             (substitute-command-keys
+                              "\\[selectrum-insert-current-candidate]")
+                             (if (assoc crm-separator
+                                        selectrum--crm-separator-alist)
+                                 ;; Separator will be automatically
+                                 ;; inserted.
+                                 ""
+                               "and crm-separator"))
+                     (text-properties-at (point)))))))))
        (selectrum-read
         prompt
         candidates
@@ -1516,8 +1571,7 @@ the prompt."
         :may-modify-candidates t
         :minibuffer-completion-table table
         :minibuffer-completion-predicate predicate)))
-    (mapcar #'substring-no-properties
-            (split-string res crm-separator t))))
+    (split-string res crm-separator t)))
 
 ;;;###autoload
 (defun selectrum-completion-in-region
@@ -1634,16 +1688,15 @@ PREDICATE, see `read-buffer'."
                        candidates)))
               `((candidates . ,candidates)
                 (input . ,input))))))
-    (substring-no-properties
-     (selectrum-read
-      prompt candidates
-      :default-candidate def
-      :require-match (eq require-match t)
-      :history 'buffer-name-history
-      :no-move-default-candidate t
-      :may-modify-candidates t
-      :minibuffer-completion-table #'internal-complete-buffer
-      :minibuffer-completion-predicate predicate))))
+    (selectrum-read
+     prompt candidates
+     :default-candidate def
+     :require-match (eq require-match t)
+     :history 'buffer-name-history
+     :no-move-default-candidate t
+     :may-modify-candidates t
+     :minibuffer-completion-table #'internal-complete-buffer
+     :minibuffer-completion-predicate predicate)))
 
 (defvar selectrum--old-read-buffer-function nil
   "Previous value of `read-buffer-function'.")
@@ -1692,16 +1745,15 @@ For PROMPT, COLLECTION, PREDICATE, REQUIRE-MATCH, INITIAL-INPUT,
                       (quit)))))
              `((input . ,ematch)
                (candidates . ,cands))))))
-    (substring-no-properties
-     (selectrum-read
-      prompt coll
-      :default-candidate (or (car-safe def) def)
-      :initial-input (or (car-safe initial-input) initial-input)
-      :history hist
-      :require-match (eq require-match t)
-      :may-modify-candidates t
-      :minibuffer-completion-table collection
-      :minibuffer-completion-predicate predicate))))
+    (selectrum-read
+     prompt coll
+     :default-candidate (or (car-safe def) def)
+     :initial-input (or (car-safe initial-input) initial-input)
+     :history hist
+     :require-match (eq require-match t)
+     :may-modify-candidates t
+     :minibuffer-completion-table collection
+     :minibuffer-completion-predicate predicate)))
 
 ;;;###autoload
 (defun selectrum-read-file-name
