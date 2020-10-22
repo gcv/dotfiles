@@ -4,10 +4,10 @@
 
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
-;; Package-Commit: 41d87d123e6f70ea656867356584a7133c28434c
+;; Package-Commit: e9d6dbe67f56dbb53cca893cf8e833a3ce97f39e
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 20200828.1405
-;; Package-X-Original-Version: 1.2
+;; Package-Version: 20201021.818
+;; Package-X-Original-Version: 1.6
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -94,6 +94,12 @@ to determine background color of mini frame."
 Called if `mini-frame-show-parameters' doesn't specify background color."
   :type 'function)
 
+(defcustom mini-frame-internal-border-color nil
+  "When set, set the internal border color of mini-frames to this color."
+  :type '(choice (const :tag "Not set" nil)
+                 (color :tag "Color")
+                 (const :tag "Unspecified" 'unspecified)))
+
 (defcustom mini-frame-handle-completions t
   "Create child frame to display completions buffer."
   :type 'boolean)
@@ -135,6 +141,12 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 (defcustom mini-frame-resize-max-height nil
   "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
   :type 'integer)
+
+(defcustom mini-frame-create-lazy nil
+  "Create mini-frame lazily.
+If non-nil, mini-frame will be created on first use.
+If nil, mini-frame will be created on the mode activation."
+  :type 'boolean)
 
 
 (defvar mini-frame-frame nil)
@@ -200,16 +212,21 @@ This function used as value for `resize-mini-frames' variable."
       (when (and (frame-live-p frame) (frame-visible-p frame))
         (select-frame-set-input-focus frame)))))
 
-(defconst mini-frame--common-parameters
-  '((visibility . nil)
-    (user-position . t)
-    (user-size . t)
-    (keep-ratio . t)
-    (undecorated . t)
-    (desktop-dont-save . t)
-    (internal-border-width . 3)
-    (drag-internal-border . t))
-  "Common frame parameters for mini-frame and completions frame.")
+(defun mini-frame--make-frame (parameters)
+  "Make frame with common parameters and PARAMETERS."
+  (let ((frame (make-frame (append parameters
+                                   '((visibility . nil)
+                                     (user-position . t)
+                                     (user-size . t)
+                                     (keep-ratio . t)
+                                     (undecorated . t)
+                                     (desktop-dont-save . t)
+                                     (internal-border-width . 3)
+                                     (drag-internal-border . t))))))
+    (set-face-background 'fringe nil frame)
+    (when mini-frame-internal-border-color
+      (set-face-background 'internal-border mini-frame-internal-border-color frame))
+    frame))
 
 (defun mini-frame--display-completions (buffer alist)
   "Display completions BUFFER in another child frame.
@@ -226,12 +243,9 @@ ALIST is passed to `window--display-buffer'."
     (if (frame-live-p mini-frame-completions-frame)
         (modify-frame-parameters mini-frame-completions-frame parent-frame-parameters)
       (setq mini-frame-completions-frame
-            (make-frame (append '((auto-hide-function . mini-frame--hide-completions)
-                                  (minibuffer . nil))
-                                mini-frame--common-parameters
-                                parent-frame-parameters
-                                show-parameters)))
-      (set-face-background 'fringe nil mini-frame-completions-frame))
+            (mini-frame--make-frame (append '((auto-hide-function . mini-frame--hide-completions)
+                                              (minibuffer . nil))
+                                            parent-frame-parameters))))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
     (make-frame-visible mini-frame-completions-frame)
     (let ((w (frame-selected-window mini-frame-completions-frame)))
@@ -258,15 +272,11 @@ ALIST is passed to `window--display-buffer'."
           (setq mini-frame-selected-frame selected-frame)
           (setq mini-frame-selected-window selected-window)
           (modify-frame-parameters mini-frame-frame parent-frame-parameters))
-      (progn
-        (setq mini-frame-selected-frame selected-frame)
-        (setq mini-frame-selected-window selected-window)
-        (setq mini-frame-frame
-              (make-frame (append '((minibuffer . only))
-                                  mini-frame--common-parameters
-                                  parent-frame-parameters
-                                  show-parameters)))
-        (set-face-background 'fringe nil mini-frame-frame)))
+      (setq mini-frame-selected-frame selected-frame)
+      (setq mini-frame-selected-window selected-window)
+      (setq mini-frame-frame
+            (mini-frame--make-frame (append '((minibuffer . only))
+                                            parent-frame-parameters))))
     (modify-frame-parameters mini-frame-frame show-parameters)
     (when (and (frame-live-p mini-frame-completions-frame)
                (frame-visible-p mini-frame-completions-frame))
@@ -312,9 +322,16 @@ ALIST is passed to `window--display-buffer'."
                    (throw 'ignored t))))))
     (apply fn args))
    ((and (frame-live-p mini-frame-frame)
-         (frame-visible-p mini-frame-frame))
-    (mini-frame--display fn args))
+         (frame-parameter mini-frame-frame 'parent-frame))
+    (save-excursion
+      (mini-frame--display fn args)))
    (t
+    ;; On windows `frame-visible-p' can be t even if the frame is not visible so
+    ;; calling `make-frame-visible' doesn't make frame actually visible.  Make frame
+    ;; invisible one more time.
+    (when (and (frame-live-p mini-frame-frame)
+               (frame-visible-p mini-frame-frame))
+      (make-frame-invisible mini-frame-frame))
     (let ((after-make-frame-functions nil)
           (resize-mini-frames (when mini-frame-resize
                                 #'mini-frame--resize-mini-frame))
@@ -336,17 +353,16 @@ ALIST is passed to `window--display-buffer'."
       (ignore ivy-fixed-height-minibuffer)
       (ignore resize-mini-frames)
       (ignore which-key-popup-type)
-      (unwind-protect
-          (mini-frame--display fn args)
-        (when (frame-live-p mini-frame-completions-frame)
-          (make-frame-invisible mini-frame-completions-frame))
-        (when (frame-live-p mini-frame-selected-frame)
-          (select-frame-set-input-focus mini-frame-selected-frame))
-        (when (frame-live-p mini-frame-frame)
-          (if (eq system-type 'windows-nt)
-              ;; FIXME sometime buffer is not visible on windows
-              (delete-frame mini-frame-frame)
-            (make-frame-invisible mini-frame-frame))))))))
+      (save-excursion
+        (unwind-protect
+            (mini-frame--display fn args)
+          (when (frame-live-p mini-frame-completions-frame)
+            (make-frame-invisible mini-frame-completions-frame))
+          (when (frame-live-p mini-frame-selected-frame)
+            (select-frame-set-input-focus mini-frame-selected-frame))
+          (when (frame-live-p mini-frame-frame)
+            (make-frame-invisible mini-frame-frame)
+            (modify-frame-parameters mini-frame-frame '((parent-frame . nil))))))))))
 
 ;;;###autoload
 (define-minor-mode mini-frame-mode
@@ -355,9 +371,15 @@ ALIST is passed to `window--display-buffer'."
   (cond
    (mini-frame-mode
     (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
-    (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window))
+    (advice-add 'read-string :around #'mini-frame-read-from-minibuffer)
+    (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
+    (unless mini-frame-create-lazy
+      (let ((after-make-frame-functions nil))
+        (setq mini-frame-frame
+              (mini-frame--make-frame '((minibuffer . only)))))))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
+    (advice-remove 'read-string #'mini-frame-read-from-minibuffer)
     (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
