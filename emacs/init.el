@@ -192,7 +192,9 @@
   (package-refresh-contents)
   (package-install 'quelpa)
   (package-install 'quelpa-use-package))
-(setq quelpa-stable-p t
+(require 'quelpa)
+(require 'quelpa-use-package)
+(setq quelpa-stable-p nil
       quelpa-checkout-melpa-p nil)
 
 
