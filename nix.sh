@@ -38,6 +38,7 @@ nix-env -i \
     gnupg \
     htop \
     jq \
+    kopia \
     ledger \
     magic-wormhole \
     mosh \
