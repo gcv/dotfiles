@@ -1,45 +1,36 @@
-;;; XXX: This is broken in four ways right now:
-;;;
-;;; - find-file wrapper splits (!) the current window when opening a file
-;;; - find-file has inconsistent behavior when opening a symlink to a
-;;;   vc-controlled file (sometimes prompts, sometimes not, sometimes errors,
-;;;   sometimes prompts in minibuffer, sometimes in mini frame)
-;;; - imenu-cr fails with an error
-;;; - imeni-cr should use an overlay or something to keep its history clean of "Function: " prefixes
-;;;
-;;; This breakage is reproducible with mini-frame and maple-minibuffer
-
-;; no mini-frame:
-;; (defun /with-selectrum (fn)
-;;   (let ((status-selectrum selectrum-mode))
-;;     (unwind-protect
-;;         (progn
-;;           (selectrum-mode 1)
-;;           (call-interactively fn))
-;;       (unless status-selectrum (selectrum-mode -1)))))
-
 (defun /with-selectrum (fn)
   (let ((status-selectrum selectrum-mode))
     (unwind-protect
         (progn
           (selectrum-mode 1)
-          (if window-system
-              (mini-frame-read-from-minibuffer (lambda () (call-interactively fn)))
-              ;; (maple-minibuffer:with (call-interactively fn))
-            (call-interactively fn)))
+          (call-interactively fn))
+      (unless status-selectrum (selectrum-mode -1)))))
+
+(defun /with-selectrum-mini-frame (fn advice-level)
+  (let ((status-selectrum selectrum-mode))
+    (unwind-protect
+        (progn
+          (selectrum-mode 1)
+          (when window-system
+            (advice-add advice-level :around #'mini-frame-read-from-minibuffer))
+          (call-interactively fn))
+      (when window-system
+        (advice-remove advice-level #'mini-frame-read-from-minibuffer))
       (unless status-selectrum (selectrum-mode -1)))))
 
 (defun /selectrum-M-x ()
   (interactive)
-  (/with-selectrum #'execute-extended-command))
+  (/with-selectrum-mini-frame #'execute-extended-command 'read-extended-command))
 
 (defun /selectrum-find-file ()
   (interactive)
-  (/with-selectrum #'find-file))
+  (/with-selectrum-mini-frame #'find-file 'find-file-read-args))
 
 (defun /selectrum-imenu ()
   (interactive)
-  (/with-selectrum #'imenu-cr))
+  ;; FIXME: This does not work right: command history is messed up (use overlays
+  ;; to show tags to fix?), and order looks strange.
+  (/with-selectrum-mini-frame #'imenu-cr 'read-from-minibuffer))
 
 
 (use-package selectrum
@@ -55,8 +46,8 @@
   :config (progn
 
             (when window-system
-              ;; match mini-frame height
-              (setq selectrum-num-candidates-displayed 15))
+              ;; match mini-frame height - 1
+              (setq selectrum-num-candidates-displayed 14))
 
             ;;(selectrum-mode 1)
             (selectrum-prescient-mode 1)
@@ -79,7 +70,9 @@
    '((top . 100)
      (left . 0.5)
      (height . 15)                      ; needed until frame bugs are fixed
-     (width . 0.7)))
+     (width . 0.7)
+     (left-fringe . 5)
+     (right-fringe . 5)))
   (mini-frame-resize-max-height 15)
 
   :commands (mini-frame-read-from-minibuffer)
@@ -89,23 +82,16 @@
   ;; - https://github.com/muffinmad/emacs-mini-frame/issues/18
   ;; - https://debbugs.gnu.org/cgi/bugreport.cgi?bug=44080
 
-  ;; To selectively enable mini-frame with Selectrum, the following
-  ;; works for M-x, but not for C-x C-f:
-  ;;
-  ;; (defun /xmf-M-x ()
-  ;;   (interactive)
-  ;;   (let ((completing-read-function #'selectrum-completing-read)
-  ;;         (read-buffer-function #'selectrum-read-buffer)
-  ;;         (read-file-name-function #'selectrum-read-file-name)
-  ;;         (completion-in-region-function #'selectrum-completion-in-region))
-  ;;     (mini-frame-read-from-minibuffer
-  ;;      (lambda () (call-interactively #'execute-extended-command)))))
+  ;;(when window-system
+  ;;  ;; only enable mini-frame-mode for find-file (C-x C-f) and
+  ;;  ;; execute-extended-command (M-x):
+  ;; (setq mini-frame-advice-functions '(find-file-read-args read-extended-command))
+  ;; (mini-frame-mode 1))
 
-  ;; (when window-system
-  ;;   (mini-frame-mode 1))
-
-  (add-to-list 'mini-frame-ignore-commands 'find-alternate-file)
-  (add-to-list 'mini-frame-ignore-commands "ctrlf-.*")
-  (add-to-list 'mini-frame-ignore-commands "helm-.*")
-  (add-to-list 'mini-frame-ignore-commands "magit-.*")
+  ;; Only useful when mini-frame-mode is used broadly, i.e., when
+  ;; mini-frame-advice-functions is set to activate itself at a lower level
+  ;; (read-from-minibuffer, read-string):
+  ;;(add-to-list 'mini-frame-ignore-commands 'find-alternate-file)
+  ;;(add-to-list 'mini-frame-ignore-commands "helm-.*")
+  ;;(add-to-list 'mini-frame-ignore-commands "magit-.*")
   )
