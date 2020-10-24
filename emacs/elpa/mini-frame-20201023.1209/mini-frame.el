@@ -4,10 +4,10 @@
 
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
-;; Package-Commit: e9d6dbe67f56dbb53cca893cf8e833a3ce97f39e
+;; Package-Commit: 82570c6685caf2b07da5848e1a81cc0c718dd961
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 20201021.818
-;; Package-X-Original-Version: 1.6
+;; Package-Version: 20201023.1209
+;; Package-X-Original-Version: 1.8
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -69,6 +69,11 @@
 (defgroup mini-frame nil
   "Show minibuffer in child frame."
   :group 'minibuffer)
+
+(defcustom mini-frame-advice-functions '(read-from-minibuffer read-string)
+  "Functions to advice with `mini-frame-read-from-minibuffer'.
+Set this variable before `mini-frame' mode activation."
+  :type '(repeat function))
 
 (defcustom mini-frame-ignore-commands '(eval-expression "edebug-eval-expression" debugger-eval-expression)
   "For this commands minibuffer will not be displayed in child frame."
@@ -142,7 +147,7 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
   "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
   :type 'integer)
 
-(defcustom mini-frame-create-lazy nil
+(defcustom mini-frame-create-lazy t
   "Create mini-frame lazily.
 If non-nil, mini-frame will be created on first use.
 If nil, mini-frame will be created on the mode activation."
@@ -245,7 +250,8 @@ ALIST is passed to `window--display-buffer'."
       (setq mini-frame-completions-frame
             (mini-frame--make-frame (append '((auto-hide-function . mini-frame--hide-completions)
                                               (minibuffer . nil))
-                                            parent-frame-parameters))))
+                                            parent-frame-parameters
+                                            show-parameters))))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
     (make-frame-visible mini-frame-completions-frame)
     (let ((w (frame-selected-window mini-frame-completions-frame)))
@@ -276,7 +282,8 @@ ALIST is passed to `window--display-buffer'."
       (setq mini-frame-selected-window selected-window)
       (setq mini-frame-frame
             (mini-frame--make-frame (append '((minibuffer . only))
-                                            parent-frame-parameters))))
+                                            parent-frame-parameters
+                                            show-parameters))))
     (modify-frame-parameters mini-frame-frame show-parameters)
     (when (and (frame-live-p mini-frame-completions-frame)
                (frame-visible-p mini-frame-completions-frame))
@@ -370,16 +377,20 @@ ALIST is passed to `window--display-buffer'."
   :global t
   (cond
    (mini-frame-mode
-    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
-    (advice-add 'read-string :around #'mini-frame-read-from-minibuffer)
+    (mapc #'(lambda (fn)
+              (advice-add fn :around #'mini-frame-read-from-minibuffer))
+          mini-frame-advice-functions)
     (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
     (unless mini-frame-create-lazy
-      (let ((after-make-frame-functions nil))
-        (setq mini-frame-frame
-              (mini-frame--make-frame '((minibuffer . only)))))))
+      (add-hook 'window-setup-hook
+                #'(lambda ()
+                    (let ((after-make-frame-functions nil))
+                      (setq mini-frame-frame
+                            (mini-frame--make-frame '((minibuffer . only)))))))))
    (t
-    (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
-    (advice-remove 'read-string #'mini-frame-read-from-minibuffer)
+    (mapc #'(lambda (fn)
+              (advice-remove fn #'mini-frame-read-from-minibuffer))
+          mini-frame-advice-functions)
     (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
