@@ -797,7 +797,11 @@
 	    ;; likelihood of extra frame state, even though
 	    ;; Perspective tries to lock it out):
 	    (defun /persp-state-before-save-hook ()
-	      (posframe-delete-all))
+              (when (and (fboundp 'mini-frame--delete-frame)
+                         (boundp 'mini-frame-frame))
+                (mini-frame--delete-frame mini-frame-frame))
+              (when (fboundp 'posframe-delete-all)
+	        (posframe-delete-all)))
 
 	    (add-hook 'persp-state-before-save-hook #'/persp-state-before-save-hook)
 
