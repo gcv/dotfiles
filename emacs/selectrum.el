@@ -68,44 +68,6 @@
   :commands (selectrum-prescient-mode))
 
 
-(use-package maple-minibuffer
-  :quelpa (maple-minibuffer :fetcher github :repo "honmaple/emacs-maple-minibuffer")
-
-  :if window-system
-
-  :config
-  (setq maple-minibuffer:position-type 'frame-center
-        maple-minibuffer:border-color "gray50"
-        maple-minibuffer:height nil
-        maple-minibuffer:width 0.7
-        maple-minibuffer:cache t)
-
-  (setq maple-minibuffer:action (list)
-        maple-minibuffer:ignore-action (list))
-
-  (add-to-list 'maple-minibuffer:action 'read-from-minibuffer)
-  (add-to-list 'maple-minibuffer:action 'read-string)
-
-  (add-to-list 'maple-minibuffer:ignore-action 'org-schedule)
-  (add-to-list 'maple-minibuffer:ignore-action 'find-alternate-file)
-  (add-to-list 'maple-minibuffer:ignore-action 'eval-expression)
-  (add-to-list 'maple-minibuffer:ignore-action 'edebug-eval-expression)
-  (add-to-list 'maple-minibuffer:ignore-action 'debugger-eval-expression)
-  (add-to-list 'maple-minibuffer:ignore-action 'find-alternate-file)
-
-  (add-to-list 'maple-minibuffer:ignore-regexp "^helm-")
-  (add-to-list 'maple-minibuffer:ignore-regexp "^magit-")
-
-  ;; more custom parameters for frame
-  (defun maple-minibuffer:parameters ()
-    "Maple minibuffer parameters."
-    `((height . ,(or maple-minibuffer:height 10))
-      (width . ,(or maple-minibuffer:width (window-pixel-width)))
-      (left-fringe . 5)
-      (right-fringe . 5)))
-  )
-
-
 (use-package mini-frame
   :pin melpa
   :if window-system
