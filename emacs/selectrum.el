@@ -28,8 +28,6 @@
 
 (defun /selectrum-imenu ()
   (interactive)
-  ;; FIXME: This does not work right: command history is messed up (use overlays
-  ;; to show tags to fix?), and order looks strange.
   (/with-selectrum-mini-frame #'imenu-cr 'read-from-minibuffer))
 
 
@@ -38,9 +36,9 @@
   :defer t
 
   :bind
-  (;;("M-x" . /selectrum-M-x)
-   ;;("C-x C-M-f" . /selectrum-find-file)
-   ;;("M-i" . /selectrum-imenu)
+  (("M-x" . /selectrum-M-x)
+   ("C-x C-M-f" . /selectrum-find-file)
+   ("M-i" . /selectrum-imenu)
    )
 
   :config (progn
