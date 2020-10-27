@@ -281,16 +281,29 @@
                                  `(("Functions" ,@fns)))
                         items))
                   items))
-         (items (-flatten-n
-                 1
-                 (cl-loop for entry in items collect
-                          (if (listp (cdr entry))
-                              (cl-loop for subentry in (cdr entry) collect
-                                       (cons (concat (propertize (car entry) 'face 'bold) ": " (car subentry))
-                                             (cdr subentry)))
-                            entry))))
-         (selection (imenu-choose-buffer-index "Items: " items)))
-    (imenu selection)))
+         (flat-items (list)))
+    (cl-labels ((helper (node tag)
+                        (cl-loop for entry in node do
+                                 (if (listp (cdr entry))
+                                     (helper (cdr entry)
+                                             (append tag (list (car entry))))
+                                   (let ((real-tag (if (null tag)
+                                                       (car entry)
+                                                     (concat
+                                                      (propertize (concat (s-join "/" tag) ":") 'face 'bold) " " (car entry)))))
+                                     (add-to-list 'flat-items
+                                                  (cons real-tag
+                                                        (cdr entry))))))))
+      (helper items (list))
+      (let* ((selection (imenu-choose-buffer-index "Items: " flat-items))
+             (raw-key (car selection))
+             (prop-change (next-property-change 0 raw-key))
+             (key (if prop-change
+                      (s-trim (substring raw-key (+ 1 prop-change) nil))
+                    raw-key)))
+        (imenu selection)
+        ;; replace selection in history with key
+        (setf (car imenu--history-list) key)))))
 
 
 (defun what-face (pos)
