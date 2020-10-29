@@ -783,7 +783,7 @@
   :bind (("C-c C-p" . perspective-map)
          ("H-p" . perspective-map)
          ("C-c M-p" . persp-switch)
-         ("C-x C-M-b" . persp-ivy-switch-buffer))
+         ("C-x C-M-b" . (lambda () (interactive) (/with-selectrum-mini-frame #'persp-switch-to-buffer* 'read-from-minibuffer))))
   :config (progn
 
             (persp-mode)
