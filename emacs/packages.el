@@ -1041,11 +1041,11 @@
             (setq treemacs-no-png-images t)
 
             (defun /treemacs-mode-hook ()
-              (define-key treemacs-mode-map (kbd "M-x")
-                (lambda ()
-                  (interactive)
-                  (let ((ivy-posframe-display-functions-alist '((counsel-M-x . ivy-posframe-display-at-frame-center))))
-                    (counsel-M-x))))
+              ;; (define-key treemacs-mode-map (kbd "M-x")
+              ;;   (lambda ()
+              ;;     (interactive)
+              ;;     (let ((ivy-posframe-display-functions-alist '((counsel-M-x . ivy-posframe-display-at-frame-center))))
+              ;;       (counsel-M-x))))
               (define-key treemacs-mode-map (kbd "<S-return>") #'treemacs-visit-node-ace))
 
             (add-hook 'treemacs-mode-hook #'/treemacs-mode-hook)

@@ -1,9 +1,9 @@
 (use-package counsel
   :pin melpa
-  :bind (;;("M-x" . counsel-M-x)
-         ;;("C-x C-M-f" . counsel-find-file)
+  :bind (("M-x" . counsel-M-x)
+         ("C-x C-M-f" . counsel-find-file)
          ;;("C-M-y" . counsel-yank-pop)
-         ;;("M-i" . counsel-imenu)
+         ("M-i" . counsel-imenu)
          )
   :config (progn
 
@@ -158,7 +158,8 @@
   :init (progn
           (when (>= emacs-major-version 27)
             (setq xref-show-definitions-function #'ivy-xref-show-defs))
-          (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)))
+          (setq xref-show-xrefs-function #'ivy-xref-show-xrefs)
+          ))
 
 
 (use-package flx

@@ -945,7 +945,7 @@ See `eshell-prompt-regexp'."
                       "themes.el"
                       "modeline.el"
                       "helm.el"
-                      "ivy.el"
+                      ;;"ivy.el"
                       "selectrum.el"
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
