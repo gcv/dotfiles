@@ -60,14 +60,14 @@
   :defer t
   :config (progn
 
-            (add-to-list 'display-buffer-alist
-                         '("\\*cider-repl .*"
-                           (display-buffer-reuse-window display-buffer-in-side-window)
-                           (reusable-frames . visible)
-                           (side . bottom)
-                           (window-height . 0.2)))
+            ;; (add-to-list 'display-buffer-alist
+            ;;              '("\\*cider-repl .*"
+            ;;                (display-buffer-reuse-window display-buffer-in-side-window)
+            ;;                (reusable-frames . visible)
+            ;;                (side . bottom)
+            ;;                (window-height . 0.2)))
 
-            (setq cider-show-error-buffer t
+            (setq cider-show-error-buffer 'except-in-repl
                   cider-prompt-for-symbol nil
                   cider-repl-tab-command 'indent-for-tab-command
                   cider-repl-display-help-banner nil
