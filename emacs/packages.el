@@ -607,19 +607,15 @@
 
             (setq minibuffer-line-refresh-interval 5)
 
-            (defun /minibuffer-line-justify-right (text)
-              "Return a string of `window-width' length with TEXT right-aligned."
-              (with-selected-window (minibuffer-window)
-                (let ((offset (if (or (not window-system)
-                                      (zerop (mod (frame-native-width) (frame-char-width))))
-                                  1
-                                2)))
-                  (format (format "%%%ds" (- (window-width) offset)) text))))
-
             (setq minibuffer-line-format
-                  '("" (:eval (/minibuffer-line-justify-right
-                               (concat ;; (system-name) " | " (format-time-string "%F %R")
-                                (format-time-string "%R"))))))
+                  '("" (:eval
+                        (let ((time-str (format-time-string "%R")))
+                          (concat
+                           (propertize
+                            " "
+                            'display
+                            `(space :align-to (- right-fringe ,(string-width time-str) 1)))
+                           time-str)))))
 
             (minibuffer-line-mode 1)
 
