@@ -4,10 +4,10 @@
 
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
-;; Package-Commit: 82570c6685caf2b07da5848e1a81cc0c718dd961
+;; Package-Commit: 31380e7688c5e82965f72e5707cbff3ec2712ba9
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 20201023.1209
-;; Package-X-Original-Version: 1.8
+;; Package-Version: 20201113.838
+;; Package-X-Original-Version: 1.8.5
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -134,18 +134,21 @@ If nil, leave focus as is."
 A value of nil means don't autotomatically resize mini-frame.
 A value of t means autotomatically resize mini-frame.
 A value of `grow-only' means let mini-frame grow only.
+A value of `not-set' means to not override `resize-mini-frames'.
 
-If non-nil, `resize-mini-frames' will be set to
+If t or `grow-only', `resize-mini-frames' will be set to
 `mini-frame--resize-mini-frame' function.
 
 Option `resize-mini-frames' is available on Emacs 27 and later."
   :type '(choice (const :tag "Don't resize" nil)
                  (const :tag "Resize" t)
-                 (const :tag "Grow only" grow-only)))
+                 (const :tag "Grow only" grow-only)
+                 (const :tag "Don't set" not-set)))
 
 (defcustom mini-frame-resize-max-height nil
-  "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
-  :type 'integer)
+  "Max height boundary for mini-frame when `mini-frame-resize' is set."
+  :type '(choice (const :tag "Not set" nil)
+                 (integer :tag "Lines count")))
 
 (defcustom mini-frame-create-lazy t
   "Create mini-frame lazily.
@@ -178,14 +181,21 @@ If nil, mini-frame will be created on the mode activation."
             (mini-frame--shift-color (cadr bg) (cadr fg))
             (mini-frame--shift-color (caddr bg) (caddr fg)))))
 
+(defconst mini-frame--fit-frame-function
+  (if (functionp 'fit-frame-to-buffer-1)
+      'fit-frame-to-buffer-1
+    'fit-frame-to-buffer)
+  "Function used to fit mini-frame to buffer.")
+
 (defun mini-frame--resize-mini-frame (frame)
   "Resize FRAME vertically only.
 This function used as value for `resize-mini-frames' variable."
-  (fit-frame-to-buffer frame
-                       mini-frame-resize-max-height
-                       (when (eq mini-frame-resize 'grow-only)
-                         (frame-parameter frame 'height))
-                       nil nil 'vertically)
+  (funcall mini-frame--fit-frame-function
+           frame
+           mini-frame-resize-max-height
+           (when (eq mini-frame-resize 'grow-only)
+             (frame-parameter frame 'height))
+           nil nil 'vertically)
   (when (and (frame-live-p mini-frame-completions-frame)
              (frame-visible-p mini-frame-completions-frame))
     (let ((show-parameters (if (functionp mini-frame-completions-show-parameters)
@@ -319,7 +329,8 @@ ALIST is passed to `window--display-buffer'."
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame (if needed) and call FN with ARGS."
   (cond
-   ((or (minibufferp)
+   ((or (not (display-graphic-p))
+        (minibufferp)
         (and (symbolp this-command)
              (catch 'ignored
                (dolist (ignored-command mini-frame-ignore-commands)
@@ -340,8 +351,10 @@ ALIST is passed to `window--display-buffer'."
                (frame-visible-p mini-frame-frame))
       (make-frame-invisible mini-frame-frame))
     (let ((after-make-frame-functions nil)
-          (resize-mini-frames (when mini-frame-resize
-                                #'mini-frame--resize-mini-frame))
+          (resize-mini-frames (if (eq mini-frame-resize 'not-set)
+                                  resize-mini-frames
+                                (when mini-frame-resize
+                                  #'mini-frame--resize-mini-frame)))
           (display-buffer-alist
            (if mini-frame-handle-completions
                (append
@@ -371,12 +384,21 @@ ALIST is passed to `window--display-buffer'."
             (make-frame-invisible mini-frame-frame)
             (modify-frame-parameters mini-frame-frame '((parent-frame . nil))))))))))
 
+;; http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=2ecbf4cfae
+;; By default minibuffer is moved onto active frame leaving empty mini-frame.
+;; Disable this behavior on mini-frame-mode.
+(defvar minibuffer-follows-selected-frame)
+(defvar mini-frame--minibuffer-follows-selected-frame)
+
 ;;;###autoload
 (define-minor-mode mini-frame-mode
   "Show minibuffer in child frame on read-from-minibuffer."
   :global t
   (cond
    (mini-frame-mode
+    (when (boundp 'minibuffer-follows-selected-frame)
+      (setq mini-frame--minibuffer-follows-selected-frame minibuffer-follows-selected-frame)
+      (setq minibuffer-follows-selected-frame nil))
     (mapc #'(lambda (fn)
               (advice-add fn :around #'mini-frame-read-from-minibuffer))
           mini-frame-advice-functions)
@@ -388,6 +410,8 @@ ALIST is passed to `window--display-buffer'."
                       (setq mini-frame-frame
                             (mini-frame--make-frame '((minibuffer . only)))))))))
    (t
+    (when (boundp 'minibuffer-follows-selected-frame)
+      (setq minibuffer-follows-selected-frame mini-frame--minibuffer-follows-selected-frame))
     (mapc #'(lambda (fn)
               (advice-remove fn #'mini-frame-read-from-minibuffer))
           mini-frame-advice-functions)
