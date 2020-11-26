@@ -214,6 +214,7 @@ strings."
     (define-key map [remap previous-matching-history-element]
       #'selectrum-select-from-history)
     (define-key map (kbd "C-M-DEL") #'backward-kill-sexp)
+    (define-key map (kbd "C-M-<backspace>") #'backward-kill-sexp)
     (define-key map (kbd "C-j") #'selectrum-submit-exact-input)
     (define-key map (kbd "TAB") #'selectrum-insert-current-candidate)
 
@@ -347,15 +348,6 @@ Nil (the default) means to only highlight the displayed text."
   :type 'boolean)
 
 ;;;; Utility functions
-
-;;;###autoload
-(progn
-  (defmacro selectrum--when-compile (cond &rest body)
-    "Like `when', but COND is evaluated at compile time.
-If it's nil, BODY is not even compiled."
-    (declare (indent 1))
-    (when (eval cond)
-      `(progn ,@body))))
 
 (defun selectrum--clamp (x lower upper)
   "Constrain X to be between LOWER and UPPER inclusive.
@@ -660,17 +652,25 @@ PRED defaults to `minibuffer-completion-predicate'."
   (let ((annotf (or (selectrum--get-meta 'annotation-function table pred)
                     (plist-get completion-extra-properties
                                :annotation-function)))
+        (docsigf (plist-get completion-extra-properties
+                            :company-docsig))
         (strings (selectrum--normalize-collection
                   (or table minibuffer-completion-table)
                   (or pred minibuffer-completion-predicate))))
-    (cond (annotf
+    (cond ((or annotf docsigf)
            (let ((cands ()))
              (dolist (string strings (nreverse cands))
-               (push (propertize
-                      string
-                      'selectrum-candidate-display-suffix
-                      (selectrum--get-annotation-suffix
-                       string annotf))
+               (push (apply #'propertize
+                            string
+                            (append
+                             (when annotf
+                               (list 'selectrum-candidate-display-suffix
+                                     (selectrum--get-annotation-suffix
+                                      string annotf)))
+                             (when docsigf
+                               (list 'selectrum-candidate-display-right-margin
+                                     (selectrum--get-margin-docsig
+                                      string docsigf)))))
                      cands))))
           (t strings))))
 
@@ -725,21 +725,22 @@ PRED defaults to `minibuffer-completion-predicate'."
         ;; there's no special attention needed.
         (setq selectrum--visual-input nil)
         (let ((cands (if (functionp selectrum--preprocessed-candidates)
-                         (funcall selectrum-preprocess-candidates-function
-                                  (let ((result
-                                         (funcall
-                                          selectrum--preprocessed-candidates
-                                          input)))
-                                    (if (stringp (car result))
-                                        result
-                                      (setq input (or (alist-get 'input result)
-                                                      input))
-                                      (setq selectrum--visual-input input)
-                                      ;; Avoid modifying the returned
-                                      ;; candidates to let the function
-                                      ;; reuse them.
-                                      (copy-sequence
-                                       (alist-get 'candidates result)))) )
+                         (funcall
+                          selectrum-preprocess-candidates-function
+                          (let ((result
+                                 (funcall
+                                  selectrum--preprocessed-candidates
+                                  input)))
+                            ;; Avoid modifying the returned
+                            ;; candidates to let the function
+                            ;; reuse them.
+                            (copy-sequence
+                             (if (stringp (car result))
+                                 result
+                               (setq input (or (alist-get 'input result)
+                                               input))
+                               (setq selectrum--visual-input input)
+                               (alist-get 'candidates result)))))
                        selectrum--preprocessed-candidates)))
           (setq selectrum--total-num-candidates (length cands))
           (setq selectrum--refined-candidates
@@ -1250,6 +1251,8 @@ Zero means to select the current user input. See
 `selectrum-show-indices' which can be used to show candidate
 indices."
   (interactive "P")
+  (unless selectrum-active-p
+    (user-error "Cannot select a candidate when Selectrum is not active"))
   (let ((index (selectrum--index-for-arg arg)))
     (when (or (not selectrum--match-required-p)
               (and index (>= index 0))
@@ -1267,6 +1270,8 @@ indices."
 This differs from `selectrum-select-current-candidate' in that it
 ignores the currently selected candidate, if one exists."
   (interactive)
+  (unless selectrum-active-p
+    (user-error "Cannot select a candidate when Selectrum is not active"))
   (unless selectrum--match-required-p
     (selectrum--exit-with
      (buffer-substring-no-properties
@@ -1581,7 +1586,7 @@ Can be used as `completion-in-region-function'. For START, END,
 COLLECTION, and PREDICATE, see `completion-in-region'."
   (let* ((input (buffer-substring-no-properties start end))
          (meta (completion-metadata input collection predicate))
-         (category (cdr (assq 'category meta)))
+         (category (completion-metadata-get meta 'category))
          (bound (pcase category
                   ('file start)
                   (_ (+ start (car (completion-boundaries
@@ -1589,59 +1594,42 @@ COLLECTION, and PREDICATE, see `completion-in-region'."
          (exit-func (plist-get completion-extra-properties
                                :exit-function))
          (cands (nconc
+                 ;; `completion-styles' is used for the initial
+                 ;; filtering here internally! Selectrum doesn't use
+                 ;; `completion-styles' in other places yet. For
+                 ;; completion in region this matches the expected
+                 ;; behavior because the candidates should be
+                 ;; determined according to the sourrounding text
+                 ;; that gets completed for which
+                 ;; `completion-styles' is typically configured.
                  (completion-all-completions input collection predicate
                                              (- end start) meta)
                  nil))
+         ;; See doc of `completion-extra-properties'.
          (exit-status nil)
          (result nil))
     (if (null cands)
         (progn (unless completion-fail-discreetly (ding))
                (message "No match"))
       (pcase category
-        ('file (setq result (selectrum--completing-read-file-name
-                             "Completion: " collection predicate
-                             nil input))
-               (setq exit-status 'finished))
+        ('file
+         (setq result
+               (selectrum--completing-read-file-name
+                "Completion: " collection predicate
+                nil input)
+               exit-status 'finished))
         (_
-         (let* ((annotation-func (plist-get completion-extra-properties
-                                            :annotation-function))
-                (docsig-func (plist-get completion-extra-properties
-                                        :company-docsig))
-                (display-sort-func (cdr (assq 'display-sort-function meta)))
-                (cands (selectrum--map-destructive
-                        (lambda (cand)
-                          (propertize
-                           cand
-                           'selectrum-candidate-display-suffix
-                           (when annotation-func
-                             (selectrum--get-annotation-suffix
-                              cand annotation-func))
-                           'selectrum-candidate-display-right-margin
-                           (when docsig-func
-                             (selectrum--get-margin-docsig
-                              cand docsig-func))))
-                        cands))
-                (selectrum-should-sort-p selectrum-should-sort-p))
-           (when display-sort-func
-             (setq cands (funcall display-sort-func cands))
-             ;; FIXME: This will set `selectrum-should-sort-p' for any
-             ;; recursive minibuffer sessions, too.
-             (setq selectrum-should-sort-p nil))
-           (pcase (length cands)
-             ;; We already rule out the situation where `cands' is empty.
-             (`1 (setq result (car cands)))
-             ( _ (setq result (selectrum-read
-                               "Completion: " cands
-                               ;; Don't pass
-                               ;; `minibuffer-completion-table' and
-                               ;; `minibuffer-completion-predicate'
-                               ;; here because currently this function
-                               ;; handles all metadata for region
-                               ;; completion itself.
-                               :may-modify-candidates t))))
-           (setq exit-status
-                 (cond ((not (member result cands)) 'sole)
-                       (t 'finished))))))
+         (setq result
+               (if (not (cdr cands))
+                   (car cands)
+                 (selectrum-completing-read
+                  "Completion: "
+                  (lambda (string pred action)
+                    (if (eq action 'metadata)
+                        meta
+                      (complete-with-action action cands string pred)))))
+               exit-status (cond ((not (member result cands)) 'sole)
+                                 (t 'finished)))))
       (delete-region bound end)
       (insert (substring-no-properties result))
       (when exit-func

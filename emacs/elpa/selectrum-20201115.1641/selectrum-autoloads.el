@@ -9,10 +9,6 @@
 ;;;### (autoloads nil "selectrum" "selectrum.el" (0 0 0 0))
 ;;; Generated autoloads from selectrum.el
 
-(defmacro selectrum--when-compile (cond &rest body) "\
-Like `when', but COND is evaluated at compile time.
-If it's nil, BODY is not even compiled." (declare (indent 1)) (when (eval cond) `(progn ,@body)))
-
 (autoload 'selectrum-completing-read "selectrum" "\
 Read choice using Selectrum. Can be used as `completing-read-function'.
 For PROMPT, COLLECTION, PREDICATE, REQUIRE-MATCH, INITIAL-INPUT,
