@@ -44,6 +44,7 @@ nix-env -i \
     mosh \
     nmap \
     offlineimap \
+    pandoc \
     password-store \
     p7zip \
     pv \
