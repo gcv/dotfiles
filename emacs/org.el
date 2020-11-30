@@ -86,6 +86,7 @@
     (define-key org-mode-map (kbd "S-<right>") nil)
     (define-key org-mode-map (kbd "M-h") nil)
     (define-key org-mode-map (kbd "C-c C-z") nil)
+    (define-key org-mode-map (kbd "C-c C-p") nil)
     (define-key org-mode-map (kbd "C-c M-z") 'org-add-note)
     (define-key org-mode-map (kbd "M-C-<up>") 'org-timestamp-up)
     (define-key org-mode-map (kbd "M-C-<down>") 'org-timestamp-down)

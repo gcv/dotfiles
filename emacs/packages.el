@@ -78,6 +78,7 @@
               (paredit-mode 1)
               (define-key cider-mode-map (kbd "C-c C-,") #'cider-test-run-tests)
               (define-key cider-mode-map (kbd "C-c C-t") nil)
+              (define-key cider-repl-mode-map (kbd "C-c M-p") nil)
               (define-key cider-mode-map (kbd "C-c M-p") nil))
 
             (add-hook 'cider-mode-hook #'/cider-mode-hook)
