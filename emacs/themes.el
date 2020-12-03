@@ -300,3 +300,20 @@
    (/theme-face-spec 'ivy-posframe-border :background "#515462")
    (/theme-face-spec 'fringe :background "#515462" :foreground "#c6c6c6"))
   (apply #'custom-theme-set-faces 'doom-wilmersdorf (/theme-common)))
+
+
+(defun theme-nord ()
+  (interactive)
+  (disable-all-themes)
+  (load-theme 'nord t)
+  (custom-theme-set-faces
+   'nord
+   (/theme-face-spec 'button :weight 'bold :box nil)
+   (/theme-face-spec 'custom-button :weight 'bold :box nil)
+   (let ((bg (face-attribute 'default :background)))
+     (/theme-face-spec 'fringe :background bg))
+   (let ((bg (face-attribute 'mode-line :background)))
+     (/theme-face-spec 'mode-line :box `(:line-width 1 :color ,bg)))
+   (let ((bg (face-attribute 'mode-line-inactive :background)))
+     (/theme-face-spec 'mode-line-inactive :box `(:line-width 1 :color ,bg)))))
+  (apply #'custom-theme-set-faces 'nord (/theme-common)))

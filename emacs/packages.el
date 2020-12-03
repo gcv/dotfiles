@@ -645,6 +645,10 @@
   :mode "\\.nix$")
 
 
+(use-package nord-theme
+  :defer t)
+
+
 ;; turn on when built-in Org dependency is up-to-date
 ;;(use-package ob-async)
 
