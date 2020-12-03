@@ -236,7 +236,15 @@
   (load-theme 'modus-vivendi t)
   (custom-theme-set-faces
    'modus-vivendi
-   (/theme-face-spec 'org-hide :foreground "black" :background "black"))
+   (/theme-face-spec 'org-hide :foreground "black" :background "black")
+   (let ((bg "grey42")
+         (fg "grey90"))
+     (/theme-face-spec 'mode-line
+                       :background bg :foreground fg :box `(:line-width 1 :color ,bg)))
+   (let ((bg "grey32")
+         (fg "grey52"))
+     (/theme-face-spec 'mode-line-inactive
+                       :background bg :foreground fg :box `(:line-width 1 :color ,bg))))
   (apply #'custom-theme-set-faces 'modus-vivendi (/theme-common)))
 
 
