@@ -80,6 +80,10 @@
   :defer t)
 
 
+(use-package helm-org-rifle
+  :defer t)
+
+
 (use-package helm-projectile
   :defer nil                            ; must load eagerly
   :config (progn
