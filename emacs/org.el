@@ -68,6 +68,9 @@
   (org-crypt-use-before-save-magic)
   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
 
+  ;; open directory links in dired:
+  (add-to-list 'org-file-apps '(directory . emacs))
+
   (defun /org-mode-hook ()
     (setq mode-name "Ω")
     (diminish 'org-indent-mode)
