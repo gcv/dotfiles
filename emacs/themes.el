@@ -315,5 +315,5 @@
    (let ((bg (face-attribute 'mode-line :background)))
      (/theme-face-spec 'mode-line :box `(:line-width 1 :color ,bg)))
    (let ((bg (face-attribute 'mode-line-inactive :background)))
-     (/theme-face-spec 'mode-line-inactive :box `(:line-width 1 :color ,bg)))))
+     (/theme-face-spec 'mode-line-inactive :box `(:line-width 1 :color ,bg))))
   (apply #'custom-theme-set-faces 'nord (/theme-common)))
