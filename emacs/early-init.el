@@ -8,4 +8,5 @@
 (setq package-enable-at-startup nil)
 
 ;; set a very high garbage collection limit to improve startup speed
-(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-threshold 402653184
+      gc-cons-percentage 0.6)

@@ -952,7 +952,8 @@ See `eshell-prompt-regexp'."
     (load-file (expand-file-name (concat "../" f) (file-truename user-emacs-directory)))))
 
 ;; reset normal garbage collection limits (disabled in early-init.el)
-(setq gc-cons-threshold 800000)
+(setq gc-cons-threshold 800000
+      gc-cons-percentage 0.1)
 
 
 ;;; ----------------------------------------------------------------------------
