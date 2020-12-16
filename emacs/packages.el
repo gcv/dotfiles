@@ -711,6 +711,15 @@
             ))
 
 
+(use-package org-sidebar
+  :custom
+  (org-sidebar-jump-indirect nil)
+  (org-sidebar-tree-jump-fn #'org-sidebar-tree-jump-source))
+
+
+(use-package org-ql)
+
+
 (use-package origami
   :pin melpa
   :after (hydra)
