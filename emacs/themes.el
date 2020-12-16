@@ -14,6 +14,12 @@
   (setq custom--inhibit-theme-enable nil))
 
 
+(defun /theme-before-enable ()
+  (disable-all-themes)
+  (when (boundp 'mini-frame-frame)
+    (delete-frame mini-frame-frame)))
+
+
 (defun /theme-face-spec (face &rest merge-attrs)
   (let* ((attrs (a-merge (ignore-errors (face-all-attributes face (selected-frame)))
                          (apply #'a-alist merge-attrs))))
@@ -59,7 +65,7 @@
 
 (defun theme-zenburn ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'zenburn t)
   (let ((bg-ml "grey30")
 	(fg-ml "grey68")
@@ -109,7 +115,7 @@
 
 (defun theme-solarized-light ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'solarized-light t)
   (custom-theme-set-faces
    'solarized-light
@@ -125,7 +131,7 @@
 
 (defun theme-solarized-dark ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'solarized-dark t)
   (custom-theme-set-faces
    'solarized-dark
@@ -165,7 +171,7 @@
 
 (defun theme-leuven ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'leuven t)
   (custom-theme-set-faces
    'leuven
@@ -186,7 +192,7 @@
 
 (defun theme-material-dark ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'material t)
   (custom-theme-set-faces
    'material
@@ -204,7 +210,7 @@
 
 (defun theme-material-light ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'material-light t)
   (custom-theme-set-faces
    'material-light
@@ -222,7 +228,7 @@
 
 (defun theme-modus-operandi-light ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'modus-operandi t)
   (custom-theme-set-faces
    'modus-operandi
@@ -232,7 +238,7 @@
 
 (defun theme-modus-vivendi-dark ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'modus-vivendi t)
   (custom-theme-set-faces
    'modus-vivendi
@@ -250,7 +256,7 @@
 
 (defun theme-green-phosphor ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'green-phosphor t)
   (let ((base-color "#159e2b")
         (base-color-darker-1 "#107d23")
@@ -289,7 +295,7 @@
 
 (defun theme-wilmersdorf ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'doom-wilmersdorf t)
   (custom-theme-set-faces
    'doom-wilmersdorf
@@ -304,7 +310,7 @@
 
 (defun theme-nord ()
   (interactive)
-  (disable-all-themes)
+  (/theme-before-enable)
   (load-theme 'nord t)
   (custom-theme-set-faces
    'nord
