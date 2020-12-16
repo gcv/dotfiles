@@ -812,6 +812,8 @@
               (when (and (fboundp 'mini-frame--delete-frame)
                          (boundp 'mini-frame-frame))
                 (mini-frame--delete-frame mini-frame-frame))
+              (when (boundp 'mini-frame-frame)
+                (delete-frame mini-frame-frame))
               (when (fboundp 'posframe-delete-all)
 	        (posframe-delete-all)))
 
