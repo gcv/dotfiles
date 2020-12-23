@@ -613,6 +613,14 @@
 (setq ediff-split-window-function 'split-window-horizontally)
 
 
+;;; outline
+(use-feature outline-minor-mode
+  :hook (outline-minor-mode . /outline-minor-mode-hook)
+  :config
+  (defun /outline-minor-mode-hook ()
+    (local-set-key (kbd "H-o") 'org-cycle)))
+
+
 ;;; comint
 (setq comint-input-ignoredups t)
 
