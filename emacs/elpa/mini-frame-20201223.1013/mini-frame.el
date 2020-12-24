@@ -4,10 +4,10 @@
 
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
-;; Package-Commit: 31380e7688c5e82965f72e5707cbff3ec2712ba9
+;; Package-Commit: 0912cf4f500403be32735bc50e331fd06910471f
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 20201113.838
-;; Package-X-Original-Version: 1.8.5
+;; Package-Version: 20201223.1013
+;; Package-X-Original-Version: 1.9
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -154,6 +154,11 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
   "Create mini-frame lazily.
 If non-nil, mini-frame will be created on first use.
 If nil, mini-frame will be created on the mode activation."
+  :type 'boolean)
+
+(defcustom mini-frame-detach-on-hide t
+  "Detach mini-frame from parent frame on mini-frame hide.
+This allow to avoid mini-frame recreation in case its parent frame were deleted."
   :type 'boolean)
 
 
@@ -340,7 +345,8 @@ ALIST is passed to `window--display-buffer'."
                    (throw 'ignored t))))))
     (apply fn args))
    ((and (frame-live-p mini-frame-frame)
-         (frame-parameter mini-frame-frame 'parent-frame))
+         (frame-parameter mini-frame-frame 'parent-frame)
+         (frame-visible-p mini-frame-frame))
     (save-excursion
       (mini-frame--display fn args)))
    (t
@@ -382,7 +388,8 @@ ALIST is passed to `window--display-buffer'."
             (select-frame-set-input-focus mini-frame-selected-frame))
           (when (frame-live-p mini-frame-frame)
             (make-frame-invisible mini-frame-frame)
-            (modify-frame-parameters mini-frame-frame '((parent-frame . nil))))))))))
+            (when mini-frame-detach-on-hide
+              (modify-frame-parameters mini-frame-frame '((parent-frame . nil)))))))))))
 
 ;; http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=2ecbf4cfae
 ;; By default minibuffer is moved onto active frame leaving empty mini-frame.

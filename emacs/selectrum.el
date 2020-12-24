@@ -63,6 +63,7 @@
   :defer t
 
   :custom
+  (mini-frame-detach-on-hide nil)       ; workaround for hidden frames showing up
   (mini-frame-resize nil)               ; cannot be t until frame bugs are fixed
   (mini-frame-show-parameters
    '((top . 100)
