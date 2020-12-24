@@ -1178,8 +1178,7 @@
 
 (use-package yaml-mode
   :defer t
-  ;; Disabled: too slow.
-  ;;:hook (yaml-mode . /yaml-mode-outline-hook)
+  :hook (yaml-mode . /yaml-mode-outline-hook)
   :config (progn
 
             (defun /yaml-outline-level ()

@@ -618,7 +618,8 @@
   :hook (outline-minor-mode . /outline-minor-mode-hook)
   :config
   (defun /outline-minor-mode-hook ()
-    (local-set-key (kbd "H-o") 'org-cycle)))
+    (local-set-key (kbd "H-o") outline-mode-prefix-map)
+    (local-set-key (kbd "C-<tab>") 'outline-toggle-children)))
 
 
 ;;; comint
