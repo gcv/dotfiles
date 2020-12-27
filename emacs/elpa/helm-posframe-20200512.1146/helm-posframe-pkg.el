@@ -1,0 +1,2 @@
+;;; Generated package description from /Users/kostya/Code/dotfiles/emacs/elpa/helm-posframe-20200512.1146/helm-posframe.el  -*- no-byte-compile: t -*-
+(define-package "helm-posframe" "20200512.1146" "Using posframe to show helm window" '((emacs "26.0") (posframe "0.1.0") (helm "0.1")) :commit "b107e64eedef6292c49d590f30d320c29b64190b" :authors '(("Feng Shu")) :maintainer '("Feng Shu" . "tumashu@163.com") :keywords '("abbrev" "convenience" "matching" "helm") :url "https://github.com/tumashu/helm-posframe")

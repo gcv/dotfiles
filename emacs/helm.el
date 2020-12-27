@@ -84,6 +84,35 @@
   :defer t)
 
 
+(use-package helm-posframe
+  :pin melpa
+  :defer nil
+  :if window-system
+
+  :custom
+  (helm-posframe-poshandler #'(lambda (info)
+                                (cons (/ (- (plist-get info :parent-frame-width)
+                                            (plist-get info :posframe-width))
+                                         2)
+                                      100)))
+  (helm-posframe-parameters '((left-fringe . 5)
+                              (right-fringe . 5)))
+
+  :config
+  (defun /helm-posframe-display (orig-fn &rest args)
+    (let* ((frame (apply orig-fn args))
+           (bg (mini-frame-get-background-color frame)))
+      (set-face-attribute 'default frame :background bg)
+      (set-face-attribute 'fringe frame :background nil)
+      (set-face-attribute 'helm-source-header frame :box `(:color ,bg))))
+  (advice-add 'helm-posframe-display :around #'/helm-posframe-display)
+
+  ;; Not currently enabled by default. It works, but seems to delete the frame
+  ;; instead of hiding it all the time, which leads to slow frame recreation.
+  ;;(helm-posframe-enable)
+  )
+
+
 (use-package helm-projectile
   :defer nil                            ; must load eagerly
   :config (progn
