@@ -90,6 +90,7 @@
   :if window-system
 
   :custom
+  (helm-display-buffer-reuse-frame t)
   (helm-posframe-poshandler #'(lambda (info)
                                 (cons (/ (- (plist-get info :parent-frame-width)
                                             (plist-get info :posframe-width))
