@@ -617,21 +617,27 @@
 (use-feature outline-minor-mode
   :hook (outline-minor-mode . /outline-minor-mode-hook)
   :config
-  ;; TODO: Implement outline-cycle which combines outline-toggle-children and
-  ;; outline-toggle-subtree.
-  (defun outline-toggle-subtree ()
-    (interactive)
-    ;; this implements outline-toggle-subtree
-    (save-excursion
-      (outline-back-to-heading)
-      (if (not (outline-invisible-p (line-end-position)))
-          (outline-hide-subtree)
-        (outline-show-subtree)
-        (outline-show-entry))))
+  (let ((outline-cycle-state 0))
+    (defun outline-cycle ()
+      (interactive)
+      (cond ((and (not (= 2 outline-cycle-state))
+                  (outline-invisible-p (line-end-position)))
+             (outline-show-children)
+             (setq outline-cycle-state 1))
+            ((and (not (= 2 outline-cycle-state))
+                  (equal 'outline-cycle last-command))
+             (outline-show-subtree)
+             (setq outline-cycle-state 2))
+            ((or (= 2 outline-cycle-state)
+                 (and (not (outline-invisible-p (line-end-position)))
+                      (equal 'outline-cycle last-command)))
+             (outline-hide-subtree)
+             (setq outline-cycle-state 0))
+            (t (outline-hide-subtree)
+               (setq outline-cycle-state 0)))))
   (defun /outline-minor-mode-hook ()
     (local-set-key (kbd "H-o") outline-mode-prefix-map)
-    (local-set-key (kbd "C-<tab>") 'outline-toggle-children)
-    (local-set-key (kbd "C-S-<tab>") 'outline-toggle-subtree)))
+    (local-set-key (kbd "C-<tab>") 'outline-cycle)))
 
 
 ;;; comint
