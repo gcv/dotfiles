@@ -1,9 +1,12 @@
+;;; -*- lexical-binding: t -*-
+
 (setq package-user-dir (file-truename "~/.emacs.d/elpa/"))
 (setq user-emacs-directory (file-truename "~/.emacs.d/user/"))
 
-(tool-bar-mode -1)                                              ; remove the toolbar
-(scroll-bar-mode -1)                                            ; no scrollbars (bugs on Mac OS)
-(menu-bar-mode -1)                                              ; remove the menu bar
+(when window-system
+  (tool-bar-mode -1))                                           
+(scroll-bar-mode -1)
+(menu-bar-mode -1)
 
 (setq package-enable-at-startup nil)
 
