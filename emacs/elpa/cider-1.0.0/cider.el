@@ -11,8 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: http://www.github.com/clojure-emacs/cider
-;; Version: 0.26.1
-;; Package-Requires: ((emacs "25") (clojure-mode "5.12") (parseedn "0.1") (pkg-info "0.4") (queue "0.2") (spinner "1.7") (seq "2.16") (sesman "0.3.2"))
+;; Version: 1.0.0
+;; Package-Requires: ((emacs "25") (clojure-mode "5.12") (parseedn "0.2") (pkg-info "0.4") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -33,11 +33,12 @@
 ;;; Commentary:
 
 ;; Provides a Clojure interactive development environment for Emacs, built on
-;; top of nREPL.
+;; top of nREPL.  See https://docs.cider.mx for more details.
 
 ;;; Installation:
 
-;; Available as a package in melpa.org and stable.melpa.org
+;; CIDER is available as a package in melpa.org and stable.melpa.org.  First, make sure you've
+;; enabled one of the repositories in your Emacs config:
 
 ;; (add-to-list 'package-archives
 ;;              '("melpa" . "https://melpa.org/packages/"))
@@ -46,10 +47,14 @@
 ;;
 ;; (add-to-list 'package-archives
 ;;              '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-;;
+
+;; Afterwards, installing CIDER is as easy as:
+
 ;; M-x package-install cider
 
 ;;; Usage:
+
+;; You can start CIDER with one of the following commands:
 
 ;; M-x cider-jack-in-clj
 ;; M-x cider-jack-in-cljs
@@ -87,12 +92,12 @@
 (require 'seq)
 (require 'sesman)
 
-(defconst cider-version "0.26.1"
+(defconst cider-version "1.0.0"
   "Fallback version used when it cannot be extracted automatically.
 Normally it won't be used, unless `pkg-info' fails to extract the
 version from the CIDER package or library.")
 
-(defconst cider-codename "Nesebar"
+(defconst cider-codename "Sofia"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -359,6 +364,10 @@ Throws an error if PROJECT-TYPE is unknown."
 
 (defun cider-jack-in-params (project-type)
   "Determine the commands params for `cider-jack-in' for the PROJECT-TYPE."
+  ;; The format of these command-line strings must consider different shells,
+  ;; different values of IFS, and the possibility that they'll be run remotely
+  ;; (e.g. with TRAMP). Using `", "` causes problems with TRAMP, for example.
+  ;; Please be careful when changing them.
   (pcase project-type
     ('lein        cider-lein-parameters)
     ('boot        cider-boot-parameters)
@@ -368,7 +377,7 @@ Throws an error if PROJECT-TYPE is unknown."
                            (mapconcat
                             (apply-partially #'format "\"%s\"")
                             (cider-jack-in-normalized-nrepl-middlewares)
-                            ", ")
+                            ",")
                            "]")))
     ('shadow-cljs cider-shadow-cljs-parameters)
     ('gradle      cider-gradle-parameters)
@@ -382,13 +391,13 @@ Throws an error if PROJECT-TYPE is unknown."
 ;; We inject the newest known version of nREPL just in case
 ;; your version of Boot or Leiningen is bundling an older one.
 (cider-add-to-alist 'cider-jack-in-dependencies
-                    "nrepl" "0.8.0")
+                    "nrepl/nrepl" "0.8.3")
 
 (defvar cider-jack-in-cljs-dependencies nil
   "List of dependencies where elements are lists of artifact name and version.
 Added to `cider-jack-in-dependencies' when doing `cider-jack-in-cljs'.")
 (put 'cider-jack-in-cljs-dependencies 'risky-local-variable t)
-(cider-add-to-alist 'cider-jack-in-cljs-dependencies "cider/piggieback" "0.5.1")
+(cider-add-to-alist 'cider-jack-in-cljs-dependencies "cider/piggieback" "0.5.2")
 
 (defvar cider-jack-in-dependencies-exclusions nil
   "List of exclusions for jack in dependencies.
@@ -404,7 +413,7 @@ Elements of the list are artifact name and list of exclusions to apply for the a
 (defconst cider-latest-clojure-version "1.10.1"
   "Latest supported version of Clojure.")
 
-(defconst cider-required-middleware-version "0.25.3"
+(defconst cider-required-middleware-version "0.25.5"
   "The CIDER nREPL version that's known to work properly with CIDER.")
 
 (defcustom cider-jack-in-auto-inject-clojure nil
@@ -559,16 +568,16 @@ removed, LEIN-PLUGINS, and finally PARAMS."
 
 (defun cider-clojure-cli-jack-in-dependencies (global-opts params dependencies)
   "Create Clojure tools.deps jack-in dependencies.
-Does so by concatenating GLOBAL-OPTS, DEPENDENCIES finally PARAMS."
+Does so by concatenating DEPENDENCIES, GLOBAL-OPTS and PARAMS."
   (let ((dependencies (append dependencies cider-jack-in-lein-plugins)))
     (concat
-     global-opts
-     (unless (seq-empty-p global-opts) " ")
      "-Sdeps '{:deps {"
      (mapconcat #'identity
                 (seq-map (lambda (dep) (format "%s {:mvn/version \"%s\"}" (car dep) (cadr dep))) dependencies)
                 " ")
      "}}' "
+     global-opts
+     (unless (seq-empty-p global-opts) " ")
      params)))
 
 (defun cider-shadow-cljs-jack-in-dependencies (global-opts params dependencies)
@@ -710,6 +719,11 @@ Generally you should not disable this unless you run into some faulty check."
       options
     (concat ":" options)))
 
+(defcustom cider-shadow-watched-builds nil
+  "Defines the list of builds `shadow-cljs' should watch."
+  :type '(repeat string)
+  :package-version '(cider . "1.0"))
+
 (defcustom cider-shadow-default-options nil
   "Defines default `shadow-cljs' options."
   :type 'string
@@ -749,17 +763,26 @@ not just a string."
 We have to prompt the user to select a build, that's why
 this is a command, not just a string."
   (let* ((shadow-require "(require '[shadow.cljs.devtools.api :as shadow])")
+
+         (default-build (cider-normalize-cljs-init-options
+                         (or cider-shadow-default-options
+                             (car cider-shadow-watched-builds)
+                             (completing-read "Select shadow-cljs build: "
+                                              (cider--shadow-get-builds)))))
+
+         (watched-builds (or (mapcar #'cider-normalize-cljs-init-options cider-shadow-watched-builds)
+                             (list default-build)))
+
+         (watched-builds-form (mapconcat (lambda (build) (format "(shadow/watch %s)" build))
+                                         watched-builds
+                                         " "))
          ;; form used for user-defined builds
-         (user-build-form "(do %s (shadow/watch %s) (shadow/nrepl-select %s))")
+         (user-build-form "(do %s %s (shadow/nrepl-select %s))")
          ;; form used for built-in builds like :browser-repl and :node-repl
-         (default-build-form "(do %s (shadow/%s))")
-         (options (or cider-shadow-default-options
-                      (completing-read "Select shadow-cljs build: "
-                                       (cider--shadow-get-builds))))
-         (build (cider-normalize-cljs-init-options options)))
-    (if (member build '(":browser-repl" ":node-repl"))
-        (format default-build-form shadow-require (string-remove-prefix ":" build))
-      (format user-build-form shadow-require build build))))
+         (default-build-form "(do %s (shadow/%s))"))
+    (if (member default-build '(":browser-repl" ":node-repl"))
+        (format default-build-form shadow-require (string-remove-prefix ":" default-build))
+      (format user-build-form shadow-require watched-builds-form default-build))))
 
 (defcustom cider-figwheel-main-default-options nil
   "Defines the `figwheel.main/start' options.
@@ -1337,8 +1360,8 @@ canceled the action, signal quit."
     (when session
       (unless (y-or-n-p
                (concat
-                "A session with the same parameters exists (" (car session) ").  "
-                "You can connect a sibling instead.  Proceed? "))
+                "A CIDER session with the same connection parameters already exists (" (car session) ").  "
+                "Are you sure you want to create a new session instead of using `cider-connect-sibling-clj(s)'?  "))
         (let ((debug-on-quit nil))
           (signal 'quit nil)))))
   params)
@@ -1346,24 +1369,10 @@ canceled the action, signal quit."
 
 ;;; Aliases
 
- ;;;###autoload
-(defalias 'cider-jack-in #'cider-jack-in-clj)
- ;;;###autoload
-(define-obsolete-function-alias 'cider-jack-in-clojure 'cider-jack-in-clj "0.22")
 ;;;###autoload
-(define-obsolete-function-alias 'cider-jack-in-clojurescript 'cider-jack-in-cljs "0.22")
-
+(defalias 'cider-jack-in #'cider-jack-in-clj)
 ;;;###autoload
 (defalias 'cider-connect #'cider-connect-clj)
-;;;###autoload
-(define-obsolete-function-alias 'cider-connect-clojure 'cider-connect-clj "0.22")
-;;;###autoload
-(define-obsolete-function-alias 'cider-connect-clojurescript 'cider-connect-cljs "0.22")
-
-;;;###autoload
-(define-obsolete-function-alias 'cider-connect-sibling-clojure 'cider-connect-sibling-clj "0.22")
-;;;###autoload
-(define-obsolete-function-alias 'cider-connect-sibling-clojurescript 'cider-connect-sibling-cljs "0.22")
 
 
 ;;; Helpers

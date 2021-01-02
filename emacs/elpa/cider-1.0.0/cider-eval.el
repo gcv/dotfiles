@@ -710,9 +710,11 @@ This is used by pretty-printing commands."
 
 (defvar cider-to-nrepl-filename-function
   (with-no-warnings
-    (if (eq system-type 'cygwin)
-        #'cygwin-convert-file-name-to-windows
-      #'identity))
+    (lambda (path)
+      (let ((path* (if (eq system-type 'cygwin)
+                       (cygwin-convert-file-name-to-windows path)
+                     path)))
+        (or (cider--translate-path-to-nrepl path*) path*))))
   "Function to translate Emacs filenames to nREPL namestrings.")
 
 (defun cider--prep-interactive-eval (form connection)
@@ -800,7 +802,9 @@ buffer."
     ;; we have to be sure the evaluation won't result in an error
     (cider-nrepl-sync-request:eval last-sexp)
     ;; seems like the sexp is valid, so we can safely kill it
-    (backward-kill-sexp)
+    (let ((opoint (point)))
+      (clojure-backward-logical-sexp)
+      (kill-region (point) opoint))
     (cider-interactive-eval last-sexp
                             (cider-eval-print-handler)
                             nil
