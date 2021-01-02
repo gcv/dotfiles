@@ -25,8 +25,13 @@
 (defvar crm-separator)
 (defvar ido-everywhere)
 (defvar completion-flex-nospace)
+(defvar helm-completion--sorting-done)
+(defvar helm-mode)
 
 (declare-function ido-mode "ido.el")
+(declare-function helm-apropos-init "helm-elisp")
+(declare-function helm-lisp-completion-persistent-action "helm-elisp")
+(declare-function helm-lisp-completion-persistent-help "helm-elisp")
 
 (defgroup helm-mode nil
   "Enable helm completion."
@@ -160,6 +165,9 @@ Apply only in `helm-mode' handled commands."
 When nil no sorting is done.
 The function is a `filtered-candidate-transformer' function which takes
 two args CANDIDATES and SOURCE.
+The function must use the flag `helm-completion--sorting-done' and
+return CANDIDATES unchanged when the flag is nil.
+See default function `helm-completion-in-region-sort-fn' as example.
 It will be used only when `helm-completion-style' is either Emacs or
 helm, otherwise when helm-fuzzy style is used, the fuzzy sort function
 will be used."
@@ -316,6 +324,17 @@ i.e. completing-read's."
 ;;; helm-comp-read
 ;;
 ;;
+(defvar helm-comp-read-use-marked nil
+  "[INTERNAL] When non nil `helm-comp-read' will return marked candidates.
+
+Use this ONLY in `let', NOT globally, this allows third party packages
+to use a list as return value when `helm-mode' is enabled, e.g.
+
+    (let ((helm-comp-read-use-marked t))
+      (completing-read \"test: \" '(a b c d e f g)))
+
+")
+
 (defun helm-cr-empty-string ()
   "Return empty string."
   (interactive)
@@ -494,7 +513,10 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
                                 ;; Don't convert
                                 ;; nil to "nil" (i.e the string)
                                 ;; it will be delq'ed on top.
-                                collect (if (null d) d (helm-stringify d)))
+                                for str = (if (null d) d (helm-stringify d))
+                                when (member str cands)
+                                do (setq cands (delete d cands))
+                                when str collect str)
                        cands))
               (t cands))))
 
@@ -530,7 +552,7 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
                             sort
                             fc-transformer
                             hist-fc-transformer
-                            marked-candidates
+                            (marked-candidates helm-comp-read-use-marked)
                             nomark
                             (alistp t)
                             (candidate-number-limit helm-candidate-number-limit)
@@ -867,7 +889,7 @@ It should be used when candidate list doesn't need to be rebuilt dynamically."
                                     (eq require-match
                                         'confirm-after-completion)))
                            1 0)
-     :nomark t
+     :nomark (null helm-comp-read-use-marked)
      :candidates-in-buffer cands-in-buffer
      :exec-when-only-one exec-when-only-one
      :fuzzy helm-mode-fuzzy-match
@@ -965,7 +987,7 @@ This handler uses dynamic matching which allows honouring `completion-styles'."
          :initial-input input
          :buffer buffer
          :history history
-         :nomark t
+         :nomark (null helm-comp-read-use-marked)
          :reverse-history helm-mode-reverse-history
          ;; In helm h-c-styles default is passed directly in
          ;; candidates.
@@ -1029,12 +1051,25 @@ This handler uses dynamic matching which allows honouring `completion-styles'."
            init hist default inherit-input-method
            name buffer standard)))
 
+(defun helm-mode--read-buffer-to-switch (prompt)
+  "[INTERNAL] This is used to advice `read-buffer-to-switch'.
+Don't use it directly."
+  ;; `read-buffer-to-switch' is passing `minibuffer-completion-table'
+  ;; to `read-buffer' through `minibuffer-setup-hook' which is too
+  ;; late to be known by `read-buffer-function', in our case
+  ;; `helm--generic-read-buffer'.  It should let bind it to allow us
+  ;; using it. 
+  (let ((minibuffer-completion-table (internal-complete-buffer-except)))
+    (read-buffer prompt (other-buffer (current-buffer))
+                 (confirm-nonexistent-file-or-buffer))))
+
 (defun helm--generic-read-buffer (prompt &optional default require-match predicate)
   "The `read-buffer-function' for `helm-mode'.
-Affects `switch-to-buffer' and related."
-  (let ((collection (helm-buffer-list)))
-    (helm--completing-read-default
-     prompt collection predicate require-match nil nil default)))
+Affects `switch-to-buffer' `kill-buffer' and related."
+  (helm--completing-read-default
+   prompt (or minibuffer-completion-table
+              (internal-complete-buffer "" nil t))
+   predicate require-match nil nil default))
 
 (cl-defun helm--completing-read-default
     (prompt collection &optional
@@ -1077,6 +1112,7 @@ See documentation of `completing-read' and `all-completions' for details."
           (cl-loop for h in minibuffer-setup-hook
                    unless (or (consp h) ; a lambda.
                               (byte-code-function-p h)
+                              (helm-subr-native-elisp-p h)
                               (memq h helm-mode-minibuffer-setup-hook-black-list))
                    collect h))
          ;; Disable hack that could be used before `completing-read'.
@@ -1353,9 +1389,14 @@ Don't use it directly, use instead `helm-read-file-name' in your programs."
          ;; in helm specialized functions.
          (others-args (append def-args (list str-command buf-name)))
          (reading-directory (eq predicate 'file-directory-p))
+         (use-dialog (and (next-read-file-uses-dialog-p)
+                          ;; Graphical file dialogs can't handle
+                          ;; remote files.
+                          (not (file-remote-p init))
+                          use-file-dialog))
          helm-completion-mode-start-message ; Be quiet
          helm-completion-mode-quit-message  ; Same here
-         fname)
+         add-to-history fname)
     ;; Build `default-filename' with `dir'+`initial' when
     ;; `default-filename' is not specified.
     ;; See `read-file-name' docstring for more infos.
@@ -1378,22 +1419,34 @@ Don't use it directly, use instead `helm-read-file-name' in your programs."
                (helm-mode -1)
                (apply read-file-name-function def-args))
           (helm-mode 1))))
-    ;; If we use now `read-file-name' we MUST turn off `helm-mode'
+    ;; If we use now `read-file-name' or dialog we MUST turn off `helm-mode'
     ;; to avoid infinite recursion and CRASH. It will be reenabled on exit.
-    (when (or (eq def-com 'read-file-name)
-              (eq def-com 'ido-read-file-name)
+    (when (or (memq def-com '(read-file-name ido-read-file-name))
+              use-dialog
               (and (stringp str-defcom)
                    (not (string-match "^helm" str-defcom))))
       (helm-mode -1))
     (unwind-protect
          (setq fname
-               (cond (;; A specialized function exists, run it
-                      ;; with the two extra args specific to helm.
-                      ;; Note that the helm handler should ensure
-                      ;; :initial-input is not nil i.e. Use init
-                      ;; which fallback to default-directory instead
-                      ;; of INITIAL.
-                      (and def-com helm-mode
+               (cond (use-dialog
+                      (let ((dialog-mustmatch
+                             (not (memq mustmatch
+                                        '(nil confirm confirm-after-completion)))))
+                        ;; Dialogs don't support a list of default fnames.
+                        (when (and default-filename (consp default-filename))
+                          (setq default-filename
+                                (expand-file-name (car default-filename) init)))
+                        (setq add-to-history t)
+                        (x-file-dialog prompt init default-filename
+                                       dialog-mustmatch
+                                       reading-directory)))
+                     ;; A specialized function exists, run it
+                     ;; with the two extra args specific to helm.
+                     ;; Note that the helm handler should ensure
+                     ;; :initial-input is not nil i.e. Use init
+                     ;; which fallback to default-directory instead
+                     ;; of INITIAL.
+                     ((and def-com helm-mode
                            (not (eq def-com 'ido-read-file-name))
                            (not (eq def-com 'incompatible)))
                       (apply def-com others-args))
@@ -1406,7 +1459,7 @@ Don't use it directly, use instead `helm-read-file-name' in your programs."
                       ;; run it with default args.
                       (eq def-com 'read-file-name)
                       (apply def-com def-args))
-                     (t ; Fall back to classic `helm-read-file-name'.
+                     (t  ; Fall back to classic `helm-read-file-name'.
                       (helm-read-file-name
                        prompt
                        :name str-command
@@ -1422,13 +1475,17 @@ Don't use it directly, use instead `helm-read-file-name' in your programs."
       (helm-mode 1)
       ;; Same comment as in `helm--completing-read-default'.
       (setq this-command current-command))
+    (when add-to-history
+      (add-to-history 'file-name-history
+                      (minibuffer-maybe-quote-filename fname)))
     (if (and
          ;; Using `read-directory-name'.
          reading-directory
          ;; `file-name-as-directory' return "./" when FNAME is
          ;; empty string.
          (not (string= fname "")))
-        (file-name-as-directory fname) fname)))
+        (file-name-as-directory fname)
+      fname)))
 
 ;; Read file name handler with history (issue #1652)
 (defun helm-read-file-name-handler-1 (prompt dir default-filename
@@ -1589,7 +1646,8 @@ Actually does nothing."
          (bounds (completion-boundaries beforepoint table pred afterpoint))
          (prefix (substring beforepoint 0 (car bounds)))
          (suffix (substring afterpoint (cdr bounds)))
-         (all (helm-completion--multi-all-completions-1 string table pred)))
+         (all (helm-completion--multi-all-completions-1
+               (regexp-quote string) table pred)))
     (list all string prefix suffix point)))
 
 ;; The adjust-metadata functions run only in emacs-27, they are NOT
@@ -1634,7 +1692,7 @@ Actually does nothing."
                          (length prefix)))))))
 
 (defun helm-flex-add-score-as-prop (candidates regexp)
-  (cl-loop with case-fold-search = (helm-set-case-fold-search) 
+  (cl-loop with case-fold-search = (helm-set-case-fold-search)
            for cand in candidates
            collect (helm-flex--style-score cand regexp)))
 
@@ -1688,6 +1746,12 @@ Can be used for `completion-in-region-function' by advicing it with an
      'lisp--local-variables
      :around #'helm-mode--advice-lisp--local-variables)
     (let ((old--helm-completion-style helm-completion-style)
+          (exit-fun (plist-get completion-extra-properties :exit-function))
+          ;; Always start with prefix to allow completing without
+          ;; the need of inserting a space after cursor or
+          ;; relaying on crap old completion-styles emacs22 which
+          ;; add suffix after prefix. e.g. def|else.
+          (initial-input (buffer-substring-no-properties start (point)))
           string)
       (helm-aif (cdr (assq major-mode helm-completion-styles-alist))
           (customize-set-variable 'helm-completion-style
@@ -1701,14 +1765,18 @@ Can be used for `completion-in-region-function' by advicing it with an
                  (completion-flex-nospace t)
                  (completion-styles (helm--prepare-completion-styles))
                  (input (buffer-substring-no-properties start end))
-                 ;; Always start with prefix to allow completing without
-                 ;; the need of inserting a space after cursor or
-                 ;; relaying on crap old completion-styles emacs22 which
-                 ;; add suffix after prefix. e.g. def|else.
-                 (initial-input (buffer-substring-no-properties start (point)))
                  (prefix (and (eq helm-completion-style 'emacs) initial-input))
                  (point (point))
-                 (current-command (or (helm-this-command) this-command))
+                 (current-command (or (helm-this-command)
+                                      this-command
+                                      ;; Some backends are async and
+                                      ;; use a callback, in those
+                                      ;; cases, we can't retrieve from
+                                      ;; frames the last interactive
+                                      ;; command, so fallback to
+                                      ;; `last-command' which may be
+                                      ;; the one that called the callback.
+                                      last-command))
                  (crm (eq current-command 'crm-complete))
                  (str-command (helm-symbol-name current-command))
                  (buf-name (format "*helm-mode-%s*" str-command))
@@ -1836,29 +1904,53 @@ Can be used for `completion-in-region-function' by advicing it with an
                               t)        ; exit minibuffer immediately.
                             :must-match require-match))))
             ;; `helm-completion-in-region--insert-result' is stripping
-            ;; out properties on RESULT and by side-effect (perhaps
-            ;; `choose-completion-string'?) modify STRING so make a copy.
+            ;; out properties on RESULT by side-effect (perhaps
+            ;; `choose-completion-string'?) so make a copy of STRING
+            ;; to not loose props.
             (setq string (copy-sequence result))
-            (helm-completion-in-region--insert-result result start point end base-size))
-        ;; Allow running extra property :exit-function (Issue #2265)
-        (when (stringp string)
-          (completion--done string 'exact))
+            (helm-completion-in-region--insert-result
+             result start point end base-size))
+        ;; Allow running extra property `:exit-function' (Issues #2265,
+        ;; #2356). Function is called with 'exact if for a unique
+        ;; match which is exact, the return value of `try-completion'
+        ;; is t, otherwise it is called with 'finished.
+        (when (and (stringp string) exit-fun)
+          (funcall exit-fun string
+                   (if (eq (try-completion initial-input collection) t)
+                       'exact 'finished)))
         (remove-hook 'helm-before-action-hook 'helm-completion-in-region--selection)
         (customize-set-variable 'helm-completion-style old--helm-completion-style)
         (setq helm-completion--sorting-done nil)
         (advice-remove 'lisp--local-variables
                        #'helm-mode--advice-lisp--local-variables)))))
 
+(defvar helm-crm-default-separator ","
+  "Default separator for `completing-read-multiple'.
+
+`crm-separator' will take precedence on this when it is a string composed
+of a single character.
+If used globally, it is a string composed of a single character,
+if let-bounded, it can be also nil or a symbol which mean no
+separator.  Don't set this to a string composed of more than one
+character.
+Be sure to know what you are doing when modifying this.")
 (defun helm-completion-in-region--insert-result (result start point end base-size)
   (cond ((stringp result)
+         ;; When RESULT have annotation, annotation is displayed
+         ;; in it with a display property attached to a space
+         ;; added at end of string, take care of removing this
+         ;; space (issue #2360). However keep RESULT intact to
+         ;; pass it to `:exit-function' i.e. Don't store the
+         ;; modified string in STRING.
          (choose-completion-string
-          result (current-buffer)
+          (replace-regexp-in-string " \\'" "" result)
+          (current-buffer)
           (list (+ start base-size) point)
           completion-list-insert-choice-function)
          (when helm-completion-mark-suffix
            (run-with-idle-timer 0.01 nil
                                 (lambda ()
-                                  (helm-aand 
+                                  (helm-aand
                                    (+ (- (point) point) end)
                                    (and (> it (point)) it)
                                    (push-mark  it t t))))))
@@ -1871,13 +1963,19 @@ Can be used for `completion-in-region-function' by advicing it with an
                          ;; it matches or default to "," if no match.
                          (eq (length crm-separator) 1)
                          crm-separator)
-                        ",")))
+                        helm-crm-default-separator)))
            ;; Try to find a default separator. If `crm-separator' is a
            ;; regexp use the string the regexp is matching.
-           (save-excursion
-             (goto-char beg)
-             (when (looking-back crm-separator (1- (point)))
-               (setq sep (match-string 0))))
+           ;; If SEP is not a string, it have been probably bound to a
+           ;; symbol or nil through `helm-crm-default-separator' that serve
+           ;; as a flag to say "Please no separator" (Issue #2353 with
+           ;; `magit-completing-read-multiple').
+           (if (stringp sep)
+               (save-excursion
+                 (goto-char beg)
+                 (when (looking-back crm-separator (1- (point)))
+                   (setq sep (match-string 0))))
+             (setq sep nil))
            (funcall completion-list-insert-choice-function
                     beg end (mapconcat 'identity (append result '("")) sep))))
         (t nil)))
@@ -1949,8 +2047,9 @@ Note: This mode is incompatible with Emacs23."
         (when (fboundp 'ffap-read-file-or-url-internal)
           ;; `ffap-read-file-or-url-internal' have been removed in
           ;; emacs-27 and `ffap-read-file-or-url' is fixed, so no need
-          ;; to advice it. 
-          (advice-add 'ffap-read-file-or-url :override #'helm-advice--ffap-read-file-or-url)))
+          ;; to advice it.
+          (advice-add 'ffap-read-file-or-url :override #'helm-advice--ffap-read-file-or-url))
+        (advice-add 'read-buffer-to-switch :override #'helm-mode--read-buffer-to-switch))
     (progn
       (remove-function completing-read-function #'helm--completing-read-default)
       (remove-function read-file-name-function #'helm--generic-read-file-name)
@@ -1958,7 +2057,8 @@ Note: This mode is incompatible with Emacs23."
       (remove-function completion-in-region-function #'helm--completion-in-region)
       (remove-hook 'ido-everywhere-hook #'helm-mode--ido-everywhere-hook)
       (when (fboundp 'ffap-read-file-or-url-internal)
-        (advice-remove 'ffap-read-file-or-url #'helm-advice--ffap-read-file-or-url)))))
+        (advice-remove 'ffap-read-file-or-url #'helm-advice--ffap-read-file-or-url))
+      (advice-remove 'read-buffer-to-switch #'helm-mode--read-buffer-to-switch))))
 
 (provide 'helm-mode)
 

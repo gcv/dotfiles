@@ -23,7 +23,11 @@
 (require 'helm-help)
 (require 'helm-utils)
 
-(declare-function 'helm-buffers-get-visible-buffers "helm-buffers.el")
+(declare-function helm-buffers-get-visible-buffers "helm-buffers")
+(declare-function helm-buffer-list "helm-buffers")
+(declare-function helm-grep-split-line "helm-grep")
+(declare-function helm-grep-highlight-match "helm-grep")
+(declare-function helm-comp-read "helm-mode")
 
 ;;; Internals
 ;;
@@ -121,13 +125,13 @@ Note that when using `buffer-substring' initialization will be slower."
 
 (defface helm-moccur-buffer
   `((t ,@(and (>= emacs-major-version 27) '(:extend t))
-       (:foreground "DarkTurquoise" :underline t)))
+       :foreground "DarkTurquoise" :underline t))
   "Face used to highlight occur buffer names."
   :group 'helm-occur)
 
 (defface helm-resume-need-update
   `((t ,@(and (>= emacs-major-version 27) '(:extend t))
-       (:background "red")))
+       :background "red"))
   "Face used to flash occur buffer when it needs update."
   :group 'helm-occur)
 
@@ -281,7 +285,7 @@ Each buffer's result is displayed in a separated source."
                             finally return (> total_size 2000000))
              helm-sources-using-default-as-input))
          (sources (helm-occur-build-sources bufs))
-         (helm--maybe-use-default-as-input
+         (helm-maybe-use-default-as-input
           (not (null (memq 'helm-source-moccur
                            helm-sources-using-default-as-input)))))
     (helm-set-local-variable 'helm-occur--buffer-list bufs

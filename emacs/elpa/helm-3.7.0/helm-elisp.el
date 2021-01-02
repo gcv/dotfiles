@@ -26,9 +26,11 @@
 (require 'helm-eval)
 (require 'helm-files)
 
-(declare-function 'helm-describe-function "helm-lib")
-(declare-function 'helm-describe-variable "helm-lib")
-(declare-function 'helm-describe-face "helm-lib")
+(declare-function helm-describe-function "helm-lib")
+(declare-function helm-describe-variable "helm-lib")
+(declare-function helm-describe-face "helm-lib")
+(declare-function helm-read-file-name "helm-mode")
+(declare-function helm-comp-read "helm-mode")
 
 
 ;;; Customizable values
@@ -628,9 +630,7 @@ double quote."
                          (helm-elisp--persistent-help
                           candidate 'helm-describe-function))
     :persistent-help "Toggle describe command"
-    :action '(("Describe function" . helm-describe-function)
-              ("Find function" . helm-find-function)
-              ("Info lookup" . helm-info-lookup-symbol))))
+    :action 'helm-type-function-actions))
 
 (defun helm-def-source--emacs-functions (&optional default)
   (helm-build-in-buffer-source "Functions"
@@ -649,9 +649,7 @@ double quote."
                           candidate 'helm-describe-function))
     :persistent-help "Toggle describe function"
     :nomark t
-    :action '(("Describe function" . helm-describe-function)
-              ("Find function" . helm-find-function)
-              ("Info lookup" . helm-info-lookup-symbol))))
+    :action 'helm-type-function-actions))
 
 (defun helm-def-source--eieio-classes (&optional default)
   (helm-build-in-buffer-source "Classes"

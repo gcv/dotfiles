@@ -24,6 +24,13 @@
 (require 'cl-lib)
 (require 'eieio)
 
+(defvar helm-map)
+(defvar helm-mode-line-string)
+(defvar helm-bookmark-map)
+(declare-function helm-make-actions "helm-lib")
+(declare-function helm-ediff-marked-buffers "helm-buffers")
+(declare-function helm-make-type "helm-source")
+
 
 ;;  Files
 (defclass helm-type-file (helm-source) ()
@@ -45,7 +52,6 @@
     (define-key map (kbd "M-g s")   'helm-ff-run-grep)
     (define-key map (kbd "M-g z")   'helm-ff-run-zgrep)
     (define-key map (kbd "M-g p")   'helm-ff-run-pdfgrep)
-    (define-key map (kbd "C-c g")   'helm-ff-run-gid)
     (define-key map (kbd "M-R")     'helm-ff-run-rename-file)
     (define-key map (kbd "M-C")     'helm-ff-run-copy-file)
     (define-key map (kbd "M-B")     'helm-ff-run-byte-compile-file)
@@ -61,7 +67,6 @@
     (define-key map (kbd "M-i")     'helm-ff-properties-persistent)
     (define-key map (kbd "C-c C-x") 'helm-ff-run-open-file-externally)
     (define-key map (kbd "C-c X")   'helm-ff-run-open-file-with-default-tool)
-    (define-key map (kbd "M-.")     'helm-ff-run-etags)
     (define-key map (kbd "C-c @")   'helm-ff-run-insert-org-link)
     (define-key map (kbd "C-x C-q") 'helm-ff-run-marked-files-in-dired)
     (define-key map (kbd "C-c C-a") 'helm-ff-run-mail-attach-files)
@@ -84,7 +89,6 @@
     "Checksum File"                           'helm-ff-checksum
     "Ediff File"                              'helm-find-files-ediff-files
     "Ediff Merge File"                        'helm-find-files-ediff-merge-files
-    "Etags `M-., C-u reload tag file'"        'helm-ff-etags-select
     "View file"                               'view-file
     "Insert file"                             'insert-file
     "Add marked files to file-cache"          'helm-ff-cache-add-file
@@ -170,6 +174,8 @@
    (lambda () (and (fboundp 'tab-bar-mode)
                    "Switch to buffer other tab `C-c C-t'"))
    'switch-to-buffer-other-tab
+   "Switch to buffer at line number"
+   'helm-switch-to-buffer-at-linum
    "Browse project `C-x C-d'"
    'helm-buffers-browse-project
    "Query replace regexp `C-M-%'"
@@ -202,7 +208,11 @@
 (defmethod helm--setup-source :before ((source helm-type-buffer))
   (setf (slot-value source 'action) 'helm-type-buffer-actions)
   (setf (slot-value source 'persistent-help) "Show this buffer")
-  (setf (slot-value source 'mode-line) (list "Buffer(s)" helm-mode-line-string))
+  (setf (slot-value source 'mode-line)
+        ;; Use default-value of `helm-mode-line-string' in case user
+        ;; starts with a helm buffer as current-buffer otherwise the
+        ;; local value of this helm buffer is used (issues #1517,#2377).
+        (list "Buffer(s)" (default-value 'helm-mode-line-string)))
   (setf (slot-value source 'filtered-candidate-transformer)
         '(helm-skip-boring-buffers
           helm-buffers-sort-transformer
@@ -215,8 +225,8 @@
 
 (defcustom helm-type-function-actions
   (helm-make-actions
-   "Describe command" 'helm-describe-function
-   "Go to command's definition" 'find-function
+   "Describe function" 'helm-describe-function
+   "Find function" 'find-function
    "Info lookup" 'helm-info-lookup-symbol
    "Debug on entry" 'debug-on-entry
    "Cancel debug on entry" 'cancel-debug-on-entry
@@ -288,7 +298,8 @@
                              (describe-function (timer--function tm))))
     ("Find Function" . (lambda (tm)
                          (helm-aif (timer--function tm)
-                             (if (byte-code-function-p it)
+                             (if (or (byte-code-function-p it)
+                                     (helm-subr-native-elisp-p it))
                                  (message "Can't find anonymous function `%s'" it)
                                  (find-function it))))))
   "Default actions for type timers."

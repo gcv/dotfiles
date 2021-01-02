@@ -244,6 +244,7 @@ Note that this variable is buffer-local.")
     (define-key map (kbd "C-x C-d")   'helm-buffers-run-browse-project)
     (define-key map (kbd "C-c o")     'helm-buffer-switch-other-window)
     (define-key map (kbd "C-c C-o")   'helm-buffer-switch-other-frame)
+    (define-key map (kbd "M-g M-g")   'helm-buffer-run-goto-line)
     (define-key map (kbd "C-c =")     'helm-buffer-run-ediff)
     (define-key map (kbd "M-=")       'helm-buffer-run-ediff-merge)
     (define-key map (kbd "C-=")       'helm-buffer-diff-persistent)
@@ -513,6 +514,7 @@ The list is reordered with `helm-buffer-list-reorder-fn'."
   "Transformer function to highlight BUFFERS list.
 Should be called after others transformers i.e. (boring
 buffers)."
+  (cl-assert helm-fuzzy-matching-highlight-fn nil "Wrong type argument functionp: nil")
   (cl-loop for i in buffers
            for (name size mode meta) = (if helm-buffer-details-flag
                                            (helm-buffer--details i 'details)
@@ -591,6 +593,7 @@ buffers)."
            finally return (mapconcat 'identity lst (or separator " "))))
 
 (defun helm-buffers-sort-transformer (candidates source)
+  (cl-assert helm-buffers-sort-fn nil "Wrong type argument functionp: nil")
   (if (string= helm-pattern "")
       candidates
     (let ((helm-pattern (helm-buffers--pattern-sans-filters)))
@@ -860,6 +863,22 @@ If REGEXP-FLAG is given use `query-replace-regexp'."
     (helm-exit-and-execute-action 'helm-buffers-rename-buffer)))
 (put 'helm-buffer-run-rename-buffer 'helm-only t)
 
+(defun helm-switch-to-buffer-at-linum (candidate)
+  (let ((linum (read-number
+                "Line number: "
+                (with-current-buffer candidate
+                  (line-number-at-pos)))))
+    (switch-to-buffer candidate)
+    (goto-char (point-min))
+    (forward-line (1- linum))))
+
+(defun helm-buffer-run-goto-line ()
+  "Switch to buffer at line number."
+  (interactive)
+  (with-helm-alive-p
+    (helm-exit-and-execute-action 'helm-switch-to-buffer-at-linum)))
+(put 'helm-buffer-run-goto-line 'helm-only t)
+
 (defun helm-buffer-run-kill-persistent ()
   "Kill buffer without quitting Helm."
   (interactive)
@@ -1109,6 +1128,8 @@ Can be used by any source that list buffers."
 ;;
 ;;
 (defun helm-skip-boring-buffers (buffers _source)
+  "Remove buffers matching `helm-boring-buffer-regexp-list' in BUFFERS.
+Where BUFFERS is a list of buffer names."
   (helm-skip-entries buffers
                      helm-boring-buffer-regexp-list
                      helm-white-buffer-regexp-list))
