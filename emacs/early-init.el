@@ -3,7 +3,7 @@
 (setq package-user-dir (file-truename "~/.emacs.d/elpa/"))
 (setq user-emacs-directory (file-truename "~/.emacs.d/user/"))
 
-(when window-system
+(when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
 (scroll-bar-mode -1)
 (menu-bar-mode -1)
