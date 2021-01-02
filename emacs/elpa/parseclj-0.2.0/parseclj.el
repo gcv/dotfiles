@@ -3,7 +3,7 @@
 ;; Copyright (C) 2017-2018  Arne Brasseur
 
 ;; Author: Arne Brasseur <arne@arnebrasseur.net>
-;; Keywords: lisp
+;; Keywords: lisp clojure edn parser
 ;; Package-Requires: ((emacs "25") (a "0.1.0alpha4"))
 ;; Version: 0.1.0
 
@@ -45,7 +45,9 @@ key-value pairs to specify parsing options.
 - `:lexical-preservation' Retain whitespace, comments, and
   discards.  Defaults to nil.
 - `:fail-fast' Raise an error when encountering invalid syntax.
-  Defaults to t."
+  Defaults to t.
+- `:read-one'
+  Read a single form.  Defaults to false: parse the complete input."
   (if (stringp (car string-and-options))
       (with-temp-buffer
         (insert (car string-and-options))
