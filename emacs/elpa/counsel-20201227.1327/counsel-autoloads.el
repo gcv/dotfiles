@@ -162,7 +162,7 @@ Pass X to `xdg-open' or equivalent command via the shell.
 \(fn X)" t nil)
 
 (autoload 'counsel-locate "counsel" "\
-Call the \"locate\" shell command.
+Call a \"locate\" style shell command.
 INITIAL-INPUT can be given as the initial minibuffer input.
 
 \(fn &optional INITIAL-INPUT)" t nil)
