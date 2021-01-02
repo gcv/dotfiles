@@ -4,8 +4,8 @@
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: https://github.com/bbatsov/crux
-;; Package-Version: 20200817.1534
-;; Package-Commit: 139eb6f1504b6885c86c658fd33c6d59bfac0a8c
+;; Package-Version: 20201129.1921
+;; Package-Commit: ba4a1f38eee0ae7597f67a1424bbf5c0c09473bf
 ;; Version: 0.4.0-snapshot
 ;; Keywords: convenience
 ;; Package-Requires: ((seq "1.11"))
@@ -147,6 +147,8 @@ expected name of the shell buffer."
 (defun crux-ansi-term (buffer-name)
   "Use ansi-term for `crux-visit-term-buffer'"
   (ansi-term crux-shell buffer-name))
+
+(defvar eshell-buffer-name)
 
 (defun crux-eshell (buffer-name)
   "Use eshell for `crux-visit-term-buffer'"
@@ -544,7 +546,6 @@ See `file-attributes' for more info."
 (defun crux-find-alternate-file-as-root (filename)
   "Wraps `find-alternate-file' with opening FILENAME as root."
   (let ((remote-method (file-remote-p default-directory 'method))
-        (remote-user (file-remote-p default-directory 'user))
         (remote-host (file-remote-p default-directory 'host))
         (remote-localname (file-remote-p filename 'localname)))
     (find-alternate-file (format "/%s:root@%s:%s"
