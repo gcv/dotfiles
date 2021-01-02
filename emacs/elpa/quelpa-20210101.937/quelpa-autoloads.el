@@ -28,6 +28,17 @@ Returns the archive entry for the package.
 
 \(fn PACKAGE-NAME VERSION FILE-SPECS SOURCE-DIR TARGET-DIR)" nil nil)
 
+(autoload 'quelpa-checkout-melpa "quelpa" "\
+Fetch or update the melpa source code from Github.
+If there is no error return non-nil.
+If there is an error but melpa is already checked out return non-nil.
+If there is an error and no existing checkout return nil.
+
+When FORCE is non-nil we will always update MELPA regrdless of
+`quelpa-update-melpa-p`.
+
+\(fn &optional FORCE)" t nil)
+
 (autoload 'quelpa-expand-recipe "quelpa" "\
 Expand a given RECIPE into full recipe.
 If called interactively, let the user choose a recipe name and
