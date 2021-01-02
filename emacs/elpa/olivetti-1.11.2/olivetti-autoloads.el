@@ -12,6 +12,10 @@
 (autoload 'olivetti-mode "olivetti" "\
 Olivetti provides a nice writing environment.
 
+If called interactively, enable Olivetti mode if ARG is positive, and disable it
+if ARG is zero or negative.  If called from Lisp, also enable the mode if ARG is
+omitted or nil, and toggle it if ARG is `toggle'; disable the mode otherwise.
+
 Window margins are set to relative widths to accomodate a text
 body width set with `olivetti-body-width'.
 
