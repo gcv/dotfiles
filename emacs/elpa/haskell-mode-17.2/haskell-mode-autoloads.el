@@ -12,9 +12,7 @@
 (let ((loads (get 'ghc-core 'custom-loads))) (if (member '"ghc-core" loads) nil (put 'ghc-core 'custom-loads (cons '"ghc-core" loads))))
 
 (autoload 'ghc-core-create-core "ghc-core" "\
-Compile and load the current buffer as tidy core.
-
-\(fn)" t nil)
+Compile and load the current buffer as tidy core." t nil)
 
 (add-to-list 'auto-mode-alist '("\\.hcr\\'" . ghc-core-mode))
 
@@ -50,16 +48,18 @@ Major mode for working with .ghci files.
 (autoload 'interactive-haskell-mode "haskell" "\
 Minor mode for enabling haskell-process interaction.
 
+If called interactively, enable Interactive-Haskell mode if ARG
+is positive, and disable it if ARG is zero or negative.  If
+called from Lisp, also enable the mode if ARG is omitted or nil,
+and toggle it if ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
 (autoload 'haskell-interactive-mode-return "haskell" "\
-Handle the return key.
-
-\(fn)" t nil)
+Handle the return key." t nil)
 
 (autoload 'haskell-session-kill "haskell" "\
 Kill the session process and buffer, delete the session.
-0. Prompt to kill all associated buffers.
 1. Kill the process.
 2. Kill the interactive buffer unless LEAVE-INTERACTIVE-BUFFER is not given.
 3. Walk through all the related buffers and set their haskell-session to nil.
@@ -68,24 +68,16 @@ Kill the session process and buffer, delete the session.
 \(fn &optional LEAVE-INTERACTIVE-BUFFER)" t nil)
 
 (autoload 'haskell-interactive-kill "haskell" "\
-Kill the buffer and (maybe) the session.
-
-\(fn)" t nil)
+Kill the buffer and (maybe) the session." t nil)
 
 (autoload 'haskell-session "haskell" "\
-Get the Haskell session, prompt if there isn't one or fail.
-
-\(fn)" nil nil)
+Get the Haskell session, prompt if there isn't one or fail." nil nil)
 
 (autoload 'haskell-interactive-switch "haskell" "\
-Switch to the interactive mode for this session.
-
-\(fn)" t nil)
+Switch to the interactive mode for this session." t nil)
 
 (autoload 'haskell-session-change "haskell" "\
-Change the session for the current buffer.
-
-\(fn)" t nil)
+Change the session for the current buffer." t nil)
 
 (autoload 'haskell-kill-session-process "haskell" "\
 Kill the process.
@@ -93,9 +85,7 @@ Kill the process.
 \(fn &optional SESSION)" t nil)
 
 (autoload 'haskell-interactive-mode-visit-error "haskell" "\
-Visit the buffer of the current (or last) error message.
-
-\(fn)" t nil)
+Visit the buffer of the current (or last) error message." t nil)
 
 (autoload 'haskell-mode-jump-to-tag "haskell" "\
 Jump to the tag of the given identifier.
@@ -106,9 +96,7 @@ Give optional NEXT-P parameter to override value of
 \(fn &optional NEXT-P)" t nil)
 
 (autoload 'haskell-mode-after-save-handler "haskell" "\
-Function that will be called after buffer's saving.
-
-\(fn)" nil nil)
+Function that will be called after buffer's saving." nil nil)
 
 (autoload 'haskell-mode-tag-find "haskell" "\
 The tag find function, specific for the particular session.
@@ -116,24 +104,15 @@ The tag find function, specific for the particular session.
 \(fn &optional NEXT-P)" t nil)
 
 (autoload 'haskell-interactive-bring "haskell" "\
-Bring up the interactive mode for this session.
-
-\(fn)" t nil)
+Bring up the interactive mode for this session." t nil)
 
 (autoload 'haskell-process-load-file "haskell" "\
-Load the current buffer file.
-
-\(fn)" t nil)
+Load the current buffer file." t nil)
 
 (autoload 'haskell-process-reload "haskell" "\
-Re-load the current buffer file.
+Re-load the current buffer file." t nil)
 
-\(fn)" t nil)
-
-(autoload 'haskell-process-reload-file "haskell" "\
-
-
-\(fn)" nil nil)
+(autoload 'haskell-process-reload-file "haskell" nil nil nil)
 
 (autoload 'haskell-process-load-or-reload "haskell" "\
 Load or reload. Universal argument toggles which.
@@ -141,9 +120,7 @@ Load or reload. Universal argument toggles which.
 \(fn &optional TOGGLE)" t nil)
 
 (autoload 'haskell-process-cabal-build "haskell" "\
-Build the Cabal project.
-
-\(fn)" t nil)
+Build the Cabal project." t nil)
 
 (autoload 'haskell-process-cabal "haskell" "\
 Prompts for a Cabal command to run.
@@ -151,11 +128,9 @@ Prompts for a Cabal command to run.
 \(fn P)" t nil)
 
 (autoload 'haskell-process-minimal-imports "haskell" "\
-Dump minimal imports.
+Dump minimal imports." t nil)
 
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell" '("haskell-" "xref-prompt-for-identifier" "interactive-haskell-mode-map")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell" '("haskell-" "interactive-haskell-mode-map" "xref-prompt-for-identifier")))
 
 ;;;***
 
@@ -164,9 +139,7 @@ Dump minimal imports.
 ;;; Generated autoloads from haskell-align-imports.el
 
 (autoload 'haskell-align-imports "haskell-align-imports" "\
-Align all the imports in the buffer.
-
-\(fn)" t nil)
+Align all the imports in the buffer." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-align-imports" '("haskell-align-imports-")))
 
@@ -234,6 +207,11 @@ OTHER-WINDOW use `find-file-other-window'.
 (autoload 'haskell-collapse-mode "haskell-collapse" "\
 Minor mode to collapse and expand haskell expressions
 
+If called interactively, enable Haskell-Collapse mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-collapse" '("haskell-")))
@@ -245,19 +223,13 @@ Minor mode to collapse and expand haskell expressions
 ;;; Generated autoloads from haskell-commands.el
 
 (autoload 'haskell-process-restart "haskell-commands" "\
-Restart the inferior Haskell process.
-
-\(fn)" t nil)
+Restart the inferior Haskell process." t nil)
 
 (autoload 'haskell-process-clear "haskell-commands" "\
-Clear the current process.
-
-\(fn)" t nil)
+Clear the current process." t nil)
 
 (autoload 'haskell-process-interrupt "haskell-commands" "\
-Interrupt the process (SIGINT).
-
-\(fn)" t nil)
+Interrupt the process (SIGINT)." t nil)
 
 (autoload 'haskell-describe "haskell-commands" "\
 Describe the given identifier IDENT.
@@ -302,9 +274,7 @@ position with `xref-pop-marker-stack'.
 
 (autoload 'haskell-mode-goto-loc "haskell-commands" "\
 Go to the location of the thing at point.
-Requires the :loc-at command from GHCi.
-
-\(fn)" t nil)
+Requires the :loc-at command from GHCi." t nil)
 
 (autoload 'haskell-mode-jump-to-def "haskell-commands" "\
 Jump to definition of identifier IDENT at point.
@@ -317,9 +287,7 @@ Change directory.
 \(fn &optional NOT-INTERACTIVE)" t nil)
 
 (autoload 'haskell-process-cabal-macros "haskell-commands" "\
-Send the cabal macros string.
-
-\(fn)" t nil)
+Send the cabal macros string." t nil)
 
 (autoload 'haskell-mode-show-type-at "haskell-commands" "\
 Show type of the thing at point or within active region asynchronously.
@@ -339,9 +307,7 @@ happened since function invocation).
 (autoload 'haskell-process-unignore "haskell-commands" "\
 Unignore any ignored files.
 Do not ignore files that were specified as being ignored by the
-inferior GHCi process.
-
-\(fn)" t nil)
+inferior GHCi process." t nil)
 
 (autoload 'haskell-session-change-target "haskell-commands" "\
 Set the build TARGET for cabal REPL.
@@ -354,14 +320,10 @@ Apply stylish-haskell to the current buffer.
 Use `haskell-mode-stylish-haskell-path' to know where to find
 stylish-haskell executable.  This function tries to preserve
 cursor position and markers by using
-`haskell-mode-buffer-apply-command'.
-
-\(fn)" t nil)
+`haskell-mode-buffer-apply-command'." t nil)
 
 (autoload 'haskell-mode-find-uses "haskell-commands" "\
-Find use cases of the identifier at point and highlight them all.
-
-\(fn)" t nil)
+Find use cases of the identifier at point and highlight them all." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-commands" '("haskell-")))
 
@@ -375,10 +337,7 @@ Find use cases of the identifier at point and highlight them all.
 
 (autoload 'haskell-compile "haskell-compile" "\
 Run a compile command for the current Haskell buffer.
-
-Locates stack or cabal definitions and, if found, invokes the
-default build command for that build tool. Cabal is preferred
-but may be ignored with `haskell-compile-ignore-cabal'.
+Obeys haskell-compiler-type to choose the appropriate build command.
 
 If prefix argument EDIT-COMMAND is non-nil (and not a negative
 prefix `-'), prompt for a custom compile command.
@@ -422,9 +381,7 @@ base directory for build tools, or the current buffer for
 Provide completion list for thing at point.
 This function is used in non-interactive `haskell-mode'.  It
 provides completions for haskell keywords, language pragmas,
-GHC's options, and language extensions, but not identifiers.
-
-\(fn)" nil nil)
+GHC's options, and language extensions, but not identifiers." nil nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-completions" '("haskell-completions-")))
 
@@ -448,22 +405,22 @@ GHC's options, and language extensions, but not identifiers.
 (let ((loads (get 'haskell-debug 'custom-loads))) (if (member '"haskell-debug" loads) nil (put 'haskell-debug 'custom-loads (cons '"haskell-debug" loads))))
 
 (defface haskell-debug-warning-face '((t :inherit 'compilation-warning)) "\
-Face for warnings." :group (quote haskell-debug))
+Face for warnings." :group 'haskell-debug)
 
 (defface haskell-debug-trace-number-face '((t :weight bold :background "#f5f5f5")) "\
-Face for numbers in backtrace." :group (quote haskell-debug))
+Face for numbers in backtrace." :group 'haskell-debug)
 
 (defface haskell-debug-newline-face '((t :weight bold :background "#f0f0f0")) "\
-Face for newlines in trace steps." :group (quote haskell-debug))
+Face for newlines in trace steps." :group 'haskell-debug)
 
 (defface haskell-debug-keybinding-face '((t :inherit 'font-lock-type-face :weight bold)) "\
-Face for keybindings." :group (quote haskell-debug))
+Face for keybindings." :group 'haskell-debug)
 
 (defface haskell-debug-heading-face '((t :inherit 'font-lock-keyword-face)) "\
-Face for headings." :group (quote haskell-debug))
+Face for headings." :group 'haskell-debug)
 
 (defface haskell-debug-muted-face '((t :foreground "#999")) "\
-Face for muteds." :group (quote haskell-debug))
+Face for muteds." :group 'haskell-debug)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-debug" '("haskell-debug")))
 
@@ -478,14 +435,10 @@ Face for muteds." :group (quote haskell-debug))
 (autoload 'haskell-ds-create-imenu-index "haskell-decl-scan" "\
 Function for finding `imenu' declarations in Haskell mode.
 Finds all declarations (classes, variables, imports, instances and
-datatypes) in a Haskell file for the `imenu' package.
-
-\(fn)" nil nil)
+datatypes) in a Haskell file for the `imenu' package." nil nil)
 
 (autoload 'turn-on-haskell-decl-scan "haskell-decl-scan" "\
-Unconditionally activate `haskell-decl-scan-mode'.
-
-\(fn)" t nil)
+Unconditionally activate `haskell-decl-scan-mode'." t nil)
 
 (autoload 'haskell-decl-scan-mode "haskell-decl-scan" "\
 Toggle Haskell declaration scanning minor mode on or off.
@@ -516,7 +469,7 @@ declaration.  Therefore, using Haskell font locking with comments
 coloured in `font-lock-comment-face' improves declaration scanning.
 
 Literate Haskell scripts are supported: If the value of
-`haskell-literate' (set automatically by `literate-haskell-mode')
+`haskell-literate' (set automatically by `haskell-literate-mode')
 is `bird', a Bird-style literate script is assumed.  If it is nil
 or `tex', a non-literate or LaTeX-style literate script is
 assumed, respectively.
@@ -546,9 +499,7 @@ See variable docstring.
 
 (autoload 'haskell-doc-current-info "haskell-doc" "\
 Return the info about symbol at point.
-Meant for `eldoc-documentation-function'.
-
-\(fn)" nil nil)
+Meant for `eldoc-documentation-function'." nil nil)
 
 (autoload 'haskell-doc-show-type "haskell-doc" "\
 Show the type of the function near point or given symbol SYM.
@@ -559,7 +510,7 @@ current buffer.
 
 \(fn &optional SYM)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-doc" '("inferior-haskell-" "haskell-" "turn-off-haskell-doc")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-doc" '("haskell-" "inferior-haskell-" "turn-off-haskell-doc")))
 
 ;;;***
 
@@ -570,26 +521,26 @@ current buffer.
 (let ((loads (get 'haskell-appearance 'custom-loads))) (if (member '"haskell-font-lock" loads) nil (put 'haskell-appearance 'custom-loads (cons '"haskell-font-lock" loads))))
 
 (defface haskell-keyword-face '((t :inherit font-lock-keyword-face)) "\
-Face used to highlight Haskell keywords." :group (quote haskell-appearance))
+Face used to highlight Haskell keywords." :group 'haskell-appearance)
 
 (defface haskell-type-face '((t :inherit font-lock-type-face)) "\
-Face used to highlight Haskell types" :group (quote haskell-appearance))
+Face used to highlight Haskell types" :group 'haskell-appearance)
 
 (defface haskell-constructor-face '((t :inherit font-lock-type-face)) "\
-Face used to highlight Haskell constructors." :group (quote haskell-appearance))
+Face used to highlight Haskell constructors." :group 'haskell-appearance)
 
 (defface haskell-operator-face '((t :inherit font-lock-variable-name-face)) "\
-Face used to highlight Haskell operators." :group (quote haskell-appearance))
+Face used to highlight Haskell operators." :group 'haskell-appearance)
 
 (defface haskell-pragma-face '((t :inherit font-lock-preprocessor-face)) "\
-Face used to highlight Haskell pragmas ({-# ... #-})." :group (quote haskell-appearance))
+Face used to highlight Haskell pragmas ({-# ... #-})." :group 'haskell-appearance)
 
 (defface haskell-liquid-haskell-annotation-face '((t :inherit haskell-pragma-face)) "\
-Face used to highlight LiquidHaskell annotations ({-@ ... @-})." :group (quote haskell-appearance))
+Face used to highlight LiquidHaskell annotations ({-@ ... @-})." :group 'haskell-appearance)
 
 (defface haskell-literate-comment-face '((t :inherit font-lock-doc-face)) "\
 Face with which to fontify literate comments.
-Inherit from `default' to avoid fontification of them." :group (quote haskell-appearance))
+Inherit from `default' to avoid fontification of them." :group 'haskell-appearance)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-font-lock" '("haskell-")))
 
@@ -609,8 +560,6 @@ Inherit from `default' to avoid fontification of them." :group (quote haskell-ap
 
 (autoload 'haskell-hoogle "haskell-hoogle" "\
 Do a Hoogle search for QUERY.
-When `haskell-hoogle-command' is non-nil, this command runs
-that.  Otherwise, it opens a hoogle search result in the browser.
 
 If prefix argument INFO is given, then `haskell-hoogle-command'
 is asked to show extra info for the items matching QUERY..
@@ -619,19 +568,15 @@ is asked to show extra info for the items matching QUERY..
 
 (defalias 'hoogle 'haskell-hoogle)
 
-(autoload 'haskell-hoogle-lookup-from-local "haskell-hoogle" "\
-Lookup by local hoogle.
-
-\(fn)" t nil)
-
-(autoload 'haskell-hayoo "haskell-hoogle" "\
-Do a Hayoo search for QUERY.
+(autoload 'haskell-hoogle-lookup-from-website "haskell-hoogle" "\
+Lookup QUERY at `haskell-hoogle-url'.
 
 \(fn QUERY)" t nil)
 
-(defalias 'hayoo 'haskell-hayoo)
+(autoload 'haskell-hoogle-lookup-from-local "haskell-hoogle" "\
+Lookup QUERY on local hoogle server." t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-hoogle" '("haskell-h")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-hoogle" '("haskell-hoogle-" "hoogle-prompt")))
 
 ;;;***
 
@@ -642,9 +587,7 @@ Do a Hayoo search for QUERY.
 (let ((loads (get 'haskell-indent 'custom-loads))) (if (member '"haskell-indent" loads) nil (put 'haskell-indent 'custom-loads (cons '"haskell-indent" loads))))
 
 (autoload 'turn-on-haskell-indent "haskell-indent" "\
-Turn on ``intelligent'' Haskell indentation mode.
-
-\(fn)" nil nil)
+Turn on ``intelligent'' Haskell indentation mode." nil nil)
 
 (autoload 'haskell-indent-mode "haskell-indent" "\
 ``Intelligent'' Haskell indentation mode.
@@ -675,7 +618,7 @@ Invokes `haskell-indent-hook' if not nil.
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-indent" '("turn-off-haskell-indent" "haskell-indent-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-indent" '("haskell-indent-" "turn-off-haskell-indent")))
 
 ;;;***
 
@@ -690,12 +633,15 @@ Haskell indentation mode that deals with the layout rule.
 It rebinds RET, DEL and BACKSPACE, so that indentations can be
 set and deleted as if they were real tabs.
 
+If called interactively, enable Haskell-Indentation mode if ARG
+is positive, and disable it if ARG is zero or negative.  If
+called from Lisp, also enable the mode if ARG is omitted or nil,
+and toggle it if ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
 (autoload 'turn-on-haskell-indentation "haskell-indentation" "\
-Turn on the haskell-indentation minor mode.
-
-\(fn)" t nil)
+Turn on the haskell-indentation minor mode." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-indentation" '("haskell-indentation-")))
 
@@ -706,24 +652,24 @@ Turn on the haskell-indentation minor mode.
 ;;; Generated autoloads from haskell-interactive-mode.el
 
 (defface haskell-interactive-face-prompt '((t :inherit font-lock-function-name-face)) "\
-Face for the prompt." :group (quote haskell-interactive))
+Face for the prompt." :group 'haskell-interactive)
 
 (defface haskell-interactive-face-prompt-cont '((t :inherit font-lock-keyword-face)) "\
-Face for GHCi's prompt-cont in multi-line mode." :group (quote haskell-interactive))
+Face for GHCi's prompt-cont in multi-line mode." :group 'haskell-interactive)
 
 (define-obsolete-face-alias 'haskell-interactive-face-prompt2 'haskell-interactive-face-prompt-cont "16.2")
 
 (defface haskell-interactive-face-compile-error '((t :inherit compilation-error)) "\
-Face for compile errors." :group (quote haskell-interactive))
+Face for compile errors." :group 'haskell-interactive)
 
 (defface haskell-interactive-face-compile-warning '((t :inherit compilation-warning)) "\
-Face for compiler warnings." :group (quote haskell-interactive))
+Face for compiler warnings." :group 'haskell-interactive)
 
 (defface haskell-interactive-face-result '((t :inherit font-lock-string-face)) "\
-Face for the result." :group (quote haskell-interactive))
+Face for the result." :group 'haskell-interactive)
 
 (defface haskell-interactive-face-garbage '((t :inherit font-lock-string-face)) "\
-Face for trailing garbage after a command has completed." :group (quote haskell-interactive))
+Face for trailing garbage after a command has completed." :group 'haskell-interactive)
 
 (autoload 'haskell-interactive-mode-reset-error "haskell-interactive-mode" "\
 Reset the error cursor position.
@@ -759,13 +705,13 @@ function `haskell-presentation-present', depending on variable
 ;;; Generated autoloads from haskell-load.el
 
 (defface haskell-error-face '((((supports :underline (:style wave))) :underline (:style wave :color "#dc322f")) (t :inherit error)) "\
-Face used for marking error lines." :group (quote haskell-mode))
+Face used for marking error lines." :group 'haskell-mode)
 
 (defface haskell-warning-face '((((supports :underline (:style wave))) :underline (:style wave :color "#b58900")) (t :inherit warning)) "\
-Face used for marking warning lines." :group (quote haskell-mode))
+Face used for marking warning lines." :group 'haskell-mode)
 
 (defface haskell-hole-face '((((supports :underline (:style wave))) :underline (:style wave :color "#6c71c4")) (t :inherit warning)) "\
-Face used for marking hole lines." :group (quote haskell-mode))
+Face used for marking hole lines." :group 'haskell-mode)
 
 (autoload 'haskell-process-reload-devel-main "haskell-load" "\
 Reload the module `DevelMain' and then run `DevelMain.update'.
@@ -774,9 +720,7 @@ This is for doing live update of the code of servers or GUI
 applications.  Put your development version of the program in
 `DevelMain', and define `update' to auto-start the program on a
 new thread, and use the `foreign-store' package to access the
-running context across :load/:reloads in GHCi.
-
-\(fn)" t nil)
+running context across :load/:reloads in GHCi." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-load" '("haskell-")))
 
@@ -786,9 +730,7 @@ running context across :load/:reloads in GHCi.
 ;;; Generated autoloads from haskell-menu.el
 
 (autoload 'haskell-menu "haskell-menu" "\
-Launch the Haskell sessions menu.
-
-\(fn)" t nil)
+Launch the Haskell sessions menu." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-menu" '("haskell-menu-")))
 
@@ -804,16 +746,14 @@ With prefix argument HERE, insert it at point.
 \(fn &optional HERE)" t nil)
 
 (autoload 'haskell-mode-view-news "haskell-mode" "\
-Display information on recent changes to haskell-mode.
-
-\(fn)" t nil)
+Display information on recent changes to haskell-mode." t nil)
 
 (autoload 'haskell-mode "haskell-mode" "\
 Major mode for editing Haskell programs.
 
 \\<haskell-mode-map>
 
-Literate Haskell scripts are supported via `literate-haskell-mode'.
+Literate Haskell scripts are supported via `haskell-literate-mode'.
 The variable `haskell-literate' indicates the style of the script in the
 current buffer.  See the documentation on this variable for more details.
 
@@ -875,16 +815,18 @@ list marker of some kind), and end of the obstacle.
 
 \(fn &optional ARG)" t nil)
 
-(autoload 'literate-haskell-mode "haskell-mode" "\
+(autoload 'haskell-literate-mode "haskell-mode" "\
 As `haskell-mode' but for literate scripts.
 
 \(fn)" t nil)
+
+(define-obsolete-function-alias 'literate-haskell-mode 'haskell-literate-mode "2020-04")
 
 (add-to-list 'auto-mode-alist '("\\.[gh]s\\'" . haskell-mode))
 
 (add-to-list 'auto-mode-alist '("\\.hsig\\'" . haskell-mode))
 
-(add-to-list 'auto-mode-alist '("\\.l[gh]s\\'" . literate-haskell-mode))
+(add-to-list 'auto-mode-alist '("\\.l[gh]s\\'" . haskell-literate-mode))
 
 (add-to-list 'auto-mode-alist '("\\.hsc\\'" . haskell-mode))
 
@@ -978,15 +920,11 @@ Cycle the Haskell import lines or return to point (with prefix arg).
 \(fn &optional RETURN)" t nil)
 
 (autoload 'haskell-navigate-imports-go "haskell-navigate-imports" "\
-Go to the first line of a list of consecutive import lines. Cycles.
-
-\(fn)" t nil)
+Go to the first line of a list of consecutive import lines. Cycles." t nil)
 
 (autoload 'haskell-navigate-imports-return "haskell-navigate-imports" "\
 Return to the non-import point we were at before going to the module list.
-   If we were originally at an import list, we can just cycle through easily.
-
-\(fn)" t nil)
+   If we were originally at an import list, we can just cycle through easily." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-navigate-imports" '("haskell-navigate-imports-")))
 
@@ -1028,9 +966,7 @@ Return to the non-import point we were at before going to the module list.
 ;;; Generated autoloads from haskell-session.el
 
 (autoload 'haskell-session-maybe "haskell-session" "\
-Maybe get the Haskell session, return nil if there isn't one.
-
-\(fn)" nil nil)
+Maybe get the Haskell session, return nil if there isn't one." nil nil)
 
 (autoload 'haskell-session-process "haskell-session" "\
 Get the session process.
@@ -1050,9 +986,7 @@ Sort the import list at point. It sorts the current group
 i.e. an import list separated by blank lines on either side.
 
 If the region is active, it will restrict the imports to sort
-within that region.
-
-\(fn)" t nil)
+within that region." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "haskell-sort-imports" '("haskell-sort-imports-")))
 
@@ -1077,10 +1011,10 @@ within that region.
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from haskell-unicode-input-method.el
 
-(autoload 'turn-on-haskell-unicode-input-method "haskell-unicode-input-method" "\
-Set input method `haskell-unicode'.
+(autoload 'haskell-unicode-input-method-enable "haskell-unicode-input-method" "\
+Set input method `haskell-unicode'." t nil)
 
-\(fn)" t nil)
+(define-obsolete-function-alias 'turn-on-haskell-unicode-input-method 'haskell-unicode-input-method-enable "2020-04")
 
 ;;;***
 
@@ -1098,6 +1032,11 @@ Set input method `haskell-unicode'.
 (autoload 'highlight-uses-mode "highlight-uses-mode" "\
 Minor mode for highlighting and jumping between uses.
 
+If called interactively, enable Highlight-Uses mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "highlight-uses-mode" '("highlight-uses-mode-")))
@@ -1109,12 +1048,8 @@ Minor mode for highlighting and jumping between uses.
 
 (let ((loads (get 'inferior-haskell 'custom-loads))) (if (member '"inf-haskell" loads) nil (put 'inferior-haskell 'custom-loads (cons '"inf-haskell" loads))))
 
-(defalias 'run-haskell 'switch-to-haskell)
-
-(autoload 'switch-to-haskell "inf-haskell" "\
-Show the inferior-haskell buffer.  Start the process if needed.
-
-\(fn)" t nil)
+(autoload 'run-haskell "inf-haskell" "\
+Show the inferior-haskell buffer.  Start the process if needed." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "inf-haskell" '("haskell-" "inf")))
 
@@ -1124,9 +1059,9 @@ Show the inferior-haskell buffer.  Start the process if needed.
 ;;; Generated autoloads from w3m-haddock.el
 
 (defface w3m-haddock-heading-face '((((class color)) :inherit highlight)) "\
-Face for quarantines." :group (quote haskell))
+Face for quarantines." :group 'haskell)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "w3m-haddock" '("w3m-haddock-" "haskell-w3m-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "w3m-haddock" '("haskell-w3m-" "w3m-haddock-")))
 
 ;;;***
 
