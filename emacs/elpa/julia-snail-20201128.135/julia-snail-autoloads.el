@@ -42,14 +42,6 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 
 ;;;***
 
-;;;### (autoloads nil "julia-snail-parser" "julia-snail-parser.el"
-;;;;;;  (0 0 0 0))
-;;; Generated autoloads from julia-snail-parser.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "julia-snail-parser" '("julia-snail-parser-")))
-
-;;;***
-
 ;;;### (autoloads nil nil ("julia-snail-pkg.el") (0 0 0 0))
 
 ;;;***
