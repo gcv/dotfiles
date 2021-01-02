@@ -1,3 +1,7 @@
+2020-09-04  Stefan Kangas  <stefankangas@gmail.com>
+
+	; Sync seq.el with Emacs master and bump version to 2.22
+
 2017-05-04  Nicolas Petton  <nicolas@petton.fr>
 
 	Update seq.el to 2.20
