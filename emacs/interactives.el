@@ -702,3 +702,31 @@ end tell")))
                (insert (seq-elt notes idx))
                (incf idx)))))))
 ;;(global-set-key (kbd "H-n") #'screencast-posframe-notes)
+
+
+;; Commit updated ELPA packages.
+(defun commit-elpa-packages ()
+  (interactive)
+  (let ((default-directory package-user-dir))
+    (let* ((raw (shell-command-to-string "git status --porcelain=v1 -- ."))
+           (lines (-filter #'nil-blank-string (s-split "\n" raw)))
+           (no-tag (loop for l in lines collect
+                         (when (> (length l) 2) (substring l 3))))
+           (matcher (rx (group "emacs/elpa/")
+                        (group (*? anything))
+                        (group "-" (+ (any num ".")) (any "/" ".signed"))))
+           (to-version (loop for l in lines collect
+                             (progn (string-match matcher l)
+                                    (match-string 2 l))))
+           (packages (delete-dups to-version))
+           ;; sort packages by length so more specific ones commit first, e.g.
+           ;; counsel-projectile before counsel
+           (sorted-packages (sort packages (lambda (p1 p2) (> (length p1) (length p2)))))
+           (commands (-flatten
+                      (loop for pkg in sorted-packages collect
+                            (list (concat "git add -A '" pkg "*'")
+                                  (concat "git commit -q -m 'Emacs package update: " pkg "'"))))))
+      (loop for cmd in commands do
+            (let ((ans (read-string (concat "Execute {{" cmd "}}? "))))
+              (when (or (string= "y" ans) (string= "Y" ans) (string= "" ans))
+                (shell-command-to-string cmd)))))))
