@@ -4,8 +4,8 @@
 
 ;; Author: Phil Hagelberg
 ;; URL: https://gitlab.com/technomancy/fennel-mode
-;; Package-Version: 20200714.237
-;; Package-Commit: a39543750ba337b9327108ba17ffb0cdb18c7f9b
+;; Package-Version: 20201221.543
+;; Package-Commit: bebc9dd58a845928114082c5ab4538b9869b4fc7
 ;; Version: 0.2.0
 ;; Created: 2018-02-18
 ;;
@@ -35,6 +35,7 @@
 ;;; Code:
 (require 'lisp-mode)
 (require 'inf-lisp)
+(require 'xref)
 
 (defcustom fennel-mode-switch-to-repl-after-reload t
   "If the focus should switch to the repl after a module reload."
@@ -64,7 +65,7 @@
     "import-macros" "pick-args" "pick-values" "macroexpand" "macrodebug"
     "do" "values" "if" "when" "each" "for" "fn" "lambda" "λ" "partial" "while"
     "set" "global" "var" "local" "let" "tset" "set-forcibly!" "doto" "match"
-    "or" "and" "true" "false" "nil" "not" "not="
+    "or" "and" "true" "false" "nil" "not" "not=" "collect" "icollect"
     "." "+" ".." "^" "-" "*" "%" "/" ">" "<" ">=" "<=" "=" "#" "..." ":"
     "->" "->>" "-?>" "-?>>" "$" "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
     "rshift" "lshift" "bor" "band" "bnot" "bxor" "with-open"))
@@ -162,12 +163,12 @@
                     ;; changes which affect already-loaded code, but if
                     ;; it is then we should splice new values into the
                     ;; existing table and remove values that are gone.
-                    (when (= (type new) :table)
+                    (when (and (= (type old) :table) (= (type new) :table))
                       (each [k v (pairs new)]
                             (tset old k v))
                       (each [k (pairs old)]
                             ;; the elisp reader is picky about where . can be
-                            (when (not (,"." new k))
+                            (when (= nil (,"." new k))
                               (tset old k nil)))
                       (tset package.loaded ,module-keyword old)))))
 
@@ -219,18 +220,22 @@ buffer, or when given a prefix arg."
             (delete-file tempfile)
             (buffer-substring-no-properties (point-min) (point-max)))))))
 
-(defun fennel-find-definition ()
-  (interactive)
-  ;; find-tag-marker-ring is obsolete, but since its replacement was
-  ;; introduced in 25 we continue to use it for compatibility.
-  (with-no-warnings (ring-insert find-tag-marker-ring (point-marker)))
-  (fennel-find-definition-go (fennel-find-definition-for (symbol-at-point))))
+(defun fennel-find-definition (identifier)
+  "Jump to the definition of the function identified at point.
+This will only work when the reference to the function is in scope for the repl;
+for instance if you have already entered (local foo (require :foo)) then foo.bar
+can be resolved. It also requires line number correlation."
+  (interactive (list (if (thing-at-point 'symbol)
+                         (substring-no-properties (thing-at-point 'symbol))
+                       (read-string "Find definition: "))))
+  (xref-push-marker-stack (point-marker))
+  (fennel-find-definition-go (fennel-find-definition-for identifier)))
 
 (defun fennel-find-definition-pop ()
   "Return point to previous position in previous buffer."
   (interactive)
   (require 'etags)
-  (let ((marker (with-no-warnings (ring-remove find-tag-marker-ring 0))))
+  (let ((marker (xref-pop-marker-stack)))
     (switch-to-buffer (marker-buffer marker))
     (goto-char (marker-position marker))))
 
@@ -247,7 +252,8 @@ buffer, or when given a prefix arg."
     (goto-char (point-min))))
 
 (defun fennel-repl (ask-for-command?)
-  "Switch to the fennel repl buffer, or start a new one if needed."
+  "Switch to the fennel repl buffer, or start a new one if needed.
+Return this buffer."
   (interactive "P")
   (if (get-buffer-process inferior-lisp-buffer)
       (pop-to-buffer inferior-lisp-buffer)
@@ -258,7 +264,8 @@ buffer, or when given a prefix arg."
                     (t inferior-lisp-program)))
     (set (make-local-variable 'lisp-describe-sym-command) "(doc %s)\n")
     (set (make-local-variable 'inferior-lisp-prompt) ">> ")
-    (set (make-local-variable 'lisp-arglist-command) fennel-arglist-command)))
+    (set (make-local-variable 'lisp-arglist-command) fennel-arglist-command))
+  (get-buffer inferior-lisp-buffer))
 
 (define-key fennel-mode-map (kbd "M-.") 'fennel-find-definition)
 (define-key fennel-mode-map (kbd "M-,") 'fennel-find-definition-pop)
@@ -280,6 +287,9 @@ buffer, or when given a prefix arg."
 (put 'doto 'fennel-indent-function 1)
 (put 'match 'fennel-indent-function 1)
 (put 'with-open 'fennel-indent-function 1)
+(put 'collect 'fennel-indent-function 1)
+(put 'icollect 'fennel-indent-function 1)
+
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fnl\\'" . fennel-mode))
