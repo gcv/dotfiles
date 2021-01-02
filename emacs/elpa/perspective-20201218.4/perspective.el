@@ -6,10 +6,10 @@
 
 ;; Author: Natalie Weizenbaum <nex342@gmail.com>
 ;; URL: http://github.com/nex3/perspective-el
-;; Package-Version: 20200827.1945
-;; Package-Commit: 17cfb7f3a50c5ebc8edafd6418531c17c2cbf47e
+;; Package-Version: 20201218.4
+;; Package-Commit: 94830c4fc18ac460a217be7c46da4272b2217f43
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Version: 2.11
+;; Version: 2.13
 ;; Created: 2008-03-05
 ;; By: Natalie Weizenbaum <nex342@gmail.com>
 ;; Keywords: workspace, convenience, frames
@@ -451,7 +451,7 @@ first."
 (defun persp-all-names (&optional not-frame)
   "Return a list of the perspective names for all frames.
 Excludes NOT-FRAME, if given."
-  (cl-reduce 'union
+  (cl-reduce 'cl-union
              (mapcar
               (lambda (frame)
                 (unless (equal frame not-frame)
@@ -632,11 +632,12 @@ If NORECORD is non-nil, do not update the
       (set-frame-parameter nil 'persp--last (persp-curr))
       (when (null persp)
         (setq persp (persp-new name)))
-      (run-hooks 'persp-before-switch-hook)
+      (unless norecord
+        (run-hooks 'persp-before-switch-hook))
       (persp-activate persp)
       (unless norecord
-        (setf (persp-last-switch-time persp) (current-time)))
-      (run-hooks 'persp-switch-hook)
+        (setf (persp-last-switch-time persp) (current-time))
+        (run-hooks 'persp-switch-hook))
       name)))
 
 (defun persp-activate (persp)
@@ -860,7 +861,7 @@ copied across frames."
         (let ((persp (gethash name (perspectives-hash))))
           (if persp (cl-return-from persp-all-get (persp-buffers persp))))))))
 
-(defun persp-read-buffer (prompt &optional def require-match)
+(defun persp-read-buffer (prompt &optional def require-match predicate)
   "A replacement for the built-in `read-buffer', meant to be used with `read-buffer-function'.
 Return the name of the buffer selected, only selecting from buffers
 within the current perspective.
@@ -871,7 +872,7 @@ With a prefix arg, uses the old `read-buffer' instead."
   (persp-protect
     (let ((read-buffer-function nil))
       (if current-prefix-arg
-          (read-buffer prompt def require-match)
+          (read-buffer prompt def require-match predicate)
         ;; Most of this is taken from `minibuffer-with-setup-hook',
         ;; slightly modified because it's not a macro.
         ;; The only functional difference is that the append argument
@@ -886,7 +887,7 @@ With a prefix arg, uses the old `read-buffer' instead."
           (unwind-protect
               (progn
                 (add-hook 'minibuffer-setup-hook persp-read-buffer-hook t)
-                (read-buffer prompt def require-match))
+                (read-buffer prompt def require-match predicate))
             (remove-hook 'minibuffer-setup-hook persp-read-buffer-hook)))))))
 
 (defun persp-complete-buffer ()
@@ -1252,6 +1253,7 @@ PERSP-SET-IDO-BUFFERS)."
     (user-error "Ivy not loaded"))
   (defvar ivy-switch-buffer-map)
   (declare-function ivy-read "ivy.el")
+  (declare-function ivy-switch-buffer "ivy.el")
   (declare-function ivy--switch-buffer-matcher "ivy.el")
   (declare-function ivy--switch-buffer-action "ivy.el")
   (if (and persp-mode (null arg))
@@ -1259,9 +1261,14 @@ PERSP-SET-IDO-BUFFERS)."
              (append
               (list
                (format "Switch to buffer (%s): " (persp-current-name))
-               (cl-remove-if #'null (mapcar #'buffer-name (persp-current-buffers)))
+               (cl-remove-if #'null (mapcar #'buffer-name
+                                            ;; buffer-list is ordered by access time
+                                            ;; seq-intersection keeps the order
+                                            (seq-intersection (buffer-list)
+                                                              (persp-current-buffers))))
                :preselect (buffer-name (persp-other-buffer (current-buffer)))
                :keymap ivy-switch-buffer-map
+               :caller #'ivy-switch-buffer
                :action #'ivy--switch-buffer-action
                :matcher #'ivy--switch-buffer-matcher)
               ivy-params))
@@ -1273,7 +1280,16 @@ PERSP-SET-IDO-BUFFERS)."
   "A version of `ivy-switch-buffer' which respects perspectives."
   (interactive "P")
   (declare-function ivy-switch-buffer "ivy.el")
-  (persp--switch-buffer-ivy-counsel-helper arg nil #'ivy-switch-buffer))
+  (declare-function ivy--buffer-list "ivy.el")
+  (let ((saved-ivy-buffer-list (symbol-function 'ivy--buffer-list))
+        (temp-ivy-buffer-list (lambda (_str &optional _virtual _predicate)
+                                (persp-current-buffer-names))))
+    (unwind-protect
+        (progn
+          (when (and persp-mode (null arg))
+            (setf (symbol-function 'ivy--buffer-list) temp-ivy-buffer-list))
+          (persp--switch-buffer-ivy-counsel-helper arg nil #'ivy-switch-buffer))
+      (setf (symbol-function 'ivy--buffer-list) saved-ivy-buffer-list))))
 
 ;; Buffer switching integration: Counsel.
 ;;;###autoload
@@ -1286,8 +1302,7 @@ PERSP-SET-IDO-BUFFERS)."
   (declare-function counsel--switch-buffer-unwind "counsel.el")
   (declare-function counsel--switch-buffer-update-fn "counsel.el")
   (persp--switch-buffer-ivy-counsel-helper arg
-                                           (list :caller #'counsel-switch-buffer
-                                                 :unwind #'counsel--switch-buffer-unwind
+                                           (list :unwind #'counsel--switch-buffer-unwind
                                                  :update-fn #'counsel--switch-buffer-update-fn)
                                            #'counsel-switch-buffer))
 
