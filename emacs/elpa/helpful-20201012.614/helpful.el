@@ -1,12 +1,13 @@
 ;;; helpful.el --- a better *help* buffer            -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2019  Wilfred Hughes
+;; Copyright (C) 2017-2020  Wilfred Hughes
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
-;; Package-Version: 20200506.816
+;; Package-Version: 20201012.614
+;; Package-Commit: 584ecc887bb92133119f93a6716cdf7af0b51dca
 ;; Keywords: help, lisp
-;; Version: 0.18
+;; Version: 0.19
 ;; Package-Requires: ((emacs "25") (dash "2.12.0") (dash-functional "1.2.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -759,7 +760,7 @@ blank line afterwards."
                 (-cons* first-line "" (cdr lines)))
       docstring)))
 
-(defun helpful--propertize-sym-ref (sym-name)
+(defun helpful--propertize-sym-ref (sym-name before-txt after-txt)
   "Given a symbol name from a docstring, convert to a button (if
 bound) or else highlight."
   (let* ((sym (intern sym-name)))
@@ -773,6 +774,20 @@ bound) or else highlight."
        sym-name)
       (propertize sym-name
                   'face 'font-lock-builtin-face))
+     ((and (boundp sym) (s-ends-with-p "variable " before-txt))
+      (helpful--button
+       sym-name
+       'helpful-describe-exactly-button
+       'symbol sym
+       'callable-p nil))
+     ((and (fboundp sym) (or
+                          (s-starts-with-p " command" after-txt)
+                          (s-ends-with-p "function " before-txt)))
+      (helpful--button
+       sym-name
+       'helpful-describe-exactly-button
+       'symbol sym
+       'callable-p t))
      ;; Only create a link if this is a symbol that is bound as a
      ;; variable or callable.
      ((or (boundp sym) (fboundp sym))
@@ -965,6 +980,20 @@ vector suitable for `key-description', and COMMAND is a smbol."
    t
    t))
 
+(defun helpful--chars-before (pos n)
+  "Return up to N chars before POS in the current buffer.
+The string may be shorter than N or empty if out-of-range."
+  (buffer-substring
+   (max (point-min) (- pos n))
+   pos))
+
+(defun helpful--chars-after (pos n)
+  "Return up to N chars after POS in the current buffer.
+The string may be shorter than N or empty if out-of-range."
+  (buffer-substring
+   pos
+   (min (point-max) (+ pos n))))
+
 (defun helpful--format-command-keys (docstring)
   "Convert command key references and keymap references
 in DOCSTRING to buttons.
@@ -1020,9 +1049,13 @@ unescaping too."
              ((s-contains-p "\\[" contents)
               (delete-region start-pos end-pos)
               (insert (helpful--format-commands contents keymap)))
+             ;; Highlight a normal `foo', extracting the surrounding
+             ;; text so we can detect e.g. "function `foo'".
              (t
-              (delete-region start-pos end-pos)
-              (insert (helpful--propertize-sym-ref contents))))))
+              (let ((before (helpful--chars-before start-pos 10))
+                    (after (helpful--chars-after end-pos 10)))
+                (delete-region start-pos end-pos)
+                (insert (helpful--propertize-sym-ref contents before after)))))))
          ((looking-at
            ;; Text of the form \\<foo-keymap>
            (rx "\\<" (group (+ (not (in ">")))) ">"
@@ -1579,12 +1612,12 @@ E.g. (x x y z y) -> ((x . 2) (y . 2) (z . 1))"
 
 (defun helpful--without-advice (sym)
   "Given advised function SYM, return the function object
-without the advice."
+without the advice. Assumes function has been loaded."
   (advice--cd*r
    (advice--symbol-function sym)))
 
 (defun helpful--advised-p (sym)
-  "A list of advice associated with SYM."
+  "Does SYM have advice associated with it?"
   (and (symbolp sym)
        (advice--p (advice--symbol-function sym))))
 
@@ -2043,7 +2076,7 @@ may contain duplicates."
   "Ensure the symbol associated with the current buffer has been loaded."
   (when (and helpful--callable-p
              (symbolp helpful--sym))
-    (let ((fn-obj (helpful--without-advice helpful--sym)))
+    (let ((fn-obj (symbol-function helpful--sym)))
       (when (autoloadp fn-obj)
         (autoload-do-load fn-obj)))))
 
@@ -2392,7 +2425,10 @@ state of the current symbol."
   "Remove mentions of advice from DOCSTRING."
   (let* ((lines (s-lines docstring))
          (relevant-lines
-          (--drop-while (s-starts-with-p ":around advice:" it) lines)))
+          (--drop-while
+           (or (s-starts-with-p ":around advice:" it)
+               (s-starts-with-p "This function has :around advice:" it))
+           lines)))
     (s-trim (s-join "\n" relevant-lines))))
 
 (defun helpful--format-argument (arg)
@@ -2501,36 +2537,50 @@ escapes that are used by `substitute-command-keys'."
             (documentation-property sym 'variable-documentation t)))
     docstring))
 
-(defun helpful--read-symbol (prompt predicate)
-  (let* ((sym-here (symbol-at-point))
-         (default-val
-           (when (funcall predicate sym-here)
-             (symbol-name sym-here))))
-    (when default-val
-      ;; TODO: Only modify the prompt when we don't have ido/ivy/helm,
-      ;; because the default is obvious for them.
-      (setq prompt
-            (replace-regexp-in-string
-             (rx ": " eos)
-             (format " (default: %s): " default-val)
-             prompt)))
-    (intern (completing-read prompt obarray
-                             predicate t nil nil
-                             default-val))))
+(defun helpful--read-symbol (prompt default-val predicate)
+  "Read a symbol from the minibuffer, with completion.
+Returns the symbol."
+  (when (and default-val
+             (not (funcall predicate default-val)))
+    (setq default-val nil))
+  (when default-val
+    ;; `completing-read' expects a string.
+    (setq default-val (symbol-name default-val))
+
+    ;; TODO: Only modify the prompt when we don't have ido/ivy/helm,
+    ;; because the default is obvious for them.
+    (setq prompt
+          (replace-regexp-in-string
+           (rx ": " eos)
+           (format " (default: %s): " default-val)
+           prompt)))
+  (intern (completing-read prompt obarray
+                           predicate t nil nil
+                           default-val)))
 
 ;;;###autoload
 (defun helpful-function (symbol)
-  "Show help for function named SYMBOL."
+  "Show help for function named SYMBOL.
+
+See also `helpful-macro', `helpful-command' and `helpful-callable'."
   (interactive
-   (list (helpful--read-symbol "Function: " #'functionp)))
+   (list (helpful--read-symbol
+          "Function: "
+          (helpful--callable-at-point)
+          #'functionp)))
   (funcall helpful-switch-buffer-function (helpful--buffer symbol t))
   (helpful-update))
 
 ;;;###autoload
 (defun helpful-command (symbol)
-  "Show help for interactive function named SYMBOL."
+  "Show help for interactive function named SYMBOL.
+
+See also `helpful-function'."
   (interactive
-   (list (helpful--read-symbol "Command: " #'commandp)))
+   (list (helpful--read-symbol
+          "Command: "
+          (helpful--callable-at-point)
+          #'commandp)))
   (funcall helpful-switch-buffer-function (helpful--buffer symbol t))
   (helpful-update))
 
@@ -2556,7 +2606,10 @@ escapes that are used by `substitute-command-keys'."
 (defun helpful-macro (symbol)
   "Show help for macro named SYMBOL."
   (interactive
-   (list (helpful--read-symbol "Macro: " #'macrop)))
+   (list (helpful--read-symbol
+          "Macro: "
+          (helpful--callable-at-point)
+          #'macrop)))
   (funcall helpful-switch-buffer-function (helpful--buffer symbol t))
   (helpful-update))
 
@@ -2564,9 +2617,12 @@ escapes that are used by `substitute-command-keys'."
 (defun helpful-callable (symbol)
   "Show help for function, macro or special form named SYMBOL.
 
-See also `helpful-macro' and `helpful-function'."
+See also `helpful-macro', `helpful-function' and `helpful-command'."
   (interactive
-   (list (helpful--read-symbol "Callable: " #'fboundp)))
+   (list (helpful--read-symbol
+          "Callable: "
+          (helpful--callable-at-point)
+          #'fboundp)))
   (funcall helpful-switch-buffer-function (helpful--buffer symbol t))
   (helpful-update))
 
@@ -2625,7 +2681,10 @@ nil if SYMBOL doesn't begin with \"F\" or \"V\"."
 
 See also `helpful-callable' and `helpful-variable'."
   (interactive
-   (list (helpful--read-symbol "Symbol: " #'helpful--bound-p)))
+   (list (helpful--read-symbol
+          "Symbol: "
+          (helpful--symbol-at-point)
+          #'helpful--bound-p)))
   (let ((c-var-sym (helpful--convert-c-name symbol t))
         (c-fn-sym (helpful--convert-c-name symbol nil)))
     (cond
@@ -2650,15 +2709,74 @@ See also `helpful-callable' and `helpful-variable'."
 (defun helpful-variable (symbol)
   "Show help for variable named SYMBOL."
   (interactive
-   (list (helpful--read-symbol "Variable: " #'helpful--variable-p)))
+   (list (helpful--read-symbol
+          "Variable: "
+          (helpful--variable-at-point)
+          #'helpful--variable-p)))
   (funcall helpful-switch-buffer-function (helpful--buffer symbol nil))
   (helpful-update))
+
+(defun helpful--variable-at-point-exactly ()
+  "Return the symbol at point, if it's a bound variable."
+  (let ((var (variable-at-point)))
+    ;; `variable-at-point' uses 0 rather than nil to signify no symbol
+    ;; at point (presumably because 'nil is a symbol).
+    (unless (symbolp var)
+      (setq var nil))
+    (when (helpful--variable-p var)
+      var)))
+
+(defun helpful--variable-defined-at-point ()
+  "Return the variable defined in the form enclosing point."
+  ;; TODO: do the same thing if point is just before a top-level form.
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let* ((ppss (syntax-ppss))
+             (sexp-start (nth 1 ppss))
+             sexp)
+        (when sexp-start
+          (goto-char sexp-start)
+          (setq sexp (read (current-buffer)))
+          (when (memq (car-safe sexp)
+                      (list 'defvar 'defvar-local 'defcustom 'defconst))
+            (nth 1 sexp)))))))
+
+(defun helpful--variable-at-point ()
+  "Return the variable exactly under point, or defined at point."
+  (let ((var (helpful--variable-at-point-exactly)))
+    (if var
+        var
+      (let ((var (helpful--variable-defined-at-point)))
+        (when (helpful--variable-p var)
+          var)))))
+
+(defun helpful--callable-at-point ()
+  (let ((sym (symbol-at-point))
+        (enclosing-sym (function-called-at-point)))
+    (if (fboundp sym)
+        sym
+      enclosing-sym)))
+
+(defun helpful--symbol-at-point-exactly ()
+  "Return the symbol at point, if it's bound."
+  (let ((sym (symbol-at-point)))
+    (when (helpful--bound-p sym)
+      sym)))
+
+(defun helpful--symbol-at-point ()
+  "Find the most relevant symbol at or around point.
+Returns nil if nothing found."
+  (or
+   (helpful--symbol-at-point-exactly)
+   (helpful--callable-at-point)
+   (helpful--variable-at-point)))
 
 ;;;###autoload
 (defun helpful-at-point ()
   "Show help for the symbol at point."
   (interactive)
-  (-if-let (symbol (symbol-at-point))
+  (-if-let (symbol (helpful--symbol-at-point))
       (helpful-symbol symbol)
     (user-error "There is no symbol at point.")))
 
