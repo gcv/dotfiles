@@ -1,8 +1,8 @@
 ;;; rust-mode.el --- A major emacs mode for editing Rust source code -*-lexical-binding: t-*-
 
 ;; Version: 0.5.0
-;; Package-Version: 20200709.723
-;; Package-Commit: ca7d99c6fd90fc1e636aa9d4020a2f077786a0c3
+;; Package-Version: 20201204.1527
+;; Package-Commit: c5c7ed31a2e1106ab4835b135618a34570796dc7
 ;; Author: Mozilla
 ;; Url: https://github.com/rust-lang/rust-mode
 ;; Keywords: languages
@@ -1911,6 +1911,11 @@ Return the created process."
                    (file-name-directory rust-buffer-project))
               default-directory)))
     (compile (apply #'format format-string args))))
+
+(defun rust-check ()
+  "Compile using `cargo check`"
+  (interactive)
+  (rust--compile "%s check" rust-cargo-bin))
 
 (defun rust-compile ()
   "Compile using `cargo build`"
