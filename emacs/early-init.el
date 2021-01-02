@@ -4,7 +4,7 @@
 (setq user-emacs-directory (file-truename "~/.emacs.d/user/"))
 
 (when window-system
-  (tool-bar-mode -1))                                           
+  (tool-bar-mode -1))
 (scroll-bar-mode -1)
 (menu-bar-mode -1)
 
