@@ -10,14 +10,10 @@
 ;;; Generated autoloads from helm-ag.el
 
 (autoload 'helm-ag-pop-stack "helm-ag" "\
-Not documented.
-
-\(fn)" t nil)
+Not documented." t nil)
 
 (autoload 'helm-ag-clear-stack "helm-ag" "\
-Not documented.
-
-\(fn)" t nil)
+Not documented." t nil)
 
 (autoload 'helm-ag-this-file "helm-ag" "\
 Do ag with in this file with QUERY.

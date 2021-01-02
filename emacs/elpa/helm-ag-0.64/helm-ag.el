@@ -4,9 +4,9 @@
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-helm-ag
-;; Package-Version: 0.62
-;; Package-Commit: 08aaab53b8876caba619f956945a8152ece47182
-;; Version: 0.62
+;; Package-Version: 0.64
+;; Package-Commit: 6a3e738c1bb5e80c7ea80f7166fda34a714284d8
+;; Version: 0.64
 ;; Package-Requires: ((emacs "25.1") (helm "2.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -302,8 +302,8 @@ Default behaviour shows finish and result in mode-line."
       (while (re-search-forward "^\\([^:]+\\)" nil t)
         (replace-match (abbreviate-file-name (match-string-no-properties 1)))))))
 
-(defun helm-ag--command-succeeded-p (cmd exit-status)
-  "Not documented, CMD, EXIT-STATUS."
+(defun helm-ag--command-succeeded-p (exit-status)
+  "Not documented, EXIT-STATUS."
   (cond ((integerp helm-ag-success-exit-status) (= exit-status helm-ag-success-exit-status))
         ((consp helm-ag-success-exit-status) (member exit-status helm-ag-success-exit-status))
         (t (zerop exit-status))))
@@ -323,7 +323,7 @@ Default behaviour shows finish and result in mode-line."
         (let ((ret (apply #'process-file (car cmds) nil t nil (cdr cmds))))
           (if (zerop (length (buffer-string)))
               (error "No ag output: '%s'" helm-ag--last-query)
-            (unless (helm-ag--command-succeeded-p (car cmds) ret)
+            (unless (helm-ag--command-succeeded-p ret)
               (unless (executable-find (car cmds))
                 (error "'%s' is not installed" (car cmds)))
               (error "Failed: '%s'" helm-ag--last-query))))
@@ -1233,12 +1233,13 @@ Continue searching the parent directory? "))
   (let ((search-dir (or search-dir dir)))
     (setq helm-source-do-ag
           (helm-make-source "AG" 'helm-do-ag-class
-            :candidates-process (lambda ()
-                                  (helm-ag--do-ag-set-command)
-                                  (helm-ag--do-ag-candidate-process dir))
-            :header-name (lambda (_name)
-                           (helm-ag--helm-header search-dir))
-            :follow (and helm-follow-mode-persistent 1)))))
+                            :candidates-process
+                            (lambda ()
+                              (helm-ag--do-ag-set-command)
+                              (helm-ag--do-ag-candidate-process dir))
+                            :header-name
+                            (lambda (_name) (helm-ag--helm-header search-dir))
+                            :follow (and helm-follow-mode-persistent 1)))))
 
 (defun helm-ag--do-ag-up-one-level ()
   "Not documented."
@@ -1261,11 +1262,12 @@ Continue searching the parent directory? "))
 
 (defun helm-ag--set-do-ag-option ()
   "Not documented."
-  (when (or (< (prefix-numeric-value current-prefix-arg) 0)
-            helm-ag-always-set-extra-option)
-    (let ((option (read-string "Extra options: " (or helm-ag--extra-options "")
-                               'helm-ag--extra-options-history)))
-      (setq helm-ag--extra-options option))))
+  (if (or (< (prefix-numeric-value current-prefix-arg) 0)
+          helm-ag-always-set-extra-option)
+      (let ((option (read-string "Extra options: " (or helm-ag--extra-options "")
+                                 'helm-ag--extra-options-history)))
+        (setq helm-ag--extra-options option))
+    (setq helm-ag--extra-options nil)))
 
 (defun helm-ag--set-command-features ()
   "Not documented."
