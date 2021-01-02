@@ -14,7 +14,8 @@
  (with-eval-after-load 'cus-load
   (custom-add-load 'languages 'swift-mode))
 
-(defsubst swift-mode:add-supported-extension-for-speedbar nil (if (fboundp 'speedbar-add-supported-extension) (speedbar-add-supported-extension ".swift") (add-hook 'speedbar-load-hook (lambda nil (speedbar-add-supported-extension ".swift")))))
+(defsubst swift-mode:add-supported-extension-for-speedbar nil "\
+Register .swfit to speedbar." (if (fboundp 'speedbar-add-supported-extension) (speedbar-add-supported-extension ".swift") (add-hook 'speedbar-load-hook (lambda nil (speedbar-add-supported-extension ".swift")))))
 
 (autoload 'swift-mode "swift-mode" "\
 Major mode for editing Swift code.
@@ -109,9 +110,7 @@ START and END define region within current buffer
 \(fn START END)" t nil)
 
 (autoload 'swift-mode:send-buffer "swift-mode-repl" "\
-Send the buffer to the Swift REPL process.
-
-\(fn)" t nil)
+Send the buffer to the Swift REPL process." t nil)
 
 (autoload 'swift-mode:build-swift-module "swift-mode-repl" "\
 Build a Swift module in the PROJECT-DIRECTORY.
@@ -128,7 +127,7 @@ Build it for iOS device DEVICE-IDENTIFIER for the given SCHEME.
 If PROJECT-DIRECTORY is nil or omitted, it is searched from `default-directory'
 or its ancestors.
 DEVICE-IDENTIFIER is the device identifier of the iOS simulator.  If it is nil
-or omitted, the value of `swift-mode:ios-device-identifier' is used. If it is
+or omitted, the value of `swift-mode:ios-device-identifier' is used.  If it is
 equal to `swift-mode:ios-local-device-identifier', a local device is used via
 `ios-deploy' instead.
 SCHEME is the name of the project scheme in Xcode.  If it is nil or omitted,
@@ -190,7 +189,8 @@ the value of `swift-mode:ios-project-scheme' is used.
 
 ;;;***
 
-;;;### (autoloads nil nil ("swift-mode-pkg.el") (0 0 0 0))
+;;;### (autoloads nil nil ("src-autoloads.el" "swift-mode-pkg.el")
+;;;;;;  (0 0 0 0))
 
 ;;;***
 
