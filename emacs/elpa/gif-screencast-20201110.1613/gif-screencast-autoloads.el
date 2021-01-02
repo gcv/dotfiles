@@ -12,9 +12,7 @@
 
 (autoload 'gif-screencast "gif-screencast" "\
 Start recording the GIF.
-A screenshot is taken before every command runs.
-
-\(fn)" t nil)
+A screenshot is taken before every command runs." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "gif-screencast" '("gif-screencast-")))
 
