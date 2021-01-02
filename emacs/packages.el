@@ -453,6 +453,12 @@
             ))
 
 
+(use-package highlight-indent-guides
+  :pin melpa
+  :defer t
+  :custom (highlight-indent-guides-method 'character))
+
+
 (use-package hydra
   :defer t)
 
