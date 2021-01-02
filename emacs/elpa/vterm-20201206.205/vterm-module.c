@@ -578,6 +578,15 @@ static void term_redraw(Term *term, emacs_env *env) {
     free(term->elisp_code);
     term->elisp_code = NULL;
   }
+  if (term->selection_data) {
+    emacs_value selection_target = env->make_string(
+        env, &term->selection_target[0], strlen(&term->selection_target[0]));
+    emacs_value selection_data = env->make_string(env, term->selection_data,
+                                                  strlen(term->selection_data));
+    vterm_selection(env, selection_target, selection_data);
+    free(term->selection_data);
+    term->selection_data = NULL;
+  }
 
   term->is_invalidated = false;
 }
@@ -609,15 +618,37 @@ static bool is_key(unsigned char *key, size_t len, char *key_description) {
           memcmp(key, key_description, len) == 0);
 }
 
-static void term_set_title(Term *term, char *title) {
-  size_t len = strlen(title);
-  if (term->title) {
-    free(term->title);
+/* str1=concat(str1,str2,str2_len,true); */
+/* str1 can be NULL */
+static char *concat(char *str1, const char *str2, size_t str2_len,
+                    bool free_str1) {
+  if (str1 == NULL) {
+    str1 = malloc(str2_len + 1);
+    memcpy(str1, str2, str2_len);
+    str1[str2_len] = '\0';
+    return str1;
   }
-  term->title = malloc(sizeof(char) * (len + 1));
-  strncpy(term->title, title, len);
-  term->title[len] = 0;
-  term->title_changed = true;
+  size_t str1_len = strlen(str1);
+  char *buf = malloc(str1_len + str2_len + 1);
+  memcpy(buf, str1, str1_len);
+  memcpy(&buf[str1_len], str2, str2_len);
+  buf[str1_len + str2_len] = '\0';
+  if (free_str1) {
+    free(str1);
+  }
+  return buf;
+}
+static void term_set_title(Term *term, const char *title, size_t len,
+                           bool initial, bool final) {
+  if (term->title && initial) {
+    free(term->title);
+    term->title = NULL;
+    term->title_changed = false;
+  }
+  term->title = concat(term->title, title, len, true);
+  if (final) {
+    term->title_changed = true;
+  }
   return;
 }
 
@@ -640,7 +671,12 @@ static int term_settermprop(VTermProp prop, VTermValue *val, void *user_data) {
 
     break;
   case VTERM_PROP_TITLE:
-    term_set_title(term, val->string);
+#ifdef VTermStringFragmentNotExists
+    term_set_title(term, val->string, strlen(val->string), true, true);
+#else
+    term_set_title(term, val->string.str, val->string.len, val->string.initial,
+                   val->string.final);
+#endif
     break;
   case VTERM_PROP_ALTSCREEN:
     invalidate_terminal(term, 0, term->height);
@@ -664,11 +700,18 @@ static emacs_value render_text(emacs_env *env, Term *term, char *buffer,
 
   emacs_value fg = cell_rgb_color(env, term, cell, true);
   emacs_value bg = cell_rgb_color(env, term, cell, false);
+  /* With vterm-disable-bold-font, vterm-disable-underline,
+   * vterm-disable-inverse-video, users can disable some text properties.
+   * Here, we check whether the text would require adding such properties.
+   * In case it does, and the user does not disable the attribute, we later
+   * append the property to the list props.  If the text does not require
+   * such property, or the user disable it, we set the variable to nil.
+   * Properties that are marked as nil are not added to the text. */
   emacs_value bold =
-      cell->attrs.bold && !term->disable_bold_font ? Qbold : Qnormal;
+      cell->attrs.bold && !term->disable_bold_font ? Qbold : Qnil;
   emacs_value underline =
       cell->attrs.underline && !term->disable_underline ? Qt : Qnil;
-  emacs_value italic = cell->attrs.italic ? Qitalic : Qnormal;
+  emacs_value italic = cell->attrs.italic ? Qitalic : Qnil;
   emacs_value reverse =
       cell->attrs.reverse && !term->disable_inverse_video ? Qt : Qnil;
   emacs_value strike = cell->attrs.strike ? Qt : Qnil;
@@ -677,23 +720,28 @@ static emacs_value render_text(emacs_env *env, Term *term, char *buffer,
   int emacs_major_version =
       env->extract_integer(env, symbol_value(env, Qemacs_major_version));
   emacs_value properties;
-  if (emacs_major_version >= 27) {
-    properties =
-        list(env,
-             (emacs_value[]){Qforeground, fg, Qbackground, bg, Qweight, bold,
-                             Qunderline, underline, Qslant, italic, Qreverse,
-                             reverse, Qstrike, strike, Qextend, Qt},
-             16);
-  } else {
-    properties =
-        list(env,
-             (emacs_value[]){Qforeground, fg, Qbackground, bg, Qweight, bold,
-                             Qunderline, underline, Qslant, italic, Qreverse,
-                             reverse, Qstrike, strike},
-             14);
-  }
+  emacs_value props[64]; int props_len = 0;
+  if (env->is_not_nil (env, fg))
+    props[props_len++] = Qforeground, props[props_len++] = fg;
+  if (env->is_not_nil (env, bg))
+    props[props_len++] = Qbackground, props[props_len++] = bg;
+  if (bold != Qnil)
+    props[props_len++] = Qweight, props[props_len++] = bold;
+  if (underline != Qnil)
+    props[props_len++] = Qunderline, props[props_len++] = underline;
+  if (italic != Qnil)
+    props[props_len++] = Qslant, props[props_len++] = italic;
+  if (reverse != Qnil)
+    props[props_len++] = Qreverse, props[props_len++] = reverse;
+  if (strike != Qnil)
+    props[props_len++] = Qstrike, props[props_len++] = strike;
+  if (emacs_major_version >= 27)
+    props[props_len++] = Qextend, props[props_len++] = Qt;
 
-  put_text_property(env, text, Qface, properties);
+  properties = list (env, props, props_len);
+
+  if (props_len)
+    put_text_property(env, text, Qface, properties);
 
   return text;
 }
@@ -871,8 +919,22 @@ static void term_process_key(Term *term, emacs_env *env, unsigned char *key,
     vterm_keyboard_key(term->vt, VTERM_KEY_KP_8, modifier);
   } else if (is_key(key, len, "<kp-9>")) {
     vterm_keyboard_key(term->vt, VTERM_KEY_KP_9, modifier);
+  } else if (is_key(key, len, "<kp-add>")) {
+    vterm_keyboard_key(term->vt, VTERM_KEY_KP_PLUS, modifier);
+  } else if (is_key(key, len, "<kp-subtract>")) {
+    vterm_keyboard_key(term->vt, VTERM_KEY_KP_MINUS, modifier);
+  } else if (is_key(key, len, "<kp-multiply>")) {
+    vterm_keyboard_key(term->vt, VTERM_KEY_KP_MULT, modifier);
+  } else if (is_key(key, len, "<kp-divide>")) {
+    vterm_keyboard_key(term->vt, VTERM_KEY_KP_DIVIDE, modifier);
+  } else if (is_key(key, len, "<kp-equal>")) {
+    vterm_keyboard_key(term->vt, VTERM_KEY_KP_EQUAL, modifier);
   } else if (is_key(key, len, "<kp-decimal>")) {
     vterm_keyboard_key(term->vt, VTERM_KEY_KP_PERIOD, modifier);
+  } else if (is_key(key, len, "<kp-separator>")) {
+    vterm_keyboard_key(term->vt, VTERM_KEY_KP_COMMA, modifier);
+  } else if (is_key(key, len, "<kp-enter>")) {
+    vterm_keyboard_key(term->vt, VTERM_KEY_KP_ENTER, modifier);
   } else if (is_key(key, len, "j") && (modifier == VTERM_MOD_CTRL)) {
     vterm_keyboard_unichar(term->vt, '\n', 0);
   } else if (is_key(key, len, "SPC")) {
@@ -907,6 +969,15 @@ void term_finalize(void *object) {
     free(term->elisp_code);
     term->elisp_code = NULL;
   }
+  if (term->cmd_buffer) {
+    free(term->cmd_buffer);
+    term->cmd_buffer = NULL;
+  }
+  if (term->selection_data) {
+    free(term->selection_data);
+    term->selection_data = NULL;
+  }
+
   for (int i = 0; i < term->lines_len; i++) {
     if (term->lines[i] != NULL) {
       free_lineinfo(term->lines[i]);
@@ -919,33 +990,21 @@ void term_finalize(void *object) {
   }
 
   free(term->sb_buffer);
+  free(term->lines);
   vterm_free(term->vt);
   free(term);
 }
 
-static int osc_callback(const char *command, size_t cmdlen, void *user) {
-  /* osc_callback (OSC = Operating System Command) */
-
-  /* We interpret escape codes that start with "51;" */
-  /* "51;A" sets the current directory */
-  /* "51;A" has also the role of identifying the end of the prompt */
-  /* "51;E" executes elisp code */
-  /* The elisp code is executed in term_redraw */
-
-  Term *term = (Term *)user;
-  char buffer[cmdlen + 1];
-
-  buffer[cmdlen] = '\0';
-  memcpy(buffer, command, cmdlen);
-
-  if (cmdlen > 4 && buffer[0] == '5' && buffer[1] == '1' && buffer[2] == ';' &&
-      buffer[3] == 'A') {
+static int handle_osc_cmd_51(Term *term, char subCmd, char *buffer) {
+  if (subCmd == 'A') {
+    /* "51;A" sets the current directory */
+    /* "51;A" has also the role of identifying the end of the prompt */
     if (term->directory != NULL) {
       free(term->directory);
       term->directory = NULL;
     }
-    term->directory = malloc(cmdlen - 4 + 1);
-    strcpy(term->directory, &buffer[4]);
+    term->directory = malloc(strlen(buffer) + 1);
+    strcpy(term->directory, buffer);
     term->directory_changed = true;
 
     for (int i = term->cursor.row; i < term->lines_len; i++) {
@@ -956,8 +1015,8 @@ static int osc_callback(const char *command, size_t cmdlen, void *user) {
       if (term->lines[i]->directory != NULL) {
         free(term->lines[i]->directory);
       }
-      term->lines[i]->directory = malloc(cmdlen - 4 + 1);
-      strcpy(term->lines[i]->directory, &buffer[4]);
+      term->lines[i]->directory = malloc(strlen(buffer) + 1);
+      strcpy(term->lines[i]->directory, buffer);
       if (i == term->cursor.row) {
         term->lines[i]->prompt_col = term->cursor.col;
       } else {
@@ -965,16 +1024,81 @@ static int osc_callback(const char *command, size_t cmdlen, void *user) {
       }
     }
     return 1;
-  } else if (cmdlen > 4 && buffer[0] == '5' && buffer[1] == '1' &&
-             buffer[2] == ';' && buffer[3] == 'E') {
-    term->elisp_code = malloc(cmdlen - 4 + 1);
-    strcpy(term->elisp_code, &buffer[4]);
+  } else if (subCmd == 'E') {
+    /* "51;E" executes elisp code */
+    /* The elisp code is executed in term_redraw */
+    term->elisp_code = malloc(strlen(buffer) + 1);
+    strcpy(term->elisp_code, buffer);
     term->elisp_code_changed = true;
     return 1;
   }
   return 0;
 }
+static int handle_osc_cmd_52(Term *term, char *buffer) {
+  /* OSC 52 ; Pc ; Pd BEL */
+  /* Manipulate Selection Data  */
+  /* https://invisible-island.net/xterm/ctlseqs/ctlseqs.html */
+  /* test by printf "\033]52;c;$(printf "%s" "blabla" | base64)\a" */
 
+  for (int i = 0; i < SELECTION_TARGET_MAX; i++) { /* reset Pc */
+    term->selection_target[i] = 0;
+  }
+  int selection_target_idx = 0;
+  size_t cmdlen = strlen(buffer);
+
+  for (int i = 0; i < cmdlen; i++) {
+    /* OSC 52 ; Pc ; Pd BEL */
+    if (buffer[i] == ';') { /* find the second ";" */
+      term->selection_data = malloc(cmdlen - i);
+      strcpy(term->selection_data, &buffer[i + 1]);
+      break;
+    }
+    if (selection_target_idx < SELECTION_TARGET_MAX) {
+      /* c , p , q , s , 0 , 1 , 2 , 3 , 4 , 5 , 6 , and 7 */
+      /* for clipboard, primary, secondary, select, or cut buffers 0 through 7
+       * respectively */
+      term->selection_target[selection_target_idx] = buffer[i];
+      selection_target_idx++;
+    } else { /* len of Pc should not >12 just ignore this cmd,am I wrong? */
+      return 0;
+    }
+  }
+  return 1;
+}
+static int handle_osc_cmd(Term *term, int cmd, char *buffer) {
+  if (cmd == 51) {
+    char subCmd = '0';
+    if (strlen(buffer) == 0) {
+      return 0;
+    }
+    subCmd = buffer[0];
+    /* ++ skip the subcmd char */
+    return handle_osc_cmd_51(term, subCmd, ++buffer);
+  } else if (cmd == 52) {
+    return handle_osc_cmd_52(term, buffer);
+  }
+  return 0;
+}
+#ifdef VTermStringFragmentNotExists
+static int osc_callback(const char *command, size_t cmdlen, void *user) {
+  Term *term = (Term *)user;
+  char buffer[cmdlen + 1];
+  buffer[cmdlen] = '\0';
+  memcpy(buffer, command, cmdlen);
+
+  if (cmdlen > 4 && buffer[0] == '5' && buffer[1] == '1' && buffer[2] == ';' &&
+      buffer[3] == 'A') {
+    return handle_osc_cmd_51(term, 'A', &buffer[4]);
+  } else if (cmdlen > 4 && buffer[0] == '5' && buffer[1] == '1' &&
+             buffer[2] == ';' && buffer[3] == 'E') {
+    return handle_osc_cmd_51(term, 'E', &buffer[4]);
+  } else if (cmdlen > 4 && buffer[0] == '5' && buffer[1] == '2' &&
+             buffer[2] == ';') {
+    /* OSC 52 ; Pc ; Pd BEL */
+    return handle_osc_cmd_52(term, &buffer[3]);
+  }
+  return 0;
+}
 static VTermParserCallbacks parser_callbacks = {
     .text = NULL,
     .control = NULL,
@@ -983,6 +1107,53 @@ static VTermParserCallbacks parser_callbacks = {
     .osc = &osc_callback,
     .dcs = NULL,
 };
+#else
+
+static int osc_callback(int cmd, VTermStringFragment frag, void *user) {
+  /* osc_callback (OSC = Operating System Command) */
+
+  /* We interpret escape codes that start with "51;" */
+  /* "51;A" sets the current directory */
+  /* "51;A" has also the role of identifying the end of the prompt */
+  /* "51;E" executes elisp code */
+  /* The elisp code is executed in term_redraw */
+
+  /* "52;[cpqs01234567];data" Manipulate Selection Data */
+  /* I think libvterm has bug ,sometimes when the data is long enough ,the final
+   * fragment is missed */
+  /* printf "\033]52;c;$(printf "%s" $(ruby -e 'print "x"*999999')|base64)\a"
+   */
+
+  Term *term = (Term *)user;
+
+  if (frag.initial) {
+    /* drop old fragment,because this is a initial fragment */
+    if (term->cmd_buffer) {
+      free(term->cmd_buffer);
+      term->cmd_buffer = NULL;
+    }
+  }
+
+  if (!frag.initial && !frag.final && frag.len == 0) {
+    return 0;
+  }
+
+  term->cmd_buffer = concat(term->cmd_buffer, frag.str, frag.len, true);
+  if (frag.final) {
+    handle_osc_cmd(term, cmd, term->cmd_buffer);
+    free(term->cmd_buffer);
+    term->cmd_buffer = NULL;
+  }
+  return 0;
+}
+static VTermStateFallbacks parser_callbacks = {
+    .control = NULL,
+    .csi = NULL,
+    .osc = &osc_callback,
+    .dcs = NULL,
+};
+
+#endif
 
 emacs_value Fvterm_new(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
                        void *data) {
@@ -1039,6 +1210,9 @@ emacs_value Fvterm_new(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
   term->directory_changed = false;
   term->elisp_code = NULL;
   term->elisp_code_changed = false;
+  term->selection_data = NULL;
+
+  term->cmd_buffer = NULL;
 
   term->lines = malloc(sizeof(LineInfo *) * rows);
   term->lines_len = rows;
@@ -1059,11 +1233,11 @@ emacs_value Fvterm_update(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
     unsigned char key[len];
     env->copy_string_contents(env, args[1], (char *)key, &len);
     VTermModifier modifier = VTERM_MOD_NONE;
-    if (env->is_not_nil(env, args[2]))
+    if (nargs > 2 && env->is_not_nil(env, args[2]))
       modifier = modifier | VTERM_MOD_SHIFT;
-    if (env->is_not_nil(env, args[3]))
+    if (nargs > 3 && env->is_not_nil(env, args[3]))
       modifier = modifier | VTERM_MOD_ALT;
-    if (env->is_not_nil(env, args[4]))
+    if (nargs > 4 && env->is_not_nil(env, args[4]))
       modifier = modifier | VTERM_MOD_CTRL;
 
     // Ignore the final zero byte
@@ -1210,7 +1384,7 @@ int emacs_module_init(struct emacs_runtime *ert) {
   Flist = env->make_global_ref(env, env->intern(env, "list"));
   Fnth = env->make_global_ref(env, env->intern(env, "nth"));
   Ferase_buffer = env->make_global_ref(env, env->intern(env, "erase-buffer"));
-  Finsert = env->make_global_ref(env, env->intern(env, "insert"));
+  Finsert = env->make_global_ref(env, env->intern(env, "vterm--insert"));
   Fgoto_char = env->make_global_ref(env, env->intern(env, "goto-char"));
   Fput_text_property =
       env->make_global_ref(env, env->intern(env, "put-text-property"));
@@ -1246,11 +1420,13 @@ int emacs_module_init(struct emacs_runtime *ert) {
   Fvterm_get_color =
       env->make_global_ref(env, env->intern(env, "vterm--get-color"));
   Fvterm_eval = env->make_global_ref(env, env->intern(env, "vterm--eval"));
+  Fvterm_selection =
+      env->make_global_ref(env, env->intern(env, "vterm--selection"));
 
   // Exported functions
   emacs_value fun;
   fun =
-      env->make_function(env, 4, 6, Fvterm_new, "Allocates a new vterm.", NULL);
+      env->make_function(env, 4, 6, Fvterm_new, "Allocate a new vterm.", NULL);
   bind_function(env, "vterm--new", fun);
 
   fun = env->make_function(env, 1, 5, Fvterm_update,
@@ -1266,11 +1442,11 @@ int emacs_module_init(struct emacs_runtime *ert) {
   bind_function(env, "vterm--write-input", fun);
 
   fun = env->make_function(env, 3, 3, Fvterm_set_size,
-                           "Sets the size of the terminal.", NULL);
+                           "Set the size of the terminal.", NULL);
   bind_function(env, "vterm--set-size", fun);
 
   fun = env->make_function(env, 2, 2, Fvterm_set_pty_name,
-                           "Sets the name of the pty.", NULL);
+                           "Set the name of the pty.", NULL);
   bind_function(env, "vterm--set-pty-name", fun);
   fun = env->make_function(env, 2, 2, Fvterm_get_pwd,
                            "Get the working directory of at line n.", NULL);
@@ -1280,7 +1456,7 @@ int emacs_module_init(struct emacs_runtime *ert) {
   bind_function(env, "vterm--reset-point", fun);
 
   fun = env->make_function(env, 1, 1, Fvterm_get_icrnl,
-                           "Gets the icrnl state of the pty", NULL);
+                           "Get the icrnl state of the pty", NULL);
   bind_function(env, "vterm--get-icrnl", fun);
 
   provide(env, "vterm-module");

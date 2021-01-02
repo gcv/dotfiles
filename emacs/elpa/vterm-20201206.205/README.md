@@ -137,9 +137,62 @@ Or, with `use-package`:
 ```
 
 ## vterm and Ubuntu
-
+### 20.04
 Using `vterm` on Ubuntu requires additional steps. The latest LTS version
-(18.04) ships with a version of CMake that is too old for `vterm` and GNU
+(20.04) ships without CMake installed and Emacs27 is not yet available from Ubuntu's package repository.
+
+The basic steps for getting vterm to work on Ubuntu 20.04 are:
+* Ensure Emacs27 is installed
+* Install cmake, libtool, and libtool-bin
+
+There are a few options for installing Emacs27 on Ubuntu 20.04:
+* Compile Emacs27 from source
+* Install Emacs27 from Snap
+* Install Emacs27 from Kevin Kelley's PPA
+
+In any case, if you have an older Emacs version you will need to purge it before proceeding:
+
+#### Purge Emacs
+```sh
+sudo apt --purge remove emacs
+sudo apt autoremove
+```
+
+#### Installing Emacs27 from Kevin Kelley PPA
+```sh
+sudo add-apt-repository ppa:kelleyk/emacs
+sudo apt install emacs27
+```
+
+##### If you get an error about emacs27_common during the install process:
+```sh
+Errors were encountered while processing:
+ /tmp/apt-dpkg-install-RVK8CA/064-emacs27-common_27.1~1.git86d8d76aa3-kk2+20.04_all.deb
+```
+run
+```sh
+sudo apt --purge remove emacs-common
+sudo apt --fix-broken install
+```
+
+#### Installing Emacs27 from Snap
+I hesitate to include SNAP here, because I ran into a number of GTK Theme parsing errors, and Fontconfig errors when I tested it, and reverted to installing from Kevin Kelley's PPA. YMMV
+```sh
+sudo snap install emacs --classic
+```
+
+#### Install CMake and Libtool
+In Ubuntu 20.04 CMake (v3.16.3-1ubuntu1) and Libtool can be installed with
+```sh
+sudo apt install cmake
+sudo apt install libtool
+sudo apt install libtool-bin
+```
+
+### 18.04
+
+Using `vterm` on Ubuntu 18.04 requires additional steps.
+18.04 ships with a version of CMake that is too old for `vterm` and GNU
 Emacs is not compiled with support for dynamical module loading.
 
 It is possible to install GNU Emacs with module support from Kevin Kelley's PPA.
@@ -157,6 +210,7 @@ A way to install a recent version of CMake (>= 3.11) is with linuxbrew.
 ```sh
 brew install cmake
 ```
+
 
 In some cases, `/bin/sh` needs to be relinked to `/bin/bash` for the compilation
 to work (see,
@@ -177,9 +231,9 @@ The package can be installed with `guix package -i emacs-vterm`.
 
 ## Shell-side configuration
 
-Some of the most useful features in `vterm` (e.g.,
-[directory-tracking and prompt-tracking](#directory-tracking-and-prompt-tracking) or
-[message passing](#message-passing)) require shell-side configurations. The main goal of
+Some of the most useful features in `vterm` (e.g., [directory-tracking and
+prompt-tracking](#directory-tracking-and-prompt-tracking) or [message
+passing](#message-passing)) require shell-side configurations. The main goal of
 these additional functions is to enable the shell to send information to `vterm`
 via properly escaped sequences. A function that helps in this task,
 `vterm_printf`, is defined below. This function is widely used throughout this
@@ -272,6 +326,15 @@ if [[ "$INSIDE_EMACS" = 'vterm' ]]; then
     }
 fi
 ```
+For `fish`:
+```
+if [ "$INSIDE_EMACS" = 'vterm' ]
+    function clear
+        vterm_printf "51;Evterm-clear-scrollback";
+        tput clear;
+    end
+end
+```
 These aliases take advantage of the fact that `vterm` can execute `elisp`
 commands, as explained below.
 
@@ -286,6 +349,12 @@ behavior can be achieved by using the universal prefix (ie, calling `C-u C-l`).
 ## `vterm-shell`
 
 Shell to run in a new vterm. It defaults to `$SHELL`.
+
+## `vterm-environment`
+
+to add more environment variables there is the custom vterm-environment which has
+a similar format than the internal emacs variable process-environment.
+You can check the documentation with C-h v process-environment for more details.
 
 ## `vterm-term-environment-variable`
 
@@ -322,6 +391,26 @@ The variable `vterm-use-vterm-prompt-detection-method` determines whether to use
 the vterm prompt tracking, if false it use the regexp in
 `vterm-copy-prompt-regexp` to search for the prompt.
 
+## `vterm-enable-manipulate-selection-data-by-osc52`
+
+Vterm support copy text to emacs kill ring and system clipboard by using OSC 52.
+See https://invisible-island.net/xterm/ctlseqs/ctlseqs.html for more info about OSC 52.
+For example: send 'blabla' to kill ring: printf "\033]52;c;$(printf "%s" "blabla" | base64)\a"
+
+tmux can share its copy buffer to terminals bysupporting osc52(like iterm2 xterm),
+you can enable this feature for tmux by :
+set -g set-clipboard on         #osc 52 copy paste share with iterm
+set -ga terminal-overrides ',xterm*:XT:Ms=\E]52;%p1%s;%p2%s\007'
+set -ga terminal-overrides ',screen*:XT:Ms=\E]52;%p1%s;%p2%s\007'
+
+The clipboard querying/clearing functionality offered by OSC 52 is not implemented here,
+And for security reason, this feature is disabled by default."
+
+This feature need the new way of handling strings with a struct `VTermStringFragment`
+in libvterm. You'd better compile emacs-libvterm with `cmake -DUSE_SYSTEM_LIBVTERM=no ..`.
+If you don't do that, when  the content you want to copied is too long, it would be truncated
+by bug of libvterm.
+
 ## `vterm-buffer-name-string`
 
 When `vterm-buffer-name-string` is not nil, vterm renames automatically its own
@@ -340,7 +429,7 @@ add-zsh-hook -Uz chpwd (){ print -Pn "\e]2;%m:%2~\a" }
 ```
 For `bash`,
 ```bash
-PROMPT_COMMAND='echo -ne "\033]0;\h:\w\007"'
+PROMPT_COMMAND='echo -ne "\033]0;${HOSTNAME}:${PWD}\007"'
 ```
 For `fish`,
 ```fish
@@ -370,7 +459,7 @@ C-c`.
 
 ## Fonts
 
-If you would like to change the font or face used in a vterm, use the following code:
+You can change the font (the _face_) used in a vterm with the following code:
 
 ``` emacs
 (add-hook 'vterm-mode-hook
@@ -379,8 +468,14 @@ If you would like to change the font or face used in a vterm, use the following 
                  (buffer-face-mode t)))
 ```
 
-The above would change change the font in vterm buffers to a mono-spaced font
-(the `fixed-pitch` face) if your default font in Emacs is a proportional font.
+Where instead of `'fixed-pitch` you specify the face you want to use. The
+example reported here can be used to force vterm to use a mono-spaced font (the
+`fixed-pitch` face). This is useful when your default font in Emacs is a
+proportional font.
+
+In addition to that, you can disable some text properties (bold, underline,
+reverse video) setting the relative option to `t` (`vterm-disable-bold`,
+`vterm-disable-underline`, or `vterm-disable-inverse-video`).
 
 ## Colors
 
@@ -388,7 +483,6 @@ Set the `:foreground` and `:background` attributes of the following faces to a
 color you like. The `:foreground` is ansi color 0-7, the `:background` attribute
 is ansi color 8-15.
 
-- vterm-color-default
 - vterm-color-black
 - vterm-color-red
 - vterm-color-green
@@ -447,7 +541,7 @@ For `fish`, put this in your `~/.config/fish/config.fish`:
 function vterm_prompt_end;
     vterm_printf '51;A'(whoami)'@'(hostname)':'(pwd)
 end
-functions -c fish_prompt vterm_old_fish_prompt
+functions --copy fish_prompt vterm_old_fish_prompt
 function fish_prompt --description 'Write out the prompt; do not replace this. Instead, put this at end of your file.'
     # Remove the trailing newline from the original prompt. This is done
     # using the string builtin from fish, but to make sure any escape codes
@@ -456,6 +550,9 @@ function fish_prompt --description 'Write out the prompt; do not replace this. I
     vterm_prompt_end
 end
 ```
+Here we are using the function `vterm_printf` that we have discussed above, so make
+sure that this function is defined in your configuration file.
+
 
 Directory tracking works on remote servers too. In case the hostname of your
 remote machine does not match the actual hostname needed to connect to that
@@ -501,7 +598,7 @@ vterm_cmd() {
 ```
 `fish`:
 ```sh
-function vterm_cmd --description 'Run an emacs command that\'s been defined in vterm-eval-cmds'
+function vterm_cmd --description 'Run an emacs command among the ones been defined in vterm-eval-cmds.'
     set -l vterm_elisp ()
     for arg in $argv
         set -a vterm_elisp (printf '"%s" ' (string replace -a -r '([\\\\"])' '\\\\\\\\$1' $arg))
@@ -514,7 +611,7 @@ Now we can write shell functions to call the ones defined in `vterm-eval-cmds`.
 
 ```sh
 find_file() {
-    vterm_cmd find-file "$(realpath "$@")"
+    vterm_cmd find-file "$(realpath "${@:-.}")"
 }
 
 say() {
@@ -522,11 +619,25 @@ say() {
 }
 ```
 
-This can be used inside `vterm` as
+Or for `fish`:
+```fish
+function find_file
+    set -q argv[1]; or set argv[1] "."
+    vterm_cmd find-file (realpath "$argv")
+end
+
+function say
+    vterm_cmd message "%s" "$argv"
+end
+```
+
+This newly defined `find_file` function can now be used inside `vterm` as
 
 ```sh
 find_file name_of_file_in_local_directory
 ```
+If you call `find_file` without specifying any file (you just execute `find_file` in your shell),
+`dired` will open with the current directory.
 
 As an example, say you like having files opened below the current window. You
 could add the command to do it on the lisp side like so:
@@ -545,7 +656,7 @@ Then add the command in your `.bashrc` file.
 
 ```sh
 open_file_below() {
-    vterm_cmd find-file-below "$(realpath "$@")"
+    vterm_cmd find-file-below "$(realpath "${@:-.}")"
 }
 ```
 
@@ -553,6 +664,31 @@ Then you can open any file from inside your shell.
 
 ```sh
 open_file_below ~/Documents
+```
+
+## Shell-side configuration files
+
+The configurations described in earlier sections are combined in
+[`etc/`](./etc/). These can be appended to or loaded into your user
+configuration file. Alternatively, they can be installed system-wide, for
+example in `/etc/bash/bashrc.d/`, `/etc/profile.d/` (for `zsh`), or
+`/etc/fish/conf.d/` for `fish`.
+
+When using vterm Emacs sets the environment variable INSIDE_EMACS in the subshell to ‘vterm’.
+Usually the programs check this variable to determine whether they are running inside emacs.
+
+Vterm also sets an extra variable EMACS_VTERM_PATH to the place where the vterm library is installed.
+This is very useful because when vterm is installed from melpa the Shell-side configuration files are
+in the EMACS_VTERM_PATH inside the /etc sub-directory. After a package update, the directory name changes,
+so, a code like this in your bashrc could be enough to load always the latest version of the file
+from the right loation without coping any file manually.
+
+```
+if [[ "$INSIDE_EMACS" = 'vterm' ]] \
+    && [[ -n ${EMACS_VTERM_PATH} ]] \
+    && [[ -f ${EMACS_VTERM_PATH}/etc/emacs-vterm-bash.sh ]]; then
+	source ${EMACS_VTERM_PATH}/etc/emacs-vterm-bash.sh
+fi
 ```
 
 ## Frequently Asked Questions and Problems
@@ -629,21 +765,60 @@ A possible application of this function is in combination with `find-file`:
 ```
 This method does not work on remote machines.
 
+### How can I get the directory tracking in a more understandable way?
+
+If you looked at the reccomended way to set-up directory tracking, you will have
+noticed that it requires printing obscure code like `\e]2;%m:%2~\a` (unless you
+are using `fish`).
+
+There is another way to achieve this behavior. Define a shell function, on a
+local host you can simply use
+
+``` sh
+vterm_set_directory() {
+    vterm_cmd update-pwd "$PWD/"
+}
+```
+On a remote one, use instead
+``` sh
+vterm_set_directory() {
+    vterm_cmd update-pwd "/-:""$USER""@""$HOSTNAME"":""$PWD/"
+}
+```
+Then, for `zsh`, add this function to the `chpwd` hook:
+
+``` sh
+autoload -U add-zsh-hook
+add-zsh-hook -Uz chpwd (){ vterm_set_directory }
+```
+For `bash`, append it to the prompt:
+
+``` sh
+PROMPT_COMMAND="$PROMPT_COMMAND;vterm_set_directory"
+```
+Finally, add `update-pwd` to the list of commands that Emacs
+is allowed to execute from vterm:
+
+``` emacs-lisp
+(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq default-directory path))))
+```
+
 ### When evil-mode is enabled, the cursor moves back in normal state, and this messes directory tracking
 
 `evil-collection` provides a solution for this problem. If you do not want to
 use `evil-collection`, you can add the following code:
+
 ```emacs-lisp
 (defun evil-collection-vterm-escape-stay ()
-  "Go back to normal state but don't move cursor backwards.
-Moving cursor backwards is the default vim behavior but
-it is not appropriate in some cases like terminals."
-  (setq-local evil-move-cursor-back nil))
+"Go back to normal state but don't move
+cursor backwards. Moving cursor backwards is the default vim behavior but it is
+not appropriate in some cases like terminals."
+(setq-local evil-move-cursor-back nil))
 
 (add-hook 'vterm-mode-hook #'evil-collection-vterm-escape-stay)
 ```
 
-  
+
 ## Related packages
 
 - [vterm-toggle](https://github.com/jixiuf/vterm-toggle): Toggles between a
@@ -655,6 +830,11 @@ it is not appropriate in some cases like terminals."
 ### Breaking changes
 
 Obsolete variables will be removed in version 0.1.
+
+#### October 2020
+
+* `vterm-disable-bold-font` was renamed to `vterm-disable-bold` to uniform it
+   with the other similar options.
 
 #### July 2020
 
