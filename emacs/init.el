@@ -618,7 +618,7 @@
 ;;; outline
 (use-feature outline-minor-mode
   :hook (outline-minor-mode . /outline-minor-mode-hook)
-  :config
+  :init
   (let ((outline-cycle-state 0))
     (defun outline-cycle ()
       (interactive)
