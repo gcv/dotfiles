@@ -37,6 +37,8 @@
 
   (setq org-startup-indented t)
   (setq org-startup-folded 'nofold)
+  (setq org-startup-align-all-tables t)
+
   (setq org-hide-leading-stars nil)
   (setq org-odd-levels-only nil)
   (setq org-alphabetical-lists t)
