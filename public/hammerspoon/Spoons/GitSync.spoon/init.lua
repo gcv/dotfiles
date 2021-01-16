@@ -12,14 +12,14 @@
 --- This is intended as a private, Git-backed replacement for synchronization
 --- services like Dropbox and Syncthing.
 ---
---- Download: https://github.com/gcv/git-sync-spoon/releases/download/1.0.0beta4/GitSync.spoon.zip
+--- Download: https://github.com/gcv/git-sync-spoon/releases/download/1.0.0/GitSync.spoon.zip
 
 local obj = {}
 obj.__index = obj
 
 --- Metadata
 obj.name = "GitSync"
-obj.version = "1.0.0beta4"
+obj.version = "1.0.0"
 obj.author = "gcv"
 obj.homepage = "https://github.com/gcv/git-sync.spoon"
 obj.license = "CC0"

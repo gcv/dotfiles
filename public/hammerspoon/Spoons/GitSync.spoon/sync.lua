@@ -114,13 +114,14 @@ function obj:display()
    -- path
    resTitle = resTitle .. " " .. self.displayPath
    -- last and next sync
+   nextStr = ""
+   if self.timer then
+      nextStr = "; next: " .. os.date(fmt, math.floor(os.time() + self.timer:nextTrigger()))
+   end
    if self.lastSync then
-      resTitle = resTitle ..
-         " (last: " .. os.date(fmt, self.lastSync) ..
-         "; next: " .. os.date(fmt, math.floor(os.time() + self.timer:nextTrigger())) .. ")"
+      resTitle = resTitle .. " (last: " .. os.date(fmt, self.lastSync) .. nextStr .. ")"
    elseif self.started then
-      resTitle = resTitle ..
-         " (next: " .. os.date(fmt, math.floor(os.time() + self.timer:nextTrigger())) .. ")"
+      resTitle = resTitle .. nextStr
    end
    -- done
    return {
