@@ -21,7 +21,7 @@ nix-env -i \
     autoconf \
     autojump \
     automake \
-    awscli \
+    awscli2 \
     bat \
     cmake \
     coreutils \
