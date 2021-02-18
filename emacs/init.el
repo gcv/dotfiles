@@ -467,6 +467,10 @@
 (add-hook 'abbrev-mode-hook #'/abbrev-mode-hook)
 
 
+;;; EasyPG (epg)
+(setq epg-pinentry-mode (unless window-system 'loopback))
+
+
 ;;; isearch
 (setq lazy-highlight-initial-delay 0.25)
 
