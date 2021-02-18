@@ -531,14 +531,18 @@
 
 
 ;;; linum: display fix with right-aligned padding
-;;; NB: linum-mode is deprecated in Emacs 26, use display-line-numbes-mode
-(defun /linum-update-window (orig-fn &rest args)
-  (let* ((w (length (number-to-string
-                     (count-lines (point-min) (point-max)))))
-         (linum-format (concat "%" (number-to-string w) "d ")))
-    (apply orig-fn args)))
+;;; NB: linum-mode is deprecated in Emacs 26, use display-line-numbers-mode
+;;(defun /linum-update-window (orig-fn &rest args)
+;;  (let* ((w (length (number-to-string
+;;                     (count-lines (point-min) (point-max)))))
+;;         (linum-format (concat "%" (number-to-string w) "d ")))
+;;    (apply orig-fn args)))
+;;
+;;(advice-add 'linum-update-window :around #'/linum-update-window)
 
-(advice-add 'linum-update-window :around #'/linum-update-window)
+(defun linum-mode ()
+  (interactive)
+  (error "linum-mode is deprecated; use display-line-numbers-mode"))
 
 
 ;;; display-line-numbers-mode
