@@ -387,6 +387,17 @@
 (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
 
+;;; terminal mode: show a prettier separator
+(unless window-system
+  (set-face-inverse-video-p 'vertical-border nil)
+  (set-face-background 'vertical-border (face-background 'default))
+  (set-display-table-slot standard-display-table
+                          'vertical-border
+                          (make-glyph-code ?│)
+                          ;;(make-glyph-code ? )
+                          ))
+
+
 ;;; ----------------------------------------------------------------------------
 ;;; global key bindings, not specific to other modes or functionality
 ;;; ----------------------------------------------------------------------------
