@@ -345,14 +345,14 @@
 
 
 ;;; fix window splitting behavior when possible
-(setq display-buffer-reuse-frames t)         ; reuse windows in other frames
 (setq even-window-sizes nil)                 ; display-buffer: avoid resizing
 (setq window-resize-pixelwise t)             ; smoother window resizing?
 (setq split-height-threshold 15)             ; for rare occasions
 
 (setq display-buffer-alist
       '((".*"
-         (display-buffer-reuse-window display-buffer-same-window))))
+         (display-buffer-reuse-window display-buffer-same-window)
+         (reusable-frames . t))))
 
 (winner-mode 1)                              ; restore windows: C-c right-arrow
 (windmove-default-keybindings)               ; shift-arrow keys switch windows
