@@ -46,7 +46,7 @@
      (/theme-face-spec 'helm-selection :underline nil)
      (/theme-face-spec 'dired-header :foreground nil :background nil :family base-font :weight 'bold)
      (/theme-face-spec 'bold :family base-font :foreground nil :weight 'bold)
-     (/theme-face-spec 'aw-leading-char-face :foreground "red" :background nil :family base-font :height 2.0 :weight 'bold)
+     (/theme-face-spec 'aw-leading-char-face :foreground "red" :background nil :family base-font :height 1.0 :weight 'bold)
      (/theme-face-spec 'aw-background-face :foreground "gray40" :background nil)
      (/theme-face-spec 'fixed-pitch :family base-font)
      (/theme-face-spec 'term :foreground nil :background nil)
