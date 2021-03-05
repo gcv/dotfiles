@@ -686,6 +686,14 @@
 
 (setq eshell-prompt-regexp "^\\[.*?\\] ")
 
+(defun eshell/h ()
+  (/with-selectrum-mini-frame
+   (lambda ()
+     (interactive)
+     (insert
+      (completing-read "History: " (delete-dups (ring-elements eshell-history-ring)))))
+   'read-from-minibuffer))
+
 (defun eshell/shortpwd ()
   (/display-dir (eshell/pwd)))
 
