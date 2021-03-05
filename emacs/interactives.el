@@ -730,3 +730,15 @@ end tell")))
             (let ((ans (read-string (concat "Execute {{" cmd "}}? "))))
               (when (or (string= "y" ans) (string= "Y" ans) (string= "" ans))
                 (shell-command-to-string cmd)))))))
+
+
+(defun kill-or-delete-region (beg end &optional region)
+  "Normally just calls kill-region, just like the default C-w
+binding. When used with a prefix argument, it calls delete-region
+instead, which does not save the deletion to the kill-ring."
+  (interactive (list (mark) (point) 'region))
+  (if current-prefix-arg
+      (delete-region beg end)
+    (kill-region beg end region)))
+
+(global-set-key (kbd "C-w") #'kill-or-delete-region)
