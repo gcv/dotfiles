@@ -170,7 +170,7 @@
 
 (use-package crux
   :pin melpa
-  :defer t)
+  :bind ("C-M-z" . crux-indent-defun))
 
 
 (use-package deft
@@ -643,6 +643,7 @@
 
 (use-package multiple-cursors
   :bind (("C-?" . mc/edit-lines)
+         ("C-M-_" . mc/edit-lines)      ; C-M-/ evals to this in terminal?
          ("C->" . mc/mark-next-like-this)
          ("C-<" . mc/mark-previous-like-this)
          ("C-c C-<" . mc/mark-all-like-this)))
