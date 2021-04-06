@@ -1105,6 +1105,7 @@
   :config (progn
 
             (setq vterm-max-scrollback 10000)
+            (setq vterm-min-window-width 20)
 
             (setq vterm-keymap-exceptions
                   '("C-c" "C-x" "C-h" "M-x" "M-o" "C-v" "M-v" "C-y" "M-y"))
