@@ -864,9 +864,13 @@ See `eshell-prompt-regexp'."
 
 
 ;;; tex-mode
+(defun /tex-mode-hook ()
+  (define-key tex-mode-map (kbd "C-c C-p") nil))
+
 (defun /latex-mode-hook ()
   (visual-line-mode))
 
+(add-hook 'tex-mode-hook #'/tex-mode-hook)
 (add-hook 'latex-mode-hook #'/latex-mode-hook)
 
 
