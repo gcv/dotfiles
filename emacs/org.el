@@ -42,7 +42,7 @@
   (setq org-hide-leading-stars nil)
   (setq org-odd-levels-only nil)
   (setq org-alphabetical-lists t)
-  (setq org-hide-emphasis-markers t)
+  (when window-system (setq org-hide-emphasis-markers t))
   (setq org-link-search-must-match-exact-headline nil)
   (setq org-replace-disputed-keys t)
   (setq org-archive-location "%s-archive::")
