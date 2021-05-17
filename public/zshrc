@@ -328,7 +328,7 @@ if [[ $(command -v fzf) ]]; then
 fi
 
 
-### Turn on Docker autocompletion on macOS with Docker.app.
+### Turn on Docker autocompletion on Mac with Docker.app.
 if [[ "${UNAME}" == "Darwin" && -f "/Applications/Docker.app/Contents/Resources/etc/docker.zsh-completion" ]]; then
     . /Applications/Docker.app/Contents/Resources/etc/docker.zsh-completion
     compinit -i
@@ -339,6 +339,13 @@ fi
 ### Turn on direnv integration if found.
 if [[ $(command -v direnv) ]]; then
     eval "$($(readlink $(which direnv)) hook zsh)"
+fi
+
+
+### Turn on terminal GPG pinentry if on SSH connection:
+export GPG_TTY=$(tty)
+if [[ -n "$SSH_CONNECTION" ]] ;then
+    export PINENTRY_USER_DATA="USE_CURSES=1"
 fi
 
 
