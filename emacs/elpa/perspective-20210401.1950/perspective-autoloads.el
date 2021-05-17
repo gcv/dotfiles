@@ -47,6 +47,16 @@ PERSP-SET-IDO-BUFFERS).
 
 \(fn BUFFER-OR-NAME)" t nil)
 
+(autoload 'persp-buffer-menu "perspective" "\
+Like the default C-x C-b, but filters for the current perspective's buffers.
+
+\(fn ARG)" t nil)
+
+(autoload 'persp-list-buffers "perspective" "\
+Like the default C-x C-b, but filters for the current perspective's buffers.
+
+\(fn ARG)" t nil)
+
 (autoload 'persp-bs-show "perspective" "\
 Invoke BS-SHOW with a configuration enabled for Perspective.
 With a prefix arg, show buffers in all perspectives.
