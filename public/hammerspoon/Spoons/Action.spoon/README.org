@@ -1,0 +1,358 @@
+* Action Spoon — a Hammerspoon Plugin
+
+Action Spoon (or Action.spoon, formerly Backup Spoon) is a [[http://www.hammerspoon.org/][Hammerspoon]] [[https://www.hammerspoon.org/Spoons/][plugin, or Spoon]], for orchestrating command-line utilities to run on a schedule. It was originally designed to handle timer-scheduled runs of backup tools like [[https://restic.net/][restic]], [[https://www.borgbackup.org/][Borg]], and [[https://kopia.io][Kopia]]. With Action Spoon, these utilities can even be configured to run simultaneously to provide extra redundancy, since all have been known to have [[https://forum.restic.net/t/recovery-options-for-damaged-repositories/1571][data-loss]] bugs.
+
+
+** Installation
+
+- Install your CLI (e.g. backup) utilities. (You should use Nix.)
+- Download the latest release zip file from https://github.com/gcv/action-spoon/releases/.
+- Open the downloaded file, and Hammerspoon will automatically install it.
+- Edit your Hammerspoon configuration file (~~/.hammerspoon/init.lua~), and add the following line:
+
+#+BEGIN_SRC lua
+hs.loadSpoon("Action")
+#+END_SRC
+
+Make and edit the Action Spoon configuration file (see below), and reload the Hammerspoon configuration.
+
+
+** Concepts
+
+Action Spoon organizes things it runs into /sets/. Each set contains one or more /actions/, and each action has one or more /commands/. Every action in a set must have the same number of commands. Sets can run in parallel, but actions within a set run sequentially, subject to defined /intervals/.
+
+An easy example for the backup use case could be a configuration of two named backup sets: ~Data~ and ~Media~. The ~Data~ backup set has one action named ~Quotes~, and the ~Media~ backup set has two: ~Photos~ and ~Audio~. Each action defines two commands: ~backup~ (which runs on an hourly interval) and ~prune~ (which runs on a monthly interval). Backups for ~Data~ and ~Media~ can run in parallel, but ~Media:Photos~ and ~Media:Audio~ will only run sequentially.
+
+
+** Configuration
+
+Make sure whatever CLI tools you want to use with Action Spoon are correctly configured and work from the command line non-interactively (i.e., without prompting the user for any input).
+
+For backup tools, it's a good idea to run the initial backup before setting it up with Action Spoon.
+
+Add a file to your ~XDG_CONFIG_HOME~ directory (probably ~~./config~) named ~ActionSpoon.lua~. A simple configuration file looks like this:
+
+#+begin_src lua
+sets = {
+   id = "Health",
+   intervals = {
+      commands = {
+         15 * 60,
+         40 * 60
+      }
+   },
+   actions = {
+      {
+         id = "Relax!",
+         commands = {
+            -- a command defined as a Lua function:
+            function ()
+               hs.notify.show(
+                  "Relax reminder 1",
+                  "Breathe...",
+                  "..."
+               )
+            end,
+            -- a command calling an external utility:
+            {"osascript", "-e", "display notification \"Take a moment to stretch and walk around.\" with title \"Relax reminder 2\""}
+         }
+      }
+   }
+}
+#+end_src
+
+Set IDs should be unique.
+
+Note that a command can be a Lua function (which has access to the Hammerspoon runtime!), or a command-line invocation. For technical reasons (related to argument quoting), CLI invocations must be written as arrays (Lua tables) of strings, where each entry is a separate token in the command.
+
+A more sophisticated example:
+
+#+begin_src lua
+enabled = true
+-- default:
+--stateFile = "~/.config/ActionSpoon-state.json"
+path = { "~/.nix-profile/bin" }
+-- default is debug = false, but enabling it might be useful:
+--debug = true
+
+
+-- global settings; can be modified per set:
+excludedSSIDs = { ".*iPhone" }
+
+intervals = {             -- defaults for all sets:
+   poll = 5 * 60,         -- 5 minutes, default
+   commands = {
+      60 * 60,            -- backup: 1 hour, overridable at set level
+      30 * 24 * 60 * 60   -- prune: 30 day, overridable at set level
+   }
+}
+
+environment = {
+   {
+      var = "RESTIC_PASSWORD_COMMAND",
+      value = "/usr/bin/security find-generic-password -s 'My Restic Backup' -w"
+   },
+   {
+      var = "AWS_ACCESS_KEY_ID",
+      command = {"aws", "configure", "--profile=my-profile", "get", "aws_access_key_id"}
+   },
+   {
+      var = "AWS_SECRET_ACCESS_KEY",
+      command = {"aws", "configure", "--profile=my-profile", "get", "aws_secret_access_key"} },
+   {
+      var = "AWS_DEFAULT_REGION",
+      value = "eu-west-1"
+   }
+}
+
+
+-- main part:
+sets = {
+
+   {
+      id = "Data",
+      actions = {
+         {
+            id = "Quotes",
+            commands = {
+               -- backup:
+               {"restic",
+                "--repo=s3:s3.amazonaws.com/<backup-bucket>/restic/Quotes",
+                "--limit-upload=4900", -- KiB/s approx 5 MB/s
+                "--option=s3.storage-class=STANDARD_IA",
+                "--quiet",
+                "backup",
+                "/Users/gcv/Data/Quotes"},
+               -- prune:
+               {"restic",
+                "--repo=s3:s3.amazonaws.com/<backup-bucket>/restic/Quotes",
+                "--quiet",
+                "forget",
+                "--prune",
+                "--max-unused=unlimited",
+                "--keep-last=100",
+                "--keep-hourly=72",
+                "--keep-daily=60",
+                "--keep-weekly=12",
+                "--keep-monthly=36",
+                "--keep-yearly=100"}
+            }
+         }
+      }
+   },
+
+   {
+      id = "Media",
+      -- override intervals:
+      intervals = {
+         commands = {
+            6 * 60 * 60,       -- backup: 6 hours
+            30 * 24 * 60 * 60  -- prune: 30 days
+         }
+      },
+      actions = {
+         {
+            id = "Audio",
+            commands = {
+               -- backup:
+               {"restic",
+                "--repo=s3:s3.amazonaws.com/<backup-bucket>/restic/Audio",
+                "--limit-upload=4900", -- KiB/s approx 5 MB/s
+                "--option=s3.storage-class=STANDARD_IA",
+                "--quiet",
+                "backup",
+                "/Users/gcv/Audio"},
+               -- prune:
+               {"restic",
+                "--repo=s3:s3.amazonaws.com/<backup-bucket>/restic/Audio",
+                "--quiet",
+                "forget",
+                "--prune",
+                "--max-unused=unlimited",
+                "--keep-last=100",
+                "--keep-hourly=72",
+                "--keep-daily=60",
+                "--keep-weekly=12",
+                "--keep-monthly=36",
+                "--keep-yearly=100"}
+            }
+         },
+         {
+            id = "Photos",
+            commands = {
+               -- backup:
+               {"restic",
+                "--repo=s3:s3.amazonaws.com/<backup-bucket>/restic/Photos",
+                "--limit-upload=4900", -- KiB/s approx 5 MB/s
+                "--option=s3.storage-class=STANDARD_IA",
+                "--quiet",
+                "backup",
+                "/Users/gcv/Photos"},
+               -- prune:
+               {"restic",
+                "--repo=s3:s3.amazonaws.com/<backup-bucket>/restic/Photos",
+                "--quiet",
+                "forget",
+                "--prune",
+                "--max-unused=unlimited",
+                "--keep-last=100",
+                "--keep-hourly=72",
+                "--keep-daily=60",
+                "--keep-weekly=12",
+                "--keep-monthly=36",
+                "--keep-yearly=100"}
+            }
+         }
+      }
+   },
+
+   {
+      id = "Git Sync",
+      intervals = {
+         commands = { 4 * 60 }
+      },
+      environment = {
+         {
+            var = "GIT_SYNC_EXCLUDES",
+            value = "Books/Novel-1"
+         }
+      },
+      actions = {
+         {
+            id = "Writing",
+            -- set the working directory of the command:
+            directory = "~/Writing",
+            commands = {
+               {"git-sync"}
+            }
+         }
+      }
+   }
+
+}
+#+end_src
+
+
+*** Notes
+
+- Environment variables can be set with either constant values, or to the result of running a command.
+- Environment variables can be overriden at the set level. They are merged with environment variables set at the higher configuration level.
+- ~poll~: this interval setting controls how frequently an attempt is made to run an action when another action in the same is running. For example, when doing a prune, it is bad to run a backup on the same directory. So when the prune and backup are configured as sibling commands on the same action, and one is scheduled to run while the other is still running, the one will sleep for ~poll~ seconds before attempting again.
+- Intervals are given in seconds.
+- [[https://github.com/gcv/git-sync-spoon][Git Sync Spoon]] compatibility: Action Spoon contains the full functionality of Git Sync Spoon. It includes the ~git-sync~ script, which can be used in a CLI invocation directly.
+
+
+** Usage
+
+- Action Spoon displays a menu icon when enabled.
+- Clicking the menu icon shows the list of sets. There should be a status icon next to each.
+
+| status icon | meaning                |
+|-------------+------------------------|
+| ✓           | set task succeeded     |
+| !           | error                  |
+| ⟳           | set task in progress   |
+| ×           | set task stopped       |
+| •           | waiting for set action |
+
+- The menu icon turns grey when disabled.
+- The menu icon turns red when an error affects at least one set. When this happens, look for messages on the Hammerspoon console.
+- The menu icon turns orange when a task has been interrupted.
+- The menu icon shows flashing hard drive activity lights while running a command.
+- Set timers will be suspended when the system goes into sleep mode. When the system wakes up, Action Spoon will honor the expected interval. (This means if the defined run time of an action will have occured while the system was asleep, the action will be scheduled to run in 1 minute.)
+- After editing the configuration file, reload the Hammerspoon configuration, either from the Hammerspoon console or with a dedicated key binding to ~hs.reload()~.
+
+
+** Notes
+
+*** Restic: reasonable commands for S3 backups
+
+Set ~RESTIC_PASSWORD_COMMAND~ to something reasonable, e.g., something like this for retrieving the password from the Keychain:
+
+#+begin_src shell
+/usr/bin/security find-generic-password -s 'My Restic Backup' -w
+#+end_src
+
+Set ~AWS_ACCESS_KEY_ID~, ~AWS_SECRET_ACCESS_KEY~, and ~AWS_DEFAULT_REGION~ appropriately.
+
+As an alternative to passing ~--repo~ options to all these commands, consider setting ~RESTIC_REPOSITORY~. (Naturally, this only makes sense if you don't use different repositories.)
+
+
+**** Initialize
+
+#+begin_src shell
+restic \
+    --repo=s3:s3.amazonaws.com/<bucket>/<path> \
+    init
+#+end_src
+
+
+**** Backup
+
+#+begin_src shell
+restic \
+    --repo=s3:s3.amazonaws.com/<bucket>/<path> \
+    --limit-upload=950 \
+    --option=s3.storage-class=STANDARD_IA \
+    --quiet \
+    backup /<path to source>
+#+end_src
+
+
+**** Prune
+
+#+begin_src shell
+restic \
+    --repo=s3:s3.amazonaws.com/<bucket>/<path> \
+    --quiet
+    forget --prune \
+    --max-unused=unlimited \
+    --keep-last=100 \
+    --keep-hourly=72 \
+    --keep-daily=60 \
+    --keep-weekly=12 \
+    --keep-monthly=36 \
+    --keep-yearly=100
+#+end_src
+
+
+**** List snapshots
+
+#+begin_src shell
+restic \
+    --repo=s3:s3.amazonaws.com/<bucket>/<path> \
+    snapshots
+#+end_src
+
+
+**** List files in snapshot
+
+Substitute snapshot ID for ~latest~ below as needed.
+
+#+begin_src shell
+restic \
+    --repo=s3:s3.amazonaws.com/<bucket>/<path> \
+    ls latest
+#+end_src
+
+
+**** Retrieve files from snapshot
+
+#+begin_src shell
+restic \
+    --repo=s3:s3.amazonaws.com/<bucket>/<path> \
+    restore latest \
+    --include="/<path in snapshot>/*" \
+    --target="/<path to restore location>"
+#+end_src
+
+
+*** Kopia: S3 infrequent access policy
+
+Blobs starting with ~p~ can be marked infrequent for savings (https://kopia.discourse.group/t/using-s3-infrequent-access-policies/187/2).
+
+
+** Credits
+
+- This evolved from my [[https://github.com/gcv/git-sync-spoon][Git Sync Spoon]] project.
+- This would not have been possible without the [[http://www.hammerspoon.org/][Hammerspoon]] platform.

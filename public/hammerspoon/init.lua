@@ -15,5 +15,10 @@ dofile("./itunes.lua")
 dofile("./emacs-and-term.lua")
 
 --- Spoons:
-hs.loadSpoon("GitSync")
--- hs.loadSpoon("Shade")
+hs.loadSpoon("Action")
+--hs.loadSpoon("GitSync")
+--hs.loadSpoon("Shade")
+
+-- Consider installing URLDispatcher to set up link-following:
+-- http://www.hammerspoon.org/Spoons/URLDispatcher.html
+-- Good ideas here: https://github.com/dcreemer/dotfiles/blob/master/.hammerspoon/init.fnl
