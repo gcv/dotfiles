@@ -62,7 +62,7 @@ end
 function obj:goCommand(idxCmd)
    if self.app.conf.debug then print("ActionSpoon:", "command[" .. idxCmd .. "] trigger for set '" .. self.id .. "'") end
    -- avoid simultaneous runs! try again in <poll> min
-   local isRunning = "running" == self.status
+   local isRunning = ("running" == self.status)
    local currentSSID = hs.wifi.currentNetwork()
    local isExcludedSSID = false
    for idxSSID, rxSSID in ipairs(self.excludedSSIDs) do
@@ -84,6 +84,7 @@ function obj:helper(idxAction, idxCmd)
    local entry = self.actions[idxAction]
    if not entry then
       -- base case: after last run, so finished successfully
+      if self.app.conf.debug then print("ActionSpoon", "set run completed for " .. self.id .. "[" .. idxCmd .. "]") end
       self.lastActions[idxCmd] = os.time()
       self.timers[idxCmd]:setNextTrigger(self.intervals.commands[idxCmd])
       self:updateStatus("ok")
@@ -136,11 +137,12 @@ function obj:helper(idxAction, idxCmd)
       if not string.find(taskEnv["PATH"], pathToAdd) then
          taskEnv["PATH"] = ((taskEnv["PATH"] .. ":") or "") .. pathToAdd
       end
-      if self.app.conf.debug then print("ActionSpoon:", "task path: " .. hs.inspect(taskEnv["PATH"])) end
+      if self.app.conf.debug then print("ActionSpoon:", "starting action " .. self.id .. " : " .. entry.id .. "[" .. idxCmd .. "]") end
+      if self.app.conf.debug then print("ActionSpoon:", " - task path: " .. hs.inspect(taskEnv["PATH"])) end
       self:updateStatus("running")
       self.task:setEnvironment(taskEnv)
       local directory = hs.fs.pathToAbsolute(entry.directory or self.directory or self.app.conf.directory or self.app.spoonPath)
-      if self.app.conf.debug then print("ActionSpoon:", "task working directory:", directory) end
+      if self.app.conf.debug then print("ActionSpoon:", " - task working directory: " .. directory) end
       self.task:setWorkingDirectory(directory)
       self.task:start()
    end

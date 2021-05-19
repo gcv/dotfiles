@@ -3,14 +3,14 @@
 --- Orchestrates running scheduled tasks. Useful for automatic backup of local
 --- data using command-line utilities such as Restic, Kopia, and Borg.
 ---
---- Download: https://github.com/gcv/action-spoon/releases/download/1.0.0beta1/Action.spoon.zip
+--- Download: https://github.com/gcv/action-spoon/releases/download/1.0.0beta2/Action.spoon.zip
 
 local obj = {}
 obj.__index = obj
 
 --- Metadata
 obj.name = "Action"
-obj.version = "1.0.0beta1"
+obj.version = "1.0.0beta2"
 obj.author = "gcv"
 obj.homepage = "https://github.com/gcv/action.spoon"
 obj.license = "CC0"
@@ -239,12 +239,18 @@ function obj:updateMenuIcon()
          anyRunning = true
       end
    end
-   if anyErrors and obj.menu:icon() ~= obj.menuIconError then
-      obj.menu:setIcon(obj.menuIconError, false)
-   elseif anyInterrupted and obj.menu:icon() ~= obj.menuIconInterrupted then
-      obj.menu:setIcon(obj.menuIconInterrupted, false)
-   elseif anyRunning and obj.menu:icon() ~= obj.menuIconRunning then
-      obj.menu:setIcon(obj.menuIconRunning, true)
+   if anyErrors then
+      if obj.menu:icon() ~= obj.menuIconError then
+         obj.menu:setIcon(obj.menuIconError, false)
+      end
+   elseif anyInterrupted then
+      if obj.menu:icon() ~= obj.menuIconInterrupted then
+         obj.menu:setIcon(obj.menuIconInterrupted, false)
+      end
+   elseif anyRunning then
+      if obj.menu:icon() ~= obj.menuIconRunning then
+         obj.menu:setIcon(obj.menuIconRunning, true)
+      end
    elseif obj.menu:icon() ~= obj.menuIconNormal then
       obj.menu:setIcon(obj.menuIconNormal, true)
    end
