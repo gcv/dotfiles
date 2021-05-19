@@ -33,6 +33,7 @@
 (column-number-mode 1)                                          ; show column numbers
 (global-auto-revert-mode 1)                                     ; track externally changed files
 (show-paren-mode 1)                                             ; show matching parens
+(transient-mark-mode -1)                                        ; muscle memory
 
 
 ;;; OS-specific configuration
