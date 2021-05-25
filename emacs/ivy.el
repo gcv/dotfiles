@@ -149,6 +149,7 @@
 
 
 (use-package ivy-prescient
+  :pin melpa
   :defer t)
 
 

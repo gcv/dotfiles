@@ -873,6 +873,7 @@
 
 
 (use-package prescient
+  :pin melpa
   :defer t
   :config (progn
             ;;(setq prescient-aggressive-file-save t)

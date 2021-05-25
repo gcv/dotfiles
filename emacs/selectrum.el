@@ -54,6 +54,7 @@
 
 
 (use-package selectrum-prescient
+  :pin melpa
   :commands (selectrum-prescient-mode))
 
 
