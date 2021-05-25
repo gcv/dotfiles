@@ -566,8 +566,6 @@
             (setq magit-diff-refine-hunk t) ; "all" shows word differences in all hunks
             ;;(setq auto-revert-check-vc-info t)
 
-            (magit-define-popup-switch 'magit-log-popup ?f "Follow renames" "--follow")
-
             (remove-hook 'git-commit-setup-hook 'git-commit-turn-on-auto-fill)
             (remove-hook 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
 
