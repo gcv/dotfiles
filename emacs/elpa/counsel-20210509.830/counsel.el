@@ -1,13 +1,13 @@
 ;;; counsel.el --- Various completion functions using Ivy -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015-2019  Free Software Foundation, Inc.
+;; Copyright (C) 2015-2021 Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/swiper
-;; Package-Version: 20201227.1327
-;; Package-Commit: d2891aab7b816aebf21ebd01ce33933a6ac6244f
-;; Version: 0.13.0
-;; Package-Requires: ((emacs "24.5") (swiper "0.13.0"))
+;; Package-Version: 20210509.830
+;; Package-Commit: a5eade0c77b7dd78cdea0f246683c6cb00f7b7c6
+;; Version: 0.13.4
+;; Package-Requires: ((emacs "24.5") (ivy "0.13.4") (swiper "0.13.4"))
 ;; Keywords: convenience, matching, tools
 
 ;; This file is part of GNU Emacs.
@@ -42,6 +42,7 @@
 
 ;;; Code:
 
+(require 'ivy)
 (require 'swiper)
 
 (require 'compile)
@@ -124,10 +125,11 @@ complex regexes."
       (executable-find command)))
   "Compatibility shim for `executable-find'.")
 
-(defun counsel-require-program (cmd)
+(defun counsel-require-program (cmd &optional noerror)
   "Check system for program used in CMD, printing error if not found.
 CMD is either a string or a list of strings.
-To skip the `executable-find' check, start the string with a space."
+To skip the `executable-find' check, start the string with a space.
+When NOERROR is non-nil, return nil instead of raising an error."
   (unless (and (stringp cmd) (string-prefix-p " " cmd))
     (let ((program (if (listp cmd)
                        (car cmd)
@@ -135,7 +137,8 @@ To skip the `executable-find' check, start the string with a space."
       (or (and (stringp program)
                (not (string= program ""))
                (counsel--executable-find program t))
-          (user-error "Required program \"%s\" not found in your path" program)))))
+          (unless noerror
+            (user-error "Required program \"%s\" not found in your path" program))))))
 
 (declare-function eshell-split-path "esh-util")
 
@@ -424,7 +427,8 @@ Update the minibuffer with the amount of lines collected every
   (cons (concat (car x) (irony-completion-annotation x))
         (car x)))
 
-(add-to-list 'ivy-display-functions-alist '(counsel-irony . ivy-display-function-overlay))
+(ivy-configure #'counsel-irony
+  :display-fn #'ivy-display-function-overlay)
 
 ;;* Elisp symbols
 ;;** `counsel-describe-variable'
@@ -622,29 +626,35 @@ to `ivy-highlight-face'."
 (defun counsel-read-setq-expression (sym)
   "Read and eval a setq expression for SYM."
   (setq this-command 'eval-expression)
-  (let* ((minibuffer-completing-symbol t)
-         (sym-value (symbol-value sym))
-         (expr (minibuffer-with-setup-hook
-                   (lambda ()
-                     ;; Functions `elisp-eldoc-documentation-function' and
-                     ;; `elisp-completion-at-point' added in Emacs 25.1.
-                     (add-function :before-until (local 'eldoc-documentation-function)
-                                   #'elisp-eldoc-documentation-function)
-                     (add-hook 'completion-at-point-functions #'elisp-completion-at-point nil t)
-                     (run-hooks 'eval-expression-minibuffer-setup-hook)
-                     (goto-char (minibuffer-prompt-end))
-                     (forward-char 6)
-                     (insert (format "%S " sym)))
-                 (read-from-minibuffer "Eval: "
-                                       (format
-                                        (if (and sym-value (or (consp sym-value)
-                                                               (symbolp sym-value)))
-                                            "(setq '%S)"
-                                          "(setq %S)")
-                                        sym-value)
-                                       read-expression-map t
-                                       'read-expression-history))))
-    expr))
+  (let* ((sym-value (symbol-value sym))
+         (init (format "(setq %s%S)"
+                       (if (or (consp sym-value)
+                               (and sym-value (symbolp sym-value)))
+                           "'"
+                         "")
+                       sym-value)))
+    ;; Most of this duplicates `read--expression'.
+    (minibuffer-with-setup-hook
+        (lambda ()
+          (set-syntax-table emacs-lisp-mode-syntax-table)
+          ;; Added in Emacs 25.1.
+          (when (fboundp 'elisp-completion-at-point)
+            (add-hook 'completion-at-point-functions
+                      #'elisp-completion-at-point nil t))
+          ;; Emacs 27+ already sets up ElDoc in this hook.  Emacs 25 added
+          ;; `elisp-eldoc-documentation-function' and Emacs 28 obsoletes it.
+          (when (< emacs-major-version 27)
+            (when (fboundp 'elisp-eldoc-documentation-function)
+              (add-function :before-until (local 'eldoc-documentation-function)
+                            #'elisp-eldoc-documentation-function))
+            (eldoc-mode))
+          (run-hooks 'eval-expression-minibuffer-setup-hook)
+          ;; The following diverges from `read--expression'.
+          (goto-char (minibuffer-prompt-end))
+          (forward-char 6)
+          (insert (format "%S " sym)))
+      (read-from-minibuffer "Eval: " init read-expression-map t
+                            'read-expression-history))))
 
 (defun counsel--setq-doconst (x)
   "Return a cons of description and value for X.
@@ -875,6 +885,26 @@ packages are, in order of precedence, `amx' and `smex'."
            (smex-update))
          smex-ido-cache)))
 
+(defun counsel--M-x-externs-predicate (cand)
+  "Return non-nil if `counsel-M-x' should complete CAND.
+CAND is a string returned by `counsel--M-x-externs'."
+  (not (get (intern cand) 'no-counsel-M-x)))
+
+(defun counsel--M-x-make-predicate ()
+  "Return a predicate for `counsel-M-x' in the current buffer."
+  (defvar read-extended-command-predicate)
+  (let ((buf (current-buffer)))
+    (lambda (sym)
+      (and (commandp sym)
+           (not (get sym 'byte-obsolete-info))
+           (not (get sym 'no-counsel-M-x))
+           (cond ((not (bound-and-true-p read-extended-command-predicate)))
+                 ((functionp read-extended-command-predicate)
+                  (condition-case-unless-debug err
+                      (funcall read-extended-command-predicate sym buf)
+                    (error (message "read-extended-command-predicate: %s: %s"
+                                    sym (error-message-string err))))))))))
+
 (defun counsel--M-x-prompt ()
   "String for `M-x' plus the string representation of `current-prefix-arg'."
   (concat (cond ((null current-prefix-arg)
@@ -920,12 +950,8 @@ when available, in that order of precedence."
   (let ((externs (counsel--M-x-externs)))
     (ivy-read (counsel--M-x-prompt) (or externs obarray)
               :predicate (if externs
-                             (lambda (x)
-                               (not (get (intern x) 'no-counsel-M-x)))
-                           (lambda (sym)
-                             (and (commandp sym)
-                                  (not (get sym 'byte-obsolete-info))
-                                  (not (get sym 'no-counsel-M-x)))))
+                             #'counsel--M-x-externs-predicate
+                           (counsel--M-x-make-predicate))
               :require-match t
               :history 'counsel-M-x-history
               :action #'counsel-M-x-action
@@ -1818,7 +1844,7 @@ currently checked out."
   "Switch to `counsel-file-jump' from `counsel-find-file'."
   (interactive)
   (ivy-quit-and-run
-    (counsel-file-jump ivy-text)))
+    (counsel-file-jump ivy-text (ivy-state-directory ivy-last))))
 
 (when (executable-find "git")
   (add-to-list 'ivy-ffap-url-functions 'counsel-github-url-p)
@@ -1947,7 +1973,7 @@ but the leading dot is a lot faster."
           (const :tag "None" nil)
           (const :tag "Dotfiles and Lockfiles" "\\(?:\\`\\|[/\\]\\)\\(?:[#.]\\)")
           (const :tag "Ignored Extensions"
-                 ,(regexp-opt completion-ignored-extensions))
+                 ,(concat (regexp-opt completion-ignored-extensions) "\\'"))
           (regexp :tag "Regex")))
 
 (defvar counsel--find-file-predicate nil
@@ -2028,14 +2054,14 @@ The preselect behavior can be customized via user options
               :caller caller)))
 
 ;;;###autoload
-(defun counsel-find-file (&optional initial-input)
+(defun counsel-find-file (&optional initial-input initial-directory)
   "Forward to `find-file'.
 When INITIAL-INPUT is non-nil, use it in the minibuffer during completion."
   (interactive)
-  (counsel--find-file-1
-   "Find file: " initial-input
-   #'counsel-find-file-action
-   'counsel-find-file))
+  (let ((default-directory (or initial-directory default-directory)))
+    (counsel--find-file-1 "Find file: " initial-input
+                          #'counsel-find-file-action
+                          'counsel-find-file)))
 
 (ivy-configure 'counsel-find-file
   :parent 'read-file-name-internal
@@ -2188,34 +2214,34 @@ See variable `counsel-up-directory-level'."
 
 (defun counsel-github-url-p ()
   "Return a Github issue URL at point."
-  (counsel-require-program "git")
-  (let ((url (counsel-at-git-issue-p)))
-    (when url
-      (let ((origin (shell-command-to-string
-                     "git remote get-url origin"))
-            user repo)
-        (cond ((string-match "\\`git@github.com:\\([^/]+\\)/\\(.*\\)\\.git$"
-                             origin)
-               (setq user (match-string 1 origin))
-               (setq repo (match-string 2 origin)))
-              ((string-match "\\`https://github.com/\\([^/]+\\)/\\(.*\\)$"
-                             origin)
-               (setq user (match-string 1 origin))
-               (setq repo (match-string 2 origin))))
-        (when user
-          (setq url (format "https://github.com/%s/%s/issues/%s"
-                            user repo (substring url 1))))))))
+  (when (counsel-require-program "git" t)
+    (let ((url (counsel-at-git-issue-p)))
+      (when url
+        (let ((origin (shell-command-to-string
+                       "git remote get-url origin"))
+              user repo)
+          (cond ((string-match "\\`git@github.com:\\([^/]+\\)/\\(.*\\)\\.git$"
+                               origin)
+                 (setq user (match-string 1 origin))
+                 (setq repo (match-string 2 origin)))
+                ((string-match "\\`https://github.com/\\([^/]+\\)/\\(.*\\)$"
+                               origin)
+                 (setq user (match-string 1 origin))
+                 (setq repo (match-string 2 origin))))
+          (when user
+            (setq url (format "https://github.com/%s/%s/issues/%s"
+                              user repo (substring url 1)))))))))
 
 (defun counsel-emacs-url-p ()
   "Return a Debbugs issue URL at point."
-  (counsel-require-program "git")
-  (let ((url (counsel-at-git-issue-p)))
-    (when url
-      (let ((origin (shell-command-to-string
-                     "git remote get-url origin")))
-        (when (string-match "git.sv.gnu.org:/srv/git/emacs.git" origin)
-          (format "https://debbugs.gnu.org/cgi/bugreport.cgi?bug=%s"
-                  (substring url 1)))))))
+  (when (counsel-require-program "git" t)
+    (let ((url (counsel-at-git-issue-p)))
+      (when url
+        (let ((origin (shell-command-to-string
+                       "git remote get-url origin")))
+          (when (string-match "git.sv.gnu.org:/srv/git/emacs.git" origin)
+            (format "https://debbugs.gnu.org/cgi/bugreport.cgi?bug=%s"
+                    (substring url 1))))))))
 
 (defvar counsel-url-expansions-alist nil
   "Map of regular expressions to expansions.
@@ -2593,18 +2619,27 @@ string - the full shell command to run."
   "Use `dired-jump' on X."
   (dired-jump nil x))
 
+(defvar locate-command)
+
 (defun counsel-locate-cmd-default (input)
-  "Return a `locate' shell command based on regexp INPUT."
-  (counsel-require-program "locate")
-  (format "locate -i --regex %s"
+  "Return a `locate' shell command based on regexp INPUT.
+This uses the user option `locate-command' from the `locate'
+library, which see."
+  (counsel-require-program locate-command)
+  (format "%s -i --regex %s"
+          locate-command
           (shell-quote-argument
            (counsel--elisp-to-pcre
             (ivy--regex input)))))
 
 (defun counsel-locate-cmd-noregex (input)
-  "Return a `locate' shell command based on INPUT."
-  (counsel-require-program "locate")
-  (format "locate -i %s" (shell-quote-argument input)))
+  "Return a `locate' shell command based on INPUT.
+This uses the user option `locate-command' from the `locate'
+library, which see."
+  (counsel-require-program locate-command)
+  (format "%s -i %s"
+          locate-command
+          (shell-quote-argument input)))
 
 (defun counsel-locate-cmd-mdfind (input)
   "Return a `mdfind' shell command based on INPUT."
@@ -2660,6 +2695,8 @@ string - the full shell command to run."
   "Call a \"locate\" style shell command.
 INITIAL-INPUT can be given as the initial minibuffer input."
   (interactive)
+  ;; For `locate-command', which is honored in some options of `counsel-locate-cmd'.
+  (require 'locate)
   (counsel--locate-updatedb)
   (ivy-read "Locate: " #'counsel-locate-function
             :initial-input initial-input
@@ -2843,6 +2880,18 @@ FZF-PROMPT, if non-nil, is passed as `ivy-read' prompt argument."
   :type '(repeat string))
 
 ;;** `counsel-file-jump'
+(defvar counsel-file-jump-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "`") #'counsel-find-file-from-jump)
+    map)
+  "Key bindings to be used when in a file-jump minibuffer.")
+
+(defun counsel-find-file-from-jump ()
+  "Switch to `counsel-find-file' from `counsel-file-jump'."
+  (interactive)
+  (ivy-quit-and-run
+    (counsel-find-file ivy-text (ivy-state-directory ivy-last))))
+
 ;;;###autoload
 (defun counsel-file-jump (&optional initial-input initial-directory)
   "Jump to a file below the current directory.
@@ -2863,6 +2912,7 @@ INITIAL-DIRECTORY, if non-nil, is used as the root directory for search."
               :preselect (counsel--preselect-file)
               :require-match 'confirm-after-completion
               :history 'file-name-history
+              :keymap counsel-file-jump-map
               :caller 'counsel-file-jump)))
 
 (ivy-set-actions
@@ -2908,14 +2958,24 @@ INITIAL-DIRECTORY, if non-nil, is used as the root directory for search."
     (define-key map (kbd "C-x C-d") 'counsel-cd)
     map))
 
-(defcustom counsel-ag-base-command "ag --vimgrep %s"
-  "Format string to use in `counsel-ag-function' to construct the command.
-The %s will be replaced by optional extra ag arguments followed by the
-regex string."
-  :type '(radio
-          (const "ag --vimgrep %s")
-          (const "ag --nocolor --nogroup %s")
-          (string :tag "custom")))
+(defcustom counsel-ag-base-command (list "ag" "--vimgrep" "%s")
+  "Template for default `counsel-ag' command.
+The value should be either a list of strings, starting with the
+`ag' executable file name and followed by its arguments, or a
+single string describing a full `ag' shell command.
+
+If the command is specified as a list, `ag' is called directly
+using `process-file'; otherwise, it is called as a shell command.
+Calling `ag' directly avoids various shell quoting pitfalls, so
+it is generally recommended.
+
+If the string \"%s\" appears as an element of the list, or as a
+substring of the command string, it is replaced by any optional
+`ag' arguments followed by the search regexp specified during the
+`counsel-ag' session."
+  :package-version '(counsel . "0.14.0")
+  :type '(choice (repeat :tag "Command list to call directly" string)
+                 (string :tag "Shell command")))
 
 (defvar counsel-ag-command nil)
 
@@ -2973,11 +3033,11 @@ NEEDLE is the search string."
        (ivy-more-chars))
      (let* ((default-directory (ivy-state-directory ivy-last))
             (regex (counsel--grep-regex search-term))
-            (switches (concat (car command-args)
-                              (counsel--ag-extra-switches regex)
-                              (if (ivy--case-fold-p string)
+            (switches (concat (if (ivy--case-fold-p string)
                                   " -i "
-                                " -s "))))
+                                " -s ")
+                              (counsel--ag-extra-switches regex)
+                              (car command-args))))
        (counsel--async-command (counsel--format-ag-command
                                 switches
                                 (funcall (if (listp counsel-ag-command) #'identity
@@ -2988,9 +3048,10 @@ NEEDLE is the search string."
 ;;;###autoload
 (cl-defun counsel-ag (&optional initial-input initial-directory extra-ag-args ag-prompt
                       &key caller)
-  "Grep for a string in a root directory using ag.
+  "Grep for a string in a root directory using `ag'.
 
-By default, the root directory is the first directory containing a .git subdirectory.
+By default, the root directory is the first directory containing
+a .git subdirectory.
 
 INITIAL-INPUT can be given as the initial minibuffer input.
 INITIAL-DIRECTORY, if non-nil, is used as the root directory for search.
@@ -3080,8 +3141,9 @@ Works for `counsel-git-grep', `counsel-ag', etc."
     (ivy-occur-grep-mode)
     (setq default-directory (ivy-state-directory ivy-last)))
   (ivy-set-text
-   (and (string-match "\"\\(.*\\)\"" (buffer-name))
-        (match-string 1 (buffer-name))))
+   (if (string-match "\"\\(.*\\)\"" (buffer-name))
+       (match-string 1 (buffer-name))
+     (ivy-state-text ivy-occur-last)))
   (let* ((cmd
           (if (functionp cmd-template)
               (funcall cmd-template ivy-text)
@@ -3157,19 +3219,23 @@ This uses `counsel-ag' with `counsel-ack-base-command' replacing
      initial-input nil nil nil
      :caller 'counsel-ack)))
 
-
 ;;** `counsel-rg'
 (defcustom counsel-rg-base-command
-  (split-string
-   (if (memq system-type '(ms-dos windows-nt))
-       "rg -M 240 --with-filename --no-heading --line-number --color never %s --path-separator / ."
-     "rg -M 240 --with-filename --no-heading --line-number --color never %s"))
-  "Alternative to `counsel-ag-base-command' using ripgrep.
+  `("rg"
+    "--max-columns" "240"
+    "--with-filename"
+    "--no-heading"
+    "--line-number"
+    "--color" "never"
+    "%s"
+    ,@(and (memq system-type '(ms-dos windows-nt))
+           (list "--path-separator" "/" ".")))
+  "Like `counsel-ag-base-command', but for `counsel-rg'.
 
-Note: don't use single quotes for the regex."
-  :type '(choice
-          (repeat :tag "List to be used in `process-file'." string)
-          (string :tag "String to be used in `shell-command-to-string'.")))
+Note: don't use single quotes for the regexp."
+  :package-version '(counsel . "0.14.0")
+  :type '(choice (repeat :tag "Command list to call directly" string)
+                 (string :tag "Shell command")))
 
 (defun counsel--rg-targets ()
   "Return a list of files to operate on, based on `dired-mode' marks."
@@ -3186,7 +3252,7 @@ Note: don't use single quotes for the regex."
 
 ;;;###autoload
 (defun counsel-rg (&optional initial-input initial-directory extra-rg-args rg-prompt)
-  "Grep for a string in the current directory using rg.
+  "Grep for a string in the current directory using `rg'.
 INITIAL-INPUT can be given as the initial minibuffer input.
 INITIAL-DIRECTORY, if non-nil, is used as the root directory for search.
 EXTRA-RG-ARGS string, if non-nil, is appended to `counsel-rg-base-command'.
@@ -4522,6 +4588,8 @@ Note: Duplicate elements of `kill-ring' are always deleted."
               :action #'counsel-yank-pop-action
               :caller 'counsel-yank-pop)))
 
+(put #'counsel-yank-pop 'delete-selection 'yank)
+
 (ivy-configure 'counsel-yank-pop
   :height 5
   :format-fn #'counsel--yank-pop-format-function)
@@ -5397,6 +5465,9 @@ Return nil if NAME does not designate a valid color."
          (propertize (funcall formatter color)
                      'face (list :foreground fg :background hex))))
      formatter colors "\n")))
+
+;; No longer preloaded in Emacs 28.
+(autoload 'list-colors-duplicates "facemenu")
 
 ;;;###autoload
 (defun counsel-colors-emacs ()
