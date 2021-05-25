@@ -1,14 +1,14 @@
-;;; helpful.el --- a better *help* buffer            -*- lexical-binding: t; -*-
+;;; helpful.el --- A better *help* buffer            -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017-2020  Wilfred Hughes
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
-;; Package-Version: 20201012.614
-;; Package-Commit: 584ecc887bb92133119f93a6716cdf7af0b51dca
+;; Package-Version: 20210319.802
+;; Package-Commit: 7e4b1f0d5572a4e2b8ee7a9b084ef863d0315a73
 ;; Keywords: help, lisp
 ;; Version: 0.19
-;; Package-Requires: ((emacs "25") (dash "2.12.0") (dash-functional "1.2.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
+;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -48,7 +48,6 @@
 (require 'help)
 (require 'help-fns)
 (require 'dash)
-(require 'dash-functional)
 (require 's)
 (require 'f)
 (require 'find-func)
@@ -183,11 +182,15 @@ can make Helpful very slow.")
 (defun helpful--pretty-print (value)
   "Pretty-print VALUE.
 
-If VALUE is self-referential, or just very big, the user may
-press \\[keyboard-quit] to gracefully stop the printing."
+If VALUE is very big, the user may press \\[keyboard-quit] to
+gracefully stop the printing. If VALUE is self-referential, the
+error will be caught and displayed."
   ;; Inspired by `ielm-eval-input'.
-  (condition-case nil
+  (condition-case err
       (s-trim-right (pp-to-string value))
+    (error
+     (propertize (format "(Display error: %s)" (cadr err))
+                 'face 'font-lock-comment-face))
     (quit
      (propertize "(User quit during pretty-printing.)"
                  'face 'font-lock-comment-face))))
@@ -1818,7 +1821,7 @@ OBJ may be a symbol or a compiled function object."
 
 (defun helpful--make-callees-button (sym source)
   (helpful--button
-   "Find callees"
+   (format "Functions used by %s" sym)
    'helpful-callees-button
    'symbol sym
    'source source))
@@ -1955,13 +1958,13 @@ OBJ may be a symbol or a compiled function object."
                           (helpful--buffer-button buf pos)))))
              (primitive-p
               "defined in C source code")
-             ((helpful--kbd-macro-p sym) "")
+             ((helpful--kbd-macro-p sym) nil)
              (t
               "without a source file"))))
 
     (s-word-wrap
      70
-     (format "%s is %s %s %s %s."
+     (format "%s is %s %s %s%s."
              (if (symbolp sym)
                  (helpful--format-symbol sym)
                "This lambda")
@@ -1972,7 +1975,7 @@ OBJ may be a symbol or a compiled function object."
                "a")
              description
              kind
-             defined))))
+             (if defined (concat " " defined) "")))))
 
 (defun helpful--callees (form)
   "Given source code FORM, return a list of all the functions called."
@@ -2737,7 +2740,9 @@ See also `helpful-callable' and `helpful-variable'."
              sexp)
         (when sexp-start
           (goto-char sexp-start)
-          (setq sexp (read (current-buffer)))
+          (setq sexp (condition-case nil
+                         (read (current-buffer))
+                       (error nil)))
           (when (memq (car-safe sexp)
                       (list 'defvar 'defvar-local 'defcustom 'defconst))
             (nth 1 sexp)))))))
