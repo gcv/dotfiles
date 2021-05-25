@@ -23,9 +23,14 @@ or call the function `selectrum-prescient-mode'.")
 (autoload 'selectrum-prescient-mode "selectrum-prescient" "\
 Minor mode to use prescient.el in Selectrum menus.
 
+If called interactively, enable Selectrum-Prescient mode if ARG
+is positive, and disable it if ARG is zero or negative.  If
+called from Lisp, also enable the mode if ARG is omitted or nil,
+and toggle it if ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "selectrum-prescient" '("selectrum-prescient--")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "selectrum-prescient" '("selectrum-prescient-")))
 
 ;;;***
 
