@@ -1,2 +1,0 @@
-;;; Generated package description from /Users/kostya/Code/dotfiles/emacs/elpa/gif-screencast-20201110.1613/gif-screencast.el  -*- no-byte-compile: t -*-
-(define-package "gif-screencast" "20201110.1613" "One-frame-per-action GIF recording" '((emacs "25.1")) :commit "1145e676b160e7b1e5756f5b0f30dd31de252e1f" :authors '(("Pierre Neidhardt" . "mail@ambrevar.xyz")) :maintainer '("Pierre Neidhardt" . "mail@ambrevar.xyz") :keywords '("multimedia" "screencast") :url "https://gitlab.com/ambrevar/emacs-gif-screencast")
