@@ -1,10 +1,10 @@
 ;;; ivy.el --- Incremental Vertical completYon -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015-2020  Free Software Foundation, Inc.
+;; Copyright (C) 2015-2021 Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/swiper
-;; Version: 0.13.0
+;; Version: 0.13.4
 ;; Package-Requires: ((emacs "24.5"))
 ;; Keywords: matching
 
@@ -99,7 +99,8 @@ a behavior similar to `swiper'."
 The usual reason for `ivy-backward-delete-char' to fail is when
 there is no text left to delete, i.e., when it is called at the
 beginning of the minibuffer.
-The default setting provides a quick exit from completion."
+The default setting provides a quick exit from completion.
+Another common option is `ignore', which does nothing."
   :type '(choice
           (const :tag "Exit completion" abort-recursive-edit)
           (const :tag "Do nothing" ignore)
@@ -1769,7 +1770,8 @@ specified for the current collection in
 `ivy-sort-functions-alist'."
   (interactive)
   (let ((cell (or (assq (ivy-state-collection ivy-last) ivy-sort-functions-alist)
-                  (assq (ivy-state-caller ivy-last) ivy-sort-functions-alist))))
+                  (assq (ivy-state-caller ivy-last) ivy-sort-functions-alist)
+                  (assq t ivy-sort-functions-alist))))
     (when (consp (cdr cell))
       (setcdr cell (nconc (cddr cell) (list (cadr cell))))
       (ivy--reset-state ivy-last))))
@@ -1892,6 +1894,7 @@ The child caller inherits and can override the settings of the parent.")
                          unwind-fn
                          index-fn
                          sort-fn
+                         sort-matches-fn
                          format-fn
                          display-fn
                          display-transformer-fn
@@ -1919,6 +1922,8 @@ The child caller inherits and can override the settings of the parent.")
     (ivy--alist-set 'ivy-index-functions-alist caller index-fn))
   (when sort-fn
     (ivy--alist-set 'ivy-sort-functions-alist caller sort-fn))
+  (when sort-matches-fn
+    (ivy--alist-set 'ivy-sort-matches-functions-alist caller sort-matches-fn))
   (when format-fn
     (ivy--alist-set 'ivy-format-functions-alist caller format-fn))
   (when display-fn
@@ -2212,6 +2217,13 @@ customizations apply to the current completion session."
 
 (defvar Info-complete-menu-buffer)
 
+(defun ivy--alist-to-cands (alist)
+  "Transform ALIST to a list of strings."
+  (let ((i -1))
+    (mapcar (lambda (x)
+              (propertize x 'idx (cl-incf i)))
+            (all-completions "" alist))))
+
 (defun ivy--reset-state (state)
   "Reset the ivy to STATE.
 This is useful for recursive `ivy-read'."
@@ -2333,10 +2345,7 @@ This is useful for recursive `ivy-read'."
                (setq collection (sort (copy-sequence collection) sort-fn))
                (setq sort nil))
              (setf (ivy-state-collection ivy-last) collection)
-             (setq coll (let ((i -1))
-                          (mapcar (lambda (x)
-                                    (propertize x 'idx (cl-incf i)))
-                                  (all-completions "" collection)))))
+             (setq coll (ivy--alist-to-cands collection)))
             ((or (functionp collection)
                  (byte-code-function-p collection)
                  (vectorp collection)
@@ -2503,6 +2512,12 @@ behavior."
 
 (declare-function mc/all-fake-cursors "ext:multiple-cursors-core")
 
+;; Kludge: Try to retain original minibuffer completion data.
+(defvar ivy--minibuffer-table)
+(defvar ivy--minibuffer-pred)
+(defvar ivy--minibuffer-try nil
+  "Store original `try-completion' result for sole completions.")
+
 (defun ivy-completion-in-region-action (str)
   "Insert STR, erasing the previous one.
 The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
@@ -2518,7 +2533,15 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
         (delete-region beg end))
       (setq ivy-completion-beg (point))
       (insert (substring-no-properties str))
-      (completion--done str 'exact)
+      (let ((minibuffer-completion-table (if (boundp 'ivy--minibuffer-table)
+                                             ivy--minibuffer-table
+                                           (ivy-state-collection ivy-last)))
+            (minibuffer-completion-predicate (if (boundp 'ivy--minibuffer-pred)
+                                                 ivy--minibuffer-pred
+                                               (ivy-state-predicate ivy-last))))
+        (completion--done str (cond ((eq ivy--minibuffer-try t) 'finished)
+                                    ((eq ivy-exit 'done) 'unknown)
+                                    ('exact))))
       (setq ivy-completion-end (point))
       (save-excursion
         (dolist (cursor fake-cursors)
@@ -2558,8 +2581,12 @@ See `completion-in-region' for further information."
   (let* ((enable-recursive-minibuffers t)
          (str (buffer-substring-no-properties start end))
          (completion-ignore-case (ivy--case-fold-p str))
-         (comps
-          (completion-all-completions str collection predicate (- end start))))
+         (md (completion-metadata str collection predicate))
+         (reg (- end start))
+         (comps (completion-all-completions str collection predicate reg md))
+         (try (completion-try-completion str collection predicate reg md))
+         (ivy--minibuffer-table collection)
+         (ivy--minibuffer-pred predicate))
     (cond ((null comps)
            (message "No matches"))
           ((progn
@@ -2586,8 +2613,9 @@ See `completion-in-region' for further information."
                  (progn
                    (unless (minibuffer-window-active-p (selected-window))
                      (setf (ivy-state-window ivy-last) (selected-window)))
-                   (ivy-completion-in-region-action
-                    (substring-no-properties (car comps))))
+                   (let ((ivy--minibuffer-try try))
+                     (ivy-completion-in-region-action
+                      (substring-no-properties (car comps)))))
                (dolist (s comps)
                  ;; Remove face `completions-first-difference'.
                  (ivy--remove-props s 'face))
@@ -3040,6 +3068,26 @@ parts beyond their respective faces `ivy-confirm-face' and
            (funcall fn (ivy-state-prompt ivy-last))))
       ivy--prompt)))
 
+(defun ivy--break-lines (str width)
+  "Break each line in STR with newlines to fit into WIDTH columns."
+  (if (<= width 0)
+      str
+    (let (lines)
+      (dolist (line (split-string str "\n"))
+        (while (and line (> (string-width line) width))
+          (let ((prefix "") (extra 0))
+            (while (string-empty-p prefix)
+              ;; Grow `width' until it fits at least one char from `line'.
+              (setq prefix (truncate-string-to-width line (+ width extra)))
+              (setq extra (1+ extra)))
+            ;; Avoid introducing spurious newline if `prefix' and `line' are
+            ;; equal, i.e., if `line' couldn't be truncated to `width'.
+            (setq line (and (> (length line) (length prefix))
+                            (substring line (length prefix))))
+            (push prefix lines)))
+        (when line (push line lines)))
+      (string-join (nreverse lines) "\n"))))
+
 (defun ivy--insert-prompt ()
   "Update the prompt according to `ivy--prompt'."
   (when (setq ivy--prompt (ivy-prompt))
@@ -3080,13 +3128,13 @@ parts beyond their respective faces `ivy-confirm-face' and
         (save-excursion
           (goto-char (point-min))
           (delete-region (point-min) (minibuffer-prompt-end))
-          (let ((len-n (length n-str))
-                (len-d (length d-str))
+          (let ((wid-n (string-width n-str))
+                (wid-d (string-width d-str))
                 (ww (window-width)))
             (setq n-str
-                  (cond ((> (+ len-n len-d) ww)
+                  (cond ((> (+ wid-n wid-d) ww)
                          (concat n-str "\n" d-str "\n"))
-                        ((> (+ len-n len-d (length ivy-text)) ww)
+                        ((> (+ wid-n wid-d (string-width ivy-text)) ww)
                          (concat n-str d-str "\n"))
                         (t
                          (concat n-str d-str)))))
@@ -3094,11 +3142,7 @@ parts beyond their respective faces `ivy-confirm-face' and
             (setq n-str (concat (funcall ivy-pre-prompt-function) n-str)))
           (when ivy-add-newline-after-prompt
             (setq n-str (concat n-str "\n")))
-          (let ((regex (format "\\([^\n]\\{%d\\}\\)[^\n]" (window-width))))
-            (while (string-match regex n-str)
-              (setq n-str (replace-match
-                           (concat (match-string 1 n-str) "\n")
-                           nil t n-str 1))))
+          (setq n-str (ivy--break-lines n-str (window-width)))
           (set-text-properties 0 (length n-str)
                                `(face minibuffer-prompt ,@std-props)
                                n-str)
@@ -3284,10 +3328,16 @@ The function was added in Emacs 26.1.")
           "~"
         home)))))
 
+(defvar ivy--minibuffer-metadata nil)
+
 (defun ivy-update-candidates (cands)
-  (ivy--insert-minibuffer
-   (ivy--format
-    (setq ivy--all-candidates cands))))
+  (let ((ivy--minibuffer-metadata
+         (unless (ivy-state-dynamic-collection ivy-last)
+           (completion-metadata "" minibuffer-completion-table
+                                minibuffer-completion-predicate))))
+    (ivy--insert-minibuffer
+     (ivy--format
+      (setq ivy--all-candidates cands)))))
 
 (defun ivy--exhibit ()
   "Insert Ivy completions display.
@@ -4030,7 +4080,8 @@ in this case."
                     (funcall ivy--highlight-function str))
                 str))
          (olen (length str))
-         (annot (plist-get completion-extra-properties :annotation-function)))
+         (annot (or (completion-metadata-get ivy--minibuffer-metadata 'annotation-function)
+                    (plist-get completion-extra-properties :annotation-function))))
     (add-text-properties
      0 olen
      '(mouse-face
@@ -4423,7 +4474,8 @@ BUFFER may be a string or nil."
 (defun ivy--kill-current-candidate-buffer ()
   (setf (ivy-state-preselect ivy-last) ivy--index)
   (setq ivy--old-re nil)
-  (setq ivy--all-candidates (ivy--buffer-list "" ivy-use-virtual-buffers nil))
+  (setq ivy--all-candidates (ivy--buffer-list "" ivy-use-virtual-buffers
+                                              (ivy-state-predicate ivy-last)))
   (let ((ivy--recompute-index-inhibit t))
     (ivy--exhibit)))
 
