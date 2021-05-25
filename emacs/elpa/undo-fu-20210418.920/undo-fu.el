@@ -5,8 +5,8 @@
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
 ;; URL: https://gitlab.com/ideasman42/emacs-undo-fu
-;; Package-Version: 20200701.1435
-;; Package-Commit: c0806c1903c5a0e4c69b6615cdc3366470a9b8ca
+;; Package-Version: 20210418.920
+;; Package-Commit: e0ad06b5ef2ac2733dad2ad48e3957b5c36edfa5
 ;; Version: 0.4
 ;; Package-Requires: ((emacs "24.3"))
 
@@ -79,7 +79,8 @@ Instead, explicitly call `undo-fu-disable-checkpoint'."
 ;; Use in conjunction with `undo-fu--was-undo-or-redo' to ensure the value isn't stale.
 (defvar-local undo-fu--was-redo nil)
 ;; List of interactive commands.
-(defvar-local undo-fu--commands '(undo-fu-only-undo undo-fu-only-redo-all undo-fu-only-redo undo-fu-disable-checkpoint))
+(defvar-local undo-fu--commands
+  '(undo-fu-only-undo undo-fu-only-redo-all undo-fu-only-redo undo-fu-disable-checkpoint))
 
 ;; ---------------------------------------------------------------------------
 ;; Back Port `undo-redo'
