@@ -1,31 +1,34 @@
 ;;; with-editor.el --- Use the Emacsclient as $EDITOR -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014-2020  The Magit Project Contributors
+;; Copyright (C) 2014-2021  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file.  If not,
 ;; see https://github.com/magit/with-editor/blob/master/AUTHORS.md.
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Maintainer: Jonas Bernoulli <jonas@bernoul.li>
-
-;; Package-Requires: ((emacs "24.4") (async "1.9"))
 ;; Keywords: tools
 ;; Homepage: https://github.com/magit/with-editor
 
-;; This file is not part of GNU Emacs.
+;; Package-Requires: ((emacs "24.4"))
+;; Package-Version: 3.0.4
+
+;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 3, or (at your option)
 ;; any later version.
-
+;;
 ;; This file is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with Magit.  If not, see http://www.gnu.org/licenses.
+
+;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
 
@@ -87,22 +90,13 @@
 (require 'server)
 (require 'shell)
 
-(and (require 'async-bytecomp nil t)
-     (let ((pkgs (bound-and-true-p async-bytecomp-allowed-packages)))
-       (if (consp pkgs)
-           (cl-intersection '(all magit) pkgs)
-         (memq pkgs '(all t))))
-     (fboundp 'async-bytecomp-package-mode)
-     (async-bytecomp-package-mode 1))
-
 (eval-when-compile
   (progn (require 'dired nil t)
          (require 'eshell nil t)
          (require 'term nil t)
          (condition-case err
              (require 'vterm nil t)
-           (error (message "Error: %S" err)))
-         (require 'vterm nil t)
+           (error (message "Error(vterm): %S" err)))
          (require 'warnings nil t)))
 (declare-function dired-get-filename 'dired)
 (declare-function term-emulate-terminal 'term)
@@ -327,12 +321,9 @@ And some tools that do not handle $EDITOR properly also break."
 (put 'with-editor-post-finish-hook 'permanent-local t)
 (put 'with-editor-post-cancel-hook 'permanent-local t)
 
-(defvar with-editor-show-usage t)
-(defvar with-editor-cancel-message nil)
-(defvar with-editor-previous-winconf nil)
-(make-variable-buffer-local 'with-editor-show-usage)
-(make-variable-buffer-local 'with-editor-cancel-message)
-(make-variable-buffer-local 'with-editor-previous-winconf)
+(defvar-local with-editor-show-usage t)
+(defvar-local with-editor-cancel-message nil)
+(defvar-local with-editor-previous-winconf nil)
 (put 'with-editor-cancel-message 'permanent-local t)
 (put 'with-editor-previous-winconf 'permanent-local t)
 
@@ -706,7 +697,7 @@ This works in `shell-mode', `term-mode', `eshell-mode' and
   (interactive (list (with-editor-read-envvar)))
   (cond
    ((derived-mode-p 'comint-mode 'term-mode)
-    (let ((process (get-buffer-process (current-buffer))))
+    (when-let ((process (get-buffer-process (current-buffer))))
       (goto-char (process-mark process))
       (process-send-string
        process (format " export %s=%s\n" envvar
