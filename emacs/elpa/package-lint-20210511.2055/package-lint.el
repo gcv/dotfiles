@@ -87,16 +87,23 @@ The path can be absolute or relative to that of the linted file.")
 This is bound dynamically while the checks run.")
 
 (defconst package-lint-backport-libraries
-  (list (cons 'cl-lib "\\`cl-")
-        (cons 'cl-generic "\\`cl-\\(?:def\\)?generic")
-        (cons 'cl-print "\\`cl-print")
-        (cons 'map "\\`map-")
-        (cons 'nadvice "\\`advice-")
-        (cons 'seq "\\`seq-")
-        (cons 'let-alist "\\`let-alist"))
-  "A sequence of (FEATURE . SYMBOL-NAME-MATCH) for backport libraries.
+  (list (list 'cl-lib "\\`cl-")
+        (list 'cl-generic "\\`cl-\\(?:def\\)?generic")
+        (list 'cl-print "\\`cl-print")
+        (list 'jsonrpc "\\`jsonrpc-")
+        (list 'map "\\`map-")
+        (list 'nadvice "\\`advice-")
+        (list 'ol "\\`org-link-" 'org "9.3")
+        (list 'seq "\\`seq-")
+        (list 'let-alist "\\`let-alist"))
+  "A sequence of (FEATURE SYMBOL-NAME-MATCH) for backport libraries.
 These are libraries that are built into newer Emacsen and also
-published in ELPA for use by older Emacsen.")
+published in ELPA for use by older Emacsen.
+
+Alternatively, items can take a form of (FEATURE
+SYMBOL-NAME-MATCH PACKAGE VERSION?) where PACKAGE is the name of
+a backport library shipping the feature and VERSION is an
+optional minimum version containing the feature.")
 
 (defconst package-lint-symbol-info
   (let* ((stdlib-changes (with-temp-buffer
@@ -173,8 +180,9 @@ symbol such as 'variable-added.")
   "A regexp matching whitelisted non-standard symbol prefixes.")
 
 (defvar package-lint--allowed-prefix-mappings
-  '(("ox-" . ("org-"))
-    ("ob-" . ("org-")))
+  '(("ob-" . ("org-"))
+    ("ol-" . ("org-"))
+    ("ox-" . ("org-")))
   "Alist containing mappings of package prefixes to symbol prefixes.")
 
 (defun package-lint--main-file-p ()
@@ -528,7 +536,7 @@ required version PACKAGE-VERSION.  If not, raise an error for DEP-POS."
   (save-excursion
     (save-match-data
       (and (re-search-backward
-            (concat "(fboundp\\s-+'" (regexp-quote sym) "\\_>") (point-min) t)
+            (concat "(" (regexp-opt '("fboundp" "macrop")) "\\s-+#?'" (regexp-quote sym) "\\_>") (point-min) t)
            (not (package-lint--inside-comment-or-string-p))))))
 
 (defun package-lint--map-regexp-match (regexp callback)
@@ -569,25 +577,39 @@ type of the symbol, either FUNCTION or FEATURE."
                                    ('feature .library-added))))
            (when (and added-in-version (version-list-< emacs-version-dep added-in-version))
              (unless (and (eq type 'function) (package-lint--seen-fboundp-check-for sym))
-               (let ((available-backport
-                      (cl-ecase type
-                        ('feature
-                         (cl-some (lambda (bp)
-                                    (when (string= (car bp) sym)
-                                      (car bp)))
-                                  package-lint-backport-libraries))
-                        ('function
-                         (cl-some (lambda (bp)
-                                    (when (string-match-p (cdr bp) sym)
-                                      (car bp)))
-                                  package-lint-backport-libraries)))))
-                 (unless (and available-backport (assoc available-backport valid-deps))
+               (let* ((available-backport-with-ver
+                       (cl-ecase type
+                         ('feature
+                          (cl-some (lambda (bp)
+                                     (when (string= (car bp) sym)
+                                       (or (cddr bp)
+                                           (list (car bp)))))
+                                   package-lint-backport-libraries))
+                         ('function
+                          (cl-some (lambda (bp)
+                                     (when (string-match-p (nth 1 bp) sym)
+                                       (or (cddr bp)
+                                           (list (car bp)))))
+                                   package-lint-backport-libraries))))
+                      (available-backport (car available-backport-with-ver))
+                      (required-backport-version (cadr available-backport-with-ver))
+                      (matching-dep (when available-backport
+                                      (assoc available-backport valid-deps))))
+                 (unless (and matching-dep
+                              (or (not required-backport-version)
+                                  (version-list-<= (version-to-list required-backport-version)
+                                                   (cadr matching-dep))))
                    (list
                     'error
                     (format "You should depend on (emacs \"%s\")%s if you need `%s'."
                             (mapconcat #'number-to-string added-in-version ".")
                             (if available-backport
-                                (format " or the %s package" available-backport)
+                                (format " or the %s package"
+                                        (if required-backport-version
+                                            (format "(%s \"%s\")"
+                                                    available-backport
+                                                    required-backport-version)
+                                          available-backport))
                               "")
                             sym))))))))))))
 
@@ -816,12 +838,19 @@ DESC is a struct as returned by `package-buffer-info'."
 (defun package-lint--check-provide-form (desc)
   "Check the provide form for package with descriptor DESC.
 DESC is a struct as returned by `package-buffer-info'."
-  (let ((name (package-lint--package-desc-name desc))
-        (feature (package-lint--provided-feature)))
-    (unless (string-equal (symbol-name name) feature)
-      (package-lint--error-at-bob
-       'error
-       (format "There is no (provide '%s) form." name)))))
+  (let ((name (symbol-name (package-lint--package-desc-name desc))))
+    (if (string-match-p "-theme\\'" name)
+        (let ((theme-name (replace-regexp-in-string "-theme\\'" "" name))
+              (provided-theme (package-lint--provided-theme)))
+          (unless (string-equal theme-name provided-theme)
+            (package-lint--error-at-bob
+             'error
+             (format "There is no (provide-theme '%s) form." theme-name))))
+      (let ((feature (package-lint--provided-feature)))
+        (unless (string-equal name feature)
+          (package-lint--error-at-bob
+           'error
+           (format "There is no (provide '%s) form." name)))))))
 
 (defun package-lint--check-provide-form-secondary-file ()
   "Check there is a provide form."
@@ -1105,7 +1134,7 @@ The returned list is of the form (SYMBOL-NAME . POSITION)."
       (pcase entry
         ((and `(,submenu-name . ,submenu-elements)
               (guard (consp submenu-elements)))
-         (when (member submenu-name '("Variables" "Defuns"))
+         (when (member submenu-name '("Variables" "Defuns" "Types"))
            (setq result (nconc (reverse submenu-elements) result))))
         (_
          (push entry result))))
@@ -1124,6 +1153,13 @@ The returned list is of the form (SYMBOL-NAME . POSITION)."
            (match-string-no-properties 1))
           ((re-search-backward "(provide-me)" nil t)
            (file-name-sans-extension (file-name-nondirectory buffer-file-name))))))
+
+(defun package-lint--provided-theme ()
+  "Return the last-provided theme name, as a string, or nil if none."
+  (save-excursion
+    (goto-char (point-max))
+    (when (re-search-backward (rx "(provide-theme '" (group (1+ (or (syntax word) (syntax symbol))))) nil t)
+      (match-string-no-properties 1))))
 
 (defun package-lint--get-package-prefix ()
   "Return package prefix string (i.e. the symbol the package `provide's).
@@ -1246,8 +1282,7 @@ whether or not warnings alone produce a non-zero exit code."
             (widen)
             (goto-char (point-min))
             (re-search-forward
-             (concat lm-header-prefix
-                     (rx (or "Version" "Package-Version" "Package-Requires")))
+             (lm-get-header-re (rx (or "Version" "Package-Version" "Package-Requires")))
              nil t))))))
 
 (provide 'package-lint)
