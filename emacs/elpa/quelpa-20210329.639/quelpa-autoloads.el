@@ -78,8 +78,8 @@ to install.
 
 When `quelpa' is called interactively with a prefix argument (e.g
 \\[universal-argument] \\[quelpa]) it will try to upgrade the
-given package even if the global var `quelpa-upgrade-p' is set to
-nil.
+given package and remove any old versions of it even if the
+`quelpa-upgrade-p' and `quelpa-autoremove-p' are set to nil.
 
 \(fn ARG &rest PLIST)" t nil)
 

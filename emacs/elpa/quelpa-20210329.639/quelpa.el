@@ -1,6 +1,6 @@
 ;;; quelpa.el --- Emacs Lisp packages built directly from source
 
-;; Copyright 2014-2018, Steckerhalter
+;; Copyright 2014-2021, Steckerhalter
 ;; Copyright 2014-2015, Vasilij Schneidermann <v.schneidermann@gmail.com>
 
 ;; Author: steckerhalter
@@ -155,16 +155,24 @@ quelpa cache."
   :group 'quelpa
   :type 'boolean)
 
-(defcustom quelpa-git-clone-depth 1
+(defcustom quelpa-git-clone-depth nil
   "If non-nil shallow clone quelpa git recipes."
   :group 'quelpa
   :type '(choice (const :tag "Don't shallow clone" nil)
                  (integer :tag "Depth")))
 
+(defcustom quelpa-git-clone-partial :blobless
+  "If non-nil partially clone quelpa git recipes."
+  :group 'quelpa
+  :type '(choice (const :tag "Don't partially clone" nil)
+                 (const :tag "Blobless clone" :blobless)
+                 (const :tag "Treeless clone" :treeless)))
+
 (defcustom quelpa-upgrade-interval nil
   "Interval in days for `quelpa-upgrade-all-maybe'."
   :group 'quelpa
-  :type 'integer)
+  :type '(choice (const :tag "Don't upgrade" nil)
+                 (integer :tag "Days")))
 
 (defvar quelpa-initialized-p nil
   "Non-nil when quelpa has been initialized.")
@@ -416,7 +424,8 @@ and return TIME-STAMP, otherwise return OLD-TIME-STAMP."
       prog))
   "Path to a GNU coreutils \"timeout\" command if available.
 This must be a version which supports the \"-k\" option."
-  :type '(file :must-match t))
+  :type '(choice (const nil)
+                 (file :must-match t)))
 
 (defcustom quelpa-build-timeout-secs 600
   "Wait this many seconds for external processes to complete.
@@ -431,7 +440,8 @@ if `quelpa-build-timeout-executable' is non-nil."
       (executable-find "tar"))
   "Path to a (preferably GNU) tar command.
 Certain package names (e.g. \"@\") may not work properly with a BSD tar."
-  :type '(file :must-match t))
+  :type '(choice (const nil)
+                 (file :must-match t)))
 
 (defvar quelpa--tar-type nil
   "Type of `quelpa-build-tar-executable'.  Can be `gnu' or `bsd'.
@@ -890,14 +900,25 @@ Return a cons cell whose `car' is the root and whose `cdr' is the repository."
   (quelpa-build--run-process-match
    "Fetch URL: \\(.*\\)" dir "git" "remote" "show" "-n" remote))
 
+(defvar quelpa--git-version :uninitialized)
+
 (defun quelpa-build--checkout-git (name config dir)
   "Check package NAME with config CONFIG out of git into DIR."
-  (let* ((repo (plist-get config :url))
+  (let* ((version-regexp-alist `(,@version-regexp-alist ("^[-._+ ]?.*$" . 0)))
+         (git-version (or (when (not (eq quelpa--git-version :uninitialized))
+                            quelpa--git-version)
+                          (setq quelpa--git-version (version-to-list
+                                                     (quelpa-build--run-process-match
+                                                      "git version \\(.*\\)"
+                                                      nil "git" "version")))))
+         (repo (plist-get config :url))
          (remote (or (plist-get config :remote) "origin"))
          (commit (or (plist-get config :commit)
                      (when-let ((branch (plist-get config :branch)))
                        (concat remote "/" branch))))
          (depth (or (plist-get config :depth) quelpa-git-clone-depth))
+         (partial (and (or (plist-get config :partial) quelpa-git-clone-partial)
+                       (version-list-<= '(2 20) git-version)))
          (force (plist-get config :force))
          (use-current-ref (plist-get config :use-current-ref)))
     (when (string-match (rx bos "file://" (group (1+ anything))) repo)
@@ -919,6 +940,9 @@ Return a cons cell whose `car' is the root and whose `cdr' is the repository."
                (append
                 `(nil "git" "clone" ,repo ,dir)
                 `("--origin" ,remote)
+                (pcase partial
+                  (:blobless `("--filter=blob:none"))
+                  (:treeless `("--filter=tree:0")))
                 (when (and depth (not (plist-get config :commit)))
                   `("--depth" ,(int-to-string depth)
                     "--no-single-branch"))
@@ -1703,7 +1727,7 @@ When FORCE is non-nil we will always update MELPA regrdless of
       (condition-case err
           (quelpa-build--checkout-git
            'package-build
-           `(:url ,quelpa-melpa-repo-url :files ("*"))
+           `(:url ,quelpa-melpa-repo-url :files ("*") :partial :treeless)
            quelpa-melpa-dir)
         (error "Failed to checkout melpa git repo: `%s'" (error-message-string err)))))
 
@@ -1919,8 +1943,8 @@ to install.
 
 When `quelpa' is called interactively with a prefix argument (e.g
 \\[universal-argument] \\[quelpa]) it will try to upgrade the
-given package even if the global var `quelpa-upgrade-p' is set to
-nil."
+given package and remove any old versions of it even if the
+`quelpa-upgrade-p' and `quelpa-autoremove-p' are set to nil."
   (interactive (list nil))
   (run-hooks 'quelpa-before-hook)
   (when (quelpa-setup-p) ;if init fails we do nothing
@@ -1930,7 +1954,7 @@ nil."
                       (quelpa-interactive-candidate))))
            (quelpa-upgrade-p (if current-prefix-arg t quelpa-upgrade-p)) ;shadow `quelpa-upgrade-p'
            (quelpa-stable-p quelpa-stable-p) ;shadow `quelpa-stable-p'
-           (quelpa-autoremove-p (if current-prefix-arg quelpa-autoremove-p nil))
+           (quelpa-autoremove-p (if current-prefix-arg t quelpa-autoremove-p))
            (cache-item (quelpa-arg-rcp arg)))
       (quelpa-parse-plist plist)
       (quelpa-parse-stable cache-item)
