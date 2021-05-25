@@ -2,15 +2,13 @@
 
 ;; Copyright (c) 2014-2018  Paul W. Rankin
 ;; Copyright (c) 2019       Free Software Foundation, Inc.
-;; Copyright (c) 2019-2020  Paul W. Rankin
+;; Copyright (c) 2019-2021  Paul W. Rankin
 
-;; Author: Paul W. Rankin <pwr@skeletons.cc>
+;; Author: Paul W. Rankin <pwr@bydasein.com>
 ;; Keywords: wp, text
-;; Package-Version: 3.4.0
-;; Package-Commit: 3e7ef35fae455f77abb63c34e926c2d0e3070d7f
 ;; Version: 3.4.0
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
-;; URL: https://git.skeletons.cc/fountain-mode
+;; URL: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
 
@@ -66,7 +64,7 @@
 ;; ------------
 
 ;;  - Emacs 24.4
-;;  - seq 2.20 (part of Emacs 25.1+)
+;;  - seq 2.20 (part of Emacs 25 and later)
 
 
 ;; Exporting
@@ -1604,6 +1602,8 @@ If N is 0, move to beginning of scene."
       (beginning-of-line)
       (funcall move-fun p))))
 
+;; FIXME: this could permit any string and search the current scene heading for
+;; that string before reverting to an integer count.
 (defun fountain-goto-scene (n)
   "Move point to Nth scene in current buffer.
 
@@ -1705,9 +1705,12 @@ string. e.g.
                     (concat value (when value "\n")
                             (match-string-no-properties 2)))
               (forward-line))
-            (push (cons (intern (string-join (split-string (downcase
-                (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
-                    "[^[:alnum:]]+" t) "-")) value)
+            (push (cons
+                   (intern (string-join (split-string (downcase
+                       (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
+                      "[^[:alnum:]]+" t)
+                     "-"))
+                   value)
                   list)))
         list))))
 
@@ -3026,9 +3029,9 @@ Return non-nil if match occurs." fun)))
     (scene-heading
      (define-fountain-font-lock-matcher fountain-match-scene-heading)
      (0 fountain-scene-heading)
-     (8 fountain-non-printing prepend t fountain-syntax-chars)
-     (10 fountain-non-printing prepend t fountain-syntax-chars)
-     (1 fountain-non-printing prepend t fountain-syntax-chars))
+     (8 nil prepend t fountain-syntax-chars)
+     (10 nil prepend t fountain-syntax-chars)
+     (1 nil prepend t fountain-syntax-chars))
     (action
      (define-fountain-font-lock-matcher fountain-match-action)
      (0 fountain-action)
@@ -3106,7 +3109,7 @@ Return non-nil if match occurs." fun)))
              (matcher (eval (cadr element)))
              (subexp-highlight-list (cddr element))
              use-form align-col highlight)
-         ;; When MATCHED is 'eval, flag that we're using a form.
+         ;; When MATCHER is 'eval, flag that we're using a form.
          (when (eq matcher 'eval) (setq use-form t))
          (setq align-col
                (eval (intern-soft (format "fountain-align-%s" (car element)))))
@@ -3151,7 +3154,6 @@ Return non-nil if match occurs." fun)))
      fountain--font-lock-keywords)
     (reverse keywords)))
 
-;; FIXME: Make scene numbers display in both margins (like a real script).
 (defun fountain-redisplay-scene-numbers (start end)
   "Apply display text properties to scene numbers between START and END.
 
@@ -3159,17 +3161,26 @@ If `fountain-scene-numbers-display-in-margin' is non-nil and
 scene heading has scene number, apply display text properties to
 redisplay in margin. Otherwise, remove display text properties."
   ;; FIXME: Why use jit-lock rather than font-lock?
-  (when fountain-scene-numbers-display-in-margin
-    (goto-char start)
-    (while (< (point) (min end (point-max)))
-      (when (fountain-match-scene-heading)
-        (if (match-string-no-properties 9)
-            (put-text-property (match-beginning 7) (match-end 10)
-                               'display (list '(margin right-margin)
-                                              (match-string-no-properties 9)))
-          (remove-text-properties (match-beginning 0) (match-end 0)
-                                  '(display))))
-      (forward-line))))
+  (goto-char start)
+  (while (< (point) (min end (point-max)))
+    (when (fountain-match-scene-heading)
+      (if (and fountain-scene-numbers-display-in-margin
+               (match-string-no-properties 9))
+          (let ((scene-num (match-string-no-properties 9)))
+        (if (<= 28 emacs-major-version)
+            (progn
+              (put-text-property (match-beginning 7) (match-end 8)
+               'display `((margin left-margin)
+                          (space :width (- left-margin
+                                           ,(+ (string-width scene-num) 4)))))
+              (put-text-property (match-beginning 9) (match-end 9)
+               'display `((margin left-margin) ,scene-num))
+              (put-text-property (match-beginning 10) (match-end 10)
+               'display `((margin right-margin) ,scene-num)))
+          (put-text-property (match-beginning 7) (match-end 10)
+           'display `((margin right-margin) ,scene-num))))
+        (remove-text-properties (match-beginning 0) (match-end 0) '(display))))
+    (forward-line)))
 
 
 ;;; Key Bindings
