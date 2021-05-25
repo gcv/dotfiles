@@ -6,11 +6,11 @@
 ;;         Naoya Yamashita <conao3@gmail.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/ivy-posframe
-;; Package-Version: 20201215.39
-;; Package-Commit: 83047d440ff132d5a45acde5955f71853edeefb9
-;; Version: 0.5.5
+;; Package-Version: 20210426.2144
+;; Package-Commit: 084cc59ea2cd62afaa51445ada3d00404749a541
+;; Version: 0.6.0
 ;; Keywords: abbrev, convenience, matching, ivy
-;; Package-Requires: ((emacs "26.0") (posframe "0.8.0") (ivy "0.13.0"))
+;; Package-Requires: ((emacs "26.0") (posframe "1.0.0") (ivy "0.13.0"))
 
 ;; This file is part of GNU Emacs.
 
@@ -33,7 +33,7 @@
 
 ;; ** What is ivy-posframe
 
-;; ivy-posframe is a ivy extension, which let ivy use posframe to show
+;; ivy-posframe is an ivy extension, which lets ivy use posframe to show
 ;; its candidate menu.
 
 ;; NOTE: ivy-posframe requires Emacs 26 and do not support mouse
@@ -179,6 +179,12 @@ When nil, Using current frame's font as fallback."
   "The height of ivy-min-posframe."
   :type 'number)
 
+(defcustom ivy-posframe-refposhandler #'ivy-posframe-refposhandler-default
+  "The refposhandler use by ivy-posframe.
+
+NOTE: This variable is very useful to EXWM users."
+  :type 'function)
+
 (defcustom ivy-posframe-size-function #'ivy-posframe-get-size
   "The function which is used to deal with posframe's size."
   :type 'function)
@@ -241,6 +247,28 @@ This variable is useful for `ivy-posframe-read-action' .")
 (defvar emacs-basic-display)
 (defvar ivy--display-function)
 
+(defvar exwm--connection)
+(defvar exwm-workspace--workareas)
+(defvar exwm-workspace-current-index)
+
+(defun ivy-posframe-refposhandler-default (&optional frame)
+  "The default posframe refposhandler used by ivy-posframe."
+  (cond
+   ;; EXWM environment
+   ((bound-and-true-p exwm--connection)
+    (or (ignore-errors
+          (let ((info (elt exwm-workspace--workareas
+                           exwm-workspace-current-index)))
+            (cons (elt info 0)
+                  (elt info 1))))
+        ;; Need user install xwininfo.
+        (ignore-errors
+          (posframe-refposhandler-xwininfo frame))
+        ;; Fallback, this value will incorrect sometime, for example: user
+        ;; have panel.
+        (cons 0 0)))
+   (t nil)))
+
 (defun ivy-posframe--display (str &optional poshandler)
   "Show STR in ivy's posframe with POSHANDLER."
   (if (not (posframe-workable-p))
@@ -257,6 +285,7 @@ This variable is useful for `ivy-posframe-read-action' .")
              :internal-border-width ivy-posframe-border-width
              :internal-border-color (face-attribute 'ivy-posframe-border :background nil t)
              :override-parameters ivy-posframe-parameters
+             :refposhandler ivy-posframe-refposhandler
              (funcall ivy-posframe-size-function))
       (ivy-posframe--add-prompt 'ignore)))
   (with-current-buffer ivy-posframe-buffer
@@ -347,6 +376,25 @@ This variable is useful for `ivy-posframe-read-action' .")
   (interactive)
   (let ((ivy-read-action-function #'ivy-posframe-read-action-by-key))
     (ivy-posframe--dispatching-done)))
+
+(defun ivy-posframe--dispatching-call ()
+  "Select one of the available actions and call `ivy-call'."
+  (interactive)
+  (setq ivy-current-prefix-arg current-prefix-arg)
+  (let ((actions (copy-sequence (ivy-state-action ivy-last)))
+        (old-ivy-text ivy-text))
+    (unwind-protect
+        (when (ivy-read-action)
+          (ivy-set-text old-ivy-text)
+          (ivy-call))
+      (ivy-set-action actions)))
+  (ivy-posframe-shrink-after-dispatching))
+
+(defun ivy-posframe-dispatching-call ()
+  "Ivy-posframe's `ivy-dispatching-call'."
+  (interactive)
+  (let ((ivy-read-action-function #'ivy-posframe-read-action-by-key))
+    (ivy-posframe--dispatching-call)))
 
 (defun ivy-posframe-read-action ()
   "Ivy-posframe version `ivy-read-action'"
@@ -605,7 +653,8 @@ This variable is useful for `ivy-posframe-read-action' .")
   :keymap '(([remap ivy-avy]              . ivy-posframe-avy)
             ([remap swiper-avy]           . ivy-posframe-swiper-avy)
             ([remap ivy-read-action]      . ivy-posframe-read-action)
-            ([remap ivy-dispatching-done] . ivy-posframe-dispatching-done))
+            ([remap ivy-dispatching-done] . ivy-posframe-dispatching-done)
+            ([remap ivy-dispatching-call] . ivy-posframe-dispatching-call))
   (if ivy-posframe-mode
       (mapc (lambda (elm)
               (advice-add (car elm) :around (cdr elm)))
