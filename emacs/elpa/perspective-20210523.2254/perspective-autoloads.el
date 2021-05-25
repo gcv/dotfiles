@@ -114,6 +114,12 @@ restored.
 
 \(fn FILE)" t nil)
 
+(autoload 'persp-ibuffer-generate-filter-groups "perspective" "\
+Create a set of ibuffer filter groups based on the persp name of buffers." nil nil)
+
+(autoload 'persp-ibuffer-set-filter-groups "perspective" "\
+Set the current filter groups to filter by persp name." t nil)
+
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "perspective" '("check-persp" "make-persp" "persp" "quick-perspective-keys" "with-")))
 
 ;;;***

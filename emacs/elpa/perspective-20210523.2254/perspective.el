@@ -6,8 +6,8 @@
 
 ;; Author: Natalie Weizenbaum <nex342@gmail.com>
 ;; URL: http://github.com/nex3/perspective-el
-;; Package-Version: 20210401.1950
-;; Package-Commit: dd2a380ac71edf1321a6462f14668baf99879e80
+;; Package-Version: 20210523.2254
+;; Package-Commit: b37c6756700a167742c8ab06fa5a850d9d94f4bd
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
 ;; Version: 2.15
 ;; Created: 2008-03-05
@@ -1213,6 +1213,9 @@ perspective beginning with the given letter."
       ;; `other-buffer'.
       (get-buffer-create (persp-scratch-buffer)))))
 
+
+;;; --- perspective-aware buffer switchers
+
 ;; Buffer switching integration: useful for frameworks which enhance the
 ;; built-in completing-read (e.g., Selectrum).
 ;;;###autoload
@@ -1383,6 +1386,9 @@ PERSP-SET-IDO-BUFFERS)."
                                            (list :unwind #'counsel--switch-buffer-unwind
                                                  :update-fn #'counsel--switch-buffer-update-fn)
                                            #'counsel-switch-buffer))
+
+
+;;; --- durability implementation (persp-state-save and persp-state-load)
 
 ;; Symbols namespaced by persp--state (internal) and persp-state (user
 ;; functions) provide functionality which allows saving perspective state on
@@ -1634,6 +1640,61 @@ restored."
   (run-hooks 'persp-state-after-load-hook))
 
 (defalias 'persp-state-restore 'persp-state-load)
+
+
+;;; --- ibuffer filter group code
+
+(with-eval-after-load 'ibuffer
+  (defvar ibuffer-filtering-alist nil)
+  (define-ibuffer-filter persp-name
+      "Toggle current view to buffers with persp name QUALIFIER."
+    (:description "persp-name"
+                  :reader (read-regexp "Filter by persp name (regexp): "))
+    (ibuffer-awhen (persp-ibuffer-name buf)
+      (if (stringp qualifier)
+          (or (string-match-p qualifier (car it))
+              (string-match-p qualifier (cdr-safe it)))
+        (equal qualifier it)))))
+
+(defun persp-ibuffer-default-group-name (persp-name)
+  "Produce an ibuffer group name string for PERSP-NAME."
+  (format "%s" persp-name))
+
+(defun persp-ibuffer-name (buf)
+  "Return a PERSP-NAME of BUF."
+  (let ((persp-names (cl-loop for persp-name in (persp-all-names)
+                              if (memq buf (persp-all-get persp-name nil))
+                              collect persp-name)))
+    (list (car persp-names))))
+
+;;;###autoload
+(defun persp-ibuffer-generate-filter-groups ()
+  "Create a set of ibuffer filter groups based on the persp name of buffers."
+  (declare-function ibuffer-remove-duplicates "ibuf-ext.el")
+  (declare-function ibuffer-push-filter "ibuf-ext.el")
+  (declare-function ibuffer-pop-filter "ibuf-ext.el")
+  (let ((persp-names (ibuffer-remove-duplicates
+                      (delq nil (mapcar 'persp-ibuffer-name (buffer-list))))))
+    (mapcar (lambda (persp-name)
+              (cons (persp-ibuffer-default-group-name (car persp-name))
+                    `((persp-name . ,persp-name))))
+            persp-names)))
+
+;;;###autoload
+(defun persp-ibuffer-set-filter-groups ()
+  "Set the current filter groups to filter by persp name."
+  (interactive)
+  (unless (featurep 'ibuffer)
+    (user-error "IBuffer not loaded"))
+  (defvar ibuffer-filter-groups)
+  (declare-function ibuffer-update "ibuffer.el")
+  (setq ibuffer-filter-groups (persp-ibuffer-generate-filter-groups))
+  (message "persp-ibuffer: groups set")
+  (let ((ibuf (get-buffer "*Ibuffer*")))
+    (when ibuf
+      (with-current-buffer ibuf
+        (pop-to-buffer ibuf)
+        (ibuffer-update nil t)))))
 
 
 ;;; --- done
