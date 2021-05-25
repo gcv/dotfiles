@@ -4,8 +4,8 @@
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: https://github.com/bbatsov/crux
-;; Package-Version: 20201129.1921
-;; Package-Commit: ba4a1f38eee0ae7597f67a1424bbf5c0c09473bf
+;; Package-Version: 20210309.838
+;; Package-Commit: 20c07848049716a0e1aa2560e23b5f4149f2a74f
 ;; Version: 0.4.0-snapshot
 ;; Keywords: convenience
 ;; Package-Requires: ((seq "1.11"))
@@ -51,13 +51,13 @@
 (defcustom crux-indent-sensitive-modes
   '(conf-mode coffee-mode haml-mode python-mode slim-mode yaml-mode)
   "Modes for which auto-indenting is suppressed."
-  :type 'list
+  :type '(repeat symbol)
   :group 'crux)
 
 (defcustom crux-untabify-sensitive-modes
   '(makefile-bsdmake-mode)
   "Modes for which untabify is suppressed."
-  :type 'list
+  :type '(repeat symbol)
   :group 'crux)
 
 (defcustom crux-line-start-regex-alist
@@ -73,7 +73,7 @@ found, use the regex specified by the default key.
 
 Used by crux functions like `crux-move-beginning-of-line' to skip
 over whitespace, prompts, and markup at the beginning of the line."
-  :type 'list
+  :type '(repeat (cons symbol regexp))
   :group 'crux)
 
 
@@ -88,7 +88,7 @@ over whitespace, prompts, and markup at the beginning of the line."
     "/etc/zlogout" "$ZDOTDIR/.zshrc" "$ZDOTDIR/.zlogin" "$ZDOTDIR/.zprofile"
     "$ZDOTIR/.zshenv" "$ZDOTDIR/.zlogout")
   "The default init files of zsh."
-  :type 'list
+  :type '(repeat string)
   :group 'crux)
 
 (defcustom crux-shell-bash-init-files
@@ -96,26 +96,26 @@ over whitespace, prompts, and markup at the beginning of the line."
     "$HOME/.profile" "$HOME/.bash_logout" "/etc/bashrc" "/etc/bash_profile"
     "/etc/bash_login" "/etc/profile" "/etc/bash_logout")
   "The default init files of bash."
-  :type 'list
+  :type '(repeat string)
   :group 'crux)
 
 (defcustom crux-shell-tcsh-init-files
   '("$HOME/.login" "$HOME/.cshrc" "$HOME/.tcshrc" "$HOME/.logout"
     "/etc/csh.cshrc" "/etc/csh.login" "/etc/csh.logout")
   "The default init files of tcsh."
-  :type 'list
+  :type '(repeat string)
   :group 'crux)
 
 (defcustom crux-shell-fish-init-files
   '("$HOME/.config/fish/config.fish" "$XDG_CONFIG_HOME/fish/config.fish")
   "The default init files of fish."
-  :type 'list
+  :type '(repeat string)
   :group 'crux)
 
 (defcustom crux-shell-ksh-init-files
   '("$HOME/.profile" "$ENV" "/etc/profile")
   "The default init files of ksh."
-  :type 'list
+  :type '(repeat string)
   :group 'crux)
 
 
@@ -125,7 +125,7 @@ over whitespace, prompts, and markup at the beginning of the line."
 
 It will be called with a two arguments: the shell to start and the
 expected name of the shell buffer."
-  :type 'symbol
+  :type 'function
   :group 'crux)
 
 (defcustom crux-shell-func
@@ -134,7 +134,7 @@ expected name of the shell buffer."
 
 It will be called with a two arguments: the shell to start and the
 expected name of the shell buffer."
-  :type 'symbol
+  :type 'function
   :group 'crux)
 
 (defcustom crux-move-visually
@@ -224,7 +224,7 @@ If the process in that buffer died, ask to restart."
                              (apply crux-shell-func (list crux-shell-buffer-name)))
                            (format "*%s*" crux-shell-buffer-name))
   (when (and (null (get-buffer-process (current-buffer)))
-             (not (eq major-mode 'eshell)) ; eshell has no process
+             (not (eq major-mode 'eshell-mode)) ; eshell has no process
              (y-or-n-p "The process has died.  Do you want to restart it? "))
     (kill-buffer-and-window)
     (crux-visit-shell-buffer)))
@@ -315,6 +315,7 @@ Deletes whitespace at join."
       (delete-indentation 1)
     (kill-line arg)))
 
+;;;###autoload
 (defun crux-move-to-mode-line-start ()
   "Move to the beginning, skipping mode specific line start regex."
   (interactive)
@@ -413,7 +414,7 @@ there's a region, all lines that region covers will be duplicated."
   (let ((filename (buffer-file-name)))
     (if (not (and filename (file-exists-p filename)))
         (rename-buffer (read-from-minibuffer "New name: " (buffer-name)))
-      (let* ((new-name (read-from-minibuffer "New name: " filename))
+      (let* ((new-name (read-file-name "New name: " (file-name-directory filename)))
              (containing-dir (file-name-directory new-name)))
         (make-directory containing-dir t)
         (cond
@@ -491,7 +492,9 @@ When invoke with C-u, the newly created file will be visited.
 (defun crux-view-url ()
   "Open a new buffer containing the contents of URL."
   (interactive)
-  (let* ((default (thing-at-point-url-at-point))
+  (let* ((default (if (eq major-mode 'org-mode)
+                      (org-element-property :raw-link (org-element-context))
+                    (thing-at-point-url-at-point)))
          (url (read-from-minibuffer "URL: " default)))
     (switch-to-buffer (url-retrieve-synchronously url))
     (rename-buffer url t)
@@ -607,16 +610,25 @@ as the current user."
   (insert (format-time-string "%c" (current-time))))
 
 ;;;###autoload
-(defun crux-recentf-find-file ()
-  "Find a recent file using `completing-read'."
+(defun crux-recentf-find-file (&optional filter)
+  "Find a recent file using `completing-read'.
+When optional argument FILTER is a function, it is used to
+transform recent files before completion."
   (interactive)
-  (let ((file (completing-read "Choose recent file: "
-                               (mapcar #'abbreviate-file-name recentf-list)
-                               nil t)))
+  (let* ((filter (if (functionp filter) filter #'abbreviate-file-name))
+         (file (completing-read "Choose recent file: "
+                                (delete-dups (mapcar filter recentf-list))
+                                nil t)))
     (when file
       (find-file file))))
 
 (define-obsolete-function-alias 'crux-recentf-ido-find-file 'crux-recentf-find-file "0.4.0")
+
+;;;###autoload
+(defun crux-recentf-find-directory ()
+  "Find a recent directory using `completing-read'."
+  (interactive)
+  (crux-recentf-find-file (lambda (file) (abbreviate-file-name (file-name-directory file)))))
 
 ;; modified from https://www.emacswiki.org/emacs/TransposeWindows
 ;;;###autoload

@@ -64,6 +64,9 @@ Deletes whitespace at join.
 
 \(fn &optional ARG)" t nil)
 
+(autoload 'crux-move-to-mode-line-start "crux" "\
+Move to the beginning, skipping mode specific line start regex." t nil)
+
 (autoload 'crux-move-beginning-of-line "crux" "\
 Move point back to indentation of beginning of line.
 
@@ -171,7 +174,14 @@ and toggle it if ARG is `toggle'; disable the mode otherwise.
 Insert a timestamp according to locale's date and time format." t nil)
 
 (autoload 'crux-recentf-find-file "crux" "\
-Find a recent file using `completing-read'." t nil)
+Find a recent file using `completing-read'.
+When optional argument FILTER is a function, it is used to
+transform recent files before completion.
+
+\(fn &optional FILTER)" t nil)
+
+(autoload 'crux-recentf-find-directory "crux" "\
+Find a recent directory using `completing-read'." t nil)
 
 (autoload 'crux-transpose-windows "crux" "\
 Transpose the buffers shown in two windows.
