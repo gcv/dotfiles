@@ -5,9 +5,9 @@
 ;; Author: Justin Burkett <justin@burkett.cc>
 ;; Maintainer: Justin Burkett <justin@burkett.cc>
 ;; URL: https://github.com/justbur/emacs-which-key
-;; Package-Version: 3.5.0
-;; Package-Commit: ae59b7edb0d82aa0251803fdfbde6b865083c8b8
-;; Version: 3.5.0
+;; Package-Version: 3.5.2
+;; Package-Commit: 5fb30301cb3b4fca5a0e1ce8ec1ef59290b79199
+;; Version: 3.5.1
 ;; Keywords:
 ;; Package-Requires: ((emacs "24.4"))
 
@@ -679,12 +679,12 @@ update.")
 (defvar which-key--ignore-non-evil-keys-regexp
   (eval-when-compile
     (regexp-opt '("mouse-" "wheel-" "remap" "drag-" "scroll-bar"
-                  "select-window" "switch-frame" "which-key-"))))
+                  "select-window" "switch-frame" "which-key"))))
 (defvar which-key--ignore-keys-regexp
   (eval-when-compile
     (regexp-opt '("mouse-" "wheel-" "remap" "drag-" "scroll-bar"
                   "select-window" "switch-frame" "-state"
-                  "which-key-"))))
+                  "which-key"))))
 
 (make-obsolete-variable 'which-key-prefix-name-alist nil "2016-10-05")
 (make-obsolete-variable 'which-key-prefix-title-alist nil "2016-10-05")
@@ -842,6 +842,7 @@ problems at github. If DISABLE is non-nil disable support."
       (setq-local cursor-type nil)
       (setq-local cursor-in-non-selected-windows nil)
       (setq-local mode-line-format nil)
+      (setq-local header-line-format nil)
       (setq-local word-wrap nil)
       (setq-local show-trailing-whitespace nil)
       (run-hooks 'which-key-init-buffer-hook))))
@@ -966,8 +967,7 @@ In the second case, the second string is used to provide a longer
 name for the keys under a prefix.
 
 MORE allows you to specifcy additional KEY REPLACEMENT pairs.  All
-replacements are added to
-`which-key-key-based-description-replacement-alist'."
+replacements are added to `which-key-replacement-alist'."
   ;; TODO: Make interactive
   (while key-sequence
     ;; normalize key sequences before adding
@@ -1597,11 +1597,8 @@ which are strings. KEY is of the form produced by `key-binding'."
 (defun which-key--pseudo-key (key &optional prefix)
   "Replace the last key in the sequence KEY by a special symbol
 in order for which-key to allow looking up a description for the key."
-  (let* ((seq (listify-key-sequence key))
-         (final (intern (format "which-key-%s" (key-description (last seq))))))
-    (if prefix
-        (vconcat prefix (list final))
-      (vconcat (butlast seq) (list final)))))
+  (let ((seq (listify-key-sequence key)))
+    (vconcat (or prefix (butlast seq)) [which-key] (last seq))))
 
 (defun which-key--maybe-get-prefix-title (keys)
   "KEYS is a string produced by `key-description'.
