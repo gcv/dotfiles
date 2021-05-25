@@ -9,7 +9,7 @@
 ;;;### (autoloads nil "slime-company" "slime-company.el" (0 0 0 0))
 ;;; Generated autoloads from slime-company.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "slime-company" '("company-slime" "slime-company")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "slime-company" '("*slime-company--meta-request*" "company-slime" "slime-company")))
 
 ;;;***
 
