@@ -9,6 +9,11 @@
 ;;;### (autoloads nil "fennel-mode" "fennel-mode.el" (0 0 0 0))
 ;;; Generated autoloads from fennel-mode.el
 
+(autoload 'fennel-repl-mode "fennel-mode" "\
+Major mode for Fennel REPL.
+
+\(fn)" t nil)
+
 (autoload 'fennel-mode "fennel-mode" "\
 Major mode for editing Fennel code.
 

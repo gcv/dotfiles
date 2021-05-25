@@ -1,2 +1,0 @@
-;;; Generated package description from /Users/kostya/Code/dotfiles/emacs/elpa/fennel-mode-20201221.543/fennel-mode.el  -*- no-byte-compile: t -*-
-(define-package "fennel-mode" "20201221.543" "a major-mode for editing Fennel code" 'nil :commit "bebc9dd58a845928114082c5ab4538b9869b4fc7" :authors '(("Phil Hagelberg")) :maintainer '("Phil Hagelberg") :keywords '("languages" "tools") :url "https://gitlab.com/technomancy/fennel-mode")

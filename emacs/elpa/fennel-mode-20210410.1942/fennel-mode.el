@@ -1,13 +1,14 @@
-;;; fennel-mode.el --- a major-mode for editing Fennel code
+;;; fennel-mode.el --- A major-mode for editing Fennel code
 
 ;; Copyright © 2018 Phil Hagelberg and contributors
 
 ;; Author: Phil Hagelberg
 ;; URL: https://gitlab.com/technomancy/fennel-mode
-;; Package-Version: 20201221.543
-;; Package-Commit: bebc9dd58a845928114082c5ab4538b9869b4fc7
+;; Package-Version: 20210410.1942
+;; Package-Commit: 59ab02344f569069b9899a3a5ffdca4a30093df4
 ;; Version: 0.2.0
 ;; Created: 2018-02-18
+;; Package-Requires: ((emacs "25.1"))
 ;;
 ;; Keywords: languages, tools
 
@@ -37,11 +38,45 @@
 (require 'inf-lisp)
 (require 'xref)
 
+(declare-function paredit-open-curly "ext:paredit")
+(declare-function paredit-close-curly "ext:paredit")
+(declare-function lua-mode "ext:lua-mode")
+
 (defcustom fennel-mode-switch-to-repl-after-reload t
   "If the focus should switch to the repl after a module reload."
   :group 'fennel-mode
   :type 'boolean
   :package-version '(fennel-mode "0.10.0"))
+
+(defcustom fennel-program "fennel --correlate --repl"
+  "Command to run the fennel REPL"
+  :group 'fennel-mode
+  :type 'string
+  :package-version '(fennel-mode "0.10.0"))
+
+(make-variable-buffer-local
+ (defvar fennel-repl--last-fennel-buffer nil))
+
+;;;###autoload
+(define-derived-mode fennel-repl-mode inferior-lisp-mode "Fennel REPL"
+  "Major mode for Fennel REPL."
+  (set (make-local-variable 'lisp-describe-sym-command) "(doc %s)\n")
+  (set (make-local-variable 'inferior-lisp-prompt) ">> ")
+  (set (make-local-variable 'lisp-arglist-command) fennel-arglist-command))
+
+(define-key fennel-repl-mode-map (kbd "C-c C-z") 'fennel-repl)
+
+(defvar fennel-repl--buffer "*Fennel REPL*")
+
+(defun fennel-repl--start (&optional ask-for-command?)
+  (if (not (comint-check-proc fennel-repl--buffer))
+      (let* ((cmd (or (and ask-for-command? (read-from-minibuffer "Command: "))
+                      fennel-program))
+             (cmdlist (split-string fennel-program)))
+        (set-buffer (apply #'make-comint "Fennel REPL" (car cmdlist) nil (cdr cmdlist)))
+        (fennel-repl-mode)
+        (setq inferior-lisp-buffer fennel-repl--buffer)))
+  (get-buffer fennel-repl--buffer))
 
 (defvar fennel-module-name nil
   "Buffer-local value for storing the current file's module name.")
@@ -96,11 +131,18 @@
     (,(rx (group letter (0+ word) "." (1+ word))) 0 font-lock-type-face)))
 
 (defun fennel-font-lock-setup ()
+  "Setup font lock for keywords."
   (setq font-lock-defaults
         '(fennel-font-lock-keywords nil nil (("+-*/.<>=!?$%_&:" . "w")))))
 
-;; simplified version of lisp-indent-function
+(defvar calculate-lisp-indent-last-sexp)
+
 (defun fennel-indent-function (indent-point state)
+  "Simplified version of function `lisp-indent-function'.
+
+INDENT-POINT is the position at which the line being indented begins.
+Point is located at the point to indent under (for default indentation);
+STATE is the `parse-partial-sexp' state for that position."
   (let ((normal-indent (current-column)))
     (goto-char (1+ (elt state 1)))
     (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
@@ -127,7 +169,7 @@
   (make-local-variable 'fennel-module-name)
   (set (make-local-variable 'indent-tabs-mode) nil)
   (set (make-local-variable 'lisp-indent-function) 'fennel-indent-function)
-  (set (make-local-variable 'inferior-lisp-program) "fennel --repl")
+  (set (make-local-variable 'inferior-lisp-program) fennel-program)
   (set (make-local-variable 'lisp-describe-sym-command) "(doc %s)\n")
   (set (make-local-variable 'inferior-lisp-load-command)
        ;; won't work if the fennel module name has changed but beats nothing
@@ -141,19 +183,22 @@
   (add-hook 'paredit-mode-hook #'fennel-paredit-setup))
 
 (defun fennel-paredit-setup ()
+  "Setup paredit keys."
   (define-key fennel-mode-map "{" #'paredit-open-curly)
   (define-key fennel-mode-map "}" #'paredit-close-curly))
 
 (defun fennel-get-module (ask? last-module)
-  "Ask for the name of a module for the current file; returns keyword."
+  "Ask for the name of a module for the current file; return keyword.
+
+If ASK? or LAST-MODULE were not supplied, asks for the name of a module."
   (let ((module (if (or ask? (not last-module))
-                    (read-string "Module: " (or last-module (file-name-base)))
+                    (read-string "Module: " (or last-module (file-name-base nil)))
                   last-module)))
     (setq fennel-module-name module) ; remember for next time
     (intern (concat ":" module))))
 
 (defun fennel-reload-form (module-keyword)
-  "Return a string of the code to reload the `module-keyword' module."
+  "Return a string of the code to reload the MODULE-KEYWORD module."
   (format "%s\n" `(let [old (require ,module-keyword)
                             _ (tset package.loaded ,module-keyword nil)
                             (ok new) (pcall require ,module-keyword)
@@ -175,24 +220,27 @@
 (defun fennel-reload (ask?)
   "Reload the module for the current file.
 
+ASK? forces module name prompt.
+
 Tries to reload in a way that makes it retroactively visible; if
 the module returns a table, then existing references to the same
 module will have their contents updated with the new
-value. Requires installing `fennel.searcher'.
+value.  Requires installing `fennel.searcher'.
 
 Queries the user for a module name upon first run for a given
 buffer, or when given a prefix arg."
   (interactive "P")
   (comint-check-source buffer-file-name)
   (let* ((module (fennel-get-module ask? fennel-module-name)))
-    (when (and (file-exists-p (concat (file-name-base) ".lua"))
+    (when (and (file-exists-p (concat (file-name-base nil) ".lua"))
                (yes-or-no-p "Lua file for module exists; delete it first?"))
-      (delete-file (concat (file-name-base) ".lua")))
+      (delete-file (concat (file-name-base nil) ".lua")))
     (comint-send-string (inferior-lisp-proc) (fennel-reload-form module)))
   (when fennel-mode-switch-to-repl-after-reload
     (switch-to-lisp t)))
 
 (defun fennel-find-definition-go (location)
+  "Go to the definition LOCATION."
   (when (string-match "^@\\(.+\\)!\\(.+\\)" location)
     (let ((file (match-string 1 location))
           (line (string-to-number (match-string 2 location))))
@@ -203,15 +251,15 @@ buffer, or when given a prefix arg."
         (forward-line (1- line))))))
 
 (defun fennel-find-definition-for (identifier)
-  (let ((tempfile (make-temp-file "fennel-completions-")))
+  "Find the definition of IDENTIFIER."
+  (let ((tempfile (make-temp-file "fennel-find-")))
     (comint-send-string
      (inferior-lisp-proc)
      (format "%s\n"
-             `(let [f (io.open ,(format "\"%s\"" tempfile) :w)
-                      info (debug.getinfo ,identifier)]
-                (when (= :Lua info.what)
-                  (: f :write info.source :! info.linedefined))
-                (: f :close))))
+             `(with-open [f (io.open ,(format "\"%s\"" tempfile) :w)]
+                (match (-?> ,identifier (debug.getinfo))
+                  {:what :Lua
+                   : source : linedefined} (f:write source :! linedefined)))))
     (sit-for 0.1)
     (unwind-protect
         (when (file-exists-p tempfile)
@@ -221,15 +269,47 @@ buffer, or when given a prefix arg."
             (buffer-substring-no-properties (point-min) (point-max)))))))
 
 (defun fennel-find-definition (identifier)
-  "Jump to the definition of the function identified at point.
+  "Jump to the definition of the function IDENTIFIER at point.
 This will only work when the reference to the function is in scope for the repl;
 for instance if you have already entered (local foo (require :foo)) then foo.bar
 can be resolved. It also requires line number correlation."
-  (interactive (list (if (thing-at-point 'symbol)
-                         (substring-no-properties (thing-at-point 'symbol))
-                       (read-string "Find definition: "))))
+  (interactive (list (read-string "Find definition: ")))
   (xref-push-marker-stack (point-marker))
   (fennel-find-definition-go (fennel-find-definition-for identifier)))
+
+(defvar fennel-module-history nil)
+(defvar fennel-field-history nil)
+
+(defun fennel-find-module-field (module fields-string)
+  (let ((tempfile (make-temp-file "fennel-module-"))
+        (fields (mapcar (apply-partially 'concat ":")
+                        (split-string fields-string "\\."))))
+    (comint-send-string
+     (inferior-lisp-proc)
+     (format "%s\n"
+             `(with-open [f (io.open ,(format "\"%s\"" tempfile) :w)]
+                (match (-?> (,"." (require ,(format "\"%s\"" module)) ,@fields)
+                            (debug.getinfo))
+                  {:what :Lua
+                   : source : linedefined} (f:write source :! linedefined)))))
+    (sit-for 0.1)
+    (unwind-protect
+        (when (file-exists-p tempfile)
+          (with-temp-buffer
+            (insert-file-contents tempfile)
+            (delete-file tempfile)
+            (buffer-substring-no-properties (point-min) (point-max)))))))
+
+(defun fennel-find-module-definition ()
+  (interactive)
+  (let* ((module (read-from-minibuffer "Find in module: " nil nil nil
+                                       'fennel-module-history
+                                       (car fennel-module-history)))
+         (fields (read-from-minibuffer "Find module field: " nil nil nil
+                                       'fennel-field-history
+                                       (car fennel-field-history))))
+    (xref-push-marker-stack (point-marker))
+    (fennel-find-definition-go (fennel-find-module-field module fields))))
 
 (defun fennel-find-definition-pop ()
   "Return point to previous position in previous buffer."
@@ -251,27 +331,35 @@ can be resolved. It also requires line number correlation."
     (read-only-mode)
     (goto-char (point-min))))
 
-(defun fennel-repl (ask-for-command?)
+(defun fennel-repl (ask-for-command? &optional buffer)
   "Switch to the fennel repl buffer, or start a new one if needed.
+
+If ASK-FOR-COMMAND? was supplied, asks for command to start the REPL.
+
 Return this buffer."
   (interactive "P")
-  (if (get-buffer-process inferior-lisp-buffer)
-      (pop-to-buffer inferior-lisp-buffer)
-    (run-lisp (cond (ask-for-command?
-                     (read-from-minibuffer "Command: "))
-                    ((string= inferior-lisp-program "lisp")
-                     "fennel")
-                    (t inferior-lisp-program)))
-    (set (make-local-variable 'lisp-describe-sym-command) "(doc %s)\n")
-    (set (make-local-variable 'inferior-lisp-prompt) ">> ")
-    (set (make-local-variable 'lisp-arglist-command) fennel-arglist-command))
-  (get-buffer inferior-lisp-buffer))
+  (if (eq major-mode 'fennel-repl-mode)
+      (when fennel-repl--last-fennel-buffer
+        (switch-to-buffer-other-window fennel-repl--last-fennel-buffer))
+    (let ((last-buf (or buffer (current-buffer)))
+          (repl-buf (or (get-buffer fennel-repl--buffer)
+                        (fennel-repl--start ask-for-command?))))
+      (with-current-buffer repl-buf
+        (setq fennel-repl--last-fennel-buffer last-buf))
+      (pop-to-buffer repl-buf))))
+
+(defun fennel-format ()
+  "Run fnlfmt on the current buffer."
+  (interactive)
+  (shell-command-on-region (point-min) (point-max) "fnlfmt -" nil t))
 
 (define-key fennel-mode-map (kbd "M-.") 'fennel-find-definition)
 (define-key fennel-mode-map (kbd "M-,") 'fennel-find-definition-pop)
+(define-key fennel-mode-map (kbd "M-'") 'fennel-find-module-definition)
 (define-key fennel-mode-map (kbd "C-c C-k") 'fennel-reload)
 (define-key fennel-mode-map (kbd "C-c C-l") 'fennel-view-compilation)
 (define-key fennel-mode-map (kbd "C-c C-z") 'fennel-repl)
+(define-key fennel-mode-map (kbd "C-c C-t") 'fennel-format)
 
 (put 'lambda 'fennel-indent-function 'defun)
 (put 'λ 'fennel-indent-function 'defun)
@@ -289,9 +377,10 @@ Return this buffer."
 (put 'with-open 'fennel-indent-function 1)
 (put 'collect 'fennel-indent-function 1)
 (put 'icollect 'fennel-indent-function 1)
-
+(put 'pick-values 'fennel-indent-function 1)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fnl\\'" . fennel-mode))
 
-(provide 'fennel-mode) ;;; fennel-mode.el ends here
+(provide 'fennel-mode)
+;;; fennel-mode.el ends here
