@@ -216,7 +216,7 @@ In some cases, `/bin/sh` needs to be relinked to `/bin/bash` for the compilation
 to work (see,
 [#216](https://github.com/akermu/emacs-libvterm/issues/216#issuecomment-575934593)).
 
-Pull requests to improve support for Ubuntu are welcome (e.g., simplyfing the
+Pull requests to improve support for Ubuntu are welcome (e.g., simplifying the
 installation).
 
 Some releases of Ubuntu (e.g., 18.04) ship with a old version of libvterm that
@@ -242,9 +242,8 @@ readme.
 For `bash` or `zsh`, put this in your `.zshrc` or `.bashrc`
 ```bash
 vterm_printf(){
-    if [ -n "$TMUX" ]; then
+    if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ] ); then
         # Tell tmux to pass the escape sequences through
-        # (Source: http://permalink.gmane.org/gmane.comp.terminal-emulators.tmux.user/1324)
         printf "\ePtmux;\e\e]%s\007\e\\" "$1"
     elif [ "${TERM%%-*}" = "screen" ]; then
         # GNU screen (screen, screen-256color, screen-256color-bce)
@@ -259,9 +258,8 @@ This works also for `dash`.
 For `fish` put this in your `~/.config/fish/config.fish`:
 ```bash
 function vterm_printf;
-    if [ -n "$TMUX" ]
+    if begin; [  -n "$TMUX" ]  ; and  string match -q -r "screen|tmux" "$TERM"; end 
         # tell tmux to pass the escape sequences through
-        # (Source: http://permalink.gmane.org/gmane.comp.terminal-emulators.tmux.user/1324)
         printf "\ePtmux;\e\e]%s\007\e\\" "$argv"
     else if string match -q -- "screen*" "$TERM"
         # GNU screen (screen, screen-256color, screen-256color-bce)
@@ -342,7 +340,7 @@ If it possible to automatically clear the scrollback when the screen is cleared
 by setting the variable `vterm-clear-scrollback-when-clearing`: When
 `vterm-clear-scrollback-when-clearing` is non nil, `C-l` clears both the screen
 and the scrollback. When is nil, `C-l` only clears the screen. The opposite
-behavior can be achieved by using the universal prefix (ie, calling `C-u C-l`).
+behavior can be achieved by using the universal prefix (i.e., calling `C-u C-l`).
 
 # Customization
 
@@ -353,7 +351,7 @@ Shell to run in a new vterm. It defaults to `$SHELL`.
 ## `vterm-environment`
 
 to add more environment variables there is the custom vterm-environment which has
-a similar format than the internal emacs variable process-environment.
+a similar format than the internal Emacs variable process-environment.
 You can check the documentation with C-h v process-environment for more details.
 
 ## `vterm-term-environment-variable`
@@ -393,11 +391,11 @@ the vterm prompt tracking, if false it use the regexp in
 
 ## `vterm-enable-manipulate-selection-data-by-osc52`
 
-Vterm support copy text to emacs kill ring and system clipboard by using OSC 52.
+Vterm support copy text to Emacs kill ring and system clipboard by using OSC 52.
 See https://invisible-island.net/xterm/ctlseqs/ctlseqs.html for more info about OSC 52.
 For example: send 'blabla' to kill ring: printf "\033]52;c;$(printf "%s" "blabla" | base64)\a"
 
-tmux can share its copy buffer to terminals bysupporting osc52(like iterm2 xterm),
+tmux can share its copy buffer to terminals by supporting osc52(like iterm2 xterm),
 you can enable this feature for tmux by :
 set -g set-clipboard on         #osc 52 copy paste share with iterm
 set -ga terminal-overrides ',xterm*:XT:Ms=\E]52;%p1%s;%p2%s\007'
@@ -476,6 +474,13 @@ proportional font.
 In addition to that, you can disable some text properties (bold, underline,
 reverse video) setting the relative option to `t` (`vterm-disable-bold`,
 `vterm-disable-underline`, or `vterm-disable-inverse-video`).
+
+## Blink cursor
+
+When `vterm-ignore-blink-cursor` is `t`, vterm will ignore request from application to turn on or off cursor blink.
+
+If `nil`, cursor in any window may begin to blink or not blink because `blink-cursor-mode`
+is a global minor mode in Emacs, you can use `M-x blink-cursor-mode` to toggle.
 
 ## Colors
 
@@ -598,7 +603,7 @@ vterm_cmd() {
 ```
 `fish`:
 ```sh
-function vterm_cmd --description 'Run an emacs command among the ones been defined in vterm-eval-cmds.'
+function vterm_cmd --description 'Run an Emacs command among the ones been defined in vterm-eval-cmds.'
     set -l vterm_elisp ()
     for arg in $argv
         set -a vterm_elisp (printf '"%s" ' (string replace -a -r '([\\\\"])' '\\\\\\\\$1' $arg))
@@ -675,13 +680,13 @@ example in `/etc/bash/bashrc.d/`, `/etc/profile.d/` (for `zsh`), or
 `/etc/fish/conf.d/` for `fish`.
 
 When using vterm Emacs sets the environment variable INSIDE_EMACS in the subshell to ‘vterm’.
-Usually the programs check this variable to determine whether they are running inside emacs.
+Usually the programs check this variable to determine whether they are running inside Emacs.
 
 Vterm also sets an extra variable EMACS_VTERM_PATH to the place where the vterm library is installed.
 This is very useful because when vterm is installed from melpa the Shell-side configuration files are
 in the EMACS_VTERM_PATH inside the /etc sub-directory. After a package update, the directory name changes,
 so, a code like this in your bashrc could be enough to load always the latest version of the file
-from the right loation without coping any file manually.
+from the right location without coping any file manually.
 
 ```
 if [[ "$INSIDE_EMACS" = 'vterm' ]] \
@@ -767,7 +772,7 @@ This method does not work on remote machines.
 
 ### How can I get the directory tracking in a more understandable way?
 
-If you looked at the reccomended way to set-up directory tracking, you will have
+If you looked at the recommended way to set-up directory tracking, you will have
 noticed that it requires printing obscure code like `\e]2;%m:%2~\a` (unless you
 are using `fish`).
 

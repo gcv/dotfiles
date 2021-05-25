@@ -232,9 +232,11 @@ static int is_end_of_prompt(Term *term, int end_col, int row, int col) {
   }
   return 0;
 }
-static size_t get_col_offset(Term *term, int row, int end_col) {
+
+static void goto_col(Term *term, emacs_env *env, int row, int end_col) {
   int col = 0;
   size_t offset = 0;
+  size_t beyond_eol = 0;
 
   int height;
   int width;
@@ -250,11 +252,16 @@ static size_t get_col_offset(Term *term, int row, int end_col) {
     } else {
       if (is_eol(term, term->width, row, col)) {
         offset += cell.width;
+        beyond_eol += cell.width;
       }
     }
     col += cell.width;
   }
-  return offset;
+
+  forward_char(env, env->make_integer(env, end_col - offset));
+  emacs_value space = env->make_string(env, " ", 1);
+  for (int i = 0; i < beyond_eol; i += 1)
+    insert(env, space);
 }
 
 static void refresh_lines(Term *term, emacs_env *env, int start_row,
@@ -264,8 +271,19 @@ static void refresh_lines(Term *term, emacs_env *env, int start_row,
   }
   int i, j;
 
-  char buffer[((end_row - start_row + 1) * end_col) * 4];
+#define PUSH_BUFFER(c)                                                         \
+  do {                                                                         \
+    if (length == capacity) {                                                  \
+      capacity += end_col * 4;                                                 \
+      buffer = realloc(buffer, capacity * sizeof(char));                       \
+    }                                                                          \
+    buffer[length] = (c);                                                      \
+    length++;                                                                  \
+  } while (0)
+
+  int capacity = ((end_row - start_row + 1) * end_col) * 4;
   int length = 0;
+  char *buffer = malloc(capacity * sizeof(char));
   VTermScreenCell cell;
   VTermScreenCell lastCell;
   fetch_cell(term, start_row, 0, &lastCell);
@@ -298,19 +316,18 @@ static void refresh_lines(Term *term, emacs_env *env, int start_row,
       if (cell.chars[0] == 0) {
         if (is_eol(term, end_col, i, j)) {
           /* This cell is EOL if this and every cell to the right is black */
-          buffer[length] = '\n';
-          length++;
+          PUSH_BUFFER('\n');
           newline = 1;
           break;
         }
-        buffer[length] = ' ';
-        length++;
+        PUSH_BUFFER(' ');
       } else {
-        unsigned char bytes[4];
-        size_t count = codepoint_to_utf8(cell.chars[0], bytes);
-        for (int k = 0; k < count; k++) {
-          buffer[length] = bytes[k];
-          length++;
+        for (int k = 0; k < VTERM_MAX_CHARS_PER_CELL && cell.chars[k]; ++k) {
+          unsigned char bytes[4];
+          size_t count = codepoint_to_utf8(cell.chars[k], bytes);
+          for (int l = 0; l < count; l++) {
+            PUSH_BUFFER(bytes[l]);
+          }
         }
       }
 
@@ -336,6 +353,9 @@ static void refresh_lines(Term *term, emacs_env *env, int start_row,
   }
   emacs_value text = render_text(env, term, buffer, length, &lastCell);
   insert(env, text);
+
+#undef PUSH_BUFFER
+  free(buffer);
 
   return;
 }
@@ -466,8 +486,7 @@ static void adjust_topline(Term *term, emacs_env *env) {
    */
 
   goto_line(env, pos.row - term->height);
-  size_t offset = get_col_offset(term, pos.row, pos.col);
-  forward_char(env, env->make_integer(env, pos.col - offset));
+  goto_col(term, env, pos.row, pos.col);
 
   emacs_value windows = get_buffer_window_list(env);
   emacs_value swindow = selected_window(env);
@@ -524,26 +543,32 @@ static int term_movecursor(VTermPos new, VTermPos old, int visible,
 }
 
 static void term_redraw_cursor(Term *term, emacs_env *env) {
+  if (term->cursor.cursor_blink_changed) {
+    term->cursor.cursor_blink_changed = false;
+    set_cursor_blink(env, term->cursor.cursor_blink);
+  }
+
   if (term->cursor.cursor_type_changed) {
     term->cursor.cursor_type_changed = false;
-    switch (term->cursor.cursor_type) {
-    case VTERM_PROP_CURSOR_VISIBLE:
-      set_cursor_type(env, Qt);
-      break;
-    case VTERM_PROP_CURSOR_NOT_VISIBLE:
+
+    if (!term->cursor.cursor_visible) {
       set_cursor_type(env, Qnil);
-      break;
-    case VTERM_PROP_CURSOR_BLOCK:
+      return;
+    }
+
+    switch (term->cursor.cursor_type) {
+    case VTERM_PROP_CURSORSHAPE_BLOCK:
       set_cursor_type(env, Qbox);
       break;
-    case VTERM_PROP_CURSOR_UNDERLINE:
+    case VTERM_PROP_CURSORSHAPE_UNDERLINE:
       set_cursor_type(env, Qhbar);
       break;
-    case VTERM_PROP_CURSOR_BAR_LEFT:
+    case VTERM_PROP_CURSORSHAPE_BAR_LEFT:
       set_cursor_type(env, Qbar);
       break;
     default:
-      return;
+      set_cursor_type(env, Qt);
+      break;
     }
   }
 }
@@ -570,14 +595,18 @@ static void term_redraw(Term *term, emacs_env *env) {
         env, env->make_string(env, term->directory, strlen(term->directory)));
     term->directory_changed = false;
   }
-  if (term->elisp_code_changed) {
-    term->elisp_code_changed = false;
-    emacs_value elisp_code =
-        env->make_string(env, term->elisp_code, strlen(term->elisp_code));
+
+  while (term->elisp_code_first) {
+    ElispCodeListNode *node = term->elisp_code_first;
+    term->elisp_code_first = node->next;
+    emacs_value elisp_code = env->make_string(env, node->code, node->code_len);
     vterm_eval(env, elisp_code);
-    free(term->elisp_code);
-    term->elisp_code = NULL;
+
+    free(node->code);
+    free(node);
   }
+  term->elisp_code_p_insert = &term->elisp_code_first;
+
   if (term->selection_data) {
     emacs_value selection_target = env->make_string(
         env, &term->selection_target[0], strlen(&term->selection_target[0]));
@@ -657,18 +686,20 @@ static int term_settermprop(VTermProp prop, VTermValue *val, void *user_data) {
   switch (prop) {
   case VTERM_PROP_CURSORVISIBLE:
     invalidate_terminal(term, term->cursor.row, term->cursor.row + 1);
-    if (val->boolean) {
-      term->cursor.cursor_type = VTERM_PROP_CURSOR_VISIBLE;
-    } else {
-      term->cursor.cursor_type = VTERM_PROP_CURSOR_NOT_VISIBLE;
-    }
+    term->cursor.cursor_visible = val->boolean;
     term->cursor.cursor_type_changed = true;
+    break;
+  case VTERM_PROP_CURSORBLINK:
+    if (term->ignore_blink_cursor)
+      break;
+    invalidate_terminal(term, term->cursor.row, term->cursor.row + 1);
+    term->cursor.cursor_blink = val->boolean;
+    term->cursor.cursor_blink_changed = true;
     break;
   case VTERM_PROP_CURSORSHAPE:
     invalidate_terminal(term, term->cursor.row, term->cursor.row + 1);
     term->cursor.cursor_type = val->number;
     term->cursor.cursor_type_changed = true;
-
     break;
   case VTERM_PROP_TITLE:
 #ifdef VTermStringFragmentNotExists
@@ -720,10 +751,11 @@ static emacs_value render_text(emacs_env *env, Term *term, char *buffer,
   int emacs_major_version =
       env->extract_integer(env, symbol_value(env, Qemacs_major_version));
   emacs_value properties;
-  emacs_value props[64]; int props_len = 0;
-  if (env->is_not_nil (env, fg))
+  emacs_value props[64];
+  int props_len = 0;
+  if (env->is_not_nil(env, fg))
     props[props_len++] = Qforeground, props[props_len++] = fg;
-  if (env->is_not_nil (env, bg))
+  if (env->is_not_nil(env, bg))
     props[props_len++] = Qbackground, props[props_len++] = bg;
   if (bold != Qnil)
     props[props_len++] = Qweight, props[props_len++] = bold;
@@ -738,7 +770,7 @@ static emacs_value render_text(emacs_env *env, Term *term, char *buffer,
   if (emacs_major_version >= 27)
     props[props_len++] = Qextend, props[props_len++] = Qt;
 
-  properties = list (env, props, props_len);
+  properties = list(env, props, props_len);
 
   if (props_len)
     put_text_property(env, text, Qface, properties);
@@ -965,10 +997,15 @@ void term_finalize(void *object) {
     free(term->directory);
     term->directory = NULL;
   }
-  if (term->elisp_code) {
-    free(term->elisp_code);
-    term->elisp_code = NULL;
+
+  while (term->elisp_code_first) {
+    ElispCodeListNode *node = term->elisp_code_first;
+    term->elisp_code_first = node->next;
+    free(node->code);
+    free(node);
   }
+  term->elisp_code_p_insert = &term->elisp_code_first;
+
   if (term->cmd_buffer) {
     free(term->cmd_buffer);
     term->cmd_buffer = NULL;
@@ -1027,9 +1064,14 @@ static int handle_osc_cmd_51(Term *term, char subCmd, char *buffer) {
   } else if (subCmd == 'E') {
     /* "51;E" executes elisp code */
     /* The elisp code is executed in term_redraw */
-    term->elisp_code = malloc(strlen(buffer) + 1);
-    strcpy(term->elisp_code, buffer);
-    term->elisp_code_changed = true;
+    ElispCodeListNode *node = malloc(sizeof(ElispCodeListNode));
+    node->code_len = strlen(buffer);
+    node->code = malloc(node->code_len + 1);
+    strcpy(node->code, buffer);
+    node->next = NULL;
+
+    *(term->elisp_code_p_insert) = node;
+    term->elisp_code_p_insert = &(node->next);
     return 1;
   }
   return 0;
@@ -1165,6 +1207,7 @@ emacs_value Fvterm_new(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
   int disable_bold_font = env->is_not_nil(env, args[3]);
   int disable_underline = env->is_not_nil(env, args[4]);
   int disable_inverse_video = env->is_not_nil(env, args[5]);
+  int ignore_blink_cursor = env->is_not_nil(env, args[6]);
 
   term->vt = vterm_new(rows, cols);
   vterm_set_utf8(term->vt, 1);
@@ -1191,6 +1234,7 @@ emacs_value Fvterm_new(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
   term->disable_bold_font = disable_bold_font;
   term->disable_underline = disable_underline;
   term->disable_inverse_video = disable_inverse_video;
+  term->ignore_blink_cursor = ignore_blink_cursor;
   emacs_value newline = env->make_string(env, "\n", 1);
   for (int i = 0; i < term->height; i++) {
     insert(env, newline);
@@ -1206,10 +1250,15 @@ emacs_value Fvterm_new(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
 
   term->cursor.row = 0;
   term->cursor.col = 0;
+  term->cursor.cursor_type = -1;
+  term->cursor.cursor_visible = true;
+  term->cursor.cursor_type_changed = false;
+  term->cursor.cursor_blink = false;
+  term->cursor.cursor_blink_changed = false;
   term->directory = NULL;
   term->directory_changed = false;
-  term->elisp_code = NULL;
-  term->elisp_code_changed = false;
+  term->elisp_code_first = NULL;
+  term->elisp_code_p_insert = &term->elisp_code_first;
   term->selection_data = NULL;
 
   term->cmd_buffer = NULL;
@@ -1342,8 +1391,7 @@ emacs_value Fvterm_reset_cursor_point(emacs_env *env, ptrdiff_t nargs,
   Term *term = env->get_user_ptr(env, args[0]);
   int line = row_to_linenr(term, term->cursor.row);
   goto_line(env, line);
-  size_t offset = get_col_offset(term, term->cursor.row, term->cursor.col);
-  forward_char(env, env->make_integer(env, term->cursor.col - offset));
+  goto_col(term, env, term->cursor.row, term->cursor.col);
   return point(env);
 }
 
@@ -1379,6 +1427,8 @@ int emacs_module_init(struct emacs_runtime *ert) {
   Qcursor_type = env->make_global_ref(env, env->intern(env, "cursor-type"));
 
   // Functions
+  Fblink_cursor_mode =
+      env->make_global_ref(env, env->intern(env, "blink-cursor-mode"));
   Fsymbol_value = env->make_global_ref(env, env->intern(env, "symbol-value"));
   Flength = env->make_global_ref(env, env->intern(env, "length"));
   Flist = env->make_global_ref(env, env->intern(env, "list"));
@@ -1426,7 +1476,7 @@ int emacs_module_init(struct emacs_runtime *ert) {
   // Exported functions
   emacs_value fun;
   fun =
-      env->make_function(env, 4, 6, Fvterm_new, "Allocate a new vterm.", NULL);
+      env->make_function(env, 4, 7, Fvterm_new, "Allocate a new vterm.", NULL);
   bind_function(env, "vterm--new", fun);
 
   fun = env->make_function(env, 1, 5, Fvterm_update,
