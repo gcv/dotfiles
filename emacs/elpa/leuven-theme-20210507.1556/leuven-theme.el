@@ -1,10 +1,10 @@
 ;;; leuven-theme.el --- Awesome Emacs color theme on white background
 
-;; Copyright (C) 2003-2020 Free Software Foundation, Inc.
+;; Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
 ;; Author: Fabrice Niessen <(concat "fniessen" at-sign "pirilampo.org")>
 ;; URL: https://github.com/fniessen/emacs-leuven-theme
-;; Version: 20201207.2203
+;; Version: 20210507.1750
 ;; Keywords: color theme
 
 ;; This file is part of GNU Emacs.
@@ -44,6 +44,15 @@
   "Leuven theme options.
 The theme has to be reloaded after changing anything in this group."
   :group 'faces)
+
+(defcustom leuven-scale-org-document-title t
+  "Scale Org document title.
+This can be nil for unscaled, t for using the theme default, or a scaling
+number."
+  :type '(choice
+          (const :tag "Unscaled" nil)
+          (const :tag "Default provided by theme" t)
+          (number :tag "Set scaling")))
 
 (defcustom leuven-scale-outline-headlines t
   "Scale `outline' (and `org') level-1 headlines.
@@ -430,6 +439,36 @@ more...")
    `(company-scrollbar-bg ((,class (:background "#EBF4FE"))))
    `(company-scrollbar-fg ((,class (:background "#D1DAE4")))) ; Scrollbar (visible).
 
+   ;; Centaur Tabs
+   ;; With the addition of tab-mode, centaur tabs looks there first for how the tabline should look
+   (if (version<= "27.0" emacs-version)
+       `(tab-line ((t (:background ,"#5D6B99" :foreground ,"#5D6B99")))))
+   `(centaur-tabs-default ((t (:background ,"#335EA8" :foreground ,"#FFFFFF" :box nil))))
+   `(centaur-tabs-background-color ((t (:background ,"#5D6B99" :foreground ,"#5D6B99" :box nil))))
+   `(centaur-tabs-active-bar-face ((t (:background ,"#335EA8" :foreground ,"#FFFFFF"  :box nil))))
+   `(centaur-tabs-selected ((t (:foreground ,"#333333" :background ,"#F5CC84" :box nil))))
+   `(centaur-tabs-unselected ((t (:foreground ,"#FFFFFF" :background ,"#3B4F81" :box nil))))
+   `(centaur-tabs-selected-modified ((t (:foreground ,"#333333" :background ,"#F5CC84" :weight ,'bold :box nil))))
+   `(centaur-tabs-unselected-modified ((t (:foreground ,"#FFFFFF" :background ,"#3B4F81" :weight ,'bold :box nil))))
+   `(centaur-tabs-modified-marker-selected ((t (:foreground ,"#333333" :background ,"#F5CC84" :weight ,'bold :box nil))))
+   `(centaur-tabs-modified-marker-unselected ((t (:foreground ,"#FFFFFF" :background ,"#3B4F81" :weight ,'bold :box nil))))
+
+   ;; doom-modeline
+   `(doom-modeline-bar ((t (:background ,"#5D6B99"))))
+   `(doom-modeline-info ((t (:inherit ,'mode-line-emphasis))))
+   `(doom-modeline-urgent ((t (:inherit ,'mode-line-emphasis))))
+   `(doom-modeline-warning ((t (:inherit ,'mode-line-emphasis))))
+   `(doom-modeline-debug ((t (:inherit ,'mode-line-emphasis))))
+   `(doom-modeline-buffer-minor-mode ((t (:inherit ,'mode-line-emphasis :weight ,'bold))))
+   `(doom-modeline-project-dir ((t (:inherit ,'mode-line-emphasis :weight ,'bold))))
+   `(doom-modeline-project-parent-dir ((t (:inherit ,'mode-line-emphasis :weight ,'bold))))
+   `(doom-modeline-persp-name ((t (:inherit ,'mode-line-emphasis :weight ,'bold))))
+   `(doom-modeline-buffer-file ((t (:inherit ,'mode-line-emphasis :weight ,'bold))))
+   `(doom-modeline-buffer-modified ((t (:inherit ,'mode-line-emphasis :weight ,'bold))))
+   `(doom-modeline-lsp-success ((t (:inherit ,'mode-line-emphasis :weight ,'bold))))
+   `(doom-modeline-buffer-path ((t (:inherit ,'mode-line-emphasis :weight ,'bold))))
+   `(doom-modeline-buffer-project-root ((t (:inherit ,'mode-line-emphasis))))
+
    `(compare-windows ((,class (:background "#FFFF00"))))
    ;; `(completions-common-part ((,class (:foreground "red" :weight bold))))
    ;; `(completions-first-difference ((,class (:foreground "green" :weight bold))))
@@ -516,7 +555,6 @@ more...")
    `(diredp-ignored-file-name ((,class ,shadow)))
    `(diredp-read-priv ((,class (:background "#0A99FF"))))
    `(diredp-write-priv ((,class (:foreground "white" :background "#FF4040"))))
-   `(doom-modeline-panel ((,class (:foreground "#000000" :background "#FFF68F"))))
    `(eldoc-highlight-function-argument ((,class (:weight bold :foreground "red" :background "#FFE4FF"))))
    `(elfeed-search-filter-face ((,class (:foreground "gray"))))
    ;; `(eww-form-checkbox ((,class ())))
@@ -768,7 +806,7 @@ more...")
    `(org-dim ((,class (:foreground "#AAAAAA"))))
    `(org-document-info ((,class (:foreground "#484848"))))
    `(org-document-info-keyword ((,class (:foreground "#008ED1" :background "#EAEAFF"))))
-   `(org-document-title ((,class (:height 1.8 :weight bold :foreground "black"))))
+   `(org-document-title ((,class (,@(leuven-scale-font leuven-scale-org-document-title 1.8)  :weight bold :foreground "black"))))
    `(org-done ((,class (:weight bold :box (:line-width 1 :color "#BBBBBB") :foreground "#BBBBBB" :background "#F0F0F0"))))
    `(org-drawer ((,class (:weight bold :foreground "#00BB00" :background "#EAFFEA"))))
    `(org-ellipsis ((,class (:underline nil :foreground "#999999")))) ; #FFEE62

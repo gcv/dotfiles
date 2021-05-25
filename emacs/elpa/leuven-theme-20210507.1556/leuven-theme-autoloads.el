@@ -12,7 +12,7 @@
 
 (when (and (boundp 'custom-theme-load-path) load-file-name) (add-to-list 'custom-theme-load-path (file-name-as-directory (file-name-directory load-file-name))))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "leuven-dark-theme" '("leuven-dark")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "leuven-dark-theme" '("leuven-")))
 
 ;;;***
 
