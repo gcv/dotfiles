@@ -15,6 +15,12 @@ This option needs to be set before activating `selectrum-mode'.")
 
 (custom-autoload 'selectrum-complete-in-buffer "selectrum" t)
 
+(autoload 'selectrum-select-from-history "selectrum" "\
+Submit or insert candidate from minibuffer history.
+To insert the history item into the previous session use the
+binding for `selectrum-insert-current-candidate'. To submit the
+history item and exit use `selectrum-select-current-candidate'." t nil)
+
 (autoload 'selectrum-completing-read "selectrum" "\
 Read choice using Selectrum. Can be used as `completing-read-function'.
 For PROMPT, COLLECTION, PREDICATE, REQUIRE-MATCH, INITIAL-INPUT,
@@ -109,38 +115,6 @@ ARGS are standard as in all `:around' advice.
 Minor mode to use Selectrum for `completing-read'." :global t (if selectrum-mode (progn (selectrum-mode -1) (setq selectrum-mode t) (setq selectrum--old-completing-read-function (default-value 'completing-read-function)) (setq-default completing-read-function #'selectrum-completing-read) (setq selectrum--old-read-buffer-function (default-value 'read-buffer-function)) (setq-default read-buffer-function #'selectrum-read-buffer) (setq selectrum--old-read-file-name-function (default-value 'read-file-name-function)) (setq-default read-file-name-function #'selectrum-read-file-name) (setq selectrum--old-completion-in-region-function (default-value 'completion-in-region-function)) (when selectrum-complete-in-buffer (setq-default completion-in-region-function #'selectrum-completion-in-region)) (advice-add #'completing-read-multiple :override #'selectrum-completing-read-multiple) (advice-add 'dired-read-dir-and-switches :around #'selectrum--fix-dired-read-dir-and-switches) (advice-add 'read-library-name :override #'selectrum-read-library-name) (advice-add #'minibuffer-message :around #'selectrum--fix-minibuffer-message) (define-key minibuffer-local-map [remap previous-matching-history-element] 'selectrum-select-from-history)) (when (equal (default-value 'completing-read-function) #'selectrum-completing-read) (setq-default completing-read-function selectrum--old-completing-read-function)) (when (equal (default-value 'read-buffer-function) #'selectrum-read-buffer) (setq-default read-buffer-function selectrum--old-read-buffer-function)) (when (equal (default-value 'read-file-name-function) #'selectrum-read-file-name) (setq-default read-file-name-function selectrum--old-read-file-name-function)) (when (equal (default-value 'completion-in-region-function) #'selectrum-completion-in-region) (setq-default completion-in-region-function selectrum--old-completion-in-region-function)) (advice-remove #'completing-read-multiple #'selectrum-completing-read-multiple) (advice-remove 'dired-read-dir-and-switches #'selectrum--fix-dired-read-dir-and-switches) (advice-remove 'read-library-name #'selectrum-read-library-name) (advice-remove #'minibuffer-message #'selectrum--fix-minibuffer-message) (when (eq (lookup-key minibuffer-local-map [remap previous-matching-history-element]) #'selectrum-select-from-history) (define-key minibuffer-local-map [remap previous-matching-history-element] nil))))
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "selectrum" '("selectrum-")))
-
-;;;***
-
-;;;### (autoloads nil "selectrum-helm" "selectrum-helm.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from selectrum-helm.el
-
-(defvar selectrum-helm-mode nil "\
-Non-nil if Selectrum-Helm mode is enabled.
-See the `selectrum-helm-mode' command
-for a description of this minor mode.
-Setting this variable directly does not take effect;
-either customize it (see the info node `Easy Customization')
-or call the function `selectrum-helm-mode'.")
-
-(custom-autoload 'selectrum-helm-mode "selectrum-helm" nil)
-
-(autoload 'selectrum-helm-mode "selectrum-helm" "\
-Minor mode to use Selectrum to implement Helm commands.
-
-If called interactively, enable Selectrum-Helm mode if ARG is
-positive, and disable it if ARG is zero or negative.  If called
-from Lisp, also enable the mode if ARG is omitted or nil, and
-toggle it if ARG is `toggle'; disable the mode otherwise.
-
-\(fn &optional ARG)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "selectrum-helm" '("selectrum-helm--adapter")))
-
-;;;***
-
-;;;### (autoloads nil nil ("selectrum-pkg.el") (0 0 0 0))
 
 ;;;***
 
