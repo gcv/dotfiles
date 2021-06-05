@@ -8,7 +8,6 @@
 (use-package a)                          ; Clojure-style associative data
 (use-package async)
 (use-package dash)                       ; a modern list library
-(use-package dash-functional)
 (use-package f)                          ; file handling
 (use-package ht)                         ; hash tables
 (use-package map)                        ; a family of mapping functions
@@ -714,15 +713,6 @@
             (define-key olivetti-mode-map (kbd "H-o") '/hydra-olivetti/body)
 
             ))
-
-
-(use-package org-sidebar
-  :custom
-  (org-sidebar-jump-indirect nil)
-  (org-sidebar-tree-jump-fn #'org-sidebar-tree-jump-source))
-
-
-(use-package org-ql)
 
 
 (use-package origami
