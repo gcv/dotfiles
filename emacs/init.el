@@ -24,6 +24,7 @@
 (setq tags-revert-without-query t)                              ; minimize TAGS use annoyance
 (setq truncate-partial-width-windows nil)                       ; no more truncated lines
 (setq use-dialog-box nil)                                       ; turn off lame GUI dialogs
+(setq enable-remote-dir-locals t)                               ; use remote .dir-locals.el
 (setq-default indent-tabs-mode nil)                             ; replace tabs with spaces
 (setq-default fill-column 80)                                   ; 80-character screens, not 70
 
