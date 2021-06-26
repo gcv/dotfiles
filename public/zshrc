@@ -29,8 +29,8 @@ export DO_NOT_TRACK=1 # https://consoledonottrack.com
 if [[ -z "${NIX_PATH}" ]]; then
     [[ -e ~/.nix-defexpr ]] && export NIX_PATH=nixpkgs=${HOME}/.nix-defexpr/channels/nixpkgs
     [[ -e ~/.nix-profile ]] && export NIX_SSL_CERT_FILE=${HOME}/.nix-profile/etc/ssl/certs/ca-bundle.crt
-    [[ -e "/nix/var/nix/profiles/per-user/${USER}" ]] && export NIX_USER_PROFILE_DIR=/nix/var/nix/profiles/per-user/${USER}
 fi
+[[ -e "/nix/var/nix/profiles/per-user/${USER}" ]] && export NIX_USER_PROFILE_DIR=/nix/var/nix/profiles/per-user/${USER}
 
 
 ### Paths include locally-installed packages under ~/.local as symbolic links to
