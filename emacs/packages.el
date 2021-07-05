@@ -1100,7 +1100,6 @@
                   '("C-c" "C-x" "C-h" "M-x" "M-o" "C-o" "C-M-o" "C-v" "M-v" "C-y" "M-y"))
 
             (defun /vterm-mode-hook ()
-              (local-set-key (kbd "C-c C-t") 'vterm-copy-mode)      ; explicit
               (local-set-key (kbd "C-c C-z") 'flip-windows)
               (local-set-key (kbd "C-u") 'vterm--self-insert)
               (local-set-key (kbd "C-g") 'vterm--self-insert)
