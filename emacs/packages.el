@@ -1097,7 +1097,7 @@
             (setq vterm-min-window-width 20)
 
             (setq vterm-keymap-exceptions
-                  '("C-c" "C-x" "C-h" "M-x" "M-o" "C-v" "M-v" "C-y" "M-y"))
+                  '("C-c" "C-x" "C-h" "M-x" "M-o" "C-o" "C-M-o" "C-v" "M-v" "C-y" "M-y"))
 
             (defun /vterm-mode-hook ()
               (local-set-key (kbd "C-c C-z") 'flip-windows)
