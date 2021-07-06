@@ -606,6 +606,7 @@
     (setq dired-use-ls-dired t)))
 
 (defun /dired-mode-hook ()
+  (dired-hide-details-mode 1)
   (define-key dired-mode-map (kbd "<RET>")
     (lambda ()
       (interactive)
