@@ -6,8 +6,8 @@
 
 ;; Author: Natalie Weizenbaum <nex342@gmail.com>
 ;; URL: http://github.com/nex3/perspective-el
-;; Package-Version: 20210610.548
-;; Package-Commit: 68b13cef8435cae581850415cdda17e245dd0eae
+;; Package-Version: 20210706.1305
+;; Package-Commit: b847965128695ac6e18a7a218e6e2d2d5a1bd8c9
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
 ;; Version: 2.15
 ;; Created: 2008-03-05
@@ -878,6 +878,15 @@ perspective and no others are killed."
     ;; Don't let persp-last get set to the deleted persp.
     (persp-let-frame-parameters ((persp--last (persp-last)))
       (persp-switch (persp-find-some)))))
+
+(defun persp-kill-others ()
+  "Kill all perspectives except the current one."
+  (interactive)
+  (let ((self (persp-current-name)))
+    (when (yes-or-no-p (concat "Really kill all perspectives other than `" self "'? "))
+      (cl-loop for p in (persp-names)
+               when (not (string-equal p self)) do
+               (persp-kill p)))))
 
 (defun persp-rename (name)
   "Rename the current perspective to NAME."
