@@ -31,7 +31,7 @@ to perform almost all of their daily version control tasks directly from
 within Emacs.  While many fine Git clients exist, only Magit and Git
 itself deserve to be called porcelains.
 
-This manual is for Magit version 3.0.0.
+This manual is for Magit version 3.1.1.
 
      Copyright (C) 2015-2021 Jonas Bernoulli <jonas@bernoul.li>
 
@@ -319,6 +319,8 @@ FAQ - Issues and Errors
 * My Git hooks work on the command-line but not inside Magit::
 * git-commit-mode isn't used when committing from the command-line::
 * Point ends up inside invisible text when jumping to a file-visiting buffer::
+* I am unable to stage when using Tramp from MS Windows::
+* I am no longer able to save popup defaults::
 
 
 
@@ -3169,6 +3171,17 @@ File: magit.info,  Node: Log Buffer,  Next: Log Margin,  Prev: Refreshing Logs, 
      first parent, but a numeric prefix can be used to specify another
      parent.
 
+‘j’     (‘magit-log-move-to-revision’)
+
+     Read a revision and move to it in current log buffer.
+
+     If the chosen reference or revision isn’t being displayed in the
+     current log buffer, then inform the user about that and do nothing
+     else.
+
+     If invoked outside any log buffer, then display the log buffer of
+     the current repository first; creating it if necessary.
+
 ‘SPC’     (‘magit-diff-show-or-scroll-up’)
 
      Update the commit or diff buffer for the thing at point.
@@ -5169,7 +5182,7 @@ Also see *note (gitman)git-commit::.
      "instant" variants always require confirmation because making an
      error while using those is harder to recover from.
 
-   • User Option magit-post-commit-hook
+ -- User Option: magit-post-commit-hook
 
      Hook run after creating a commit without the user editing a
      message.
@@ -7731,67 +7744,4 @@ modules.
      being fetched in parallel.  Also fetch the super-repository,
      because ‘git fetch’ does not support not doing that.  With a prefix
      argument fetch all remotes.
-
-
-File: magit.info,  Node: Subtree,  Next: Worktree,  Prev: Submodules,  Up: Miscellaneous
-
-8.4 Subtree
-===========
-
-Also see *note (gitman)git-subtree::.
-
-‘O’     (‘magit-subtree’)
-
-     This transient prefix command binds the two sub-transients; one for
-     importing a subtree and one for exporting a subtree.
-
-‘O i’     (‘magit-subtree-import’)
-
-     This transient prefix command binds the following suffix commands
-     along with the appropriate infix arguments and displays them in a
-     temporary buffer until a suffix is invoked.
-
-     The suffixes of this command import subtrees.
-
-     If the ‘--prefix’ argument is set, then the suffix commands use
-     that prefix without prompting the user.  If it is unset, then they
-     read the prefix in the minibuffer.
-
-‘O i a’     (‘magit-subtree-add’)
-
-     This command adds COMMIT from REPOSITORY as a new subtree at
-     PREFIX.
-
-‘O i c’     (‘magit-subtree-add-commit’)
-
-     This command add COMMIT as a new subtree at PREFIX.
-
-‘O i m’     (‘magit-subtree-merge’)
-
-     This command merges COMMIT into the PREFIX subtree.
-
-‘O i f’     (‘magit-subtree-pull’)
-
-     This command pulls COMMIT from REPOSITORY into the PREFIX subtree.
-
-‘O e’     (‘magit-subtree-export’)
-
-     This transient prefix command binds the following suffix commands
-     along with the appropriate infix arguments and displays them in a
-     temporary buffer until a suffix is invoked.
-
-     The suffixes of this command export subtrees.
-
-     If the ‘--prefix’ argument is set, then the suffix commands use
-     that prefix without prompting the user.  If it is unset, then they
-     read the prefix in the minibuffer.
-
-‘O e p’     (‘magit-subtree-push’)
-
-     This command extract the history of the subtree PREFIX and pushes
-     it to REF on REPOSITORY.
-
-‘O e s’     (‘magit-subtree-split’)
-
-     This command extracts the history of the subtree PREFIX.
 

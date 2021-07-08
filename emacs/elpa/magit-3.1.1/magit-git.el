@@ -70,12 +70,12 @@
 (defvar magit-inhibit-libgit nil
   "Whether to inhibit the use of libgit.")
 
-(defvar magit--libgit-available-p eieio-unbound
+(defvar magit--libgit-available-p 'unknown
   "Whether libgit is available.
 Use the function by the same name instead of this variable.")
 
 (defun magit--libgit-available-p ()
-  (if (eq magit--libgit-available-p eieio-unbound)
+  (if (eq magit--libgit-available-p 'unknown)
       (setq magit--libgit-available-p
             (and module-file-suffix
                  (let ((libgit (locate-library "libgit")))
@@ -222,6 +222,20 @@ that change the upstream and many that create new branches."
   :package-version '(magit . "2.4.2")
   :group 'magit-commands
   :type 'boolean)
+
+(defcustom magit-list-refs-namespaces
+  '("refs/heads"
+    "refs/remotes"
+    "refs/tags"
+    "refs/pullreqs")
+  "List of ref namespaces considered when reading a ref.
+
+This controls the order of refs returned by `magit-list-refs',
+which is called by functions like `magit-list-branch-names' to
+generate the collection of refs."
+  :package-version '(magit . "3.1.0")
+  :group 'magit-commands
+  :type '(repeat string))
 
 (defcustom magit-list-refs-sortby nil
   "How to sort the ref collection in the prompt.
@@ -538,8 +552,8 @@ call function WASHER with ARGS as its sole argument."
   (gethash
    ;; `git config --list' downcases first and last components of the key.
    (--> key
-        (replace-regexp-in-string "\\`[^.]+" #'downcase it t t)
-        (replace-regexp-in-string "[^.]+\\'" #'downcase it t t))
+     (replace-regexp-in-string "\\`[^.]+" #'downcase it t t)
+     (replace-regexp-in-string "[^.]+\\'" #'downcase it t t))
    (magit--with-refresh-cache (cons (magit-toplevel) 'config)
      (let ((configs (make-hash-table :test 'equal)))
        (dolist (conf (magit-git-items "config" "--list" "-z"))
@@ -1201,9 +1215,11 @@ Git."
          (substring it 8))))
 
 (defun magit-name-tag (rev &optional lax)
-  (--when-let (magit-rev-name rev "refs/tags/*")
-    (and (or lax (not (string-match-p "[~^]" it)))
-         (substring it 5))))
+  (when-let ((name (magit-rev-name rev "refs/tags/*")))
+    (when (string-suffix-p "^0" name)
+      (setq name (substring name 0 -2)))
+    (and (or lax (not (string-match-p "[~^]" name)))
+         (substring name 5))))
 
 (defun magit-ref-abbrev (refname)
   "Return an unambiguous abbreviation of REFNAME."
@@ -1609,9 +1625,6 @@ where COMMITS is the number of commits in TAG but not in REV."
               (list it (car (magit-rev-diff-count it rev)))
             it))))))
 
-(defvar magit-list-refs-namespaces
-  '("refs/heads" "refs/remotes" "refs/tags" "refs/pull"))
-
 (defun magit-list-refs (&optional namespaces format sortby)
   "Return list of references.
 
@@ -1671,7 +1684,7 @@ SORTBY is a key or list of keys to pass to the `--sort' flag of
 
 (defun magit-list-branches-pointing-at (commit)
   (let ((re (format "\\`%s refs/\\(heads\\|remotes\\)/\\(.*\\)\\'"
-                   (magit-rev-verify commit))))
+                    (magit-rev-verify commit))))
     (--keep (and (string-match re it)
                  (let ((name (match-string 2 it)))
                    (and (not (string-suffix-p "HEAD" name))
@@ -2183,10 +2196,11 @@ and this option only controls what face is used.")
        (magit-get-current-branch))))
 
 (defun magit-read-range (prompt &optional default)
-  (magit-completing-read-multiple prompt
-                                  (magit-list-refnames)
-                                  "\\.\\.\\.?"
-                                  default 'magit-revision-history))
+  (let ((crm-separator "\\.\\.\\.?"))
+    (magit-completing-read-multiple*
+     (concat prompt ": ")
+     (magit-list-refnames)
+     nil nil nil 'magit-revision-history default nil t)))
 
 (defun magit-read-remote-branch
     (prompt &optional remote default local-branch require-match)
@@ -2225,7 +2239,7 @@ and this option only controls what face is used.")
     (or (magit-completing-read prompt choices
                                nil nil nil 'magit-revision-history
                                (or (magit-local-branch-at-point) commit))
-                     (user-error "Nothing selected"))))
+        (user-error "Nothing selected"))))
 
 (defun magit-read-local-branch-or-ref (prompt &optional secondary-default)
   (magit-completing-read prompt (nconc (magit-list-local-branch-names)
