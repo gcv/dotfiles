@@ -50,7 +50,7 @@ versions), not `font-lock-face' - do not change the value.")
 
 (custom-autoload 'hlt-face-prop "highlight" t)
 
-(defvar hlt-line-dups-ignore-regexp "[ 	]*" "\
+(defvar hlt-line-dups-ignore-regexp "[ \11]*" "\
 Regexp to ignore leading and trailing text for duplicate lines.
 Or nil if no such text is to be ignored.
 Used by `hlt-highlight-line-dups-region' to determine whether two
@@ -145,14 +145,10 @@ erase the face represented by the Nth entry of
 \(fn START-EVENT &optional FACE-NB)" t nil)
 
 (autoload 'hlt-highlighter-mouse "highlight" "\
-Same as `hlt-highlighter', but for binding to a menu item.
-
-\(fn)" t nil)
+Same as `hlt-highlighter', but for binding to a menu item." t nil)
 
 (autoload 'hlt-eraser-mouse "highlight" "\
-Same as `hlt-eraser', but for binding to a menu item.
-
-\(fn)" t nil)
+Same as `hlt-eraser', but for binding to a menu item." t nil)
 
 (autoload 'hlt-highlight "highlight" "\
 Highlight or unhighlight.
@@ -530,9 +526,7 @@ Optional arg MSGP non-nil means display a progress message.
 (autoload 'hlt-toggle-use-overlays-flag "highlight" "\
 Toggle `hlt-use-overlays-flag'.
 If the current value is non-nil, it is set to nil.
-If the current value is nil, it is set to the last non-nil value.
-
-\(fn)" t nil)
+If the current value is nil, it is set to the last non-nil value." t nil)
 
 (defalias 'hlt-paste-props 'hlt-yank-props)
 
