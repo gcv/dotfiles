@@ -8612,7 +8612,7 @@ node are given relative start positions and correct lengths."
     (aset parsers js2-FOR       #'js2-parse-for)
     (aset parsers js2-FUNCTION  #'js2-parse-function-stmt)
     (aset parsers js2-IF        #'js2-parse-if)
-    (aset parsers js2-IMPORT    #'js2-parse-import)
+    (aset parsers js2-IMPORT    #'js2-parse-import-declaration-or-expr)
     (aset parsers js2-LC        #'js2-parse-block)
     (aset parsers js2-LET       #'js2-parse-let-stmt)
     (aset parsers js2-NAME      #'js2-parse-name-or-label)
@@ -8741,6 +8741,11 @@ Return value is a list (EXPR LP RP), with absolute paren positions."
                                :rp (js2-relpos (cl-third cond) pos)))
     (js2-node-add-children pn (car cond) if-true if-false)
     pn))
+
+(defun js2-parse-import-declaration-or-expr ()
+  (if (memq (js2-peek-token) `(,js2-LP ,js2-DOT))
+      (js2-parse-expr-stmt)
+    (js2-parse-import)))
 
 (defun js2-parse-import ()
   "Parse import statement. The current token must be js2-IMPORT."
@@ -9892,15 +9897,20 @@ If NODE is non-nil, it is the AST node associated with the symbol."
     (while (and (not oneshot)
                 (js2-match-token js2-COMMA))
       (setq op-pos (- (js2-current-token-beg) pos))  ; relative
-      (setq right (js2-parse-assign-expr)
-            left pn
-            pn (make-js2-infix-node :type js2-COMMA
-                                    :pos pos
-                                    :len (- js2-ts-cursor pos)
-                                    :op-pos op-pos
-                                    :left left
-                                    :right right))
-      (js2-node-add-children pn left right))
+      (if (eq (js2-peek-token) js2-RP)
+          ;; Stop the parser from scanning too far: it's actually
+          ;; valid syntax in arrow fun arguments, and we don't want
+          ;; the RP token to get consumed.
+          (js2-report-error "msg.syntax")
+        (setq right (js2-parse-assign-expr)
+              left pn
+              pn (make-js2-infix-node :type js2-COMMA
+                                      :pos pos
+                                      :len (- js2-ts-cursor pos)
+                                      :op-pos op-pos
+                                      :left left
+                                      :right right))
+        (js2-node-add-children pn left right)))
     pn))
 
 (defun js2-parse-assign-expr ()
@@ -10646,6 +10656,8 @@ array-literals, array comprehensions and regular expressions."
       (js2-parse-attribute-access))
      ((= tt js2-NAME)
       (js2-parse-name tt))
+     ((= tt js2-IMPORT)
+      (js2-create-name-node nil nil "import"))
      ((= tt js2-NUMBER)
       (setq node (make-js2-number-node))
       (when (and js2-in-use-strict-directive

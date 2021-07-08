@@ -1,7 +1,7 @@
-(define-package "js2-mode" "20210414.2241" "Improved JavaScript editing mode"
+(define-package "js2-mode" "20210622.102" "Improved JavaScript editing mode"
   '((emacs "24.1")
     (cl-lib "0.5"))
-  :commit "b891edecedf30be6321e2f109fdfeb25b0edad27" :authors
+  :commit "4eaf98e3cc3789381a37a05cd70a248db9ac8c1b" :authors
   '(("Steve Yegge" . "steve.yegge@gmail.com")
     ("mooz" . "stillpedant@gmail.com")
     ("Dmitry Gutov" . "dgutov@yandex.ru"))
