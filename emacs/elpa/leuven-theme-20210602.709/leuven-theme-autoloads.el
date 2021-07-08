@@ -19,6 +19,12 @@
 ;;;### (autoloads nil "leuven-theme" "leuven-theme.el" (0 0 0 0))
 ;;; Generated autoloads from leuven-theme.el
 
+(autoload 'leuven-scale-font "leuven-theme" "\
+Function for splicing optional font heights into face descriptions.
+CONTROL can be a number, nil, or t.  When t, use DEFAULT-HEIGHT.
+
+\(fn CONTROL DEFAULT-HEIGHT)" nil nil)
+
 (when (and (boundp 'custom-theme-load-path) load-file-name) (add-to-list 'custom-theme-load-path (file-name-as-directory (file-name-directory load-file-name))))
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "leuven-theme" '("leuven")))
