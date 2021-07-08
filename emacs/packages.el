@@ -259,6 +259,10 @@
 ;;             ))
 
 
+;; gopher and gemini client
+(use-package elpher)
+
+
 (use-package eshell-autojump
   :defer t)
 
