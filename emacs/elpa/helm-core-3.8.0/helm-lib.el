@@ -47,6 +47,9 @@
 (declare-function org-content "org.el")
 (declare-function org-mark-ring-goto "org.el")
 (declare-function org-mark-ring-push "org.el")
+(declare-function org-table-p "org-compat.el")
+(declare-function org-table-align "org-table.el")
+(declare-function org-table-end "org-table.el")
 (declare-function org-open-at-point "org.el")
 (declare-function wdired-change-to-dired-mode "wdired.el")
 (declare-function wdired-do-perm-changes "wdired.el")
@@ -392,15 +395,18 @@ available APPEND is ignored."
 
 ;;; Command loop helper
 ;;
+(defconst helm-this-command-black-list
+  '(helm-maybe-exit-minibuffer
+    helm-confirm-and-exit-minibuffer
+    helm-exit-minibuffer
+    exit-minibuffer
+    helm-M-x))
+
 (defun helm-this-command ()
   "Return the actual command in action.
 Like `this-command' but return the real command, and not
 `exit-minibuffer' or other unwanted functions."
-  (cl-loop with bl = '(helm-maybe-exit-minibuffer
-                       helm-confirm-and-exit-minibuffer
-                       helm-exit-minibuffer
-                       exit-minibuffer)
-           for count from 1 to 50
+  (cl-loop for count from 1 to 50
            for btf = (backtrace-frame count)
            for fn = (cl-second btf)
            if (and
@@ -409,7 +415,7 @@ Like `this-command' but return the real command, and not
                ;; ignore it (Bug#691).
                (symbolp fn)
                (commandp fn)
-               (not (memq fn bl)))
+               (not (memq fn helm-this-command-black-list)))
            return fn
            else
            if (and (eq fn 'call-interactively)
@@ -646,9 +652,14 @@ displayed in BUFNAME."
              (when helm-help-full-frame (delete-other-windows))
              (delete-region (point-min) (point-max))
              (org-mode)
-             (org-mark-ring-push) ; Put mark at bob
              (save-excursion
-               (funcall insert-content-fn))
+               (funcall insert-content-fn)
+               (goto-char (point-min))
+               (while (re-search-forward "^[|]" nil t)
+                 (when (org-table-p t)
+                   (org-table-align)
+                   (goto-char (org-table-end)))))
+             (org-mark-ring-push) ; Put mark at bob
              (buffer-disable-undo)
              (helm-help-event-loop))
         (raise-frame hframe)
@@ -788,21 +799,22 @@ See `helm-help-hkmap' for supported keys and functions."
 
 ;;; List processing
 ;;
-(defun helm-flatten-list (seq &optional omit-nulls)
-  "Return a list of all single elements of sublists in SEQ."
+(defun helm-flatten-list (seq)
+  "Return a list of all single elements of sublists in SEQ.
+
+    Example:
+    (helm-flatten-list '(1 (2 . 3) nil (4 5 (6) 7) 8 (9 . 10)))
+    => (1 2 3 4 5 6 7 8 9 10)"
   (let (result)
-    (cl-labels ((flatten (seq)
-                  (cl-loop
-                        for elm in seq
-                        if (and (or elm
-                                    (null omit-nulls))
-                                (or (atom elm)
-                                    (functionp elm)
-                                    (and (consp elm)
-                                         (cdr elm)
-                                         (atom (cdr elm)))))
-                        do (push elm result)
-                        else do (flatten elm))))
+    (cl-labels ((flatten
+                 (seq)
+                 (cl-loop for elm in seq
+                          if (consp elm)
+                          do (flatten
+                              (if (atom (cdr elm))
+                                  (list (car elm) (cdr elm))
+                                elm))
+                          else do (and elm (push elm result)))))
       (flatten seq))
     (nreverse result)))
 
@@ -1741,7 +1753,6 @@ broken."
    '(("(\\<\\(with-helm-after-update-hook\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(with-helm-temp-hook\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(with-helm-window\\)\\>" 1 font-lock-keyword-face)
-     ("(\\<\\(with-helm-quittable\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(with-helm-current-buffer\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(with-helm-buffer\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(with-helm-show-completion\\)\\>" 1 font-lock-keyword-face)
@@ -1757,11 +1768,5 @@ broken."
      ("(\\<\\(helm-read-answer\\)\\>" 1 font-lock-keyword-face))))
 
 (provide 'helm-lib)
-
-;; Local Variables:
-;; byte-compile-warnings: (not obsolete)
-;; coding: utf-8
-;; indent-tabs-mode: nil
-;; End:
 
 ;;; helm-lib ends here
