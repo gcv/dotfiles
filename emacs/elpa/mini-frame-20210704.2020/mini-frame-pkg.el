@@ -1,0 +1,2 @@
+;;; Generated package description from mini-frame.el  -*- no-byte-compile: t -*-
+(define-package "mini-frame" "20210704.2020" "Show minibuffer in child frame on read-from-minibuffer" '((emacs "26.1")) :commit "50fc66655bca819b56100212bc7b8535c76570e0" :authors '(("Andrii Kolomoiets" . "andreyk.mad@gmail.com")) :maintainer '("Andrii Kolomoiets" . "andreyk.mad@gmail.com") :keywords '("frames") :url "https://github.com/muffinmad/emacs-mini-frame")
