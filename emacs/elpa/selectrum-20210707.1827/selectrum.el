@@ -6,8 +6,8 @@
 ;; Created: 8 Dec 2019
 ;; Homepage: https://github.com/raxod502/selectrum
 ;; Keywords: extensions
-;; Package-Version: 20210520.1825
-;; Package-Commit: a922b19f715ad6d046072a35a3df5ac5e4ed73d3
+;; Package-Version: 20210707.1827
+;; Package-Commit: 48ea51aa5b6959ea2a134e36cd21f727047b0677
 ;; Package-Requires: ((emacs "26.1"))
 ;; SPDX-License-Identifier: MIT
 ;; Version: 3.1
@@ -1983,7 +1983,7 @@ plus CANDIDATE."
                   candidate)
                  (selectrum--get-full candidate))))
          (inhibit-read-only t))
-    (erase-buffer)
+    (delete-minibuffer-contents)
     (insert (if (string-empty-p result)
                 (or selectrum--default-candidate result)
               result))
@@ -2336,7 +2336,7 @@ locally in the minibuffer."
               (read-from-minibuffer
                prompt initial-input selectrum-minibuffer-map nil
                (or history 'minibuffer-history) default-candidate)))))
-    (cond (minibuffer-completion-table
+    (cond (mc-table
            ;; Behave like completing-read-default which strips the
            ;; text properties but leaves the default unchanged
            ;; when submitting the empty prompt to get it (see
