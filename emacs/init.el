@@ -347,14 +347,16 @@
 
 
 ;;; fix window splitting behavior when possible
-(setq even-window-sizes nil)                 ; display-buffer: avoid resizing
 (setq window-resize-pixelwise t)             ; smoother window resizing?
-(setq split-height-threshold 15)             ; for rare occasions
 
-(setq display-buffer-alist
-      '((".*"
-         (display-buffer-reuse-window display-buffer-same-window)
-         (reusable-frames . t))))
+;; display-buffer customization; note that this formerly changed
+;; display-buffer-alist, but this is deemed too aggressive
+;; (https://debbugs.gnu.org/cgi/bugreport.cgi?bug=49069#28)
+(customize-set-variable 'even-window-sizes nil)     ; avoid resizing
+(customize-set-variable 'split-height-threshold 15) ; for rare occasions
+(customize-set-variable 'display-buffer-base-action
+  '((display-buffer-reuse-window display-buffer-same-window)
+    (reusable-frames . t)))
 
 (winner-mode 1)                              ; restore windows: C-c right-arrow
 (windmove-default-keybindings)               ; shift-arrow keys switch windows

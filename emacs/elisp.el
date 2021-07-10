@@ -3,6 +3,7 @@
 (put 'use-package 'lisp-indent-function 1)
 (put 'cl-flet 'lisp-indent-function 1)
 (put 'cl-labels 'lisp-indent-function 1)
+(put 'customize-set-variable 'lisp-indent-function 1)
 
 
 (diminish 'eldoc-mode)
