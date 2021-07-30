@@ -159,6 +159,14 @@
   :defer t)
 
 
+(use-package company-quickhelp
+  :pin melpa
+  :defer t
+  :config (progn
+            ;;(company-quickhelp-mode 1)
+            ))
+
+
 (use-package company-terraform
   :defer t)
 
@@ -525,6 +533,8 @@
 (use-package julia-snail
   ;;:load-path "~/Code/julia-snail"
   :pin melpa
+  :custom
+  (julia-snail-company-doc-enable nil)
   :hook (julia-mode . julia-snail-mode))
 
 
