@@ -29,7 +29,7 @@
 
 
 (use-package adoc-mode
-  :mode "\\.adoc$"
+  :mode "\\.\\(adoc\\|asciidoc\\)$"
   :config (progn
 
             (defun /adoc-mode-hook ()
