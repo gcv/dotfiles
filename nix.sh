@@ -43,6 +43,7 @@ nix-env -i \
     magic-wormhole \
     mosh \
     nmap \
+    notmuch \
     offlineimap \
     pandoc \
     password-store \
