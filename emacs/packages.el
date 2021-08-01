@@ -668,6 +668,11 @@
   :defer t)
 
 
+;; mail client
+(use-package notmuch
+  :defer t)
+
+
 ;; turn on when built-in Org dependency is up-to-date
 ;;(use-package ob-async)
 
