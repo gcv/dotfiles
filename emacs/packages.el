@@ -879,6 +879,11 @@
   :defer t)
 
 
+(use-package posframe
+  :pin melpa
+  :defer t)
+
+
 (use-package prescient
   :pin melpa
   :defer t
