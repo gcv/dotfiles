@@ -305,6 +305,8 @@
         ;; replace selection in history with key
         (setf (car imenu--history-list) key)))))
 
+(global-set-key (kbd "M-i") 'imenu-cr)
+
 
 (defun what-face (pos)
   (interactive "d")
