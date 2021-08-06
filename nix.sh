@@ -51,6 +51,7 @@ nix-env -i \
     pv \
     rclone \
     restic \
+    ripgrep \
     rlwrap \
     silver-searcher \
     tectonic \
