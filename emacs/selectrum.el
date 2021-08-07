@@ -66,12 +66,19 @@
   :pin melpa
   ;; Either bind `marginalia-cycle` globally or only in the minibuffer
   :bind (:map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
+         ("C-'" . marginalia-cycle))
 
   :init                                 ; not lazy
   ;; Must be in the :init section of use-package such that the mode gets
   ;; enabled right away. Note that this forces loading the package.
-  (marginalia-mode)
+  (marginalia-mode 1)
+
+  :config
+  (defun /marginalia-cycle ()
+    (let ((inhibit-message t))
+      (customize-save-variable 'marginalia-annotator-registry
+                               marginalia-annotator-registry)))
+  (advice-add #'marginalia-cycle :after #'/marginalia-cycle)
   )
 
 
@@ -107,13 +114,12 @@
     (define-key map (kbd "C-x C-M-f") #'selective-selectrum-find-file)
     map))
 
-;; XXX: consult-* commands die when called with M-x. This seems to be a
-;; mini-frame-mode bug.
 (define-minor-mode selective-selectrum-mode
   "Selectively enable Selectrum or mini-frame-mode for some commands."
+  :global t
   :init-value nil
   :lighter nil
-  :keymap 'selective-selectrum-mode-map
+  :keymap selective-selectrum-mode-map
   (if selective-selectrum-mode
       ;; enable
       (progn
@@ -121,19 +127,21 @@
         (advice-add 'read-extended-command :around #'selective-selectrum-mini-frame)
         (advice-add 'selective-selectrum-find-file :around #'selective-selectrum-base)
         (advice-add 'selective-selectrum-find-file :around #'selective-selectrum-mini-frame)
+        (advice-add 'imenu-cr :around #'selective-selectrum-base)
+        (advice-add 'imenu-cr :around #'selective-selectrum-mini-frame)
+        ;; XXX: consult-* commands die when called with M-x. This seems to be a
+        ;; mini-frame-mode bug. They do, however, require Consult.
         (cl-loop for sym the symbols of obarray
                  if (and (string-prefix-p "consult-" (symbol-name sym))
                          (not (string-match-p "--" (symbol-name sym))))
-                 do (advice-add sym :around #'selective-selectrum-base))
-        (advice-add 'imenu-cr :around #'selective-selectrum-base)
-        (advice-add 'imenu-cr :around #'selective-selectrum-mini-frame))
+                 do (advice-add sym :around #'selective-selectrum-base)))
     ;; disable
-    (advice-remove 'imenu-cr #'selective-selectrum-mini-frame)
-    (advice-remove 'imenu-cr #'selective-selectrum-base)
     (cl-loop for sym the symbols of obarray
              if (and (string-prefix-p "consult-" (symbol-name sym))
                      (not (string-match-p "--" (symbol-name sym))))
              do (advice-remove sym #'selective-selectrum-base))
+    (advice-remove 'imenu-cr #'selective-selectrum-mini-frame)
+    (advice-remove 'imenu-cr #'selective-selectrum-base)
     (advice-remove 'selective-selectrum-find-file #'selective-selectrum-mini-frame)
     (advice-remove 'selective-selectrum-find-file #'selective-selectrum-base)
     (advice-remove 'read-extended-command #'selective-selectrum-mini-frame)
