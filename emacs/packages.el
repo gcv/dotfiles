@@ -742,6 +742,10 @@
   :defer t)
 
 
+(use-package pandoc-mode
+  :defer t)
+
+
 (use-package paredit
   :defer t
   :diminish " π"
