@@ -64,9 +64,10 @@
 
 (use-package marginalia
   :pin melpa
-  ;; Either bind `marginalia-cycle` globally or only in the minibuffer
-  :bind (:map minibuffer-local-map
-         ("C-'" . marginalia-cycle))
+
+  :bind
+  (:map minibuffer-local-map
+        ("C-'" . marginalia-cycle))
 
   :init                                 ; not lazy
   ;; Must be in the :init section of use-package such that the mode gets
