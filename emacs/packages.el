@@ -581,6 +581,12 @@
             ))
 
 
+(use-package markdown-toc
+  :defer t
+  :custom
+  (markdown-toc-header-toc-title ""))
+
+
 (use-package material-theme
   :defer t)
 
