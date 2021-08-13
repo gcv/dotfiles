@@ -663,47 +663,23 @@
 ;;; Olivetti.
 (use-package olivetti
   :defer t
-  :config (progn
+  :custom
+  (olivetti-body-width 0.9)
 
-            (setq-default olivetti-body-width 90)
-
-            (defun olivetti-reset-width ()
-              (interactive)
-              (when (and (-contains? minor-mode-list 'olivetti-mode)
-                         (symbol-value 'olivetti-mode))
-                (let ((orig-width olivetti-body-width))
-                  (olivetti-set-width 1.0)
-                  (olivetti-set-width orig-width))
-                (message "olivetti width reset")))
-
-            (defun /olivetti-mode-hook ()
-              (setq right-fringe-width 0
-                    left-fringe-width 0)
-              (set-window-buffer (frame-selected-window) (current-buffer)))
-
-            (add-hook 'olivetti-mode-hook #'/olivetti-mode-hook)
-
-            (defun /olivetti-mode-reset (&optional arg)
-              (if (symbol-value 'olivetti-mode)
-                  (olivetti-set-width (default-value 'olivetti-body-width))
-                (olivetti-set-width 1.0)))
-
-            (advice-add 'olivetti-mode :after #'/olivetti-mode-reset)
-
-            (defhydra /hydra-olivetti (:color red)
-              "
+  :config
+  (defhydra /hydra-olivetti (:color red)
+    "
   _r_eset    _s_et width    _<left>_ shrink    _<right>_ expand   _<return>_ exit
   "
-              ("r" olivetti-reset-width)
-              ("s" olivetti-set-width)
-              ("<left>" olivetti-shrink)
-              ("<right>" olivetti-expand)
-              ("<return>" keyboard-quit :color blue)
-              )
+    ("r" olivetti-reset-width)
+    ("s" olivetti-set-width)
+    ("<left>" olivetti-shrink)
+    ("<right>" olivetti-expand)
+    ("<return>" keyboard-quit :color blue)
+    )
 
-            (define-key olivetti-mode-map (kbd "H-o") '/hydra-olivetti/body)
-
-            ))
+  (define-key olivetti-mode-map (kbd "H-o") '/hydra-olivetti/body)
+  )
 
 
 (use-package origami
