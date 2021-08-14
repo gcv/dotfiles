@@ -6,10 +6,10 @@
 
 ;; Author: Natalie Weizenbaum <nex342@gmail.com>
 ;; URL: http://github.com/nex3/perspective-el
-;; Package-Version: 20210706.1305
-;; Package-Commit: b847965128695ac6e18a7a218e6e2d2d5a1bd8c9
+;; Package-Version: 20210812.319
+;; Package-Commit: bf3f4c8cc9ae26573f39be026e8c5e994c14da63
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
-;; Version: 2.15
+;; Version: 2.16
 ;; Created: 2008-03-05
 ;; By: Natalie Weizenbaum <nex342@gmail.com>
 ;; Keywords: workspace, convenience, frames
@@ -1103,10 +1103,11 @@ named collections of buffers and window configurations."
     (setq read-buffer-function nil)
     (set-frame-parameter nil 'persp--hash nil)
     (setq global-mode-string (delete '(:eval (persp-mode-line)) global-mode-string))
-    (set-default 'header-line-format (delete '(:eval (persp-mode-line)) header-line-format))
-    (unless (delete "" header-line-format)
-      ;; need to set header-line-format to nil to completely remove the header from the buffer
-      (set-default 'header-line-format nil))))
+    (let ((default-header-line-format (default-value 'header-line-format)))
+      (set-default 'header-line-format (delete '(:eval (persp-mode-line)) default-header-line-format))
+      (unless (delete "" default-header-line-format)
+        ;; need to set header-line-format to nil to completely remove the header from the buffer
+        (set-default 'header-line-format nil)))))
 
 (defun persp-init-frame (frame)
   "Initialize the perspectives system in FRAME.
@@ -1340,50 +1341,41 @@ PERSP-SET-IDO-BUFFERS)."
         (ibuffer))
     (ibuffer)))
 
-(defun persp--switch-buffer-ivy-counsel-helper (arg ivy-params fallback)
+;; Buffer switching integration: Ivy.
+;;
+;; An alternative implementation, which has the drawback of not allowing a
+;; prefix argument to list all buffers:
+;;
+;; (defun persp-ivy-read-advice (args)
+;;   (append args
+;;           (list :predicate
+;;                 (lambda (b) (persp-is-current-buffer (cdr b))))))
+;; (advice-add 'ivy-read :filter-args #'persp-ivy-read-advice)
+;; (advice-remove 'ivy-read #'persp-ivy-read-advice)
+
+(defun persp--switch-buffer-ivy-counsel-helper (arg fallback)
   (unless (featurep 'ivy)
     (user-error "Ivy not loaded"))
-  (defvar ivy-switch-buffer-map)
   (declare-function ivy-read "ivy.el")
-  (declare-function ivy-switch-buffer "ivy.el")
-  (declare-function ivy--switch-buffer-matcher "ivy.el")
-  (declare-function ivy--switch-buffer-action "ivy.el")
   (if (and persp-mode (null arg))
-      (apply #'ivy-read
-             (append
-              (list
-               (format "Switch to buffer (%s): " (persp-current-name))
-               (cl-remove-if #'null (mapcar #'buffer-name
-                                            ;; buffer-list is ordered by access time
-                                            ;; seq-intersection keeps the order
-                                            (seq-intersection (buffer-list)
-                                                              (persp-current-buffers))))
-               :preselect (buffer-name (persp-other-buffer (current-buffer)))
-               :keymap ivy-switch-buffer-map
-               :caller #'ivy-switch-buffer
-               :action #'ivy--switch-buffer-action
-               :matcher #'ivy--switch-buffer-matcher)
-              ivy-params))
+      (let ((real-ivy-read (symbol-function 'ivy-read)))
+        (cl-letf (((symbol-function 'ivy-read)
+                   (lambda (&rest args)
+                     (apply real-ivy-read
+                            (append args
+                                    (list :predicate
+                                          (lambda (b)
+                                            (persp-is-current-buffer (cdr b)))))))))
+          (funcall fallback)))
     (funcall fallback)))
 
-;; Buffer switching integration: Ivy.
 ;;;###autoload
 (defun persp-ivy-switch-buffer (arg)
   "A version of `ivy-switch-buffer' which respects perspectives."
   (interactive "P")
   (declare-function ivy-switch-buffer "ivy.el")
-  (declare-function ivy--buffer-list "ivy.el")
-  (let ((saved-ivy-buffer-list (symbol-function 'ivy--buffer-list))
-        (temp-ivy-buffer-list (lambda (_str &optional _virtual _predicate)
-                                (persp-current-buffer-names))))
-    (unwind-protect
-        (progn
-          (when (and persp-mode (null arg))
-            (setf (symbol-function 'ivy--buffer-list) temp-ivy-buffer-list))
-          (persp--switch-buffer-ivy-counsel-helper arg nil #'ivy-switch-buffer))
-      (setf (symbol-function 'ivy--buffer-list) saved-ivy-buffer-list))))
+  (persp--switch-buffer-ivy-counsel-helper arg #'ivy-switch-buffer))
 
-;; Buffer switching integration: Counsel.
 ;;;###autoload
 (defun persp-counsel-switch-buffer (arg)
   "A version of `counsel-switch-buffer' which respects perspectives."
@@ -1391,12 +1383,7 @@ PERSP-SET-IDO-BUFFERS)."
   (unless (featurep 'counsel)
     (user-error "Counsel not loaded"))
   (declare-function counsel-switch-buffer "counsel.el")
-  (declare-function counsel--switch-buffer-unwind "counsel.el")
-  (declare-function counsel--switch-buffer-update-fn "counsel.el")
-  (persp--switch-buffer-ivy-counsel-helper arg
-                                           (list :unwind #'counsel--switch-buffer-unwind
-                                                 :update-fn #'counsel--switch-buffer-update-fn)
-                                           #'counsel-switch-buffer))
+  (persp--switch-buffer-ivy-counsel-helper arg #'counsel-switch-buffer))
 
 
 ;;; --- durability implementation (persp-state-save and persp-state-load)
