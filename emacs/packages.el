@@ -273,11 +273,6 @@
   )
 
 
-(use-package fennel-mode
-  :pin melpa
-  :mode "\\.fnl$")
-
-
 (use-package flycheck
   :pin melpa)
 
