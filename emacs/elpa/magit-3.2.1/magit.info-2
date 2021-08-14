@@ -933,14 +933,6 @@ the faster ‘vfork’ will be used.  (The creation of child processes still
 takes about twice as long on Darwin compared to Linux.)  See (1) for
 more information.
 
-   On Catalina, and potentially other macOS releases, there may be a
-performance problem where any action takes 20 times longer on Darwin
-than on Linux.  This can be worked around by setting
-‘magit-git-executable’ to the absolute path of the ‘git’ executable,
-instead of relying on resolving the ‘$PATH’.  You should not do that if
-you want to use Magit on remote machines using Tramp and if ‘git’ is not
-installed in the same location on those machines.
-
    ---------- Footnotes ----------
 
    (1) 
@@ -965,7 +957,7 @@ File: magit.info,  Node: Default Bindings,  Prev: Performance,  Up: Essential Se
      ‘C-x M-g’   ‘magit-dispatch’
      ‘C-c M-g’   ‘magit-file-dispatch’
 
-     These bindings may be added when ‘after-init-hook’ is called.  Each
+     These bindings may be added when ‘after-init-hook’ is run.  Each
      binding is added if and only if at that time no other key is bound
      to the same command and no other command is bound to the same key.
      In other words we try to avoid adding bindings that are
@@ -977,8 +969,14 @@ File: magit.info,  Node: Default Bindings,  Prev: Performance,  Up: Essential Se
      or autoloaded) and to increase the likelihood that all the
      potentially conflicting user bindings have already been added.
 
-     Setting this variable after the hook has already been called has no
-     effect.
+     To set this variable use either ‘setq’ or the Custom interface.  Do
+     not use the function ‘customize-set-variable’ because doing that
+     would cause Magit to be loaded immediately when that form is
+     evaluated (this differs from ‘custom-set-variables’, which doesn’t
+     load the libraries that define the customized variables).
+
+     Setting this variable to nil has no effect if that is done after
+     the key bindings have already been added.
 
      We recommend that you bind ‘C-c g’ instead of ‘C-c M-g’ to
      ‘magit-file-dispatch’.  The former is a much better binding but the
@@ -1109,6 +1107,21 @@ side-effects, but that should be avoided.
      with a non-zero exit status, then warn about that in the echo area
      and add a section containing git’s standard error in the current
      repository’s process buffer.
+
+ -- Function: magit-process-git destination &rest args
+
+     Calls Git synchronously in a separate process, returning its exit
+     code.  DESTINATION specifies how to handle the output, like for
+     ‘call-process’, except that file handlers are supported.  Enables
+     Cygwin’s "noglob" option during the call and ensures unix eol
+     conversion.
+
+ -- Function: magit-process-file process &optional infile buffer display
+          &rest args
+
+     Processes files synchronously in a separate process.  Identical to
+     ‘process-file’ but temporarily enables Cygwin’s "noglob" option
+     during the call and ensures unix eol conversion.
 
    If an error occurs when using one of the above functions, then that
 is usually due to a bug, i.e.  using an argument which is not actually
@@ -2574,7 +2587,7 @@ Appendix C Keystroke Index
                                                               (line  43)
 * M-w:                                   Blaming.             (line 127)
 * M-w <1>:                               Common Commands.     (line  28)
-* M-x magit-debug-git-executable:        Git Executable.      (line  45)
+* M-x magit-debug-git-executable:        Git Executable.      (line  55)
 * M-x magit-debug-git-executable <1>:    Debugging Tools.     (line  36)
 * M-x magit-describe-section-briefly:    Section Types and Values.
                                                               (line  13)
@@ -2591,7 +2604,7 @@ Appendix C Keystroke Index
 * M-x magit-toggle-verbose-refresh:      Debugging Tools.     (line  30)
 * M-x magit-unstage-file:                Staging from File-Visiting Buffers.
                                                               (line  18)
-* M-x magit-version:                     Git Executable.      (line  17)
+* M-x magit-version:                     Git Executable.      (line  60)
 * M-x magit-version <1>:                 Debugging Tools.     (line  10)
 * M-x magit-wip-commit:                  Wip Modes.           (line  88)
 * M-x with-editor-debug:                 Debugging Tools.     (line  44)
@@ -2876,8 +2889,8 @@ Appendix D Command Index
 * magit-branch-configure <3>:            Branch Commands.     (line  32)
 * magit-branch-create:                   Branch Commands.     (line  57)
 * magit-branch-delete:                   Branch Commands.     (line 147)
-* magit-branch-or-checkout:              Branch Commands.     (line 257)
-* magit-branch-orphan:                   Branch Commands.     (line 252)
+* magit-branch-or-checkout:              Branch Commands.     (line 267)
+* magit-branch-orphan:                   Branch Commands.     (line 262)
 * magit-branch-rename:                   Branch Commands.     (line 153)
 * magit-branch-reset:                    Branch Commands.     (line 131)
 * magit-branch-shelve:                   Auxiliary Branch Commands.
@@ -2917,7 +2930,7 @@ Appendix D Command Index
 * magit-copy-buffer-revision:            Common Commands.     (line  28)
 * magit-copy-section-value:              Common Commands.     (line  10)
 * magit-cycle-margin-style:              Log Margin.          (line  70)
-* magit-debug-git-executable:            Git Executable.      (line  45)
+* magit-debug-git-executable:            Git Executable.      (line  55)
 * magit-debug-git-executable <1>:        Debugging Tools.     (line  36)
 * magit-describe-section-briefly:        Section Types and Values.
                                                               (line  13)
@@ -3248,7 +3261,7 @@ Appendix D Command Index
                                                               (line  18)
 * magit-unstage-file <1>:                Commands for Buffers Visiting Files.
                                                               (line  33)
-* magit-version:                         Git Executable.      (line  17)
+* magit-version:                         Git Executable.      (line  60)
 * magit-version <1>:                     Debugging Tools.     (line  10)
 * magit-visit-ref:                       References Buffer.   (line 181)
 * magit-wip-commit:                      Wip Modes.           (line  88)
@@ -3301,8 +3314,8 @@ Appendix E Function Index
 * magit-add-section-hook:                Section Hooks.       (line  20)
 * magit-after-save-refresh-status:       Automatic Refreshing of Magit Buffers.
                                                               (line  59)
-* magit-branch-or-checkout:              Branch Commands.     (line 257)
-* magit-branch-orphan:                   Branch Commands.     (line 252)
+* magit-branch-or-checkout:              Branch Commands.     (line 267)
+* magit-branch-orphan:                   Branch Commands.     (line 262)
 * magit-branch-shelve:                   Auxiliary Branch Commands.
                                                               (line   9)
 * magit-branch-unshelve:                 Auxiliary Branch Commands.
@@ -3371,7 +3384,7 @@ Appendix E Function Index
 * magit-git-lines:                       Getting a Value from Git.
                                                               (line  44)
 * magit-git-str:                         Getting a Value from Git.
-                                                              (line  72)
+                                                              (line  87)
 * magit-git-string:                      Getting a Value from Git.
                                                               (line  38)
 * magit-git-success:                     Getting a Value from Git.
@@ -3452,26 +3465,30 @@ Appendix E Function Index
 * magit-mode-display-buffer:             Refreshing Buffers.  (line  33)
 * magit-mode-quit-window:                Quitting Windows.    (line  34)
 * magit-mode-setup:                      Refreshing Buffers.  (line  17)
+* magit-process-file:                    Getting a Value from Git.
+                                                              (line  67)
+* magit-process-git:                     Getting a Value from Git.
+                                                              (line  59)
 * magit-push-implicitly:                 Pushing.             (line  83)
 * magit-push-to-remote:                  Pushing.             (line 101)
 * magit-region-sections:                 Section Selection.   (line  10)
 * magit-region-values:                   Section Selection.   (line  37)
-* magit-repolist-column-branch:          Repository List.     (line  44)
-* magit-repolist-column-branches:        Repository List.     (line  53)
-* magit-repolist-column-flag:            Repository List.     (line  61)
-* magit-repolist-column-ident:           Repository List.     (line  30)
-* magit-repolist-column-path:            Repository List.     (line  35)
-* magit-repolist-column-stashes:         Repository List.     (line  57)
+* magit-repolist-column-branch:          Repository List.     (line  50)
+* magit-repolist-column-branches:        Repository List.     (line  59)
+* magit-repolist-column-flag:            Repository List.     (line  67)
+* magit-repolist-column-ident:           Repository List.     (line  36)
+* magit-repolist-column-path:            Repository List.     (line  41)
+* magit-repolist-column-stashes:         Repository List.     (line  63)
 * magit-repolist-column-unpulled-from-pushremote: Repository List.
-                                                              (line  81)
+                                                              (line  87)
 * magit-repolist-column-unpulled-from-upstream: Repository List.
-                                                              (line  76)
+                                                              (line  82)
 * magit-repolist-column-unpushed-to-pushremote: Repository List.
-                                                              (line  91)
+                                                              (line  97)
 * magit-repolist-column-unpushed-to-upstream: Repository List.
-                                                              (line  86)
-* magit-repolist-column-upstream:        Repository List.     (line  48)
-* magit-repolist-column-version:         Repository List.     (line  39)
+                                                              (line  92)
+* magit-repolist-column-upstream:        Repository List.     (line  54)
+* magit-repolist-column-version:         Repository List.     (line  45)
 * magit-restore-window-configuration:    Quitting Windows.    (line  23)
 * magit-run-git:                         Calling Git for Effect.
                                                               (line  36)
@@ -3628,8 +3645,8 @@ Appendix F Variable Index
 * magit-generate-buffer-name-function:   Naming Buffers.      (line   6)
 * magit-git-debug:                       Viewing Git Output.  (line  28)
 * magit-git-debug <1>:                   Getting a Value from Git.
-                                                              (line  64)
-* magit-git-executable:                  Git Executable.      (line  39)
+                                                              (line  79)
+* magit-git-executable:                  Git Executable.      (line  26)
 * magit-git-global-arguments:            Global Git Arguments.
                                                               (line   6)
 * magit-keep-region-overlay:             The Selection.       (line  52)
@@ -3680,6 +3697,7 @@ Appendix F Variable Index
 * magit-refs-show-remote-prefix:         References Buffer.   (line  62)
 * magit-remote-add-set-remote.pushDefault: Remote Commands.   (line  92)
 * magit-remote-direct-configure:         Remote Commands.     (line  21)
+* magit-remote-git-executable:           Git Executable.      (line  33)
 * magit-repolist-columns:                Repository List.     (line  14)
 * magit-repository-directories:          Status Buffer.       (line  58)
 * magit-revision-filter-files-on-follow: Revision Buffer.     (line  64)

@@ -31,7 +31,7 @@ to perform almost all of their daily version control tasks directly from
 within Emacs.  While many fine Git clients exist, only Magit and Git
 itself deserve to be called porcelains.
 
-This manual is for Magit version 3.1.1.
+This manual is for Magit version 3.2.1.
 
      Copyright (C) 2015-2021 Jonas Bernoulli <jonas@bernoul.li>
 
@@ -2378,48 +2378,65 @@ File: magit.info,  Node: Git Executable,  Next: Global Git Arguments,  Prev: Run
 4.6.4 Git Executable
 --------------------
 
-Except on MS Windows, Magit defaults to running Git without specifying
-the path to the git executable.  Instead the first executable found by
-Emacs on ‘exec-path’ is used (whose value in turn is set based on the
-value of the environment variable ‘$PATH’ when Emacs was started).
+When Magit calls Git, then it may do so using the absolute path to the
+‘git’ executable, or using just its name.
 
-   This has the advantage that it continues to work even when using
-Tramp to connect to a remote machine on which the executable is found in
-a different place.  The downside is that if you have multiple versions
-of Git installed, then you might end up using another version than the
-one you think you are using.
+   When running ‘git’ locally and the ‘system-type’ is ‘windows-nt’ (any
+Windows version) or ‘darwin’ (macOS) then ‘magit-git-executable’ is set
+to an absolute path when Magit is loaded.
+
+   On Windows it is necessary to use an absolute path because Git comes
+with several wrapper scripts for the actual ‘git’ binary, which are also
+placed on ‘$PATH’, and using one of these wrappers instead of the binary
+would degrade performance horribly.  For some macOS users using just the
+name of the executable also performs horribly, so we avoid doing that on
+that platform as well.  On other platforms, using just the name seems to
+work just fine.
+
+   Using an absolute path when running ‘git’ on a remote machine over
+Tramp, would be problematic to use an absolute path that is suitable on
+the local machine, so a separate option is used to control the name or
+path that is used on remote machines.
+
+ -- User Option: magit-git-executable
+
+     The ‘git’ executable used by Magit on the local host.  This should
+     be either the absolute path to the executable, or the string "git"
+     to let Emacs find the executable itself, using the standard
+     mechanism for doing such things.
+
+ -- User Option: magit-remote-git-executable
+
+     The ‘git’ executable used by Magit on remote machines over Tramp.
+     Normally this should be just the string "git".
+
+   If Emacs is unable to find the correct executable, then you can work
+around that by explicitly setting the value of one of these two options.
+Doing that should be considered a kludge; it is better to make sure that
+the order in ‘exec-path’ or ‘tramp-remote-path’ is correct.
+
+   Note that ‘exec-path’ is set based on the value of the ‘PATH’
+environment variable that is in effect when Emacs is started.  If you
+set ‘PATH’ in your shell’s init files, then that only has an effect on
+Emacs if you start it from that shell (because the environment of a
+process is only passed to its child processes, not to arbitrary other
+processes).  If that is not how you start Emacs, then the
+‘exec-path-from-shell’ package can help; though honestly I consider that
+a kludge too.
+
+   The command ‘magit-debug-git-executable’ can be useful to find out
+where Emacs is searching for ‘git’.
+
+‘M-x magit-debug-git-executable’     (‘magit-debug-git-executable’)
+
+     This command displays a buffer with information about
+     ‘magit-git-executable’ and ‘magit-remote-git-executable’.
 
 ‘M-x magit-version’     (‘magit-version’)
 
      This command shows the currently used versions of Magit, Git, and
      Emacs in the echo area.  Non-interactively this just returns the
      Magit version.
-
-   When the ‘system-type’ is ‘windows-nt’, then ‘magit-git-executable’
-is set to an absolute path when Magit is first loaded.  This is
-necessary because Git on that platform comes with several wrapper
-scripts for the actual git binary, which are also placed on ‘$PATH’, and
-using one of these wrappers instead of the binary would degrade
-performance horribly.
-
-   If Magit doesn’t find the correct executable then you *can* work
-around that by setting ‘magit-git-executable’ to an absolute path.  But
-note that doing so is a kludge.  It is better to make sure the order in
-the environment variable ‘$PATH’ is correct, and that Emacs is started
-with that environment in effect.  The command
-‘magit-debug-git-executable’ can be useful to find out where Emacs is
-searching for git.  If you have to connect from Windows to a non-Windows
-machine, then you must change the value to "git".
-
- -- User Option: magit-git-executable
-
-     The git executable used by Magit, either the full path to the
-     executable or the string "git" to let Emacs find the executable
-     itself, using the standard mechanism for doing such things.
-
-‘M-x magit-debug-git-executable’     (‘magit-debug-git-executable’)
-
-     Display a buffer with information about ‘magit-git-executable’.
 
 
 File: magit.info,  Node: Global Git Arguments,  Prev: Git Executable,  Up: Running Git
@@ -2948,6 +2965,12 @@ File: magit.info,  Node: Repository List,  Next: Logging,  Prev: Status Buffer, 
      with ‘default-directory’ bound to the toplevel of its working tree.
      It has to return a string to be inserted or nil.  PROPS is an alist
      that supports the keys ‘:right-align’ and ‘:pad-right’.
+
+     You may wish to display a range of numeric columns using just one
+     character per column and without any padding between columns, in
+     which case you should use an appropriate HEADER, set WIDTH to 1,
+     and set ‘:pad-right’ to 0.  ‘+’ is substituted for numbers higher
+     than 9.
 
    The following functions can be added to the above option:
 
@@ -5812,7 +5835,7 @@ them.  Those features are available from separate transient command.
      If you use a finite set of non-ephemeral branches across all your
      repositories, then you might use something like:
 
-          (("origin/master" "master" "next" "maint"))
+          (("origin/master" . ("master" "next" "maint")))
 
      Or if the names of all your ephemeral branches contain a slash, at
      least in some repositories, then a good value could be:
@@ -5823,6 +5846,16 @@ them.  Those features are available from separate transient command.
 
           (("origin/maint" . "\\`hotfix/")
            ("origin/master" . "\\`feature/"))
+
+     UPSTREAM can be a local branch:
+
+          (("master" . ("master" "next" "maint")))
+
+   Because the main branch is no longer almost always named "master" you
+should also account for other common names:
+
+     (("main"  . ("main" "master" "next" "maint"))
+      ("master" . ("main" "master" "next" "maint")))
 
  -- Command: magit-branch-orphan
 

@@ -197,9 +197,9 @@ support additional %-sequences."
   :group 'magit-buffers
   :type 'boolean)
 
-(defcustom magit-bury-buffer-function 'magit-restore-window-configuration
+(defcustom magit-bury-buffer-function 'magit-mode-quit-window
   "The function used to bury or kill the current Magit buffer."
-  :package-version '(magit . "2.3.0")
+  :package-version '(magit . "3.2.0")
   :group 'magit-buffers
   :type '(radio (function-item quit-window)
                 (function-item magit-mode-quit-window)
@@ -513,6 +513,7 @@ Magit is documented in info node `(magit)'."
   (hack-dir-local-variables-non-file-buffer)
   (face-remap-add-relative 'header-line 'magit-header-line)
   (setq mode-line-process (magit-repository-local-get 'mode-line-process))
+  (setq-local revert-buffer-function 'magit-refresh-buffer)
   (setq-local bookmark-make-record-function 'magit--make-bookmark)
   (setq-local isearch-filter-predicate 'magit-section--open-temporarily))
 
@@ -822,9 +823,9 @@ into thinking a buffer belongs to a repo that it doesn't.")
 
 If no such buffer exists then return nil.  Multiple buffers with
 the same major-mode may exist for a repository but only one can
-exist that hasn't been looked to its value.  Return that buffer
+exist that hasn't been locked to its value.  Return that buffer
 \(or nil if there is no such buffer) unless VALUE is non-nil, in
-which case return the buffer that has been looked to that value.
+which case return the buffer that has been locked to that value.
 
 If FRAME is nil or omitted, then consider all buffers.  Otherwise
   only consider buffers that are displayed in some live window
@@ -1056,7 +1057,7 @@ Run hooks `magit-pre-refresh-hook' and `magit-post-refresh-hook'."
 
 (defvar-local magit-refresh-start-time nil)
 
-(defun magit-refresh-buffer ()
+(defun magit-refresh-buffer (&rest _ignore)
   "Refresh the current Magit buffer."
   (setq magit-refresh-start-time (current-time))
   (let ((refresh (intern (format "%s-refresh-buffer"

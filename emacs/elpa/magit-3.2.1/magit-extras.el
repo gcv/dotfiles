@@ -65,8 +65,7 @@
 (defun magit-run-git-gui ()
   "Run `git gui' for the current git repository."
   (interactive)
-  (magit-with-toplevel
-    (magit-process-file magit-git-executable nil 0 nil "gui")))
+  (magit-with-toplevel (magit-process-git 0 "gui")))
 
 ;;;###autoload
 (defun magit-run-git-gui-blame (commit filename &optional linenum)
@@ -88,10 +87,10 @@ blame to center around the line point is on."
                          (magit-file-relative-name buffer-file-name)))
                 (line-number-at-pos)))))
   (magit-with-toplevel
-    (apply #'magit-process-file magit-git-executable nil 0 nil "gui" "blame"
-           `(,@(and linenum (list (format "--line=%d" linenum)))
-             ,commit
-             ,filename))))
+    (magit-process-git 0 "gui" "blame"
+                       (and linenum (list (format "--line=%d" linenum)))
+                       commit
+                       filename)))
 
 ;;;###autoload
 (defun magit-run-gitk ()
@@ -517,7 +516,9 @@ list returned by `magit-rebase-arguments'."
 (defvar magit-revision-stack nil)
 
 (defcustom magit-pop-revision-stack-format
-  '("[%N: %h] " "%N: %H\n   %s\n" "\\[\\([0-9]+\\)[]:]")
+  '("[%N: %h] "
+    "%N: %cs %H\n   %s\n"
+    "\\[\\([0-9]+\\)[]:]")
   "Control how `magit-pop-revision-stack' inserts a revision.
 
 The command `magit-pop-revision-stack' inserts a representation
@@ -548,7 +549,7 @@ The expansion of POINT-FORMAT is inserted at point, and the
 expansion of EOB-FORMAT is inserted at the end of the buffer (if
 the buffer ends with a comment, then it is inserted right before
 that)."
-  :package-version '(magit . "2.3.0")
+  :package-version '(magit . "3.2.0")
   :group 'magit-commands
   :type '(list (choice (string :tag "Insert at point format")
                        (cons (string :tag "Insert at point format")

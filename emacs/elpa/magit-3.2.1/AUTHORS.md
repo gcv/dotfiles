@@ -57,7 +57,6 @@ Contributors
 - Alexey Voinov <alexey.v.voinov@gmail.com>
 - Alex Kost <alezost@gmail.com>
 - Alex Ott <alexott@gmail.com>
-- Allen <darkfeline@felesatra.moe>
 - Allen Li <darkfeline@felesatra.moe>
 - Andreas Fuchs <asf@boinkor.net>
 - Andreas Liljeqvist <andreas.liljeqvist@robacks.se>
@@ -83,6 +82,7 @@ Contributors
 - Ben North <ben@redfrontdoor.org>
 - Ben Walton <bwalton@artsci.utoronto.ca>
 - Bob Uhl <buhl@zvelo.com>
+- Boruch Baum <boruch_baum@gmx.com>
 - Bradley Wright <brad@intranation.com>
 - Brandon W Maister <quodlibetor@gmail.com>
 - Brian Leung <leungbk@mailfence.com>
@@ -121,7 +121,6 @@ Contributors
 - Dato Simó <dato@net.com.org.es>
 - David Abrahams <dave@boostpro.com>
 - David Ellison <davidehellison@gmail.com>
-- David Ellison <davide@voicebox.com>
 - David Hull <david.hull@openx.com>
 - David L. Rager <ragerdl@gmail.com>
 - David Wallin <david.wallin@gmail.com>
@@ -129,7 +128,6 @@ Contributors
 - Dennis Paskorz <dennis@walltowall.com>
 - Divye Kapoor <divye@google.com>
 - Dominique Quatravaux <dominique.quatravaux@epfl.ch>
-- Dominique Quatravaux <domq@google.com>
 - Duianto Vebotci <vebotci@openmailbox.org>
 - Eli Barzilay <eli@barzilay.org>
 - Eric Davis <ed@npri.org>
@@ -276,6 +274,7 @@ Contributors
 - Peter Jaros <peter.a.jaros@gmail.com>
 - Peter J. Weisberg <pj@irregularexpressions.net>
 - Peter Vasil <mail@petervasil.net>
+- Philippe Cavalaria <philippe.cavalaria@gmail.com>
 - Philippe Vaucher <philippe.vaucher@gmail.com>
 - Philipp Fehre <pfehre@twitter.com>
 - Philipp Haselwarter <philipp@haselwarter.org>
@@ -319,6 +318,7 @@ Contributors
 - Sergey Pashinin <sergey@pashinin.com>
 - Sergey Vinokurov <serg.foo@gmail.com>
 - Servilio Afre Puentes <afrepues@mcmaster.ca>
+- Siavash Askari Nasr <siavash.askari.nasr@gmail.com>
 - Silent Sphere <silentsphere110@gmail.com>
 - Simon Pintarelli <simon.pintarelli@cscs.ch>
 - Štěpán Němec <stepnem@gmail.com>
@@ -333,6 +333,7 @@ Contributors
 - Szunti <Szunti@users.noreply.github.com>
 - Takafumi Arakaki <aka.tkf@gmail.com>
 - Tassilo Horn <tsdh@gnu.org>
+- TEC <tec@tecosaur.com>
 - Teemu Likonen <tlikonen@iki.fi>
 - Teruki Shigitani <teruki.shigitani@gmail.com>
 - Thierry Volpiatto <thievol@posteo.net>
@@ -347,6 +348,7 @@ Contributors
 - Tim Wraight <tim@wraight.net>
 - Ting-Yu Lin <aethanyc@gmail.com>
 - Tom Feist <shabble@metavore.org>
+- Toon Claes <toon@iotcl.com>
 - Topi Miettinen <toiwoton@gmail.com>
 - Troy Hinckley <t.macman@gmail.com>
 - Tsuyoshi Kitamoto <tsuyoshi.kitamoto@gmail.com>
