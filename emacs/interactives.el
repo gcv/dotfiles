@@ -1,5 +1,7 @@
 ;;; -*- lexical-binding: t; -*-
 
+(require 's)
+
 
 ;;; fonts
 ;;; best choices:
