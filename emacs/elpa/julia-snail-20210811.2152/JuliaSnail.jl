@@ -100,7 +100,14 @@ function elexpr(arg::ElispKeyword)
 end
 
 
-### --- evaluator for running Julia code in a given module
+### --- evaluation helpers for Julia code coming in from Emacs
+
+struct UndefinedModule <: Exception
+   name::Symbol
+end
+
+Base.showerror(io::IO, e::UndefinedModule) =
+   Printf.@printf(io, "Module %s not defined", e.name)
 
 """
 Call eval on expr in the context of the module given by the
@@ -127,7 +134,15 @@ function eval_in_module(fully_qualified_module_name::Array{Symbol}, expr::Expr)
       getfield(Main, root)
    catch err
       if isa(err, UndefVarError)
-         Base.root_module(Base.__toplevel__, root)
+         try
+            Base.root_module(Base.__toplevel__, root)
+         catch err2
+            if isa(err2, MethodError)
+               throw(UndefinedModule(root))
+            else
+               rethrow(err2)
+            end
+         end
       else
          rethrow(err)
       end
@@ -135,7 +150,45 @@ function eval_in_module(fully_qualified_module_name::Array{Symbol}, expr::Expr)
    for m in fully_qualified_module_name[2:end]
       fqm = getfield(fqm, m)
    end
+   # If Revise is being used, force it to update its state; invokelatest is
+   # necessary to deal with the World Age problem because Revise was probably
+   # loaded after the main Snail loop started running.
+   if isdefined(Main, :Revise)
+      Base.invokelatest(Main.Revise.revise)
+   end
+   # go
    Core.eval(fqm, expr)
+end
+
+"""
+Change the LineNumberNode instances in the given Expr tree to match real source
+file locations.
+"""
+function expr_change_lnn(expr, filesym, linenum)
+   if Expr !== typeof(expr); return; end
+   for (i, arg) in enumerate(expr.args)
+      if LineNumberNode === typeof(arg)
+         expr.args[i] = LineNumberNode(arg.line + linenum - 1, filesym)
+      elseif Expr === typeof(arg)
+         expr_change_lnn(arg, filesym, linenum)
+      end
+   end
+end
+
+"""
+Parse and eval the given tmpfile in the context of the module given by the
+modpath array and modify the parsed expression to refer to realfile (instead of
+tmpfile) line numbers. Useed to evaluate a top-level form in a file while
+preserving the original filename and line numbers for xref and stack traces.
+"""
+function eval_tmpfile(tmpfile, modpath, realfile, linenum)
+   realfilesym = Symbol(realfile)
+   code = read(tmpfile, String)
+   exprs = Meta.parse(code)
+   # linenum - 1 accounts for the leading "begin" line in tmpfiles
+   expr_change_lnn(exprs, realfilesym, linenum - 1)
+   eval_in_module(modpath, exprs)
+   Main.JuliaSnail.elexpr(true)
 end
 
 
@@ -269,14 +322,15 @@ function lsdefinitions(ns, identifier)
       let ms = methods(getproperty(ns, Symbol(identifier))).ms
          # If all definitions point to the same file and line, collapse them
          # into one. This often happens with function default arguments.
-         lines = map(m -> m.line, ms)
-         files = map(m -> m.file, ms)
          [:list;
-          map(m -> (Printf.@sprintf("%s(%s)",
-                                    identifier,
-                                    format_method_signature(m.sig)),
-                    Base.find_source_file(string(m.file)),
-                    m.line),
+          map(function(m)
+                 floc = functionloc(m) # returns a (file, linenum) tuple
+                 (Printf.@sprintf("%s(%s)",
+                                  identifier,
+                                  format_method_signature(m.sig)),
+                  Base.find_source_file(string(floc[1])),
+                  floc[2])
+              end,
               ms)]
       end
    catch
@@ -319,17 +373,19 @@ function apropos(ns, pattern)
    res::Array{Tuple{String,String,Int32}} = []
    for name in names
       name_ns, name_n = split_name(name, ns)
-      append!(res, lsdefinitions(name_ns, name_n))
+      defs = lsdefinitions(name_ns, name_n) # this returns [:list, tuple(...)] for Emacs
+      if length(defs) >= 2
+         append!(res, defs[2:end])
+      end
    end
-   return res
+   return [:list; res]
 end
 
 """
-    replcompletion(identifier,mod)
 Code completion suggestions for completion string `identifier` in module `mod`.
 Completions are provided by the built-in REPL.REPLCompletions.
 """
-function replcompletion(identifier,mod)
+function replcompletion(identifier, mod)
    cs, _, _ = REPLCompletions.completions(identifier, lastindex(identifier), mod)
    return [:list; REPLCompletions.completion_text.(cs)]
 end
@@ -368,12 +424,14 @@ represents the root node, and the last element is the expression at the offset.
 Each tuple has a start and stop value, showing locations in the original source
 where that node begins and ends.
 
+NB: The locations represent bytes, not characters!
+
 This is necessary because CSTParser does not include full location data, see
 https://github.com/julia-vscode/CSTParser.jl/pull/80.
 """
 function pathat(cst, offset, pos = 0, path = [(expr=cst, start=1, stop=cst.span+1)])
-   if cst.args !== nothing && CSTParser.typof(cst) !== CSTParser.NONSTDIDENTIFIER
-      for a in cst.args
+   if cst !== nothing && !CSTParser.isnonstdid(cst)
+      for a in cst
          if pos < offset <= (pos + a.span)
             return pathat(a, offset, pos, [path; [(expr=a, start=pos+1, stop=pos+a.span+1)]])
          end
@@ -387,6 +445,28 @@ function pathat(cst, offset, pos = 0, path = [(expr=cst, start=1, stop=cst.span+
 end
 
 """
+Debugging helper: example code for traversing the CST.
+"""
+function print_cst(cst, offset = 0)
+   for a in cst
+      if a.args === nothing
+         val = CSTParser.valof(a)
+         # Unicode byte fix
+         if String == typeof(val)
+            diff = sizeof(val) - length(val)
+            a.span -= diff
+            a.fullspan -= diff
+         end
+         println(offset, ":", offset+a.span, "\t", val)
+         offset += a.fullspan
+      else
+         offset = print_cst(a, offset)
+      end
+   end
+   return offset
+end
+
+"""
 Return the module active at point as a list of their names.
 """
 function moduleat(encodedbuf, byteloc)
@@ -395,7 +475,7 @@ function moduleat(encodedbuf, byteloc)
    modules = []
    for node in path
       if CSTParser.defines_module(node.expr)
-         push!(modules, CSTParser.get_name(node.expr).val)
+         push!(modules, CSTParser.valof(CSTParser.get_name(node.expr)))
       end
    end
    return [:list; modules]
@@ -414,7 +494,7 @@ function blockat(encodedbuf, byteloc)
    for node in path
       if CSTParser.defines_module(node.expr)
          description = nothing
-         push!(modules, CSTParser.get_name(node.expr).val)
+         push!(modules, CSTParser.valof(CSTParser.get_name(node.expr)))
       elseif (isnothing(description) &&
               (CSTParser.defines_abstract(node.expr) ||
                CSTParser.defines_datatype(node.expr) ||
@@ -423,7 +503,7 @@ function blockat(encodedbuf, byteloc)
                CSTParser.defines_mutable(node.expr) ||
                CSTParser.defines_primitive(node.expr) ||
                CSTParser.defines_struct(node.expr)))
-         description = CSTParser.get_name(node.expr).val
+         description = CSTParser.valof(CSTParser.get_name(node.expr))
          start = node.start
          stop = node.stop
       end
@@ -451,16 +531,14 @@ function includesin(encodedbuf, path="")
    # walk across args, and track the current module
    # when a node of type "call" is found, check its args[1]
    helper = (node, modules = []) -> begin
-      for a in node.args
-         if (CSTParser.Call == a.typ &&
-             !isnothing(a.args) &&
-             4 == length(a.args) &&
-             "include" == a.args[1].val)
-            # a.args[3] is the file name being included
-            filename = joinpath(path, a.args[3].val)
+      for a in node
+         if (CSTParser.iscall(a) &&
+             "include" == CSTParser.valof(a.args[1]))
+            # a.args[2] is the file name being included
+            filename = joinpath(path, CSTParser.valof(a.args[2]))
             results[filename] = modules
          elseif CSTParser.defines_module(a)
-            helper(a, [modules; CSTParser.get_name(a).val])
+            helper(a, [modules; CSTParser.valof(CSTParser.get_name(a))])
          elseif !isnothing(a.args)
             helper(a, modules)
          end
@@ -486,6 +564,75 @@ function forcecompile()
    # call these functions before the user does
    includesin(Base64.base64encode("module Alpha\ninclude(\"a.jl\")\nend"))
    moduleat(Base64.base64encode("module Alpha\nend"), 1)
+end
+
+end
+
+
+### --- multimedia support
+### Adapted from a PR by https://github.com/dahtah (https://github.com/gcv/julia-snail/pull/21).
+
+module Multimedia
+
+import Base64
+
+struct EmacsDisplay <: Base.AbstractDisplay
+end
+
+const EMACS = EmacsDisplay()
+
+function send(img_encoded)
+   el = Main.JuliaSnail.elexpr([
+      Symbol("julia-snail-multimedia-display"),
+      img_encoded
+   ])
+   Main.JuliaSnail.send_to_client(el)
+end
+
+function Base.display(d::EmacsDisplay, ::MIME{Symbol("image/png")}, img_raw)
+   send(Base64.stringmime("image/png", img_raw))
+end
+
+function Base.display(d::EmacsDisplay, ::MIME{Symbol("image/svg+xml")}, img_raw)
+   send(Base64.base64encode(repr("image/svg+xml", img_raw)))
+end
+
+function Base.display(d::EmacsDisplay, img)
+   supported = ["image/png", "image/svg+xml"]
+   for imgtype in supported
+      if showable(imgtype, img)
+         display(d, imgtype, img)
+         return
+      end
+   end
+   # no dice
+   throw(MethodError(Base.display, (d, img)))
+end
+
+"""
+Turn the Emacs multimedia display support on or off. If on, any supported image
+type will be displayed in an Emacs buffer.
+"""
+function display_toggle()
+   if EMACS in Base.Multimedia.displays
+      popdisplay(EMACS)
+      return "Emacs plotting turned off"
+   else
+      pushdisplay(EMACS)
+      return "Emacs plotting turned on"
+   end
+end
+
+function display_on()
+   if EMACS ∉ Base.Multimedia.displays
+      pushdisplay(EMACS)
+   end
+   return true
+end
+
+function display_off()
+   popdisplay(EMACS)
+   return true
 end
 
 end
