@@ -5,8 +5,8 @@
 ;; Author: Radon Rosborough <radon.neon@gmail.com>
 ;; Homepage: https://github.com/raxod502/prescient.el
 ;; Keywords: extensions
-;; Package-Version: 20210425.1720
-;; Package-Commit: 4a0f5405798cfcb98ea005078ef2e2d490e922c4
+;; Package-Version: 20210724.1756
+;; Package-Commit: 027c2137a8d9e01a1d4c7b5e5d98da017dd2d48e
 ;; Created: 8 Dec 2019
 ;; Package-Requires: ((emacs "25.1") (prescient "5.1") (selectrum "3.1"))
 ;; SPDX-License-Identifier: MIT
@@ -176,8 +176,14 @@ buffer. It does not affect the default behavior (determined by
              ;; be a list of only one filter type.
              (setq prescient-filter-method '(,filter-type))
 
-           ;; Otherwise, if we need to add or remove from the list,
-           ;; make sure it's actually a list and not just a symbol.
+           ;; Otherwise, if the current setting is a function,
+           ;; evaluate it to get the value.
+           (when (functionp prescient-filter-method)
+             (setq prescient-filter-method
+                   (funcall prescient-filter-method)))
+
+           ;; If we need to add or remove from the list, make sure
+           ;; it's actually a list and not just a symbol.
            (when (symbolp prescient-filter-method)
              (setq prescient-filter-method
                    (list prescient-filter-method)))
