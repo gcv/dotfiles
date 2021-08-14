@@ -1,12 +1,12 @@
 ;;; crux.el --- A Collection of Ridiculously Useful eXtensions -*- lexical-binding: t -*-
 ;;
-;; Copyright © 2015-2020 Bozhidar Batsov
+;; Copyright © 2015-2021 Bozhidar Batsov
 ;;
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
+;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/bbatsov/crux
-;; Package-Version: 20210309.838
-;; Package-Commit: 20c07848049716a0e1aa2560e23b5f4149f2a74f
-;; Version: 0.4.0-snapshot
+;; Package-Version: 20210811.436
+;; Package-Commit: 6bfd212a7f7ae32e455802fde1f9e3f4fba932a0
+;; Version: 0.4.0
 ;; Keywords: convenience
 ;; Package-Requires: ((seq "1.11"))
 
@@ -41,6 +41,8 @@
 (require 'tramp)
 
 (declare-function dired-get-file-for-visit "dired")
+(declare-function org-element-property "org-element")
+(declare-function org-element-context "org-element")
 (defvar recentf-list)
 
 (defgroup crux nil
@@ -384,7 +386,8 @@ there's a region, all lines that region covers will be duplicated."
                (region (buffer-substring-no-properties beg end)))
     (dotimes (_i arg)
       (goto-char end)
-      (newline)
+      (unless (use-region-p)
+        (newline))
       (insert region)
       (setq end (point)))
     (goto-char (+ origin (* (length region) arg) arg))))
@@ -402,7 +405,8 @@ there's a region, all lines that region covers will be duplicated."
     (setq end (line-end-position))
     (dotimes (_ arg)
       (goto-char end)
-      (newline)
+      (unless (use-region-p)
+        (newline))
       (insert region)
       (setq end (point)))
     (goto-char (+ origin (* (length region) arg) arg))))
@@ -638,14 +642,11 @@ Prefix ARG determines if the current windows buffer is swapped
 with the next or previous window, and the number of
 transpositions to execute in sequence."
   (interactive "p")
-  (let ((selector (if (>= arg 0) 'next-window 'previous-window)))
-    (while (/= arg 0)
-      (let ((this-win (window-buffer))
-            (next-win (window-buffer (funcall selector))))
-        (set-window-buffer (selected-window) next-win)
-        (set-window-buffer (funcall selector) this-win)
-        (select-window (funcall selector)))
-      (setq arg (if (cl-plusp arg) (1- arg) (1+ arg))))))
+  (let ((this-win (selected-window))
+        (this-buffer (window-buffer)))
+    (other-window arg)
+    (set-window-buffer this-win (current-buffer))
+    (set-window-buffer (selected-window) this-buffer)))
 
 (defalias 'crux-swap-windows 'crux-transpose-windows)
 
