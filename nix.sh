@@ -40,6 +40,7 @@ nix-env -i \
     jq \
     kopia \
     ledger \
+    libvterm-neovim \
     magic-wormhole \
     mosh \
     nmap \
