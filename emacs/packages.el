@@ -296,23 +296,37 @@
 
 (use-package fringe-helper
   :pin melpa
+  :if window-system
+  :demand t
+
+  ;;:custom
+  ;;(visual-line-fringe-indicators '(/fringe-fwdslash /fringe-backslash))
 
   :config
-  (when (or (eq window-system 'ns) (eq window-system 'mac))
-            (set-fringe-mode '(0 . 8)))
+  (set-fringe-mode '(0 . 8))
+  ;;(set-fringe-mode '(8 . 8))
 
-  (define-fringe-bitmap '/fringe-backslash (fringe-helper-convert
-                                            "........"
-                                            ".X......"
-                                            ".XX....."
-                                            "..XX...."
-                                            "...XX..."
-                                            "....XX.."
-                                            ".....X.."
-                                            "........"))
+  (define-fringe-bitmap '/fringe-fwdslash (fringe-helper-convert
+                                           "........"
+                                           "......X."
+                                           ".....XX."
+                                           "....XX.."
+                                           "...XX..."
+                                           "..XX...."
+                                           "..X....."
+                                           "........"))
 
-  (setcdr (assq 'continuation fringe-indicator-alist) '(nil /fringe-backslash))
-  ;;(setq visual-line-fringe-indicators '(nil /fringe-backslash))
+  (define-fringe-bitmap '/fringe-bckslash (fringe-helper-convert
+                                           "........"
+                                           ".X......"
+                                           ".XX....."
+                                           "..XX...."
+                                           "...XX..."
+                                           "....XX.."
+                                           ".....X.."
+                                           "........"))
+
+  (setcdr (assq 'continuation fringe-indicator-alist) '(/fringe-fwdslash /fringe-bckslash))
   )
 
 
@@ -536,6 +550,14 @@
 
   (remove-hook 'git-commit-setup-hook 'git-commit-turn-on-auto-fill)
   (remove-hook 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
+
+  (defun /magit-window-config ()
+    (set-window-fringes nil 8 8))
+
+  (defun /magit-mode-hook ()
+    (add-hook 'window-configuration-change-hook #'/magit-window-config nil :local))
+
+  (add-hook 'magit-mode-hook #'/magit-mode-hook)
 
   (defun /magit-status-mode-hook ()
     ;; Restore window configuration and clean up all Magit buffers.
