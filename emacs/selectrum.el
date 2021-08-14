@@ -1,6 +1,5 @@
 (use-package selectrum
   :pin melpa
-  :defer t
 
   ;;:init
   ;;(selectrum-mode 1)
@@ -22,7 +21,6 @@
 (use-package mini-frame
   :pin melpa
   :if window-system
-  :defer t
 
   :custom
   (mini-frame-detach-on-hide nil)       ; workaround for hidden frames showing up
@@ -38,7 +36,7 @@
 
   :commands (mini-frame-read-from-minibuffer)
 
-  ;;:init                                 ; not lazy
+  ;;:init
   ;;(mini-frame-mode 1)
 
   :config
@@ -69,7 +67,7 @@
   (:map minibuffer-local-map
         ("C-'" . marginalia-cycle))
 
-  :init                                 ; not lazy
+  :init
   ;; Must be in the :init section of use-package such that the mode gets
   ;; enabled right away. Note that this forces loading the package.
   (marginalia-mode 1)

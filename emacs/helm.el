@@ -79,17 +79,14 @@
   )
 
 
-(use-package helm-ag
-  :defer t)
+(use-package helm-ag)
 
 
-(use-package helm-org-rifle
-  :defer t)
+(use-package helm-org-rifle)
 
 
 (use-package helm-posframe
   :pin melpa
-  :defer nil
   :if window-system
 
   :custom
@@ -109,6 +106,7 @@
       (set-face-attribute 'default frame :background bg)
       (set-face-attribute 'fringe frame :background nil)
       (set-face-attribute 'helm-source-header frame :box `(:color ,bg))))
+
   (advice-add 'helm-posframe-display :around #'/helm-posframe-display)
 
   ;; Not currently enabled by default. It works, but seems to delete the frame
@@ -118,9 +116,10 @@
 
 
 (use-package helm-projectile
-  :init
-  (helm-projectile-on)
-)
+  :defer 2.0
+  :config
+  (helm-projectile-toggle 1)
+  )
 
 
 (use-package helm-swoop
@@ -131,4 +130,4 @@
 
   :config
   (setq helm-swoop-split-with-multiple-windows t)
-)
+  )

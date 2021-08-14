@@ -43,8 +43,7 @@
   )
 
 
-(use-package ag
-  :defer t)
+(use-package ag)
 
 
 (use-package avy
@@ -60,8 +59,6 @@
 
 
 (use-package cider
-  :defer t
-
   :config
   ;; (add-to-list 'display-buffer-alist
   ;;              '("\\*cider-repl .*"
@@ -108,8 +105,6 @@
 
 
 (use-package clojure-mode
-  :defer t
-
   :config
   (defun /clojure-mode-hook ()
     (paredit-mode 1)
@@ -129,8 +124,6 @@
 
 
 (use-package cmake-mode
-  :defer t
-
   :config
   (setq cmake-tab-width 4)
   )
@@ -158,25 +151,21 @@
 
 
 (use-package company-lua
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package company-quickhelp
   :pin melpa
-  :defer t
 
   :config
   ;;(company-quickhelp-mode 1)
   )
 
 
-(use-package company-terraform
-  :defer t)
+(use-package company-terraform)
 
 
-(use-package company-web
-  :defer t)
+(use-package company-web)
 
 
 (use-package crux
@@ -216,17 +205,14 @@
 ;;; " MD" :major) does not work, though the documentation says it should.
 ;;; Varying the last argument does nothing. Leaving this comment here in case I
 ;;; forget and go back looking for it again.
-;; (use-package delight
-;;   :defer t)
+;; (use-package delight)
 
 
-(use-package diminish
-  :defer t)
+(use-package diminish)
 
 
 (use-package disk-usage
   :pin gnu
-  :defer t
 
   :config
   (setq disk-usage--du-command "du")
@@ -234,8 +220,6 @@
 
 
 (use-package direnv
-  :defer t
-
   :config
   ;; It's faster to keep this minor mode disabled, and use
   ;; direnv-update-environment manually as needed.
@@ -252,8 +236,7 @@
 
 
 (use-package doom-themes
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package dumb-jump
@@ -285,8 +268,7 @@
 (use-package elpher)
 
 
-(use-package eshell-autojump
-  :defer t)
+(use-package eshell-autojump)
 
 
 (use-package expand-region
@@ -301,13 +283,11 @@
 
 
 (use-package flycheck
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package flycheck-rust
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package fountain-mode              ; screenwriting
@@ -338,7 +318,6 @@
 
 (use-package git-auto-commit-mode
   :pin melpa
-  :defer t
 
   :config
   (setq gac-automatically-push-p nil)
@@ -349,7 +328,6 @@
 ;;; Obsoleted by zoom.
 (use-package golden-ratio
   :pin melpa
-  :defer t
   :diminish " φ"
 
   :config
@@ -381,13 +359,10 @@
 
 
 (use-package green-phosphor-theme
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package haskell-mode
-  :defer t
-
   :config
   ;; consider installing Intero if Haskell becomes relevant
   (defun /haskell-mode-hook ()
@@ -399,8 +374,7 @@
 
 
 ;;; Hashicorp Configuration Language: dependency for terraform-mode
-(use-package hcl-mode
-  :defer t)
+(use-package hcl-mode)
 
 
 ;;; replacement for built-in Help system
@@ -452,24 +426,19 @@
 
 (use-package highlight-indent-guides
   :pin melpa
-  :defer t
 
   :custom
   (highlight-indent-guides-method 'character)
   )
 
 
-(use-package hydra
-  :defer t)
+(use-package hydra)
 
 
 (use-package iedit
-  :defer nil
-
   :init
   (setq iedit-toggle-key-default nil)
 
-  :config
   ;; manually set keys, because iedit overrides some important globals:
   (let ((iedit-toggle-keybinding (kbd "C-;")))
     (define-key global-map iedit-toggle-keybinding 'iedit-mode)
@@ -505,7 +474,6 @@
 
 (use-package julia-mode
   :pin melpa
-  :defer t
 
   :config
   (setq julia-indent-offset 3)
@@ -541,8 +509,7 @@
 
 
 (use-package leuven-theme
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package lua-mode
@@ -560,8 +527,6 @@
 
 
 (use-package magit
-  :defer t
-
   :config
   (diminish 'magit-auto-revert-mode)
 
@@ -586,8 +551,6 @@
 
 
 (use-package markdown-mode
-  :defer t
-
   :config
   (add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
   (add-to-list 'auto-mode-alist '("\\.md$" . markdown-mode))
@@ -604,34 +567,31 @@
 
 
 (use-package markdown-toc
-  :defer t
-
   :custom
   (markdown-toc-header-toc-title "")
   )
 
 
-(use-package material-theme
-  :defer t)
+(use-package material-theme)
 
 
 (use-package minibuffer-line
   :pin gnu
-  :defer nil
 
-  :config
-  (setq minibuffer-line-refresh-interval 5)
+  :custom
+  (minibuffer-line-refresh-interval 5)
 
-  (setq minibuffer-line-format
-        '("" (:eval
-              (let ((time-str (format-time-string "%R")))
-                (concat
-                 (propertize
-                  " "
-                  'display
-                  `(space :align-to (- right-fringe ,(string-width time-str) 1)))
-                 time-str)))))
+  (minibuffer-line-format
+   '("" (:eval
+         (let ((time-str (format-time-string "%R")))
+           (concat
+            (propertize
+             " "
+             'display
+             `(space :align-to (- right-fringe ,(string-width time-str) 1)))
+            time-str)))))
 
+  :init
   (minibuffer-line-mode 1)
 
   (set-face-attribute 'minibuffer-line nil :inherit 'unspecified)
@@ -639,12 +599,10 @@
   )
 
 
-(use-package modus-operandi-theme
-  :defer t)
+(use-package modus-operandi-theme)
 
 
-(use-package modus-vivendi-theme
-  :defer t)
+(use-package modus-vivendi-theme)
 
 
 (use-package multiple-cursors
@@ -661,13 +619,11 @@
   :mode "\\.nix$")
 
 
-(use-package nord-theme
-  :defer t)
+(use-package nord-theme)
 
 
 ;;; mail client
-(use-package notmuch
-  :defer t)
+(use-package notmuch)
 
 
 ;;; turn on when built-in Org dependency is up-to-date
@@ -675,8 +631,7 @@
 
 
 (use-package ob-restclient
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 ;;; Focused writing mode.
@@ -687,8 +642,6 @@
 ;;; has GitHub Issues (tickets) turned off for both Binder and
 ;;; Olivetti.
 (use-package olivetti
-  :defer t
-
   :custom
   (olivetti-body-width 0.9)
 
@@ -746,16 +699,13 @@
 
 
 (use-package package-lint
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
-(use-package pandoc-mode
-  :defer t)
+(use-package pandoc-mode)
 
 
 (use-package paredit
-  :defer t
   :diminish " π"
 
   :config
@@ -781,14 +731,13 @@
 (use-package perspective
   ;;:load-path "~/Code/perspective-el"
   :pin melpa
-  :defer nil
 
   :bind
   (("C-c C-p" . perspective-map)
    ("H-p" . perspective-map)
    ("C-c M-p" . persp-switch))
 
-  :config
+  :init
   (persp-mode)
   (persp-turn-off-modestring)
 
@@ -843,18 +792,15 @@
 
 
 (use-package poporg
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package posframe
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package prescient
   :pin melpa
-  :defer t
 
   :config
   ;;(setq prescient-aggressive-file-save t)
@@ -864,22 +810,18 @@
 
 
 (use-package projectile
-  :defer nil                            ; must load eagerly
-
   :bind
   (:map projectile-mode-map
         ("C-c p" . projectile-command-map))
 
-  :init
-  (setq projectile-mode-line-prefix "")
+  :custom
+  (projectile-mode-line-prefix "")
+  (projectile-completion-system 'default)
+  (projectile-enable-caching nil)
+  (projectile-tags-command "ctags -Re -f \"%s\" %s")
 
   :config
   (projectile-mode 1)
-
-  (setq projectile-completion-system 'default)
-
-  (setq projectile-enable-caching nil)
-  (setq projectile-tags-command "ctags -Re -f \"%s\" %s")
 
   (setq /projectile-project-cache (make-hash-table))
 
@@ -899,7 +841,6 @@
 
 (use-package rainbow-mode
   :pin gnu
-  :defer t
   :diminish ""
 
   :config
@@ -912,7 +853,6 @@
 
 (use-package restclient
   :pin melpa
-  :defer t
 
   :config
   (setq restclient-log-request nil)
@@ -923,7 +863,6 @@
 ;;; is enabled system-wide.
 (use-package reverse-im
   :pin melpa
-  :defer t
 
   :config
   (setq reverse-im-modifiers '(control meta super hyper))
@@ -943,8 +882,6 @@
 
 
 (use-package slime
-  :defer t
-
   :config
   (setq slime-net-coding-system 'utf-8-unix)
   (setq inferior-lisp-program "sbcl")
@@ -982,8 +919,6 @@
 
 
 (use-package slime-company
-  :defer t
-
   :config
   ;; XXX: For some reason, the documented activation method does not work:
   ;;(add-to-list 'slime-contribs 'slime-company)
@@ -1004,20 +939,17 @@
 ;;             ))
 
 
-(use-package solarized-theme
-  :defer t)
+(use-package solarized-theme)
 
 
 ;;; Package showing how to render SVG with updates, in any buffer.
 ;;; Example: (svg-clock-insert 50).
 (use-package svg-clock
-  :pin gnu
-  :defer t)
+  :pin gnu)
 
 
 (use-package swift-mode
   :pin melpa
-  :defer t
 
   :config
   (setq swift-mode:switch-case-offset 2)
@@ -1030,13 +962,10 @@
   )
 
 
-(use-package terraform-mode
-  :defer t)
+(use-package terraform-mode)
 
 
 (use-package treemacs
-  :defer t
-
   :config
   (setq treemacs-persist-file (expand-file-name "treemacs/treemacs-persist" user-emacs-directory))
   (setq treemacs-no-png-images t)
@@ -1066,7 +995,6 @@
 ;;; Installed purely because it's a tide dependency. web-mode provides superior
 ;;; TS indentation.
 (use-package typescript-mode
-  :defer t
   :diminish " TS"
 
   :config
@@ -1087,7 +1015,6 @@
 
 (use-package vterm
   :pin melpa
-  :defer t
 
   :config
   (setq vterm-max-scrollback 10000)
@@ -1153,8 +1080,7 @@
   )
 
 
-(use-package wgrep
-  :defer t)
+(use-package wgrep)
 
 
 (use-package which-key
@@ -1170,7 +1096,6 @@
 
 
 (use-package yaml-mode
-  :defer t
   :hook
   (yaml-mode . /yaml-mode-hook)
 
@@ -1187,8 +1112,7 @@
   )
 
 
-(use-package zenburn-theme
-  :defer t)
+(use-package zenburn-theme)
 
 
 ;;; This supersedes golden-ratio-mode.

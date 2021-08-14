@@ -1,5 +1,13 @@
 ;;; -*- lexical-binding: t -*-
 
+(add-hook 'emacs-startup-hook
+  (lambda ()
+    (message "Emacs started in %s seconds (garbage collections: %d)"
+             (format "%.2f"
+                     (float-time
+                      (time-subtract after-init-time before-init-time)))
+             gcs-done)))
+
 (when (version< emacs-version "27.0")
   (load-file (expand-file-name "early-init.el" user-emacs-directory)))
 
@@ -178,6 +186,7 @@
   (package-install 'use-package))
 (setq use-package-enable-imenu-support t
       use-package-always-ensure t
+      use-package-always-defer t
       use-package-always-pin "melpa-stable")
 (require 'use-package)
 ;;(setq use-package-verbose t)
@@ -572,7 +581,8 @@
 
 
 ;;; recentf
-(setq recentf-max-menu-items 250)
+(setq recentf-max-menu-items 250
+      recentf-keep '(file-remote-p file-readable-p))
 (recentf-mode 1)
 
 

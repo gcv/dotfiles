@@ -23,17 +23,14 @@
 
 (use-package counsel-projectile
   :pin melpa
-  :defer t
 
-  :config
-  ;; To turn on, change :defer to nil.
+  :init
   ;;(counsel-projectile-mode 1)
   )
 
 
 (use-package counsel-tramp
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package ivy
@@ -150,13 +147,11 @@
 
 
 (use-package ivy-prescient
-  :pin melpa
-  :defer t)
+  :pin melpa)
 
 
 (use-package ivy-xref
   :pin melpa
-  :defer t
 
   :init
   ;;(when (>= emacs-major-version 27)
@@ -165,8 +160,7 @@
   )
 
 
-(use-package flx
-  :defer nil)
+(use-package flx)
 
 
 (use-package swiper
