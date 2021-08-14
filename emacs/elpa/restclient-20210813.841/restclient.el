@@ -6,8 +6,8 @@
 ;; Maintainer: Pavel Kurnosov <pashky@gmail.com>
 ;; Created: 01 Apr 2012
 ;; Keywords: http
-;; Package-Version: 20210511.1331
-;; Package-Commit: 2cc1fd3496f57288de3f97c27a5f018284db2d23
+;; Package-Version: 20210813.841
+;; Package-Commit: 176d9cb6552f04d98c33e29fc673862bdf3bca03
 
 ;; This file is not part of GNU Emacs.
 ;; This file is public domain software. Do what you want.
@@ -514,7 +514,7 @@ The buffer contains the raw HTTP response sent by the server."
     (goto-char (restclient-current-min))
     (when (re-search-forward restclient-method-url-regexp (point-max) t)
       (let ((method (match-string-no-properties 1))
-            (url (match-string-no-properties 2))
+            (url (string-trim (match-string-no-properties 2)))
             (vars (restclient-find-vars-before-point))
             (headers '()))
         (forward-line)
