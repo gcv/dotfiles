@@ -1,7 +1,7 @@
-(define-package "fountain-mode" "3.5.0" "Major mode for screenwriting in Fountain markup"
+(define-package "fountain-mode" "3.5.1" "Major mode for screenwriting in Fountain markup"
   '((emacs "24.4")
     (seq "2.20"))
-  :commit "91f4ad083fa620e6e6202460decc3280bd8e4e71" :authors
+  :commit "7de7159a58e0594c0120d66af78f65264f61ea5f" :authors
   '(("Paul W. Rankin" . "pwr@bydasein.com"))
   :maintainer
   '("Paul W. Rankin" . "pwr@bydasein.com")
