@@ -235,10 +235,6 @@
   )
 
 
-(use-package doom-themes
-  :pin melpa)
-
-
 (use-package dumb-jump
   :bind
   (("H-." . dumb-jump-go)
@@ -370,10 +366,6 @@
   (("C-M-[" . goto-last-change)
    ("C-M-]" . goto-last-change-reverse))
   )
-
-
-(use-package green-phosphor-theme
-  :pin melpa)
 
 
 (use-package haskell-mode
@@ -522,10 +514,6 @@
   )
 
 
-(use-package leuven-theme
-  :pin melpa)
-
-
 (use-package lua-mode
   :pin melpa
 
@@ -594,9 +582,6 @@
   )
 
 
-(use-package material-theme)
-
-
 (use-package minibuffer-line
   :pin gnu
 
@@ -621,12 +606,6 @@
   )
 
 
-(use-package modus-operandi-theme)
-
-
-(use-package modus-vivendi-theme)
-
-
 (use-package multiple-cursors
   :bind
   (("C-?" . mc/edit-lines)
@@ -639,9 +618,6 @@
 
 (use-package nix-mode
   :mode "\\.nix$")
-
-
-(use-package nord-theme)
 
 
 ;;; mail client
@@ -961,9 +937,6 @@
 ;;             ))
 
 
-(use-package solarized-theme)
-
-
 ;;; Package showing how to render SVG with updates, in any buffer.
 ;;; Example: (svg-clock-insert 50).
 (use-package svg-clock
@@ -1132,9 +1105,6 @@
     (setq outline-regexp "^\\([ ]\\{2\\}\\)*\\([-] \\)?\\([\"][^\"]*[\"]\\|[a-zA-Z0-9_-]*\\)")
     (setq outline-level '/yaml-outline-level))
   )
-
-
-(use-package zenburn-theme)
 
 
 ;;; This supersedes golden-ratio-mode.

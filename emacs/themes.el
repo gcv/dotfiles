@@ -7,6 +7,17 @@
 (require 'dash)
 
 
+(use-package doom-themes :pin melpa)
+(use-package green-phosphor-theme :pin melpa)
+(use-package leuven-theme :pin melpa)
+(use-package material-theme)
+(use-package modus-operandi-theme)
+(use-package modus-vivendi-theme)
+(use-package nord-theme)
+(use-package solarized-theme)
+(use-package zenburn-theme)
+
+
 ;;; XXX: Emacs 27 breaks custom-theme-set-faces. Apparently the
 ;;; default value of custom--inhibit-theme-enable changed since 26.3.
 ;;; See also https://emacs.stackexchange.com/a/52804
