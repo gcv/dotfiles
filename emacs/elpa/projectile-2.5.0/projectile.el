@@ -4,11 +4,11 @@
 
 ;; Author: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: https://github.com/bbatsov/projectile
-;; Package-Version: 2.4.0
-;; Package-Commit: bbb7b8d4c498e88046e4e6227990626f2b5dbe1b
+;; Package-Version: 2.5.0
+;; Package-Commit: a2a1aba8aa12d0ff0e044c4336a5c2598c259720
 ;; Keywords: project, convenience
-;; Version: 2.4.0
-;; Package-Requires: ((emacs "25.1") (pkg-info "0.4"))
+;; Version: 2.5.0
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -44,6 +44,7 @@
 (require 'ibuf-ext)
 (require 'compile)
 (require 'grep)
+(require 'lisp-mnt)
 (eval-when-compile
   (require 'find-dired)
   (require 'subr-x))
@@ -75,7 +76,6 @@
 
 (declare-function ggtags-ensure-project "ext:ggtags")
 (declare-function ggtags-update-tags "ext:ggtags")
-(declare-function pkg-info-version-info "ext:pkg-info")
 (declare-function ripgrep-regexp "ext:ripgrep")
 (declare-function vterm "ext:vterm")
 (declare-function vterm-send-return "ext:vterm")
@@ -189,7 +189,8 @@ A value of nil means the cache never expires."
   :package-version '(projectile . "2.3.0"))
 
 (defcustom projectile-auto-update-cache t
-  "Whether the cache should automatically be updated when files are opened or deleted."
+  "Whether the cache should automatically be updated when files are opened or
+deleted."
   :group 'projectile
   :type 'boolean)
 
@@ -299,7 +300,8 @@ It has precedence over function `projectile-project-name-function'."
 (defcustom projectile-project-name-function 'projectile-default-project-name
   "A function that receives the project-root and returns the project name.
 
-If variable `projectile-project-name' is non-nil, this function will not be used."
+If variable `projectile-project-name' is non-nil, this function will not be
+used."
   :group 'projectile
   :type 'function
   :package-version '(projectile . "0.14.0"))
@@ -632,9 +634,14 @@ When set to nil you'll have always add projects explicitly with
 (defcustom projectile-project-search-path nil
   "List of folders where projectile is automatically going to look for projects.
 You can think of something like $PATH, but for projects instead of executables.
-Examples of such paths might be ~/projects, ~/work, etc."
+Examples of such paths might be ~/projects, ~/work, (~/github . 1) etc.
+
+For elements of form (DIRECTORY . DEPTH), DIRECTORY has to be a
+directory and DEPTH an integer that specifies the depth at which to
+look for projects. A DEPTH of 0 means check DIRECTORY. A depth of 1
+means check all the subdirectories of DIRECTORY. Etc."
   :group 'projectile
-  :type '(repeat directory)
+  :type '(repeat (choice directory (cons directory (integer :tag "Depth"))))
   :package-version '(projectile . "1.0.0"))
 
 (defcustom projectile-git-command "git ls-files -zco --exclude-standard"
@@ -781,6 +788,11 @@ If the value is nil, there is no limit to the opend buffers count."
 
 ;;; Version information
 
+(defconst projectile-version
+  (eval-when-compile
+    (lm-version (or load-file-name buffer-file-name)))
+  "The current version of Projectile.")
+
 ;;;###autoload
 (defun projectile-version (&optional show-version)
   "Get the Projectile version as string.
@@ -795,12 +807,9 @@ If the version number could not be determined, signal an error,
 if called interactively, or if SHOW-VERSION is non-nil, otherwise
 just return nil."
   (interactive (list t))
-  (if (require 'pkg-info nil t)
-      (let ((version (pkg-info-version-info 'projectile)))
-        (when show-version
-          (message "Projectile %s" version))
-        version)
-    (error "Cannot determine version without package pkg-info")))
+  (if show-version
+      (message "Projectile %s" projectile-version)
+    projectile-version))
 
 ;;; Misc utility functions
 (defun projectile-difference (list1 list2)
@@ -1019,21 +1028,19 @@ The cache is created both in memory and on the hard drive."
     (projectile-invalidate-cache nil)))
 
 ;;;###autoload
-(defun projectile-discover-projects-in-directory (directory)
+(defun projectile-discover-projects-in-directory (directory &optional depth)
   "Discover any projects in DIRECTORY and add them to the projectile cache.
-This function is not recursive and only adds projects with roots
-at the top level of DIRECTORY."
-  (interactive
-   (list (read-directory-name "Starting directory: ")))
-  (if (file-exists-p directory)
-      (let ((subdirs (directory-files directory t)))
-        (mapcar
-         (lambda (dir)
-           (when (and (file-directory-p dir)
-                      (not (member (file-name-nondirectory dir) '(".." "."))))
-             (when (projectile-project-p dir)
-               (projectile-add-known-project dir))))
-         subdirs))
+
+If DEPTH is non-nil recursively descend exactly DEPTH levels below DIRECTORY and
+discover projects there."
+  (if (file-directory-p directory)
+      (if (and (numberp depth) (> depth 0))
+          (dolist (dir (directory-files directory t))
+            (when (and (file-directory-p dir)
+                       (not (member (file-name-nondirectory dir) '(".." "."))))
+	            (projectile-discover-projects-in-directory dir (1- depth))))
+        (when (projectile-project-p directory)
+          (projectile-add-known-project directory)))
     (message "Project search path directory %s doesn't exist" directory)))
 
 ;;;###autoload
@@ -1041,7 +1048,10 @@ at the top level of DIRECTORY."
   "Discover projects in `projectile-project-search-path'.
 Invoked automatically when `projectile-mode' is enabled."
   (interactive)
-  (mapcar #'projectile-discover-projects-in-directory projectile-project-search-path))
+  (dolist (path projectile-project-search-path)
+    (if (consp path)
+	(projectile-discover-projects-in-directory (car path) (cdr path))
+      (projectile-discover-projects-in-directory path 1))))
 
 
 (defun delete-file-projectile-remove-from-cache (filename &optional _trash)
@@ -2832,7 +2842,7 @@ test/impl/other files as below:
   "Get CMake user and system COMMAND-TYPE presets."
   (projectile-flatten
    (mapcar (lambda (filename) (projectile--cmake-command-presets filename command-type))
-           '("CMakeUserPresets.json" "CMakeSystemPresets.json"))))
+           '("CMakeUserPresets.json" "CMakePresets.json"))))
 
 (defun projectile--cmake-command-preset-names (command-type)
   "Get names of CMake user and system COMMAND-TYPE presets."
@@ -3304,7 +3314,9 @@ PROJECT-ROOT is the targeted directory.  If nil, use
    (t 'none)))
 
 (defun projectile--test-name-for-impl-name (impl-file-path)
-  "Determine the name of the test file for IMPL-FILE-PATH."
+  "Determine the name of the test file for IMPL-FILE-PATH.
+
+IMPL-FILE-PATH may be a absolute path, relative path or a file name."
   (let* ((project-type (projectile-project-type))
          (impl-file-name (file-name-sans-extension (file-name-nondirectory impl-file-path)))
          (impl-file-ext (file-name-extension impl-file-path))
@@ -3315,19 +3327,58 @@ PROJECT-ROOT is the targeted directory.  If nil, use
      (test-suffix (concat impl-file-name test-suffix "." impl-file-ext))
      (t (error "Project type `%s' not supported!" project-type)))))
 
-(defun projectile-create-test-file-for (impl-file-path)
-  "Create a test file for IMPL-FILE-PATH."
-  (let* ((test-file (projectile--test-name-for-impl-name impl-file-path))
-         (project-root (projectile-project-root))
-         (relative-dir (file-name-directory (file-relative-name impl-file-path project-root)))
-         (src-dir-name (projectile-src-directory (projectile-project-type)))
-         (test-dir-name (projectile-test-directory (projectile-project-type)))
-         (test-dir (expand-file-name (replace-regexp-in-string src-dir-name test-dir-name relative-dir) project-root))
-         (test-path (expand-file-name test-file test-dir)))
-    (unless (file-exists-p test-path)
-      (progn (unless (file-exists-p test-dir)
-               (make-directory test-dir :create-parents))
-             test-path))))
+(defun projectile--impl-name-for-test-name (test-file-path)
+  "Determine the name of the implementation file for TEST-FILE-PATH.
+
+TEST-FILE-PATH may be a absolute path, relative path or a file name."
+  (let* ((project-type (projectile-project-type))
+         (test-file-name (file-name-sans-extension (file-name-nondirectory test-file-path)))
+         (test-file-ext (file-name-extension test-file-path))
+         (test-prefix (funcall projectile-test-prefix-function project-type))
+         (test-suffix (funcall projectile-test-suffix-function project-type)))
+    (cond
+     (test-prefix
+      (concat (string-remove-prefix test-prefix test-file-name) "." test-file-ext))
+     (test-suffix
+      (concat (string-remove-suffix test-suffix test-file-name) "." test-file-ext))
+     (t (error "Project type `%s' not supported!" project-type)))))
+
+(defun projectile--impl-to-test-dir (impl-dir-path)
+  "Return the directory path of a test whose impl file resides in IMPL-DIR-PATH.
+
+Occurrences of the current project type's src-dir property (which should be a
+string) are replaced with the current project type's test-dir property
+ (which should be a string) to obtain the new directory.
+
+An error is signalled if either the src-dir or test-dir properties are not
+strings."
+  (let ((test-dir (projectile-test-directory (projectile-project-type)))
+        (impl-dir (projectile-src-directory (projectile-project-type))))
+    (if (and (stringp test-dir) (stringp impl-dir))
+        (projectile-complementary-dir impl-dir-path impl-dir test-dir)
+      (error "Expected the current project's :test-dir and :impl-dir properties to be strings but found %s and %s" test-dir impl-dir))))
+
+(defun projectile-complementary-dir (dir-path string replacement)
+  "Return the \"complementary\" directory of DIR-PATH by replacing STRING in DIR-PATH with REPLACEMENT."
+  (let* ((project-root (projectile-project-root))
+         (relative-dir (file-name-directory (file-relative-name dir-path project-root))))
+    (projectile-expand-root
+     (replace-regexp-in-string string replacement relative-dir))))
+
+(defun projectile--create-directories-for (path)
+  "Create directories necessary for PATH."
+  (unless (file-exists-p path)
+    (make-directory (if (file-directory-p path)
+                        path
+                      (file-name-directory path))
+                    :create-parents)))
+
+(defun projectile--test-file-fallback (file-name)
+  "Attempt to build a path for the test file of FILE-NAME using the src-dir and test-dir properties of the current project type which should be strings, an error is signalled if this is not the case."
+  (projectile--complementary-file
+   file-name
+   #'projectile--impl-to-test-dir
+   #'projectile--test-name-for-impl-name))
 
 (defun projectile-find-implementation-or-test (file-name)
   "Given a FILE-NAME return the matching implementation or test filename.
@@ -3344,13 +3395,15 @@ test file."
            "No matching source file found for project type `%s'"
            (projectile-project-type))))
     ;; find the matching test file
-    (let ((test-file (projectile-find-matching-test file-name)))
-      (if test-file
-          (projectile-expand-root test-file)
-        (if projectile-create-missing-test-files
-            (projectile-create-test-file-for file-name)
-          (error "No matching test file found for project type `%s'"
-                 (projectile-project-type)))))))
+    (let* ((test-file (projectile-find-matching-test file-name))
+           (test-file-or-fallback (or test-file (projectile--test-file-fallback file-name)))
+           (expanded-test-file (projectile-expand-root test-file-or-fallback)))
+      (cond ((file-exists-p expanded-test-file) expanded-test-file)
+            (projectile-create-missing-test-files
+             (projectile--create-directories-for expanded-test-file)
+             expanded-test-file)
+            (t (error "No matching test file found for project type `%s'"
+                      (projectile-project-type)))))))
 
 ;;;###autoload
 (defun projectile-find-implementation-or-test-other-window ()
@@ -3445,13 +3498,48 @@ Fallback to DEFAULT-VALUE for missing attributes."
         (or (string-equal prefix-name name)
             (string-equal suffix-name name))))))
 
+(defun projectile--complementary-file (file-path dir-fn filename-fn)
+  "Apply DIR-FN and FILENAME-FN to the directory and name of FILE-PATH.
+
+More specifically, return DIR-FN applied to the directory of FILE-PATH
+concatenated with FILENAME-FN applied to the file name of FILE-PATH."
+  (let* ((filename (file-name-nondirectory file-path))
+         (complementary-filename (funcall filename-fn filename))
+         (dir (funcall dir-fn (file-name-directory file-path))))
+    (concat (file-name-as-directory dir) complementary-filename)))
+
+(defun projectile--impl-file-from-src-dir-fn (test-file)
+  "Return the implementation file path for the absolute path TEST-FILE relative to the project root in the case the current project type's src-dir has been set to a custom function, return nil if this is not the case or the path points to a file that does not exist."
+  (when-let ((src-dir (projectile-src-directory (projectile-project-type))))
+    (when (functionp src-dir)
+      (let ((impl-file (projectile--complementary-file
+                        test-file
+                        src-dir
+                        #'projectile--impl-name-for-test-name)))
+        (when (file-exists-p impl-file)
+          (file-relative-name impl-file (projectile-project-root)))))))
+
+(defun projectile--test-file-from-test-dir-fn (impl-file)
+  "Return the test file path for the absolute path IMPL-FILE relative to the project root, in the case the current project type's test-dir has been set to a custom function, else return nil."
+  (when-let ((test-dir (projectile-test-directory (projectile-project-type))))
+    (when (functionp test-dir)
+      (file-relative-name
+       (projectile--complementary-file
+        impl-file
+        test-dir
+        #'projectile--test-name-for-impl-name)
+       (projectile-project-root)))))
+
 (defun projectile--find-matching-test (impl-file)
   "Return a list of test files for IMPL-FILE."
-  (if-let ((plist (projectile--related-files-plist-by-kind impl-file :test)))
-      (projectile--related-files-from-plist plist)
-    (if-let ((predicate (projectile--impl-to-test-predicate impl-file)))
+  (if-let ((test-file-from-test-dir-fn
+            (projectile--test-file-from-test-dir-fn impl-file)))
+      (list test-file-from-test-dir-fn)
+    (if-let ((plist (projectile--related-files-plist-by-kind impl-file :test)))
+        (projectile--related-files-from-plist plist)
+      (when-let ((predicate (projectile--impl-to-test-predicate impl-file)))
         (projectile--best-or-all-candidates-based-on-parents-dirs
-         impl-file (cl-remove-if-not predicate (projectile-current-project-files))))))
+         impl-file (cl-remove-if-not predicate (projectile-current-project-files)))))))
 
 (defun projectile--test-to-impl-predicate (test-file)
   "Return a predicate, which returns t for any impl files for TEST-FILE."
@@ -3465,11 +3553,14 @@ Fallback to DEFAULT-VALUE for missing attributes."
 
 (defun projectile--find-matching-file (test-file)
   "Return a list of impl files tested by TEST-FILE."
-  (if-let ((plist (projectile--related-files-plist-by-kind test-file :impl)))
-      (projectile--related-files-from-plist plist)
-    (if-let ((predicate (projectile--test-to-impl-predicate test-file)))
-        (projectile--best-or-all-candidates-based-on-parents-dirs
-         test-file (cl-remove-if-not predicate (projectile-current-project-files))))))
+  (if-let ((impl-file-from-src-dir-fn
+            (projectile--impl-file-from-src-dir-fn test-file)))
+      (list impl-file-from-src-dir-fn)
+    (if-let ((plist (projectile--related-files-plist-by-kind test-file :impl)))
+        (projectile--related-files-from-plist plist)
+      (if-let ((predicate (projectile--test-to-impl-predicate test-file)))
+          (projectile--best-or-all-candidates-based-on-parents-dirs
+           test-file (cl-remove-if-not predicate (projectile-current-project-files)))))))
 
 (defun projectile--choose-from-candidates (candidates)
   "Choose one item from CANDIDATES."
@@ -3776,15 +3867,13 @@ regular expression."
            (default-directory project-root)
            (tags-file (expand-file-name projectile-tags-file-name))
            (command (format projectile-tags-command
-                            tags-file
+                            (or (file-remote-p tags-file 'localname) tags-file)
                             tags-exclude
-                            ;; Use directory file name for MSYS2 compatibility.
-                            ;; See https://github.com/bbatsov/projectile/issues/1377 for more details
-                            (directory-file-name default-directory)))
+                            "."))
            shell-output exit-code)
       (with-temp-buffer
         (setq exit-code
-              (call-process-shell-command command nil (current-buffer))
+              (process-file-shell-command command nil (current-buffer))
               shell-output (string-trim
                             (buffer-substring (point-min) (point-max)))))
       (unless (zerop exit-code)
@@ -3846,18 +3935,18 @@ regular expression."
     (call-interactively #'execute-extended-command)))
 
 ;;;###autoload
-(defun projectile-run-shell-command-in-root ()
+(defun projectile-run-shell-command-in-root (command &optional output-buffer error-buffer)
   "Invoke `shell-command' in the project's root."
-  (interactive)
+  (interactive "sShell command: ")
   (projectile-with-default-dir (projectile-acquire-root)
-    (call-interactively #'shell-command)))
+    (shell-command command output-buffer error-buffer)))
 
 ;;;###autoload
-(defun projectile-run-async-shell-command-in-root ()
+(defun projectile-run-async-shell-command-in-root (command &optional output-buffer error-buffer)
   "Invoke `async-shell-command' in the project's root."
-  (interactive)
+  (interactive "sAsync shell command: ")
   (projectile-with-default-dir (projectile-acquire-root)
-    (call-interactively #'async-shell-command)))
+    (async-shell-command command output-buffer error-buffer)))
 
 ;;;###autoload
 (defun projectile-run-gdb ()
@@ -4451,11 +4540,11 @@ project of that type"
       (projectile-read-command prompt default-cmd)
     default-cmd))
 
-(defun projectile-run-compilation (cmd)
+(defun projectile-run-compilation (cmd &optional use-comint-mode)
   "Run external or Elisp compilation command CMD."
   (if (functionp cmd)
       (funcall cmd)
-    (compile cmd)))
+    (compile cmd use-comint-mode)))
 
 (defvar projectile-project-command-history (make-hash-table :test 'equal)
   "The history of last executed project commands, per project.
@@ -4469,7 +4558,7 @@ Projects are indexed by their project-root value.")
                projectile-project-command-history)))
 
 (cl-defun projectile--run-project-cmd
-    (command command-map &key show-prompt prompt-prefix save-buffers)
+    (command command-map &key show-prompt prompt-prefix save-buffers use-comint-mode)
   "Run a project COMMAND, typically a test- or compile command.
 
 Cache the COMMAND for later use inside the hash-table COMMAND-MAP.
@@ -4497,8 +4586,44 @@ The command actually run is returned."
                                                         project-root))))
     (unless (file-directory-p default-directory)
       (mkdir default-directory))
-    (projectile-run-compilation command)
+    (projectile-run-compilation command use-comint-mode)
     command))
+
+(defcustom projectile-configure-use-comint-mode nil
+  "Make the output buffer of projectile-configure-project interactive."
+  :group 'projectile
+  :type 'boolean
+  :package-version '(projectile . "2.5.0"))
+
+(defcustom projectile-compile-use-comint-mode nil
+  "Make the output buffer of projectile-compile-project interactive."
+  :group 'projectile
+  :type 'boolean
+  :package-version '(projectile . "2.5.0"))
+
+(defcustom projectile-test-use-comint-mode nil
+  "Make the output buffer of projectile-test-project interactive."
+  :group 'projectile
+  :type 'boolean
+  :package-version '(projectile . "2.5.0"))
+
+(defcustom projectile-install-use-comint-mode nil
+  "Make the output buffer of projectile-install-project interactive."
+  :group 'projectile
+  :type 'boolean
+  :package-version '(projectile . "2.5.0"))
+
+(defcustom projectile-package-use-comint-mode nil
+  "Make the output buffer of projectile-package-project interactive."
+  :group 'projectile
+  :type 'boolean
+  :package-version '(projectile . "2.5.0"))
+
+(defcustom projectile-run-use-comint-mode nil
+  "Make the output buffer of projectile-run-project interactive."
+  :group 'projectile
+  :type 'boolean
+  :package-version '(projectile . "2.5.0"))
 
 ;;;###autoload
 (defun projectile-configure-project (arg)
@@ -4512,7 +4637,8 @@ with a prefix ARG."
     (projectile--run-project-cmd command projectile-configure-cmd-map
                                  :show-prompt arg
                                  :prompt-prefix "Configure command: "
-                                 :save-buffers t)))
+                                 :save-buffers t
+                                 :use-comint-mode projectile-configure-use-comint-mode)))
 
 ;;;###autoload
 (defun projectile-compile-project (arg)
@@ -4526,7 +4652,8 @@ with a prefix ARG."
     (projectile--run-project-cmd command projectile-compilation-cmd-map
                                  :show-prompt arg
                                  :prompt-prefix "Compile command: "
-                                 :save-buffers t)))
+                                 :save-buffers t
+                                 :use-comint-mode projectile-compile-use-comint-mode)))
 
 ;;;###autoload
 (defun projectile-test-project (arg)
@@ -4540,7 +4667,8 @@ with a prefix ARG."
     (projectile--run-project-cmd command projectile-test-cmd-map
                                  :show-prompt arg
                                  :prompt-prefix "Test command: "
-                                 :save-buffers t)))
+                                 :save-buffers t
+                                 :use-comint-mode projectile-test-use-comint-mode)))
 
 ;;;###autoload
 (defun projectile-install-project (arg)
@@ -4554,7 +4682,8 @@ with a prefix ARG."
     (projectile--run-project-cmd command projectile-install-cmd-map
                                  :show-prompt arg
                                  :prompt-prefix "Install command: "
-                                 :save-buffers t)))
+                                 :save-buffers t
+                                 :use-comint-mode projectile-install-use-comint-mode)))
 
 ;;;###autoload
 (defun projectile-package-project (arg)
@@ -4568,7 +4697,8 @@ with a prefix ARG."
     (projectile--run-project-cmd command projectile-package-cmd-map
                                  :show-prompt arg
                                  :prompt-prefix "Package command: "
-                                 :save-buffers t)))
+                                 :save-buffers t
+                                 :use-comint-mode projectile-package-use-comint-mode)))
 
 ;;;###autoload
 (defun projectile-run-project (arg)
@@ -4581,7 +4711,8 @@ with a prefix ARG."
   (let ((command (projectile-run-command (projectile-compilation-dir))))
     (projectile--run-project-cmd command projectile-run-cmd-map
                                  :show-prompt arg
-                                 :prompt-prefix "Run command: ")))
+                                 :prompt-prefix "Run command: "
+                                 :use-comint-mode projectile-run-use-comint-mode)))
 
 ;;;###autoload
 (defun projectile-repeat-last-command (show-prompt)
@@ -4610,24 +4741,18 @@ If the prefix argument SHOW_PROMPT is non nil, the command can be edited."
       (ring-insert command-history executed-command))))
 
 (defun compilation-find-file-projectile-find-compilation-buffer (orig-fun marker filename directory &rest formats)
-  "Try to find a buffer for FILENAME, if we cannot find it,
-fallback to the original function."
-  (when (and (not (file-exists-p (expand-file-name filename)))
-             (projectile-project-p))
-    (let* ((root (projectile-project-root))
-           (dirs (cons "" (projectile-current-project-dirs)))
-           (new-filename (car (cl-remove-if-not
-                               #'file-exists-p
-                               (mapcar
-                                (lambda (f)
-                                  (expand-file-name
-                                   filename
-                                   (expand-file-name f root)))
-                                dirs)))))
-      (when new-filename
-        (setq filename new-filename))))
-
-  (apply orig-fun `(,marker ,filename ,directory ,@formats)))
+  "Advice around compilation-find-file. We enhance its functionality by
+appending the current project's directories to its search path. This way
+when filenames in compilation buffers can't be found by compilation's
+normal logic they are searched for in project directories."
+  (let* ((root (projectile-project-root))
+         (compilation-search-path
+          (if (projectile-project-p)
+              (append compilation-search-path (list root)
+                      (mapcar (lambda (f) (expand-file-name f root))
+                              (projectile-current-project-dirs)))
+            compilation-search-path)))
+    (apply orig-fun `(,marker ,filename ,directory ,@formats))))
 
 (defun projectile-open-projects ()
   "Return a list of all open projects.
