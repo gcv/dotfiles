@@ -10,7 +10,6 @@
 (use-package dash)                       ; a modern list library
 (use-package f)                          ; file handling
 (use-package ht)                         ; hash tables
-(use-package map)                        ; a family of mapping functions
 (use-package parsec :pin melpa)          ; parser generator
 (use-package pfuture)
 (use-package queue :pin gnu)
