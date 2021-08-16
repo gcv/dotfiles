@@ -1,14 +1,12 @@
 ;;; olivetti.el --- Minor mode for a nice writing environment -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2014-2019  Paul W. Rankin
-;; Copyright (c) 2019       Free Software Foundation, Inc.
-;; Copyright (c) 2019-2021  Paul W. Rankin
+;; Copyright (c) 2014-2021  Paul W. Rankin
 
 ;; Author: Paul W. Rankin <pwr@bydasein.com>
 ;; Keywords: wp, text
-;; Package-Version: 2.0.0
-;; Package-Commit: 1f0d3cf404bb776fd04812f4d2313599e3c86806
-;; Version: 2.0.0
+;; Package-Version: 2.0.1
+;; Package-Commit: 032b3d779f7b374bd12f62b7fc717a310ea16bee
+;; Version: 2.0.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/olivetti
 
@@ -279,7 +277,9 @@ if it is an integer, and otherwise return WIDTH."
   "Remove Olivetti's parameters and margins from WINDOW."
   (when (eq (window-parameter window 'split-window) 'olivetti-split-window)
     (set-window-parameter window 'split-window nil))
-  (set-window-fringes window fringe-mode fringe-mode)
+  (if (consp fringe-mode)
+      (set-window-fringes window (car fringe-mode) (cdr fringe-mode))
+    (set-window-fringes window fringe-mode fringe-mode))
   (set-window-margins window nil))
 
 (defun olivetti-reset-all-windows ()
