@@ -16,6 +16,7 @@
 
 (setq confirm-kill-emacs 'yes-or-no-p)                          ; ask before exiting
 (setq debug-on-error nil)                                       ; turn this on only when needed
+(setq enable-remote-dir-locals t)                               ; use remote .dir-locals.el
 (setq font-lock-verbose nil)                                    ; silence slow compile messages
 (setq gnutls-verify-error t)                                    ; enable all TLS checks
 (setq inhibit-startup-screen t)                                 ; turn off the splash screen
@@ -32,7 +33,6 @@
 (setq tags-revert-without-query t)                              ; minimize TAGS use annoyance
 (setq truncate-partial-width-windows nil)                       ; no more truncated lines
 (setq use-dialog-box nil)                                       ; turn off lame GUI dialogs
-(setq enable-remote-dir-locals t)                               ; use remote .dir-locals.el
 (setq-default indent-tabs-mode nil)                             ; replace tabs with spaces
 (setq-default fill-column 80)                                   ; 80-character screens, not 70
 
