@@ -1,3 +1,12 @@
+(defun /println (str &optional buf)
+  "Get an *output* buffer going, and write to it. Like println in every language."
+  (let ((buf (if buf buf (get-buffer-create "*output*"))))
+    (with-current-buffer buf
+      (end-of-buffer)
+      (insert str "\n"))
+    (display-buffer buf)))
+
+
 (defun /mode-line-abbrev-file-name ()
   "Take the current buffer's file name and return only the last four elements
    of its path."
