@@ -4,8 +4,8 @@
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/swiper
-;; Package-Version: 20210802.931
-;; Package-Commit: bde2176e89aa38344f700e9e7f9fc5c7b4fc471f
+;; Package-Version: 20210819.1455
+;; Package-Commit: 7cdde66c95d5205287e88010bc7a3a978c931db0
 ;; Version: 0.13.4
 ;; Package-Requires: ((emacs "24.5") (ivy "0.13.4") (swiper "0.13.4"))
 ;; Keywords: convenience, matching, tools
@@ -4833,6 +4833,7 @@ An extra action allows to switch to the process buffer."
     (ivy-read "History: " (ivy-history-contents minibuffer-history-variable)
               :keymap ivy-reverse-i-search-map
               :action (lambda (x)
+                        (delete-minibuffer-contents)
                         (insert (substring-no-properties (car x))))
               :caller 'counsel-minibuffer-history)))
 
@@ -5257,7 +5258,7 @@ the face to apply."
 NAME specifies the name of the buffer (defaults to \"*Ibuffer*\")."
   (interactive)
   (setq counsel-ibuffer--buffer-name (or name "*Ibuffer*"))
-  (ivy-read "Switch to buffer: " (counsel-ibuffer--get-buffers)
+  (ivy-read "Switch to buffer: " (counsel--ibuffer-get-buffers)
             :history 'counsel-ibuffer-history
             :action #'counsel-ibuffer-visit-buffer
             :caller 'counsel-ibuffer))
@@ -5267,8 +5268,10 @@ NAME specifies the name of the buffer (defaults to \"*Ibuffer*\")."
 (declare-function ibuffer-forward-line "ibuffer")
 (defvar ibuffer-movement-cycle)
 
-(defun counsel-ibuffer--get-buffers ()
-  "Return list of buffer-related lines in Ibuffer as strings."
+(defun counsel--ibuffer-get-buffers ()
+  "Return an alist with buffer completion candidates from Ibuffer.
+The keys are buffer-related lines from Ibuffer as strings, and
+the values are the corresponding buffer objects."
   (let ((oldbuf (get-buffer counsel-ibuffer--buffer-name)))
     (unless oldbuf
       ;; Avoid messing with the user's precious window/frame configuration.
@@ -5298,11 +5301,11 @@ NAME specifies the name of the buffer (defaults to \"*Ibuffer*\")."
 
 (defun counsel-ibuffer-visit-buffer (x)
   "Switch to buffer of candidate X."
-  (switch-to-buffer (cdr x)))
+  (switch-to-buffer (or (cdr-safe x) x)))
 
 (defun counsel-ibuffer-visit-buffer-other-window (x)
   "Switch to buffer of candidate X in another window."
-  (switch-to-buffer-other-window (cdr x)))
+  (switch-to-buffer-other-window (or (cdr-safe x) x)))
 
 (defun counsel-ibuffer-visit-ibuffer (_)
   "Switch to Ibuffer buffer."
