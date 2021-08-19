@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler and Consult contributors
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 0.10
+;; Version: 0.11
 ;; Package-Requires: ((emacs "26.1"))
 ;; Homepage: https://github.com/minad/consult
 
@@ -222,7 +222,7 @@ See `consult--multi' for a description of the source values."
   :type 'integer)
 
 (defconst consult--grep-match-regexp
-  "\\`\\(?:./\\)?\\([^\n:]+\\):\\([0-9]+\\):"
+  "\\`\\(?:\\./\\)?\\([^\n:]+\\):\\([0-9]+\\):"
   "Regexp used to match file and line of grep output.")
 
 ;; TODO remove deprecation
@@ -4102,7 +4102,7 @@ BUILDER is the command argument builder."
                   (add-text-properties 0 file-len `(face consult-file consult--grep-file ,file) str)
                   (put-text-property (1+ file-len) (+ 1 file-len (length line)) 'face 'consult-line-number str)
                   (push str result)))))
-          (funcall async result)))
+          (funcall async (nreverse result))))
        (t (funcall async action))))))
 
 (defun consult--grep-position (cand &optional find-file)
