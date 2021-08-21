@@ -87,9 +87,9 @@
 (use-package embark-consult
   :pin melpa
   :after (embark consult)
-  ;; :demand t
-  ;; :hook
-  ;; (embark-collect-mode . consult-preview-at-point-mode)
+  :demand t                             ; required!
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode)
   )
 
 
