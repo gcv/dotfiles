@@ -209,6 +209,7 @@
 (require 'quelpa-use-package)
 (setq quelpa-stable-p nil
       quelpa-checkout-melpa-p nil)
+(quelpa-use-package-activate-advice)    ; undocumented!
 
 
 ;;; ----------------------------------------------------------------------------
