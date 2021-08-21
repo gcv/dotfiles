@@ -1,0 +1,2 @@
+;;; Generated package description from embark-consult.el  -*- no-byte-compile: t -*-
+(define-package "embark-consult" "20210816.1819" "Consult integration for Embark" '((emacs "25.1") (embark "0.9") (consult "0.1")) :commit "353275e345908cc8464fa0f51cb35db0e43e119d" :authors '(("Omar Antolín Camarena" . "omar@matem.unam.mx")) :maintainer '("Omar Antolín Camarena" . "omar@matem.unam.mx") :keywords '("convenience") :url "https://github.com/oantolin/embark")

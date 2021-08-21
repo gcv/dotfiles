@@ -1,6 +1,9 @@
 (use-package selectrum
   :pin melpa
 
+  :custom
+  (selectrum-display-style '(vertical))
+
   ;;:init
   ;;(selectrum-mode 1)
 
@@ -8,6 +11,8 @@
   (when window-system
     ;; match mini-frame height - 1
     (setq selectrum-num-candidates-displayed 14))
+
+  selectrum-display-style
 
   (selectrum-prescient-mode 1)
   )
@@ -57,6 +62,34 @@
   :init
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
+  )
+
+
+(use-package embark
+  :pin melpa
+
+  :bind
+  (("C-," . embark-act)
+   ("C-M-," . embark-dwim))
+
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+  ;; hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none))))
+  )
+
+
+(use-package embark-consult
+  :pin melpa
+  :after (embark consult)
+  ;; :demand t
+  ;; :hook
+  ;; (embark-collect-mode . consult-preview-at-point-mode)
   )
 
 
