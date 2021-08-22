@@ -168,7 +168,8 @@ bounds pair of the target at point for highlighting."
   '((minor-mode . embark--lookup-lighter-minor-mode)
     (symbol . embark--refine-symbol-type)
     (embark-keybinding . embark--keybinding-command)
-    (project-file . embark--project-file-full-path))
+    (project-file . embark--project-file-full-path)
+    (versioned-package . embark--remove-package-version))
   "Alist associating type to functions for transforming targets.
 Each function should take a type and a target string and return a
 pair of the form a `cons' of the new type and the new target."
@@ -427,8 +428,7 @@ the key :always are executed always."
     (capitalize-region embark--mark-target)
     (count-words-region embark--mark-target)
     (shell-command-on-region embark--mark-target)
-    (backward-delete-char embark--mark-target)
-    (backward-delete-char-untabify embark--mark-target))
+    (delete-region embark--mark-target))
   "Alist associating commands with pre-action hooks.
 The hooks are run right before an action is embarked upon.  See
 `embark-setup-action-hooks' for information about the hook
@@ -679,6 +679,7 @@ In `dired-mode', it uses `dired-get-filename' instead."
           . ,(bounds-of-thing-at-point 'url))))
 
 (declare-function widget-at "wid-edit")
+
 (defun embark-target-custom-variable-at-point ()
   "Target the variable corresponding to the customize widget at point."
   (when (derived-mode-p 'Custom-mode)
@@ -701,29 +702,33 @@ In `dired-mode', it uses `dired-get-filename' instead."
 ;; parentheses. This version here is slightly more general.
 (defun embark-target-expression-at-point ()
   "Target expression at point."
-  (when-let*
-      ((pt (point))
-       (bounds
-        (save-excursion
-          (catch 'found
-            (while
-                ;; Looking at opening parenthesis or find last one
-                (or (memq (syntax-class (syntax-after pt)) '(4 6 7))
-                    (re-search-backward "\\(\\s(\\|\\s/\\|\\s\"\\)"
-                                        nil 'noerror))
-              (when-let (bounds (bounds-of-thing-at-point 'sexp))
-                ;; Point must be located within the sexp at point.
-                ;; Otherwise continue the search for the next larger
-                ;; outer sexp.
-                (when (<= (car bounds) pt (cdr bounds))
-                  (throw 'found bounds))))))))
-    (unless (eq (car bounds) (car (bounds-of-thing-at-point 'defun)))
-      `(expression
-        ,(buffer-substring (car bounds) (cdr bounds))
-        . ,bounds))))
+  (cl-flet ((syntax-p (class &optional (delta 0))
+              (and (<= (point-min) (+ (point) delta) (point-max))
+                   (eq (pcase class
+                         ('open 4) ('close 5) ('prefix 6) ('string 7))
+                       (syntax-class (syntax-after (+ (point) delta)))))))
+    (when-let
+        ((start
+          (pcase-let ((`(_ ,open _ ,string _ _ _ _ ,start _ _) (syntax-ppss)))
+            (ignore-errors ; set start=nil if delimiters are unbalanced
+              (cond
+                (string start)
+                ((or (syntax-p 'open) (syntax-p 'prefix))
+                 (save-excursion (backward-prefix-chars) (point)))
+                ((syntax-p 'close -1)
+                 (save-excursion
+                   (backward-sexp) (backward-prefix-chars) (point)))
+                ((syntax-p 'string) (point))
+                ((syntax-p 'string -1) (scan-sexps (point) -1))
+                (t open)))))
+         (end (ignore-errors (scan-sexps start 1))))
+      (unless (eq start (car (bounds-of-thing-at-point 'defun)))
+      `(expression ,(buffer-substring start end) ,start . ,end)))))
 
 (defmacro embark-define-thingatpt-target (thing &rest modes)
-  "Define a target finder for THING using the thingatpt library."
+  "Define a target finder for THING using the thingatpt library.
+If any MODES are given, the target finder only applies to buffers
+in one of those major modes."
   (declare (indent 1))
   `(defun ,(intern (format "embark-target-%s-at-point" thing)) ()
      ,(format "Target %s at point." thing)
@@ -772,7 +777,7 @@ As a convenience, in Org Mode an initial ' or surrounding == or
 Return the category metadatum as the type of the target.
 
 This target finder is meant for the default completion UI and
-completion UI highly compatible with it, like `icomplete-mode'.
+completion UI highly compatible with it, like Icomplete.
 Many completion UIs can still work with Embark but will need
 their own target finder.  See for example
 `embark--vertico-selected' or `embark--selectrum-selected'."
@@ -1624,6 +1629,10 @@ work on them."
                            (car (project-roots project))))))
             (expand-file-name target root)
           target)))
+
+(defun embark--remove-package-version (_type target)
+  "Remove version number from a versioned package."
+  (cons 'package (replace-regexp-in-string "-[0-9.]+$" "" target)))
 
 (defun embark--targets ()
   "Retrieve current targets.
@@ -3116,7 +3125,8 @@ and leaves the point to the left of it."
   ("L" embark-collect-live)
   ("B" embark-become)
   ("C-s" embark-isearch)
-  ("SPC" mark))
+  ("SPC" mark)
+  ("DEL" delete-region))
 
 (autoload 'org-table-convert-region "org-table")
 
