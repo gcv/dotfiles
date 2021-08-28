@@ -38,7 +38,6 @@ nix-env -i \
     gnupg \
     htop \
     jq \
-    kopia \
     ledger \
     libvterm-neovim \
     magic-wormhole \
