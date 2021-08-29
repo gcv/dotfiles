@@ -246,8 +246,7 @@
   )
 
 
-;;; Deprecated, since set-fontset-font invocations with appropriate fonts should
-;;; now work.
+;;; obsolete: set-fontset-font invocations with appropriate fonts should work
 ;; (use-package emojify
 ;;   :pin melpa
 ;;   :defer t
@@ -338,7 +337,7 @@
   )
 
 
-;;; Obsoleted by zoom.
+;;; obsolete: replaced by zoom
 (use-package golden-ratio
   :pin melpa
   :diminish " φ"
