@@ -218,6 +218,7 @@
   )
 
 
+;;; obsolete: replaced by envrc
 (use-package direnv
   :config
   ;; It's faster to keep this minor mode disabled, and use
@@ -258,6 +259,14 @@
 ;;             ;;(global-emojify-mode)
 ;;             ))
 
+
+;;; handle direnv configuration on a per-buffer basis, instead of globally (as
+;;; the direnv package does)
+(use-package envrc
+  :pin melpa
+  :config
+  ;;(envrc-global-mode)
+  )
 
 ;;; gopher and gemini client
 (use-package elpher)
