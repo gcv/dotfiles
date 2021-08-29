@@ -42,12 +42,13 @@ nix-env -i \
     libvterm-neovim \
     magic-wormhole \
     mosh \
+    nix-direnv \
     nmap \
     notmuch \
     offlineimap \
+    p7zip \
     pandoc \
     password-store \
-    p7zip \
     pv \
     rclone \
     restic \
