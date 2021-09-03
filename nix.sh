@@ -63,4 +63,5 @@ nix-env -i \
     watch \
     wget \
     xz \
-    youtube-dl
+    youtube-dl \
+    yt-dlp
