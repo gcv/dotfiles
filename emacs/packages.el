@@ -263,6 +263,10 @@
 ;;; the direnv package does)
 (use-package envrc
   :pin melpa
+
+  :custom
+  (envrc-lighter nil)
+
   :config
   ;;(envrc-global-mode)
   )
