@@ -25,6 +25,8 @@
   (("C-M-o" . ace-window))
 
   :custom
+  (aw-display-mode-overlay nil)
+  (aw-make-frame-char ?!)
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l ?z ?x ?c ?v ?b ?n ?m))
   )
 
