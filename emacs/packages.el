@@ -177,6 +177,10 @@
   )
 
 
+(use-package csv-mode
+  :pin gnu)
+
+
 (use-package deft
   :bind
   (("C-c d" . deft))
