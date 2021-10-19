@@ -153,6 +153,5 @@
         (advice-remove 'org-babel--shell-command-on-region overrider))))
 
   (advice-add 'org-ctrl-c-ctrl-c :around #'/org-ctrl-c-ctrl-c)
-  (advice-remove 'org-ctrl-c-ctrl-c #'/org-ctrl-c-ctrl-c)
 
   )
