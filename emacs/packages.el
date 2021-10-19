@@ -225,12 +225,12 @@
 
 
 ;;; obsolete: replaced by envrc
-(use-package direnv
-  :config
-  ;; It's faster to keep this minor mode disabled, and use
-  ;; direnv-update-environment manually as needed.
-  ;;(direnv-mode 1)
-  )
+;; (use-package direnv
+;;   :config
+;;   ;; It's faster to keep this minor mode disabled, and use
+;;   ;; direnv-update-environment manually as needed.
+;;   ;;(direnv-mode 1)
+;;   )
 
 
 (use-package discover-my-major
