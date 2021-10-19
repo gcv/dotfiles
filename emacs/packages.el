@@ -275,7 +275,7 @@
   (envrc-on-lighter '(" ε"))
 
   :config
-  ;;(envrc-global-mode)
+  (envrc-global-mode 0)
   )
 
 ;;; gopher and gemini client
