@@ -66,7 +66,7 @@ function obj:goCommand(idxCmd)
    local currentSSID = hs.wifi.currentNetwork()
    local isExcludedSSID = false
    for idxSSID, rxSSID in ipairs(self.excludedSSIDs) do
-      if string.find(currentSSID, rxSSID) then
+      if currentSSID and string.find(currentSSID, rxSSID) then
          isExcludedSSID = true
          break
       end

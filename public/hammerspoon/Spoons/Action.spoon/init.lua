@@ -3,14 +3,14 @@
 --- Orchestrates running scheduled tasks. Useful for automatic backup of local
 --- data using command-line utilities such as Restic, Kopia, and Borg.
 ---
---- Download: https://github.com/gcv/action-spoon/releases/download/1.0.0beta2/Action.spoon.zip
+--- Download: https://github.com/gcv/action-spoon/releases/download/1.0.0beta3/Action.spoon.zip
 
 local obj = {}
 obj.__index = obj
 
 --- Metadata
 obj.name = "Action"
-obj.version = "1.0.0beta2"
+obj.version = "1.0.0beta3"
 obj.author = "gcv"
 obj.homepage = "https://github.com/gcv/action.spoon"
 obj.license = "CC0"
