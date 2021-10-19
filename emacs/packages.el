@@ -271,7 +271,8 @@
   :pin melpa
 
   :custom
-  (envrc-lighter nil)
+  ;;(envrc-lighter nil)
+  (envrc-on-lighter '(" ε"))
 
   :config
   ;;(envrc-global-mode)
