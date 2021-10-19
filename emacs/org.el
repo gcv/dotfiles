@@ -127,4 +127,32 @@
 
   (advice-add 'org-toggle-heading :after #'/org-toggle-heading)
 
+  ;; XXX: Massive kludge. org-babel--shell-command-on-region does not respect
+  ;; buffer-local exec-path because it executes in the context of a temporary
+  ;; buffer which does not copy in buffer-local exec-path. It also knows nothing
+  ;; about envrc-mode setting the PATH environment variable. This installs an
+  ;; advice at a point that runs in the Org buffer which then installs a piece of
+  ;; advice on org-babel--shell-command-on-region to do the right thing. What a
+  ;; mess.
+  (defun /org-ctrl-c-ctrl-c (orig-fn &rest args)
+    (let* ((buf (current-buffer))
+           (ep (exec-path))
+           (shell-path (getenv "PATH"))
+           (overrider (lambda (orig-fn &rest args)
+                        (let ((exec-path ep)
+                              (saved-path (getenv "PATH")))
+                          (unwind-protect
+                              (progn
+                                (setenv "PATH" (s-join ":" ep))
+                                (apply orig-fn args))
+                            (setenv "PATH" saved-path))))))
+      (unwind-protect
+          (progn
+            (advice-add 'org-babel--shell-command-on-region :around overrider)
+            (apply orig-fn args))
+        (advice-remove 'org-babel--shell-command-on-region overrider))))
+
+  (advice-add 'org-ctrl-c-ctrl-c :around #'/org-ctrl-c-ctrl-c)
+  (advice-remove 'org-ctrl-c-ctrl-c #'/org-ctrl-c-ctrl-c)
+
   )
