@@ -7,6 +7,24 @@ hs.hotkey.bind(
 )
 hs.alert("Reloading Hammerspoon configuration")
 
+-- forward delete key should be escape on 60% keyboards
+-- but this code does not work in Emacs and iTerm2, not sure why
+-- eventtapHandler = hs.eventtap.new(
+--    {hs.eventtap.event.types.keyDown},
+--    function (evt)
+--       local kbdType = evt:getProperty(hs.eventtap.event.properties.keyboardEventKeyboardType)
+--       local kbdEvtCode = evt:getProperty(hs.eventtap.event.properties.keyboardEventKeycode)
+--       if 46 == kbdType then
+--          if kbdEvtCode == hs.keycodes.map.forwarddelete then
+--             evt:setKeyCode(hs.keycodes.map.escape)
+--          elseif kbdEvtCode == hs.keycodes.map.escape then
+--             evt:setKeyCode(hs.keycodes.map["`"])
+--          end
+--       end
+--    end
+-- )
+-- eventtapHandler:start()
+
 --- external scripts
 dofile("./dark-mode.lua")
 dofile("./windows.lua")
