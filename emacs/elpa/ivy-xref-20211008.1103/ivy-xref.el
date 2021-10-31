@@ -4,7 +4,8 @@
 
 ;; Author: Alex Murray <murray.alex@gmail.com>
 ;; URL: https://github.com/alexmurray/ivy-xref
-;; Package-Version: 20191126.401
+;; Package-Version: 20211008.1103
+;; Package-Commit: a82e8e117d2dd62c28b6a3e3d6e4cfb11c0bda38
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "25.1") (ivy "0.10.0"))
 
@@ -56,25 +57,26 @@
   "Transform XREFS into a collection for display via `ivy-read'."
   (let ((collection nil))
     (dolist (xref xrefs)
-      (with-slots (summary location) xref
-        (let* ((line (xref-location-line location))
-               (file (xref-location-group location))
-               (candidate
-                 (concat
-                  (propertize
-                   (concat
-                    (if ivy-xref-use-file-path
-                        file
-                      (file-name-nondirectory file))
-                    (if (integerp line)
-                        (format ":%d: " line)
-                      ": "))
-                   'face 'compilation-info)
-                  (progn
-                    (when ivy-xref-remove-text-properties
-                      (set-text-properties 0 (length summary) nil summary))
-                    summary))))
-          (push `(,candidate . ,location) collection))))
+      (let* ((summary (xref-item-summary xref))
+             (location  (xref-item-location xref))
+             (line (xref-location-line location))
+             (file (xref-location-group location))
+             (candidate
+              (concat
+               (propertize
+                (concat
+                 (if ivy-xref-use-file-path
+                     file
+                   (file-name-nondirectory file))
+                 (if (integerp line)
+                     (format ":%d: " line)
+                   ": "))
+                'face 'compilation-info)
+               (progn
+                 (when ivy-xref-remove-text-properties
+                   (set-text-properties 0 (length summary) nil summary))
+                 summary))))
+        (push `(,candidate . ,location) collection)))
     (nreverse collection)))
 
 ;;;###autoload
