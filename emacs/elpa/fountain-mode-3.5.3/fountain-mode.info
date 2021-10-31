@@ -7,11 +7,11 @@ Copyright (C) 2021 Paul W. Rankin
 Paul W. Rankin, Kohl Sudduth
 INFO-DIR-SECTION Emacs
 START-INFO-DIR-ENTRY
-* Fountain Mode: (fountain-mode). Write screenplays and stageplays.
+* Fountain Mode: (fountain-mode).	Write screenplays.
 END-INFO-DIR-ENTRY
 
 
-File: fountain-mode.info,  Node: Top,  Next: Introduction,  Up: (dir)
+File: fountain-mode.info,  Node: Top,  Next: Overview,  Up: (dir)
 
 Fountain Mode
 *************
@@ -20,11 +20,10 @@ Fountain Mode
      missing.  Please consult the help functions within Emacs for
      current documentation.
 
-   Fountain Mode is a scriptwriting (both screenplays and stageplays)
-program for GNU Emacs version 24.4 or later.  The Fountain markup format
-is a plain-text format designed to be easily readable and editable,
-portable and future-proof, and to look as much like a script as
-possible.
+   Fountain Mode is a screenwriting (and playwriting) program for
+GNU Emacs version 24.4 or later.  The Fountain markup format is a
+plain-text format designed to be easily readable and editable, portable
+and future-proof, and to look as much like a script as possible.
 
    This is the Fountain Mode Manual updated for version 3.5.
 
@@ -33,70 +32,67 @@ possible.
 
 * Menu:
 
-* Introduction::                The pitch.
-* Installation::                Getting started.
-* Script Elements::             The constituent parts of Fountain.
-* Outlining::                   Organize your script in pieces.
-* Navigation::                  Fly through your script with ease.
-* Syntax Highlighting::         Differentiate all the elements with colors.
-* Element Aligning::            WYSIWYG visual indentation of script elements.
-* Text Emphasis::               Bold, italic and underline.
-* Autocompletion::              Completion of frequently used text.
-* Do What I Mean::              Traditional TAB-style autocompletion.
-* Scene Numbering::             Adding numbers to a script scenes.
-* Pagination::                  Counting a navigating script pages.
-* Exporting::                   Sharing your great writing!
-* Indexes::
+* Overview::			The pitch.
+* Installation::		Getting started.
+* Script Elements::		The constituent parts of Fountain.
+* Outlining::			Organize your script in pieces.
+* Navigation::			Fly through your script with ease.
+* Syntax Highlighting::		Differentiate all the elements with colors.
+* Element Aligning::		WYSIWYG visual indentation of script elements.
+* Text Emphasis::		Bold, italic and underline.
+* Do What I Mean::		Traditional TAB-style autocompletion.
+* Autocompletion::		Completion of frequently used text.
+* Scene Numbering::		Adding numbers to a script scenes.
+* Pagination::			Counting a navigating script pages.
+* Exporting::			Sharing your great writing!
+* Donations::			Support Fountain Mode development.
+* Indexes::			What are you looking for?
 
 
-File: fountain-mode.info,  Node: Introduction,  Next: Installation,  Prev: Top,  Up: Top
+File: fountain-mode.info,  Node: Overview,  Next: Installation,  Prev: Top,  Up: Top
 
-Introduction
-************
+Overview
+********
 
 Fountain Mode combines the simplicity of Fountain syntax with the
-extensibility of Emacs.  Fountain Mode is a major mode for Emacs, which
+extensibility of Emacs. Fountain Mode is a major mode for Emacs, which
 is to say it is a program that runs inside Emacs -- the extensible,
 customizable, free/libre text editor.  It enables the writer to engage
 with all aspects of realizing a screenplay -- story development,
-outlining, drafting, rewriting -- and to work in such a way that the
-hands never need to leave the keyboard.
-
-   After learning a handful of syntax rules and a few keyboard
-shortcuts, nothing stands between the writer and the screenplay.  The
-friction between thought and its expression on the page lessens,
-allowing the writer to more readily access a state of relaxed
-concentration that is conducive to creativity -- all the writer needs to
-do is write.
+outlining, drafting, and rewriting.
 
    To quickly get up to speed with Fountain syntax, memorize the rules
 for the six most used elements of the screenplay format: *note Scene
 Headings::, *note Action::, *note Characters::, *note Dialogue::, *note
 Parentheticals::, and *note Transitions::.
 
-   Then learn how to use *note Section Headings:: to outline a story.
-This will be familiar for anyone who has used Markdown, as the syntax is
-the same.  Sections allow you to easily show or hide and reorder large
-parts of a script.
+   Then learn how to outline a script.  *Note Section Headings::.  This
+will be familiar for anyone who has used Markdown, as the syntax is the
+same.  Sections allow you to easily show or hide and reorder large parts
+of a script.
 
    There are additional Fountain syntax elements to allow for
 brainstorming, capturing ideas and omitting a part of the script without
-deleting it.  These include *note Synopses::, *note Notes::, and *note
-Comments::.  These elements are not usually included in the formatted
-output.
+deleting it.  *Note Synopses::, *note Notes::, and *note Comments::.
+These elements are not usually included in the formatted output.
+
+   All of Fountain Mode's capabilities are accessible via the menu, and
+all customization is performed via the 'Fountain' option group.  *Note
+(emacs) Customization Groups::.
 
 
-File: fountain-mode.info,  Node: Installation,  Next: Script Elements,  Prev: Introduction,  Up: Top
+File: fountain-mode.info,  Node: Installation,  Next: Script Elements,  Prev: Overview,  Up: Top
 
 Installation
 ************
 
 The latest stable release of Fountain Mode is available as an Emacs
-package via MELPA-stable (https://stable.melpa.org/#/fountain-mode).  In
-order to install packages via MELPA-stable, you'll first need to add it
-to your package archives:
+package via MELPA-stable (https://stable.melpa.org/#/fountain-mode).
 
-   'M-x customize-option RET package-archives RET'
+   In order to install packages via MELPA-stable, you'll first need to
+add it to your package archives:
+
+     M-x customize-option RET package-archives RET
 
    Insert an entry named 'melpa-stable' with the URL
 'https://stable.melpa.org/packages/'
@@ -109,13 +105,13 @@ list returned by:
    If you like to live on the bleeding edge and prefer the latest but
 perhaps unstable version, do the above using MELPA
 (https://melpa.org/#/fountain-mode).  Unless you are already familiar
-with debugging Elisp code, you are strongly encouraged to use the stable
+with debugging Elisp code, it is strongly encouraged to use the stable
 version.
 
 * Menu:
 
-* Requirements::                Do you have what it takes?
-* Advanced Installation::       For the pros.
+* Requirements::		Do you have what it takes?
+* Advanced Installation::	For the pros.
 
 
 File: fountain-mode.info,  Node: Requirements,  Next: Advanced Installation,  Up: Installation
@@ -142,7 +138,7 @@ Advanced Installation
 
 Download the latest release
 (https://github.com/rnkn/fountain-mode/releases/latest), move this file
-into your load-path and add the following to your 'init.el' file:
+into your 'load-path' and add the following to your 'init.el' file:
 
      (require 'fountain-mode)
 
@@ -150,6 +146,8 @@ into your load-path and add the following to your 'init.el' file:
 repository into your load-path and require as above:
 
      git clone https://github.com/rnkn/fountain-mode
+
+   *Note (emacs) Lisp Libraries::.
 
 
 File: fountain-mode.info,  Node: Script Elements,  Next: Outlining,  Prev: Installation,  Up: Top
@@ -162,24 +160,23 @@ able to just start writing -- as long as your text looks like a script,
 you should get correctly formatted output.
 
      n.b.: Fountain Mode uses the Fountain 1.1 syntax specification.
-     While some programs use custom additions to the specification,
-     these aren't considered official.  For the greatest
-     cross-compatibility, stick with the 1.1 spec.
+     While some programs use custom additions to the specification, for
+     the greatest cross-compatibility, stick with the 1.1 spec.
 
 * Menu:
 
-* Metadata::                    Key-value info at the top of your script.
-* Section Headings::            Outline your script with '#'-prefixed headings.
-* Scene Headings::              Lines beginning with 'INT', 'EXT', etc.
-* Action::                      Anything that's not another element.
-* Characters::                  Names are in ALL-CAPS.
-* Dialogue::                    Text following character elements.
-* Parentheticals::              Text inside (parens) within dialogue.
-* Transitions::                 Uppercase lines ending in 'TO:'.
-* Notes::                       Text within '[[' double brackets ']]'.
-* Synopses::                    Lines beginning with '='.
-* Center Text::                 Put your titles '>' between these '<'.
-* Comments::                    C-style multi-line comments (aka "Boneyard").
+* Metadata::			Key-value info at the top of your script.
+* Section Headings::		Outline your script with '#'-prefixed headings.
+* Scene Headings::		Lines beginning with 'INT', 'EXT', etc.
+* Action::			Anything that's not another element.
+* Characters::			Names are in ALL-CAPS.
+* Dialogue::			Text following character elements.
+* Parentheticals::		Text inside (parens) within dialogue.
+* Transitions::			Uppercase lines ending in 'TO:'.
+* Notes::			Text within '[[' double brackets ']]'.
+* Synopses::			Lines beginning with '='.
+* Center Text::			Put your titles '>' between these '<'.
+* Comments::			C-style multi-line comments (aka "Boneyard").
 
 
 File: fountain-mode.info,  Node: Metadata,  Next: Section Headings,  Up: Script Elements
@@ -189,7 +186,9 @@ Metadata
 
 A Fountain script usually starts with some metadata stating the basic
 information about the script.  These are colon-separated key-value pairs
-at the start of a file, e.g.  'key: value'.
+at the start of a file:
+
+     key: value
 
    Other Fountain-compatible programs may refer to this as "title page"
 info, but metadata can store information not related to or present on
@@ -218,9 +217,9 @@ the colon, or a newline followed multiple lines indented with
 whitespace:
 
      author:
-         Mary Maryland
-         and
-         Alan Smithee
+     	Mary Maryland
+     	and
+     	Alan Smithee
 
    Metadata keys are case-insensitive, e.g.  'Title' is the same as
 'title'.
@@ -252,8 +251,9 @@ Scene Headings
 A scene begins with a scene heading.
 
    Scene headings begin with a prefix, specified in
-'fountain-scene-heading-prefix-list', which defaults to 'INT, EXT, EST,
-INT./EXT., INT/EXT, I/E'.
+'fountain-scene-heading-prefix-list', which defaults to:
+
+     INT, EXT, EST, INT./EXT., INT/EXT, I/E
 
    Each prefix may be followed by a dot and/or a space, so the following
 are equivalent:
@@ -269,7 +269,7 @@ are equivalent:
  -- User Option: fountain-scene-heading-suffix-sep
      This option allows setting the separator (a regular expression)
      between the scene location and time of day.  The default ' --? '
-     allows either ' - ' or ' -- '.
+     allows either one or two dashes.
 
    *Note Scene Heading Completion::.
 
@@ -480,8 +480,35 @@ File: fountain-mode.info,  Node: Navigation,  Next: Syntax Highlighting,  Prev: 
 Navigation
 **********
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+ -- Function: fountain-outline-next
+     Bound to 'C-M-n', move to the next visible heading line.  Also
+     'fountain-outline-previous', bound to 'C-M-p'.
+
+ -- Function: fountain-outline-forward
+     Bound to 'C-M-f', move forward to the ARG'th subheading at same
+     level as this one.  Also 'fountain-outline-backward', bound to
+     'C-M-b'.
+
+ -- Function: fountain-outline-beginning
+     Bound to 'C-M-a', move to the beginning of the current subtree.
+
+ -- Function: fountain-outline-up
+     Bound to 'C-M-u', move to the visible heading line of which the
+     present line is a subheading.
+
+ -- Function: fountain-forward-character
+     Bound to 'M-n', goto Nth next character (or Nth previous is N is
+     negative).  Also 'fountain-backward-character', bound to 'M-p'.
+
+ -- Function: fountain-forward-page
+     Bound to 'C-x ]', move to Nth next page (or Nth previous if N is
+     negative).  Also 'fountain-backward-page', bound to 'C-x ['.
+
+ -- Function: fountain-goto-scene
+     Bound to 'M-g s', move point to Nth scene in current buffer.
+
+ -- Function: fountain-goto-page
+     Bound to 'M-g p', move point to Nth page in current buffer.
 
 
 File: fountain-mode.info,  Node: Syntax Highlighting,  Next: Element Aligning,  Prev: Navigation,  Up: Top
@@ -502,7 +529,7 @@ Sorry, this node is not yet written.  You can help by submitting a
 patch!
 
 
-File: fountain-mode.info,  Node: Text Emphasis,  Next: Autocompletion,  Prev: Element Aligning,  Up: Top
+File: fountain-mode.info,  Node: Text Emphasis,  Next: Do What I Mean,  Prev: Element Aligning,  Up: Top
 
 Text Emphasis
 *************
@@ -519,18 +546,58 @@ Text can be underlined, italic, bold, or a combination thereof.
 typewriters, stick to underlining.
 
 
-File: fountain-mode.info,  Node: Autocompletion,  Next: Do What I Mean,  Prev: Text Emphasis,  Up: Top
+File: fountain-mode.info,  Node: Do What I Mean,  Next: Autocompletion,  Prev: Text Emphasis,  Up: Top
+
+Do What I Mean
+**************
+
+Like many screenwriting programs, in Fountain Mode pressing 'TAB' will
+do the most convenient thing based on context.
+
+   The most common use is triggering autocompletion.  If the point is at
+a blank line or the end of a non-blank line, pressing 'TAB' will call
+'completion-at-point'.  *Note Autocompletion::.
+
+   In Fountain Mode, 'TAB' is also used to control outline visibility.
+So if point is at a scene or section heading, it will cycle visibility
+of that scene of section between collapsed and expanded.  To allow for
+more control over outline cycling, if 'TAB' is prefixed with 'ARG', call
+'fountain-outline-cycle' and pass 'ARG'.  *Note Outlining::.
+
+   'TAB' also helps working with parentheticals.  If the point is at a
+blank line within dialogue, it will insert a parenthetical; if the point
+is inside an empty parenthetical, it will delete it, or if inside a
+non-empty parenthetical, move to a newline.
+
+   If the point is at or inside a note, 'TAB' will cycle visibility of
+that note between collapsed and expanded.
+
+   This all might seem complicated, but the idea is by covering all the
+cases you don't have to think about it.
+
+ -- Function: fountain-dwim
+     This is the command you'll use the most.  Bound to 'TAB', it will
+     perform the most convenient action based on the current context.
+
+
+File: fountain-mode.info,  Node: Autocompletion,  Next: Scene Numbering,  Prev: Do What I Mean,  Up: Top
 
 Autocompletion
 **************
 
-One of the nicest things about using a dedicated scriptwriting program
-is that it helps you type less of the things you need to type a lot.
+One of the nice things about using a dedicated screenwriting program is
+that it helps you type less of the things you need to type a lot.
+Fountain Mode provides autocompletion for scene headings and character
+names.
+
+ -- Function: fountain-completion-update
+     This command, bound to 'C-c C-x a' will update the completion
+     candidates for current buffer.
 
 * Menu:
 
-* Scene Heading Completion::    Complete times and places.
-* Character Name Completion::   For every time someone speaks.
+* Scene Heading Completion::	Complete times and places.
+* Character Name Completion::	For every time someone speaks.
 
 
 File: fountain-mode.info,  Node: Scene Heading Completion,  Next: Character Name Completion,  Up: Autocompletion
@@ -622,33 +689,7 @@ completion candidates.
      JOHN|
 
 
-File: fountain-mode.info,  Node: Do What I Mean,  Next: Scene Numbering,  Prev: Autocompletion,  Up: Top
-
-Do What I Mean
-**************
-
-Like many scriptwriting programs, in Fountain Mode pressing 'TAB' will
-do the thing you mean depending on context.
-
-   This all might seem complicated, but the idea is by covering all the
-cases you don't have to think about it.
-
- -- Function: fountain-dwim
-     This command, bound to 'TAB' by default, will perform different
-     actions based on context.
-
-  1. If prefixed with ARG, call 'fountain-outline-cycle' and pass ARG.
-  2. If point is inside an empty parenthetical, delete it.
-  3. If point is inside a non-empty parenthetical, move to a newline.
-  4. If point is at a blank line within dialogue, insert a
-     parenthetical.
-  5. If point is at a note, cycle visibility of that note.
-  6. If point is at the end of line, call 'completion-at-point'.
-  7. If point is a scene heading or section heading, cycle visibility of
-     that heading.
-
-
-File: fountain-mode.info,  Node: Scene Numbering,  Next: Pagination,  Prev: Do What I Mean,  Up: Top
+File: fountain-mode.info,  Node: Scene Numbering,  Next: Pagination,  Prev: Autocompletion,  Up: Top
 
 Scene Numbering
 ***************
@@ -665,43 +706,66 @@ Pagination
 Sorry, this node is not yet written.  You can help by submitting a
 patch!
 
+ -- Function: fountain-count-pages
+     Bound 'C-c C-p', return both the current page and the total page
+     count of the current buffer.
+
 
-File: fountain-mode.info,  Node: Exporting,  Next: Indexes,  Prev: Pagination,  Up: Top
+File: fountain-mode.info,  Node: Exporting,  Next: Donations,  Prev: Pagination,  Up: Top
 
 Exporting
 *********
 
 Exporting a script in Fountain Mode is handled by one or more external
-command-line tools.  By defining an "export profile", you're able to
-easily interface with an external tool from within Emacs.
+command-line tools.  Here are some recommended export tools:
 
-   Essentiall an export profile is just a shell command, interpolated
-with a selection of values.
+   * Afterwriting (https://github.com/ifrost/afterwriting-labs)
+   * Wrap (https://github.com/Wraparound/wrap)
+   * Screenplain (https://github.com/vilcans/screenplain)
+   * Textplay (https://github.com/olivertaylor/Textplay) (1)
+
+   By defining an "export profile", you can easily interface with an
+external tool from within Emacs.  A profile is essentially a shell
+command, interpolated with a selection of values:
 
    * '%b' is the 'buffer-file-name'
    * '%B' is the 'buffer-file-name' sans extension
    * '%n' is the 'user-full-name'
-   * '%t' is the title (from Script *note Metadata::)
-   * '%a' is the author (from Script *note Metadata::)
+   * '%t' is the title (*Note Metadata::.)
+   * '%a' is the author (*Note Metadata::.)
    * '%F' is the current date in ISO format
    * '%x' is the current date in your locale's "preferred" format
 
  -- Function: fountain-export-command
-     This command, bound to 'C-c C-e' by default, will prompt for an
-     export profile.
+     This command, bound to 'C-c C-e', will prompt for an export
+     profile.  The first profile is considered default, so just hitting
+     RET is a quick way to export in your usual way.
 
-   * Afterwriting (https://github.com/ifrost/afterwriting-labs)
-     (JavaScript)
-   * Wrap (https://github.com/Wraparound/wrap) (Go)
-   * Screenplain (https://github.com/vilcans/screenplain) (Python 3)
-   * Textplay (https://github.com/olivertaylor/Textplay) (Ruby) (1)
+ -- Function: fountain-export-view
+     This command, bound to 'C-c C-v', attempts to open the last
+     exported file.  This works by finding the other most recently
+     modified file in the current directory matching the current file
+     base-name.
 
    ---------- Footnotes ----------
 
    (1) Requires PrinceXML (https://www.princexml.com) for PDF export.
 
 
-File: fountain-mode.info,  Node: Indexes,  Prev: Exporting,  Up: Top
+File: fountain-mode.info,  Node: Donations,  Next: Indexes,  Prev: Exporting,  Up: Top
+
+Donations
+*********
+
+Fountain Mode is written and maintained by Paul W. Rankin
+(https://bydasein.com) and contributors.
+
+   If you would like to support development, donations are accepted via
+GitHub (https://github.com/sponsors/rnkn) and Liberapay
+(https://liberapay.com/rnkn/).
+
+
+File: fountain-mode.info,  Node: Indexes,  Prev: Donations,  Up: Top
 
 Indexes
 *******
@@ -717,6 +781,24 @@ File: fountain-mode.info,  Node: Index of Commands,  Next: Index of Variables,  
 Index of Commands
 =================
 
+ [index ]
+* Menu:
+
+* fountain-completion-update:            Autocompletion.       (line 12)
+* fountain-count-pages:                  Pagination.           (line  9)
+* fountain-dwim:                         Do What I Mean.       (line 30)
+* fountain-export-command:               Exporting.            (line 26)
+* fountain-export-view:                  Exporting.            (line 31)
+* fountain-forward-character:            Navigation.           (line 22)
+* fountain-forward-page:                 Navigation.           (line 26)
+* fountain-goto-page:                    Navigation.           (line 33)
+* fountain-goto-scene:                   Navigation.           (line 30)
+* fountain-outline-beginning:            Navigation.           (line 15)
+* fountain-outline-forward:              Navigation.           (line 10)
+* fountain-outline-next:                 Navigation.           (line  6)
+* fountain-outline-to-indirect-buffer:   Outlining.            (line 59)
+* fountain-outline-up:                   Navigation.           (line 18)
+
 
 File: fountain-mode.info,  Node: Index of Variables,  Prev: Index of Commands,  Up: Indexes
 
@@ -726,46 +808,47 @@ Index of Variables
  [index ]
 * Menu:
 
-* fountain-scene-heading-prefix-list:    Scene Headings.       (line 19)
-* fountain-scene-heading-suffix-sep:     Scene Headings.       (line 23)
+* fountain-scene-heading-prefix-list:    Scene Headings.       (line 20)
+* fountain-scene-heading-suffix-sep:     Scene Headings.       (line 24)
 
 
 
 Tag Table:
-Node: Top342
-Node: Introduction1915
-Node: Installation3608
-Node: Requirements4631
-Node: Advanced Installation5219
-Node: Script Elements5741
-Node: Metadata7148
-Node: Section Headings8756
-Node: Scene Headings9180
-Node: Action10074
-Node: Characters10787
-Node: Dialogue11715
-Node: Parentheticals12041
-Node: Transitions12411
-Node: Notes12618
-Node: Synopses12807
-Node: Center Text13196
-Node: Comments13400
-Node: Outlining13581
-Node: Navigation15503
-Node: Syntax Highlighting15704
-Node: Element Aligning15930
-Node: Text Emphasis16153
-Node: Autocompletion16626
-Node: Scene Heading Completion17036
-Node: Character Name Completion17553
-Node: Do What I Mean19606
-Node: Scene Numbering20599
-Node: Pagination20811
-Node: Exporting21008
-Ref: Exporting-Footnote-122196
-Node: Indexes22267
-Node: Index of Commands22411
-Node: Index of Variables22543
+Node: Top327
+Node: Overview1790
+Node: Installation3208
+Node: Requirements4208
+Node: Advanced Installation4796
+Node: Script Elements5356
+Node: Metadata6539
+Node: Section Headings8135
+Node: Scene Headings8559
+Node: Action9459
+Node: Characters10172
+Node: Dialogue11100
+Node: Parentheticals11426
+Node: Transitions11796
+Node: Notes12003
+Node: Synopses12192
+Node: Center Text12581
+Node: Comments12785
+Node: Outlining12966
+Node: Navigation14888
+Node: Syntax Highlighting16166
+Node: Element Aligning16392
+Node: Text Emphasis16615
+Node: Do What I Mean17088
+Node: Autocompletion18538
+Node: Scene Heading Completion19166
+Node: Character Name Completion19683
+Node: Scene Numbering21736
+Node: Pagination21948
+Node: Exporting22285
+Ref: Exporting-Footnote-123788
+Node: Donations23859
+Node: Indexes24230
+Node: Index of Commands24374
+Node: Index of Variables25550
 
 End Tag Table
 

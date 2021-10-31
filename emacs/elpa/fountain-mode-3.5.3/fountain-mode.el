@@ -4,7 +4,7 @@
 
 ;; Author: Paul W. Rankin <pwr@bydasein.com>
 ;; Keywords: wp, text
-;; Version: 3.5.1
+;; Version: 3.5.3
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -521,20 +521,6 @@ whatever extension you like."
 (defconst fountain-forced-action-regexp
   "^\\(!\\)\\(.*\\)[\s\t]*$"
   "Regular expression for forced action.")
-
-;; FIXME: a comment without whitespace will be fontified as italic, e.g.
-;;     /*comment*/
-;;
-;; This is especially problematic when `fountain-hide-emphasis-markup' is
-;; non-nil.
-;;
-;; Comments should not receive any fontification, i.e. the
-;; `fountain-comment' face should override any previous faces.
-;;
-;; Unused variable.
-(defconst fountain-comment-regexp
-  "/\\*+[.\n]*?\\*/"
-  "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
   (concat "^\\([^:\s\t\n][^:[\n]*\\):[\s\t]*\\(.+\\)?"
@@ -3000,6 +2986,14 @@ takes the form:
                display nil invisible fountain-element-markup)
       '(face nil display nil invisible nil))))
 
+;; FIXME: a comment without whitespace will be fontified as italic, e.g.
+;;     /*comment*/
+;;
+;; This is especially problematic when `fountain-hide-emphasis-markup' is
+;; non-nil.
+;;
+;; Comments should not receive any fontification, i.e. the
+;; `fountain-comment' face should override any previous faces.
 (defun fountain-init-font-lock ()
   "Return a new list of `font-lock-keywords'."
   (let ((highlight-elements
