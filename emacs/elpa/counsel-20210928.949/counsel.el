@@ -4,8 +4,8 @@
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/swiper
-;; Package-Version: 20210819.1455
-;; Package-Commit: 7cdde66c95d5205287e88010bc7a3a978c931db0
+;; Package-Version: 20210928.949
+;; Package-Commit: 1c6b3da377a840e898b14020133f59fca9ceea1c
 ;; Version: 0.13.4
 ;; Package-Requires: ((emacs "24.5") (ivy "0.13.4") (swiper "0.13.4"))
 ;; Keywords: convenience, matching, tools
@@ -3103,7 +3103,9 @@ prompt additionally for EXTRA-AG-ARGS."
   :exit-codes '(1 "No matches found"))
 
 (defun counsel-read-directory-name (prompt &optional default)
-  "Read a directory name from user, a (partial) replacement of `read-directory-name'."
+  "Read a directory name.
+This is intended as a (partial) replacement for
+`read-directory-name'."
   (let ((counsel--find-file-predicate #'file-directory-p))
     (ivy-read prompt
               #'read-file-name-internal
@@ -5641,8 +5643,9 @@ value of a macro, using them for a new macro."
 
 (defun counsel--kmacro-candidates ()
   "Create the list of keyboard macros used by `counsel-kmacro'.
-This is a combination of `kmacro-ring' and, together in a list, `last-kbd-macro',
-`kmacro-counter-format-start', and `kmacro-counter-value-start'."
+This is a combination of `kmacro-ring' and, together in a list,
+`last-kbd-macro', `kmacro-counter-format-start', and
+`kmacro-counter-value-start'."
   (mapcar
    (lambda (kmacro)
      (cons
@@ -5703,7 +5706,10 @@ to 0."
     (kmacro-set-counter number)))
 
 (defun counsel-kmacro-action-copy-counter-format-for-new-macro (x)
-  "Set `kmacro-default-counter-format' to an existing keyboard macro's counter format.
+  "Set the default keyboard macro counter format.
+This sets `kmacro-default-counter-format' to the counter format
+of an existing keyboard macro.
+
 This will apply to the next macro a user defines."
   (let* ((actual-kmacro (cdr x))
          (format (nth 2 actual-kmacro)))
