@@ -1,10 +1,10 @@
-;;; modus-operandi-theme.el --- Accessible light theme (WCAG AAA) -*- lexical-binding:t -*-
+;;; modus-vivendi-theme.el --- Accessible dark theme (WCAG AAA) -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2019-2021  Free Software Foundation, Inc.
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
 ;; URL: https://gitlab.com/protesilaos/modus-themes
-;; Version: 1.5.0
+;; Version: 1.6.0
 ;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: faces, theme, accessibility
 
@@ -25,8 +25,8 @@
 
 ;;; Commentary:
 ;;
-;; Modus Operandi is the light variant of the Modus themes (Modus
-;; Vivendi is the dark one).  The themes are designed for color-contrast
+;; Modus Vivendi is the dark variant of the Modus themes (Modus Operandi
+;; is the light one).  The themes are designed for color-contrast
 ;; accessibility.  More specifically:
 ;;
 ;;     1. Provide a consistent minimum contrast ratio between background
@@ -44,7 +44,7 @@
 ;; current item):
 ;;
 ;; - modus-themes.el            (Main code shared between the themes)
-;; - modus-vivendi-theme.el     (Dark theme)
+;; - modus-operandi-theme.el    (Light theme)
 
 ;;; Code:
 
@@ -58,15 +58,15 @@
                (require-theme 'modus-themes t))
     (require 'modus-themes)))
 
-(deftheme modus-operandi
-  "Accessible and customizable light theme (WCAG AAA standard).
+(deftheme modus-vivendi
+  "Accessible and customizable dark theme (WCAG AAA standard).
 Conforms with the highest legibility standard for color contrast
 between background and foreground in any given piece of text,
 which corresponds to a minimum contrast in relative luminance of
 7:1.")
 
-(modus-themes-theme modus-operandi)
+(modus-themes-theme modus-vivendi)
 
-(provide-theme 'modus-operandi)
+(provide-theme 'modus-vivendi)
 
-;;; modus-operandi-theme.el ends here
+;;; modus-vivendi-theme.el ends here

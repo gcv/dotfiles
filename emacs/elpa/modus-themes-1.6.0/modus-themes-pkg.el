@@ -1,6 +1,6 @@
-(define-package "modus-themes" "1.5.0" "Highly accessible themes (WCAG AAA)"
-  '((emacs "26.1"))
-  :commit "b6fb7cda01a665f9369f2c6a29f3bf26c8cc8019" :authors
+(define-package "modus-themes" "1.6.0" "Highly accessible themes (WCAG AAA)"
+  '((emacs "27.1"))
+  :commit "8dbfe43fe52a9420a23d29e8ca631c2b7f52d966" :authors
   '(("Protesilaos Stavrou" . "info@protesilaos.com"))
   :maintainer
   '("Protesilaos Stavrou" . "info@protesilaos.com")
