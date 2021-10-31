@@ -13,8 +13,8 @@
 
 ;; Keywords: git tools vc
 ;; Homepage: https://github.com/magit/magit
-;; Package-Requires: ((emacs "25.1") (dash "2.18.1") (transient "0.3.6") (with-editor "3.0.4"))
-;; Package-Version: 3.2.1
+;; Package-Requires: ((emacs "25.1") (dash "2.19.1") (transient "0.3.6") (with-editor "3.0.5"))
+;; Package-Version: 3.3.0
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -116,6 +116,7 @@
 (require 'subr-x)
 
 (require 'magit-git nil t)
+(require 'magit-mode nil t)
 (require 'magit-utils nil t)
 
 (require 'log-edit)
@@ -305,6 +306,16 @@ already using it, then you probably shouldn't start doing so."
   :group 'git-commit
   :safe (lambda (val) (and (listp val) (-all-p 'stringp val)))
   :type '(repeat string))
+
+(defcustom git-commit-use-local-message-ring nil
+  "Whether to use a local message ring instead of the global one.
+This can be set globally, in which case every repository gets its
+own commit message ring, or locally for a single repository.  If
+Magit isn't available, then setting this to a non-nil value has
+no effect."
+  :group 'git-commit
+  :safe 'booleanp
+  :type 'boolean)
 
 ;;;; Faces
 
@@ -500,6 +511,17 @@ to recover older messages")
     ;; That library declares this functions without loading
     ;; magit-process.el, which defines it.
     (require 'magit-process nil t))
+  (when git-commit-major-mode
+    (let ((auto-mode-alist (list (cons (concat "\\`"
+                                               (regexp-quote buffer-file-name)
+                                               "\\'")
+                                       git-commit-major-mode)))
+          ;; The major-mode hook might want to consult these minor
+          ;; modes, while the minor-mode hooks might want to consider
+          ;; the major mode.
+          (git-commit-mode t)
+          (with-editor-mode t))
+      (normal-mode t)))
   ;; Pretend that git-commit-mode is a major-mode,
   ;; so that directory-local settings can be used.
   (let ((default-directory
@@ -516,17 +538,6 @@ to recover older messages")
           (major-mode 'git-commit-mode)) ; trick dir-locals-collect-variables
       (hack-dir-local-variables)
       (hack-local-variables-apply)))
-  (when git-commit-major-mode
-    (let ((auto-mode-alist (list (cons (concat "\\`"
-                                               (regexp-quote buffer-file-name)
-                                               "\\'")
-                                       git-commit-major-mode)))
-          ;; The major-mode hook might want to consult these minor
-          ;; modes, while the minor-mode hooks might want to consider
-          ;; the major mode.
-          (git-commit-mode t)
-          (with-editor-mode t))
-      (normal-mode t)))
   ;; Show our own message using our hook.
   (setq with-editor-show-usage nil)
   (setq with-editor-usage-message git-commit-usage-message)
@@ -555,9 +566,9 @@ to recover older messages")
       (magit-wip-maybe-add-commit-hook)))
   (setq with-editor-cancel-message
         'git-commit-cancel-message)
-  (make-local-variable 'log-edit-comment-ring-index)
   (git-commit-mode 1)
   (git-commit-setup-font-lock)
+  (git-commit-prepare-message-ring)
   (when (boundp 'save-place)
     (setq save-place nil))
   (save-excursion
@@ -705,7 +716,20 @@ With a numeric prefix ARG, go forward ARG comments."
   (when-let ((message (git-commit-buffer-message)))
     (when-let ((index (ring-member log-edit-comment-ring message)))
       (ring-remove log-edit-comment-ring index))
-    (ring-insert log-edit-comment-ring message)))
+    (ring-insert log-edit-comment-ring message)
+    (when (and git-commit-use-local-message-ring
+               (fboundp 'magit-repository-local-set))
+      (magit-repository-local-set 'log-edit-comment-ring
+                                  log-edit-comment-ring))))
+
+(defun git-commit-prepare-message-ring ()
+  (make-local-variable 'log-edit-comment-ring-index)
+  (when (and git-commit-use-local-message-ring
+             (fboundp 'magit-repository-local-get))
+    (setq-local log-edit-comment-ring
+                (magit-repository-local-get
+                 'log-edit-comment-ring
+                 (make-ring log-edit-maximum-comment-ring-size)))))
 
 (defun git-commit-buffer-message ()
   (let ((flush (concat "^" comment-start))
