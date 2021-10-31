@@ -4,9 +4,9 @@
 
 ;; Author: Paul W. Rankin <pwr@bydasein.com>
 ;; Keywords: wp, text
-;; Package-Version: 2.0.1
-;; Package-Commit: 032b3d779f7b374bd12f62b7fc717a310ea16bee
-;; Version: 2.0.1
+;; Package-Version: 2.0.4
+;; Package-Commit: a31ac05a161a91fe5c157930b62a6c07037982ee
+;; Version: 2.0.4
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/olivetti
 
@@ -129,13 +129,15 @@
 
 ;;; Code:
 
+(require 'fringe)
+
 (defgroup olivetti ()
   "Minor mode for a nice writing environment"
   :prefix "olivetti-"
   :group 'text)
 
 
-;;; Internal Variables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Internal Variables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (eval-when-compile
   (require 'lisp-mnt)
@@ -157,13 +159,19 @@
 `olivetti-mode' is enabled.")
 
 
-;;; Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcustom olivetti-mode-on-hook
   '(visual-line-mode)
   "Hook for `olivetti-mode', run after the mode is activated."
   :type 'hook
   :options '(visual-line-mode)
+  :safe 'hook)
+
+(defcustom olivetti-mode-off-hook
+  nil
+  "Hook for `olivetti-mode', run after the mode is deactivated."
+  :type 'hook
   :safe 'hook)
 
 (defcustom olivetti-body-width
@@ -189,7 +197,7 @@ This option does not affect file contents."
           (or (numberp value) (null value))))
 (make-variable-buffer-local 'olivetti-body-width)
 
-(defcustom olivetti-minimun-body-width
+(defcustom olivetti-minimum-body-width
   40
   "Minimum width in columns of text body."
   :type 'integer
@@ -247,7 +255,7 @@ Only has any effect when `olivetti-style' is set to 'fancy."
   :group 'olivetti)
 
 
-;;; Set Windows ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Set Windows ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun olivetti-scale-width (width)
   "Scale WIDTH in accordance with the face height.
@@ -266,8 +274,8 @@ if it is an integer, and otherwise return WIDTH."
         (window-width-pix (window-body-width window t))
         min-width-pix)
     (setq min-width-pix (* char-width
-                           (+ olivetti-minimun-body-width
-                              (% olivetti-minimun-body-width 2))))
+                           (+ olivetti-minimum-body-width
+                              (% olivetti-minimum-body-width 2))))
     (olivetti-scale-width
      (if (floatp width)
          (floor (max min-width-pix (* window-width-pix (min width 1.0))))
@@ -358,7 +366,7 @@ current buffer, and call `olivetti-set-window'."
   (mapc #'olivetti-set-window (get-buffer-window-list nil nil 'visible)))
 
 
-;;; Width Interaction ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Width Interaction ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun olivetti-set-width (width)
   "Set text body width to WIDTH with relative margins.
@@ -401,7 +409,7 @@ If prefixed with ARG, incrementally increase."
     (olivetti-expand p)))
 
 
-;;; Keymap ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Keymap ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar olivetti-mode-map
   (let ((map (make-sparse-keymap)))
@@ -423,7 +431,7 @@ If prefixed with ARG, incrementally increase."
   "Mode map for `olivetti-mode'.")
 
 
-;;; Mode Definition ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Mode Definition ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;###autoload
 (define-minor-mode olivetti-mode
