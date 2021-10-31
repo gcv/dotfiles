@@ -4,8 +4,8 @@
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
-;; Package-Version: 20210319.802
-;; Package-Commit: 7e4b1f0d5572a4e2b8ee7a9b084ef863d0315a73
+;; Package-Version: 20211021.625
+;; Package-Commit: 8df39c15d290cd499ef261de868191d3fc84f75a
 ;; Keywords: help, lisp
 ;; Version: 0.19
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
@@ -1900,7 +1900,7 @@ OBJ may be a symbol or a compiled function object."
             'info-node "(elisp)Autoload"))
           (compiled-button
            (helpful--button
-            "compiled"
+            "byte-compiled"
             'helpful-info-button
             'info-node "(elisp)Byte Compilation"))
           (native-compiled-button
