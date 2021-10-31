@@ -184,7 +184,9 @@ variable `consult-bookmark-narrow' for the narrowing configuration.
 (autoload 'consult-apropos "consult" "\
 Select pattern and call `apropos'.
 
-The default value of the completion is the symbol at point." t nil)
+The default value of the completion is the symbol at point. As a better
+alternative, you can run `embark-export' from commands like `M-x' and
+`describe-symbol'." t nil)
 
 (autoload 'consult-complex-command "consult" "\
 Select and evaluate command from the command history.
@@ -198,8 +200,8 @@ In order to select from a specific HISTORY, pass the history variable as argumen
 
 \(fn &optional HISTORY)" t nil)
 
-(autoload 'consult-isearch "consult" "\
-Read a search string with completion from history.
+(autoload 'consult-isearch-history "consult" "\
+Read a search string with completion from the Isearch history.
 
 This replaces the current search string if Isearch is active, and
 starts a new Isearch session otherwise." t nil)
