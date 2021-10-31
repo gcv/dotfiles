@@ -70,7 +70,7 @@ See `doom-themes-org-fontify-special-tags'."
 N is the match index."
   (declare (pure t) (side-effect-free t))
   (let ((context (save-match-data (org-element-context))))
-    (unless (memq (org-element-type context) '(src-block link))
+    (unless (memq (org-element-type context) doom-themes-org-fontify-exclude-types)
       (pcase (match-string n)
         ("#" 'doom-themes-org-hash-tag)
         ("@" 'doom-themes-org-at-tag)))))
@@ -124,7 +124,7 @@ N is the match index."
                   1 'org-headline-done prepend)))
              ;; custom #hashtags & @at-tags for another level of organization
              (when doom-themes-org-fontify-special-tags
-               '(("\\(?:\\s-\\|^\\)\\(\\([#@]\\)[A-Za-z0-9_.:-]+\\)"
+               '(("\\(?:\\s-\\|^\\)\\(\\([#@]\\)[A-Za-z0-9_.-]+\\)"
                   1 (doom-themes--org-tag-face 2) prepend)))))))
 
 (add-hook 'org-font-lock-set-keywords-hook #'doom-themes-enable-org-fontification)
