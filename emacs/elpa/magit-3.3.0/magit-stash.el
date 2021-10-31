@@ -125,7 +125,14 @@ AUTHOR-WIDTH has to be an integer.  When the name of the author
 Untracked files are included according to infix arguments.
 One prefix argument is equivalent to `--include-untracked'
 while two prefix arguments are equivalent to `--all'."
-  (interactive (magit-stash-read-args))
+  (interactive
+   (progn (when (and (magit-merge-in-progress-p)
+                     (not (magit-y-or-n-p "\
+Stashing and resetting during a merge conflict. \
+Applying the resulting stash won't restore the merge state. \
+Proceed anyway? ")))
+            (user-error "Abort"))
+          (magit-stash-read-args)))
   (magit-stash-save message t t include-untracked t))
 
 ;;;###autoload
@@ -216,6 +223,7 @@ are staged changes, apply without preserving the stash index."
       (magit-refresh)
     (magit-run-git "stash" "apply" stash)))
 
+;;;###autoload
 (defun magit-stash-pop (stash)
   "Apply a stash to the working tree and remove it from stash list.
 Try to preserve the stash index.  If that fails because there

@@ -454,6 +454,35 @@ and also rename the respective reflog file.
 
 ;;;***
 
+;;;### (autoloads nil "magit-bundle" "magit-bundle.el" (0 0 0 0))
+;;; Generated autoloads from magit-bundle.el
+ (autoload 'magit-bundle "magit-bundle" nil t)
+ (autoload 'magit-bundle-import "magit-bundle" nil t)
+
+(autoload 'magit-bundle-create-tracked "magit-bundle" "\
+Create and track a new bundle.
+
+\(fn FILE TAG BRANCH REFS ARGS)" t nil)
+
+(autoload 'magit-bundle-update-tracked "magit-bundle" "\
+Update a bundle that is being tracked using TAG.
+
+\(fn TAG)" t nil)
+
+(autoload 'magit-bundle-verify "magit-bundle" "\
+Check whether FILE is valid and applies to the current repository.
+
+\(fn FILE)" t nil)
+
+(autoload 'magit-bundle-list-heads "magit-bundle" "\
+List the refs in FILE.
+
+\(fn FILE)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "magit-bundle" '("magit-")))
+
+;;;***
+
 ;;;### (autoloads nil "magit-clone" "magit-clone.el" (0 0 0 0))
 ;;; Generated autoloads from magit-clone.el
  (autoload 'magit-clone "magit-clone" nil t)
@@ -845,6 +874,13 @@ Show log for all marked files, or the current file.
 
 \(fn &optional FOLLOW)" t nil)
 
+(autoload 'magit-dired-am-apply-patches "magit-extras" "\
+In Dired, apply the marked (or next ARG) files as patches.
+If inside a repository, then apply in that.  Otherwise prompt
+for a repository.
+
+\(fn REPO &optional ARG)" t nil)
+
 (autoload 'magit-do-async-shell-command "magit-extras" "\
 Open FILE with `dired-do-async-shell-command'.
 Interactively, open the file at point.
@@ -1031,6 +1067,27 @@ above.
 When `magit-copy-revision-abbreviated' is non-nil, save the
 abbreviated revision to the `kill-ring' and the
 `magit-revision-stack'." t nil)
+
+(autoload 'magit-display-repository-buffer "magit-extras" "\
+Display a Magit buffer belonging to the current Git repository.
+The buffer is displayed using `magit-display-buffer', which see.
+
+\(fn BUFFER)" t nil)
+
+(autoload 'magit-switch-to-repository-buffer "magit-extras" "\
+Switch to a Magit buffer belonging to the current Git repository.
+
+\(fn BUFFER)" t nil)
+
+(autoload 'magit-switch-to-repository-buffer-other-window "magit-extras" "\
+Switch to a Magit buffer belonging to the current Git repository.
+
+\(fn BUFFER)" t nil)
+
+(autoload 'magit-switch-to-repository-buffer-other-frame "magit-extras" "\
+Switch to a Magit buffer belonging to the current Git repository.
+
+\(fn BUFFER)" t nil)
 
 (autoload 'magit-abort-dwim "magit-extras" "\
 Abort current operation.
@@ -1733,6 +1790,14 @@ Unset the local representation of REMOTE's default branch.
 Delete the symbolic-ref \"refs/remotes/<remote>/HEAD\".
 
 \(fn REMOTE)" t nil)
+
+(autoload 'magit-remote-unshallow "magit-remote" "\
+Convert a shallow remote into a full one.
+If only a single refspec is set and it does not contain a
+wildcard, then also offer to replace it with the standard
+refspec.
+
+\(fn REMOTE)" t nil)
  (autoload 'magit-remote-configure "magit-remote" nil t)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "magit-remote" '("magit-")))
@@ -2035,6 +2100,14 @@ while two prefix arguments are equivalent to `--all'.
 Apply a stash to the working tree.
 Try to preserve the stash index.  If that fails because there
 are staged changes, apply without preserving the stash index.
+
+\(fn STASH)" t nil)
+
+(autoload 'magit-stash-pop "magit-stash" "\
+Apply a stash to the working tree and remove it from stash list.
+Try to preserve the stash index.  If that fails because there
+are staged changes, apply without preserving the stash index
+and forgo removing the stash.
 
 \(fn STASH)" t nil)
 
@@ -2488,8 +2561,8 @@ Move WORKTREE to PATH.
 
 ;;;***
 
-;;;### (autoloads nil nil ("magit-core.el" "magit-libgit-pkg.el"
-;;;;;;  "magit-pkg.el" "magit-section-pkg.el") (0 0 0 0))
+;;;### (autoloads nil nil ("magit-core.el" "magit-pkg.el") (0 0 0
+;;;;;;  0))
 
 ;;;***
 
