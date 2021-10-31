@@ -4,8 +4,8 @@
 
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: convenience
-;; Package-Version: 20210816.1819
-;; Package-Commit: 353275e345908cc8464fa0f51cb35db0e43e119d
+;; Package-Version: 20211012.1921
+;; Package-Commit: 3d2356b53f12cfb2c705cdabbc325cd89d5455bc
 ;; Version: 0.1
 ;; Homepage: https://github.com/oantolin/embark
 ;; Package-Requires: ((emacs "25.1") (embark "0.9") (consult "0.1"))
@@ -156,7 +156,8 @@ The elements of LINES are assumed to be values of category `consult-line'."
             (setq last-buf this-buf))
           (insert (concat lineno contents nl))))
       (goto-char (point-min))
-      (occur-mode))
+      (occur-mode)
+      (setq-local occur-highlight-regexp "^.*$"))
     (pop-to-buffer buf)))
 
 (setf (alist-get 'consult-location embark-collect-initial-view-alist)
@@ -238,8 +239,8 @@ actual type."
 
 ;;; Support for Consult search commands
 
-(embark-define-keymap embark-consult-non-async-search-map
-  "Keymap for Consult non-async search commands"
+(embark-define-keymap embark-consult-sync-search-map
+  "Keymap for Consult sync search commands"
   :parent nil
   ("o" consult-outline)
   ("i" consult-imenu)
@@ -258,12 +259,12 @@ actual type."
 
 (defvar embark-consult-search-map
   (keymap-canonicalize
-   (make-composed-keymap embark-consult-non-async-search-map
+   (make-composed-keymap embark-consult-sync-search-map
                          embark-consult-async-search-map))
   "Keymap for all Consult search commands.")
 
-(fset 'embark-consult-non-async-search-map embark-consult-non-async-search-map)
-(define-key embark-become-match-map "C" 'embark-consult-non-async-search-map)
+(fset 'embark-consult-sync-search-map embark-consult-sync-search-map)
+(define-key embark-become-match-map "C" 'embark-consult-sync-search-map)
 
 (cl-pushnew 'embark-consult-async-search-map embark-become-keymaps)
 
