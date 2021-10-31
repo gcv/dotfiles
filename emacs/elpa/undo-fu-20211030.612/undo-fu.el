@@ -5,10 +5,10 @@
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
 ;; URL: https://gitlab.com/ideasman42/emacs-undo-fu
-;; Package-Version: 20210813.249
-;; Package-Commit: 34b27c01da4c3eb8aa595f3613b7e2e1ed4e54be
+;; Package-Version: 20211030.612
+;; Package-Commit: ab8bc10e424bccc847800c31ab41888db789d55d
 ;; Version: 0.4
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -52,18 +52,18 @@
 ;; ---------------------------------------------------------------------------
 ;; Custom Variables
 
+(defgroup undo-fu nil "Configure default behavior for undo-fu wrapper." :group 'undo)
+
 (defcustom undo-fu-allow-undo-in-region nil
-  "When t, use `undo-in-region' when a selection is present.
+  "When non-nil, use `undo-in-region' when a selection is present.
 Otherwise `undo-in-region' is never used, since it doesn't support `undo-only',
 causing undo-fu to work with reduced functionality when a selection exists."
-  :group 'undo-fu
   :type 'boolean)
 
 (defcustom undo-fu-ignore-keyboard-quit nil
-  "When t, don't use `keyboard-quit' to disable linear undo/redo behavior.
+  "When non-nil, don't use `keyboard-quit' to disable linear undo/redo behavior.
 
 Instead, explicitly call `undo-fu-disable-checkpoint'."
-  :group 'undo-fu
   :type 'boolean)
 
 ;; ---------------------------------------------------------------------------
@@ -121,12 +121,16 @@ Instead, explicitly call `undo-fu-disable-checkpoint'."
 ;; Internal Functions/Macros
 
 (defun undo-fu--checkpoint-disable ()
-  "Disable using the checkpoint, allowing the initial boundary to be crossed when redoing."
+  "Disable using the checkpoint.
+
+This allows the initial boundary to be crossed when redoing."
   (setq undo-fu--respect nil)
   (setq undo-fu--in-region nil))
 
 (defmacro undo-fu--with-advice (fn-orig where fn-advice &rest body)
-  "Execute BODY with advice added WHERE using FN-ADVICE temporarily added to FN-ORIG."
+  "Execute BODY with advice added.
+
+WHERE using FN-ADVICE temporarily added to FN-ORIG."
   `
   (let ((fn-advice-var ,fn-advice))
     (unwind-protect
@@ -241,13 +245,14 @@ Optional argument ARG The number of steps to redo."
         (setq undo-fu--respect t)))
 
     (when (region-active-p)
-      (if undo-fu-allow-undo-in-region
-        (progn
+      (cond
+        (undo-fu-allow-undo-in-region
           (message "Undo in region in use. Undo checkpoint ignored!")
           (undo-fu--checkpoint-disable)
           (setq undo-fu--in-region t))
         ;; Default behavior, just remove selection.
-        (deactivate-mark)))
+        (t
+          (deactivate-mark))))
 
     ;; Allow crossing the boundary, if we press [keyboard-quit].
     ;; This allows explicitly over-stepping the boundary,
@@ -338,13 +343,14 @@ Optional argument ARG the number of steps to undo."
         (setq undo-fu--respect t)))
 
     (when (region-active-p)
-      (if undo-fu-allow-undo-in-region
-        (progn
+      (cond
+        (undo-fu-allow-undo-in-region
           (message "Undo in region in use. Undo checkpoint ignored!")
           (undo-fu--checkpoint-disable)
           (setq undo-fu--in-region t))
         ;; Default behavior, just remove selection.
-        (deactivate-mark)))
+        (t
+          (deactivate-mark))))
 
     ;; Allow crossing the boundary, if we press [keyboard-quit].
     ;; This allows explicitly over-stepping the boundary,
@@ -416,5 +422,4 @@ Optional argument ARG the number of steps to undo."
   '(nconc aggressive-indent-protected-commands undo-fu--commands))
 
 (provide 'undo-fu)
-
 ;;; undo-fu.el ends here
