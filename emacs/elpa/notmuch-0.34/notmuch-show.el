@@ -39,25 +39,27 @@
 (require 'notmuch-print)
 (require 'notmuch-draft)
 
-(declare-function notmuch-call-notmuch-process "notmuch" (&rest args))
+(declare-function notmuch-call-notmuch-process "notmuch-lib" (&rest args))
 (declare-function notmuch-search-next-thread "notmuch" nil)
 (declare-function notmuch-search-previous-thread "notmuch" nil)
-(declare-function notmuch-search-show-thread "notmuch" nil)
+(declare-function notmuch-search-show-thread "notmuch")
 (declare-function notmuch-foreach-mime-part "notmuch" (function mm-handle))
 (declare-function notmuch-count-attachments "notmuch" (mm-handle))
 (declare-function notmuch-save-attachments "notmuch" (mm-handle &optional queryp))
 (declare-function notmuch-tree "notmuch-tree"
 		  (&optional query query-context target buffer-name
-			     open-target unthreaded))
+			     open-target unthreaded parent-buffer))
 (declare-function notmuch-tree-get-message-properties "notmuch-tree" nil)
-(declare-function notmuch-unthreaded
-		  (&optional query query-context target buffer-name open-target))
+(declare-function notmuch-unthreaded "notmuch-tree"
+		  (&optional query query-context target buffer-name
+			     open-target))
 (declare-function notmuch-read-query "notmuch" (prompt))
 (declare-function notmuch-draft-resume "notmuch-draft" (id))
 
 (defvar shr-blocked-images)
 (defvar gnus-blocked-images)
 (defvar shr-content-function)
+(defvar w3m-ignored-image-url-regexp)
 
 ;;; Options
 
@@ -178,6 +180,8 @@ indentation."
 
 (defvar-local notmuch-show-indent-content t)
 
+(defvar-local notmuch-show-single-message nil)
+
 (defvar notmuch-show-attachment-debug nil
   "If t log stdout and stderr from attachment handlers.
 
@@ -189,10 +193,10 @@ each attachment handler is logged in buffers with names beginning
 ;;; Options
 
 (defcustom notmuch-show-stash-mlarchive-link-alist
-  '(("Gmane" . "https://mid.gmane.org/")
-    ("MARC" . "https://marc.info/?i=")
+  '(("MARC" . "https://marc.info/?i=")
     ("Mail Archive, The" . "https://mid.mail-archive.com/")
-    ("LKML" . "https://lkml.kernel.org/r/")
+    ("Lore" . "https://lore.kernel.org/r/")
+    ("Notmuch" . "https://nmbug.notmuchmail.org/nmweb/show/")
     ;; FIXME: can these services be searched by `Message-Id' ?
     ;; ("MarkMail" . "http://markmail.org/")
     ;; ("Nabble" . "http://nabble.com/")
@@ -217,7 +221,7 @@ return the ML archive reference URI."
 			     (function :tag "Function returning the URL")))
   :group 'notmuch-show)
 
-(defcustom notmuch-show-stash-mlarchive-link-default "Gmane"
+(defcustom notmuch-show-stash-mlarchive-link-default "MARC"
   "Default Mailing List Archive to use when stashing links.
 
 This is used when `notmuch-show-stash-mlarchive-link' isn't
@@ -275,7 +279,7 @@ position of the message in the thread."
        (let ((buf (generate-new-buffer (concat "*notmuch-msg-" id "*"))))
 	 (with-current-buffer buf
 	   (let ((coding-system-for-read 'no-conversion))
-	     (call-process notmuch-command nil t nil "show" "--format=raw" id))
+	     (notmuch--call-process notmuch-command nil t nil "show" "--format=raw" id))
 	   ,@body)
 	 (kill-buffer buf)))))
 
@@ -715,21 +719,23 @@ will return nil if the CID is unknown or cannot be retrieved."
   t)
 
 (defun notmuch-show-insert-part-message/rfc822 (msg part _content-type _nth depth _button)
-  (let* ((message (car (plist-get part :content)))
-	 (body (car (plist-get message :body)))
-	 (start (point)))
-    ;; Override `notmuch-message-headers' to force `From' to be
-    ;; displayed.
-    (let ((notmuch-message-headers '("From" "Subject" "To" "Cc" "Date")))
-      (notmuch-show-insert-headers (plist-get message :headers)))
-    ;; Blank line after headers to be compatible with the normal
-    ;; message display.
-    (insert "\n")
-    ;; Show the body
-    (notmuch-show-insert-bodypart msg body depth)
-    (when notmuch-show-indent-multipart
-      (indent-rigidly start (point) 1)))
-  t)
+  (let ((message (car (plist-get part :content))))
+    (and
+     message
+     (let ((body (car (plist-get message :body)))
+	   (start (point)))
+       ;; Override `notmuch-message-headers' to force `From' to be
+       ;; displayed.
+       (let ((notmuch-message-headers '("From" "Subject" "To" "Cc" "Date")))
+	 (notmuch-show-insert-headers (plist-get message :headers)))
+       ;; Blank line after headers to be compatible with the normal
+       ;; message display.
+       (insert "\n")
+       ;; Show the body
+       (notmuch-show-insert-bodypart msg body depth)
+       (when notmuch-show-indent-multipart
+	 (indent-rigidly start (point) 1))
+       t))))
 
 (defun notmuch-show-insert-part-text/plain (msg part _content-type _nth depth button)
   ;; For backward compatibility we want to apply the text/plain hook
@@ -820,7 +826,8 @@ will return nil if the CID is unknown or cannot be retrieved."
     (let ((mm-inline-text-html-with-w3m-keymap nil)
 	  ;; FIXME: If we block an image, offer a button to load external
 	  ;; images.
-	  (gnus-blocked-images notmuch-show-text/html-blocked-images))
+	  (gnus-blocked-images notmuch-show-text/html-blocked-images)
+	  (w3m-ignored-image-url-regexp notmuch-show-text/html-blocked-images))
       (notmuch-show-insert-part-*/* msg part content-type nth depth button))))
 
 ;;; Functions used by notmuch-show--insert-part-text/html-shr
@@ -1314,9 +1321,10 @@ Apply the previously saved STATE if supplied, otherwise show the
 first relevant message.
 
 If no messages match the query return NIL."
-  (let* ((cli-args (cons "--exclude=false"
-			 (and notmuch-show-elide-non-matching-messages
-			      (list "--entire-thread=false"))))
+  (let* ((cli-args (list "--exclude=false"))
+	 (cli-args (if notmuch-show-elide-non-matching-messages (cons "--entire-thread=false" cli-args) cli-args))
+	 ;; "part 0 is the whole message (headers and body)" notmuch-show(1)
+	 (cli-args (if notmuch-show-single-message (cons "--part=0" cli-args) cli-args))
 	 (queries (notmuch-show--build-queries
 		   notmuch-show-thread-id notmuch-show-query-context))
 	 (forest nil)
@@ -1327,6 +1335,8 @@ If no messages match the query return NIL."
     (while (and (not forest) queries)
       (setq forest (notmuch-query-get-threads
 		    (append cli-args (list "'") (car queries) (list "'"))))
+      (when (and forest notmuch-show-single-message)
+	(setq forest (list (list (list forest)))))
       (setq queries (cdr queries)))
     (when forest
       (notmuch-show-insert-forest forest)
@@ -2024,7 +2034,7 @@ to show, nil otherwise."
     (pop-to-buffer-same-window buf)
     (erase-buffer)
     (let ((coding-system-for-read 'no-conversion))
-      (call-process notmuch-command nil t nil "show" "--format=raw" id))
+      (notmuch--call-process notmuch-command nil t nil "show" "--format=raw" id))
     (goto-char (point-min))
     (set-buffer-modified-p nil)
     (setq buffer-read-only t)
@@ -2070,19 +2080,19 @@ message."
     (let ((cwd default-directory)
 	  (buf (get-buffer-create (concat "*notmuch-pipe*"))))
       (with-current-buffer buf
-	(setq buffer-read-only nil)
-	(erase-buffer)
-	;; Use the originating buffer's working directory instead of
-	;; that of the pipe buffer.
-	(cd cwd)
-	(let ((exit-code (call-process-shell-command shell-command nil buf)))
-	  (goto-char (point-max))
-	  (set-buffer-modified-p nil)
-	  (setq buffer-read-only t)
-	  (unless (zerop exit-code)
-	    (pop-to-buffer buf)
-	    (message (format "Command '%s' exited abnormally with code %d"
-			     shell-command exit-code))))))))
+	(setq buffer-read-only t)
+	(let ((inhibit-read-only t))
+	  (erase-buffer)
+	  ;; Use the originating buffer's working directory instead of
+	  ;; that of the pipe buffer.
+	  (cd cwd)
+	  (let ((exit-code (call-process-shell-command shell-command nil buf)))
+	    (goto-char (point-max))
+	    (set-buffer-modified-p nil)
+	    (unless (zerop exit-code)
+	      (pop-to-buffer buf)
+	      (message (format "Command '%s' exited abnormally with code %d"
+			       shell-command exit-code)))))))))
 
 (defun notmuch-show-tag-message (&rest tag-changes)
   "Change tags for the current message.
