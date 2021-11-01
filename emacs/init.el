@@ -936,6 +936,7 @@ See `eshell-prompt-regexp'."
 (defun /python-mode-hook ()
   (setq show-trailing-whitespace t)
   (define-key python-mode-map (kbd "C-c C-z") nil)
+  (define-key python-mode-map (kbd "C-c C-p") nil)
   (subword-mode)
   (defconst python-block-pairs
     '(("else" "if" "elif" "while" "for" "try" "except")
