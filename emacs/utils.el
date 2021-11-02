@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (defun /println (str &optional buf)
   "Get an *output* buffer going, and write to it. Like println in every language."
   (let ((buf (if buf buf (get-buffer-create "*output*"))))

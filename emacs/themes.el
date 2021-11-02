@@ -1,4 +1,4 @@
-;;; -*- mode: emacs-lisp; mode: rainbow; -*-
+;;; -*- mode: emacs-lisp; mode: rainbow; lexical-binding: t -*-
 
 ;;; Good resource for making colors: https://www.w3schools.com/colors/colors_picker.asp
 ;;; Also try the mac-color-picker AppleScript wrapper.

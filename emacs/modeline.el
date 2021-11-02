@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (defun /mode-line-fill (reserve)
   "Return empty space leaving RESERVE space on the right.
    Adapted from powerline.el."
