@@ -108,8 +108,6 @@
   (advice-add 'cider-switch-to-repl-buffer :around #'/display-buffer-reuse-window-nil)
   (advice-add 'cider-switch-to-last-clojure-buffer :around #'/display-buffer-reuse-window-nil)
   )
-;; XXX / FIXME: This seems to be necessary to load .clj files, or bizarre loading errors occur.
-(require 'cider)
 
 
 (use-package clojure-mode
@@ -280,9 +278,6 @@
   :custom
   ;;(envrc-lighter nil)
   (envrc-on-lighter '(" ε"))
-
-  :config
-  (envrc-global-mode 0)
   )
 
 ;;; gopher and gemini client
