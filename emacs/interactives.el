@@ -748,3 +748,10 @@ instead, which does not save the deletion to the kill-ring."
     (kill-region beg end region)))
 
 (global-set-key (kbd "C-w") #'kill-or-delete-region)
+
+
+(defun open-messages-buffer ()
+  "When the *Messages* buffer is in the ignore-buffers list, it's
+annoying to open. This function makes it easier."
+  (interactive)
+  (switch-to-buffer (get-buffer "*Messages*")))
