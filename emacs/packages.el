@@ -60,6 +60,16 @@
 
 
 (use-package cider
+  ;; :mode (rx (or ".clj" ".cljs" ".cljc" ".cljx") eol)
+
+  :custom
+  (cider-show-error-buffer 'except-in-repl)
+  (cider-prompt-for-symbol nil)
+  (cider-repl-tab-command 'indent-for-tab-command)
+  (cider-repl-display-help-banner nil)
+  (cider-repl-history-file (concat user-emacs-directory "nrepl-history"))
+  (cider-mode-line '(:eval (format " cider[%s]" (cider-current-ns))))
+
   :config
   ;; (add-to-list 'display-buffer-alist
   ;;              '("\\*cider-repl .*"
@@ -67,13 +77,6 @@
   ;;                (reusable-frames . visible)
   ;;                (side . bottom)
   ;;                (window-height . 0.2)))
-
-  (setq cider-show-error-buffer 'except-in-repl
-        cider-prompt-for-symbol nil
-        cider-repl-tab-command 'indent-for-tab-command
-        cider-repl-display-help-banner nil
-        cider-repl-history-file (concat user-emacs-directory "nrepl-history")
-        cider-mode-line '(:eval (format " cider[%s]" (cider-current-ns))))
 
   (defun /cider-mode-hook ()
     (paredit-mode 1)
@@ -103,6 +106,8 @@
   (advice-add 'cider-switch-to-repl-buffer :around #'/display-buffer-reuse-window-nil)
   (advice-add 'cider-switch-to-last-clojure-buffer :around #'/display-buffer-reuse-window-nil)
   )
+;; XXX / FIXME: This seems to be necessary to load .clj files, or bizarre loading errors occur.
+(require 'cider)
 
 
 (use-package clojure-mode
