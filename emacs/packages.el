@@ -816,16 +816,6 @@
   :pin melpa)
 
 
-(use-package prescient
-  :pin melpa
-
-  :config
-  ;;(setq prescient-aggressive-file-save t)
-  (setq prescient-filter-method '(literal regexp initialism fuzzy))
-  (prescient-persist-mode 1)
-  )
-
-
 (use-package projectile
   :bind
   (:map projectile-mode-map
