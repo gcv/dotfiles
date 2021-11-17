@@ -240,8 +240,8 @@
 
   :config
   (when window-system
-    ;; match mini-frame height - 1
-    (setq vertico-count 14))
+    ;; match mini-frame height + 1 (no idea why)
+    (setq vertico-count 16))
   )
 
 
