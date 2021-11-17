@@ -46,12 +46,20 @@
     (unwind-protect
         (progn
           (when (and window-system (not mini-frame-active))
-            (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
-            (advice-add 'find-file-read-args :around #'mini-frame-read-from-minibuffer))
+            (mini-frame--advice mini-frame-advice-functions #'mini-frame-read-from-minibuffer)
+            (mini-frame--advice mini-frame-ignore-functions #'mini-frame--ignore-function)
+            (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
+            ;; (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
+            ;; (advice-add 'find-file-read-args :around #'mini-frame-read-from-minibuffer)
+            )
           (apply orig-fn args))
       (when (and window-system (not mini-frame-active))
-        (advice-remove 'find-file-read-args #'mini-frame-read-from-minibuffer)
-        (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)))))
+        (mini-frame--advice mini-frame-advice-functions #'mini-frame-read-from-minibuffer t)
+        (mini-frame--advice mini-frame-ignore-functions #'mini-frame--ignore-function t)
+        (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
+        ;; (advice-remove 'find-file-read-args #'mini-frame-read-from-minibuffer)
+        ;; (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
+        ))))
 
 (define-minor-mode selective-mini-frame-mode
   "Selectively enable mini-frame-mode for some commands."
@@ -61,6 +69,7 @@
   (if selective-mini-frame-mode
       ;; enable
       (progn
+        (require 'mini-frame)
         (advice-add 'read-extended-command :around #'selective-mini-frame)
         (advice-add 'imenu-cr :around #'selective-mini-frame))
     ;; disable
