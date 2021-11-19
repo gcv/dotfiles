@@ -14,6 +14,7 @@
      (left . 0.5)
      (height . 15)                      ; explicit even with mini-frame-resize t
      (width . 0.7)
+     (no-accept-focus . t)              ; XXX: see https://github.com/minad/vertico/issues/115
      (left-fringe . 5)
      (right-fringe . 5)))
   (mini-frame-resize-max-height 15)
@@ -52,7 +53,11 @@
             ;; (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
             ;; (advice-add 'find-file-read-args :around #'mini-frame-read-from-minibuffer)
             )
-          (apply orig-fn args))
+          (let* ((mini-frame-height (or (ignore-errors (frame-parameter mini-frame-frame 'height)) 10))
+                 ;; not sure why these values have to be fudged by 1, let alone why in different directions
+                 (selectrum-num-candidates-displayed (- mini-frame-height 1))
+                 (vertico-count (+ mini-frame-height 1)))
+            (apply orig-fn args)))
       (when (and window-system (not mini-frame-active))
         (mini-frame--advice mini-frame-advice-functions #'mini-frame-read-from-minibuffer t)
         (mini-frame--advice mini-frame-ignore-functions #'mini-frame--ignore-function t)
@@ -237,11 +242,6 @@
   (vertico-on-demand-mode 1)
   (when window-system
     (selective-mini-frame-mode 1))
-
-  :config
-  (when window-system
-    ;; match mini-frame height + 1 (no idea why)
-    (setq vertico-count 16))
   )
 
 
@@ -268,10 +268,6 @@
   ;;(selective-selectrum-mode 1)
 
   :config
-  (when window-system
-    ;; match mini-frame height - 1
-    (setq selectrum-num-candidates-displayed 14))
-
   (selectrum-prescient-mode 1)
   )
 
