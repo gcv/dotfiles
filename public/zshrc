@@ -143,9 +143,9 @@ export LS_COLORS="no=00:fi=00:di=95:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40
 
 
 ### shell history settings
-HISTSIZE=10000
+HISTSIZE=50000
 HISTFILE=~/.history
-SAVEHIST=10000
+SAVEHIST=50000
 
 
 ### shell command timing
@@ -354,7 +354,7 @@ fi
 
 ### Turn on terminal GPG pinentry if on SSH connection:
 export GPG_TTY=$(tty)
-if [[ -n "$SSH_CONNECTION" ]] ;then
+if [[ -n "$SSH_CONNECTION" ]]; then
     export PINENTRY_USER_DATA="USE_CURSES=1"
 fi
 
