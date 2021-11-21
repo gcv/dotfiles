@@ -200,6 +200,7 @@
       (define-key map "?" #'vertico-on-demand-show)
       (define-key map "\r" #'vertico-on-demand-complete-and-exit)
       (define-key map "\t" #'vertico-on-demand-complete)
+      (define-key map [return] #'vertico-exit-input)
       (define-key map [C-return] #'vertico-exit-input)
       map)
     "Vertico on-demand minibuffer keymap derived from `minibuffer-local-map'.")
