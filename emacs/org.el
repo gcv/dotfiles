@@ -1,6 +1,6 @@
 ;;; -*- lexical-binding: t; -*-
 
-(with-eval-after-load "org"
+(with-eval-after-load 'org
 
   (require 'org-crypt)
   (require 'org-clock)
