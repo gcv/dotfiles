@@ -157,30 +157,6 @@
   )
 
 
-;;; --- mct
-
-(use-package mct
-  :pin gnu
-
-  :custom
-  (mct-live-update-delay 0)
-  (mct-remove-shadowed-file-names t)
-  (mct-hide-completion-mode-line t)
-  ;;(mct-show-completion-line-numbers t)
-
-  ;;:init
-  ;;(mct-mode 1)
-  ;;
-  ;;(defun /temp-buffer-max-height (orig-fn &rest args)
-  ;;  (let ((buffer (car args)))
-  ;;     (if (string= (buffer-name buffer) "*Completions*")
-  ;;         3
-  ;;       (apply orig-fn args))))
-  ;;(advice-add 'temp-buffer-max-height :around #'/temp-buffer-max-height)
-  ;;(temp-buffer-resize-mode)
-  )
-
-
 ;;; --- vertico
 
 (use-package vertico
