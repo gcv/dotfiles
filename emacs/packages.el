@@ -141,7 +141,8 @@
 
   :bind
   (;;("TAB" . company-indent-or-complete-common)
-   ("C-." . company-complete))
+   ("C-." . company-complete)
+   ("C-c ." . company-complete))
 
   :config
   (global-company-mode)
@@ -467,6 +468,7 @@
   ;; manually set keys, because iedit overrides some important globals:
   (let ((iedit-toggle-keybinding (kbd "C-;")))
     (define-key global-map iedit-toggle-keybinding 'iedit-mode)
+    (define-key global-map (kbd "C-c ;") 'iedit-mode)
     (define-key isearch-mode-map iedit-toggle-keybinding 'iedit-mode-from-isearch)
     (define-key help-map iedit-toggle-keybinding 'iedit-mode-toggle-on-function))
   )
@@ -628,6 +630,7 @@
 (use-package multiple-cursors
   :bind
   (("C-?" . mc/edit-lines)
+   ("C-c ?" . mc/edit-lines)
    ("C-M-_" . mc/edit-lines)             ; C-M-/ evals to this in terminal?
    ("C->" . mc/mark-next-like-this)
    ("C-<" . mc/mark-previous-like-this)
@@ -732,6 +735,8 @@
   (define-key paredit-mode-map (kbd "M-<down>") 'scroll-down-line)
   (define-key paredit-mode-map (kbd "M-S-<up>") 'paredit-splice-sexp-killing-backward)
   (define-key paredit-mode-map (kbd "M-S-<down>") 'paredit-splice-sexp-killing-forward)
+  (define-key paredit-mode-map (kbd "C-c (") 'paredit-backward-slurp-sexp)
+  (define-key paredit-mode-map (kbd "C-c )") 'paredit-forward-slurp-sexp)
   (if window-system
       (define-key paredit-mode-map (kbd "M-[") 'paredit-wrap-square)
     (define-key paredit-mode-map (kbd "M-[") nil))

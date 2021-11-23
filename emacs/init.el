@@ -469,6 +469,7 @@
    ))
 
 (global-set-key (kbd "C-M-;") 'comment-or-uncomment-region)
+(global-set-key (kbd "C-c M-;") 'comment-or-uncomment-region)
 
 (global-set-key (kbd "M-q") (lambda ()
                               (interactive)

@@ -101,7 +101,9 @@
 
   :bind
   (("C-," . embark-act)
-   ("C-M-," . embark-dwim))
+   ("C-c ," . embark-act)
+   ("C-M-," . embark-dwim)
+   ("C-c M-," . embark-dwim))
 
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
