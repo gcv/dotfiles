@@ -19,7 +19,7 @@
      (right-fringe . 5)))
   (mini-frame-resize-max-height 15)
 
-  :commands (mini-frame-read-from-minibuffer)
+  :commands (mini-frame-read-from-minibuffer mini-frame--advice)
 
   ;;:init
   ;;(mini-frame-mode 1)
@@ -74,7 +74,6 @@
   (if selective-mini-frame-mode
       ;; enable
       (progn
-        (require 'mini-frame)
         (advice-add 'read-extended-command :around #'selective-mini-frame)
         (advice-add 'imenu-cr :around #'selective-mini-frame))
     ;; disable
