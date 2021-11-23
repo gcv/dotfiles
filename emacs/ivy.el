@@ -18,8 +18,6 @@
   (add-to-list 'ivy-display-functions-alist '(counsel-M-x . /ivy-display-function-window))
   (add-to-list 'ivy-display-functions-alist '(counsel-yank-pop . /ivy-display-function-window))
   (add-to-list 'ivy-display-functions-alist '(counsel-ag . /ivy-display-function-window))
-
-  (ivy-prescient-mode 1)
   )
 
 
@@ -146,10 +144,6 @@
           ;;(t . ivy-posframe-display)
           (t . /ivy-posframe-display-smart)))
   )
-
-
-(use-package ivy-prescient
-  :pin melpa)
 
 
 (use-package ivy-xref
