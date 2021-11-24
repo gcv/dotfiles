@@ -210,11 +210,24 @@
   (defvar vertico-on-demand-auto-this nil)
 
   (defcustom vertico-on-demand-auto-commands
-    (list 'execute-extended-command "consult-.*" "imenu-.*")
+    (list 'execute-extended-command
+          'eval-expression
+          "edebug-eval-expression"
+          'debugger-eval-expression
+          "consult-.*"
+          "imenu-.*")
     "List of commands which automatically activate Vertico, bypassing on-demand mode."
     :group 'vertico
     :type '(repeat (choice function regexp))
     )
+
+  (defun vertico-on-demand--completion-at-point-advice (orig-fn &rest args)
+    (let ((vertico-on-demand-auto-this t)
+          ;; consult-completion-in-region makes completion work in minibuffer
+          ;; commands like eval-expression (where company-mode is not
+          ;; supported), as well as ielm
+          (completion-in-region-function 'consult-completion-in-region))
+      (apply orig-fn args)))
 
   (defun vertico-on-demand--advice (&rest args)
     "Advice for completion function, receiving ARGS."
@@ -236,7 +249,10 @@
     :global t
     :group 'vertico
     (if vertico-on-demand-mode
-        (advice-add #'vertico--advice :override #'vertico-on-demand--advice)
+        (progn
+          (advice-add #'vertico--advice :override #'vertico-on-demand--advice)
+          (advice-add #'completion-at-point :around #'vertico-on-demand--completion-at-point-advice))
+      (advice-remove #'completion-at-point #'vertico-on-demand--completion-at-point-advice)
       (advice-remove #'vertico--advice #'vertico-on-demand--advice)))
 
   ;; --- end of vertico-on-demand-mode
