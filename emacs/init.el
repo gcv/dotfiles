@@ -490,6 +490,158 @@
 
 
 ;;; ----------------------------------------------------------------------------
+;;; dired
+;;; ----------------------------------------------------------------------------
+
+(use-feature dired
+  :init
+  (put 'dired-find-alternate-file 'disabled nil)
+
+  (setq dired-recursive-deletes 'always
+        dired-recursive-copies 'always)
+
+  ;; quick hack for using GNU ls
+  (let ((gnu-ls (executable-find "ls")))
+    (when gnu-ls
+      (setq insert-directory-program gnu-ls)
+      (setq dired-listing-switches "-gGha")
+      (setq dired-use-ls-dired t)))
+
+  (defun /dired-mode-hook ()
+    (dired-hide-details-mode 1)
+    (define-key dired-mode-map (kbd "<RET>")
+      (lambda ()
+        (interactive)
+        (let ((f (dired-get-file-for-visit)))
+          (if (file-directory-p f)
+              (dired-find-alternate-file)
+            (dired-find-file)))))
+    (define-key dired-mode-map (kbd "<S-return>")
+      (lambda ()
+        (interactive)
+        (let ((f (dired-get-file-for-visit)))
+          (ace-select-window)
+          (find-file f))))
+    (define-key dired-mode-map (kbd "a") 'dired-find-alternate-file)
+    (define-key dired-mode-map (kbd "^")
+      (lambda ()
+        (interactive)
+        (let ((curr (directory-file-name (dired-current-directory))))
+          (find-alternate-file "..")
+          (message curr)
+          (dired-goto-file curr)))))
+
+  (add-hook 'dired-mode-hook #'/dired-mode-hook)
+  )
+
+
+;;; ----------------------------------------------------------------------------
+;;; eshell
+;;; ----------------------------------------------------------------------------
+
+(use-feature eshell
+  :bind
+  (("C-!" . eshell-here))
+
+  :custom
+  (eshell-banner-message "")
+  (eshell-history-size 10000)
+  (eshell-destroy-buffer-when-process-dies t)
+  (eshell-hist-ignoredups t)
+  (eshell-save-history-index t)
+  (eshell-prompt-regexp "^\\[.*?\\] ")
+  (eshell-prompt-function
+   (lambda ()
+     (concat
+      (propertize "[" 'face `(:foreground "lightgreen"))
+      (propertize (user-real-login-name) 'face `(:foreground "lightblue"))
+      (propertize "@" 'face `(:foreground "lightgreen"))
+      (propertize (system-name) 'face `(:foreground "blanchedalmond"))
+      (propertize "]" 'face `(:foreground "lightgreen"))
+      ;;(propertize (if (= (user-uid) 0) " #" " ∴") 'face `(:foreground "lightgreen"))
+      " "
+      )))
+
+  :hook
+  (eshell-mode-hook . /eshell-mode-hook)
+
+  :init
+  (defun eshell/h ()
+    (interactive)
+    (insert
+     (completing-read "History: " (delete-dups (ring-elements eshell-history-ring)))))
+
+  (defun eshell/shortpwd ()
+    (/display-dir (eshell/pwd)))
+
+  (defun eshell/... ()
+    (eshell/cd "../.."))
+
+  (defun eshell/.... ()
+    (eshell/cd "../../.."))
+
+  (defun eshell/..... ()
+    (eshell/cd "../../../.."))
+
+  (defun eshell/...... ()
+    (eshell/cd "../../../../.."))
+
+  (defun eshell/o (filename)
+    "Just type o filename in eshell to open the file."
+    (find-file filename))
+
+  (defun eshell/x ()
+    (insert "exit")
+    (eshell-send-input)
+    (delete-window))
+
+  (defun eshell-here ()
+    (interactive)
+    (let* ((parent (if (buffer-file-name)
+                       (file-name-directory (buffer-file-name))
+                     default-directory))
+           (height (/ (window-total-height) 3))
+           (name (car (last (split-string parent "/" t)))))
+      (split-window-vertically (- height))
+      (other-window 1)
+      (eshell "new")
+      (rename-buffer (concat "*eshell: " name "*"))
+      (insert (concat "ls"))
+      (eshell-send-input)))
+
+  (defun /eshell-mode-hook ()
+    (local-set-key (kbd "C-p") 'eshell-previous-input)
+    (local-set-key (kbd "C-p") 'eshell-next-input)
+    (local-set-key (kbd "C-r") 'eshell-isearch-backward)
+    (local-set-key (kbd "C-M-r") 'helm-eshell-history)
+    (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
+    (local-set-key (kbd "C-c C-z") 'flip-windows)
+    (local-set-key (kbd "<tab>") 'company-complete)
+    (add-to-list 'eshell-visual-commands "htop")
+    (add-to-list 'eshell-visual-commands "tmux")
+    (eshell/alias "dir" "ls -a")
+    (eshell/alias "v" "ls -laH"))
+
+;;; TODO: Delete these after Emacs 25.3.
+  (defun eshell-next-prompt (n)
+    "Move to end of Nth next prompt in the buffer.
+See `eshell-prompt-regexp'."
+    (interactive "p")
+    (re-search-forward eshell-prompt-regexp nil t n)
+    (when eshell-highlight-prompt
+      (while (not (get-text-property (line-beginning-position) 'read-only) )
+        (re-search-forward eshell-prompt-regexp nil t n)))
+    (eshell-skip-prompt))
+  (defun eshell-previous-prompt (n)
+    "Move to end of Nth previous prompt in the buffer.
+See `eshell-prompt-regexp'."
+    (interactive "p")
+    (backward-char)
+    (eshell-next-prompt (- n)))
+  )
+
+
+;;; ----------------------------------------------------------------------------
 ;;; configure smaller built-in features and modes
 ;;; ----------------------------------------------------------------------------
 
@@ -613,46 +765,6 @@
 (add-hook 'subword-mode-hook #'/subword-mode-hook)
 
 
-;;; dired
-(put 'dired-find-alternate-file 'disabled nil)
-
-(setq dired-recursive-deletes 'always
-      dired-recursive-copies 'always)
-
-;; quick hack for using GNU ls
-(let ((gnu-ls (executable-find "ls")))
-  (when gnu-ls
-    (setq insert-directory-program gnu-ls)
-    (setq dired-listing-switches "-gGha")
-    (setq dired-use-ls-dired t)))
-
-(defun /dired-mode-hook ()
-  (dired-hide-details-mode 1)
-  (define-key dired-mode-map (kbd "<RET>")
-    (lambda ()
-      (interactive)
-      (let ((f (dired-get-file-for-visit)))
-        (if (file-directory-p f)
-            (dired-find-alternate-file)
-          (dired-find-file)))))
-  (define-key dired-mode-map (kbd "<S-return>")
-    (lambda ()
-      (interactive)
-      (let ((f (dired-get-file-for-visit)))
-        (ace-select-window)
-        (find-file f))))
-  (define-key dired-mode-map (kbd "a") 'dired-find-alternate-file)
-  (define-key dired-mode-map (kbd "^")
-    (lambda ()
-      (interactive)
-      (let ((curr (directory-file-name (dired-current-directory))))
-        (find-alternate-file "..")
-        (message curr)
-        (dired-goto-file curr)))))
-
-(add-hook 'dired-mode-hook #'/dired-mode-hook)
-
-
 ;;; ediff
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 (setq ediff-split-window-function 'split-window-horizontally)
@@ -687,108 +799,6 @@
 
 ;;; comint
 (setq comint-input-ignoredups t)
-
-
-;;; eshell
-(setq eshell-banner-message ""
-      eshell-history-size 10000
-      eshell-destroy-buffer-when-process-dies t
-      eshell-hist-ignoredups t
-      eshell-save-history-index t)
-
-(setq eshell-prompt-function
-      (lambda ()
-        (concat
-         (propertize "[" 'face `(:foreground "lightgreen"))
-         (propertize (user-real-login-name) 'face `(:foreground "lightblue"))
-         (propertize "@" 'face `(:foreground "lightgreen"))
-         (propertize (system-name) 'face `(:foreground "blanchedalmond"))
-         (propertize "]" 'face `(:foreground "lightgreen"))
-         ;;(propertize (if (= (user-uid) 0) " #" " ∴") 'face `(:foreground "lightgreen"))
-         " "
-         )))
-
-(setq eshell-prompt-regexp "^\\[.*?\\] ")
-
-(defun eshell/h ()
-  (/with-selectrum-mini-frame
-   (lambda ()
-     (interactive)
-     (insert
-      (completing-read "History: " (delete-dups (ring-elements eshell-history-ring)))))
-   'read-from-minibuffer))
-
-(defun eshell/shortpwd ()
-  (/display-dir (eshell/pwd)))
-
-(defun eshell/... ()
-  (eshell/cd "../.."))
-
-(defun eshell/.... ()
-  (eshell/cd "../../.."))
-
-(defun eshell/..... ()
-  (eshell/cd "../../../.."))
-
-(defun eshell/...... ()
-  (eshell/cd "../../../../.."))
-
-(defun eshell/o (filename)
-  "Just type o filename in eshell to open the file."
-  (find-file filename))
-
-(defun eshell/x ()
-  (insert "exit")
-  (eshell-send-input)
-  (delete-window))
-
-(defun eshell-here ()
-  (interactive)
-  (let* ((parent (if (buffer-file-name)
-                     (file-name-directory (buffer-file-name))
-                   default-directory))
-         (height (/ (window-total-height) 3))
-         (name (car (last (split-string parent "/" t)))))
-    (split-window-vertically (- height))
-    (other-window 1)
-    (eshell "new")
-    (rename-buffer (concat "*eshell: " name "*"))
-    (insert (concat "ls"))
-    (eshell-send-input)))
-
-(global-set-key (kbd "C-!") 'eshell-here)
-
-(defun /eshell-mode-hook ()
-  (local-set-key (kbd "C-p") 'eshell-previous-input)
-  (local-set-key (kbd "C-p") 'eshell-next-input)
-  (local-set-key (kbd "C-r") 'eshell-isearch-backward)
-  (local-set-key (kbd "C-M-r") 'helm-eshell-history)
-  (local-set-key (kbd "C-S-d") (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))
-  (local-set-key (kbd "C-c C-z") 'flip-windows)
-  (local-set-key (kbd "<tab>") 'company-complete)
-  (add-to-list 'eshell-visual-commands "htop")
-  (add-to-list 'eshell-visual-commands "tmux")
-  (eshell/alias "dir" "ls -a")
-  (eshell/alias "v" "ls -laH"))
-
-(add-hook 'eshell-mode-hook #'/eshell-mode-hook)
-
-;;; TODO: Delete these after Emacs 25.3.
-(defun eshell-next-prompt (n)
-    "Move to end of Nth next prompt in the buffer.
-See `eshell-prompt-regexp'."
-    (interactive "p")
-    (re-search-forward eshell-prompt-regexp nil t n)
-    (when eshell-highlight-prompt
-      (while (not (get-text-property (line-beginning-position) 'read-only) )
-        (re-search-forward eshell-prompt-regexp nil t n)))
-    (eshell-skip-prompt))
-(defun eshell-previous-prompt (n)
-    "Move to end of Nth previous prompt in the buffer.
-See `eshell-prompt-regexp'."
-    (interactive "p")
-    (backward-char)
-    (eshell-next-prompt (- n)))
 
 
 ;;; icomplete mode
