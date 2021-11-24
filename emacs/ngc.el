@@ -14,7 +14,7 @@
      (left . 0.5)
      (height . 15)                      ; explicit even with mini-frame-resize t
      (width . 0.7)
-     (no-accept-focus . t)              ; XXX: see https://github.com/minad/vertico/issues/115
+     (no-accept-focus . t)              ; XXX: see https://github.com/minad/vertico/issues/115 and no-accept-focus hack below
      (left-fringe . 5)
      (right-fringe . 5)))
   (mini-frame-resize-max-height 15)
@@ -57,6 +57,7 @@
                  ;; not sure why these values have to be fudged by 1, let alone why in different directions
                  (selectrum-num-candidates-displayed (- mini-frame-height 1))
                  (vertico-count (+ mini-frame-height 1)))
+            (add-to-list 'mini-frame-show-parameters '(no-accept-focus . t)) ; XXX: weirdly this disappears
             (apply orig-fn args)))
       (when (and window-system (not mini-frame-active))
         (mini-frame--advice mini-frame-advice-functions #'mini-frame-read-from-minibuffer t)
