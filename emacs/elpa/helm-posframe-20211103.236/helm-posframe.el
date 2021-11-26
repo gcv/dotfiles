@@ -5,8 +5,8 @@
 ;; Author: Feng Shu
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/helm-posframe
-;; Package-Version: 20210412.1147
-;; Package-Commit: 2412e5b3c584c7683982a7e9cfa10a67427f2567
+;; Package-Version: 20211103.236
+;; Package-Commit: 87461b52b6f3f378c63642a33f584d4a4ba28351
 ;; Version: 0.1.0
 ;; Keywords: abbrev, convenience, matching, helm
 ;; Package-Requires: ((emacs "26.0")(posframe "1.0.0")(helm "0.1"))
@@ -94,11 +94,6 @@
   :group 'helm-posframe
   :type 'number)
 
-(defcustom helm-posframe-border-width 3
-  "The border width used by helm-posframe.
-When 0, no border is showed."
-  :type 'number)
-
 (defcustom helm-posframe-size-function #'helm-posframe-get-size
   "The function which is used to deal with posframe's size."
   :group 'helm-posframe
@@ -142,7 +137,6 @@ Argument BUFFER."
          :poshandler helm-posframe-poshandler
          :font helm-posframe-font
          :override-parameters helm-posframe-parameters
-	 :internal-border-width helm-posframe-border-width
          :respect-header-line t
          :border-width helm-posframe-border-width
          :border-color (face-attribute 'helm-posframe-border :background nil t)
