@@ -450,6 +450,38 @@ With a prefix ARG simply reset the width of the treemacs window."
                (read-number))))
   (treemacs--set-width treemacs-width))
 
+  (defun treemacs-increase-width (&optional arg)
+    "Increase the value for `treemacs-width' with `treemacs-width-increment'.
+With a prefix ARG add the increment value multiple times."
+    (interactive "P")
+    (let* ((treemacs-window (treemacs-get-local-window))
+            (multiplier (if (numberp arg) arg 1))
+            (old-width (window-body-width treemacs-window))
+            (new-width (+ old-width (* multiplier treemacs-width-increment))))
+      (setq treemacs-width new-width)
+      (treemacs--set-width new-width)
+      (let ((current-size (window-body-width treemacs-window)))
+        (when (not (eq current-size new-width))
+          (setq treemacs-width old-width)
+          (treemacs--set-width old-width)
+          (treemacs-pulse-on-failure "Could not increase window width!")))))
+
+  (defun treemacs-decrease-width (&optional arg)
+    "Decrease the value for `treemacs-width' with `treemacs-width-increment'.
+With a prefix ARG substract the increment value multiple times."
+    (interactive "P")
+    (let* ((treemacs-window (treemacs-get-local-window))
+            (multiplier (if (numberp arg) arg 1))
+            (old-width (window-body-width treemacs-window))
+            (new-width (- old-width (* multiplier treemacs-width-increment))))
+      (setq treemacs-width new-width)
+      (treemacs--set-width new-width)
+      (let ((current-size (window-body-width treemacs-window)))
+        (when (not (eq current-size new-width))
+          (setq treemacs-width old-width)
+          (treemacs--set-width old-width)
+          (treemacs-pulse-on-failure "Could not decrease window width!")))))
+
 (defun treemacs-copy-absolute-path-at-point ()
   "Copy the absolute path of the node at point."
   (interactive)
@@ -885,24 +917,6 @@ With a prefix ARG also forget about all the nodes opened in the projects."
   (treemacs--maybe-recenter 'on-distance)
   (treemacs-pulse-on-success "Collapsed all other projects"))
 
-(defun treemacs-peek ()
-  "Peek at the content of the node at point.
-This will display the file (or tag) at point in `next-window' much like
-`treemacs-visit-node-no-split' would.  The difference that the file is not
-really (or rather permanently) opened - any command other than `treemacs-peek',
-`treemacs-next-line-other-window', `treemacs-previous-line-other-window',
-`treemacs-next-page-other-window' or `treemacs-previous-page-other-window' will
-cause it to be closed again and the previously shown buffer to be restored.  The
-buffer visiting the peeked file will also be killed again, unless it was already
-open before being used for peeking."
-  (interactive)
-  (treemacs--execute-button-action
-   :window-arg '(4)
-   :ensure-window-split t
-   :window (-some-> btn (treemacs--nearest-path) (get-file-buffer) (get-buffer-window))
-   :no-match-explanation "Only files and tags are peekable."
-   :file-action (treemacs--setup-peek-buffer btn)
-   :tag-action (treemacs--setup-peek-buffer btn t)))
 
 (defun treemacs-root-up (&optional _)
   "Move treemacs' root one level upward.
@@ -1234,6 +1248,45 @@ To programmatically set the scope type see `treemacs-set-scope-type'."
                   (goto-char it)
                   (treemacs-toggle-node :purge)))))))))
     (treemacs-pulse-on-success "Cleanup complete.")))
+
+(defun treemacs-fit-window-width ()
+  "Make treemacs wide enough to display its entire content.
+
+Specifically this will increase (or reduce) the width of the treemacs window to
+that of the longest line, counting all lines, not just the ones that are
+visible."
+  (interactive)
+  (let ((longest 0)
+        (depth 0))
+    (save-excursion
+      (goto-char (point-min))
+      (while (= 0 (forward-line 1))
+        (-let [new-len (- (point-at-eol) (point-at-bol))]
+          (when (> new-len longest)
+            (setf longest new-len
+                  depth (treemacs--prop-at-point :depth))))))
+    (let* ((icon-px-diff (* depth (- treemacs--icon-size (frame-char-width))))
+           (icon-offset (% icon-px-diff (frame-char-width)))
+           (new-width (+ longest icon-offset)))
+      (setf treemacs-width new-width)
+      (treemacs--set-width new-width)
+      (treemacs-pulse-on-success "Width set to %s"
+        (propertize (format "%s" new-width) 'face 'font-lock-string-face)))))
+
+(defun treemacs-extra-wide-toggle ()
+  "Expand the treemacs window to an extr-wide state (or turn it back).
+
+Specifically this will toggle treemacs' width between
+`treemacs-wide-toggle-width' and the normal `treemacs-width'."
+  (interactive)
+  (if (get 'treemacs-extra-wide-toggle :toggle-on)
+      (progn
+        (treemacs--set-width treemacs-width)
+        (put 'treemacs-extra-wide-toggle :toggle-on nil)
+        (treemacs-log "Switched to normal width display"))
+    (treemacs--set-width treemacs-wide-toggle-width)
+    (put 'treemacs-extra-wide-toggle :toggle-on t)
+    (treemacs-log "Switched to extra width display")))
 
 (defun treemacs-icon-catalogue ()
   "Showcase a catalogue of all treemacs themes and their icons."

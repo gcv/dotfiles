@@ -420,6 +420,47 @@ Show a contextual right click menu based on click EVENT.
 
 ;;;***
 
+;;;### (autoloads nil "treemacs-peek-mode" "treemacs-peek-mode.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from treemacs-peek-mode.el
+
+(defvar treemacs-peek-mode nil "\
+Non-nil if Treemacs-Peek mode is enabled.
+See the `treemacs-peek-mode' command
+for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `treemacs-peek-mode'.")
+
+(custom-autoload 'treemacs-peek-mode "treemacs-peek-mode" nil)
+
+(autoload 'treemacs-peek-mode "treemacs-peek-mode" "\
+Minor mode that allows you to peek at buffers before deciding to open them.
+
+If called interactively, enable Treemacs-Peek mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
+
+While the mode is active treemacs will automatically display the file at point,
+without leving the treemacs window.
+
+Peeking will stop when you leave the treemacs window, be it through a command
+like `treemacs-RET-action' or some other window selection change.
+
+Files' buffers that have been opened for peeking will be cleaned up if they did
+not exist before peeking started.
+
+The peeked window can be scrolled using
+`treemacs-next/previous-line-other-window' and
+`treemacs-next/previous-page-other-window'
+
+\(fn &optional ARG)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "treemacs-peek-mode" '("treemacs--")))
+
+;;;***
+
 ;;;### (autoloads nil "treemacs-persistence" "treemacs-persistence.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from treemacs-persistence.el
