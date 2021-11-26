@@ -399,27 +399,37 @@ Returns nil if the poll timed out, t otherwise."
     snail-remote-dir))
 
 (defun julia-snail--launch-command ()
-  (let ((extra-args (if (listp julia-snail-extra-args)
-                        (mapconcat 'identity julia-snail-extra-args " ")
-                      julia-snail-extra-args))
-        (remote-user (file-remote-p default-directory 'user))
-        (remote-host (file-remote-p default-directory 'host)))
-    (if (or (null remote-host) (string-equal "localhost" remote-host))
-        ;; local REPL
-        (format "%s %s -L %s" julia-snail-executable extra-args julia-snail--server-file)
-      ;; remote REPL
-      (let* ((remote-dir (julia-snail--copy-snail-to-remote-host))
-             (remote-dir-localname (file-remote-p remote-dir 'localname))
-             (remote-dir-server-file (concat remote-dir-localname "JuliaSnail.jl")))
-        (format "ssh -t -L %1$s:localhost:%2$s %3$s %4$s %5$s -L %6$s"
-                julia-snail-port
-                (or julia-snail-remote-port julia-snail-port)
-                (concat
-                 (if remote-user (concat remote-user "@") "")
-                 remote-host)
-                julia-snail-executable
-                extra-args
-                remote-dir-server-file)))))
+  (let* ((extra-args (if (listp julia-snail-extra-args)
+                         (mapconcat 'identity julia-snail-extra-args " ")
+                       julia-snail-extra-args))
+	 (remote-method (file-remote-p default-directory 'method))
+         (remote-user (file-remote-p default-directory 'user))
+         (remote-host (file-remote-p default-directory 'host))
+	 (remote-dir-server-file (if (equal nil remote-method)
+				     ""
+				   (concat (file-remote-p (julia-snail--copy-snail-to-remote-host) 'localname) "JuliaSnail.jl"))))
+    (cond
+     ;; local REPL
+     ((equal nil remote-method)
+      (format "%s %s -L %s" julia-snail-executable extra-args julia-snail--server-file))
+     ;; remote REPL
+     ((string-equal "ssh" remote-method)
+      (format "ssh -t -L %1$s:localhost:%2$s %3$s %4$s %5$s -L %6$s"
+              julia-snail-port
+              (or julia-snail-remote-port julia-snail-port)
+              (concat
+               (if remote-user (concat remote-user "@") "")
+               remote-host)
+              julia-snail-executable
+              extra-args
+              remote-dir-server-file))
+     ;; container REPL
+     ((string-equal "docker" remote-method)
+      (format "docker exec -it %s %s %s -L %s"
+	      remote-host
+	      julia-snail-executable
+	      extra-args
+	      remote-dir-server-file)))))
 
 (defun julia-snail--efn (path &optional starting-dir)
   "A variant of expand-file-name that (1) just does
@@ -492,7 +502,11 @@ returns \"/home/username/file.jl\"."
           (user-error "The vterm buffer is inactive; double-check julia-snail-executable path"))
         ;; now try to send the Snail startup command
         (julia-snail--send-to-repl
-          (format "JuliaSnail.start(%d); # please wait, time-to-first-plot..." (or julia-snail-remote-port julia-snail-port))
+         (format "JuliaSnail.start(%d%s) ; # please wait, time-to-first-plot..."
+		 (or julia-snail-remote-port julia-snail-port)
+		 (if (string-equal "docker" (file-remote-p (buffer-file-name julia-snail--repl-go-back-target) 'method))
+		     "; addr=\"0.0.0.0\""
+		   ""))
           :repl-buf repl-buf
           ;; wait a while in case dependencies need to be downloaded
           :polling-timeout (* 5 60 1000)
@@ -514,6 +528,9 @@ returns \"/home/username/file.jl\"."
                 ;; NB: buffer-local variable!
                 (setq julia-snail--process netstream)
                 (set-process-filter julia-snail--process #'julia-snail--server-response-filter)
+                ;; TODO: Implement a sanity check on the Julia environment. Not
+                ;; sure how. But a failed dependency load (like CSTParser) will
+                ;; leave Snail in a bad state.
                 (message "Snail connected to Julia. Happy hacking!")
                 ;; Query base directory, and cache
                 (puthash process-buf (julia-snail--capture-basedir repl-buf)
@@ -1120,11 +1137,14 @@ To create multiple REPLs, give these variables distinct values (e.g.:
           (pop-to-buffer repl-buf))
       ;; run Julia in a vterm and load the Snail server file
       (let ((vterm-shell (julia-snail--launch-command))
-            ;; XXX: Allocate a buffer for the vterm. Bind its default-directory
-            ;; to the user's home because if (1) a remote REPL is being started,
+            ;; XXX: Allocate a buffer for the vterm. When a remote REPL is being
+            ;; started, bind the vterm buffer's default-directory to the user's
+            ;; home because if (1) a remote REPL is being started,
             ;; default-directory may be remote, and (2) Tramp may notice this,
             ;; mess with the path, and run ssh incorrectly.
-            (vterm-buf (let ((default-directory (expand-file-name "~")))
+            (vterm-buf (let ((default-directory (if (file-remote-p default-directory)
+                                                    (expand-file-name "~")
+                                                  default-directory)))
                          (generate-new-buffer julia-snail-repl-buffer))))
         (pop-to-buffer vterm-buf)
         (with-current-buffer vterm-buf
