@@ -196,7 +196,8 @@ This command can act as a drop-in replacement for `repeat-complex-command'." t n
 (autoload 'consult-history "consult" "\
 Insert string from HISTORY of current buffer.
 
-In order to select from a specific HISTORY, pass the history variable as argument.
+In order to select from a specific HISTORY, pass the history variable
+as argument.
 
 \(fn &optional HISTORY)" t nil)
 

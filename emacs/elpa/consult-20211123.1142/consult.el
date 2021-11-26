@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler and Consult contributors
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 0.12
+;; Version: 0.13
 ;; Package-Requires: ((emacs "26.1"))
 ;; Homepage: https://github.com/minad/consult
 
@@ -193,13 +193,17 @@ The default setting is to filter ephemeral buffer names beginning with a space
 character, the *Completions* buffer and a few log buffers."
   :type '(repeat regexp))
 
+(defcustom consult-recent-file-filter nil
+  "Filter regexps for `consult-recent-file'."
+  :type '(repeat regexp))
+
 (defcustom consult-buffer-sources
   '(consult--source-hidden-buffer
     consult--source-buffer
-    consult--source-file
+    consult--source-recent-file
     consult--source-bookmark
     consult--source-project-buffer
-    consult--source-project-file)
+    consult--source-project-recent-file)
   "Sources used by `consult-buffer'.
 
 See `consult--multi' for a description of the source values."
@@ -218,7 +222,7 @@ See `consult--multi' for a description of the source values."
   :type 'integer)
 
 (defconst consult--grep-match-regexp
-  "\\`\\(?:\\./\\)?\\([^\n\0]+\\)\0\\([0-9]+\\)[:\0]"
+  "\\`\\(?:\\./\\)?\\([^\n\0]+\\)\0\\([0-9]+\\)\\([-:\0]\\)"
   "Regexp used to match file and line of grep output.")
 
 (defcustom consult-grep-args
@@ -372,6 +376,10 @@ Used by `consult-completion-in-region', `consult-yank' and `consult-history'.")
   '((t :inherit font-lock-function-name-face))
   "Face used to highlight files in `consult-buffer'.")
 
+(defface consult-grep-context
+  '((t :inherit shadow))
+  "Face used to highlight grep context in `consult-grep'.")
+
 (defface consult-bookmark
   '((t :inherit font-lock-constant-face))
   "Face used to highlight bookmarks in `consult-buffer'.")
@@ -499,7 +507,8 @@ Size of private unicode plane b.")
 
 (defmacro consult-customize (&rest args)
   "Set properties of commands or sources.
-ARGS is a list of commands or sources followed by the list of keyword-value pairs."
+ARGS is a list of commands or sources followed by the list of keyword-value
+pairs."
   (let ((setter))
     (while args
       (let ((cmds (seq-take-while (lambda (x) (not (keywordp x))) args)))
@@ -845,7 +854,7 @@ Otherwise the `default-directory' is returned."
 (defun consult--format-location (file line &optional str)
   "Format location string 'FILE:LINE:STR'."
   (setq line (number-to-string line)
-        str (concat file ":" line ":" str)
+        str (concat file ":" line (and str ":") str)
         file (length file))
   (put-text-property 0 file 'face 'consult-file str)
   (put-text-property (1+ file) (+ 1 file (length line)) 'face 'consult-line-number str)
@@ -973,7 +982,8 @@ If TRANSFORM non-nil, return transformed CAND, otherwise return title."
       (car (get-text-property 0 'consult-location cand))))))
 
 (defun consult--line-prefix (&optional curr-line)
-  "Annotate `consult-location' candidates with line numbers given the current line CURR-LINE."
+  "Annotate `consult-location' candidates with line numbers.
+CURR-LINE is the current line number."
   (setq curr-line (or curr-line -1))
   (let* ((width (length (number-to-string (line-number-at-pos
                                            (point-max)
@@ -1077,8 +1087,8 @@ See `isearch-open-necessary-overlays' and `isearch-open-overlay-temporary'."
         (when (and (invisible-p inv) (overlay-get ov 'isearch-open-invisible))
           (push (if-let (fun (overlay-get ov 'isearch-open-invisible-temporary))
                     (progn
-                      (funcall fun nil)
-                      (lambda () (funcall fun t)))
+                      (funcall fun ov nil)
+                      (lambda () (funcall fun ov t)))
                   (overlay-put ov 'invisible nil)
                   (lambda () (overlay-put ov 'invisible inv)))
                 restore))))))
@@ -1201,7 +1211,8 @@ FACE is the cursor face."
 (defun consult--with-preview-1 (preview-key state transform candidate fun)
   "Add preview support for FUN.
 
-See `consult--with-preview' for the arguments PREVIEW-KEY, STATE, TRANSFORM and CANDIDATE."
+See `consult--with-preview' for the arguments PREVIEW-KEY, STATE, TRANSFORM
+and CANDIDATE."
   (let ((input "") (selected) (timer))
     (consult--minibuffer-with-setup-hook
         (if (and state preview-key)
@@ -1275,7 +1286,8 @@ candidate argument can be nil if the selection has been aborted."
 ;;;; Narrowing support
 
 (defun consult--widen-key ()
-  "Return widening key, if `consult-widen-key' is not set, defaults to twice `consult-narrow-key'."
+  "Return widening key, if `consult-widen-key' is not set.
+The default is twice the `consult-narrow-key'."
   (or consult-widen-key (and consult-narrow-key (vconcat consult-narrow-key consult-narrow-key))))
 
 (defun consult-narrow (key)
@@ -2128,7 +2140,11 @@ INHERIT-INPUT-METHOD, if non-nil the minibuffer inherits the input method."
 (defun consult--multi (sources &rest options)
   "Select from candidates taken from a list of SOURCES.
 
-OPTIONS is the plist of options passed to `consult--read'.
+OPTIONS is the plist of options passed to `consult--read'. The following
+options are supported: :require-match, :history, :keymap, :initial,
+:add-history, :sort and :inherit-input-method. The other options of
+`consult--read' are used by the implementation of `consult--multi' and should
+be overwritten only in special scenarios.
 
 The function returns the selected candidate in the form (cons candidate
 source-value). The sources of the source list can either be symbols of source
@@ -2267,6 +2283,7 @@ These configuration options are supported:
     * :completion-styles - Use completion styles (def: `completion-styles')
     * :require-match - Require matches when completing (def: nil)
     * :prompt - The prompt string shown in the minibuffer"
+  (barf-if-buffer-read-only)
   (cl-letf* ((config (alist-get #'consult-completion-in-region consult--read-config))
              ;; Overwrite both the local and global value of `completion-styles', such that the
              ;; `completing-read' minibuffer sees the overwritten value in any case. This is
@@ -2334,13 +2351,15 @@ These configuration options are supported:
                                         'consult--completion-candidate-hook)
                      (let ((enable-recursive-minibuffers t))
                        (if (eq category 'file)
-                           ;; When completing files with consult-completion-in-region, the point in the
-                           ;; minibuffer gets placed initially at the beginning of the last path component.
-                           ;; By using the filename as DIR argument (second argument of read-file-name), it
-                           ;; starts at the end of minibuffer contents, as for other types of completion.
-                           ;; However this is undefined behavior since initial does not only contain the
-                           ;; directory, but also the filename.
-                           (read-file-name prompt initial initial require-match nil predicate)
+                           ;; We use read-file-name, since many completion UIs make it nicer to
+                           ;; navigate the file system this way; and we insert the initial text
+                           ;; directly into the minibuffer to allow the user's completion
+                           ;; styles to expand it as appropriate (particularly useful for the
+                           ;; partial-completion and initials styles, which allow for very
+                           ;; condensed path specification).
+                           (consult--minibuffer-with-setup-hook
+                               (lambda () (insert initial))
+                             (read-file-name prompt nil initial require-match nil predicate))
                          (completing-read prompt
                                           ;; Evaluate completion table in the original buffer.
                                           ;; This is a reasonable thing to do and required
@@ -2649,7 +2668,7 @@ The symbol at point is added to the future history."
                 ;; `line-number-at-pos' is slow, see comment in `consult--mark-candidates'.
                 (let ((line (line-number-at-pos pos consult-line-numbers-widen)))
                   (push (concat
-                         (propertize (consult--format-location (buffer-name buf) line)
+                         (propertize (consult--format-location (buffer-name buf) line "")
                                      'consult-location (cons marker line)
                                      'consult-strip t)
                          (consult--line-with-cursor marker)
@@ -3118,7 +3137,11 @@ narrowing and the settings `consult-goto-line-numbers' and
   (interactive)
   (find-file
    (consult--read
-    (or (mapcar #'abbreviate-file-name recentf-list)
+    (or (mapcar #'abbreviate-file-name
+                (if-let (filter (and consult-recent-file-filter
+                                     (consult--regexp-filter consult-recent-file-filter)))
+                    (seq-remove (apply-partially #'string-match-p filter) recentf-list)
+                  recentf-list))
         (user-error "No recent files, `recentf-mode' is %s"
                     (if recentf-mode "on" "off")))
     :prompt "Find recent file: "
@@ -3267,7 +3290,7 @@ If no MODES are specified, use currently active major and minor modes."
     :prompt "Yank from kill-ring: "
     :history t ;; disable history
     :sort nil
-    :category 'consult-yank
+    :category 'kill-ring
     :require-match t
     :state
     (consult--insertion-preview
@@ -3495,7 +3518,8 @@ for which the command history is used."
 (defun consult-history (&optional history)
   "Insert string from HISTORY of current buffer.
 
-In order to select from a specific HISTORY, pass the history variable as argument."
+In order to select from a specific HISTORY, pass the history variable
+as argument."
   (interactive)
   (let ((str (consult--local-let ((enable-recursive-minibuffers t))
                (consult--read
@@ -3896,7 +3920,10 @@ If NORECORD is non-nil, do not record the buffer switch in the buffer list."
                               :as #'buffer-name)))
   "Project buffer candidate source for `consult-buffer'.")
 
-(defvar consult--source-project-file
+(define-obsolete-variable-alias
+  'consult--source-project-file
+  'consult--source-project-recent-file "0.14")
+(defvar consult--source-project-recent-file
   `(:name     "Project File"
     :narrow   (?p . "Project")
     :hidden   t
@@ -3911,12 +3938,15 @@ If NORECORD is non-nil, do not record the buffer switch in the buffer list."
       (when-let (root (consult--project-root))
         (let ((len (length root))
               (inv-root (propertize root 'invisible t))
-              (ht (consult--buffer-file-hash)))
+              (ht (consult--buffer-file-hash))
+              (filter (consult--regexp-filter consult-recent-file-filter)))
           (mapcar (lambda (x)
                     (concat inv-root (substring x len)))
                   (seq-filter (lambda (x)
                                 (and (not (gethash x ht))
-                                     (string-prefix-p root x)))
+                                     (string-prefix-p root x)
+                                     (not (and consult-recent-file-filter
+                                               (string-match-p filter x)))))
                               recentf-list))))))
   "Project file candidate source for `consult-buffer'.")
 
@@ -3947,7 +3977,10 @@ If NORECORD is non-nil, do not record the buffer switch in the buffer list."
                                        :as #'buffer-name)))
   "Buffer candidate source for `consult-buffer'.")
 
-(defvar consult--source-file
+(define-obsolete-variable-alias
+  'consult--source-file
+  'consult--source-recent-file "0.14")
+(defvar consult--source-recent-file
   `(:name     "File"
     :narrow   ?f
     :category file
@@ -3957,9 +3990,13 @@ If NORECORD is non-nil, do not record the buffer switch in the buffer list."
     :enabled  ,(lambda () recentf-mode)
     :items
     ,(lambda ()
-       (let ((ht (consult--buffer-file-hash)))
+       (let ((ht (consult--buffer-file-hash))
+             (filter (consult--regexp-filter consult-recent-file-filter)))
          (mapcar #'abbreviate-file-name
-                 (seq-remove (lambda (x) (gethash x ht)) recentf-list)))))
+                 (seq-remove (lambda (x)
+                               (or (gethash x ht)
+                                   (and consult-recent-file-filter (string-match-p filter x))))
+                             recentf-list)))))
   "Recent file candidate source for `consult-buffer'.")
 
 ;;;###autoload
@@ -4082,19 +4119,27 @@ BUILDER is the command argument builder."
         (let (result)
           (save-match-data
             (dolist (str action)
-              (when (string-match consult--grep-match-regexp str)
+              (when (and (string-match consult--grep-match-regexp str)
+                         ;; Filter out empty context lines
+                         (or (/= (aref str (match-beginning 3)) ?-)
+                             (/= (match-end 0) (length str))))
                 (let* ((file (match-string 1 str))
                        (line (match-string 2 str))
+                       (ctx (= (aref str (match-beginning 3)) ?-))
+                       (sep (if ctx "-" ":"))
                        (content (substring str (match-end 0)))
-                       (file-len (length file)))
+                       (file-len (length file))
+                       (line-len (length line)))
                   (when (> (length content) consult-grep-max-columns)
                     (setq content (substring content 0 consult-grep-max-columns)))
                   (when highlight
                     (funcall highlight content))
-                  (setq str (concat file ":" line ":" content))
+                  (setq str (concat file sep line sep content))
                   ;; Store file name in order to avoid allocations in `consult--grep-group'
                   (add-text-properties 0 file-len `(face consult-file consult--grep-file ,file) str)
-                  (put-text-property (1+ file-len) (+ 1 file-len (length line)) 'face 'consult-line-number str)
+                  (put-text-property (1+ file-len) (+ 1 file-len line-len) 'face 'consult-line-number str)
+                  (when ctx
+                    (add-face-text-property (+ 2 file-len line-len) (length str) 'consult-grep-context 'append str))
                   (push str result)))))
           (funcall async (nreverse result))))
        (t (funcall async action))))))
@@ -4392,7 +4437,8 @@ See `consult-grep' for more details regarding the asynchronous search."
 
 (define-minor-mode consult-preview-at-point-mode
   "Preview minor mode for *Completions* buffers.
-When moving around in the *Completions* buffer, the candidate at point is automatically previewed."
+When moving around in the *Completions* buffer, the candidate at point is
+automatically previewed."
   :init-value nil :group 'consult
   (if consult-preview-at-point-mode
       (add-hook 'post-command-hook #'consult-preview-at-point nil 'local)
