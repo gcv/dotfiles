@@ -1,14 +1,15 @@
 ;;; embark-consult.el --- Consult integration for Embark -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021  Omar Antolín Camarena
+;; Copyright (C) 2021  Free Software Foundation, Inc.
 
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
+;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: convenience
-;; Package-Version: 20211012.1921
-;; Package-Commit: 3d2356b53f12cfb2c705cdabbc325cd89d5455bc
-;; Version: 0.1
+;; Package-Version: 20211119.1254
+;; Package-Commit: e0057f6a6621b24e0ba4c167b683a84039c6f084
+;; Version: 0.2
 ;; Homepage: https://github.com/oantolin/embark
-;; Package-Requires: ((emacs "25.1") (embark "0.9") (consult "0.1"))
+;; Package-Requires: ((emacs "26.1") (embark "0.12") (consult "0.10"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -156,8 +157,7 @@ The elements of LINES are assumed to be values of category `consult-line'."
             (setq last-buf this-buf))
           (insert (concat lineno contents nl))))
       (goto-char (point-min))
-      (occur-mode)
-      (setq-local occur-highlight-regexp "^.*$"))
+      (occur-mode))
     (pop-to-buffer buf)))
 
 (setf (alist-get 'consult-location embark-collect-initial-view-alist)
@@ -224,11 +224,6 @@ actual type."
 ;;; Support for consult-register
 
 (setf (alist-get 'consult-register embark-collect-initial-view-alist)
-      'zebra)
-
-;;; Support for consult-yank*
-
-(setf (alist-get 'consult-yank embark-collect-initial-view-alist)
       'zebra)
 
 ;;; Bindings for consult commands in embark keymaps
@@ -311,6 +306,20 @@ that is a Consult async command."
    (cl-pushnew #'embark-consult--add-async-separator
                (alist-get cmd embark-setup-action-hooks)))
  embark-consult-async-search-map)
+
+;;; Tables of contents for buffers: imenu and outline candidate collectors
+
+(defun embark-consult-outline-candidates ()
+  "Collect all outline headings in the current buffer."
+  (cons 'consult-location (consult--outline-candidates)))
+
+(autoload 'consult-imenu--items "consult-imenu")
+(defun embark-consult-imenu-candidates ()
+  "Collect all imenu items in the current buffer."
+  (cons 'imenu (mapcar #'car (consult-imenu--items))))
+
+(setf (alist-get 'imenu embark-default-action-overrides) #'consult-imenu)
+(add-to-list 'embark-candidate-collectors #'embark-consult-outline-candidates 'append)
 
 (provide 'embark-consult)
 ;;; embark-consult.el ends here
