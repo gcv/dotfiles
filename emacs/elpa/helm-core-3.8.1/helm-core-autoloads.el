@@ -73,10 +73,12 @@ on exit.
 For any other key pressed, run their assigned command as defined
 in MAP and then exit the loop running EXIT-FN, if specified.
 
+If DELAY an integer is specified exit after DELAY seconds.
+
 NOTE: SUBKEY and OTHER-SUBKEYS bindings support only char syntax
 and vectors, so don't use strings to define them.
 
-\(fn MAP KEY SUBKEY COMMAND &optional OTHER-SUBKEYS PROMPT EXIT-FN)" nil nil)
+\(fn MAP KEY SUBKEY COMMAND &optional OTHER-SUBKEYS PROMPT EXIT-FN DELAY)" nil nil)
 
 (function-put 'helm-define-key-with-subkeys 'lisp-indent-function '1)
 

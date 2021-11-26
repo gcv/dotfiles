@@ -72,6 +72,7 @@
 (defvar helm-completion-styles-alist)
 (defvar helm-persistent-action-window-buffer)
 (defvar completion-flex-nospace)
+(defvar find-function-source-path)
 
 ;;; User vars.
 ;;
@@ -172,7 +173,8 @@ the customize functions e.g. `customize-set-variable' and NOT
 (defvar helm-suspend-update-flag nil)
 (defvar helm-action-buffer "*helm action*"
   "Buffer showing actions.")
-
+(defvar helm-current-prefix-arg nil
+  "Record `current-prefix-arg' when exiting minibuffer.")
 
 ;;; Compatibility
 ;;
@@ -986,6 +988,35 @@ LIST is a list of numbers and NUM a number."
            collect (cons diff i) into res
            minimize diff into min
            finally return (cdr (assq min res))))
+
+(defun helm-group-candidates-by (candidates function &optional selection separate)
+  "Group similar items in CANDIDATES according to FUNCTION.
+Items not matching FUNCTION are grouped as well in a separate group.
+
+Example:
+
+    (setq B '(1 2 3 4 5 6 7 8 9))
+
+    (helm-group-candidates-by B #'cl-oddp 2 'separate)
+    => ((2 4 6 8) (1 3 5 7 9))
+
+SELECTION specify where to start in CANDIDATES.
+Similar candidates to SELECTION will be listed on top.
+
+If SEPARATE is non-nil returns a list of groups i.e. a list of lists,
+otherwise a plain list is returned."
+  (cl-loop with sel = (or selection (helm-get-selection) "")
+           with lst = (copy-sequence candidates)
+           while lst
+           for group = (cl-loop for c in lst
+                                when (equal (funcall function c)
+                                            (funcall function sel))
+                                collect c into grp
+                                and do (setq lst (delete c lst))
+                                finally return (prog1 grp
+                                                 (setq sel (car lst))))
+           if separate collect group
+           else append group))
 
 ;;; Strings processing.
 ;;
@@ -1222,17 +1253,74 @@ See `helm-elisp-show-help'."
             (helm-set-attr 'help-running-p t)))
     (helm-set-attr 'help-current-symbol candidate)))
 
+(defcustom helm-find-function-default-project nil
+  "Default directories to search symbols definitions from `helm-apropos'.
+A list of directories or a single directory name.
+Helm will allow you selecting one of those directories with `M-n' when
+using a prefix arg with the `find-function' action in `helm-apropos'.
+This is a good idea to add the directory names of the projects you are
+working on to quickly jump to the definitions in the project source
+files instead of jumping to the loaded files located in `load-path'."
+  :type '(choice (repeat string)
+                 string)
+  :group 'helm-elisp)
+
+(defun helm-find-function-noselect (func &optional root-dir type)
+  "Find FUNC definition without selecting buffer.
+FUNC can be a symbol or a string.
+Instead of looking in LOAD-PATH to find library, this function
+search in all subdirs of ROOT-DIR, if ROOT-DIR is unspecified ask for
+it with completion.
+TYPE when nil specify function, for other values see `find-function-regexp-alist'."
+  (require 'find-func)
+  (let* ((sym (helm-symbolify func))
+         (dir (or root-dir (helm-read-file-name
+                            "Project directory: "
+                            :test 'file-directory-p
+                            :default (helm-mklist helm-find-function-default-project)
+                            :must-match t)))
+         (find-function-source-path
+          (cons dir (helm-walk-directory dir
+                                         :directories 'only
+                                         :path 'full)))
+         (symbol-lib (helm-acase type
+                       ((defvar defface)
+                        (or (symbol-file sym it)
+                            (help-C-file-name sym 'var)))
+                       (t (cdr (find-function-library sym)))))
+         (library (find-library-name
+                   (helm-basename symbol-lib t))))
+    (find-function-search-for-symbol sym type library)))
+
 (defun helm-find-function (func)
-  "FUNC is symbol or string."
-  (find-function (helm-symbolify func)))
+  "Try to jump to FUNC definition.
+With a prefix arg ask for the project directory to search in instead of
+using LOAD-PATH."
+  (if (not helm-current-prefix-arg)
+      (find-function (helm-symbolify func))
+    (let ((place (helm-find-function-noselect func)))
+      (when place
+        (switch-to-buffer (car place)) (goto-char (cdr place))))))
 
 (defun helm-find-variable (var)
-  "VAR is symbol or string."
-  (find-variable (helm-symbolify var)))
+  "Try to jump to VAR definition.
+With a prefix arg ask for the project directory to search in instead of
+using LOAD-PATH."
+  (if (not helm-current-prefix-arg)
+      (find-variable (helm-symbolify var))
+    (let ((place (helm-find-function-noselect var nil 'defvar)))
+      (when place
+        (switch-to-buffer (car place)) (goto-char (cdr place))))))
 
 (defun helm-find-face-definition (face)
-  "FACE is symbol or string."
-  (find-face-definition (helm-symbolify face)))
+  "Try to jump to FACE definition.
+With a prefix arg ask for the project directory to search in instead of
+using LOAD-PATH."
+  (if (not helm-current-prefix-arg)
+      (find-face-definition (helm-symbolify face))
+    (let ((place (helm-find-function-noselect face nil 'defface)))
+      (when place
+        (switch-to-buffer (car place)) (goto-char (cdr place))))))
 
 (defun helm-kill-new (candidate &optional replace)
   "CANDIDATE is symbol or string.
@@ -1291,6 +1379,13 @@ Argument ALIST is an alist of associated major modes."
       (if (string-match "\\." (helm-basename it) 1)
           (helm-file-name-sans-extension it)
           it)))
+
+(defsubst helm-file-name-extension (file)
+  "Returns FILE extension if it is not a number."
+  (helm-aif (file-name-extension file)
+      (and (not (string-match "\\`0+\\'" it))
+           (zerop (string-to-number it))
+           it)))
 
 (defun helm-basename (fname &optional ext)
   "Print FNAME with any leading directory components removed.
@@ -1449,7 +1544,12 @@ Directories expansion is not supported."
                              :skip-subdirs t)
       (helm-aif (helm-wildcard-to-regexp bn)
           (directory-files (helm-basedir pattern) full it)
-        (file-expand-wildcards pattern full)))))
+        ;; `file-expand-wildcards' fails to expand weird directories
+        ;; like "[ foo.zz ] bar.*.avi", fallback to `directory-files'
+        ;; in such cases.
+        (or (file-expand-wildcards pattern full)
+            (directory-files (helm-basedir pattern)
+                             full (wildcard-to-regexp bn)))))))
 
 (defun helm-wildcard-to-regexp (wc)
   "Transform wilcard WC like \"**.{jpg,jpeg}\" in REGEXP."
@@ -1744,6 +1844,9 @@ broken."
         (push (substring string start (match-beginning 0)) result)
         (push (substring string start) result))
     (apply 'concat (nreverse result))))
+
+(when (< emacs-major-version 26)
+  (advice-add 'ansi-color-apply :override #'helm--ansi-color-apply))
 
 
 ;;; Fontlock
