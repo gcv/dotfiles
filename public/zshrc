@@ -352,9 +352,9 @@ if [[ $(command -v direnv) ]]; then
 fi
 
 
-### Turn on terminal GPG pinentry if on SSH connection:
+### Turn on terminal GPG pinentry if on SSH connection or in tmux session:
 export GPG_TTY=$(tty)
-if [[ -n "$SSH_CONNECTION" ]]; then
+if [[ -n "$SSH_CONNECTION" || -n "$TMUX" ]]; then
     export PINENTRY_USER_DATA="USE_CURSES=1"
 fi
 
