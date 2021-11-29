@@ -80,6 +80,8 @@
   ;;                (side . bottom)
   ;;                (window-height . 0.2)))
 
+  (add-to-list 'company-backends #'cider-complete-at-point)
+
   (defun /cider-mode-hook ()
     (paredit-mode 1)
     (define-key cider-mode-map (kbd "C-c C-,") #'cider-test-run-tests)
@@ -145,15 +147,8 @@
    ("C-c ." . company-complete))
 
   :config
-  (global-company-mode)
+  (global-company-mode 1)
   (setq company-idle-delay nil)
-
-  (let ((company-backends (list 'company-slime
-                                'company-lua
-                                'company-web-html)))
-    (dolist (backend company-backends)
-      (when (functionp (lambda backend))
-        (add-to-list 'company-backends backend))))
   )
 
 
