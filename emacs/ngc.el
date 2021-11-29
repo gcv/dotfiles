@@ -151,7 +151,7 @@
   :pin melpa
 
   :custom
-  (completion-styles '(orderless))
+  (completion-styles '(orderless basic))
   (completion-category-defaults nil)
   ;;(orderless-matching-styles '(orderless-literal orderless-regexp))
   )
