@@ -249,8 +249,7 @@
 (use-package dumb-jump
   :bind
   (("H-." . dumb-jump-go)
-   ("H-," . dumb-jump-back)
-   ("H->" . dumb-jump-quick-look))
+   ("H-," . dumb-jump-back))
 
   :config
   (setq dumb-jump-selector 'popup)
