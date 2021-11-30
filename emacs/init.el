@@ -563,7 +563,7 @@
       )))
 
   :hook
-  (eshell-mode-hook . /eshell-mode-hook)
+  (eshell-mode . /eshell-mode-hook)
 
   :init
   (defun eshell/h ()
@@ -772,7 +772,9 @@ See `eshell-prompt-regexp'."
 
 ;;; outline
 (use-feature outline-minor-mode
-  :hook (outline-minor-mode . /outline-minor-mode-hook)
+  :hook
+  (outline-minor-mode . /outline-minor-mode-hook)
+
   :init
   (let ((outline-cycle-state 0))
     (defun outline-cycle ()
@@ -792,9 +794,11 @@ See `eshell-prompt-regexp'."
              (setq outline-cycle-state 0))
             (t (outline-hide-subtree)
                (setq outline-cycle-state 0)))))
+
   (defun /outline-minor-mode-hook ()
     (local-set-key (kbd "H-o") outline-mode-prefix-map)
-    (local-set-key (kbd "C-<tab>") 'outline-cycle)))
+    (local-set-key (kbd "C-<tab>") 'outline-cycle))
+  )
 
 
 ;;; comint
