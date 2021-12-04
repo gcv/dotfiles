@@ -88,13 +88,13 @@
 
 (defun m120 ()
   (interactive)
-  (set-font "Menlo" 120 13.5)
+  (set-font "Menlo" 120 15.0)
   (toggle-header-line header-line-format))
 
 
 (defun m100 ()
   (interactive)
-  (set-font "Menlo" 100 13.5)
+  (set-font "Menlo" 100 15.5)
   (toggle-header-line header-line-format))
 
 
