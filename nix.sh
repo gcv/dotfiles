@@ -38,6 +38,8 @@ nix-env -i \
     gnupg \
     htop \
     jq \
+    lazydocker \
+    lazygit \
     ledger \
     libvterm-neovim \
     magic-wormhole \
