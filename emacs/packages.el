@@ -705,8 +705,9 @@
   :pin melpa
   :after (hydra)
 
-  :bind (:map origami-mode-map
-         ("H-o" . /hydra-origami/body))
+  :bind
+  (:map origami-mode-map
+        ("H-o" . /hydra-origami/body))
 
   :config
   (setq origami-show-fold-header t)
