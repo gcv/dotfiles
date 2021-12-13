@@ -796,6 +796,7 @@ See `eshell-prompt-regexp'."
                (setq outline-cycle-state 0)))))
 
   (defun /outline-minor-mode-hook ()
+    (diminish 'outline-minor-mode " ☰") ; XXX: :diminish form does not work for some reason
     (local-set-key (kbd "H-o") outline-mode-prefix-map)
     (local-set-key (kbd "C-<tab>") 'outline-cycle))
   )

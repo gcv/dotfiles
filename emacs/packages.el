@@ -137,6 +137,29 @@
   )
 
 
+;;; neat package for writing "notebook" style literate programming files
+(use-package code-cells
+  :pin melpa
+
+  :hook (julia-mode . code-cells-mode)
+
+  :config
+  (let ((map code-cells-mode-map))
+    (define-key map "n" (code-cells-speed-key 'code-cells-forward-cell))
+    (define-key map "p" (code-cells-speed-key 'code-cells-backward-cell))
+    (define-key map "e" (code-cells-speed-key 'code-cells-eval))
+    (define-key map (kbd "TAB") (code-cells-speed-key (lambda ()
+                                                        "Show/hide current cell"
+                                                        (interactive)
+                                                        (outline-minor-mode)
+                                                        (if (outline-invisible-p (line-end-position))
+                                                            (outline-show-subtree)
+                                                          (outline-hide-subtree))))))
+
+  ;; (add-to-list 'code-cells-eval-region-commands '(julia-snail-mode . julia-snail-send-code-cell))
+  )
+
+
 ;;; "comp"lete "any"thing
 (use-package company
   :diminish ""

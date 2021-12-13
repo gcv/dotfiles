@@ -1,0 +1,2 @@
+;;; Generated package description from code-cells.el  -*- no-byte-compile: t -*-
+(define-package "code-cells" "20211014.738" "Work with code split into cells, including Jupyter notebooks" '((emacs "27.1")) :commit "68148cfc1f0723e554a09cbae4c732cfc348ecfd" :authors '(("Augusto Stoffel" . "arstoffel@gmail.com")) :maintainer '("Augusto Stoffel" . "arstoffel@gmail.com") :keywords '("convenience" "outlines") :url "https://github.com/astoff/code-cells.el")
