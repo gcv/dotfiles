@@ -292,6 +292,9 @@
   )
 
 
+(use-package find-file-in-project)
+
+
 (use-package flycheck
   :pin melpa)
 
