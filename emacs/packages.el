@@ -156,7 +156,7 @@
                                                             (outline-show-subtree)
                                                           (outline-hide-subtree))))))
 
-  ;; (add-to-list 'code-cells-eval-region-commands '(julia-snail-mode . julia-snail-send-code-cell))
+  (add-to-list 'code-cells-eval-region-commands '(julia-snail-mode . julia-snail-send-code-cell))
   )
 
 
