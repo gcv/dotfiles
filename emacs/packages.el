@@ -315,7 +315,10 @@
   )
 
 
-(use-package find-file-in-project)
+(use-package find-file-in-project
+  :bind
+  (("C-c p f" . find-file-in-project))
+  )
 
 
 (use-package flycheck
@@ -570,6 +573,9 @@
 
 
 (use-package magit
+  :bind
+  (("C-c p v" . magit-status))
+
   :config
   (diminish 'magit-auto-revert-mode)
 

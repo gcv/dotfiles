@@ -67,17 +67,31 @@
         ;; (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
         ))))
 
+(defun selective-mini-frame-persp-switch-to-buffer* ()
+  (interactive)
+  (call-interactively 'persp-switch-to-buffer*))
+
+(defvar selective-mini-frame-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-x B") #'selective-mini-frame-persp-switch-to-buffer*)
+    map))
+
 (define-minor-mode selective-mini-frame-mode
   "Selectively enable mini-frame-mode for some commands."
   :global t
   :init-value nil
   :lighter nil
+  :keymap selective-mini-frame-mode-map
   (if selective-mini-frame-mode
       ;; enable
       (progn
         (advice-add 'read-extended-command :around #'selective-mini-frame)
-        (advice-add 'imenu-cr :around #'selective-mini-frame))
+        (advice-add 'imenu-cr :around #'selective-mini-frame)
+        (advice-add 'selective-mini-frame-persp-switch-to-buffer* :around #'selective-mini-frame)
+        (advice-add 'projectile-find-file :around #'selective-mini-frame))
     ;; disable
+    (advice-remove 'projectile-find-file #'selective-mini-frame)
+    (advice-remove 'selective-mini-frame-persp-switch-to-buffer* #'selective-mini-frame)
     (advice-remove 'imenu-cr #'selective-mini-frame)
     (advice-remove 'read-extended-command #'selective-mini-frame)))
 
@@ -86,6 +100,16 @@
 
 (use-package consult
   :pin melpa
+
+  :bind
+  (("C-c p s r" . consult-ripgrep))
+
+  :custom
+  (consult-preview-key nil)
+  ;;(consult-project-root-function #'projectile-project-root)
+  (consult-project-root-function (lambda ()
+                                   (when-let (project (project-current))
+                                     (car (project-roots project)))))
 
   :init
   (setq xref-show-xrefs-function #'consult-xref
@@ -215,11 +239,12 @@
           "edebug-eval-expression"
           'debugger-eval-expression
           "consult-.*"
+          "persp-switch-to-buffer\\*"
+          "projectile-.*"
           "imenu-.*")
     "List of commands which automatically activate Vertico, bypassing on-demand mode."
     :group 'vertico
-    :type '(repeat (choice function regexp))
-    )
+    :type '(repeat (choice function regexp)))
 
   (defun vertico-on-demand--completion-at-point-advice (orig-fn &rest args)
     (let ((vertico-on-demand-auto-this t)
