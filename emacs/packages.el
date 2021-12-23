@@ -240,6 +240,36 @@
 (use-package diminish)
 
 
+(use-package dired-sidebar
+  :pin melpa
+
+  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
+
+  :commands (dired-sidebar-toggle-sidebar)
+
+  :init
+  (add-hook 'dired-sidebar-mode-hook
+    (lambda ()
+      (unless (file-remote-p default-directory)
+        (auto-revert-mode))))
+
+  :config
+  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+
+  (setq dired-sidebar-theme 'ascii)
+  )
+
+
+(use-package dired-subtree
+  :pin melpa
+
+  :bind
+  (:map dired-mode-map
+        ("TAB" . dired-subtree-toggle))
+  )
+
+
 (use-package disk-usage
   :pin gnu
 
