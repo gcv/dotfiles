@@ -330,6 +330,7 @@
    (/theme-face-spec 'button :weight 'bold :box nil)
    (/theme-face-spec 'custom-button :weight 'bold :box nil)
    (/theme-face-spec 'font-lock-comment-face :foreground "#7e8aa3")
+   (/theme-face-spec 'magit-hash :foreground "grey50")
    (let ((bg (face-attribute 'default :background)))
      (/theme-face-spec 'fringe :background bg))
    (let ((bg (face-attribute 'mode-line :background)))
