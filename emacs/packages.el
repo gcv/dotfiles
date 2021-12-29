@@ -792,6 +792,8 @@
   (define-key paredit-mode-map (kbd "M-<down>") 'scroll-down-line)
   (define-key paredit-mode-map (kbd "M-S-<up>") 'paredit-splice-sexp-killing-backward)
   (define-key paredit-mode-map (kbd "M-S-<down>") 'paredit-splice-sexp-killing-forward)
+  (define-key paredit-mode-map (kbd "C-c <up>") 'paredit-splice-sexp-killing-backward)
+  (define-key paredit-mode-map (kbd "C-c <down>") 'paredit-splice-sexp-killing-forward)
   (define-key paredit-mode-map (kbd "C-c (") 'paredit-backward-slurp-sexp)
   (define-key paredit-mode-map (kbd "C-c )") 'paredit-forward-slurp-sexp)
   (if window-system
