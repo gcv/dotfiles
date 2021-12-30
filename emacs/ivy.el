@@ -6,7 +6,7 @@
   :bind
   (("M-x" . counsel-M-x)
    ("C-x C-M-f" . counsel-find-file)
-   ;;("C-M-y" . counsel-yank-pop)
+   ("C-M-y" . counsel-yank-pop)
    ("M-i" . counsel-imenu))
 
   :config
