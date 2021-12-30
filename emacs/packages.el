@@ -900,7 +900,7 @@
   (projectile-tags-command "ctags -Re -f \"%s\" %s")
 
   :config
-  (projectile-mode 1)
+  ;;(projectile-mode 1)
 
   (setq /projectile-project-cache (make-hash-table))
 

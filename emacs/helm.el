@@ -118,7 +118,7 @@
 (use-package helm-projectile
   :defer 2.0
   :config
-  (helm-projectile-toggle 1)
+  ;;(helm-projectile-toggle 1)
   )
 
 
