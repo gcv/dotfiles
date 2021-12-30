@@ -1044,7 +1044,7 @@ See `eshell-prompt-regexp'."
                       "elisp.el"
                       "themes.el"
                       "modeline.el"
-                      "helm.el"
+                      ;;"helm.el"
                       ;;"ivy.el"
                       "ngc.el"
                       "../private/emacs-private.el")))
