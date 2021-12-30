@@ -243,7 +243,15 @@
 (use-package dired-sidebar
   :pin melpa
 
-  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
+  :bind (("C-x C-n" . (lambda ()
+                        (interactive)
+                        (if current-prefix-arg
+                            (call-interactively #'dired-sidebar-toggle-sidebar)
+                          (dired-sidebar-follow-file)
+                          (call-interactively #'dired-sidebar-jump-to-sidebar)))))
+
+  :custom
+  (dired-sidebar-one-instance-p t)
 
   :commands (dired-sidebar-toggle-sidebar)
 
