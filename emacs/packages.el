@@ -417,28 +417,28 @@
 
 
 ;;; obsolete: replaced by zoom
-(use-package golden-ratio
-  :pin melpa
-  :diminish " φ"
-
-  :config
-  ;;(setq golden-ratio-auto-scale t)
-
-  (add-to-list 'golden-ratio-extra-commands 'mouse-set-point)
-  (add-to-list 'golden-ratio-extra-commands 'flip-windows)
-  (add-to-list 'golden-ratio-extra-commands 'switch-to-last-terminal-buffer)
-  (add-to-list 'golden-ratio-extra-commands 'ace-window)
-  (add-to-list 'golden-ratio-extra-commands 'avy-goto-char)
-  (add-to-list 'golden-ratio-extra-commands 'avy-goto-line)
-  (add-to-list 'golden-ratio-exclude-modes 'magit-key-mode)
-  (add-to-list 'golden-ratio-exclude-modes 'which-key-mode)
-  (add-to-list 'golden-ratio-exclude-buffer-names "*buffer-selection*")
-
-  (defun toggle-golden-ratio ()
-    (interactive)
-    (golden-ratio-mode (if golden-ratio-mode 0 1))
-    (when golden-ratio-mode (golden-ratio)))
-  )
+;; (use-package golden-ratio
+;;   :pin melpa
+;;   :diminish " φ"
+;;
+;;   :config
+;;   ;;(setq golden-ratio-auto-scale t)
+;;
+;;   (add-to-list 'golden-ratio-extra-commands 'mouse-set-point)
+;;   (add-to-list 'golden-ratio-extra-commands 'flip-windows)
+;;   (add-to-list 'golden-ratio-extra-commands 'switch-to-last-terminal-buffer)
+;;   (add-to-list 'golden-ratio-extra-commands 'ace-window)
+;;   (add-to-list 'golden-ratio-extra-commands 'avy-goto-char)
+;;   (add-to-list 'golden-ratio-extra-commands 'avy-goto-line)
+;;   (add-to-list 'golden-ratio-exclude-modes 'magit-key-mode)
+;;   (add-to-list 'golden-ratio-exclude-modes 'which-key-mode)
+;;   (add-to-list 'golden-ratio-exclude-buffer-names "*buffer-selection*")
+;;
+;;   (defun toggle-golden-ratio ()
+;;     (interactive)
+;;     (golden-ratio-mode (if golden-ratio-mode 0 1))
+;;     (when golden-ratio-mode (golden-ratio)))
+;;   )
 
 
 ;;; http://www.emacswiki.org/emacs/GotoChg
