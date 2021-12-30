@@ -21,14 +21,6 @@
   )
 
 
-(use-package counsel-projectile
-  :pin melpa
-
-  :init
-  ;;(counsel-projectile-mode 1)
-  )
-
-
 (use-package counsel-tramp
   :pin melpa)
 
