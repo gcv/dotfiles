@@ -653,7 +653,7 @@ See `eshell-prompt-regexp'."
 
 
 ;;; EasyPG (epg)
-(setq epg-pinentry-mode (unless window-system 'loopback))
+(setq epg-pinentry-mode 'loopback)
 
 
 ;;; isearch
