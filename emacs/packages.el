@@ -253,7 +253,7 @@
   :custom
   (dired-sidebar-one-instance-p t)
 
-  :commands (dired-sidebar-toggle-sidebar)
+  :commands (dired-sidebar-toggle-sidebar dired-sidebar-follow-file)
 
   :init
   (add-hook 'dired-sidebar-mode-hook
