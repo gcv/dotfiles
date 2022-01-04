@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.16
+;; Version: 0.18
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/vertico
 
@@ -318,10 +318,6 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--recompute-candidates (pt content)
   "Recompute candidates given PT and CONTENT."
-  ;; Redisplay the minibuffer such that the input becomes immediately
-  ;; visible before the expensive candidate recomputation is performed (Issue #89).
-  ;; Do not redisplay during initialization, since this leads to flicker.
-  (when (consp vertico--input) (redisplay))
   (pcase-let* ((before (substring content 0 pt))
                (after (substring content pt))
                ;; bug#47678: `completion-boundaries` fails for `partial-completion`
@@ -353,7 +349,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
     (when completing-file
       (setq all (vertico--filter-files all)))
     ;; Sort using the `display-sort-function' or the Vertico sort functions
-    (setq all (funcall (or (vertico--sort-function) #'identity) all))
+    (setq all (delete-consecutive-dups (funcall (or (vertico--sort-function) #'identity) all)))
     ;; Move special candidates: "field" appears at the top, before "field/", before default value
     (when (stringp def)
       (setq all (vertico--move-to-front def all)))
@@ -417,6 +413,10 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--update-candidates (pt content)
   "Preprocess candidates given PT and CONTENT."
+  ;; Redisplay the minibuffer such that the input becomes immediately
+  ;; visible before the expensive candidate recomputation is performed (Issue #89).
+  ;; Do not redisplay during initialization, since this leads to flicker.
+  (when (consp vertico--input) (redisplay))
   (let ((metadata (completion-metadata (substring content 0 pt)
                                        minibuffer-completion-table
                                        minibuffer-completion-predicate)))
@@ -456,19 +456,21 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
                                              minibuffer-completion-predicate)))
                    -1 0)))))))
 
-(defun vertico--flatten-string (prop str)
-  "Flatten STR with display or invisible PROP."
-  (let ((end (length str)) (pos 0) (chunks))
+(defun vertico--display-string (str)
+  "Return display STR without display and invisible properties."
+  (let ((end (length str)) (pos 0) chunks)
     (while (< pos end)
-      (let ((next (next-single-property-change pos prop str end))
-            (val (get-text-property pos prop str)))
-        (cond
-         ((and val (eq prop 'display) (stringp val))
-          (push val chunks))
-         ((not (and val (eq prop 'invisible)))
-          (push (substring str pos next) chunks)))
-        (setq pos next)))
-    (apply #'concat (nreverse chunks))))
+      (let ((nextd (next-single-property-change pos 'display str end))
+            (display (get-text-property pos 'display str)))
+        (if (stringp display)
+            (progn (push display chunks) (setq pos nextd))
+          (while (< pos nextd)
+            (let ((nexti (next-single-property-change pos 'invisible str nextd)))
+              (unless (get-text-property pos 'invisible str)
+                (unless (and (= pos 0) (= nexti end)) ;; full string -> avoid allocation
+                  (push (substring str pos nexti) chunks)))
+              (setq pos nexti))))))
+    (if chunks (apply #'concat (nreverse chunks)) str)))
 
 (defun vertico--truncate-multiline (cand max-width)
   "Truncate multiline CAND to MAX-WIDTH."
@@ -481,8 +483,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--format-candidate (cand prefix suffix index _start)
   "Format CAND given PREFIX, SUFFIX and INDEX."
-  (setq cand (concat prefix cand suffix "\n")
-        cand (vertico--flatten-string 'invisible (vertico--flatten-string 'display cand)))
+  (setq cand (vertico--display-string (concat prefix cand suffix "\n")))
   (when (= index vertico--index)
     (add-face-text-property 0 (length cand) 'vertico-current 'append cand))
   cand)
@@ -495,15 +496,23 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
                                (max 0 (+ vertico--index off 1 (- vertico-count))
                                     (min (- vertico--index off corr) vertico--scroll))))))
 
+(defun vertico--format-group-title (title cand)
+  "Format group TITLE given the current CAND."
+  (when (string-prefix-p title cand)
+    ;; Highlight title if title is a prefix of the candidate
+    (setq title (substring (car (funcall vertico--highlight-function
+                                         (list (propertize cand 'face 'vertico-group-title))))
+                           0 (length title)))
+    (vertico--remove-face 0 (length title) 'completions-first-difference title))
+  (format (concat vertico-group-format "\n") title))
+
 (defun vertico--arrange-candidates ()
   "Arrange candidates."
   (vertico--update-scroll)
-  (let ((curr-line 0) (lines))
+  (let ((curr-line 0) lines)
     ;; Compute group titles
-    (let* ((index vertico--scroll)
-           (title)
-           (group-fun (vertico--metadata-get 'group-function))
-           (group-format (and group-fun vertico-group-format (concat vertico-group-format "\n")))
+    (let* (title (index vertico--scroll)
+           (group-fun (and vertico-group-format (vertico--metadata-get 'group-function)))
            (candidates
             (thread-last (seq-subseq vertico--candidates index
                                      (min (+ index vertico-count) vertico--total))
@@ -511,19 +520,10 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
               (vertico--affixate))))
       (dolist (cand candidates)
         (let ((str (car cand)))
-          (when-let (new-title (and group-format (funcall group-fun str nil)))
+          (when-let (new-title (and group-fun (funcall group-fun str nil)))
             (unless (equal title new-title)
               (setq title new-title)
-              ;; Restore group title highlighting for prefix titles
-              (when (string-prefix-p title str)
-                (setq title (substring
-                             (car (funcall
-                                   vertico--highlight-function
-                                   ;; Remove all properties from the title
-                                   (list (propertize str 'face 'vertico-group-title))))
-                             0 (length title)))
-                (vertico--remove-face 0 (length title) 'completions-first-difference title))
-              (push (format group-format title) lines))
+              (push (vertico--format-group-title title str) lines))
             (setcar cand (funcall group-fun str 'transform))))
         (when (= index vertico--index)
           (setq curr-line (length lines)))
@@ -555,7 +555,9 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--resize-window (height)
   "Resize active minibuffer window to HEIGHT."
-  (setq-local truncate-lines (< (point) (* 0.8 (window-width))))
+  (setq-local truncate-lines (< (point) (* 0.8 (window-width)))
+              resize-mini-windows 'grow-only
+              max-mini-window-height 1.0)
   (unless (frame-root-window-p (active-minibuffer-window))
     (unless vertico-resize
       (setq height (max height vertico-count)))
@@ -578,11 +580,9 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--display-count ()
   "Update count overlay `vertico--count-ov'."
-  (when vertico--count-ov
-    (move-overlay vertico--count-ov (point-min) (point-min))
-    ;; Set priority for compatibility with `minibuffer-depth-indicate-mode'
-    (overlay-put vertico--count-ov 'priority 1)
-    (overlay-put vertico--count-ov 'before-string (vertico--format-count))))
+  (move-overlay vertico--count-ov (point-min) (point-min))
+  (overlay-put vertico--count-ov 'before-string
+               (if vertico-count-format (vertico--format-count) "")))
 
 (defun vertico--prompt-selection ()
   "Highlight the prompt if selected."
@@ -603,7 +603,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Exhibit completion UI."
   (let* ((buffer-undo-list t) ;; Overlays affect point position and undo list!
          (pt (max 0 (- (point) (minibuffer-prompt-end))))
-         (content (minibuffer-contents-no-properties)))
+         (content (minibuffer-contents)))
     (unless (or (input-pending-p) (equal vertico--input (cons content pt)))
       (vertico--update-candidates pt content))
     (vertico--prompt-selection)
@@ -731,29 +731,28 @@ When the prefix argument is 0, the group order is reset."
 
 (defun vertico--candidate (&optional hl)
   "Return current candidate string with optional highlighting if HL is non-nil."
-  (let ((content (minibuffer-contents)))
-    (if (>= vertico--index 0)
-        (let ((cand (substring (nth vertico--index vertico--candidates))))
-          ;;; XXX Drop the completions-common-part face which is added by `completion--twq-all'.
-          ;; This is a hack in Emacs and should better be fixed in Emacs itself, the corresponding
-          ;; code is already marked with a FIXME. Should this be reported as a bug?
-          (vertico--remove-face 0 (length cand) 'completions-common-part cand)
-          (concat (substring content 0 vertico--base)
-                  (if hl (car (funcall vertico--highlight-function (list cand))) cand)))
-      ;; Remove prompt face
-      (vertico--remove-face 0 (length content) 'vertico-current content)
-      content)))
+  (let ((content (substring (or (car-safe vertico--input) (minibuffer-contents)))))
+    (cond
+     ((>= vertico--index 0)
+      (let ((cand (substring (nth vertico--index vertico--candidates))))
+        ;; XXX Drop the completions-common-part face which is added by `completion--twq-all'.
+        ;; This is a hack in Emacs and should better be fixed in Emacs itself, the corresponding
+        ;; code is already marked with a FIXME. Should this be reported as a bug?
+        (vertico--remove-face 0 (length cand) 'completions-common-part cand)
+        (concat (substring content 0 vertico--base)
+                (if hl (car (funcall vertico--highlight-function (list cand))) cand))))
+     ((and (equal content "") (or (car-safe minibuffer-default) minibuffer-default)))
+     (t (vertico--remove-face 0 (length content) 'vertico-current content) ;; Remove prompt face
+        content))))
 
 (defun vertico--setup ()
   "Setup completion UI."
   (setq vertico--input t
         vertico--candidates-ov (make-overlay (point-max) (point-max) nil t t)
-        vertico--count-ov (and vertico-count-format
-                               (make-overlay (point-min) (point-min) nil t t)))
-  (setq-local resize-mini-windows 'grow-only
-              max-mini-window-height 1.0
-              truncate-lines t
-              completion-auto-help nil
+        vertico--count-ov (make-overlay (point-min) (point-min) nil t t))
+  ;; Set priority for compatibility with `minibuffer-depth-indicate-mode'
+  (overlay-put vertico--count-ov 'priority 1)
+  (setq-local completion-auto-help nil
               completion-show-inline-help nil)
   (use-local-map vertico-map)
   ;; Use -90 to ensure that the exhibit hook runs early such that the
