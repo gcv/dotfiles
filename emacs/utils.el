@@ -136,3 +136,29 @@
                                      (format "0%x" col)
                                    (format "%x" col))))
                              (split-string (s-replace "\"" "" color) ",")) "")))
+
+
+;;; Color shifting utilities adapted from mini-frame.el:
+(cl-defun /color-shift (from to &key (by 27))
+  "Move color FROM towards TO by BY. FROM and TO are 16-bit integer values."
+  (let ((f (ash from -8)))
+    (cond
+     ((> from to) (- f by))
+     ((< from to) (+ f by))
+     (t f))))
+
+(defun /color-shift-hex (from to)
+  "Move color FROM towards TO. FROM and TO are hex values."
+  (let* ((from (color-values from))
+         (to (color-values to)))
+    (format "#%02x%02x%02x"
+            (/color-shift (car from) (car to))
+            (/color-shift (cadr from) (cadr to))
+            (/color-shift (caddr from) (caddr to)))))
+
+(defun /color-shift-frame-bg (&optional frame)
+  "Calculate a shifted background color from FRAME background."
+  (let* ((params (frame-parameters frame))
+         (bg (alist-get 'background-color params))
+         (fg (alist-get 'foreground-color params)))
+    (/color-shift-hex bg fg)))
