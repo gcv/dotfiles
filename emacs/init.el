@@ -1046,6 +1046,7 @@ See `eshell-prompt-regexp'."
                       "modeline.el"
                       ;;"helm.el"
                       ;;"ivy.el"
+                      ;;"selectrum.el"
                       "ngc.el"
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
