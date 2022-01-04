@@ -236,6 +236,7 @@
             "\\*Quail Completions\\*"
             "\\*Shell Command Output\\*"
             "\\*buffer-selection\\*"
+            "\\*envrc\\*"
             "\\*helm"
             "\\*helm-mode"))
 
