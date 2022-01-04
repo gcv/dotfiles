@@ -826,12 +826,12 @@
    ("H-p" . perspective-map)
    ("C-c M-p" . persp-switch))
 
+  :custom
+  (persp-interactive-completion-function 'completing-read)
+  (persp-sort 'access)
   :init
   (persp-mode)
   (persp-turn-off-modestring)
-
-  (setq persp-interactive-completion-function 'ido-completing-read
-        persp-sort 'access)
 
   (setq persp-state-default-file (concat user-emacs-directory "persp-state.el"))
 
