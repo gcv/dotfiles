@@ -1,8 +1,10 @@
 ;;; -*- lexical-binding: t; -*-
 
-(use-package counsel
-  :pin melpa
+;;; This configuration is superceded by Vertico, and retained here for
+;;; reference.
 
+
+(use-package counsel
   :bind
   (("M-x" . counsel-M-x)
    ("C-x C-M-f" . counsel-find-file)
@@ -21,14 +23,7 @@
   )
 
 
-(use-package counsel-tramp
-  :pin melpa)
-
-
 (use-package ivy
-  :pin melpa
-  :after (flx)
-
   :bind
   (("C-c c r" . ivy-resume)
    :map ivy-minibuffer-map
@@ -98,7 +93,6 @@
 
 
 (use-package ivy-posframe
-  :pin melpa
   :defer nil                            ; must load eagerly
   :if window-system
   :diminish ""
@@ -139,8 +133,6 @@
 
 
 (use-package ivy-xref
-  :pin melpa
-
   :init
   ;;(when (>= emacs-major-version 27)
   ;;  (setq xref-show-definitions-function #'ivy-xref-show-defs))
@@ -148,12 +140,7 @@
   )
 
 
-(use-package flx)
-
-
 (use-package swiper
-  :pin melpa
-
   :bind
   (("M-S-C-s" . swiper))
   )
