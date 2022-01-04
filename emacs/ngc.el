@@ -1,12 +1,11 @@
 ;;; ngc - new generation completion -*- lexical-binding: t; -*-
 
-;;; --- shared NGC setup: consult, embark, marginalia, orderless
-
 (use-package consult
   :pin melpa
 
   :bind
-  (("C-c p s r" . consult-ripgrep))
+  (("C-M-y" . consult-yank-from-kill-ring)
+   ("C-c p s r" . consult-ripgrep))
 
   :custom
   (consult-preview-key nil)
@@ -110,7 +109,7 @@ targets."
     (let ((inhibit-message t))
       (customize-save-variable 'marginalia-annotator-registry
                                marginalia-annotator-registry)))
-  (advice-add #'marginalia-cycle :after #'/marginalia-cycle)
+  (advice-add 'marginalia-cycle :after #'/marginalia-cycle)
   )
 
 
@@ -124,111 +123,61 @@ targets."
   )
 
 
-;;; --- vertico
-
 (use-package vertico
-  :pin gnu
-  ;;:quelpa (vertico :fetcher github :repo "minad/vertico")
+  ;;:pin gnu
+  :quelpa (vertico :fetcher github :repo "minad/vertico" :files (:defaults "extensions/*"))
+
+  :bind
+  (:map vertico-map
+        ("TAB" . /vertico-smart-tab)
+        ("M-g" . vertico-multiform-grid)
+        ("M-f" . vertico-multiform-flat)
+        ("M-R" . vertico-multiform-reverse)
+        ("M-u" . vertico-multiform-unobtrusive)
+        ;; emulate ido-mode directory navigation
+        ;; ("RET" . vertico-directory-enter)
+        ;; ("DEL" . vertico-directory-delete-char)
+        ;; ("M-DEL" . vertico-directory-delete-word)
+        )
+
+  ;;tidy shadowed file names
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
+
+  :custom
+  (vertico-count (if window-system 16 10))
+  (completion-in-region-function 'consult-completion-in-region)
+  (vertico-buffer-display-action '(display-buffer-same-window))
 
   :init
-
-  ;; --- vertico-on-demand-mode
-  ;; derived from https://github.com/minad/vertico/blob/demand/extensions/vertico-on-demand.el
-  ;; can probably be retired when and if this extension becomes an official Vertico feature
-
-  (defvar vertico-on-demand-map
-    (let ((map (make-composed-keymap nil minibuffer-local-map)))
-      (define-key map [remap next-line] #'vertico-on-demand-show)
-      (define-key map [remap previous-line] #'vertico-on-demand-show)
-      (define-key map [remap next-line-or-history-element] #'vertico-on-demand-show)
-      (define-key map [remap previous-line-or-history-element] #'vertico-on-demand-show)
-      (define-key map "?" #'vertico-on-demand-show)
-      (define-key map "\r" #'vertico-on-demand-complete-and-exit)
-      (define-key map "\t" #'vertico-on-demand-complete)
-      (define-key map [return] #'vertico-exit-input)
-      (define-key map [C-return] #'vertico-exit-input)
-      map)
-    "Vertico on-demand minibuffer keymap derived from `minibuffer-local-map'.")
-
-  (defun vertico-on-demand-complete ()
-    "Complete minibuffer input or open Vertico UI."
-    (interactive)
-    (cl-letf (((symbol-function #'minibuffer-completion-help) #'vertico-on-demand-show))
-      (minibuffer-complete)))
-
-  (defun vertico-on-demand-complete-and-exit ()
-    "Complete minibuffer input and exit or open Vertico UI."
-    (interactive)
-    (cl-letf (((symbol-function #'minibuffer-completion-help) #'vertico-on-demand-show)
-              (completion-cycle-threshold nil)) ;; disable cycling; ensure unique match!
-      (minibuffer-complete-and-exit)))
-
-  (defun vertico-on-demand-show (&rest _)
-    "Show Vertico UI."
-    (interactive)
-    (vertico--setup))
-
-  (defun vertico-on-demand--setup ()
-    "Setup Vertico on-demand mode in the minibuffer."
-    (setq-local completion-show-inline-help nil
-                completion-auto-help t)
-    (use-local-map vertico-on-demand-map))
-
-  (defvar vertico-on-demand-auto-this nil)
-
-  (defcustom vertico-on-demand-auto-commands
-    (list 'execute-extended-command
-          'eval-expression
-          "edebug-eval-expression"
-          'debugger-eval-expression
-          "consult-.*"
-          "persp-switch-to-buffer\\*"
-          "projectile-.*"
-          "imenu-.*")
-    "List of commands which automatically activate Vertico, bypassing on-demand mode."
-    :group 'vertico
-    :type '(repeat (choice function regexp)))
-
-  (defun vertico-on-demand--completion-at-point-advice (orig-fn &rest args)
-    (let ((vertico-on-demand-auto-this t)
-          ;; consult-completion-in-region makes completion work in minibuffer
-          ;; commands like eval-expression (where company-mode is not
-          ;; supported), as well as ielm
-          (completion-in-region-function 'consult-completion-in-region))
-      (apply orig-fn args)))
-
-  (defun vertico-on-demand--advice (&rest args)
-    "Advice for completion function, receiving ARGS."
-    (minibuffer-with-setup-hook
-        (if (or vertico-on-demand-auto-this
-                (and (symbolp this-command)
-                     (catch 'auto
-                       (dolist (auto-command vertico-on-demand-auto-commands)
-                         (when (if (stringp auto-command)
-                                   (string-match-p auto-command (symbol-name this-command))
-                                 (eq auto-command this-command))
-                           (throw 'auto t))))))
-            #'vertico--setup
-          #'vertico-on-demand--setup)
-      (apply args)))
-
-  (define-minor-mode vertico-on-demand-mode
-    "Open Vertico on demand."
-    :global t
-    :group 'vertico
-    (if vertico-on-demand-mode
-        (progn
-          (advice-add #'vertico--advice :override #'vertico-on-demand--advice)
-          (advice-add #'completion-at-point :around #'vertico-on-demand--completion-at-point-advice))
-      (advice-remove #'completion-at-point #'vertico-on-demand--completion-at-point-advice)
-      (advice-remove #'vertico--advice #'vertico-on-demand--advice)))
-
-  ;; --- end of vertico-on-demand-mode
-
   (vertico-mode 1)
-  (vertico-on-demand-mode 1)
-  (when window-system
-    (selective-mini-frame-mode 1))
+  (vertico-multiform-mode 1)
+
+  (setq vertico-multiform-commands
+        '((consult-imenu buffer indexed)
+          ;;("^consult-.*" buffer indexed)
+          (imenu-cr buffer indexed)
+          (find-file-in-project buffer indexed grid)
+          ;;(find-file-in-project buffer indexed (:not grid))
+          (persp-switch flat)
+          ))
+  (if window-system
+      (add-to-list 'vertico-multiform-commands '(execute-extended-command indexed posframe))
+    (add-to-list 'vertico-multiform-commands '(execute-extended-command indexed)))
+
+  (setq vertico-multiform-categories
+        '(;;(file grid)
+          ;;(file flat (vertico-cycle . t))
+          (file unobtrusive)
+          (buffer flat (vertico-cycle . t))
+          (consult-grep buffer)
+          ))
+
+  (defun /vertico-smart-tab ()
+    (interactive)
+    (if (or (not vertico-unobtrusive-mode)
+            (= vertico--total 1))
+        (call-interactively #'vertico-insert)
+      (vertico-multiform-unobtrusive)))
   )
 
 

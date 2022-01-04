@@ -27,7 +27,9 @@
 (defun /theme-before-enable ()
   (disable-all-themes)
   (when (boundp 'mini-frame-frame)
-    (delete-frame mini-frame-frame)))
+    (delete-frame mini-frame-frame))
+  (when (fboundp 'posframe-delete-all)
+    (posframe-delete-all)))
 
 
 (defun /theme-face-spec (face &rest merge-attrs)
@@ -60,6 +62,7 @@
      (/theme-face-spec 'aw-background-face :foreground "gray40" :background nil)
      (/theme-face-spec 'fixed-pitch :family base-font)
      (/theme-face-spec 'term :foreground nil :background nil)
+     (/theme-face-spec 'vertico-posframe :background (/color-shift-hex (face-attribute 'default :background) (face-attribute 'default :foreground)))
      (/theme-face-spec 'markdown-pre-face :background nil :weight 'bold)
      (/theme-face-spec 'markdown-code-face :background (face-attribute 'default :background))
      (/theme-face-spec 'markdown-inline-code-face :background nil :weight 'bold)

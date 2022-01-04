@@ -815,10 +815,10 @@ See `eshell-prompt-regexp'."
 ;;; selectrum-mode.
 ;;; Also, there is no case-insensitive matching?
 ;;(add-to-list 'completion-styles 'flex)
-(setq icomplete-show-matches-on-no-input t
-      icomplete-hide-common-prefix nil
-      icomplete-prospects-height 1)
-
+;;(setq icomplete-show-matches-on-no-input t
+;;      icomplete-hide-common-prefix nil
+;;      icomplete-prospects-height 1)
+;;
 ;;(icomplete-mode 1)
 
 
@@ -831,12 +831,12 @@ See `eshell-prompt-regexp'."
       ido-max-prospects 20
       ido-ignore-buffers ignore-buffers)
 
-(ido-mode 'buffer)
-
-(global-set-key (kbd "C-x M-f") 'ido-find-file)
-(global-set-key (kbd "C-x M-d") 'ido-dired)
-(global-set-key (kbd "C-x C-d") 'ido-dired)
-(global-set-key (kbd "C-x M-i") 'ido-insert-file)
+;;(ido-mode 'buffer)
+;;
+;;(global-set-key (kbd "C-x M-f") 'ido-find-file)
+;;(global-set-key (kbd "C-x M-d") 'ido-dired)
+;;(global-set-key (kbd "C-x C-d") 'ido-dired)
+;;(global-set-key (kbd "C-x M-i") 'ido-insert-file)
 
 
 ;;; Gnus
