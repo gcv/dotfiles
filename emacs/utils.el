@@ -149,12 +149,15 @@
 
 (defun /color-shift-hex (from to)
   "Move color FROM towards TO. FROM and TO are hex values."
-  (let* ((from (color-values from))
-         (to (color-values to)))
-    (format "#%02x%02x%02x"
-            (/color-shift (car from) (car to))
-            (/color-shift (cadr from) (cadr to))
-            (/color-shift (caddr from) (caddr to)))))
+  (if (or (string-match-p "^unspecified" from)
+          (string-match-p "^unspecified" to))
+      "unspecified"
+    (let* ((from (color-values from))
+           (to (color-values to)))
+      (format "#%02x%02x%02x"
+              (/color-shift (car from) (car to))
+              (/color-shift (cadr from) (cadr to))
+              (/color-shift (caddr from) (caddr to))))))
 
 (defun /color-shift-frame-bg (&optional frame)
   "Calculate a shifted background color from FRAME background."
