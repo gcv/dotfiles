@@ -149,8 +149,8 @@
 
 (defun /color-shift-hex (from to)
   "Move color FROM towards TO. FROM and TO are hex values."
-  (if (or (string-match-p "^unspecified" from)
-          (string-match-p "^unspecified" to))
+  (if (or (string-match-p "^unspecified" (format "%s" from))
+          (string-match-p "^unspecified" (format "%s" to)))
       "unspecified"
     (let* ((from (color-values from))
            (to (color-values to)))
