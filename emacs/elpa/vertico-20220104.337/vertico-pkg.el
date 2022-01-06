@@ -1,4 +1,4 @@
-(define-package "vertico" "20220103.832" "VERTical Interactive COmpletion"
+(define-package "vertico" "20220104.337" "VERTical Interactive COmpletion"
   '((emacs "27.1"))
   :authors
   '(("Daniel Mendler" . "mail@daniel-mendler.de"))
