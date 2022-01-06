@@ -228,6 +228,10 @@
   )
 
 
+(use-package devdocs
+  :pin gnu)
+
+
 ;;; XXX: This package is supposed to support changing lighters for major modes
 ;;; in a more sophisticated way than (setq mode-name "..."), and has hooks into
 ;;; use-package, but does not seem to work. For example, (delight 'markdown-mode
