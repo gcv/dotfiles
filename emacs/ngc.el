@@ -133,17 +133,18 @@ targets."
   :quelpa (vertico :fetcher github :repo "minad/vertico" :files (:defaults "extensions/*"))
 
   :bind
-  (:map vertico-map
-        ("TAB" . /vertico-smart-tab)
-        ("M-g" . vertico-multiform-grid)
-        ("M-f" . vertico-multiform-flat)
-        ("M-R" . vertico-multiform-reverse)
-        ("M-u" . vertico-multiform-unobtrusive)
-        ;; emulate ido-mode directory navigation
-        ("RET" . vertico-directory-enter)
-        ("DEL" . vertico-directory-delete-char)
-        ("M-DEL" . vertico-directory-delete-word)
-        )
+  (("C-x b" . persp-switch-to-buffer*)
+   (:map vertico-map
+         ("TAB" . /vertico-smart-tab)
+         ("M-g" . vertico-multiform-grid)
+         ("M-f" . vertico-multiform-flat)
+         ("M-R" . vertico-multiform-reverse)
+         ("M-u" . vertico-multiform-unobtrusive)
+         ;; emulate ido-mode directory navigation
+         ("RET" . vertico-directory-enter)
+         ("DEL" . vertico-directory-delete-char)
+         ("M-DEL" . vertico-directory-delete-word)
+         ))
 
   ;;tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
