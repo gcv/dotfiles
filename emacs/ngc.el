@@ -13,6 +13,11 @@
   (consult-project-root-function (lambda ()
                                    (when-let (project (project-current))
                                      (car (project-roots project)))))
+  (completion-in-region-function (lambda (&rest args)
+                                   (apply (if vertico-mode
+                                              #'consult-completion-in-region
+                                            #'completion--in-region)
+                                          args)))
 
   :init
   (setq xref-show-xrefs-function #'consult-xref
@@ -135,9 +140,9 @@ targets."
         ("M-R" . vertico-multiform-reverse)
         ("M-u" . vertico-multiform-unobtrusive)
         ;; emulate ido-mode directory navigation
-        ;; ("RET" . vertico-directory-enter)
-        ;; ("DEL" . vertico-directory-delete-char)
-        ;; ("M-DEL" . vertico-directory-delete-word)
+        ("RET" . vertico-directory-enter)
+        ("DEL" . vertico-directory-delete-char)
+        ("M-DEL" . vertico-directory-delete-word)
         )
 
   ;;tidy shadowed file names
@@ -145,7 +150,6 @@ targets."
 
   :custom
   (vertico-count (if window-system 16 10))
-  (completion-in-region-function 'consult-completion-in-region)
   (vertico-buffer-display-action '(display-buffer-same-window))
 
   :init
@@ -158,11 +162,11 @@ targets."
           (imenu-cr buffer indexed)
           (find-file-in-project buffer indexed grid)
           ;;(find-file-in-project buffer indexed (:not grid))
-          (persp-switch flat)
+          ("persp-.*" flat)
           ))
   (if window-system
       (add-to-list 'vertico-multiform-commands '(execute-extended-command indexed posframe))
-    (add-to-list 'vertico-multiform-commands '(execute-extended-command indexed)))
+    (add-to-list 'vertico-multiform-commands '(execute-extended-command unobtrusive)))
 
   (setq vertico-multiform-categories
         '(;;(file grid)
@@ -178,6 +182,21 @@ targets."
             (= vertico--total 1))
         (call-interactively #'vertico-insert)
       (vertico-multiform-unobtrusive)))
+
+  ;; Sample use:
+  ;; (setq vertico-multiform-commands
+  ;;       '(("\\`consult-" buffer)
+  ;;         (t disabled)))
+  (define-minor-mode vertico-disabled-mode
+    "Disable Vertico."
+    :global t
+    :group 'vertico
+    ;; shrink current minibuffer window
+    (when-let (win (active-minibuffer-window))
+      (window-resize win (- (window-pixel-height win)) nil nil 'pixelwise))
+    (if vertico-disabled-mode
+        (advice-add 'vertico--setup :override #'ignore)
+      (advice-remove 'vertico--setup #'ignore)))
   )
 
 
