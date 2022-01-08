@@ -6,8 +6,8 @@
 ;; Maintainer: Pavel Kurnosov <pashky@gmail.com>
 ;; Created: 01 Apr 2012
 ;; Keywords: http
-;; Package-Version: 20210923.2234
-;; Package-Commit: 94d2e8421fa14d0e3307d70e1d1e2db9d43b2f95
+;; Package-Version: 20220101.1239
+;; Package-Commit: 9e2cfa86529133eba6c9ef53794be182f15e4c21
 
 ;; This file is not part of GNU Emacs.
 ;; This file is public domain software. Do what you want.
@@ -24,7 +24,10 @@
 (require 'json)
 (require 'outline)
 (eval-when-compile (require 'subr-x))
-(eval-when-compile (require 'cl))
+(eval-when-compile
+  (if (version< emacs-version "26")
+      (require 'cl)
+    (require 'cl-lib)))
 
 (defgroup restclient nil
   "An interactive HTTP client for Emacs."
