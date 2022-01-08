@@ -4,10 +4,10 @@
 
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;; Keywords: processes, tools
-;; Package-Commit: 8a9a142cf9d35e62a70d9d100a946f78fe0b066a
+;; Package-Commit: 456c4100de41d2cb50813058a9e727b6e83c5d1e
 ;; Homepage: https://github.com/purcell/envrc
 ;; Package-Requires: ((seq "2") (emacs "24.4") (inheritenv "0.1"))
-;; Package-Version: 20210516.2143
+;; Package-Version: 20220103.1759
 ;; Package-X-Original-Version: 0
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -386,6 +386,7 @@ in a temp buffer.  ARGS is as for ORIG."
     (apply orig args)))
 
 (advice-add 'shell-command-to-string :around #'envrc-propagate-environment)
+(advice-add 'org-babel-eval :around #'envrc-propagate-environment)
 
 
 ;;; Major mode for .envrc files
@@ -414,3 +415,7 @@ in a temp buffer.  ARGS is as for ORIG."
 ;;; envrc.el ends here
 
 ;; LocalWords:  envrc direnv
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
