@@ -11,25 +11,35 @@
 
 (autoload 'devdocs-delete "devdocs" "\
 Delete DevDocs documentation.
-DOC is a document slug.
+DOC is a document metadata alist.
 
 \(fn DOC)" t nil)
 
 (autoload 'devdocs-install "devdocs" "\
 Download and install DevDocs documentation.
-DOC is a document slug.
+DOC is a document metadata alist.
 
 \(fn DOC)" t nil)
+
+(autoload 'devdocs-update-all "devdocs" "\
+Reinstall all documents with a new version available." t nil)
 
 (autoload 'devdocs-lookup "devdocs" "\
 Look up a DevDocs documentation entry.
 
 Display entries in the documents `devdocs-current-docs' for
 selection.  With a prefix argument (or, from Lisp, if ASK-DOCS is
-non-nil), first read a list of available documents and set
-`devdocs-current-docs' for this buffer.
+non-nil), first read the name of one or more installed documents
+and set `devdocs-current-docs' for this buffer.
 
-\(fn &optional ASK-DOCS)" t nil)
+If INITIAL-INPUT is not nil, insert it into the minibuffer.
+
+\(fn &optional ASK-DOCS INITIAL-INPUT)" t nil)
+
+(autoload 'devdocs-peruse "devdocs" "\
+Read a document from the first page.
+
+\(fn DOC)" t nil)
 
 (autoload 'devdocs-search "devdocs" "\
 Search for QUERY in the DevDocs website.
