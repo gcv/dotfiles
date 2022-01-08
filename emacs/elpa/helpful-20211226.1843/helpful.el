@@ -4,8 +4,8 @@
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
-;; Package-Version: 20211021.625
-;; Package-Commit: 8df39c15d290cd499ef261de868191d3fc84f75a
+;; Package-Version: 20211226.1843
+;; Package-Commit: f865f17ad04cd270685187b0a5331ec8eb06e541
 ;; Keywords: help, lisp
 ;; Version: 0.19
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
@@ -1319,13 +1319,17 @@ If it fails, attempt to partially macroexpand FORM."
 (defun helpful--tree-any-p (pred tree)
   "Walk TREE, applying PRED to every subtree.
 Return t if PRED ever returns t."
-  (cond
-   ((null tree) nil)
-   ((funcall pred tree) t)
-   ((not (consp tree)) nil)
-   (t (or
-       (helpful--tree-any-p pred (car tree))
-       (helpful--tree-any-p pred (cdr tree))))))
+  (catch 'found
+    (let ((stack (list tree)))
+      (while stack
+        (let ((next (pop stack)))
+          (cond
+           ((funcall pred next)
+            (throw 'found t))
+           ((consp next)
+            (push (car next) stack)
+            (push (cdr next) stack))))))
+    nil))
 
 (defun helpful--find-by-macroexpanding (buf sym callable-p)
   "Search BUF for the definition of SYM by macroexpanding
@@ -2255,7 +2259,7 @@ state of the current symbol."
           (insert (helpful--format-docstring docstring)))
         (when version-info
           (insert "\n\n" (s-word-wrap 70 version-info)))
-        (when (helpful--in-manual-p helpful--sym)
+        (when (and (symbolp helpful--sym) (helpful--in-manual-p helpful--sym))
           (insert "\n\n")
           (insert (helpful--make-manual-button helpful--sym)))))
 
@@ -2298,7 +2302,11 @@ state of the current symbol."
      "\n\n"
      (helpful--make-references-button helpful--sym helpful--callable-p))
 
-    (when (and helpful--callable-p source (not primitive-p))
+    (when (and
+           helpful--callable-p
+           (symbolp helpful--sym)
+           source
+           (not primitive-p))
       (insert
        " "
        (helpful--make-callees-button helpful--sym source)))
@@ -2464,7 +2472,14 @@ For example, \"(some-func FOO &optional BAR)\"."
              ((symbolp sym)
               (help-function-arglist sym))
              ((byte-code-function-p sym)
-              (aref sym 0))
+              ;; argdesc can be a list of arguments or an integer
+              ;; encoding the min/max number of arguments. See
+              ;; Byte-Code Function Objects in the elisp manual.
+              (let ((argdesc (aref sym 0)))
+                (if (consp argdesc)
+                    argdesc
+                  ;; TODO: properly handle argdesc values.
+                  nil)))
              (t
               ;; Interpreted function (lambda ...)
               (cadr sym))))
@@ -2561,6 +2576,13 @@ Returns the symbol."
                            predicate t nil nil
                            default-val)))
 
+(defun helpful--update-and-switch-buffer (symbol callable-p)
+  "Update and switch to help buffer for SYMBOL."
+  (let ((buf (helpful--buffer symbol callable-p)))
+    (with-current-buffer buf
+      (helpful-update))
+    (funcall helpful-switch-buffer-function buf)))
+
 ;;;###autoload
 (defun helpful-function (symbol)
   "Show help for function named SYMBOL.
@@ -2571,8 +2593,7 @@ See also `helpful-macro', `helpful-command' and `helpful-callable'."
           "Function: "
           (helpful--callable-at-point)
           #'functionp)))
-  (funcall helpful-switch-buffer-function (helpful--buffer symbol t))
-  (helpful-update))
+  (helpful--update-and-switch-buffer symbol t))
 
 ;;;###autoload
 (defun helpful-command (symbol)
@@ -2584,8 +2605,7 @@ See also `helpful-function'."
           "Command: "
           (helpful--callable-at-point)
           #'commandp)))
-  (funcall helpful-switch-buffer-function (helpful--buffer symbol t))
-  (helpful-update))
+  (helpful--update-and-switch-buffer symbol t))
 
 ;;;###autoload
 (defun helpful-key (key-sequence)
@@ -2598,8 +2618,7 @@ See also `helpful-function'."
       (user-error "No command is bound to %s"
                   (key-description key-sequence)))
      ((commandp sym)
-      (funcall helpful-switch-buffer-function (helpful--buffer sym t))
-      (helpful-update))
+      (helpful--update-and-switch-buffer sym t))
      (t
       (user-error "%s is bound to %s which is not a command"
                   (key-description key-sequence)
@@ -2613,8 +2632,7 @@ See also `helpful-function'."
           "Macro: "
           (helpful--callable-at-point)
           #'macrop)))
-  (funcall helpful-switch-buffer-function (helpful--buffer symbol t))
-  (helpful-update))
+  (helpful--update-and-switch-buffer symbol t))
 
 ;;;###autoload
 (defun helpful-callable (symbol)
@@ -2626,8 +2644,7 @@ See also `helpful-macro', `helpful-function' and `helpful-command'."
           "Callable: "
           (helpful--callable-at-point)
           #'fboundp)))
-  (funcall helpful-switch-buffer-function (helpful--buffer symbol t))
-  (helpful-update))
+  (helpful--update-and-switch-buffer symbol t))
 
 (defun helpful--variable-p (symbol)
   "Return non-nil if SYMBOL is a variable."
@@ -2716,8 +2733,7 @@ See also `helpful-callable' and `helpful-variable'."
           "Variable: "
           (helpful--variable-at-point)
           #'helpful--variable-p)))
-  (funcall helpful-switch-buffer-function (helpful--buffer symbol nil))
-  (helpful-update))
+  (helpful--update-and-switch-buffer symbol nil))
 
 (defun helpful--variable-at-point-exactly ()
   "Return the symbol at point, if it's a bound variable."
