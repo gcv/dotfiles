@@ -1,7 +1,7 @@
 ;;; ngc - new generation completion -*- lexical-binding: t; -*-
 
 (use-package consult
-  :pin melpa
+  :pin gnu
 
   :bind
   (("C-M-y" . consult-yank-from-kill-ring)
@@ -98,7 +98,7 @@ targets."
 
 
 (use-package marginalia
-  :pin melpa
+  :pin gnu
 
   :bind
   (:map minibuffer-local-map
@@ -129,8 +129,8 @@ targets."
 
 
 (use-package vertico
-  ;;:pin gnu
-  :quelpa (vertico :fetcher github :repo "minad/vertico" :files (:defaults "extensions/*"))
+  :pin gnu
+  ;;:quelpa (vertico :fetcher github :repo "minad/vertico" :files (:defaults "extensions/*"))
 
   :bind
   (("C-x b" . persp-switch-to-buffer*)

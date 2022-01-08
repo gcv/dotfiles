@@ -36,6 +36,10 @@ Cycle between annotators in `marginalia-annotator-registry'." t nil)
 
 ;;;***
 
+;;;### (autoloads nil nil ("marginalia-pkg.el") (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t

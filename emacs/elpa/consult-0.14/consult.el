@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler and Consult contributors
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 0.13
+;; Version: 0.14
 ;; Package-Requires: ((emacs "26.1"))
 ;; Homepage: https://github.com/minad/consult
 
@@ -36,7 +36,7 @@
 
 ;; The Consult commands are compatible with completion systems based
 ;; on the Emacs `completing-read' API, including the default completion
-;; system, Icomplete, Selectrum, Vertico and Embark.
+;; system, Vertico, Icomplete, Mct, Selectrum and Embark.
 
 ;; Consult has been inspired by Counsel. Some of the Consult commands
 ;; originated in the Counsel package or the Selectrum wiki. See the
@@ -702,10 +702,8 @@ CATEGORY is the completion category, used to find the completion style via
 HIGHLIGHT must be non-nil if the resulting strings should be highlighted."
   ;; completion-all-completions returns an improper list
   ;; where the last link is not necessarily nil.
-  ;; TODO Implement support to disable highlighting as in Vertico deferred highlighting.
-  (nconc (completion-all-completions
-          pattern cands nil (length pattern)
-          `(metadata (category . ,category)))
+  (nconc (completion-all-completions pattern cands nil (length pattern)
+                                     `(metadata (category . ,category)))
          nil))
 
 (defun consult--completion-filter-complement (pattern cands category _highlight)
@@ -803,16 +801,6 @@ The line beginning/ending BEG/END is bound in BODY."
           (format "…/%s/%s/" (match-string 1 adir) (match-string 2 adir))
         adir))))
 
-(defun consult--directory-prompt-1 (prompt dir)
-  "Format PROMPT, expand directory DIR and return them as a pair."
-  (let ((edir (file-name-as-directory (expand-file-name dir)))
-        (ddir (file-name-as-directory (expand-file-name default-directory))))
-    (cons
-     (if (string= ddir edir)
-         (concat prompt ": ")
-       (format "%s (%s): " prompt (consult--abbreviate-directory dir)))
-     edir)))
-
 (defun consult--directory-prompt (prompt dir)
   "Return prompt and directory.
 
@@ -826,19 +814,27 @@ If DIR is a string, it is returned.
 If DIR is a true value, the user is asked.
 Then the `consult-project-root-function' is tried.
 Otherwise the `default-directory' is returned."
-  (cond
-   ((stringp dir) (consult--directory-prompt-1 prompt dir))
-   (dir (consult--directory-prompt-1
-         prompt
-         ;; HACK Preserve this-command across `read-directory-name' call,
-         ;; such that `consult-customize' continues to work.
-         ;; TODO Find a better and more general solution which preserves `this-command'.
-         (let ((this-command this-command))
-           (read-directory-name "Directory: " nil nil t))))
-   ((when-let (root (consult--project-root))
-      (cons (format "%s (Project %s): " prompt (consult--project-name root))
-            root)))
-   (t (consult--directory-prompt-1 prompt default-directory))))
+  (let* ((dir
+          (cond
+           ((stringp dir) dir)
+           (dir
+            ;; HACK Preserve this-command across `read-directory-name' call,
+            ;; such that `consult-customize' continues to work.
+            ;; TODO Find a better and more general solution which preserves `this-command'.
+            (let ((this-command this-command))
+              (read-directory-name "Directory: " nil nil t)))
+           (t (or (consult--project-root) default-directory))))
+         (edir (file-name-as-directory (expand-file-name dir)))
+         ;; Bind default-directory in order to find the project
+         (pdir (let ((default-directory edir)) (consult--project-root))))
+    (cons
+     (cond
+      ((equal edir pdir)
+       (format "%s (Project %s): " prompt (consult--project-name pdir)))
+      ((equal edir (file-name-as-directory (expand-file-name default-directory)))
+       (concat prompt ": "))
+      (t (format "%s (%s): " prompt (consult--abbreviate-directory dir))))
+     edir)))
 
 (defun consult--project-root ()
   "Return project root as absolute path."
@@ -1187,7 +1183,7 @@ FACE is the cursor face."
   "Normalize PREVIEW-KEY, return alist of keys and debounce times."
   (let ((keys)
         (debounce 0))
-    (setq preview-key (consult--to-list preview-key))
+    (setq preview-key (consult--ensure-list preview-key))
     (while preview-key
       (if (eq (car preview-key) :debounce)
           (setq debounce (cadr preview-key)
@@ -1447,18 +1443,22 @@ BIND is the asynchronous function binding."
   (let ((async (car bind)))
     `(let ((,async ,@(cdr bind)) (orig-chunk))
        (consult--minibuffer-with-setup-hook
-           (lambda ()
-             (when (functionp ,async)
-               (setq orig-chunk read-process-output-max
-                     read-process-output-max (max read-process-output-max consult--process-chunk))
-               (funcall ,async 'setup)
-               ;; Push input string to request refresh.
-               ;; We use a symbol in order to avoid adding lambdas to the hook variable.
-               ;; Symbol indirection because of bug#46407.
-               (let ((sym (make-symbol "consult--async-after-change")))
-                 (fset sym (lambda (&rest _) (funcall ,async (minibuffer-contents-no-properties))))
-                 (run-at-time 0 nil sym)
-                 (add-hook 'after-change-functions sym nil 'local))))
+           ;; Append such that we overwrite the completion style setting of
+           ;; `fido-mode'. See `consult--async-split' and
+           ;; `consult--split-setup'.
+           (:append
+            (lambda ()
+              (when (functionp ,async)
+                (setq orig-chunk read-process-output-max
+                      read-process-output-max (max read-process-output-max consult--process-chunk))
+                (funcall ,async 'setup)
+                ;; Push input string to request refresh.
+                ;; We use a symbol in order to avoid adding lambdas to the hook variable.
+                ;; Symbol indirection because of bug#46407.
+                (let ((sym (make-symbol "consult--async-after-change")))
+                  (fset sym (lambda (&rest _) (funcall ,async (minibuffer-contents-no-properties))))
+                  (run-at-time 0 nil sym)
+                  (add-hook 'after-change-functions sym nil 'local)))))
          (let ((,async (if (functionp ,async) ,async (lambda (_) ,async))))
            (unwind-protect
                ,(macroexp-progn body)
@@ -1580,18 +1580,18 @@ SPLIT is the splitting function."
 ASYNC is the async function which receives the candidates.
 CMD is the command line builder function.
 PROPS are optional properties passed to `make-process'."
-  (let ((proc) (last-args) (indicator) (count))
+  (let (proc proc-buf last-args indicator count)
     (lambda (action)
       (pcase action
         ("" ;; If no input is provided kill current process
          (when proc
            (delete-process proc)
-           (setq proc nil))
+           (kill-buffer proc-buf)
+           (setq proc nil proc-buf nil))
          (setq last-args nil))
         ((pred stringp)
          (funcall async action)
          (let* ((args (funcall cmd action))
-                (stderr-buffer (generate-new-buffer " *consult-async-stderr*"))
                 (flush t)
                 (rest "")
                 (proc-filter
@@ -1624,24 +1624,25 @@ PROPS are optional properties passed to `make-process'."
                    (with-current-buffer (get-buffer-create consult--async-log)
                      (goto-char (point-max))
                      (insert ">>>>> stderr >>>>>\n")
-                     (insert-buffer-substring stderr-buffer)
-                     (insert "<<<<< stderr <<<<<\n")
-                     (kill-buffer stderr-buffer)))))
+                     (insert-buffer-substring proc-buf)
+                     (insert "<<<<< stderr <<<<<\n")))))
            (unless (equal args last-args)
              (setq last-args args)
              (when proc
                (delete-process proc)
-               (setq proc nil))
+               (kill-buffer proc-buf)
+               (setq proc nil proc-buf nil))
              (when args
                (overlay-put indicator 'display #("*" 0 1 (face consult-async-running)))
                (consult--async-log "consult--async-process started %S\n" args)
                (setq count 0
+                     proc-buf (generate-new-buffer " *consult-async-stderr*")
                      proc (apply #'make-process
                                  `(,@props
                                    :connection-type pipe
                                    :name ,(car args)
                                    ;;; XXX tramp bug, the stderr buffer must be empty
-                                   :stderr ,stderr-buffer
+                                   :stderr ,proc-buf
                                    :noquery t
                                    :command ,args
                                    :filter ,proc-filter
@@ -1650,7 +1651,8 @@ PROPS are optional properties passed to `make-process'."
         ('destroy
          (when proc
            (delete-process proc)
-           (setq proc nil))
+           (kill-buffer proc-buf)
+           (setq proc nil proc-buf nil))
          (delete-overlay indicator)
          (funcall async 'destroy))
         ('setup
@@ -1754,9 +1756,9 @@ The refresh happens after a DELAY, defaulting to `consult-async-refresh-delay'."
   "Filter candidates of ASYNC by FUN."
   (consult--async-transform async seq-filter fun))
 
-(defun consult--to-list (list)
+(defun consult--ensure-list (list)
   "Ensure that LIST is a list."
-  (if (listp list) list (list list)))
+  (if (listp list) list (list list))) ;; Emacs 28 ensure-list
 
 (defun consult--command-builder (builder)
   "Return command line builder given CMD.
@@ -1815,9 +1817,9 @@ ASYNC must be non-nil for async completion functions."
   (delete-dups
    (append
     ;; the defaults are at the beginning of the future history
-    (consult--to-list minibuffer-default)
+    (consult--ensure-list minibuffer-default)
     ;; then our custom items
-    (remove "" (remq nil (consult--to-list items)))
+    (remove "" (remq nil (consult--ensure-list items)))
     ;; Add all the completions for non-async commands. For async commands this feature
     ;; is not useful, since if one selects a completion candidate, the async search is
     ;; restarted using that candidate string. This usually does not yield a desired
@@ -2043,7 +2045,7 @@ INHERIT-INPUT-METHOD, if non-nil the minibuffer inherits the input method."
   (let* ((src (consult--multi-source sources cand))
          (annotate (plist-get src :annotate))
          (ann (if annotate
-                  (funcall annotate (cdr (get-text-property 0 'consult-multi cand)))
+                  (funcall annotate (cdr (get-text-property 0 'multi-category cand)))
                 (plist-get src :name))))
     (and ann (concat align ann))))
 
@@ -2066,13 +2068,13 @@ INHERIT-INPUT-METHOD, if non-nil the minibuffer inherits the input method."
                        (let ((key (if (plist-member src :preview-key)
                                       (plist-get src :preview-key)
                                     consult-preview-key)))
-                         (consult--to-list key)))
+                         (consult--ensure-list key)))
                      sources))))
 
 (defun consult--multi-lookup (sources _ candidates cand)
   "Lookup CAND in CANDIDATES given SOURCES."
   (if-let (found (member cand candidates))
-      (cons (cdr (get-text-property 0 'consult-multi (car found)))
+      (cons (cdr (get-text-property 0 'multi-category (car found)))
             (consult--multi-source sources cand))
     (unless (string-blank-p cand)
       (list cand))))
@@ -2090,7 +2092,7 @@ INHERIT-INPUT-METHOD, if non-nil the minibuffer inherits the input method."
         (dolist (item items)
           (let ((cand (consult--tofu-append item idx))
                 (width (consult--display-width item)))
-            (add-text-properties 0 (length item) `(,@face consult-multi (,cat . ,item)) cand)
+            (add-text-properties 0 (length item) `(,@face multi-category (,cat . ,item)) cand)
             (when (> width max-width) (setq max-width width))
             (push cand candidates))))
       (setq idx (1+ idx)))
@@ -2179,7 +2181,7 @@ Optional source fields:
                            options
                            (list
                             :default     (car candidates)
-                            :category    'consult-multi
+                            :category    'multi-category
                             :predicate   (apply-partially #'consult--multi-predicate sources)
                             :annotate    (apply-partially #'consult--multi-annotate sources align)
                             :group       (apply-partially #'consult--multi-group sources)
@@ -2387,23 +2389,37 @@ These configuration options are supported:
 
 ;;;;; Function: consult-completing-read-multiple
 
+(defun consult--crm-selected ()
+  "Return selected candidates from `consult-completing-read-multiple'."
+  (when (eq minibuffer-history-variable 'consult--crm-history)
+    (mapcar
+     (apply-partially #'get-text-property 0 'consult--crm-selected)
+     (all-completions
+      "" minibuffer-completion-table
+      (lambda (cand)
+        (and (stringp cand)
+             (get-text-property 0 'consult--crm-selected cand)
+             (or (not minibuffer-completion-predicate)
+                 (funcall minibuffer-completion-predicate cand))))))))
+
 ;;;###autoload
 (defun consult-completing-read-multiple (prompt table &optional
                                                 pred require-match initial-input
                                                 hist def inherit-input-method)
   "Enhanced replacement for `completing-read-multiple'.
 See `completing-read-multiple' for the documentation of the arguments."
-  (let* ((orig-items
+  (let* ((orig-items (all-completions "" table pred))
+         (prefixed-orig-items
           (funcall
            (if-let (prefix (car consult-crm-prefix))
                (apply-partially #'mapcar (lambda (item) (propertize item 'line-prefix prefix)))
              #'identity)
-           (all-completions "" table pred)))
+           orig-items))
          (format-item
           (lambda (item)
             ;; Restore original candidate in order to preserve formatting
-            (setq item (propertize (or (car (member item orig-items)) item)
-                                   'consult--crm-selected t
+            (setq item (or (car (member item orig-items)) item)
+                  item (propertize item 'consult--crm-selected item
                                    'line-prefix (cdr consult-crm-prefix)))
             (add-face-text-property 0 (length item) 'consult-crm-selected 'append item)
             item))
@@ -2428,7 +2444,7 @@ See `completing-read-multiple' for the documentation of the arguments."
          (consult--crm-history (append (mapcar #'substring-no-properties selected) hist-val))
          (items (append selected
                         (seq-remove (lambda (x) (member x selected))
-                                    orig-items)))
+                                    prefixed-orig-items)))
          (orig-md (and (functionp table) (cdr (funcall table "" nil 'metadata))))
          (group-fun (alist-get 'group-function orig-md))
          (sort-fun
@@ -2479,7 +2495,7 @@ See `completing-read-multiple' for the documentation of the arguments."
                          consult--crm-history (append (mapcar #'substring-no-properties selected) hist-val)
                          items (append selected
                                        (seq-remove (lambda (x) (member x selected))
-                                                   orig-items)))
+                                                   prefixed-orig-items)))
                    (when overlay
                      (overlay-put overlay 'display
                                   (when selected
@@ -2516,15 +2532,16 @@ See `completing-read-multiple' for the documentation of the arguments."
                     "" ;; default
                     inherit-input-method)))
               (unless (or (equal result "") selected)
-                (setq selected (split-string (substring-no-properties result) separator 'omit-nulls)
-                      consult--crm-history (append selected hist-val)))))
+                (setq selected (split-string result separator 'omit-nulls)
+                      consult--crm-history (append (mapcar #'substring-no-properties selected) hist-val)))))
         (remove-hook 'pre-command-hook hook)))
-    (set hist-sym consult--crm-history)
     (when (consp def)
       (setq def (car def)))
     (if (and def (not (equal "" def)) (not selected))
         (split-string def separator 'omit-nulls)
-      (mapcar #'substring-no-properties selected))))
+      (setq selected (mapcar #'substring-no-properties selected))
+      (set hist-sym (append selected (symbol-value hist-sym)))
+      selected)))
 
 ;;;; Commands
 
@@ -2959,13 +2976,20 @@ INITIAL is the initial input."
            (consult--completion-filter-dispatch
             pattern cands 'consult-location 'highlight))))
   (consult--forbid-minibuffer)
-  (barf-if-buffer-read-only)
-  (consult--with-increased-gc
-   (consult--prompt
-    :prompt "Keep lines: "
-    :initial initial
-    :history 'consult--keep-lines-history
-    :state (consult--keep-lines-state filter))))
+  (cl-letf ((ro buffer-read-only)
+            ((buffer-local-value 'buffer-read-only (current-buffer)) nil))
+    (consult--minibuffer-with-setup-hook
+        (lambda ()
+          (when ro
+            (minibuffer-message
+             (substitute-command-keys
+              " [Unlocked read-only buffer. \\[minibuffer-keyboard-quit] to quit.]"))))
+        (consult--with-increased-gc
+         (consult--prompt
+          :prompt "Keep lines: "
+          :initial initial
+          :history 'consult--keep-lines-history
+          :state (consult--keep-lines-state filter))))))
 
 ;;;;; Command: consult-focus-lines
 
@@ -3828,7 +3852,7 @@ AS is a conversion function."
       (when sort
         (setq buffers (funcall (intern (format "consult--buffer-sort-%s" sort)) buffers)))
       (when (or filter mode as (stringp root))
-        (let ((mode (consult--to-list mode))
+        (let ((mode (consult--ensure-list mode))
               (exclude-re (consult--regexp-filter exclude))
               (include-re (consult--regexp-filter include)))
           (consult--keep! buffers
@@ -4231,15 +4255,32 @@ INITIAL is inital input."
 (defun consult-grep (&optional dir initial)
   "Search for regexp with grep in DIR with INITIAL input.
 
-The input string is split, the first part of the string is passed to
-the asynchronous grep process and the second part of the string is
-passed to the completion-style filtering. The input string is split at
-a punctuation character, which is given as the first character of the
-input string. The format is similar to Perl-style regular expressions,
-e.g., /regexp/. Furthermore command line options can be passed to
-grep, specified behind --.
+The input string is split, the first part of the string (grep input) is
+passed to the asynchronous grep process and the second part of the string is
+passed to the completion-style filtering.
 
-Example: #async-regexp -- grep-opts#filter-string
+The input string is split at a punctuation character, which is given as the
+first character of the input string. The format is similar to Perl-style
+regular expressions, e.g., /regexp/. Furthermore command line options can be
+passed to grep, specified behind --. The overall prompt input has the form
+`#async-input -- grep-opts#filter-string'.
+
+Note that the grep input string is transformed from Emacs regular expressions
+to Posix regular expressions. Always enter Emacs regular expressions at the
+prompt. `consult-grep' behaves like builtin Emacs search commands, e.g.,
+Isearch, which take Emacs regular expressions. Furthermore the asynchronous
+input split into words, each word must match separately and in any order. See
+`consult--regexp-compiler' for the inner workings. In order to disable
+transformations of the grep input, adjust `consult--regexp-compiler'
+accordingly.
+
+Here we give a few example inputs:
+
+#alpha beta         : Search for alpha and beta in any order.
+#alpha.*beta        : Search for alpha before beta.
+#\\(alpha\\|beta\\) : Search for alpha or beta (Note Emacs syntax!)
+#word -- -C3        : Search for word, include 3 lines as context
+#first#second       : Search for first, quick filter for second.
 
 The symbol at point is added to the future history. If `consult-grep'
 is called interactively with a prefix argument, the user can specify
