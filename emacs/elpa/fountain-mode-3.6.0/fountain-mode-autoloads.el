@@ -9,6 +9,28 @@
 ;;;### (autoloads nil "fountain-mode" "fountain-mode.el" (0 0 0 0))
 ;;; Generated autoloads from fountain-mode.el
 
+(defvar fountain-completion-auto-update-mode nil "\
+Non-nil if Fountain-Completion-Auto-Update mode is enabled.
+See the `fountain-completion-auto-update-mode' command
+for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `fountain-completion-auto-update-mode'.")
+
+(custom-autoload 'fountain-completion-auto-update-mode "fountain-mode" nil)
+
+(autoload 'fountain-completion-auto-update-mode "fountain-mode" "\
+Updates `fountain-mode' completion candidates when idle.
+Calls `fountain-completion-update' in `fountain-mode' buffers
+after `fountain-completion-auto-update-delay'.
+
+If called interactively, enable Fountain-Completion-Auto-Update mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called from Lisp, also
+enable the mode if ARG is omitted or nil, and toggle it if ARG is `toggle';
+disable the mode otherwise.
+
+\(fn &optional ARG)" t nil)
+
 (add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
 
 (autoload 'fountain-mode "fountain-mode" "\
