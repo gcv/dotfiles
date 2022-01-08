@@ -889,7 +889,9 @@
 
 
 (use-package posframe
-  :pin melpa)
+  :pin gnu
+  ;;:quelpa (posframe :fetcher github :repo "tumashu/posframe")
+  )
 
 
 (use-package projectile
