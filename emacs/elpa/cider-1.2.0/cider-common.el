@@ -28,7 +28,7 @@
 (require 'cider-compat)
 (require 'nrepl-dict)
 (require 'cider-util)
-(require 'etags) ; for find-tags-marker-ring
+(require 'xref)
 (require 'tramp)
 
 (defcustom cider-prompt-for-symbol nil
@@ -151,7 +151,7 @@ If a symbol, `cider-jump-to' searches for something that looks like the
 symbol's definition in the file.
 If OTHER-WINDOW is non-nil don't reuse current window."
   (with-no-warnings
-    (ring-insert find-tag-marker-ring (point-marker)))
+    (xref-push-marker-stack))
   (if other-window
       (pop-to-buffer buffer 'display-buffer-pop-up-window)
     (pop-to-buffer buffer cider-jump-to-pop-to-buffer-actions))
@@ -277,7 +277,7 @@ otherwise, nil."
 (defcustom cider-path-translations nil
   "Alist of path prefixes to path prefixes.
 Useful to intercept the location of a path in a container (or virtual
-machine) and translate to the oringal location.  If your project is located
+machine) and translate to the original location.  If your project is located
 at \"~/projects/foo\" and the src directory of foo is mounted at \"/src\"
 in the container, the alist would be `((\"/src\" \"~/projects/foo/src\"))."
   :type '(alist :key-type string :value-type string)

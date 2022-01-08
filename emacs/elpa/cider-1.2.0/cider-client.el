@@ -2,7 +2,7 @@
 
 ;; Copyright © 2013-2021 Bozhidar Batsov
 ;;
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
+;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -70,6 +70,18 @@ resulting value are used to compute completions."
   :group 'cider
   :package-version '(cider . "0.23.0"))
 
+(defcustom cider-before-eval-hook nil
+  "List of functions to call before eval request is sent to nrepl."
+  :type 'hook
+  :group 'cider
+  :package-version '(cider . "1.2.0"))
+
+(defcustom cider-after-eval-done-hook nil
+  "List of functions to call after eval was responded by nrepl with done status."
+  :type 'hook
+  :group 'cider
+  :package-version '(cider . "1.2.0"))
+
 (defun cider-spinner-start (buffer)
   "Start the evaluation spinner in BUFFER.
 Do nothing if `cider-show-eval-spinner' is nil."
@@ -78,21 +90,19 @@ Do nothing if `cider-show-eval-spinner' is nil."
       (spinner-start cider-eval-spinner-type nil
                      cider-eval-spinner-delay))))
 
-(defun cider-eval-spinner-handler (eval-buffer original-callback)
-  "Return a response handler to stop the spinner and call ORIGINAL-CALLBACK.
+(defun cider-eval-spinner (eval-buffer response)
+  "Handle RESPONSE stopping the spinner.
 EVAL-BUFFER is the buffer where the spinner was started."
-  (lambda (response)
-    ;; buffer still exists and
-    ;; we've got status "done" from nrepl
-    ;; stop the spinner
-    (when (and (buffer-live-p eval-buffer)
-               (let ((status (nrepl-dict-get response "status")))
-                 (or (member "done" status)
-                     (member "eval-error" status)
-                     (member "error" status))))
-      (with-current-buffer eval-buffer
-        (when spinner-current (spinner-stop))))
-    (funcall original-callback response)))
+  ;; buffer still exists and
+  ;; we've got status "done" from nrepl
+  ;; stop the spinner
+  (when (and (buffer-live-p eval-buffer)
+             (let ((status (nrepl-dict-get response "status")))
+               (or (member "done" status)
+                   (member "eval-error" status)
+                   (member "error" status))))
+    (with-current-buffer eval-buffer
+      (when spinner-current (spinner-stop)))))
 
 
 ;;; Evaluation helpers
@@ -162,13 +172,14 @@ Signal an error if it is not supported."
   (unless (cider-nrepl-op-supported-p op)
     (user-error "`%s' requires the nREPL op \"%s\" (provided by cider-nrepl)" this-command op)))
 
-(defun cider-nrepl-send-request (request callback &optional connection)
+(defun cider-nrepl-send-request (request callback &optional connection tooling)
   "Send REQUEST and register response handler CALLBACK.
 REQUEST is a pair list of the form (\"op\" \"operation\" \"par1-name\"
                                     \"par1\" ... ).
 If CONNECTION is provided dispatch to that connection instead of
-the current connection.  Return the id of the sent message."
-  (nrepl-send-request request callback (or connection (cider-current-repl 'any 'ensure))))
+the current connection.  Return the id of the sent message.
+If TOOLING is truthy then the tooling session is used."
+  (nrepl-send-request request callback (or connection (cider-current-repl 'any 'ensure)) tooling))
 
 (defun cider-nrepl-send-sync-request (request &optional connection abort-on-input)
   "Send REQUEST to the nREPL server synchronously using CONNECTION.
@@ -196,11 +207,18 @@ If NS is non-nil, include it in the request.  LINE and COLUMN, if non-nil,
 define the position of INPUT in its buffer.  ADDITIONAL-PARAMS is a plist
 to be appended to the request message.  CONNECTION is the connection
 buffer, defaults to (cider-current-repl)."
-  (let ((connection (or connection (cider-current-repl nil 'ensure))))
+  (let ((connection (or connection (cider-current-repl nil 'ensure)))
+        (eval-buffer (current-buffer)))
+    (run-hooks 'cider-before-eval-hook)
     (nrepl-request:eval input
-                        (if cider-show-eval-spinner
-                            (cider-eval-spinner-handler connection callback)
-                          callback)
+                        (lambda (response)
+                          (when cider-show-eval-spinner
+                            (cider-eval-spinner connection response))
+                          (when (and (buffer-live-p eval-buffer)
+                                     (member "done" (nrepl-dict-get response "status")))
+                            (with-current-buffer eval-buffer
+                              (run-hooks 'cider-after-eval-done-hook)))
+                          (funcall callback response))
                         connection
                         ns line column additional-params)
     (cider-spinner-start connection)))
@@ -582,9 +600,10 @@ resolve those to absolute paths."
 
 (defun cider-classpath-entries ()
   "Return a list of classpath entries."
-  (if (cider-nrepl-op-supported-p "classpath")
-      (cider-sync-request:classpath)
-    (cider-fallback-eval:classpath)))
+  (seq-map #'expand-file-name ; normalize filenames for e.g. Windows
+           (if (cider-nrepl-op-supported-p "classpath")
+               (cider-sync-request:classpath)
+             (cider-fallback-eval:classpath))))
 
 (defun cider-sync-request:completion (prefix)
   "Return a list of completions for PREFIX using nREPL's \"completion\" op."
@@ -635,7 +654,7 @@ CONTEXT represents a completion context for compliment."
                     (cider-nrepl-send-sync-request (cider-current-repl)))))
     (if (member "lookup-error" (nrepl-dict-get var-info "status"))
         nil
-      var-info)))
+      (nrepl-dict-get var-info "info"))))
 
 (defun cider-sync-request:eldoc (symbol &optional class member)
   "Send \"eldoc\" op with parameters SYMBOL or CLASS and MEMBER."

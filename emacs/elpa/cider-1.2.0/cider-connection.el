@@ -3,7 +3,7 @@
 ;; Copyright © 2019-2021 Artur Malabarba, Bozhidar Batsov, Vitalie Spinu and CIDER contributors
 ;;
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
-;;         Bozhidar Batsov <bozhidar@batsov.com>
+;;         Bozhidar Batsov <bozhidar@batsov.dev>
 ;;         Vitalie Spinu <spinuvit@gmail.com>
 ;;
 ;; Keywords: languages, clojure, cider
@@ -85,7 +85,8 @@ PARAMS is a plist containing :host, :port, :server and other parameters for
     (plist-get params :port)
     (plist-get params :server)
     (lambda (_)
-      (cider-repl-create params)))))
+      (cider-repl-create params))
+    (plist-get params :socket-file))))
 
 (defun cider-sessions ()
   "Return a list of all active CIDER sessions."
@@ -201,7 +202,10 @@ FORMAT is a format string to compile with ARGS and display on the REPL."
 (defvar cider-minimum-clojure-version)
 (defun cider--check-clojure-version-supported ()
   "Ensure that we are meeting the minimum supported version of Clojure."
-  (if-let* ((clojure-version (cider--clojure-version)))
+  (if-let* ((clojure-version (cider--clojure-version))
+            ;; drop all qualifiers from the version string
+            ;; e.g. 1.10.0-master-SNAPSHOT becomes simply 1.10.0
+            (clojure-version (car (split-string clojure-version "-"))))
       (when (version< clojure-version cider-minimum-clojure-version)
         (cider-emit-manual-warning "basics/installation.html#prerequisites"
                                    "Clojure version (%s) is not supported (minimum %s). CIDER will not work."
@@ -542,7 +546,8 @@ REPL defaults to the current REPL."
                                   (let ((cp (thread-last classpath
                                               (seq-filter (lambda (path) (not (string-match-p "\\.jar$" path))))
                                               (mapcar #'file-name-directory)
-                                              (seq-remove  #'null))))
+                                              (seq-remove  #'null)
+                                              (seq-uniq))))
                                     (process-put proc :cached-classpath-roots cp)
                                     cp))))
         (or (seq-find (lambda (path) (string-prefix-p path file))
@@ -698,7 +703,7 @@ Session name can be customized with `cider-session-name-template'."
 ;;; REPL Buffer Init
 
 (defvar-local cider-cljs-repl-type nil
-  "The type of the ClojureScript runtime (Browser, Node, Figwheel, etc.)")
+  "The type of the ClojureScript runtime (Browser, Node, Figwheel, etc.).")
 
 (defvar-local cider-repl-type nil
   "The type of this REPL buffer, usually either clj or cljs.")

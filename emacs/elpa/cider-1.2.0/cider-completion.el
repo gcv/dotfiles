@@ -2,7 +2,7 @@
 
 ;; Copyright © 2013-2021 Bozhidar Batsov, Artur Malabarba and CIDER contributors
 ;;
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
+;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 ;;         Artur Malabarba <bruce.connor.am@gmail.com>
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -83,6 +83,26 @@ backend, and ABBREVIATION is a short form of that type."
   :type '(alist :key-type string :value-type string)
   :group 'cider
   :package-version '(cider . "0.9.0"))
+
+(defconst cider-completion-kind-alist
+  '(("class" class)
+    ("field" field)
+    ("function" function)
+    ("import" class)
+    ("keyword" keyword)
+    ("local" variable)
+    ("macro" macro)
+    ("method" method)
+    ("namespace" module)
+    ("protocol" enum)
+    ("protocol-function" enum-member)
+    ("record" struct)
+    ("special-form" keyword)
+    ("static-field" field)
+    ("static-method" interface)
+    ("type" parameter)
+    ("var" variable))
+  "Icon mapping for company-mode.")
 
 (defcustom cider-completion-annotations-include-ns 'unqualified
   "Controls passing of namespaces to `cider-annotate-completion-function'.
@@ -192,6 +212,12 @@ completion functionality."
   (concat (when ns (format " (%s)" ns))
           (when type (format " <%s>" type))))
 
+(defun cider-company-symbol-kind (symbol)
+  "Get SYMBOL kind for company-mode."
+  (let ((type (get-text-property 0 'type symbol)))
+    (or (cadr (assoc type cider-completion-kind-alist))
+        type)))
+
 (defun cider-annotate-symbol (symbol)
   "Return a string suitable for annotating SYMBOL.
 If SYMBOL has a text property `type` whose value is recognised, its
@@ -213,6 +239,7 @@ performed by `cider-annotate-completion-function'."
       (list (car bounds) (cdr bounds)
             (completion-table-dynamic #'cider-complete)
             :annotation-function #'cider-annotate-symbol
+            :company-kind #'cider-company-symbol-kind
             :company-doc-buffer #'cider-create-doc-buffer
             :company-location #'cider-company-location
             :company-docsig #'cider-company-docsig))))

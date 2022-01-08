@@ -5,7 +5,7 @@
 ;;
 ;; Author: Tim King <kingtim@gmail.com>
 ;;         Phil Hagelberg <technomancy@gmail.com>
-;;         Bozhidar Batsov <bozhidar@batsov.com>
+;;         Bozhidar Batsov <bozhidar@batsov.dev>
 ;;         Artur Malabarba <bruce.connor.am@gmail.com>
 ;;         Hugo Duncan <hugo@hugoduncan.org>
 ;;         Steve Purcell <steve@sanityinc.com>
@@ -424,7 +424,7 @@ present."
 ;; In case you're seeing any warnings you should consult the manual's
 ;; \"Troubleshooting\" section.
 ;;
-;; Here are few tips to get you started:
+;; Here are a few tips to get you started:
 ;;
 ;; * Press <\\[describe-mode]> to see a list of the keybindings available (this
 ;;   will work in every Emacs buffer)
@@ -1027,7 +1027,7 @@ If NEWLINE is true then add a newline at the end of the input."
 
 (defun cider-repl-return (&optional end-of-input)
   "Evaluate the current input string, or insert a newline.
-Send the current input ony if a whole expression has been entered,
+Send the current input only if a whole expression has been entered,
 i.e. the parenthesis are matched.
 When END-OF-INPUT is non-nil, send the input even if the parentheses
 are not balanced."
@@ -1150,7 +1150,7 @@ With a prefix argument CLEAR-REPL it will clear the entire REPL buffer instead."
   (interactive)
   ;; TODO: Improve the boundaries detecting logic
   ;; probably it should be based on text properties
-  ;; the current implemetation will clear warnings as well
+  ;; the current implementation will clear warnings as well
   (let ((start (point-min))
         (end (save-excursion
                (goto-char (point-min))

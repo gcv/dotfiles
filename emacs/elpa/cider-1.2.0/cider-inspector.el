@@ -4,7 +4,7 @@
 ;; Copyright © 2014-2021  Bozhidar Batsov and CIDER contributors
 
 ;; Author: Ian Eslick <ian@vitalreactor.com>
-;;         Bozhidar Batsov <bozhidar@batsov.com>
+;;         Bozhidar Batsov <bozhidar@batsov.dev>
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -375,7 +375,7 @@ MAX-COLL-SIZE if non nil."
     (when (eq cider-inspector-last-command 'cider-inspector-pop)
       (setq cider-inspector-last-command nil)
       ;; Prevents error message being displayed when we try to pop
-      ;; from the top-level of a data struture
+      ;; from the top-level of a data structure
       (when cider-inspector-location-stack
         (goto-char (pop cider-inspector-location-stack))))
 

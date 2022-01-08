@@ -417,6 +417,13 @@ current buffer's namespace.
 
 ;;;***
 
+;;;### (autoloads nil "cider-jar" "cider-jar.el" (0 0 0 0))
+;;; Generated autoloads from cider-jar.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-jar" '("cider-jar-")))
+
+;;;***
+
 ;;;### (autoloads nil "cider-macroexpansion" "cider-macroexpansion.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from cider-macroexpansion.el
