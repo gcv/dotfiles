@@ -20,7 +20,7 @@ Embark: Emacs Mini-Buffer Actions Rooted in Keymaps
 * Embark, Marginalia and Consult: Embark Marginalia and Consult.
 * Resources::
 * Contributions::
-* Acknowledgements::
+* Acknowledgments::
 
 — The Detailed Node Listing —
 
@@ -36,8 +36,8 @@ Advanced configuration
 * Showing information about available targets and actions::
 * Selecting commands via completions instead of key bindings::
 * Quitting the minibuffer after an action::
-* Allowing the target to be edited before acting on it::
 * Running some setup after injecting the target::
+* Running hooks before or after an action::
 * Creating your own keymaps::
 * Defining actions for new categories of targets::
 
@@ -189,7 +189,7 @@ given location, each has its own default action, so first cycle to the
 target you want and then press ‘RET’ to run the corresponding default
 action.
 
-   There is also the ‘embark-dwim’ which runs the default action for the
+   There is also ‘embark-dwim’ which runs the default action for the
 first target found.  It’s pretty handy in non-minibuffer buffers: with
 Embark’s default configuration it will:
 
@@ -213,8 +213,12 @@ File: embark.info,  Node: Working with sets of possible targets,  Next: Switchin
 Besides acting individually on targets, Embark lets you work
 collectively on a set of target _candidates_.  For example, while you
 are in the minibuffer the candidates are simply the possible completions
-of your input.  Embark provides two main commands to work on candidate
+of your input.  Embark provides three main commands to work on candidate
 sets:
+
+   • The ‘embark-act-all’ command runs the same action on each of the
+     current candidates.  It is just like using ‘embark-act’ on each
+     candidate in turn.
 
    • The ‘embark-collect-snapshot’ command produces a buffer listing all
      the current candidates, for you to peruse and run actions on at
@@ -235,16 +239,16 @@ sets:
      buffer, on which you can even use wgrep
      (https://github.com/mhayashi1120/Emacs-wgrep) if you wish.
 
-   When in doubt choosing among these a good rule of thumb is to always
-prefer ‘embark-export’ since when an exporter to a special major mode is
-available for a given type of target, it will be more featureful than an
-Embark collect buffer, and if no such exporter is configured the
-‘embark-export’ command falls back to the generic
+   When in doubt choosing between exporting and collecting, a good rule
+of thumb is to always prefer ‘embark-export’ since when an exporter to a
+special major mode is available for a given type of target, it will be
+more featureful than an Embark collect buffer, and if no such exporter
+is configured the ‘embark-export’ command falls back to the generic
 ‘embark-collect-snapshot’.
 
    These commands are always available as “actions” (although they do
 not act on just the current target but on all candidates) for
-‘embark-act’ and are bound to ‘S’, ‘E’, respectively, in
+‘embark-act’ and are bound to ‘A’, ‘S’, and ‘E’, respectively, in
 ‘embark-general-map’.  This means that you do not have to bind your own
 key bindings for these (although you can, of course!), just a key
 binding for ‘embark-act’.
@@ -253,12 +257,18 @@ binding for ‘embark-act’.
 ‘embark-collect-snapshot’ which produces “live” Embark Collect buffers,
 meaning they auto-update as the set of candidates changes.  Most users
 of visual completion UIs such as Vertico, Icomplete, Selectrum or Ivy
-will probably either not want to use this, to avoid seeing double (the
-list of candidates is displayed both by Embark and by the completion
-UI), or to configure their completion UI to hide while using
-‘embark-collect-live’.  See the Embark wiki for sample configuration for
-Selectrum
+will probably either not want to use this from the minibuffer, to avoid
+seeing double (the list of candidates is displayed both by Embark and by
+the completion UI), or to configure their completion UI to hide while
+using ‘embark-collect-live’.  See the Embark wiki for sample
+configuration for Selectrum
 (https://github.com/oantolin/embark/wiki/Additional-Configuration#pause-selectrum-while-using-embark-collect-live).
+This command can also be used outside the minibuffer if you have a
+relevant candidate collector registered in
+‘embark-candidate-collectors’.  Users of the ‘embark-consult’ package,
+for example, get such a candidate collector registered for them, and can
+produce a live-updating table of contents for any buffer, whose items
+are the lines matching ‘outline-regexp’.
 
 
 File: embark.info,  Node: Switching to a different command without losing what you've typed,  Prev: Working with sets of possible targets,  Up: Overview
@@ -351,9 +361,9 @@ configuration:
        :hook
        (embark-collect-mode . consult-preview-at-point-mode))
 
-   Other Embark commands such as ‘embark-become’,
+   Other Embark commands such as ‘mbark-act-all’, ‘embark-become’,
 ‘embark-collect-snapshot’, ‘embark-collect-live’, ‘embark-export’ can be
-run through ‘embark-act’ as actions bound to ‘B’, ‘S’, ‘L’, ‘E’
+run through ‘embark-act’ as actions bound to ‘A’, ‘B’, ‘S’, ‘L’, ‘E’
 respectively, and thus don’t really need a dedicated key binding, but
 feel free to bind them directly if you so wish.  If you do choose to
 bind them directly, you’ll probably want to bind them in
@@ -367,10 +377,10 @@ seen as a right-click context menu at point and ‘M-.’ acts like
 left-click.  The keybindings are mnemonic, both act at the point (‘.’).
 
    Embark needs to know what your minibuffer completion system considers
-to be the list of candidates and which one is the current one.  Embark
-works out of the box if you use Emacs’s default tab completion, the
-built-in ‘icomplete-mode’ or ‘fido-mode’, or the third-party packages
-Vertico (https://github.com/minad/vertico), Selectrum
+to be the list of candidates and which one is the current candidate.
+Embark works out of the box if you use Emacs’s default tab completion,
+the built-in ‘icomplete-mode’ or ‘fido-mode’, or the third-party
+packages Vertico (https://github.com/minad/vertico), Selectrum
 (https://github.com/raxod502/selectrum/) or Ivy
 (https://github.com/abo-abo/swiper).
 
@@ -391,8 +401,8 @@ File: embark.info,  Node: Advanced configuration,  Next: How does Embark call th
 * Showing information about available targets and actions::
 * Selecting commands via completions instead of key bindings::
 * Quitting the minibuffer after an action::
-* Allowing the target to be edited before acting on it::
 * Running some setup after injecting the target::
+* Running hooks before or after an action::
 * Creating your own keymaps::
 * Defining actions for new categories of targets::
 
@@ -475,7 +485,7 @@ embark to always prompt you for actions by setting the variable
 ‘embark-prompter’ to ‘embark-completing-read-prompter’.
 
 
-File: embark.info,  Node: Quitting the minibuffer after an action,  Next: Allowing the target to be edited before acting on it,  Prev: Selecting commands via completions instead of key bindings,  Up: Advanced configuration
+File: embark.info,  Node: Quitting the minibuffer after an action,  Next: Running some setup after injecting the target,  Prev: Selecting commands via completions instead of key bindings,  Up: Advanced configuration
 
 3.3 Quitting the minibuffer after an action
 ===========================================
@@ -508,48 +518,156 @@ behavior of ‘embark-act’ and define a non-quitting version as follows:
          (embark-act)))
 
 
-File: embark.info,  Node: Allowing the target to be edited before acting on it,  Next: Running some setup after injecting the target,  Prev: Quitting the minibuffer after an action,  Up: Advanced configuration
+File: embark.info,  Node: Running some setup after injecting the target,  Next: Running hooks before or after an action,  Prev: Quitting the minibuffer after an action,  Up: Advanced configuration
 
-3.4 Allowing the target to be edited before acting on it
-========================================================
-
-By default, for most commands ‘embark’ inserts the target of the action
-into the next minibuffer prompt and “presses ‘RET’” for you, accepting
-the target as is.
-
-   For some commands this might be undesirable, either for safety
-(because a command is “hard to undo”, like ‘delete-file’ or
-‘kill-buffer’), or because further input is required next to the target
-(like when using ‘shell-command’: the target is the file and you still
-need to enter a shell command to run on it, at the same prompt).  You
-can add such commands to the ‘embark-allow-edit-actions’ variable (which
-by default already contains the examples mentioned, and a few others as
-well).
-
-
-File: embark.info,  Node: Running some setup after injecting the target,  Next: Creating your own keymaps,  Prev: Allowing the target to be edited before acting on it,  Up: Advanced configuration
-
-3.5 Running some setup after injecting the target
+3.4 Running some setup after injecting the target
 =================================================
 
 You can customize what happens after the target is inserted at the
-minibuffer prompt of an action.  There are ‘embark-setup-action-hooks’,
-that are run by default after injecting the target into the minibuffer.
-The hook can be specified for specific action commands by associating
-the command to the desired hook.  By default the hooks with the key t
-are executed.
+minibuffer prompt of an action.  There are
+‘embark-target-injection-hooks’, that are run by default after injecting
+the target into the minibuffer.  The variable
+‘embark-target-injection-hooks’ is an alist associating commands to
+their setup hooks.  There are two special keys: if no setup hook is
+specified for a given action, the hook associated to ‘t’ is run; and the
+hook associated to ‘:always’ is run regardless of the action.  (This
+variable used to have the less explicit name of
+‘embark-setup-action-hooks’, so please update your configuration.)
 
    For example, consider using ‘shell-command’ as an action during file
 completion.  It would be useful to insert a space before the target file
 name and to leave the point at the beginning, so you can immediately
-type the shell command.  That’s why in ‘embark’’s default configuration
-there is an entry in ‘embark-setup-action-hooks’ associating
-‘shell-command’ to ‘embark--shell-prep’, a simple helper command that
-quotes all the spaces in the file name, inserts an extra space at the
-beginning of the line and leaves point to the left of it.
+type the shell command to run on that file.  That’s why in Embark’s
+default configuration there is an entry in
+‘embark-target-injection-hooks’ associating ‘shell-command’ to a hook
+that includes ‘embark--shell-prep’, a simple helper function that quotes
+all the spaces in the file name, inserts an extra space at the beginning
+of the line and leaves point to the left of it.
+
+   Now, the preparation that ‘embark--shell-prep’ does would be useless
+if Embark did what it normally does after it inserts the target of the
+action at the minibuffer prompt, which is to “press ‘RET’” for you,
+accepting the target as is; if Embark did that for ‘shell-command’ you
+wouldn’t get a chance to type in the command to execute!  That is why in
+Embark’s default configuration the entry for ‘shell-command’ in
+‘embark-target-injection-hooks’ also contains the function
+‘embark--allow-edit’.
+
+   Embark used to have a dedicated variable ‘embark-allow-edit-actions’
+to which you could add commands for which Embark should forgo pressing
+‘RET’ for you after inserting the target.  Since its effect can also be
+achieved via the general ‘embark-target-injection-hooks’ mechanism, that
+variable has been removed to simply Embark.  Be sure to update your
+configuration; if you had something like:
+
+     (add-to-list 'embark-allow-edit-actions 'my-command)
+
+   you should replace it with:
+
+     (push 'embark--allow-edit
+           (alist-get 'my-command embark-target-injection-hooks))
+
+   Also note that while you could abuse ‘embark--allow-edit’ so that you
+have to confirm “dangerous” actions such as ‘delete-file’, it is better
+to implement confirmation by adding the ‘embark--confirm’ function to
+the appropriate entry of a different hook alist, namely,
+‘embark-pre-action-hooks’.
+
+   Besides ‘embark--allow-edit’, Embark comes with another function that
+is of general utility in action setup hooks: ‘embark--ignore-target’.
+Use it for commands that do prompt you in the minibuffer but for which
+inserting the target would be inappropriate.  This is not a common
+situation but does occasionally arise.  For example it is used by
+default for ‘shell-command-on-region’: that command is used as an action
+for region targets, and it prompts you for a shell command; you
+typically do _not_ want the target, that is the contents of the region,
+to be entered at that prompt!
 
 
-File: embark.info,  Node: Creating your own keymaps,  Next: Defining actions for new categories of targets,  Prev: Running some setup after injecting the target,  Up: Advanced configuration
+File: embark.info,  Node: Running hooks before or after an action,  Next: Creating your own keymaps,  Prev: Running some setup after injecting the target,  Up: Advanced configuration
+
+3.5 Running hooks before or after an action
+===========================================
+
+Embark has two variables, ‘embark-pre-action-hooks’ and
+‘embark-post-action-hooks’, which are alists associating commands to
+hooks that should run before or after the command is used as an action.
+As with, ‘embark-target-injection-hooks’, there are two special keys for
+the alists: ‘t’ designates the default hook to run when no specific hook
+is specified for a command; and the hook associated to ‘:always’ runs
+regardless.
+
+   The default values of those variables are fairly extensive, adding
+creature comforts to make running actions a smooth experience.  Embark
+comes with several functions intended to be added to these hooks, and
+used in the default values of ‘embark-pre-action-hooks’ and
+‘embark-post-action-hooks’.
+
+   For pre-action hooks:
+
+‘embark--confirm’
+     Prompt the user for confirmation before executing the action.  This
+     is used be default for commands deemed “dangerous”, or, more
+     accurately, hard to undo, such as ‘delete-file’ and ‘kill-buffer’.
+
+‘embark--mark-target’
+     Mark the target as an active region.  Most targets at point outside
+     the minibuffer report which region of the buffer they correspond to
+     (this is the information used by ‘embark-highlight-indicator’ to
+     know what portion of the buffer to highlight); this function marks
+     that region.  It is useful as a pre action hook for commands that
+     expect a region to be marked, for example, it is used by default
+     for ‘indent-region’ so that it works on s-expression targets, or
+     for ‘fill-region’ so that it works on paragraph targets.
+
+‘embark--unmark-target’
+     Unmark the active region.  Use this for commands you want to act on
+     the region contents but without the region being active.  The
+     default configuration uses this function as a pre-action hook for
+     ‘occur’ and ‘query-replace’, for example, so that you can use them
+     as actions with region targets to search the whole buffer for the
+     text contained in the region.  Without this pre-action hook using
+     ‘occur’ as an action for a region target would be pointless: it
+     would search for the the region contents _in the region_,
+     (typically, due to the details of regexps) finding only one match!
+
+‘embark--beginning-of-target’
+     Move to the beginning of the target (for targets that report
+     bounds).  This is used by default for backward motion commands such
+     as ‘backward-sexp’, so that they don’t accidentally leave you on
+     the current target.
+
+‘embark--end-of-target’
+     Move to the end of the target.  This is used similarly to the
+     previous function, but also for commands that act on the last
+     s-expression like ‘eval-last-sexp’.  This allow you to act on an
+     s-expression from anywhere inside it and still use ‘eval-last-sexp’
+     as an action.
+
+‘embark--narrow-to-target’
+     Narrow buffer to current target.  Use this as a pre-action hook to
+     localize the effect of actions that don’t already work on just the
+     region.  In the default configuration it is used for
+     ‘repunctuate-sentences’.
+
+‘embark--xref-push-markers’
+     Push the current location on the xref marker stack.  Use this for
+     commands that take you somewhere and for which you’d like to be
+     able to come back to where you were using ‘xref-pop-marker-stack’.
+     This is used by default for ‘find-library’.
+
+   For post-action hooks:
+
+‘embark--restart’
+     Restart the command currently prompting in the minibuffer, so that
+     the list of completion candidates is updated.  This is useful as a
+     post action hook for commands that delete or rename a completion
+     candidate; for example the default value of
+     ‘embark-post-action-hooks’ uses it for ‘delete-file’,
+     ‘kill-buffer’, ‘rename-file’, ‘rename-buffer’, etc.
+
+
+File: embark.info,  Node: Creating your own keymaps,  Next: Defining actions for new categories of targets,  Prev: Running hooks before or after an action,  Up: Advanced configuration
 
 3.6 Creating your own keymaps
 =============================
@@ -627,7 +745,7 @@ keymap you want.
           (defun my-select-tab-by-name (tab)
             (interactive
              (list
-              (let ((tab-list (or (mapcar #'(lambda (tab) (cdr (assq 'name tab)))
+              (let ((tab-list (or (mapcar (lambda (tab) (cdr (assq 'name tab)))
                                           (tab-bar-tabs))
                                   (user-error "No tabs found"))))
                 (completing-read
@@ -635,11 +753,12 @@ keymap you want.
                  (lambda (string predicate action)
                    (if (eq action 'metadata)
                        '(metadata (category . tab))
-                     (complete-with-action action tab-list string predicate)))))))
+                     (complete-with-action
+                      action tab-list string predicate)))))))
             (tab-bar-select-tab-by-name tab))
 
      As you can see, the built-in support for setting the category
-     metadatum is not very easy to use or pretty to look at.  To help
+     meta-datum is not very easy to use or pretty to look at.  To help
      with this I recommend the ‘consult--read’ function from the
      excellent Consult (https://github.com/minad/consult/) package.
      With that function we can rewrite the command as follows:
@@ -647,7 +766,7 @@ keymap you want.
           (defun my-select-tab-by-name (tab)
             (interactive
              (list
-              (let ((tab-list (or (mapcar #'(lambda (tab) (cdr (assq 'name tab)))
+              (let ((tab-list (or (mapcar (lambda (tab) (cdr (assq 'name tab)))
                                           (tab-bar-tabs))
                                   (user-error "No tabs found"))))
                 (consult--read tab-list
@@ -679,8 +798,10 @@ keymap you want.
      without confirmation is dangerous?  You have a couple of options:
 
        1. You can keep using the ‘tab-bar-close-tab-by-name’ command,
-          but no longer let Embark press ‘RET’ for you:
-               (add-to-list 'embark-allow-edit-actions 'tab-bar-close-tab-by-name)
+          but have Embark ask you for confirmation:
+               (push #'embark--confirm
+                     (alist-get 'tab-bar-close-tab-by-name
+                                embark-pre-action-hooks))
 
        2. You can write your own command that prompts for confirmation
           and use that instead of ‘tab-bar-close-tab-by-name’ in the
@@ -728,7 +849,8 @@ in the list ‘embark-indicators’).
            (save-match-data
              (when (string-match "wikipedia:\\([[:alnum:]_]+\\)" str)
                `(url
-                 (format "https://en.wikipedia.org/wiki/%s" (match-string 1 str))
+                 (format "https://en.wikipedia.org/wiki/%s"
+                         (match-string 1 str))
                  ,beg . ,end))))))
 
      (add-to-list 'embark-target-finders 'my-short-wikipedia-link)
@@ -749,16 +871,17 @@ the target string and inserts it automatically into the minibuffer,
 simulating user input this way.  After inserting the string, Embark
 exits the minibuffer, submitting the input.  (The immediate minibuffer
 exit can be disabled for specific actions in order to allow editing the
-input: see the ‘embark-allow-edit-actions’ configuration variable).
-Embark inserts the target string at the first minibuffer opened by the
-action command, and if the command happens to prompt the user for input
-more than once, the user still interacts with the second and further
-prompts in the normal fashion.  Note that if a command does not prompt
-the user for input in the minibuffer, Embark still allows you to use it
-as an action, but of course, never inserts the target anywhere.  (There
-are plenty of examples in the default configuration of commands that do
-not prompt the user bound to keys in the action maps, most of the region
-actions, for instance.)
+input; this is done by adding the ‘embark--allow-edit’ function to the
+appropriate entry of ‘embark-target-injection-hooks’).  Embark inserts
+the target string at the first minibuffer opened by the action command,
+and if the command happens to prompt the user for input more than once,
+the user still interacts with the second and further prompts in the
+normal fashion.  Note that if a command does not prompt the user for
+input in the minibuffer, Embark still allows you to use it as an action,
+but of course, never inserts the target anywhere.  (There are plenty of
+examples in the default configuration of commands that do not prompt the
+user bound to keys in the action maps, most of the region actions, for
+instance.)
 
    This is how Embark manages to reuse normal commands as actions.  The
 mechanism allows you to use as Embark actions commands that were not
@@ -932,7 +1055,7 @@ some links to read:
    • Marginalia, Consult and Embark by Mike Zamansky.
 
 
-File: embark.info,  Node: Contributions,  Next: Acknowledgements,  Prev: Resources,  Up: Top
+File: embark.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Resources,  Up: Top
 
 7 Contributions
 ***************
@@ -950,14 +1073,14 @@ GNU ELPA, copyright assignment to the FSF is required before you can
 contribute code.
 
 
-File: embark.info,  Node: Acknowledgements,  Prev: Contributions,  Up: Top
+File: embark.info,  Node: Acknowledgments,  Prev: Contributions,  Up: Top
 
-8 Acknowledgements
-******************
+8 Acknowledgments
+*****************
 
 While I, Omar Antolín Camarena, have written most of the Embark code and
 remain very stubborn about some of the design decisions, Embark has
-recieved substantial help from a number of other people which this
+received substantial help from a number of other people which this
 document has neglected to mention for far too long.  In particular,
 Daniel Mendler has been absolutely invaluable, implementing several
 important features, and providing a lot of useful advice.
@@ -996,30 +1119,30 @@ important features, and providing a lot of useful advice.
 
 Tag Table:
 Node: Top206
-Node: Overview1432
-Node: Acting on targets1714
-Node: The default action on a target7217
-Node: Working with sets of possible targets9128
-Node: Switching to a different command without losing what you've typed12155
-Node: Quick start14729
-Node: Advanced configuration18143
-Node: Showing information about available targets and actions18683
-Node: Selecting commands via completions instead of key bindings21292
-Node: Quitting the minibuffer after an action22896
-Node: Allowing the target to be edited before acting on it24664
-Node: Running some setup after injecting the target25678
-Node: Creating your own keymaps26918
-Node: Defining actions for new categories of targets27911
-Node: New minibuffer target example - tab-bar tabs28680
-Ref: Telling Embark about commands that prompt for tabs by name29396
-Ref: Defining and configuring a keymap for tab actions32240
-Node: New target example in regular buffers - short Wikipedia links33929
-Node: How does Embark call the actions?35936
-Node: Non-interactive functions as actions40209
-Node: Embark Marginalia and Consult41562
-Node: Resources44255
-Node: Contributions45399
-Node: Acknowledgements46110
+Node: Overview1418
+Node: Acting on targets1700
+Node: The default action on a target7203
+Node: Working with sets of possible targets9110
+Node: Switching to a different command without losing what you've typed12745
+Node: Quick start15319
+Node: Advanced configuration18768
+Node: Showing information about available targets and actions19295
+Node: Selecting commands via completions instead of key bindings21904
+Node: Quitting the minibuffer after an action23508
+Node: Running some setup after injecting the target25269
+Node: Running hooks before or after an action28875
+Node: Creating your own keymaps33077
+Node: Defining actions for new categories of targets34064
+Node: New minibuffer target example - tab-bar tabs34833
+Ref: Telling Embark about commands that prompt for tabs by name35549
+Ref: Defining and configuring a keymap for tab actions38412
+Node: New target example in regular buffers - short Wikipedia links40166
+Node: How does Embark call the actions?42198
+Node: Non-interactive functions as actions46534
+Node: Embark Marginalia and Consult47887
+Node: Resources50580
+Node: Contributions51724
+Node: Acknowledgments52434
 
 End Tag Table
 

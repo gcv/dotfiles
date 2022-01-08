@@ -16,21 +16,46 @@ This function is meant to be added to `minibuffer-setup-hook'." (setq-local emba
 
 (add-hook 'minibuffer-setup-hook #'embark--record-this-command)
 
+(autoload 'embark-bindings-in-keymap "embark" "\
+Explore command key bindings in KEYMAP with `completing-read'.
+The selected command will be executed.  Interactively, prompt the
+user for a KEYMAP variable.
+
+\(fn KEYMAP)" t nil)
+
+(autoload 'embark-bindings "embark" "\
+Explore all current command key bindings with `completing-read'.
+The selected command will be executed.
+
+If NO-GLOBAL is non-nil (interactively, if called with a prefix
+argument) omit global key bindings; this leaves key bindings from
+minor mode maps and the local map (usually set by the major
+mode), but also less common keymaps such as those from a text
+property or overlay, or the overriding maps:
+`overriding-terminal-local-map' and `overriding-local-map'.
+
+\(fn NO-GLOBAL)" t nil)
+
+(autoload 'embark-bindings-at-point "embark" "\
+Explore all key bindings at point with `completing-read'.
+The selected command will be executed.
+
+This command lists key bindings found in keymaps specified by the
+text properties `keymap' or `local-map', from either buffer text
+or an overlay.  These are not widely used in Emacs, and when they
+are used can be somewhat hard to discover.  Examples of locations
+that have such a keymap are links and images in `eww' buffers,
+attachment links in `gnus' article buffers, and the 'Stash' line
+in a `vc-dir' buffer." t nil)
+
 (autoload 'embark-prefix-help-command "embark" "\
-Prompt for and run a command bound in the prefix used to reach this command.
+Prompt for and run a command bound in the prefix used for this command.
 The prefix described consists of all but the last event of the
 key sequence that ran this command.  This function is intended to
 be used as a value for `prefix-help-command'.
 
 In addition to using completion to select a command, you can also
 type @ and the key binding (without the prefix)." t nil)
-
-(autoload 'embark-bindings "embark" "\
-Explore all current command key bindings with `completing-read'.
-The selected command will be executed.  The set of key bindings can
-be restricted by passing a PREFIX key.
-
-\(fn &optional PREFIX)" t nil)
 
 (autoload 'embark-act "embark" "\
 Prompt the user for an action and perform it.
@@ -55,6 +80,24 @@ If instead you call this from outside the minibuffer, the first
 ARG targets are skipped over (if ARG is negative the skipping is
 done by cycling backwards) and cycling starts from the following
 target.
+
+\(fn &optional ARG)" t nil)
+
+(autoload 'embark-act-all "embark" "\
+Prompt the user for an action and perform it on each candidate.
+The candidates are chosen by `embark-candidate-collectors'.
+By default, if called from a minibuffer the candidates are the
+completion candidates.
+
+This command uses `embark-prompter' to ask the user to specify an
+action, and calls it injecting the target at the first minibuffer
+prompt.
+
+If you call this from the minibuffer, it can optionally quit the
+minibuffer.  The variable `embark-quit-after-action' controls
+whether calling `embark-act' with nil ARG quits the minibuffer,
+and if ARG is non-nil it will do the opposite.  Interactively,
+ARG is the prefix argument.
 
 \(fn &optional ARG)" t nil)
 
