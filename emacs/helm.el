@@ -5,7 +5,7 @@
 
   :bind
   (("C-c h" . helm-command-prefix)
-   ;;("C-x M-b" . helm-mini)
+   ("C-x M-b" . helm-mini)
    ;;("M-x" . helm-M-x)
    ;;("M-i" . helm-semantic-or-imenu)
    ;;("C-M-y" . helm-show-kill-ring)

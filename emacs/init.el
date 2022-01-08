@@ -1045,10 +1045,10 @@ See `eshell-prompt-regexp'."
                       "elisp.el"
                       "themes.el"
                       "modeline.el"
-                      ;;"helm.el"
+                      "helm.el"
+                      "ngc.el"
                       ;;"ivy.el"
                       ;;"selectrum.el"
-                      "ngc.el"
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
     (load-file (expand-file-name (concat "../" f) (file-truename user-emacs-directory)))))
