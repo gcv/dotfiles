@@ -148,7 +148,7 @@ targets."
          ("C-M-r" . consult-history)
          ))
 
-  ;;tidy shadowed file names
+  ;; tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
 
   :custom
