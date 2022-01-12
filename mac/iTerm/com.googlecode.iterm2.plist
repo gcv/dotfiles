@@ -165,7 +165,7 @@
 	<key>HideFromDockAndAppSwitcher</key>
 	<true/>
 	<key>HideMenuBarInFullscreen</key>
-	<false/>
+	<true/>
 	<key>HideScrollbar</key>
 	<false/>
 	<key>HideTab</key>
@@ -191,7 +191,7 @@
 	<key>JobName</key>
 	<true/>
 	<key>LeftCommand</key>
-	<integer>7</integer>
+	<integer>2</integer>
 	<key>LeftOption</key>
 	<integer>2</integer>
 	<key>MaxVertically</key>
@@ -521,21 +521,7 @@
 					<key>Text</key>
 					<string>0x7f</string>
 				</dict>
-				<key>0x64-0x80000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>D</string>
-				</dict>
 				<key>0x7f-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>11</integer>
-					<key>Text</key>
-					<string>0x17</string>
-				</dict>
-				<key>0x7f-0x80000</key>
 				<dict>
 					<key>Action</key>
 					<integer>11</integer>
@@ -1297,21 +1283,7 @@
 					<key>Text</key>
 					<string>0x7f</string>
 				</dict>
-				<key>0x64-0x80000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>D</string>
-				</dict>
 				<key>0x7f-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>11</integer>
-					<key>Text</key>
-					<string>0x17</string>
-				</dict>
-				<key>0x7f-0x80000</key>
 				<dict>
 					<key>Action</key>
 					<integer>11</integer>
@@ -2046,21 +2018,7 @@
 					<key>Text</key>
 					<string>0x7f</string>
 				</dict>
-				<key>0x64-0x80000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>D</string>
-				</dict>
 				<key>0x7f-0x40000</key>
-				<dict>
-					<key>Action</key>
-					<integer>11</integer>
-					<key>Text</key>
-					<string>0x17</string>
-				</dict>
-				<key>0x7f-0x80000</key>
 				<dict>
 					<key>Action</key>
 					<integer>11</integer>
@@ -2547,6 +2505,8 @@
 	</array>
 	<key>TripleClickSelectsFullWrappedLines</key>
 	<false/>
+	<key>UIElementRequiresHotkeys</key>
+	<true/>
 	<key>URLHandlersByGuid</key>
 	<dict/>
 	<key>UseBorder</key>
