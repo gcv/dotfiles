@@ -357,12 +357,6 @@
   )
 
 
-(use-package find-file-in-project
-  :bind
-  (("C-c p f" . find-file-in-project))
-  )
-
-
 (use-package flycheck
   :pin melpa)
 

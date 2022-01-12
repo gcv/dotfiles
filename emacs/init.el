@@ -646,6 +646,12 @@ See `eshell-prompt-regexp'."
 ;;; configure smaller built-in features and modes
 ;;; ----------------------------------------------------------------------------
 
+;;; project.el
+(use-feature project
+  :bind
+  (("C-c p f" . project-find-file)))
+
+
 ;;; abbrev
 (defun /abbrev-mode-hook ()
   (diminish 'abbrev-mode))

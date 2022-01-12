@@ -144,6 +144,8 @@ targets."
          ("RET" . vertico-directory-enter)
          ("DEL" . vertico-directory-delete-char)
          ("M-DEL" . vertico-directory-delete-word)
+         ;; consult
+         ("C-M-r" . consult-history)
          ))
 
   ;;tidy shadowed file names
@@ -159,10 +161,8 @@ targets."
 
   (setq vertico-multiform-commands
         '((consult-imenu buffer indexed)
-          ;;("^consult-.*" buffer indexed)
           (imenu-cr buffer indexed)
-          (find-file-in-project buffer indexed grid)
-          ;;(find-file-in-project buffer indexed (:not grid))
+          (project-find-file buffer indexed)
           ("persp-.*" flat)
           ))
   (if window-system
@@ -170,9 +170,7 @@ targets."
     (add-to-list 'vertico-multiform-commands '(execute-extended-command unobtrusive)))
 
   (setq vertico-multiform-categories
-        '(;;(file grid)
-          ;;(file flat (vertico-cycle . t))
-          (file unobtrusive)
+        '((file unobtrusive)
           (buffer flat (vertico-cycle . t))
           (consult-grep buffer)
           ))
