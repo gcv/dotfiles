@@ -66,6 +66,7 @@
 
   :custom
   (cider-show-error-buffer 'except-in-repl)
+  (cider-auto-select-error-buffer nil)
   (cider-prompt-for-symbol nil)
   (cider-repl-tab-command 'indent-for-tab-command)
   (cider-repl-display-help-banner nil)
