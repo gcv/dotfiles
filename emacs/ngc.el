@@ -23,8 +23,8 @@
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
 
-  ;; (advice-add #'completing-read-multiple
-  ;;             :override #'consult-completing-read-multiple)
+  (advice-add #'completing-read-multiple
+              :override #'consult-completing-read-multiple)
   )
 
 
@@ -164,6 +164,7 @@ targets."
           (imenu-cr buffer indexed)
           (project-find-file buffer indexed)
           ("persp-.*" flat)
+          ("cider-.*" flat)
           ))
   (if window-system
       (add-to-list 'vertico-multiform-commands '(execute-extended-command indexed posframe))
@@ -196,8 +197,16 @@ targets."
     (if vertico-disabled-mode
         (advice-add 'vertico--setup :override #'ignore)
       (advice-remove 'vertico--setup #'ignore)))
-  )
 
+  ;; tmm-menubar sucks, but just in case it's used:
+  (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
+
+  ;; find-file-at-point advice:
+  (advice-add #'ffap-menu-ask :around (lambda (&rest args)
+                                        (cl-letf (((symbol-function #'minibuffer-completion-help)
+                                                   #'ignore))
+                                          (apply args))))
+  )
 
 (use-package vertico-posframe
   :pin gnu

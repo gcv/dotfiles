@@ -81,6 +81,7 @@
   ;;                (side . bottom)
   ;;                (window-height . 0.2)))
 
+  (require 'company)
   (add-to-list 'company-backends #'cider-complete-at-point)
 
   (defun /cider-mode-hook ()
