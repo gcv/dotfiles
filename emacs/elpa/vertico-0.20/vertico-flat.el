@@ -1,12 +1,12 @@
 ;;; vertico-flat.el --- Flat, horizontal display for Vertico -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021  Free Software Foundation, Inc.
+;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "0.19"))
+;; Package-Requires: ((emacs "27.1") (vertico "0.20"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -48,12 +48,14 @@
   :group 'vertico)
 
 (defcustom vertico-flat-format
-  '(:left       #("{" 0 1 (face minibuffer-prompt))
-    :separator  #(" | " 0 3 (face minibuffer-prompt))
-    :right      #("}" 0 1 (face minibuffer-prompt))
-    :ellipsis   #("…" 0 1 (face minibuffer-prompt))
-    :only-match #("[%s]" 0 1 (face minibuffer-prompt)
+  '(:multiple   #("{%s}" 0 1 (face minibuffer-prompt)
+                  3 4 (face minibuffer-prompt))
+    :single     #("[%s]" 0 1 (face minibuffer-prompt)
                   1 3 (face success) 3 4 (face minibuffer-prompt))
+    :prompt     #("(%s)" 0 1 (face minibuffer-prompt)
+                  3 4 (face minibuffer-prompt))
+    :separator  #(" | " 0 3 (face minibuffer-prompt))
+    :ellipsis   #("…" 0 1 (face minibuffer-prompt))
     :no-match   "[No match]")
   "Formatting strings."
   :type 'plist
@@ -76,18 +78,17 @@
    (concat #(" " 0 1 (cursor t))
            (cond
             ((and (not candidates) (plist-get vertico-flat-format :no-match)))
-            ((and (= vertico--total 1)
-                  (when-let (fmt (plist-get vertico-flat-format :only-match))
+            ((and (= vertico--total 1) (= vertico--index 0)
+                  (when-let (fmt (plist-get vertico-flat-format :single))
                     (format fmt (substring-no-properties (car candidates))))))
-             (t (concat (plist-get vertico-flat-format :left)
-                        (string-join candidates (plist-get vertico-flat-format :separator))
-                        (plist-get vertico-flat-format :right)))))))
+            (t (format (plist-get vertico-flat-format (if (< vertico--index 0) :prompt :multiple))
+                       (string-join candidates (plist-get vertico-flat-format :separator))))))))
 
 (defun vertico-flat--arrange-candidates ()
   "Arrange candidates."
   (let* ((index (max 0 vertico--index)) (count vertico-count)
          (candidates (nthcdr vertico--index vertico--candidates))
-         (width (- (* vertico-flat-max-lines (- (window-width) 4))
+         (width (- (* vertico-flat-max-lines (- (vertico--window-width) 4))
                    (length (plist-get vertico-flat-format :left))
                    (length (plist-get vertico-flat-format :separator))
                    (length (plist-get vertico-flat-format :right))
@@ -129,13 +130,11 @@
     (window-resize win (- (window-pixel-height win)) nil nil 'pixelwise))
   (cond
    (vertico-flat-mode
-    (unless (eq (cadr vertico-map) vertico-flat-map)
-      (setcdr vertico-map (cons vertico-flat-map (cdr vertico-map))))
+    (add-to-list 'minor-mode-map-alist `(vertico--input . ,vertico-flat-map))
     (advice-add #'vertico--arrange-candidates :override #'vertico-flat--arrange-candidates)
     (advice-add #'vertico--display-candidates :override #'vertico-flat--display-candidates))
    (t
-    (when (eq (cadr vertico-map) vertico-flat-map)
-      (setcdr vertico-map (cddr vertico-map)))
+    (setq minor-mode-map-alist (delete `(vertico--input . ,vertico-flat-map) minor-mode-map-alist))
     (advice-remove #'vertico--arrange-candidates #'vertico-flat--arrange-candidates)
     (advice-remove #'vertico--display-candidates #'vertico-flat--display-candidates))))
 

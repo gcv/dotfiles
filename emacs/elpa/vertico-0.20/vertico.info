@@ -22,8 +22,9 @@ vertico.el - VERTical Interactive COmpletion
 * Complementary packages::
 * Child frames and Popups::
 * Alternatives::
-* Problematic completion commands::
+* Resources::
 * Contributions::
+* Problematic completion commands::
 
 — The Detailed Node Listing —
 
@@ -69,20 +70,22 @@ File: vertico.info,  Node: Features,  Next: Key bindings,  Prev: Introduction,  
 2 Features
 **********
 
-   • Vertical display with arrow key navigation (see the *note
-     extensions: Extensions. for additional display modes)
+   • Vertical display with arrow key navigation.  See the *note
+     extensions: Extensions. for additional display modes.
    • Prompt shows the current candidate index and the total number of
-     candidates
+     candidates.
    • The current candidate is inserted with ‘TAB’ and selected with
-     ‘RET’
-   • Non-existing candidates can be entered by moving the point to the
-     prompt line
-   • Configurable sorting by history position, length and alphabetically
-   • Long candidates with newlines are formatted to take up less space
-   • Deferred completion style highlighting for performance
-   • Support for annotations (‘annotation-function’ and
-     ‘affixation-function’)
-   • Support for grouping and group cycling commands (‘group-function’)
+     ‘RET’.
+   • Non-existing candidates can be submitted with ‘C-return’ or by
+     moving the point to the prompt.
+   • Configurable sorting by history position, length and
+     alphabetically.
+   • Long candidates with newlines are formatted to take up less space.
+   • Deferred completion style highlighting for performance.
+   • Annotations are displayed next to the candidates (‘annotation-’ and
+     ‘affixation-function’).
+   • Support for candidate grouping and group cycling commands
+     (‘group-function’).
 
    <https://github.com/minad/vertico/blob/screenshots/vertico-mx.png?raw=true>
 
@@ -110,7 +113,7 @@ handful of commands.  Note in particular the binding of ‘TAB’ to
    • ‘backward-paragraph’ -> ‘vertico-previous-group’
    • ‘exit-minibuffer’ -> ‘vertico-exit’
    • ‘kill-ring-save’ -> ‘vertico-save’
-   • ‘C-<return>’ -> ‘vertico-exit-input’
+   • ‘C-return’ -> ‘vertico-exit-input’
    • ‘TAB’ -> ‘vertico-insert’
 
 
@@ -533,7 +536,7 @@ a try and judge for yourself.
      posframe library.
 
 
-File: vertico.info,  Node: Alternatives,  Next: Problematic completion commands,  Prev: Child frames and Popups,  Up: Top
+File: vertico.info,  Node: Alternatives,  Next: Resources,  Prev: Child frames and Popups,  Up: Top
 
 8 Alternatives
 **************
@@ -597,10 +600,43 @@ philosophy:
      ‘mct-region-mode’.
 
 
-File: vertico.info,  Node: Problematic completion commands,  Next: Contributions,  Prev: Alternatives,  Up: Top
+File: vertico.info,  Node: Resources,  Next: Contributions,  Prev: Alternatives,  Up: Top
 
-9 Problematic completion commands
-*********************************
+9 Resources
+***********
+
+If you want to learn more about Vertico, check out the following
+resources:
+
+   • Doom Emacs Vertico Module
+     (https://github.com/hlissner/doom-emacs/tree/develop/modules/completion/vertico):
+     Vertico is Doom’s default completion system.
+   • Vertico Extensions for Emacs
+     (https://www.youtube.com/watch?v=hPwDbx--Waw) (2022-01-08) by
+     Karthik Chikmagalur.
+   • Marginalia, Consult and Embark (2021-10-26) by Mike Zamansky.
+   • System Crafters Live!  - Replacing Ivy and Counsel with Vertico and
+     Consult (https://www.youtube.com/watch?v=UtqE-lR2HCA) (2021-05-21)
+     by David Wilson.
+   • Streamline Your Emacs Completions with Vertico
+     (https://www.youtube.com/watch?v=J0OaRy85MOo) (2021-05-17) by David
+     Wilson.
+
+
+File: vertico.info,  Node: Contributions,  Next: Problematic completion commands,  Prev: Resources,  Up: Top
+
+10 Contributions
+****************
+
+Since this package is part of GNU ELPA
+(http://elpa.gnu.org/packages/vertico.html) contributions require a
+copyright assignment to the FSF.
+
+
+File: vertico.info,  Node: Problematic completion commands,  Prev: Contributions,  Up: Top
+
+11 Problematic completion commands
+**********************************
 
 Vertico is robust in most scenarios.  However some completion commands
 make certain assumptions about the completion styles and the completion
@@ -617,8 +653,8 @@ require minor workarounds.
 
 File: vertico.info,  Node: org-refile,  Next: tmm-menubar,  Up: Problematic completion commands
 
-9.1 ‘org-refile’
-================
+11.1 ‘org-refile’
+=================
 
 ‘org-refile’ uses ‘org-olpath-completing-read’ to complete the outline
 path in steps, when ‘org-refile-use-outline-path’ is non-nil.
@@ -653,20 +689,23 @@ much more cluttered.
 
 File: vertico.info,  Node: tmm-menubar,  Next: ffap-menu,  Prev: org-refile,  Up: Problematic completion commands
 
-9.2 ‘tmm-menubar’
-=================
+11.2 ‘tmm-menubar’
+==================
 
 The text menu bar works well with Vertico but always shows a
 ‘*Completions*’ buffer, which is unwanted if you use the Vertico UI.
-This completion buffer can be disabled as follows.
+This completion buffer can be disabled with an advice.  If you disabled
+the standard GUI menu bar and prefer the Vertico interface you may also
+overwrite the default F10 keybinding.
 
+     (global-set-key [f10] #'tmm-menubar)
      (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
 
 
 File: vertico.info,  Node: ffap-menu,  Next: Tramp hostname completion,  Prev: tmm-menubar,  Up: Problematic completion commands
 
-9.3 ‘ffap-menu’
-===============
+11.3 ‘ffap-menu’
+================
 
 The command ‘ffap-menu’ shows the ‘=*Completions*’ buffer by default
 like ‘tmm-menubar’, which is unnecessary with Vertico.  This completion
@@ -680,8 +719,8 @@ buffer can be disabled as follows.
 
 File: vertico.info,  Node: Tramp hostname completion,  Prev: ffap-menu,  Up: Problematic completion commands
 
-9.4 Tramp hostname completion
-=============================
+11.4 Tramp hostname completion
+==============================
 
 In combination with Orderless, hostnames are not made available for
 completion after entering ‘/ssh:’.  In order to avoid this problem, the
@@ -707,38 +746,29 @@ files!
      (setq completion-styles '(orderless)
            completion-category-overrides '((file (styles basic-remote partial-completion))))
 
-
-File: vertico.info,  Node: Contributions,  Prev: Problematic completion commands,  Up: Top
-
-10 Contributions
-****************
-
-Since this package is part of GNU ELPA
-(http://elpa.gnu.org/packages/vertico.html) contributions require a
-copyright assignment to the FSF.
-
 
 
 Tag Table:
 Node: Top196
-Node: Introduction926
-Node: Features1761
-Node: Key bindings2729
-Node: Configuration3964
-Node: Completion styles and TAB completion7627
-Node: Completion-at-point and completion-in-region9937
-Node: Completing-read-multiple (CRM)11262
-Node: Extensions11681
-Node: Configure Vertico per command or completion category15344
-Node: Complementary packages19321
-Node: Child frames and Popups21574
-Node: Alternatives22949
-Node: Problematic completion commands26538
-Node: org-refile27050
-Node: tmm-menubar28637
-Node: ffap-menu29054
-Node: Tramp hostname completion29687
-Node: Contributions30999
+Node: Introduction940
+Node: Features1775
+Node: Key bindings2809
+Node: Configuration4042
+Node: Completion styles and TAB completion7705
+Node: Completion-at-point and completion-in-region10015
+Node: Completing-read-multiple (CRM)11340
+Node: Extensions11759
+Node: Configure Vertico per command or completion category15422
+Node: Complementary packages19399
+Node: Child frames and Popups21652
+Node: Alternatives23027
+Node: Resources26594
+Node: Contributions27469
+Node: Problematic completion commands27757
+Node: org-refile28250
+Node: tmm-menubar29839
+Node: ffap-menu30431
+Node: Tramp hostname completion31066
 
 End Tag Table
 
