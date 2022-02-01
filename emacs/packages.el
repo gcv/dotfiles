@@ -81,9 +81,6 @@
   ;;                (side . bottom)
   ;;                (window-height . 0.2)))
 
-  (require 'company)
-  (add-to-list 'company-backends #'cider-complete-at-point)
-
   (defun /cider-mode-hook ()
     (paredit-mode 1)
     (define-key cider-mode-map (kbd "C-c C-,") #'cider-test-run-tests)
@@ -163,36 +160,20 @@
 
 
 ;;; "comp"lete "any"thing
+;;; Deprecated in favor of Corfu and Cape.
 (use-package company
   :diminish ""
 
   :bind
   (;;("TAB" . company-indent-or-complete-common)
-   ("C-." . company-complete)
-   ("C-c ." . company-complete))
+   ;;("C-." . company-complete)
+   ;;("C-c ." . company-complete)
+   )
 
   :config
-  (global-company-mode 1)
-  (setq company-idle-delay nil)
+  ;;(global-company-mode 1)
+  ;;(setq company-idle-delay nil)
   )
-
-
-(use-package company-lua
-  :pin melpa)
-
-
-(use-package company-quickhelp
-  :pin melpa
-
-  :config
-  ;;(company-quickhelp-mode 1)
-  )
-
-
-(use-package company-terraform)
-
-
-(use-package company-web)
 
 
 (use-package crux
@@ -979,8 +960,6 @@
   (add-to-list 'slime-contribs 'slime-asdf)
   (add-to-list 'slime-contribs 'slime-quicklisp)
 
-  (require 'slime-company)
-
   ;;(defun /slime-mode-hook ()
   ;;  (setq slime-truncate-lines nil))
   ;;
@@ -999,16 +978,7 @@
   )
 
 
-(use-package slime-company
-  :config
-  ;; XXX: For some reason, the documented activation method does not work:
-  ;;(add-to-list 'slime-contribs 'slime-company)
-  (dolist (h '(slime-mode-hook slime-repl-mode-hook sldb-mode-hook))
-    (add-hook h 'slime-company-maybe-enable))
-  )
-
-
-;;; Deprecated in favor of Helm and Ivy, but keep here for reference.
+;;; Deprecated in favor of newer completion systems, but keep here for reference.
 ;; (use-package smex                       ; smart M-x completion
 ;;   :config (progn
 ;;             (setq smex-save-file (concat user-emacs-directory ".smex-items"))
