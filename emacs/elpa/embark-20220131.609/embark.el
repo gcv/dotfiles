@@ -5,9 +5,11 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: convenience
-;; Version: 0.14
+;; Version: 0.15
 ;; Homepage: https://github.com/oantolin/embark
 ;; Package-Requires: ((emacs "26.1"))
+
+;; This file is part of GNU Emacs.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -125,7 +127,8 @@
     (buffer . embark-buffer-map)
     (expression . embark-expression-map)
     (identifier . embark-identifier-map)
-    (defun . embark-defun-map)
+    ;; NOTE: Weird space in front of defun to please package-lint.
+    ( defun . embark-defun-map)
     (symbol . embark-symbol-map)
     (face . embark-face-map)
     (command . embark-command-map)
@@ -179,9 +182,7 @@ bounds pair of the target at point for highlighting."
     (embark-keybinding . embark--keybinding-command)
     (project-file . embark--project-file-full-path)
     (package . embark--remove-package-version)
-    (multi-category . embark--refine-multi-category)
-    ;; TODO: `consult-multi' has been obsoleted by `multi-category'. Remove!
-    (consult-multi . embark--refine-multi-category))
+    (multi-category . embark--refine-multi-category))
   "Alist associating type to functions for transforming targets.
 Each function should take a type and a target string and return a
 pair of the form a `cons' of the new type and the new target."
@@ -778,15 +779,15 @@ different priorities in `embark-target-finders'."
 
 (defun embark-target-url-at-point ()
   "Target the URL at point."
-  (if-let ((url (thing-at-point 'url)))
-      `(url ,url . ,(thing-at-point-bounds-of-url-at-point t))
-    (when-let ((url (or (get-text-property (point) 'shr-url)
-                        (get-text-property (point) 'image-url))))
+  (if-let ((url (or (get-text-property (point) 'shr-url)
+                    (get-text-property (point) 'image-url))))
       `(url ,url
             ,(previous-single-property-change
               (min (1+ (point)) (point-max)) 'mouse-face nil (point-min))
             . ,(next-single-property-change
-                (point) 'mouse-face nil (point-max))))))
+                (point) 'mouse-face nil (point-max)))
+    (when-let ((url (thing-at-point 'url)))
+      `(url ,url . ,(thing-at-point-bounds-of-url-at-point t)))))
 
 (declare-function widget-at "wid-edit")
 
@@ -1002,14 +1003,48 @@ If CYCLE is non-nil bind `embark-cycle'."
       (concat (car (split-string target "\n" 'omit-nulls "\\s-*")) "…")
     target))
 
-(defun embark--act-label (rep multi)
-  "Return highlighted Act/Rep indicator label given REP and MULTI."
-  (propertize
-   (cond
-    (multi "∀ct")
-    (rep "Rep")
-    (t "Act"))
-   'face 'highlight))
+(defun embark--format-targets (target shadowed-targets rep)
+  "Return a formatted string indicating the TARGET of an action.
+
+This is used internally by the minimal indicator and for the
+targets section of the verbose indicator.  The string will also
+mention any SHADOWED-TARGETS.  A non-nil REP indicates we are in
+a repeating sequence of actions."
+  (let ((act (propertize
+              (cond
+               ((plist-get target :multi) "∀ct")
+               (rep "Rep")
+               (t "Act"))
+              'face 'highlight))) 
+    (cond
+     ((eq (plist-get target :type) 'embark-become)
+      (propertize "Become" 'face 'highlight))
+     ((and (minibufferp)
+           (not (eq 'embark-keybinding
+                    (completion-metadata-get
+                     (embark--metadata)
+                     'category))))
+      ;; we are in a minibuffer but not from the
+      ;; completing-read prompter, use just "Act"
+      act)
+     ((plist-get target :multi)
+      (format "%s on %s %ss"
+              act
+              (plist-get target :multi)
+              (plist-get target :type)))
+     (t (format
+         "%s on %s%s '%s'"
+         act
+         (plist-get target :type)
+         (if shadowed-targets
+             (format (propertize "(%s)" 'face 'shadow)
+                     (string-join
+                      (mapcar (lambda (x)
+                                (symbol-name (plist-get x :type)))
+                              shadowed-targets)
+                      ", "))
+           "")
+         (embark--truncate-target (plist-get target :target)))))))
 
 (defun embark-minimal-indicator ()
   "Minimal indicator, appearing in the minibuffer prompt or echo area.
@@ -1022,42 +1057,9 @@ the minibuffer is open, the message is added to the prompt."
       (if (null keymap)
           (when indicator-overlay
             (delete-overlay indicator-overlay))
-        (let* ((target (car targets))
-               (act (embark--act-label
-                     (eq (lookup-key keymap [13]) #'embark-done)
-                     (plist-get target :multi)))
-               (shadowed-targets (cdr targets))
-               (indicator
-                (cond
-                 ;; TODO code duplication with embark--verbose-indicator-section-target
-                 ((eq (plist-get target :type) 'embark-become)
-                  (propertize "Become" 'face 'highlight))
-                 ((and (minibufferp)
-                       (not (eq 'embark-keybinding
-                                (completion-metadata-get
-                                 (embark--metadata)
-                                 'category))))
-                  ;; we are in a minibuffer but not from the
-                  ;; completing-read prompter, use just "Act"
-                  act)
-                 ((plist-get target :multi)
-                  (format "%s on %s %ss"
-                          act
-                          (plist-get target :multi)
-                          (plist-get target :type)))
-                 (t (format
-                     "%s on %s%s '%s'"
-                     act
-                     (plist-get target :type)
-                     (if shadowed-targets
-                         (format (propertize "(%s)" 'face 'shadow)
-                                 (string-join
-                                  (mapcar (lambda (x)
-                                            (symbol-name (plist-get x :type)))
-                                          shadowed-targets)
-                                  ", "))
-                       "")
-                     (embark--truncate-target (plist-get target :target)))))))
+        (let ((indicator (embark--format-targets
+                          (car targets) (cdr targets)
+                          (eq (lookup-key keymap [13]) #'embark-done))))
           (if (not (minibufferp))
               (message "%s" indicator)
             (unless indicator-overlay
@@ -1279,7 +1281,7 @@ UPDATE function is passed to it."
                       ;; embark-keybinding in the `completing-read' prompter.
                       (define-key map cycle
                         (cond
-                         ((lookup-key keymap cycle)
+                         ((eq (lookup-key keymap cycle) 'embark-cycle)
                           (lambda ()
                             (interactive)
                             (throw 'choice 'embark-cycle)))
@@ -1287,8 +1289,7 @@ UPDATE function is passed to it."
                           (lambda ()
                             (interactive)
                             (minibuffer-message
-                             (concat "Single target; can't cycle. "
-                                     "Press `%s' again to act.")
+                             "No cycling possible; press `%s' again to act."
                              (key-description cycle))
                             (define-key map cycle #'embark-act))))))
                     (when embark-keymap-prompter-key
@@ -1408,25 +1409,10 @@ of all full key sequences bound in the keymap."
     (&key targets bindings &allow-other-keys)
   "Format the TARGETS section for the indicator buffer.
 BINDINGS is the formatted list of keybindings."
-  (let* ((target (plist-get (car targets) :target))
-         (kind (plist-get (car targets) :type))
-         (result (cond
-                  ;; TODO code duplication with embark-minimal-indicator
-                  ((eq kind 'embark-become)
-                   (concat (propertize "Become" 'face 'highlight)))
-                  ((plist-get (car targets) :multi)
-                   (format "%s on %s %ss"
-                           (embark--act-label nil t)
-                           (plist-get (car targets) :multi)
-                           kind))
-                  (t
-                   (format "%s on %s '%s'"
-                           (embark--act-label
-                            (seq-find (lambda (b) (eq (caddr b) #'embark-done))
-                                      bindings)
-                            nil)
-                           kind
-                           (embark--truncate-target target))))))
+  (let ((result (embark--format-targets
+                 (car targets)
+                 nil   ; the shadowed targets section deals with these
+                 (cl-find 'embark-done bindings :key #'caddr :test #'eq))))
     (add-face-text-property 0 (length result)
                             'embark-verbose-indicator-title
                             'append
@@ -1438,8 +1424,8 @@ BINDINGS is the formatted list of keybindings."
   "Format the CYCLE key section for the indicator buffer.
 SHADOWED-TARGETS is the list of other targets."
   (concat
-   (and cycle(propertize (format "(%s to cycle)" cycle)
-                         'face 'embark-verbose-indicator-shadowed))
+   (and cycle (propertize (format "(%s to cycle)" cycle)
+                          'face 'embark-verbose-indicator-shadowed))
    (and shadowed-targets "\n")))
 
 (cl-defun embark--verbose-indicator-section-shadowed-targets
@@ -1836,15 +1822,13 @@ minibuffer before executing the action."
 (defun embark--refine-multi-category (_type target)
   "Refine `multi-category' TARGET to its actual type."
   (or (get-text-property 0 'multi-category target)
-      ;; TODO: `consult-multi' has been obsoleted by `multi-category'. Remove!
-      (get-text-property 0 'consult-multi target)
       (cons 'general target)))
 
 (defun embark--refine-symbol-type (_type target)
-  "Refine symbol TARGET to command or variable if possible."
+  "Refine symbol TARGET to more specific type if possible."
   (cons (let ((symbol (intern-soft target))
               (library (ffap-el-mode target)))
-          (cond
+          (cond 
            ((and library
                  (looking-back "\\(?:require\\|use-package\\).*"
                                (line-beginning-position)))
@@ -1853,11 +1837,13 @@ minibuffer before executing the action."
            ((commandp symbol) 'command)
            ((and symbol (boundp symbol)) 'variable)
            ;; Prefer variables over functions for backward compatibility.
-           ;; Command > variable > function > symbol seems like a
-           ;; reasonable order with decreasing usefulness of the actions.
+           ;; Command > variable > function > face > library > package > symbol
+           ;; seems like a reasonable order with decreasing usefulness
+           ;; of the actions.
            ((fboundp symbol) 'function)
            ((facep symbol) 'face)
            (library 'library)
+           ((and (featurep 'package) (embark--package-desc symbol)) 'package)
            (t 'symbol)))
         target))
 
@@ -3173,12 +3159,11 @@ PRED is a predicate function used to filter the items."
                    (let ((file (file-name-nondirectory path)))
                      (or (string= file ".") (string= file ".."))))
                  files)))
-  (let ((buf
-         (dired-noselect
-          (cons
-           ;; TODO: is it worth finding the deepest common containing directory?
-           (if (cl-every #'file-name-absolute-p files) "/" default-directory)
-           files))))
+  (let* ((dir (or (file-name-directory (try-completion "" files)) ""))
+         (buf (dired-noselect
+               (cons (expand-file-name dir)
+                     (mapcar (lambda (file) (string-remove-prefix dir file))
+                             files)))))
     (with-current-buffer buf
       (rename-buffer (format "*Embark Export Dired %s*" default-directory)))
     (pop-to-buffer buf)))
@@ -3333,7 +3318,7 @@ Return the category metadatum as the type of the target."
   (add-hook 'embark-target-finders #'embark--ivy-selected)
   (add-hook 'embark-candidate-collectors #'embark--ivy-candidates))
 
-;;; Custom actions open-line open-line
+;;; Custom actions 
 
 (defun embark-keymap-help ()
   "Prompt for an action to perform or command to become and run it."
@@ -3363,16 +3348,16 @@ its own."
                      (newline-and-indent)))
                (maybe-whitespace ()
                  (if multiline (maybe-newline) (maybe-space)))
-               (insert-string ()
+               (ins-string ()
                  (save-excursion
                    (insert string)
-                   (maybe-whitespace)
-                   (delete-blank-lines))
+                   (when (looking-back "\n" 1) (delete-char -1))   
+                   (maybe-whitespace))
                  (maybe-whitespace)))
-      (if buffer-read-only
+      (if buffer-read-only 
           (with-selected-window (other-window-for-scrolling)
-            (insert-string))
-        (insert-string)))))
+            (ins-string))
+        (ins-string)))))
 
 (define-obsolete-function-alias
   'embark-save
@@ -3595,6 +3580,7 @@ The search respects symbol boundaries."
   (compose-mail address))
 
 (autoload 'pp-display-expression "pp")
+
 (defun embark-pp-eval-defun (edebug)
   "Run `eval-defun' and pretty print the result.
 With a prefix argument EDEBUG, instrument the code for debugging."
@@ -3662,6 +3648,17 @@ ALGORITHM is the hash algorithm symbol understood by `secure-hash'."
   (interactive "r")
   (let ((epa-replace-original-text t))
     (epa-decrypt-region start end)))
+
+(defvar eww-download-directory)
+(autoload 'eww-download-callback "eww")
+
+(defun embark-download-url (url)
+  "Download URL to `eww-download-directory'."
+  (interactive "sDownload URL: ")
+  (let ((dir eww-download-directory))
+    (when (functionp dir) (setq dir (funcall dir)))
+    (access-file dir "Download failed")
+    (url-retrieve url #'eww-download-callback (list url dir))))
 
 ;;; Setup and pre-action hooks
 
@@ -3837,6 +3834,7 @@ The advice is self-removing so it only affects ACTION once."
   ("a" align)
   ("A" align-regexp)
   ("i" indent-rigidly)
+  ("I" embark-insert)
   ("TAB" indent-region)
   ("f" fill-region)
   ("p" fill-region-as-paragraph)
@@ -3876,6 +3874,7 @@ The advice is self-removing so it only affects ACTION once."
   "Keymap for Embark file actions."
   ("RET" find-file)
   ("f" find-file)
+  ("F" find-file-literally)
   ("o" find-file-other-window)
   ("d" delete-file)
   ("D" delete-directory)
@@ -3905,6 +3904,7 @@ The advice is self-removing so it only affects ACTION once."
   "Keymap for Embark url actions."
   ("RET" browse-url)
   ("b" browse-url)
+  ("d" embark-download-url)
   ("e" eww))
 
 (embark-define-keymap embark-email-map
@@ -4000,7 +4000,6 @@ The advice is self-removing so it only affects ACTION once."
   ("h" describe-symbol)
   ("s" embark-info-lookup-symbol)
   ("d" embark-find-definition)
-  ("b" where-is)
   ("e" pp-eval-expression)
   ("a" apropos)
   ("\\" embark-history-remove))
@@ -4042,6 +4041,7 @@ The advice is self-removing so it only affects ACTION once."
   :parent embark-function-map
   ("x" execute-extended-command)
   ("I" Info-goto-emacs-command-node)
+  ("b" where-is)
   ("g" global-set-key)
   ("l" local-set-key))
 
