@@ -4,8 +4,8 @@
 
 ;; Author: Alf Lervåg
 ;; Keywords: literate programming, reproducible research
-;; Package-Version: 20210718.2008
-;; Package-Commit: bfbc4d8e8a348c140f9328542daf5d979f0993e2
+;; Package-Version: 20220131.1745
+;; Package-Commit: f81f2f4f3fe6882947b8547ccd570f540106ed4d
 ;; Homepage: https://github.com/alf/ob-restclient.el
 ;; Version: 0.02
 ;; Package-Requires: ((restclient "0"))
@@ -40,10 +40,13 @@
 (require 'ob-comint)
 (require 'ob-eval)
 (require 'restclient)
-
+	
 (defvar org-babel-default-header-args:restclient
   `((:results . "raw"))
   "Default arguments for evaluating a restclient block.")
+
+(defvar org-babel-restclient--jq-path "jq" 
+	"The path to `jq', for postprocessing. Uses the PATH by default")
 
 ;;;###autoload
 (defun org-babel-execute:restclient (body params)
@@ -77,15 +80,26 @@ This function is called by `org-babel-execute-src-block'"
         (sleep-for 0.05))
 
       (goto-char (point-min))
-      (when (search-forward (buffer-name) nil t)
+      (when (equal (buffer-name) (buffer-string))
         (error "Restclient encountered an error"))
 
       (when (or (org-babel-restclient--return-pure-payload-result-p params)
                 (assq :noheaders params))
         (org-babel-restclient--hide-headers))
 
+       (when-let* ((jq-header (assoc :jq params))
+                  (jq-path "jq"))
+        (shell-command-on-region
+         (point-min)
+         (point-max)
+         (format "%s %s" org-babel-restclient--jq-path
+		         (shell-quote-argument (cdr jq-header)))
+         (current-buffer)
+         t))
+	 
       (when (not (org-babel-restclient--return-pure-payload-result-p params))
         (org-babel-restclient--wrap-result))
+	 
       (buffer-string))))
 
 (defun org-babel-restclient--wrap-result ()
