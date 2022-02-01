@@ -1,12 +1,15 @@
 ;;; orderless.el --- Completion style for matching regexps in any order  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2020  Omar Antolín Camarena
+;; Copyright (C) 2021  Free Software Foundation, Inc.
 
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
+;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: extensions
-;; Version: 0.6
+;; Version: 0.7
 ;; Homepage: https://github.com/oantolin/orderless
 ;; Package-Requires: ((emacs "26.1"))
+
+;; This file is part of GNU Emacs.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -128,9 +131,6 @@ a list of them."
   :options '(orderless-regexp
              orderless-literal
              orderless-initialism
-             orderless-strict-initialism
-             orderless-strict-leading-initialism
-             orderless-strict-full-initialism
              orderless-prefixes
              orderless-flex))
 
@@ -207,45 +207,6 @@ This means the characters in COMPONENT must occur in the
 candidate, in that order, at the beginning of words."
   (orderless--separated-by '(zero-or-more nonl)
    (cl-loop for char across component collect `(seq word-start ,char))))
-
-(defun orderless--strict-*-initialism (component &optional anchored)
-  "Match a COMPONENT as a strict initialism, optionally ANCHORED.
-The characters in COMPONENT must occur in the candidate in that
-order at the beginning of subsequent words comprised of letters.
-Only non-letters can be in between the words that start with the
-initials.
-
-If ANCHORED is `start' require that the first initial appear in
-the first word of the candidate.  If ANCHORED is `both' require
-that the first and last initials appear in the first and last
-words of the candidate, respectively."
-  (orderless--separated-by
-   '(seq (zero-or-more alpha) word-end (zero-or-more (not alpha)))
-   (cl-loop for char across component collect `(seq word-start ,char))
-   (when anchored '(seq (group buffer-start) (zero-or-more (not alpha))))
-   (when (eq anchored 'both)
-     '(seq (zero-or-more alpha) word-end (zero-or-more (not alpha)) eol))))
-
-(defun orderless-strict-initialism (component)
-  "Match a COMPONENT as a strict initialism.
-This means the characters in COMPONENT must occur in the
-candidate in that order at the beginning of subsequent words
-comprised of letters.  Only non-letters can be in between the
-words that start with the initials."
-  (orderless--strict-*-initialism component))
-
-(defun orderless-strict-leading-initialism (component)
-  "Match a COMPONENT as a strict initialism, anchored at start.
-See `orderless-strict-initialism'.  Additionally require that the
-first initial appear in the first word of the candidate."
-  (orderless--strict-*-initialism component 'start))
-
-(defun orderless-strict-full-initialism (component)
-  "Match a COMPONENT as a strict initialism, anchored at both ends.
-See `orderless-strict-initialism'.  Additionally require that the
-first and last initials appear in the first and last words of the
-candidate, respectively."
-  (orderless--strict-*-initialism component 'both))
 
 (defun orderless-prefixes (component)
   "Match a component as multiple word prefixes.
