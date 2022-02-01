@@ -24,7 +24,7 @@ propagated to all other occurrences simultaneously.
 If region is not active, `iedit-default-occurrence' is called to
 get an occurrence candidate, according to the thing at point.  It
 might be url, email address, markup tag or current symbol(or
-word) .
+word).
 
 In the above two situations, with digit prefix argument 0, only
 occurrences in current function are matched.  This is good for
@@ -67,10 +67,18 @@ Keymap used within overlays:
 
 \(fn &optional ARG)" t nil)
 
-(autoload 'iedit-mode-toggle-on-function "iedit" "\
-Toggle Iedit mode on current function.
+(autoload 'iedit-mode-from-isearch "iedit" "\
+Start Iedit mode using last search string as the regexp.
 
-\(fn)" t nil)
+\(fn &optional ARG)" t nil)
+
+(autoload 'iedit-mode-toggle-on-function "iedit" "\
+Toggle Iedit mode on current function." t nil)
+
+(autoload 'iedit-execute-last-modification "iedit" "\
+Apply last modification in Iedit mode to the current buffer or an active region.
+
+\(fn &optional ARG)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "iedit" '("iedit-")))
 
