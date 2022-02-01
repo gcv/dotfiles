@@ -5,7 +5,7 @@
 ;; Author: Feng Shu <tumashu@163.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/vertico-posframe
-;; Version: 0.4.8
+;; Version: 0.5.2
 ;; Keywords: abbrev, convenience, matching, vertico
 ;; Package-Requires: ((emacs "26.0") (posframe "1.1.4") (vertico "0.13.0"))
 
@@ -127,7 +127,27 @@ minibuffer will not be hided by minibuffer-cover."
 
 (defface vertico-posframe-border
   '((t (:inherit default :background "gray50")))
-  "Face used by the vertico-posframe's border."
+  "Face used by the vertico-posframe's border when minibuffer-depth = 1."
+  :group 'vertico-posframe)
+
+(defface vertico-posframe-border-2
+  '((t (:inherit default :background "red")))
+  "Face used by the vertico-posframe's border when minibuffer-depth = 2."
+  :group 'vertico-posframe)
+
+(defface vertico-posframe-border-3
+  '((t (:inherit default :background "green")))
+  "Face used by the vertico-posframe's border when minibuffer-depth = 3."
+  :group 'vertico-posframe)
+
+(defface vertico-posframe-border-4
+  '((t (:inherit default :background "blue")))
+  "Face used by the vertico-posframe's border when minibuffer-depth = 4."
+  :group 'vertico-posframe)
+
+(defface vertico-posframe-border-fallback
+  '((t (:inherit default :background "yellow")))
+  "Face used by the vertico-posframe's border when find no face."
   :group 'vertico-posframe)
 
 (defvar vertico-posframe--buffer nil)
@@ -173,43 +193,34 @@ Optional argument FRAME ."
                     (min width (or vertico-posframe-width width))))))
 
 (defun vertico-posframe--display (_lines)
-  "Display LINES in posframe."
-  (let* ((show-minibuffer-p (vertico-posframe--show-minibuffer-p))
-         (minibuffer-window (active-minibuffer-window))
-         (point (point)))
-    (setq vertico-posframe--buffer (current-buffer))
-    (window-resize minibuffer-window
-                   (- (window-pixel-height minibuffer-window))
-                   nil nil 'pixelwise)
-    (set-window-vscroll minibuffer-window 100)
-    (when show-minibuffer-p
-      (set-window-vscroll minibuffer-window 0))
-    (with-selected-window (vertico-posframe-last-window)
-      (vertico-posframe--show vertico-posframe--buffer point))))
-
-(defun vertico-posframe--format-count ()
-  "Format vertico count."
-  (propertize (or (vertico--format-count) "") 'face 'minibuffer-prompt))
+  "Display _LINES in posframe."
+  (let ((buffer (current-buffer))
+        (point (point)))
+    (setq vertico-posframe--buffer buffer)
+    (vertico-posframe--handle-minibuffer-window)
+    (vertico-posframe--show buffer point)))
 
 (defun vertico-posframe--show (buffer window-point)
   "`posframe-show' of vertico-posframe.
 
 BUFFER will be showed by `posframe-show'.  After `posframe-show'
 is called, window-point will be set to WINDOW-POINT."
-  (let ((posframe (apply #'posframe-show
-                         buffer
-                         :font vertico-posframe-font
-                         :poshandler vertico-posframe-poshandler
-                         :background-color (face-attribute 'vertico-posframe :background nil t)
-                         :foreground-color (face-attribute 'vertico-posframe :foreground nil t)
-                         :border-width vertico-posframe-border-width
-                         :border-color (face-attribute 'vertico-posframe-border :background nil t)
-                         :override-parameters vertico-posframe-parameters
-                         :refposhandler vertico-posframe-refposhandler
-                         :hidehandler #'vertico-posframe-hidehandler
-                         :lines-truncate t
-                         :refresh 0.5
-                         (funcall vertico-posframe-size-function))))
+  (let ((posframe
+         ;; Some posframe poshandlers need infos of last-window.
+         (with-selected-window (vertico-posframe-last-window)
+           (apply #'posframe-show
+                  buffer
+                  :font vertico-posframe-font
+                  :poshandler vertico-posframe-poshandler
+                  :background-color (face-attribute 'vertico-posframe :background nil t)
+                  :foreground-color (face-attribute 'vertico-posframe :foreground nil t)
+                  :border-width vertico-posframe-border-width
+                  :border-color (vertico-posframe--get-border-color)
+                  :override-parameters vertico-posframe-parameters
+                  :refposhandler vertico-posframe-refposhandler
+                  :hidehandler #'vertico-posframe-hidehandler
+                  :lines-truncate t
+                  (funcall vertico-posframe-size-function)))))
     ;; NOTE: `posframe-show' will force set window-point to 0, so we
     ;; need reset it again after `posframe-show'.
     (when (numberp window-point)
@@ -220,6 +231,19 @@ is called, window-point will be set to WINDOW-POINT."
     (with-current-buffer buffer
       (setq-local cursor-type t)
       (setq-local cursor-in-non-selected-windows 'box))))
+
+(defun vertico-posframe--get-border-color ()
+  "Get color of vertico-posframe border."
+  (face-attribute
+   (let* ((n (minibuffer-depth))
+          (face (intern (format "vertico-posframe-border-%s" n)))
+          (face-fallback 'vertico-posframe-border-fallback))
+     (if (= n 1)
+         'vertico-posframe-border
+       (if (facep face)
+           face
+         face-fallback)))
+   :background))
 
 (defun vertico-posframe--show-minibuffer-p ()
   "Test show minibuffer or not."
@@ -234,6 +258,18 @@ is called, window-point will be set to WINDOW-POINT."
            (t nil)))
    vertico-posframe-show-minibuffer-rules))
 
+(defun vertico-posframe--handle-minibuffer-window ()
+  "Handle minibuffer window."
+  (let ((show-minibuffer-p (vertico-posframe--show-minibuffer-p))
+        (minibuffer-window (active-minibuffer-window)))
+    (setq-local max-mini-window-height 1)
+    (window-resize minibuffer-window
+                   (- (window-pixel-height minibuffer-window))
+                   nil nil 'pixelwise)
+    (set-window-vscroll minibuffer-window 100)
+    (when show-minibuffer-p
+      (set-window-vscroll minibuffer-window 0))))
+
 (defun vertico-posframe-last-window ()
   "Get the last actived window before active minibuffer."
   (let ((window (minibuffer-selected-window)))
@@ -242,20 +278,25 @@ is called, window-point will be set to WINDOW-POINT."
           (next-window))
         (selected-window))))
 
-(defun vertico-posframe--hide ()
-  "Hide vertico buffer."
+(defun vertico-posframe--minibuffer-exit-hook ()
+  "The function used by `minibuffer-exit-hook'."
+  ;; `vertico--resize-window' have set `max-mini-window-height' to
+  ;; 1.0, so I think setting it to 1.0 here is safe :-).
+  (setq-local max-mini-window-height 1.0)
   (when (posframe-workable-p)
     (posframe-hide vertico-posframe--buffer)))
 
 (defun vertico-posframe--setup ()
   "Setup minibuffer overlay, which pushes the minibuffer content down."
-  (add-hook 'minibuffer-exit-hook 'vertico-posframe--hide nil 'local))
+  (add-hook 'minibuffer-exit-hook #'vertico-posframe--minibuffer-exit-hook nil 'local))
 
 ;;;###autoload
 (defun vertico-posframe-cleanup ()
   "Remove frames and buffers used for vertico-posframe."
   (interactive)
-  (posframe-delete vertico-posframe--buffer))
+  (dolist (buffer (buffer-list))
+    (when (minibufferp buffer)
+      (posframe-delete-frame buffer))))
 
 ;;;###autoload
 (define-minor-mode vertico-posframe-mode
