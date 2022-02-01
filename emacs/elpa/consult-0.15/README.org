@@ -52,15 +52,15 @@ greater detail how Consult and Embark work together.
 ** Screenshots                                                     :noexport:
 
 #+caption: consult-grep
-[[https://github.com/minad/consult/blob/main/images/consult-grep.gif?raw=true]]
+[[https://github.com/minad/consult/blob/screenshots/consult-grep.gif?raw=true]]
 Fig. 1: Command =consult-git-grep=
 
 #+caption: consult-imenu
-[[https://github.com/minad/consult/blob/main/images/consult-imenu.png?raw=true]]
+[[https://github.com/minad/consult/blob/screenshots/consult-imenu.png?raw=true]]
 Fig. 2: Command =consult-imenu=
 
 #+caption: consult-line
-[[https://github.com/minad/consult/blob/main/images/consult-line.png?raw=true]]
+[[https://github.com/minad/consult/blob/screenshots/consult-line.png?raw=true]]
 Fig. 3: Command =consult-line=
 
 * Available commands
@@ -1167,6 +1167,7 @@ Code contributions:
 - [[https://github.com/tecosaur][Tecosaur]]
 - [[https://github.com/mohamed-abdelnour][Mohamed Abdelnour]]
 - [[https://github.com/thisirs][Sylvain Rousseau]]
+- [[https://github.com/jdtsmith][J.D. Smith]]
 
 Advice and useful discussions:
 - [[https://github.com/clemera/][Clemens Radermacher]]
@@ -1181,6 +1182,7 @@ Advice and useful discussions:
 - [[https://github.com/dgutov/][Dmitry Gutov]]
 - [[https://github.com/iyefrat][Itai Y. Efrat]]
 - [[https://github.com/bdarcus][Bruce d'Arcus]]
+- [[https://github.com/jdtsmith][J.D. Smith]]
 
 Authors of supplementary =consult-*= packages:
 
