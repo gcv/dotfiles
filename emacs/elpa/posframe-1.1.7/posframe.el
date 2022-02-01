@@ -5,7 +5,7 @@
 ;; Author: Feng Shu <tumashu@163.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/posframe
-;; Version: 1.1.5
+;; Version: 1.1.7
 ;; Keywords: convenience, tooltip
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -201,8 +201,8 @@ ACCEPT-FOCUS."
       (unless respect-header-line
         (setq-local header-line-format nil))
 
-      ;; Find existing posframe: Sometimes, the buffer of posframe
-      ;; will be recreated by other packages, so we should find
+      ;; Find existing posframe: buffer-local variables used by
+      ;; posframe can be cleaned by other packages, so we should find
       ;; existing posframe first if possible.
       (unless (or posframe--frame posframe--last-args)
         (setq-local posframe--frame
@@ -283,10 +283,16 @@ ACCEPT-FOCUS."
           (unless respect-header-line
             (set-window-parameter posframe-window 'header-line-format 'none))
           (set-window-buffer posframe-window buffer)
+          ;; When the buffer of posframe is killed, the child-frame of
+          ;; this posframe will be deleted too.
           (set-window-dedicated-p posframe-window t)))
 
       ;; Remove tab-bar always.
-      (set-frame-parameter posframe--frame 'tab-bar-lines 0)
+      ;; NOTE: if we do not test the value of frame parameter
+      ;; 'tab-bar-lines before set it, posframe will flicker when
+      ;; scroll.
+      (unless (equal (frame-parameter posframe--frame 'tab-bar-lines) 0)
+        (set-frame-parameter posframe--frame 'tab-bar-lines 0))
       (when (version< "27.0" emacs-version)
         (setq-local tab-line-format nil))
 
@@ -997,7 +1003,8 @@ posframe is very very slowly, `posframe-hide' is more useful."
   "Delete posframe pertaining to BUFFER-OR-NAME.
 BUFFER-OR-NAME can be a buffer or a buffer name."
   (let* ((buffer (get-buffer buffer-or-name))
-         (posframe (posframe--find-existing-posframe buffer))
+         (posframe (when buffer
+                     (posframe--find-existing-posframe buffer)))
          ;; NOTE: `delete-frame' runs ‘delete-frame-functions’ before
          ;; actually deleting the frame, unless the frame is a
          ;; tooltip, posframe is a child-frame, but its function like
