@@ -691,9 +691,12 @@ See `eshell-prompt-regexp'."
 
 ;;; completion
 (setq hippie-expand-try-functions-list
-      '(try-complete-abbrev
-        try-complete-file-name
+      '(try-complete-file-name
         try-expand-dabbrev))
+(global-set-key (kbd "M-/") #'hippie-expand)
+
+(global-set-key (kbd "C-.") #'completion-at-point)
+(global-set-key (kbd "C-c .") #'completion-at-point)
 
 
 ;;; compressed files
