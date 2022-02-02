@@ -230,12 +230,13 @@
 (use-package dired-sidebar
   :pin melpa
 
-  :bind (("C-x C-n" . (lambda ()
-                        (interactive)
-                        (if current-prefix-arg
-                            (call-interactively #'dired-sidebar-toggle-sidebar)
-                          (dired-sidebar-follow-file)
-                          (call-interactively #'dired-sidebar-jump-to-sidebar)))))
+  :bind
+  (("C-x C-n" . (lambda ()
+                  (interactive)
+                  (if current-prefix-arg
+                      (call-interactively #'dired-sidebar-toggle-sidebar)
+                    (dired-sidebar-follow-file)
+                    (call-interactively #'dired-sidebar-jump-to-sidebar)))))
 
   :custom
   (dired-sidebar-one-instance-p t)
@@ -247,6 +248,8 @@
     (lambda ()
       (unless (file-remote-p default-directory)
         (auto-revert-mode))))
+
+  (add-hook 'dired-sidebar-mode-hook #'hl-line-mode)
 
   :config
   (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
