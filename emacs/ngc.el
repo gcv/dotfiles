@@ -44,6 +44,9 @@
 (use-package cape
   :pin gnu
 
+  :bind
+  (("C-M-/" . cape-dabbrev))
+
   :init
   (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-tex)
