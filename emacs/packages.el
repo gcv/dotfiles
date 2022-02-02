@@ -160,20 +160,24 @@
 
 
 ;;; "comp"lete "any"thing
-;;; Deprecated in favor of Corfu and Cape.
+;;; Deprecated as a global mode in favor of Corfu and Cape, but still needed for
+;;; modes which do not provide completion-at-point functions and only have their
+;;; own company back-ends.
 (use-package company
   :diminish ""
 
-  :bind
-  (;;("TAB" . company-indent-or-complete-common)
-   ;;("C-." . company-complete)
-   ;;("C-c ." . company-complete)
-   )
+  :custom
+  (company-idle-delay nil)
 
-  :config
-  ;;(global-company-mode 1)
-  ;;(setq company-idle-delay nil)
+  :bind
+  (:map company-mode-map
+        ("TAB" . company-indent-or-complete-common)
+        ("C-." . company-complete)
+        ("C-c ." . company-complete))
   )
+
+
+(use-package company-web)
 
 
 (use-package crux
@@ -1146,6 +1150,7 @@
 
   (defun /web-mode-hook ()
     (require 'flycheck)
+    (company-mode 1)
     (subword-mode 1)
     (when (-contains? '("ts" "tsx") (file-name-extension buffer-file-name))
       (tide-setup)
