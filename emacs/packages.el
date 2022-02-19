@@ -192,6 +192,12 @@
   :pin gnu)
 
 
+(use-package deadgrep
+  :pin melpa
+  :custom
+  (deadgrep-display-buffer-function 'switch-to-buffer))
+
+
 (use-package deft
   :bind
   (("C-c d" . deft))
