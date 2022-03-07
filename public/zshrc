@@ -94,6 +94,11 @@ fi
 alias rm='rm -i'
 alias dir='ls -aCF'
 alias v='ls -lahF'
+if [[ -x $(whence exa) ]]; then
+    alias e='exa -l'
+else
+    alias e=v
+fi
 alias d='dirs -v'
 alias pf='open -a "Path Finder.app"'
 function notify() { osascript -e "display notification \"$2\" with title \"$1\"" }

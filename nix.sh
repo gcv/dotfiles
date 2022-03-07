@@ -16,6 +16,9 @@ fi
 # - sqlite
 # The following are similar:
 # - croc and magic-wormhole
+# - bat and cat
+# - exa and ls
+# - ranger and joshuto (file managers)
 nix-env -iA \
     nixpkgs.aspell \
     nixpkgs.autoconf \
@@ -28,6 +31,7 @@ nix-env -iA \
     nixpkgs.croc \
     nixpkgs.ctags \
     nixpkgs.direnv \
+    nixpkgs.exa \
     nixpkgs.exif \
     nixpkgs.fdupes \
     nixpkgs.ffmpeg \
@@ -38,6 +42,7 @@ nix-env -iA \
     nixpkgs.gnupg \
     nixpkgs.htop \
     nixpkgs.jq \
+    nixpkgs.joshuto \
     nixpkgs.lazydocker \
     nixpkgs.lazygit \
     nixpkgs.ledger \
@@ -52,6 +57,7 @@ nix-env -iA \
     nixpkgs.pandoc \
     nixpkgs.password-store \
     nixpkgs.pv \
+    nixpkgs.ranger \
     nixpkgs.rclone \
     nixpkgs.restic \
     nixpkgs.ripgrep \
