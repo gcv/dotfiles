@@ -108,7 +108,7 @@ Restore the perspective state saved in FILE.
 FILE defaults to the value of persp-state-default-file if it is
 set.
 
-Frames are restored, along with each frame's perspective list.
+Frames are restored, along with each frame's perspective list and merge list.
 Each perspective's buffer list and window layout are also
 restored.
 
