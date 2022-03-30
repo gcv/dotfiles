@@ -1,20 +1,11 @@
-;;; helm.el --- Emacs incremental and narrowing framework -*- lexical-binding: t -*-
+;;; helm-core.el --- Development files for Helm  -*- lexical-binding: t; -*-
 
-;; Version: 3.6.2
-;; URL: https://github.com/emacs-helm/helm
-
-;; Copyright (C) 2007         Tamas Patrovics
-;;               2008 ~ 2011  rubikitch <rubikitch@ruby-lang.org>
-;;               2011 ~ 2021  Thierry Volpiatto <thierry.volpiatto@gmail.com>
-
-;; This is a fork of anything.el wrote by Tamas Patrovics.
-
-;; Authors of anything.el: Tamas Patrovics
-;;                         rubikitch <rubikitch@ruby-lang.org>
-;;                         Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2022  Thierry Volpiatto
 
 ;; Author: Thierry Volpiatto <thierry.volpiatto@gmail.com>
-;; URL: http://github.com/emacs-helm/helm
+;; URL: https://emacs-helm.github.io/helm/
+;; Version: 3.8.5
+;; Package-Requires: ((emacs "25.1") (async "1.9.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,7 +18,11 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Contains the main code for Helm.
 
 ;;; Code:
 
@@ -4328,8 +4323,51 @@ This function is used with sources built with `helm-source-sync'."
                  else do (goto-char eol)
                  finally return nil)))))
 
+(defvar helm-fuzzy-default-score-fn #'helm-fuzzy-flex-style-score)
 (defun helm-score-candidate-for-pattern (candidate pattern)
-  "Assign score to CANDIDATE according to PATTERN.
+  "Assign score to CANDIDATE according to PATTERN."
+  (funcall helm-fuzzy-default-score-fn candidate pattern))
+
+;; The flex scoring needs a regexp whereas the fuzzy scoring works
+;; directly with helm-pattern, so cache the needed regexp for flex
+;; scoring to not (re)compute it at each candidate.  We could reuse
+;; the regexp cached in `helm--fuzzy-regexp-cache' but it is not
+;; exactly the same as the one needed for flex and also it is always
+;; computed against the whole helm-pattern which is not usable for
+;; e.g. file completion.
+(defvar helm--fuzzy-flex-regexp-cache (make-hash-table :test 'equal))
+(defun helm-fuzzy-flex-style-score (candidate pattern)
+  "Give a score to CANDIDATE according to PATTERN.
+A regexp is generated from PATTERN to calculate score.
+Score is calculated with the emacs-27 flex algorithm using
+`helm-flex--style-score'."
+  (let ((regexp (helm-aif (gethash pattern helm--fuzzy-flex-regexp-cache)
+                    it
+                  (clrhash helm--fuzzy-flex-regexp-cache)
+                  (puthash pattern (helm--fuzzy-flex-pattern-to-regexp pattern)
+                           helm--fuzzy-flex-regexp-cache))))
+    (helm-flex--style-score candidate regexp t)))
+
+(defun helm--fuzzy-flex-pattern-to-regexp (pattern)
+  "Return a regexp from PATTERN compatible with emacs-27 flex algorithm."
+  (completion-pcm--pattern->regex
+   (helm-completion--flex-transform-pattern (list pattern)) 'group))
+
+(defun helm-flex-add-score-as-prop (candidates regexp)
+  (cl-loop with case-fold-search = (helm-set-case-fold-search)
+           for cand in candidates
+           collect (helm-flex--style-score cand regexp)))
+
+(defun helm-completion--flex-transform-pattern (pattern)
+  ;; "fob" => '(prefix "f" any "o" any "b" any point)
+  (cl-loop for p in pattern
+           if (stringp p) nconc
+           (cl-loop for str across p
+                    nconc (list (string str) 'any))
+           else nconc (list p)))
+
+(defun helm-fuzzy-helm-style-score (candidate pattern)
+  "Give a score to CANDIDATE according to PATTERN.
 Score is calculated for contiguous matches found with PATTERN.
 Score is 100 (maximum) if PATTERN is fully matched in CANDIDATE.
 One point bonus is added to score when PATTERN prefix matches
@@ -4508,49 +4546,52 @@ See `helm-fuzzy-default-highlight-match'."
 ;;
 ;; Provide the emacs-27 flex style for emacs<27.
 ;; Reuse the flex scoring algorithm of flex style in emacs-27.
-(defun helm-flex--style-score (str regexp)
-  "Score STR candidate according to PATTERN.
+(defun helm-flex--style-score (str regexp &optional score)
+  "Score STR candidate according to REGEXP.
 
 REGEXP should be generated from a pattern which is a list like
 \'(point \"f\" any \"o\" any \"b\" any) for \"fob\" as pattern.
-Such pattern is build with
-`helm-completion--flex-transform-pattern' function.
+Such pattern may be build with
+`helm-completion--flex-transform-pattern' function, and the regexp
+with `completion-pcm--pattern->regex'.  For commodity,
+`helm--fuzzy-flex-pattern-to-regexp' is used to build such regexp. 
 
 Function extracted from `completion-pcm--hilit-commonality' in
 emacs-27 to provide such scoring in emacs<27."
   ;; Don't modify the string itself.
   (setq str (copy-sequence str))
-  (unless (string-match regexp str)
-    (error "Internal error: %s does not match %s" regexp str))
-  (let* ((md (match-data))
-         (start (pop md))
-         (len (length str))
-         (score-numerator 0)
-         (score-denominator 0)
-         (last-b 0)
-         (update-score
-          (lambda (a b)
-            "Update score variables given match range (A B)."
-            (setq score-numerator (+ score-numerator (- b a)))
-            (unless (or (= a last-b)
-                        (zerop last-b)
-                        (= a (length str)))
-              (setq score-denominator (+ score-denominator
-                                         1
-                                         (expt (- a last-b 1)
-                                               (/ 1.0 3)))))
-            (setq last-b b))))
-    (funcall update-score start start)
-    (setq md (cdr md))
-    (while md
-      (funcall update-score start (pop md))
-      (setq start (pop md)))
-    (funcall update-score len len)
-    (unless (zerop (length str))
-      (put-text-property
-       0 1 'completion-score
-       (/ score-numerator (* len (1+ score-denominator)) 1.0) str)))
-  str)
+  (if (string-match regexp str)
+      (let* ((md (match-data))
+             (start (pop md))
+             (len (length str))
+             (score-numerator 0)
+             (score-denominator 0)
+             (last-b 0)
+             (update-score
+              (lambda (a b)
+                "Update score variables given match range (A B)."
+                (setq score-numerator (+ score-numerator (- b a)))
+                (unless (or (= a last-b)
+                            (zerop last-b)
+                            (= a (length str)))
+                  (setq score-denominator (+ score-denominator
+                                             1
+                                             (expt (- a last-b 1)
+                                                   (/ 1.0 3)))))
+                (setq last-b b)))
+             result)
+        (funcall update-score start start)
+        (setq md (cdr md))
+        (while md
+          (funcall update-score start (pop md))
+          (setq start (pop md)))
+        (funcall update-score len len)
+        (unless (zerop (length str))
+          (setq result (/ score-numerator (* len (1+ score-denominator)) 1.0))
+          (put-text-property 0 1 'completion-score result str))
+        (if (and score result) result str))
+    (put-text-property 0 1 'completion-score 0.0 str)
+    (if score 0.0 str)))
 
 
 ;;; Matching candidates
@@ -6562,9 +6603,9 @@ before running again the init function."
                   (delete (assoc helm--source-name
                                  helm--candidate-buffer-alist)
                           helm--candidate-buffer-alist)))
-      ;; When using global or local as value of CREATE-OR-BUFFER
+      ;; When using global or local as value of BUFFER-SPEC
       ;; create the buffer global-bname or local-bname, otherwise
-      ;; reuse the named buffer.
+      ;; reuse the buffer named BUFFER-SPEC.
       (unless (bufferp buffer-spec)
         ;; Global buffers are killed and recreated.
         (and (eq buffer-spec 'global)
@@ -6574,9 +6615,11 @@ before running again the init function."
         ;; Local buffer, once created are reused and a new one
         ;; is created when `helm-current-buffer' change across sessions.
         (with-current-buffer (get-buffer-create
-                              (cl-ecase buffer-spec
+                              (helm-acase buffer-spec
                                 (global global-bname)
-                                (local  local-bname)))
+                                (local  local-bname)
+                                (t (and (stringp buffer-spec)
+                                        buffer-spec))))
           ;; We need a buffer not read-only to perhaps insert later
           ;; text coming from read-only buffers (Bug#1176).
           (set (make-local-variable 'buffer-read-only) nil)
@@ -6611,11 +6654,7 @@ when initializing a source with `helm-source-in-buffer' class."
   (let ((caching (and (or (stringp buffer-spec)
                           (bufferp buffer-spec))
                       (buffer-live-p (get-buffer buffer-spec))))
-        (buf (helm-candidate-buffer
-              (if (or (stringp buffer-spec)
-                      (bufferp buffer-spec))
-                  (get-buffer-create buffer-spec)
-                buffer-spec)))) ; a symbol 'global or 'local.
+        (buf (helm-candidate-buffer buffer-spec)))
     (unless caching
       (with-current-buffer buf
         (erase-buffer)
@@ -7565,7 +7604,6 @@ help."
         (helm-update (regexp-quote (helm-get-selection nil t)))))))
 (put 'helm-toggle-truncate-line 'helm-only t)
 
-
-(provide 'helm)
 
-;;; helm.el ends here
+(provide 'helm-core)
+;;; helm-core.el ends here

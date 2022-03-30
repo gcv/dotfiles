@@ -6,13 +6,13 @@
                          (or (file-name-directory #$) (car load-path))))
 
 
-;;;### (autoloads nil "helm" "helm.el" (0 0 0 0))
-;;; Generated autoloads from helm.el
+;;;### (autoloads nil "helm-core" "helm-core.el" (0 0 0 0))
+;;; Generated autoloads from helm-core.el
 
-(autoload 'helm-configuration "helm" "\
+(autoload 'helm-configuration "helm-core" "\
 Customize Helm." t nil)
 
-(autoload 'helm-define-multi-key "helm" "\
+(autoload 'helm-define-multi-key "helm-core" "\
 In KEYMAP, define key sequence KEY for function list FUNCTIONS.
 Each function runs sequentially for each KEY press.
 If DELAY is specified, switch back to initial function of FUNCTIONS list
@@ -37,7 +37,7 @@ executing the first function on the next hit.
 
 \(fn KEYMAP KEY FUNCTIONS &optional DELAY)" nil nil)
 
-(autoload 'helm-multi-key-defun "helm" "\
+(autoload 'helm-multi-key-defun "helm-core" "\
 Define NAME as a multi-key command running FUNS.
 After DELAY seconds, the FUNS list is reinitialized.
 See `helm-define-multi-key'.
@@ -46,7 +46,7 @@ See `helm-define-multi-key'.
 
 (function-put 'helm-multi-key-defun 'lisp-indent-function '2)
 
-(autoload 'helm-define-key-with-subkeys "helm" "\
+(autoload 'helm-define-key-with-subkeys "helm-core" "\
 Define in MAP a KEY and SUBKEY to COMMAND.
 
 This allows typing KEY to call COMMAND the first time and
@@ -82,10 +82,10 @@ and vectors, so don't use strings to define them.
 
 (function-put 'helm-define-key-with-subkeys 'lisp-indent-function '1)
 
-(autoload 'helm-debug-open-last-log "helm" "\
+(autoload 'helm-debug-open-last-log "helm-core" "\
 Open Helm log file or buffer of last Helm session." t nil)
 
-(autoload 'helm "helm" "\
+(autoload 'helm "helm-core" "\
 Main function to execute helm sources.
 
 PLIST is a list like
@@ -214,16 +214,16 @@ However, the use of non-keyword args is deprecated.
 
 \(fn &key SOURCES INPUT PROMPT RESUME PRESELECT BUFFER KEYMAP DEFAULT HISTORY ALLOW-NEST OTHER-LOCAL-VARS)" nil nil)
 
-(autoload 'helm-cycle-resume "helm" "\
+(autoload 'helm-cycle-resume "helm-core" "\
 Cycle in `helm-buffers' list and resume when waiting more than 1.2s." t nil)
 
-(autoload 'helm-other-buffer "helm" "\
+(autoload 'helm-other-buffer "helm-core" "\
 Simplified Helm interface with other `helm-buffer'.
 Call `helm' only with SOURCES and BUFFER as args.
 
 \(fn SOURCES BUFFER)" nil nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm" '("helm-" "with-helm-")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "helm-core" '("helm-" "with-helm-")))
 
 ;;;***
 
@@ -249,7 +249,7 @@ Call `helm' only with SOURCES and BUFFER as args.
 
 ;;;***
 
-;;;### (autoloads nil nil ("helm-core-pkg.el") (0 0 0 0))
+;;;### (autoloads nil nil ("helm-core-pkg.el" "helm.el") (0 0 0 0))
 
 ;;;***
 
