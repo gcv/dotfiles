@@ -1167,6 +1167,11 @@ system doesn't support this, you can turn off file notifications
 by customizing the variable `helm-ff-use-notify'. In this case
 you will have to refresh manually directories when needed with `\\<helm-map>\\[helm-refresh]'.
 
+*** Prefix file candidates with icons
+
+If `all-the-icons' package is installed, turning on
+`helm-ff-icon-mode' will show icons before files and directories.
+
 ** Commands
 \\<helm-find-files-map>
 |Keys|Description
@@ -1208,6 +1213,7 @@ you will have to refresh manually directories when needed with `\\<helm-map>\\[h
 |\\[helm-ff-rotate-right-persistent]|Rotate image right.
 |\\[helm-ff-increase-image-size-persistent]|Zoom in image.
 |\\[helm-ff-decrease-image-size-persistent]|Zoom out image.
+|\\[helm-ff-toggle-thumbnails]|Show thumbnails on image files.
 |\\[helm-find-files-up-one-level]|Go to parent directory.
 |\\[helm-find-files-history]|Switch to the visited-directory history.
 |\\[helm-ff-file-name-history]|Switch to file name history.
@@ -1225,12 +1231,12 @@ you will have to refresh manually directories when needed with `\\<helm-map>\\[h
 |\\[helm-ff-run-insert-org-link]|Insert org link.
 |\\[helm-ff-bookmark-set]|Set bookmark to current directory.
 |\\[helm-find-files-switch-to-bookmark]|Jump to bookmark list.
-|\\[helm-ff-sort-alpha]|Sort alphabetically
-|\\[helm-ff-sort-by-newest]|Sort by newest
-|\\[helm-ff-sort-by-size]|Sort by size
-|\\[helm-ff-toggle-dirs-only]|Show only directories
-|\\[helm-ff-toggle-files-only]|Show only files
-|\\[helm-ff-toggle-thumbnails]|Show thumbnails on image files")
+|\\[helm-ff-sort-alpha]|Sort alphabetically.
+|\\[helm-ff-sort-by-newest]|Sort by newest.
+|\\[helm-ff-sort-by-size]|Sort by size.
+|\\[helm-ff-toggle-dirs-only]|Show only directories.
+|\\[helm-ff-toggle-files-only]|Show only files.
+|\\[helm-ff-sort-by-ext]|Sort by extensions.")
 
 ;;; Help for file-name-history
 ;;
@@ -1768,6 +1774,14 @@ See [[Commands][commands]] below.
 Once in that buffer you can use [[https://github.com/mhayashi1120/Emacs-wgrep][emacs-wgrep]] (external package not bundled with Helm)
 to edit your changes, for Helm the package name is `wgrep-helm', it is hightly recommended.
 
+Type `g' to update (revert) the buffer (after saving your buffer's changes to file).
+
+NOTE: `next-error' is available from this `helm-grep-mode' buffer.
+
+When you are running `next-error' from elsewhere, you can update
+the buffer with `helm-revert-next-error-last-buffer' (up to you
+to bind it to a convenient key).
+
 *** Helm-grep supports multi-matching
 
 \(Starting from version 1.9.4.)
@@ -1923,6 +1937,9 @@ leaving Helm.
 (defvar helm-bookmark-help-message
   "* Helm bookmark name
 
+When `helm-bookmark-use-icon' is non nil and `all-the-icons'
+package is installed icons before candidates will be displayed.
+ 
 ** Commands
 \\<helm-bookmark-map>
 |Keys|Description
@@ -2043,7 +2060,7 @@ your alias in the eshell alias file with e.g. \"alias foo $1 &\".
 |\\[helm-ff-run-delete-file]|Delete file.
 |\\[helm-ff-run-open-file-externally]|Open file externally.")
 
-;;; Moccur help
+;;; helm-occur help
 ;;
 ;;
 (defvar helm-moccur-help-message
@@ -2114,7 +2131,11 @@ This can be done automatically by customizing `helm-moccur-auto-update-on-resume
 
 *** Refresh a saved buffer
 
-Type `g' to update the buffer.
+Type `g' to update (revert) the buffer.
+
+When you are running `next-error' from elsewhere, you can update
+the buffer with `helm-revert-next-error-last-buffer' (up to you
+to bind it to a convenient key).
 
 *** Edit a saved buffer
 
@@ -2125,6 +2146,8 @@ First, install wgrep (https://github.com/mhayashi1120/Emacs-wgrep) and then:
 
 Tip: Use the excellent iedit (https://github.com/victorhge/iedit) to modify all
 occurences at once in the buffer.
+
+NOTE: `next-error' is available from this `helm-occur-mode' buffer.
 
 *** Search in region
 

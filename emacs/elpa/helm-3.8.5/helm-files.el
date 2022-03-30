@@ -87,7 +87,11 @@
 (declare-function tramp-make-tramp-file-name "tramp")
 (declare-function tramp-cleanup-connection "tramp-cmds")
 (declare-function dired-async-processes "ext:dired-async.el")
+(declare-function all-the-icons-icon-for-file "ext:all-the-icons.el")
+(declare-function all-the-icons-octicon "ext:all-the-icons.el")
+(declare-function all-the-icons-match-to-alist "ext:all-the-icons.el")
 
+(defvar all-the-icons-dir-icon-alist)
 (defvar term-char-mode-point-at-process-mark)
 (defvar term-char-mode-buffer-read-only)
 (defvar recentf-list)
@@ -260,7 +264,7 @@ very large directories."
   :group 'helm-files
   :type 'hook)
 
-(defcustom helm-find-files-bookmark-prefix "Helm-find-files: "
+(defcustom helm-find-files-bookmark-prefix nil
   "bookmark name prefix of `helm-find-files' sessions."
   :group 'helm-files
   :type 'string)
@@ -583,6 +587,12 @@ It is generally \"~/.local/share/Trash\"."
   "Face used for file names in `helm-find-files'."
   :group 'helm-files-faces)
 
+(defface helm-ff-nofile
+  `((t ,@(and (>= emacs-major-version 27) '(:extend t))
+       :inherit helm-ff-file))
+  "Face used for file names in `helm-find-files'."
+  :group 'helm-files-faces)
+
 (defface helm-ff-truename
   `((t ,@(and (>= emacs-major-version 27) '(:extend t))
        :inherit font-lock-string-face))
@@ -804,6 +814,12 @@ when moving out of directory when non nil."
   "A list of eshell aliases to not display."
   :type '(repeat string)
   :group 'helm-files)
+
+(defvar helm-ff-last-expanded-candidate-regexp "^[[:multibyte:]]? ?%s$"
+  "Regexp that retrieve previous candidate when going up one level.
+The default value matching a multibyte char at bol allows prefixing
+candidate with an icon.  The format part will be replaced by the
+display part of the candidate regexp quoted.")
 
 ;; Internal.
 (defvar helm-find-files-doc-header " (\\<helm-find-files-map>\\[helm-find-files-up-one-level]: Go up one level)"
@@ -984,9 +1000,11 @@ Should not be used among other sources.")
     ;; tramp starts and display candidates.  FNAME is here always a
     ;; directory.
     (when (file-directory-p fname)
-      (helm-find-files-1 fname (if helm-ff-transformer-show-only-basename
-                                   (concat "^" (regexp-quote (helm-basename presel)))
-                                 (regexp-quote presel))))))
+      (helm-find-files-1 fname
+                         (format helm-ff-last-expanded-candidate-regexp
+                                 (if helm-ff-transformer-show-only-basename
+                                     (regexp-quote (helm-basename presel))
+                                   (regexp-quote presel)))))))
 
 (defun helm-ff-bookmark-set ()
   "Record `helm-find-files' session in bookmarks."
@@ -2745,7 +2763,10 @@ hitting C-j on \"..\"."
                        (directory-file-name helm-ff-last-expanded))
                     (directory-file-name helm-ff-last-expanded))))
       (with-helm-window
-        (when (re-search-forward (concat "^" (regexp-quote presel) "$") nil t)
+        (when (re-search-forward
+               (format helm-ff-last-expanded-candidate-regexp
+                       (regexp-quote presel))
+               nil t)
           (forward-line 0)
           (helm-mark-current-line)))
       (setq helm-ff-last-expanded nil))))
@@ -3674,13 +3695,16 @@ Note that only existing directories are saved here."
                               (abbreviate-file-name sel)))))))
 (add-hook 'helm-exit-minibuffer-hook 'helm-files-save-file-name-history)
 
-(defun helm-ff-valid-symlink-p (file)
+(defun helm-ff-valid-symlink-p (file &optional link)
+  "Returns the truename of FILE if it exists.
+If we already know the truename of FILE we can pass it with LINK arg
+to avoid an unnecessary call to `file-truename'."
   (helm-aif (condition-case-unless-debug nil
                 ;; `file-truename' send error
                 ;; on cyclic symlinks (Bug#692).
-                (file-truename file)
+                (or link (file-truename file))
               (error nil))
-      (file-exists-p it)))
+      (and (file-exists-p it) it)))
 
 (defun helm-get-default-mode-for-file (filename)
   "Return the default mode to open FILENAME."
@@ -3725,8 +3749,7 @@ Note that only existing directories are saved here."
                 (format "True name: '%s'\n"
                         (cond ((string-match "^\\.#" (helm-basename candidate))
                                "Autosave symlink")
-                              ((helm-ff-valid-symlink-p candidate)
-                               (file-truename candidate))
+                              ((helm-ff-valid-symlink-p candidate))
                               (t "Invalid Symlink"))))
               (format "Owner: %s: %s\n" owner owner-right)
               (format "Group: %s: %s\n" group group-right)
@@ -4066,14 +4089,91 @@ If SKIP-BORING-CHECK is non nil don't filter boring files."
                 ;; cond before.
                 ((string-match helm-ff-tramp-method-regexp file)
                  (cons (propertize (concat "/" (match-string 1 file))
-                                   'face 'helm-ff-file)
+                                   'face 'helm-ff-nofile)
                        (concat "/:" (match-string 1 file))))
                 ;; A non--existing file.
                 (t
-                 (add-face-text-property 0 len 'helm-ff-file t disp)
+                 (add-face-text-property 0 len 'helm-ff-nofile t disp)
                  (cons (helm-ff-prefix-filename
                           disp nil 'new-file)
                        file))))))))
+
+(defun helm-ff-icons-transformer (candidates _source)
+  "Transformer for HFF that prefix candidates with icons."
+  (cl-loop for (disp . fname) in candidates
+           for icon = (helm-ff-get-icon disp fname)
+           collect (cons (concat icon disp) fname)))
+
+(defun helm-ff-get-icon (disp file)
+  "Get icon from all-the-icons for FILE.
+Arg DISP is the display part of the candidate."
+  (let ((icon (helm-acond (;; Non symlink directories.
+                           (helm-ff--is-dir-from-disp disp)
+                           (all-the-icons-octicon "file-directory"))
+                          (;; All files, symlinks may be symlink directories.
+                           (helm-ff--is-file-from-disp disp)
+                           ;; Detect symlink directories. We must call
+                           ;; `file-directory-p' here but it is
+                           ;; limited to symlinks, so it should not
+                           ;; degrade too much performances.
+                           (if (and (memq it '(helm-ff-symlink
+                                               helm-ff-dotted-symlink-directory))
+                                    (file-directory-p file))
+                               (let* ((icon (all-the-icons-match-to-alist
+                                             (helm-basename file)
+                                             all-the-icons-dir-icon-alist))
+                                      (args (cdr icon)))
+                                 (apply #'all-the-icons-octicon
+                                        "file-symlink-directory" (cdr args)))
+                             (all-the-icons-icon-for-file file))))))
+    (when icon (concat icon " "))))
+
+(defun helm-ff--is-dir-from-disp (disp)
+  "Return the face used for candidate when candidate is a directory."
+  (cl-loop for face in '(helm-ff-directory helm-ff-dotted-directory)
+           thereis (text-property-any 0 (length disp) 'face face disp)))
+
+(defun helm-ff--is-file-from-disp (disp)
+  "Return the face used for file's candidate or dotted-symlink dirs."
+  (cl-loop with len = (length disp)
+           for face in '(helm-ff-file
+                         helm-ff-suid
+                         helm-ff-executable
+                         helm-ff-socket
+                         helm-ff-pipe
+                         helm-ff-symlink
+                         helm-ff-dotted-symlink-directory
+                         helm-ff-backup-file)
+           when (text-property-any 0 len 'face face disp)
+           return face))
+
+;;;###autoload
+(define-minor-mode helm-ff-icon-mode
+    "Display icons from `all-the-icons' package in HFF when enabled.
+
+NOTE: This mode is building `helm-source-find-files', so if you enable
+it from your init file, ensure to call it _after_ your defmethod's
+`helm-setup-user-source' definitions (if some) to ensure they are called."
+  :global t
+  (require 'all-the-icons)
+  (if helm-ff-icon-mode
+      (progn
+        (unless helm-source-find-files 
+          (setq helm-source-find-files
+                (helm-make-source
+                    "Find Files" 'helm-source-ffiles)))
+        (helm-set-attr 'filtered-candidate-transformer
+                       (append (helm-get-attr
+                                'filtered-candidate-transformer
+                                helm-source-find-files)
+                               '(helm-ff-icons-transformer))
+                       helm-source-find-files))
+    (helm-set-attr 'filtered-candidate-transformer
+                   (remove 'helm-ff-icons-transformer
+                           (helm-get-attr
+                            'filtered-candidate-transformer
+                            helm-source-find-files))
+                   helm-source-find-files)))
 
 (defun helm-find-files-action-transformer (actions candidate)
   "Action transformer for `helm-source-find-files'."
@@ -4815,7 +4915,7 @@ Special commands:
                               (("jpg" "jpeg") 'jpeg))
                  if type collect
                  (let ((thumbnail (plist-get
-                                   (cdr (image-dired-get-thumbnail-image img))
+                                   (cdr (helm-ff--image-dired-get-thumbnail-image img))
                                    :file)))
                    (cons (concat (propertize " "
                                              'display `(image
@@ -4827,6 +4927,29 @@ Special commands:
                          img))
                  else collect (cons disp img)))
     candidates))
+
+;; Same as `image-dired-get-thumbnail-image' but use
+;; `helm-ff--image-dired-thumb-name' which cache thumbnails for further use.
+(defun helm-ff--image-dired-get-thumbnail-image (file)
+  "Return the image descriptor for a thumbnail of image file FILE."
+  (unless (string-match-p (image-file-name-regexp) file)
+    (error "%s is not a valid image file" file))
+  (let* ((thumb-file (helm-ff--image-dired-thumb-name file))
+	 (thumb-attr (file-attributes thumb-file)))
+    (when (or (not thumb-attr)
+	      (time-less-p (file-attribute-modification-time thumb-attr)
+			   (file-attribute-modification-time
+			    (file-attributes file))))
+      (image-dired-create-thumb file thumb-file))
+    (create-image thumb-file)))
+
+(defvar helm-ff-image-dired-thumbnails-cache (make-hash-table :test 'equal)
+  "Store associations of image_file/thumbnail_file.")
+(defun helm-ff--image-dired-thumb-name (file)
+  (or (gethash file helm-ff-image-dired-thumbnails-cache)
+      (let ((thumb-name (image-dired-thumb-name file)))
+        (puthash file thumb-name helm-ff-image-dired-thumbnails-cache)
+        thumb-name)))
 
 (defun helm-ff-toggle-thumbnails ()
   (interactive)
@@ -4842,6 +4965,19 @@ Special commands:
                               "\\` *" "" (helm-get-selection nil t)))))
 (put 'helm-ff-toggle-thumbnails 'no-helm-mx t)
 
+;;;###autoload
+(defun helm-ff-cleanup-image-dired-dir-and-cache ()
+  "Cleanup `image-dired-dir' directory.
+Delete all thumb files that are no more associated with an existing image file in
+`helm-ff-image-dired-thumbnails-cache'."
+  (interactive)
+  (cl-loop for key being the hash-keys in helm-ff-image-dired-thumbnails-cache
+           using (hash-value val)
+           unless (file-exists-p key) do
+           (progn
+             (message "Deleting %s" val)
+             (delete-file val)
+             (remhash key helm-ff-image-dired-thumbnails-cache))))
 
 ;;; Recursive dirs completion
 ;;
@@ -5257,23 +5393,23 @@ source is `helm-source-find-files'."
 Find inside `require' and `declare-function' sexp."
   (require 'find-func)
   (let* ((beg-sexp (save-excursion (search-backward "(" (point-at-bol) t)))
-         (end-sexp (save-excursion (search-forward ")" (point-at-eol) t)))
+         (end-sexp (save-excursion (ignore-errors (end-of-defun)) (point)))
          (sexp     (and beg-sexp end-sexp
                         (buffer-substring-no-properties
                          (1+ beg-sexp) (1- end-sexp)))))
     (ignore-errors
-      (cond ((and sexp (string-match "require ['].+[^)]" sexp))
-             (find-library-name
-              (replace-regexp-in-string
-               "'\\|)\\|(" ""
-               ;; If require use third arg, ignore it,
-               ;; always use library path found in `load-path'.
-               (cl-second (split-string (match-string 0 sexp))))))
-            ((and sexp (string-match-p "^declare-function" sexp))
-             (find-library-name
-              (replace-regexp-in-string
-               "\"\\|ext:" ""
-               (cl-third (split-string sexp)))))
+      (cond (;; Should work only when point is on the use-package line
+             ;; i.e. first line of sexp otherwise it prevents matching
+             ;; urls with helm-find-files (bug #2469).
+             (and sexp (string-match "use-package +\\([^ )\n]+\\)" sexp))
+             (find-library-name (match-string 1 sexp)))
+            ((and sexp (string-match "require +[']\\([^ )]+\\)" sexp))
+              ;; If require use third arg, ignore it,
+              ;; always use library path found in `load-path'.
+             (find-library-name (match-string 1 sexp)))
+            ;; Assume declare-function sexps are on one line.
+            ((and sexp (string-match "declare-function .+? \"\\(?:ext:\\)?\\([^ )]+\\)\"" sexp))
+             (find-library-name (match-string 1 sexp)))
             (t nil)))))
 
 
@@ -5353,15 +5489,17 @@ DESTINATION for the actions copy and rename."
          (lambda ()
            (if (and dirflag (eq action 'rename))
                (helm-find-files-1 (file-name-directory target)
-                                  (if helm-ff-transformer-show-only-basename
-                                      (helm-basename target) target))
+                                  (format helm-ff-last-expanded-candidate-regexp
+                                          (if helm-ff-transformer-show-only-basename
+                                              (helm-basename target) target)))
              (helm-find-files-1 (if (file-directory-p destination)
                                     (file-name-as-directory
                                      (expand-file-name destination))
                                   (expand-file-name (helm-basedir destination)))
-                                (if helm-ff-transformer-show-only-basename
-                                    (helm-basename (car files))
-                                  (car files))))))))))
+                                (format helm-ff-last-expanded-candidate-regexp
+                                        (if helm-ff-transformer-show-only-basename
+                                            (helm-basename (car files))
+                                          (car files)))))))))))
 
 (defun helm-get-dest-fnames-from-list (flist dest-cand rename-dir-flag)
   "Transform filenames of FLIST to abs of DEST-CAND.
@@ -5463,10 +5601,11 @@ When a prefix arg is given, meaning of
       (unwind-protect
            (cl-loop for c in marked do
                     (progn (helm-preselect
-                            (concat "^" (regexp-quote
-                                         (if (and helm-ff-transformer-show-only-basename
-                                                  (not (helm-ff-dot-file-p c)))
-                                             (helm-basename c) c))))
+                            (format helm-ff-last-expanded-candidate-regexp
+                                    (regexp-quote
+                                     (if (and helm-ff-transformer-show-only-basename
+                                              (not (helm-ff-dot-file-p c)))
+                                         (helm-basename c) c))))
                            (when (y-or-n-p
                                   (format "Really %s file `%s'? "
                                           (if trash "Trash" "Delete")
@@ -5488,9 +5627,10 @@ When a prefix arg is given, meaning of
         (helm-force-update
          (let ((presel (helm-get-selection)))
            (when presel
-             (concat "^" (regexp-quote (if (and helm-ff-transformer-show-only-basename
-                                                (not (helm-ff-dot-file-p presel)))
-                                           (helm-basename presel) presel))))))))))
+             (format helm-ff-last-expanded-candidate-regexp
+                     (regexp-quote (if (and helm-ff-transformer-show-only-basename
+                                            (not (helm-ff-dot-file-p presel)))
+                                       (helm-basename presel) presel))))))))))
 
 (defun helm-delete-file (file &optional error-if-dot-file-p synchro trash)
   "Delete FILE after querying the user.
@@ -5887,15 +6027,19 @@ doing.")
 
 (defun helm-file-name-history-transformer (candidates _source)
   (cl-loop for c in candidates
-           when (cond ((or (file-remote-p c)
-                           (and (fboundp 'tramp-archive-file-name-p)
-                                (tramp-archive-file-name-p c)))
-                       (cons (propertize c 'face 'helm-history-remote) c))
-                      ((file-exists-p c)
-                       (cons (propertize c 'face 'helm-ff-file) c))
-                      (t (unless helm--file-name-history-hide-deleted
-                           (cons (propertize c 'face 'helm-history-deleted) c))))
-           collect it))
+           for disp = (cond ((or (file-remote-p c)
+                                 (and (fboundp 'tramp-archive-file-name-p)
+                                      (tramp-archive-file-name-p c)))
+                             (propertize c 'face 'helm-history-remote))
+                            ((file-exists-p c)
+                             (propertize c 'face 'helm-ff-file))
+                            (t (unless helm--file-name-history-hide-deleted
+                                 (propertize c 'face 'helm-history-deleted))))
+           when disp
+           collect (cons (if helm-ff-icon-mode
+                             (concat (all-the-icons-icon-for-file c) " " disp)
+                           disp)
+                         c)))
 
 (defun helm-ff-file-name-history-ff (candidate)
   (helm-set-pattern
@@ -5925,6 +6069,7 @@ doing.")
                               file-name-history))
             :help-message 'helm-file-name-history-help-message
             :fuzzy-match t
+            :match-on-real t
             :persistent-action 'ignore
             :migemo t
             :filtered-candidate-transformer 'helm-file-name-history-transformer
@@ -6245,7 +6390,8 @@ files."
     ;; resume would do.
     (let ((helm--executing-helm-action (not (null hist))))
       (helm-find-files-1 input (and presel (null helm-ff-no-preselect)
-                                    (concat "^" (regexp-quote presel)))))))
+                                    (format helm-ff-last-expanded-candidate-regexp
+                                            (regexp-quote presel)))))))
 
 ;;;###autoload
 (defun helm-delete-tramp-connection ()

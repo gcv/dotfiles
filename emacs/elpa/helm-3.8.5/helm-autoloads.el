@@ -278,6 +278,35 @@ commands with `helm-external-commands-list'." t nil)
 ;;;### (autoloads nil "helm-files" "helm-files.el" (0 0 0 0))
 ;;; Generated autoloads from helm-files.el
 
+(defvar helm-ff-icon-mode nil "\
+Non-nil if Helm-Ff-Icon mode is enabled.
+See the `helm-ff-icon-mode' command
+for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `helm-ff-icon-mode'.")
+
+(custom-autoload 'helm-ff-icon-mode "helm-files" nil)
+
+(autoload 'helm-ff-icon-mode "helm-files" "\
+Display icons from `all-the-icons' package in HFF when enabled.
+
+If called interactively, enable Helm-Ff-Icon mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
+
+NOTE: This mode is building `helm-source-find-files', so if you enable
+it from your init file, ensure to call it _after_ your defmethod's
+`helm-setup-user-source' definitions (if some) to ensure they are called.
+
+\(fn &optional ARG)" t nil)
+
+(autoload 'helm-ff-cleanup-image-dired-dir-and-cache "helm-files" "\
+Cleanup `image-dired-dir' directory.
+Delete all thumb files that are no more associated with an existing image file in
+`helm-ff-image-dired-thumbnails-cache'." t nil)
+
 (autoload 'helm-projects-history "helm-files" "\
 
 
@@ -408,6 +437,13 @@ Go to previous file in Helm grep/etags buffers." t nil)
 
 (autoload 'helm-goto-next-file "helm-grep" "\
 Go to previous file in Helm grep/etags buffers." t nil)
+
+(autoload 'helm-revert-next-error-last-buffer "helm-grep" "\
+Revert last `next-error' buffer from `current-buffer'.
+
+Accept to revert only `helm-grep-mode' or `helm-occur-mode' buffers.
+Use this when you want to revert the `next-error' buffer after
+modifications in `current-buffer'." t nil)
 
 (autoload 'helm-do-grep-ag "helm-grep" "\
 Preconfigured `helm' for grepping with AG in `default-directory'.
@@ -1071,8 +1107,8 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 
 ;;;***
 
-;;;### (autoloads nil nil ("helm-config.el" "helm-easymenu.el" "helm-pkg.el")
-;;;;;;  (0 0 0 0))
+;;;### (autoloads nil nil ("helm-config.el" "helm-easymenu.el" "helm-pkg.el"
+;;;;;;  "helm.el") (0 0 0 0))
 
 ;;;***
 
