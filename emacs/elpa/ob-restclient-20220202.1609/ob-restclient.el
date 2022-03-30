@@ -4,8 +4,8 @@
 
 ;; Author: Alf Lervåg
 ;; Keywords: literate programming, reproducible research
-;; Package-Version: 20220131.1745
-;; Package-Commit: f81f2f4f3fe6882947b8547ccd570f540106ed4d
+;; Package-Version: 20220202.1609
+;; Package-Commit: 586f1fa07f76aaca13cb3f86945759f4b9fb8db7
 ;; Homepage: https://github.com/alf/ob-restclient.el
 ;; Version: 0.02
 ;; Package-Requires: ((restclient "0"))
@@ -40,13 +40,13 @@
 (require 'ob-comint)
 (require 'ob-eval)
 (require 'restclient)
-	
+
 (defvar org-babel-default-header-args:restclient
   `((:results . "raw"))
   "Default arguments for evaluating a restclient block.")
 
-(defvar org-babel-restclient--jq-path "jq" 
-	"The path to `jq', for postprocessing. Uses the PATH by default")
+(defcustom org-babel-restclient--jq-path "jq"
+  "The path to `jq', for post-processing. Uses the PATH by default")
 
 ;;;###autoload
 (defun org-babel-execute:restclient (body params)
@@ -70,9 +70,9 @@ This function is called by `org-babel-execute-src-block'"
             (when (eql key :var)
               (insert (format ":%s = <<\n%s\n#\n" (car value) (cdr value))))))
         (insert body)
-	(goto-char (point-min))
-	(delete-trailing-whitespace)
-	(goto-char (point-min))
+        (goto-char (point-min))
+        (delete-trailing-whitespace)
+        (goto-char (point-min))
         (restclient-http-parse-current-and-do
          'restclient-http-do (org-babel-restclient--raw-payload-p params) t))
 
@@ -84,7 +84,8 @@ This function is called by `org-babel-execute-src-block'"
         (error "Restclient encountered an error"))
 
       (when (or (org-babel-restclient--return-pure-payload-result-p params)
-                (assq :noheaders params))
+                (assq :noheaders params)
+                (assq :jq params))
         (org-babel-restclient--hide-headers))
 
        (when-let* ((jq-header (assoc :jq params))
@@ -93,13 +94,19 @@ This function is called by `org-babel-execute-src-block'"
          (point-min)
          (point-max)
          (format "%s %s" org-babel-restclient--jq-path
-		         (shell-quote-argument (cdr jq-header)))
+                         (shell-quote-argument (cdr jq-header)))
          (current-buffer)
          t))
-	 
+
+       ;; widen if jq but not pure payload
+      (when (and (assq :jq params)
+                 (not (assq :noheaders params))
+                 (not (org-babel-restclient--return-pure-payload-result-p params)))
+        (widen))
+
       (when (not (org-babel-restclient--return-pure-payload-result-p params))
         (org-babel-restclient--wrap-result))
-	 
+
       (buffer-string))))
 
 (defun org-babel-restclient--wrap-result ()
