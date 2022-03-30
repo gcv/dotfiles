@@ -148,6 +148,11 @@ Main.One.Two.Three.eval(:(x = 3 + 5))
 ```
 """
 function eval_in_module(fully_qualified_module_name::Array{Symbol}, expr::Expr)
+   # Work around Julia top-level loading requirements for certain forms; also:
+   # https://github.com/gcv/julia-snail/pull/78
+   if expr.head == :block
+      expr.head = :toplevel
+   end
    # Retrieving the first module in the chain can be tricky. In general, using
    # getfield to find a module works, but packages loaded as transitive
    # dependencies are not necessarily loaded into Main, and so must be found
@@ -181,7 +186,7 @@ function eval_in_module(fully_qualified_module_name::Array{Symbol}, expr::Expr)
       Base.invokelatest(Main.Revise.revise)
    end
    # go
-   Core.eval(fqm, expr)
+   return Core.eval(fqm, expr)
 end
 
 """
@@ -202,7 +207,7 @@ end
 """
 Parse and eval the given tmpfile in the context of the module given by the
 modpath array and modify the parsed expression to refer to realfile (instead of
-tmpfile) line numbers. Useed to evaluate a top-level form in a file while
+tmpfile) line numbers. Used to evaluate a top-level form in a file while
 preserving the original filename and line numbers for xref and stack traces.
 """
 function eval_tmpfile(tmpfile, modpath, realfile, linenum)
@@ -211,7 +216,11 @@ function eval_tmpfile(tmpfile, modpath, realfile, linenum)
    exprs = Meta.parse(code)
    # linenum - 1 accounts for the leading "begin" line in tmpfiles
    expr_change_lnn(exprs, realfilesym, linenum - 1)
-   eval_in_module(modpath, exprs)
+   result = eval_in_module(modpath, exprs)
+   # TODO: Returning the result of the expression can be really ugly if it's
+   # displayed in the minibuffer. There should be a nicer way to show it on
+   # the Emacs side (perhaps using overlays).
+   # Main.JuliaSnail.elexpr(result)
    Main.JuliaSnail.elexpr(true)
 end
 

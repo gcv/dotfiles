@@ -25,6 +25,9 @@ positive, and disable it if ARG is zero or negative.  If called
 from Lisp, also enable the mode if ARG is omitted or nil, and
 toggle it if ARG is `toggle'; disable the mode otherwise.
 
+The following keys are set:
+\\{julia-snail-mode-map}
+
 \(fn &optional ARG)" t nil)
 
 (autoload 'julia-snail-repl-mode "julia-snail" "\
