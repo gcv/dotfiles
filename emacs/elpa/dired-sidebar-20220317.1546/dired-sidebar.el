@@ -5,8 +5,8 @@
 ;; Author: James Nguyen <james@jojojames.com>
 ;; Maintainer: James Nguyen <james@jojojames.com>
 ;; URL: https://github.com/jojojames/dired-sidebar
-;; Package-Version: 20210608.2340
-;; Package-Commit: 6be2dad2782e28dae2f50c0cbfd82042b2b6ba8d
+;; Package-Version: 20220317.1546
+;; Package-Commit: aed7e44b5a4ef37fa7be6210ddfe73bb724bac6f
 ;; Version: 0.0.1
 ;; Package-Requires: ((emacs "25.1") (dired-subtree "0.0.1"))
 ;; Keywords: dired, files, tools
@@ -68,11 +68,10 @@ This face can be customized using `dired-sidebar-face'."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-face nil
+(defface dired-sidebar-face nil
   "Face used by `dired-sidebar' for custom font.
 
 This only takes effect if `dired-sidebar-use-custom-font' is true."
-  :type 'list
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-use-custom-modeline t
@@ -803,13 +802,8 @@ the relevant file-directory clicked on by the mouse."
     ;; Use `project' if `projectile' is not loaded yet.
     ;; `projectile' is a big package and takes a while to load so it's better
     ;; to defer loading it as long as possible (until the user chooses).
-    (dired-sidebar-if-let* ((project (project-current)))
-        ;; https://github.com/jojojames/dired-sidebar/issues/61
-        (if (eq (type-of project) 'ede-proj-project)
-            ;; Found from calling: (eieio-class-slots 'ede-proj-project)
-            (slot-value project 'directory)
-          ;; e.g. (vc . "~/.emacs.d/straight/repos/dired-sidebar/")
-          (cdr project))
+    (dired-sidebar-if-let* ((pr (project-current)))
+        (project-root pr)
       default-directory)))
 
 (defun dired-sidebar-buffer-name (dir)
@@ -853,7 +847,7 @@ the relevant file-directory clicked on by the mouse."
 
 Set font to a variable width (proportional) in the current buffer."
   (interactive)
-  (setq-local buffer-face-mode-face dired-sidebar-face)
+  (setq-local buffer-face-mode-face 'dired-sidebar-face)
   (buffer-face-mode))
 
 (defun dired-sidebar-set-mode-line ()
