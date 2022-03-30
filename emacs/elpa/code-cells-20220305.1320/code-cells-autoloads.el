@@ -34,6 +34,11 @@ region is active, use its bounds instead.  In this case,
 
 \(fn &rest BODY)" nil t)
 
+(autoload 'code-cells-move-cell-up "code-cells" "\
+Move current code cell vertically up ARG cells.
+
+\(fn &optional ARG)" t nil)
+
 (autoload 'code-cells-mark-cell "code-cells" "\
 Put point at the beginning of this cell, mark at end.
 

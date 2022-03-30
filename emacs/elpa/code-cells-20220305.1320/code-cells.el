@@ -1,14 +1,14 @@
-;;; code-cells.el --- Work with code split into cells, including Jupyter notebooks -*- lexical-binding: t; -*-
+;;; code-cells.el --- Lightweight notebooks with support for ipynb files -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021 Augusto Stoffel
+;; Copyright (C) 2022  Free Software Foundation, Inc.
 
 ;; Author: Augusto Stoffel <arstoffel@gmail.com>
 ;; Keywords: convenience, outlines
-;; Package-Version: 20211014.738
-;; Package-Commit: 68148cfc1f0723e554a09cbae4c732cfc348ecfd
+;; Package-Version: 20220305.1320
+;; Package-Commit: 8660bdeedee360e5eb632f1eb1356eb09d7dfbee
 ;; URL: https://github.com/astoff/code-cells.el
 ;; Package-Requires: ((emacs "27.1"))
-;; Version: 0.1
+;; Version: 0.2
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,12 +27,12 @@
 
 ;; With this package, you can efficiently navigate, edit and execute
 ;; code split into cells according to certain magic comments.  It also
-;; allows to open ipynb notebook files directly in Emacs.  They will
-;; be automatically converted to a script for editing, and converted
-;; back to notebook format when saving.  An external tool, Jupytext by
-;; default, is required for this.
+;; allows you to open ipynb notebook files directly in Emacs.  They
+;; will be automatically converted to a script for editing, and
+;; converted back to notebook format when saving.  An external tool,
+;; Jupytext by default, is required for this.
 ;;
-;; A minor mode, `code-cells-mode`, provides the following features:
+;; A minor mode, `code-cells-mode', provides the following features:
 ;;
 ;; - Fontification of cell boundaries.
 ;;
@@ -44,12 +44,12 @@
 ;;   cell, outline headings are as determined by the major mode, but
 ;;   they are demoted by an amount corresponding to the level of the
 ;;   containing cell.  This provides code folding and hierarchical
-;;   navigation, among other things, when `outline-minor-mode` is
+;;   navigation, among other things, when `outline-minor-mode' is
 ;;   active.
 ;;
 ;; This minor mode is automatically activated when opening an ipynb
 ;; file, but you can also activate it in any other buffer, either
-;; manually or through some hook.
+;; manually or through a hook.
 
 ;;; Code:
 
@@ -140,6 +140,39 @@ region is active, use its bounds instead.  In this case,
       (ignore using-region end start)
       ,@body)))
 (make-obsolete 'code-cells-do 'code-cells--bounds "2021-05-29")
+
+(defun code-cells--bounds-of-cell-relative-from (distance)
+  "Return the bounds of the code cell which is DISTANCE cells away
+from the current one."
+  (save-excursion
+    (when (/= 0 distance)
+      ;; Except when at the boundary, `(code-cells-forward-cell -1)' doesn't
+      ;; move out of current cell
+      (unless (looking-at-p (code-cells-boundary-regexp))
+        (code-cells-backward-cell))
+      (code-cells-forward-cell distance))
+    (code-cells--bounds)))
+
+(defun code-cells-move-cell-down (arg)
+  "Move current code cell vertically ARG cells.
+Move up when ARG is negative and move down otherwise."
+  (interactive "p")
+  (pcase-let ((`(,current-beg ,current-end) (code-cells--bounds))
+              (`(,next-beg ,next-end) (code-cells--bounds-of-cell-relative-from arg)))
+    (unless (save-excursion
+              (and (/= current-beg next-beg)
+                   (goto-char current-beg)
+                   (looking-at-p (code-cells-boundary-regexp))
+                   (goto-char next-beg)
+                   (looking-at-p (code-cells-boundary-regexp))))
+      (user-error "Can't move cell"))
+    (transpose-regions current-beg current-end next-beg next-end)))
+
+;;;###autoload
+(defun code-cells-move-cell-up (&optional arg)
+  "Move current code cell vertically up ARG cells."
+  (interactive "p")
+  (code-cells-move-cell-down (- arg)))
 
 ;;;###autoload
 (defun code-cells-mark-cell (&optional arg)
@@ -312,6 +345,8 @@ This function is useful when added to a major mode hook."
   (define-key map "@" 'code-cells-mark-cell)
   (define-key map "b" 'code-cells-backward-cell)
   (define-key map "f" 'code-cells-forward-cell)
+  (define-key map "B" 'code-cells-move-cell-up)
+  (define-key map "F" 'code-cells-move-cell-down)
   (define-key map "e" 'code-cells-eval))
 
 ;;; Jupyter notebook conversion
