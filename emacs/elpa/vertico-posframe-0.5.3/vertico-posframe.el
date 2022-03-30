@@ -5,7 +5,7 @@
 ;; Author: Feng Shu <tumashu@163.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/vertico-posframe
-;; Version: 0.5.2
+;; Version: 0.5.3
 ;; Keywords: abbrev, convenience, matching, vertico
 ;; Package-Requires: ((emacs "26.0") (posframe "1.1.4") (vertico "0.13.0"))
 
@@ -83,6 +83,10 @@ When nil, Using current frame's font as fallback."
 (defcustom vertico-posframe-min-height nil
   "The min height of vertico-posframe."
   :type 'number)
+
+(defcustom vertico-posframe-truncate-lines t
+  "Non-nil means truncate lines in vertico-posframe."
+  :type 'boolean)
 
 (defcustom vertico-posframe-poshandler #'posframe-poshandler-frame-center
   "The posframe poshandler used by vertico-posframe."
@@ -219,7 +223,7 @@ is called, window-point will be set to WINDOW-POINT."
                   :override-parameters vertico-posframe-parameters
                   :refposhandler vertico-posframe-refposhandler
                   :hidehandler #'vertico-posframe-hidehandler
-                  :lines-truncate t
+                  :lines-truncate vertico-posframe-truncate-lines
                   (funcall vertico-posframe-size-function)))))
     ;; NOTE: `posframe-show' will force set window-point to 0, so we
     ;; need reset it again after `posframe-show'.
