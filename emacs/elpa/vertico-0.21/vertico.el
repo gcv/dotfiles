@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.20
+;; Version: 0.21
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/vertico
 
@@ -122,7 +122,7 @@ See `resize-mini-windows' for documentation."
     (define-key map [remap forward-paragraph] #'vertico-next-group)
     (define-key map [remap exit-minibuffer] #'vertico-exit)
     (define-key map [remap kill-ring-save] #'vertico-save)
-    (define-key map [C-return] #'vertico-exit-input)
+    (define-key map "\e\r" #'vertico-exit-input)
     (define-key map "\t" #'vertico-insert)
     map)
   "Vertico minibuffer keymap derived from `minibuffer-local-map'.")
@@ -134,7 +134,7 @@ See `resize-mini-windows' for documentation."
   "History hash table.")
 
 (defvar-local vertico--history-base nil
-  "Base prefix of `vertico--history-hash'.")
+  "Base prefix of current history hash.")
 
 (defvar-local vertico--candidates-ov nil
   "Overlay showing the candidates.")
@@ -668,7 +668,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
                        minibuffer-completion-predicate)
       (if (eq minibuffer--require-match 'confirm)
           (eq (ignore-errors (read-char "Confirm")) 13)
-        (and (message "Match required") nil))))
+        (and (minibuffer-message "Match required") nil))))
 
 (defun vertico-exit (&optional arg)
   "Exit minibuffer with current candidate or input if prefix ARG is given."
@@ -753,10 +753,7 @@ When the prefix argument is 0, the group order is reset."
   (setq-local completion-auto-help nil
               completion-show-inline-help nil)
   (use-local-map vertico-map)
-  ;; Use -90 to ensure that the exhibit hook runs early such that the
-  ;; candidates are available for Consult preview. It works, but besides
-  ;; that I'dont have a specific reason for this particular value.
-  (add-hook 'post-command-hook #'vertico--exhibit -90 'local))
+  (add-hook 'post-command-hook #'vertico--exhibit nil 'local))
 
 (defun vertico--advice (&rest args)
   "Advice for completion function, receiving ARGS."

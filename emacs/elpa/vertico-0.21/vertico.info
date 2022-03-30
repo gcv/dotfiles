@@ -43,6 +43,7 @@ Problematic completion commands
 * org-refile::
 * tmm-menubar::
 * ffap-menu::
+* Submitting the empty string::
 * Tramp hostname completion::
 
 
@@ -76,8 +77,8 @@ File: vertico.info,  Node: Features,  Next: Key bindings,  Prev: Introduction,  
      candidates.
    • The current candidate is inserted with ‘TAB’ and selected with
      ‘RET’.
-   • Non-existing candidates can be submitted with ‘C-return’ or by
-     moving the point to the prompt.
+   • Non-existing candidates can be submitted with ‘M-RET’ or by moving
+     the point to the prompt.
    • Configurable sorting by history position, length and
      alphabetically.
    • Long candidates with newlines are formatted to take up less space.
@@ -113,7 +114,7 @@ handful of commands.  Note in particular the binding of ‘TAB’ to
    • ‘backward-paragraph’ -> ‘vertico-previous-group’
    • ‘exit-minibuffer’ -> ‘vertico-exit’
    • ‘kill-ring-save’ -> ‘vertico-save’
-   • ‘C-return’ -> ‘vertico-exit-input’
+   • ‘M-RET’ -> ‘vertico-exit-input’
    • ‘TAB’ -> ‘vertico-insert’
 
 
@@ -407,6 +408,15 @@ configuration problem!
            '((file grid)
              (consult-grep buffer)))
 
+   Temporary toggling between the different display modes is possible.
+Bind the following commands:
+
+     (define-key vertico-map "\M-V" #'vertico-multiform-vertical)
+     (define-key vertico-map "\M-G" #'vertico-multiform-grid)
+     (define-key vertico-map "\M-F" #'vertico-multiform-flat)
+     (define-key vertico-map "\M-R" #'vertico-multiform-reverse)
+     (define-key vertico-map "\M-U" #'vertico-multiform-unobtrusive)
+
    You can use your own functions or even lambdas to configure the
 completion behavior per command or per completion category.  The
 function must have the calling convention of a mode, i.e., it takes a
@@ -493,8 +503,8 @@ following quick start approach:
      since these commands allow you to act on the object at point or in
      the minibuffer.
   6. Install Consult if you want additional featureful completion
-     commands, e.g, the buffer switcher ‘consult-buffer’ with preview or
-     the line-based search ‘consult-line’.
+     commands, e.g., the buffer switcher ‘consult-buffer’ with preview
+     or the line-based search ‘consult-line’.
   7. Install Embark-Consult and Wgrep for export from ‘consult-line’ to
      ‘occur-mode’ buffers and from ‘consult-grep’ to editable
      ‘grep-mode’ buffers.
@@ -566,15 +576,20 @@ part in how the users interacts with Emacs.
    There are other interactive completion UIs, which follow a similar
 philosophy:
 
-   • Selectrum (https://github.com/raxod502/selectrum): Selectrum has a
-     similar UI as Vertico, since it directly inspired Vertico.  The
-     Selectrum code base is more complex.  Unfortunately Selectrum is
-     not fully compatible with every Emacs completion command (Issue
-     #481 (https://github.com/raxod502/selectrum/issues/481)), since it
-     uses its own filtering infrastructure, which deviates from the
-     standard Emacs completion facilities.  Vertico additionally has the
-     ability to cycle over candidates, offers commands for grouping
-     support and comes with a rich set of *note extensions: Extensions.
+   • Mct (https://gitlab.com/protesilaos/mct): Minibuffer and
+     Completions in Tandem.  Mct reuses the default ‘*Completions*’
+     buffer and enhances it with automatic updates and additional
+     keybindings, to select a candidate and move between minibuffer and
+     completions buffer.  Mct can be configured to open only when
+     requested.  Furthermore since Mct uses a fully functional buffer
+     you can reuse all your familar buffer commands inside the
+     completions buffer.  The main distinction to Vertico’s approach is
+     that ‘*Completions*’ buffer displays all matching candidates.  This
+     has the advantage that you can interact freely with the candidates
+     and jump around with Isearch or Avy.  On the other hand it
+     necessarily causes a slowdown in comparison to Vertico, which only
+     displays a subset of candidates.  Mct supports completion in region
+     via its ‘mct-region-mode’.
    • Icomplete-vertical
      (https://github.com/oantolin/icomplete-vertical): This package
      enhances the Emacs builtin Icomplete with a vertical display.  In
@@ -583,21 +598,17 @@ philosophy:
      candidate rotation feels a bit less intuitive than the UI of
      Vertico or Selectrum.  Note that Emacs 28 offers a built-in
      ‘icomplete-vertical-mode’.
-   • Mct (https://gitlab.com/protesilaos/mct): Minibuffer and
-     Completions in Tandem.  Mct reuses the default ‘*Completions*’
-     buffer and enhances it with automatic updates and additional
-     keybindings, to select a candidate and move between minibuffer and
-     completions buffer.  Mct is great if you prefer an unobtrusive UI
-     since it can be configured to open only when requested.
-     Furthermore since Mct uses a fully functional buffer you can reuse
-     all your familar buffer commands inside the completions buffer.
-     The main distinction to Vertico’s approach is that ‘*Completions*’
-     buffer displays all matching candidates.  On the one hand this is
-     good since it allows you to interact with all the candidates and
-     jump around with Isearch or Avy.  On the other hand it necessarily
-     causes a slowdown in comparison to Vertico, which only displays a
-     subset of candidates.  Mct supports completion in region via its
-     ‘mct-region-mode’.
+   • Selectrum (https://github.com/raxod502/selectrum): Selectrum is the
+     predecessor of Vertico, since it directly inspired Vertico.
+     Selectrum has a similar UI and interaction model as Vertico.
+     Vertico offers additional features and is more flexible than
+     Selectrum thanks to its *note extensions: Extensions.
+     Unfortunately Selectrum is not fully compatible with every Emacs
+     completion command and dynamic completion tables (Issue #481
+     (https://github.com/raxod502/selectrum/issues/481)), since it uses
+     its own filtering infrastructure, which deviates from the standard
+     Emacs completion facilities.  The filtering infrastructure also
+     leads to a larger and more complex code base.
 
 
 File: vertico.info,  Node: Resources,  Next: Contributions,  Prev: Alternatives,  Up: Top
@@ -605,12 +616,15 @@ File: vertico.info,  Node: Resources,  Next: Contributions,  Prev: Alternatives,
 9 Resources
 ***********
 
-If you want to learn more about Vertico, check out the following
-resources:
+If you want to learn more about Vertico and minibuffer completion, check
+out the following resources:
 
    • Doom Emacs Vertico Module
      (https://github.com/hlissner/doom-emacs/tree/develop/modules/completion/vertico):
      Vertico is Doom’s default completion system.
+   • Emacs Minibuffer Completions
+     (https://www.youtube.com/watch?v=w9hHMDyF9V4) (2022-02-12) by Greg
+     Yut.
    • Vertico Extensions for Emacs
      (https://www.youtube.com/watch?v=hPwDbx--Waw) (2022-01-08) by
      Karthik Chikmagalur.
@@ -648,6 +662,7 @@ require minor workarounds.
 * org-refile::
 * tmm-menubar::
 * ffap-menu::
+* Submitting the empty string::
 * Tramp hostname completion::
 
 
@@ -665,7 +680,7 @@ with completion styles like ‘substring’, ‘flex’ or ‘orderless’.  In
 order to fix the issue at the root, the completion table should make use
 of completion boundaries similar to the built-in file completion table.
 In your user configuration you can prioritize ‘basic’ before
-‘orderless:’
+‘orderless’.
 
      ;; Alternative 1: Use the basic completion style
      (setq org-refile-use-outline-path 'file
@@ -702,13 +717,13 @@ overwrite the default F10 keybinding.
      (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
 
 
-File: vertico.info,  Node: ffap-menu,  Next: Tramp hostname completion,  Prev: tmm-menubar,  Up: Problematic completion commands
+File: vertico.info,  Node: ffap-menu,  Next: Submitting the empty string,  Prev: tmm-menubar,  Up: Problematic completion commands
 
 11.3 ‘ffap-menu’
 ================
 
-The command ‘ffap-menu’ shows the ‘=*Completions*’ buffer by default
-like ‘tmm-menubar’, which is unnecessary with Vertico.  This completion
+The command ‘ffap-menu’ shows the ‘*Completions*’ buffer by default like
+‘tmm-menubar’, which is unnecessary with Vertico.  This completion
 buffer can be disabled as follows.
 
      (advice-add #'ffap-menu-ask :around (lambda (&rest args)
@@ -717,9 +732,36 @@ buffer can be disabled as follows.
                                         (apply args))))
 
 
-File: vertico.info,  Node: Tramp hostname completion,  Prev: ffap-menu,  Up: Problematic completion commands
+File: vertico.info,  Node: Submitting the empty string,  Next: Tramp hostname completion,  Prev: ffap-menu,  Up: Problematic completion commands
 
-11.4 Tramp hostname completion
+11.4 Submitting the empty string
+================================
+
+The commands ‘multi-occur’, ‘auto-insert’, ‘bbdb-create’ read multiple
+arguments from the minibuffer with ‘completing-read’, one at a time,
+until you submit an empty string.  You should type ‘M-RET’
+(‘vertico-exit-input’) to finish the loop.  Directly pressing ‘RET’
+(‘vertico-exit’) does not work since the first candidate is preselected.
+
+   The underlying issue is that ‘completing-read’ always allows you to
+exit with the empty string, which is called the _null completion_, even
+if the ‘REQUIRE-MATCH’ argument is non-nil.  Try the following two calls
+to ‘completing-read’ with ‘C-x C-e’:
+
+     (completing-read "Select: " '("first" "second" "third") nil 'require-match)
+     (completing-read "Select: " '("first" "second" "third") nil 'require-match nil nil "")
+
+   In both cases the empty string can be submitted.  In the first case
+no explicit default value is specified and Vertico preselects the
+*first* candidate.  In order to exit with the empty string, press
+‘M-RET’.  In the second case the explicit default value "" is specified
+and Vertico preselects the prompt, such that existing with the empty
+string is possible by pressing ‘RET’ only.
+
+
+File: vertico.info,  Node: Tramp hostname completion,  Prev: Submitting the empty string,  Up: Problematic completion commands
+
+11.5 Tramp hostname completion
 ==============================
 
 In combination with Orderless, hostnames are not made available for
@@ -750,25 +792,26 @@ files!
 
 Tag Table:
 Node: Top196
-Node: Introduction940
-Node: Features1775
-Node: Key bindings2809
-Node: Configuration4042
-Node: Completion styles and TAB completion7705
-Node: Completion-at-point and completion-in-region10015
-Node: Completing-read-multiple (CRM)11340
-Node: Extensions11759
-Node: Configure Vertico per command or completion category15422
-Node: Complementary packages19399
-Node: Child frames and Popups21652
-Node: Alternatives23027
-Node: Resources26594
-Node: Contributions27469
-Node: Problematic completion commands27757
-Node: org-refile28250
-Node: tmm-menubar29839
-Node: ffap-menu30431
-Node: Tramp hostname completion31066
+Node: Introduction972
+Node: Features1807
+Node: Key bindings2838
+Node: Configuration4068
+Node: Completion styles and TAB completion7731
+Node: Completion-at-point and completion-in-region10041
+Node: Completing-read-multiple (CRM)11366
+Node: Extensions11785
+Node: Configure Vertico per command or completion category15448
+Node: Complementary packages19851
+Node: Child frames and Popups22105
+Node: Alternatives23480
+Node: Resources27077
+Node: Contributions28096
+Node: Problematic completion commands28384
+Node: org-refile28909
+Node: tmm-menubar30498
+Node: ffap-menu31090
+Node: Submitting the empty string31726
+Node: Tramp hostname completion33154
 
 End Tag Table
 

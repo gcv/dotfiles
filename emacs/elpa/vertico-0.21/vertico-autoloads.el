@@ -69,13 +69,19 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 Enter directory or exit completion with current candidate." t nil)
 
 (autoload 'vertico-directory-up "vertico-directory" "\
-Delete directory before point." t nil)
+Delete N directories before point.
+
+\(fn &optional N)" t nil)
 
 (autoload 'vertico-directory-delete-char "vertico-directory" "\
-Delete directory or char before point." t nil)
+Delete N directories or chars before point.
+
+\(fn &optional N)" t nil)
 
 (autoload 'vertico-directory-delete-word "vertico-directory" "\
-Delete directory or word before point." t nil)
+Delete N directories or words before point.
+
+\(fn &optional N)" t nil)
 
 (autoload 'vertico-directory-tidy "vertico-directory" "\
 Tidy shadowed file name, see `rfn-eshadow-overlay'." nil nil)
