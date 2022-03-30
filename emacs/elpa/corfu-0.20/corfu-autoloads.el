@@ -10,7 +10,7 @@
 ;;; Generated autoloads from corfu.el
 
 (autoload 'corfu-mode "corfu" "\
-Completion Overlay Region FUnction
+Completion Overlay Region FUnction.
 
 If called interactively, enable Corfu mode if ARG is positive,
 and disable it if ARG is zero or negative.  If called from Lisp,

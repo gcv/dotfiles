@@ -26,9 +26,12 @@ corfu.el - Completion Overlay Region FUnction
 
 Installation and Configuration
 
+* Auto completion::
 * Completing with Corfu in the minibuffer::
-* Completing with Corfu in the Shell or Eshell::
+* Completing with Corfu in the Eshell or Shell::
+* Orderless completion::
 * TAB-and-Go completion::
+* Transfer completion to the minibuffer::
 
 
 
@@ -75,19 +78,19 @@ File: corfu.info,  Node: Features,  Next: Installation and Configuration,  Prev:
    • The current candidate is inserted with ‘TAB’ and selected with
      ‘RET’.
    • Candidates sorting by prefix, string length and alphabetically.
-   • The selected candidate is previewed (configuable via
+   • The selected candidate is previewed (configurable via
      ‘corfu-preview-current’).
    • The selected candidate automatically committed on further input by
-     default (configurable via ‘corfu-commit-predicate’).
+     default.  (configurable via ‘corfu-preview-current’).
    • The Orderless (https://github.com/oantolin/orderless) completion
      style is supported.  The filter string can contain arbitrary
-     characters, including spaces, if ‘corfu-quit-at-boundary’ is nil.
+     characters, after inserting a space via ‘M-SPC’ (configurable via
+     ‘corfu-quit-at-boundary’ and ‘corfu-separator’).
    • Deferred completion style highlighting for performance.
    • Jumping to location/documentation of current candidate.
-   • Show candidate documentation/signature string in the echo area.
+   • Support for candidate annotations and documentation in the echo
+     area.
    • Deprecated candidates are crossed out in the display.
-   • Support for annotations (‘annotation-function’,
-     ‘affixation-function’).
    • Icons can be provided by an external package via margin formatter
      functions.
 
@@ -105,9 +108,17 @@ Corfu and other packages in your init.el, you may want to use
 ‘use-package’.
 
    Corfu is highly flexible and customizable via ‘corfu-*’ customization
-variables.  For filtering I recommend to give Orderless completion a
-try, which is different from the familiar prefix TAB completion.  Corfu
-can be used with the default completion styles, the use of Orderless is
+variables, such that you can adapt it precisely to your requirements.
+However in order to quickly try out the Corfu completion package, it
+should be sufficient to activate ‘corfu-global-mode’.  Then you
+experiment with manual completion for example in an Elisp buffer or in
+an Eshell or Shell buffer.  For auto completion, set ‘corfu-auto=t’
+before turning on ‘corfu-global-mode’.
+
+   If you start to configure the package more deeply, I recommend to
+give the Orderless completion style a try for filtering.  Orderless
+completion is different from the familiar prefix TAB completion.  Corfu
+can be used with the default completion styles.  The use of Orderless is
 not a necessity.  See also the Corfu Wiki
 (https://github.com/minad/corfu/wiki) for additional configuration tips.
 In particular the Lsp-mode configuration is documented in the Wiki.
@@ -119,11 +130,12 @@ In particular the Lsp-mode configuration is documented in the Wiki.
        ;; :custom
        ;; (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
        ;; (corfu-auto t)                 ;; Enable auto completion
-       ;; (corfu-commit-predicate nil)   ;; Do not commit selected candidates on next input
-       ;; (corfu-quit-at-boundary t)     ;; Automatically quit at word boundary
-       ;; (corfu-quit-no-match t)        ;; Automatically quit if there is no match
+       ;; (corfu-separator ?\s)          ;; Orderless field separator
+       ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+       ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
        ;; (corfu-preview-current nil)    ;; Disable current candidate preview
        ;; (corfu-preselect-first nil)    ;; Disable candidate preselection
+       ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
        ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
        ;; (corfu-scroll-margin 5)        ;; Use scroll margin
 
@@ -181,14 +193,38 @@ completion in the Elisp manual
 
 * Menu:
 
+* Auto completion::
 * Completing with Corfu in the minibuffer::
-* Completing with Corfu in the Shell or Eshell::
+* Completing with Corfu in the Eshell or Shell::
+* Orderless completion::
 * TAB-and-Go completion::
+* Transfer completion to the minibuffer::
 
 
-File: corfu.info,  Node: Completing with Corfu in the minibuffer,  Next: Completing with Corfu in the Shell or Eshell,  Up: Installation and Configuration
+File: corfu.info,  Node: Auto completion,  Next: Completing with Corfu in the minibuffer,  Up: Installation and Configuration
 
-3.1 Completing with Corfu in the minibuffer
+3.1 Auto completion
+===================
+
+Auto completion is disabled by default, but can be enabled by setting
+‘corfu-auto=t’.  Furthermore you may want to configure Corfu to quit
+completion eagerly, such that the completion popup stays out of your way
+when it appeared unexpectedly.
+
+     ;; Enable auto completion and configure quitting
+     (setq corfu-auto t
+           corfu-quit-no-match 'separator) ;; or t
+
+   In general, I recommend to experiment a bit with the various settings
+and key bindings to find a configuration which works for you.  There is
+no one size fits all solution.  Some people like auto completion, some
+like manual completion, some want to cycle with TAB and some with the
+arrow keys...
+
+
+File: corfu.info,  Node: Completing with Corfu in the minibuffer,  Next: Completing with Corfu in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
+
+3.2 Completing with Corfu in the minibuffer
 ===========================================
 
 Corfu can be used for completion in the minibuffer, since it relies on
@@ -221,21 +257,40 @@ the desired result.
      (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
-File: corfu.info,  Node: Completing with Corfu in the Shell or Eshell,  Next: TAB-and-Go completion,  Prev: Completing with Corfu in the minibuffer,  Up: Installation and Configuration
+File: corfu.info,  Node: Completing with Corfu in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing with Corfu in the minibuffer,  Up: Installation and Configuration
 
-3.2 Completing with Corfu in the Shell or Eshell
+3.3 Completing with Corfu in the Eshell or Shell
 ================================================
 
-When completing in the Eshell I recommend conservative local settings,
-no auto completion, quitting at boundary and quitting if there is no
-match.
+When completing in the Eshell I recommend conservative local settings
+without auto completion, such that the completion behavior is similar to
+widely used shells like Bash, Zsh or Fish.
 
      (add-hook 'eshell-mode-hook
                (lambda ()
-                 (setq-local corfu-quit-at-boundary t
-                             corfu-quit-no-match t
-                             corfu-auto nil)
+                 (setq-local corfu-auto nil)
                  (corfu-mode)))
+
+   When pressing ‘RET’ while the Corfu popup is visible, the
+‘corfu-insert’ command will be invoked.  This command does inserts the
+currently selected candidate, but it does not send the prompt input to
+Eshell or the comint process.  Therefore you often have to press ‘RET’
+twice which feels like an unnecessary double confirmation.  Fortunately
+it is easy to improve this!  In my configuration I define the command
+‘corfu-insert-and-send’ which performs the two steps at once.
+
+     (defun corfu-insert-and-send ()
+       (interactive)
+       ;; 1. First insert the completed candidate
+       (corfu-insert)
+       ;; 2. Send the entire prompt input to the shell
+       (cond
+        ((and (derived-mode-p 'eshell-mode) (fboundp 'eshell-send-input))
+         (eshell-send-input))
+        ((derived-mode-p 'comint-mode)
+         (comint-send-input))))
+
+     (define-key corfu-map "\r" #'+corfu-insert-and-send)
 
    Shell completion uses the flexible ‘pcomplete’ mechanism internally,
 which allows you to program the completions per shell command.  If you
@@ -263,9 +318,75 @@ achieve a sane Eshell experience.*
      (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
 
 
-File: corfu.info,  Node: TAB-and-Go completion,  Prev: Completing with Corfu in the Shell or Eshell,  Up: Installation and Configuration
+File: corfu.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing with Corfu in the Eshell or Shell,  Up: Installation and Configuration
 
-3.3 TAB-and-Go completion
+3.4 Orderless completion
+========================
+
+Orderless (https://github.com/oantolin/orderless) is an advanced
+completion style that supports multi-component search filters separated
+by a configurable character (space, by default).  Normally, entering
+characters like space which lie outside the completion region boundaries
+(words, typically) causes Corfu to quit.  This behavior is helpful with
+auto-completion, which may pop-up when not desired, e.g.  on entering a
+new variable name.  Just keep typing and Corfu will get out of the way.
+
+   But orderless search terms can contain arbitrary characters; they are
+also interpreted as regular expressions.  To use orderless, set
+‘corfu-separator’ (a space, by default) to the primary character of your
+orderless component separator.
+
+   Then, when a new orderless component is desired, use ‘M-SPC’
+(‘corfu-insert-separator’) to enter the _first_ component separator in
+the input, and arbitrary orderless search terms and new separators can
+be entered thereafter.
+
+   To treat the entire input as Orderless input, you can set the
+customization option ‘corfu-quit-at-boundary=t’.  This disables the
+predicate which checks if the current completion boundary has been left.
+In contrast, if you _always_ want to quit at the boundary, simply set
+‘corfu-quit-at-boundary=nil’.  By default ‘corfu-quit-at-boundary’ is
+set to ‘separator’ which quits at completion boundaries as long as no
+separator has been inserted with ‘corfu-insert-separator’.
+
+   Finally, there exists the user option ‘corfu-quit-no-match’ which is
+set to ‘separator’ by default.  With this setting Corfu stays alive as
+soon as you start advanced filtering with a ‘corfu-separator’ even if
+there are no matches, for example due to a typo.  As long as no
+separator character has been inserted with ‘corfu-insert-separator’,
+Corfu will still quit if there are no matches.  This ensures that the
+Corfu popup goes away quickly if completion is not possible.
+
+   In the following we show two configurations, one which works best
+with auto completion and one which may work better with manual
+completion if you prefer to always use ‘SPC’ to separate the Orderless
+components.
+
+     ;; Auto completion example
+     (use-package corfu
+       :custom
+       (corfu-auto t)          ;; Enable auto completion
+       ;; (corfu-separator ?_) ;; Set to orderless separator, if not using space
+       :bind
+       ;; Another key binding can be used, such as S-SPC.
+       ;; (:map corfu-map ("M-SPC" . corfu-insert-separator))
+       :init
+       (corfu-global-mode))
+
+     ;; Manual completion example
+     (use-package corfu
+       :custom
+       ;; (corfu-separator ?_) ;; Set to orderless separator, if not using space
+       :bind
+       ;; Configure SPC for separator insertion
+       (:map corfu-map ("SPC" . corfu-insert-separator))
+       :init
+       (corfu-global-mode))
+
+
+File: corfu.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
+
+3.5 TAB-and-Go completion
 =========================
 
 You may be interested in configuring Corfu in TAB-and-Go style.
@@ -290,6 +411,33 @@ commit the selection.
        (corfu-global-mode))
 
 
+File: corfu.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
+
+3.6 Transfer completion to the minibuffer
+=========================================
+
+Sometimes it is useful to transfer the Corfu completion session to the
+minibuffer, since the minibuffer offers richer interaction features.  In
+particular, Embark (https://github.com/oantolin/embark) is available in
+the minibuffer, such that you can act on the candidates or
+export/collect the candidates to a separate buffer.  Hopefully we can
+also add Corfu-support to Embark in the future, such that at least
+export/collect is possible directly from Corfu.  But in my opinion
+having the ability to transfer the Corfu completion to the minibuffer is
+an even better feature, since further completion can be performed there.
+
+   The command ‘corfu-move-to-minibuffer’ is defined here in terms of
+‘consult-completion-in-region’, which uses the minibuffer completion UI
+via ‘completing-read’.
+
+     (defun corfu-move-to-minibuffer ()
+       (interactive)
+       (let ((completion-extra-properties corfu--extra)
+             completion-cycle-threshold completion-cycling)
+         (apply #'consult-completion-in-region completion-in-region--data)))
+     (define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
+
+
 File: corfu.info,  Node: Key bindings,  Next: Complementary packages,  Prev: Installation and Configuration,  Up: Top
 
 4 Key bindings
@@ -309,6 +457,7 @@ bindings:
    • ‘RET’ -> ‘corfu-insert’
    • ‘M-g’ -> ‘corfu-show-location’
    • ‘M-h’ -> ‘corfu-show-documentation’
+   • ‘M-SPC’ -> ‘corfu-insert-separator’
    • ‘C-g’ -> ‘corfu-quit’
    • ‘keyboard-escape-quit’ -> ‘corfu-reset’
 
@@ -323,11 +472,11 @@ via the ‘completion-at-point-functions’.  Many modes and packages
 already provide a Capf out of the box.  Nevertheless you may want to
 look into complementary packages to enhance your setup.
 
-   • Orderless (https://github.com/oantolin/orderless): Cofu supports
+   • Orderless (https://github.com/oantolin/orderless): Corfu supports
      completion styles, including the advanced Orderless
      (https://github.com/oantolin/orderless) completion style, where the
-     filtering expressions are separated by spaces (see
-     ‘corfu-quit-at-boundary’).
+     filtering expressions are separated by spaces or another character
+     (see ‘corfu-separator’).
 
    • Cape (https://github.com/minad/cape): I collect additional Capf
      backends and ‘completion-in-region’ commands in my Cape
@@ -346,10 +495,8 @@ look into complementary packages to enhance your setup.
      material design.
 
    • corfu-doc (https://github.com/galeo/corfu-doc): The corfu-doc
-     package by @galeo allows you to display the candidate documentation
-     in a popup next to the Corfu popup, similar to ‘company-quickhelp’.
-     _Note that the corfu-doc package is new and still work in
-     progress._
+     package displays the candidate documentation in a popup next to the
+     Corfu popup, similar to ‘company-quickhelp’.
 
    • pcmpl-args (https://github.com/JonWaltman/pcmpl-args.el): Extend
      the Eshell/Shell Pcomplete mechanism with support for many more
@@ -359,7 +506,8 @@ look into complementary packages to enhance your setup.
      level!
 
    • Tempel (https://github.com/minad/tempel): Tiny template/snippet
-     package which can be used in conjunction with Corfu.
+     package with templates in Lisp syntax, which can be used in
+     conjunction with Corfu.
 
    • Vertico (https://github.com/minad/vertico): You may also want to
      look into my Vertico (https://github.com/minad/vertico) package.
@@ -440,17 +588,20 @@ copyright assignment to the FSF.
 
 Tag Table:
 Node: Top195
-Node: Introduction707
-Node: Features2231
-Node: Installation and Configuration3635
-Node: Completing with Corfu in the minibuffer7891
-Node: Completing with Corfu in the Shell or Eshell9724
-Node: TAB-and-Go completion11816
-Node: Key bindings12679
-Node: Complementary packages13631
-Node: Alternatives16229
-Node: Caveats18662
-Node: Contributions19248
+Node: Introduction794
+Node: Features2318
+Node: Installation and Configuration3705
+Node: Auto completion8565
+Node: Completing with Corfu in the minibuffer9414
+Node: Completing with Corfu in the Eshell or Shell11271
+Node: Orderless completion14224
+Node: TAB-and-Go completion17332
+Node: Transfer completion to the minibuffer18217
+Node: Key bindings19556
+Node: Complementary packages20559
+Node: Alternatives23106
+Node: Caveats25539
+Node: Contributions26125
 
 End Tag Table
 
