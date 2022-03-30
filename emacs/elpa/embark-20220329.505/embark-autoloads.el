@@ -140,47 +140,17 @@ point.
 
 \(fn &optional FULL)" t nil)
 
-(autoload 'embark-collect-live "embark" "\
-Create a live-updating Embark Collect buffer.
-Optionally start in INITIAL-VIEW (either `list' or `grid')
-instead of what `embark-collect-initial-view-alist' specifies.
-Interactively, \\[universal-argument] means grid view, a prefix
-argument of 1 means list view.
-
-To control the display, add an entry to `display-buffer-alist'
-with key \"Embark Collect Live\".
-
-\(fn &optional INITIAL-VIEW)" t nil)
-
-(autoload 'embark-collect-snapshot "embark" "\
+(autoload 'embark-collect "embark" "\
 Create an Embark Collect buffer.
-Optionally start in INITIAL-VIEW (either `list' or `grid')
-instead of what `embark-collect-initial-view-alist' specifies.
-Interactively, \\[universal-argument] means grid view, a prefix
-argument of 1 means list view.
 
 To control the display, add an entry to `display-buffer-alist'
-with key \"Embark Collect\".
+with key \"Embark Collect\"." t nil)
 
-\(fn &optional INITIAL-VIEW)" t nil)
+(autoload 'embark-live "embark" "\
+Create a live-updating Embark Collect buffer.
 
-(autoload 'embark-collect-completions "embark" "\
-Create an ephemeral live-updating Embark Collect buffer." t nil)
-
-(autoload 'embark-collect-completions-after-delay "embark" "\
-Start `embark-collect-live' after `embark-collect-live-initial-delay'.
-Add this function to `minibuffer-setup-hook' to have an Embark
-Live Collect buffer popup every time you use the minibuffer." nil nil)
-
-(autoload 'embark-collect-completions-after-input "embark" "\
-Start `embark-collect-completions' after some minibuffer input.
-Add this function to `minibuffer-setup-hook' to have an Embark
-Live Collect buffer popup soon after you type something in the
-minibuffer; the length of the delay after typing is given by
-`embark-collect-live-initial-delay'." nil nil)
-
-(autoload 'embark-switch-to-collect-completions "embark" "\
-Switch to the Embark Collect Completions buffer, creating it if necessary." t nil)
+To control the display, add an entry to `display-buffer-alist'
+with key \"Embark Live\"." t nil)
 
 (autoload 'embark-export "embark" "\
 Create a type-specific buffer to manage current candidates.
