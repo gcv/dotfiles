@@ -73,22 +73,20 @@ Completion allows you to quickly select an item from a list of
 candidates.  Consult offers in particular an advanced buffer switching
 command ‘consult-buffer’ to switch between buffers and recently opened
 files.  Furthermore Consult provides multiple search commands, an
-asynchronous ‘consult-grep’ and ‘consult-ripgrep’, and ‘consult-line’,
-which resembles Swiper (https://github.com/abo-abo/swiper#swiper).  Some
-of the Consult commands are enhanced versions of built-in Emacs
-commands.  For example the command ‘consult-imenu’ presents a flat list
-of the Imenu with *note live preview: Live previews, *note grouping and
-narrowing: Narrowing and grouping.  Please take a look at the *note full
-list of commands: Available commands.
+asynchronous ‘consult-grep’ and ‘consult-ripgrep’, and the line-based
+search command ‘consult-line’.  Some of the Consult commands are
+enhanced versions of built-in Emacs commands.  For example the command
+‘consult-imenu’ presents a flat list of the Imenu with *note live
+preview: Live previews, *note grouping and narrowing: Narrowing and
+grouping.  Please take a look at the *note full list of commands:
+Available commands.
 
    Consult is fully compatible with completion systems based on the
 standard Emacs ‘completing-read’ API, notably the default completion
-system, Vertico (https://github.com/minad/vertico), Icomplete
-(https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html)/Icomplete-vertical
-(https://github.com/oantolin/icomplete-vertical), Selectrum
-(https://github.com/raxod502/selectrum), Embark
-(https://github.com/oantolin/embark/) and Mct
-(https://github.com/protesilaos/mct).
+system, Vertico (https://github.com/minad/vertico), Mct
+(https://github.com/protesilaos/mct), Icomplete
+(https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html)
+and Selectrum (https://github.com/raxod502/selectrum).
 
    This package keeps the completion system specifics to a minimum.  The
 ability of the Consult commands to work well with arbitrary completion
@@ -108,10 +106,10 @@ strings or file information.  The versatile Embark package provides
 local actions, comparable to a context menu.  These actions operate on
 the selected candidate in the minibuffer or at point in normal buffers.
 For example, when selecting from a list of files, Embark offers an
-action to delete the file.  Additionally Embark offers a completion
-system by itself through its live-updating collect buffer.  The section
-*note Embark integration:: documents in greater detail how Consult and
-Embark work together.
+action to delete the file.  Additionally Embark offers a facility to
+collect completion candidates in a collect buffer.  The section *note
+Embark integration:: documents in greater detail how Consult and Embark
+work together.
 
 
 File: consult.info,  Node: Available commands,  Next: Special features,  Prev: Introduction,  Up: Top
@@ -160,11 +158,14 @@ File: consult.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available comma
         • b Buffers
         • f Files (Requires ‘recentf-mode’)
         • m Bookmarks
-        • p Project (Requires configuration of the
-          ‘consult-project-root-function’ as shown in the *note example
-          configuration: Use-package example.).
-        • Arbitrary *note other sources: Multiple sources. configured in
+        • p Project
+        • Custom *note other sources: Multiple sources. configured in
           ‘consult-buffer-sources’.
+   • ‘consult-project-buffer’: Variant of ‘consult-buffer’ restricted to
+     buffers and recent files of the current project.  You can add
+     custom sources to ‘consult-project-buffer-sources’.  The command
+     may prompt you for a project if you invoke it from outside a
+     project.
    • ‘consult-bookmark’: Select or create bookmark.  To select bookmarks
      you might use the ‘consult-buffer’ as an alternative, which can
      include a bookmark virtual buffer source.  Note that
@@ -299,12 +300,11 @@ File: consult.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up
      ‘filter-string’ is passed to the _fast_ Emacs filtering to further
      narrow down the list of matches.  This is particularly useful if
      you are using an advanced completion style like orderless.
-     ‘consult-grep’ supports preview.  If the
-     ‘consult-project-root-function’ is *note configured: Use-package
-     example. and returns non-nil, ‘consult-grep’ searches the current
-     project directory.  Otherwise the ‘default-directory’ is searched.
-     If ‘consult-grep’ is invoked with prefix argument ‘C-u M-s g’, you
-     can specify the directory manually.
+     ‘consult-grep’ supports preview.  If the ‘consult-project-function’
+     returns non-nil, ‘consult-grep’ searches the current project
+     directory.  Otherwise the ‘default-directory’ is searched.  If
+     ‘consult-grep’ is invoked with prefix argument ‘C-u M-s g’, you can
+     specify the directory manually.
    • ‘consult-find’, ‘consult-locate’: Find file by matching the path
      against a regexp.  Like for ‘consult-grep,’ either the project root
      or the current directory is the root directory for the search.  The
@@ -397,18 +397,16 @@ File: consult.info,  Node: Miscellaneous,  Prev: Org Mode,  Up: Available comman
      the candidates.
    • ‘consult-preview-at-point’ and ‘consult-preview-at-point-mode’:
      Command and minor mode which previews the candidate at point in the
-     ‘*Completions*’ buffer.  This is mainly relevant if you use the
-     default ‘*Completions*’ UI or if you want to enable preview in
-     Embark Collect buffers.
-   • ‘consult-completion-in-region’: This function can be set as
-     ‘completion-in-region-function’.  Then the minibuffer completion UI
-     will be used for ‘completion-at-point’.  This function is
-     particularly useful in combination with Vertico or Icomplete, since
-     these UIs do not provide their own ‘completion-in-region-function’.
-     Selectrum provides its own function similar to
-     ‘consult-completion-in-region’.  If you use the default
-     ‘*Completions*’ UI, note that ‘consult-completion-in-region’ is not
-     useful.
+     ‘*Completions*’ buffer.  This mode is relevant if you use Mct
+     (https://gitlab.com/protesilaos/mct) or the default ‘*Completions*’
+     UI.
+   • ‘consult-completion-in-region’: In case you don’t use Corfu
+     (https://github.com/minad/corfu) as your in-buffer completion UI,
+     this function can be set as ‘completion-in-region-function’.  Then
+     your minibuffer completion UI (e.g., Vertico or Icomplete) will be
+     used for ‘completion-at-point’.  Note that Selectrum provides its
+     own function similar to ‘consult-completion-in-region’.  If you use
+     Mct, you may want to use the ‘mct-region-mode’ instead.
           ;; Use `consult-completion-in-region' if Vertico is enabled.
           ;; Otherwise use the default `completion--in-region' function.
           (setq completion-in-region-function
@@ -493,7 +491,8 @@ where the preview may be expensive due to file loading.
      (consult-customize
       consult-ripgrep consult-git-grep consult-grep
       consult-bookmark consult-recent-file consult-xref
-      consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+      consult--source-bookmark consult--source-recent-file
+      consult--source-project-recent-file
       :preview-key (kbd "M-."))
 
    In this case one may wonder what the difference is between using an
@@ -695,8 +694,8 @@ expensive operations.  However it is possible to configure the bookmark
 and file sources to also perform preview.
 
      (consult-customize
-      consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-      :preview-key (kbd "M-."))
+      consult--source-bookmark consult--source-recent-file
+      consult--source-project-recent-file :preview-key (kbd "M-."))
 
    Sources can be added directly to the ‘consult-buffer-source’ list for
 convenience.  For example views can be added to the list of virtual
@@ -867,6 +866,7 @@ additional configuration examples.
               ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
               ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
               ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+              ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
               ;; Custom M-# bindings for fast register access
               ("M-#" . consult-register-load)
               ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
@@ -901,11 +901,14 @@ additional configuration examples.
               ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
               ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
               ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-              ("M-s L" . consult-line-multi))           ;; needed by consult-line to detect isearch
+              ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+              ;; Minibuffer history
+              :map minibuffer-local-map
+              ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+              ("M-r" . consult-history))                ;; orig. previous-matching-history-element
 
        ;; Enable automatic preview at point in the *Completions* buffer. This is
-       ;; relevant when you use the default completion UI. You may want to also
-       ;; enable `consult-preview-at-point-mode` in Embark Collect buffers.
+       ;; relevant when you use the default completion UI.
        :hook (completion-list-mode . consult-preview-at-point-mode)
 
        ;; The :init configuration is always executed (Not lazy)
@@ -914,7 +917,7 @@ additional configuration examples.
        ;; Optionally configure the register formatting. This improves the register
        ;; preview for `consult-register', `consult-register-load',
        ;; `consult-register-store' and the Emacs built-ins.
-       (setq register-preview-delay 0
+       (setq register-preview-delay 0.5
              register-preview-function #'consult-register-format)
 
        ;; Optionally tweak the register preview window.
@@ -944,7 +947,8 @@ additional configuration examples.
         :preview-key '(:debounce 0.2 any)
         consult-ripgrep consult-git-grep consult-grep
         consult-bookmark consult-recent-file consult-xref
-        consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+        consult--source-bookmark consult--source-recent-file
+        consult--source-project-recent-file
         :preview-key (kbd "M-."))
 
        ;; Optionally configure the narrowing key.
@@ -955,20 +959,18 @@ additional configuration examples.
        ;; You may want to use `embark-prefix-help-command' or which-key instead.
        ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
 
-       ;; Optionally configure a function which returns the project root directory.
+       ;; By default `consult-project-function' uses `project-root' from project.el.
+       ;; Optionally configure a different project root function.
        ;; There are multiple reasonable alternatives to chose from.
-       ;;;; 1. project.el (project-roots)
-       (setq consult-project-root-function
-             (lambda ()
-               (when-let (project (project-current))
-                 (car (project-roots project)))))
+       ;;;; 1. project.el (the default)
+       ;; (setq consult-project-function #'consult--default-project--function)
        ;;;; 2. projectile.el (projectile-project-root)
        ;; (autoload 'projectile-project-root "projectile")
-       ;; (setq consult-project-root-function #'projectile-project-root)
+       ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
        ;;;; 3. vc.el (vc-root-dir)
-       ;; (setq consult-project-root-function #'vc-root-dir)
+       ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
        ;;;; 4. locate-dominating-file
-       ;; (setq consult-project-root-function (lambda () (locate-dominating-file "." ".git")))
+       ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
      )
 
 
@@ -1017,9 +1019,10 @@ consult-preview-excluded-hooks     List of ‘find-file’ hooks to avoid during
 consult-preview-max-count          Maximum number of files to keep open during preview
 consult-preview-max-size           Files larger than this size are not previewed
 consult-preview-raw-size           Files larger than this size are previewed in raw form
-consult-project-root-function      Function which returns current project root
+consult-project-buffer-sources     List of virtual project buffer sources
+consult-project-function           Function which returns current project root
 consult-recent-file-filter         Filter for ‘consult-recent-file’
-consult-register-narrow            Narrowing configuration for ‘consult-register’
+consult-register-prefix            Prefix string for register keys during completion
 consult-ripgrep-args               Command line arguments for ripgrep
 consult-themes                     List of themes to be presented for selection
 consult-widen-key                  Widening key during completion
@@ -1103,6 +1106,11 @@ I use and recommend this combination of packages:
 supported by Consult.  Give them a try and find out which interaction
 model fits best for you!
 
+   • The builtin completion UI, which pops up the ‘*Completions*’
+     buffer.
+   • mct by Protesilaos Stavrou (https://gitlab.com/protesilaos/mct):
+     Minibuffer and Completions in Tandem, which builds on the default
+     completion UI.
    • selectrum by Radon Rosborough
      (https://github.com/raxod502/selectrum): Alternative vertical
      completion system.
@@ -1110,12 +1118,6 @@ model fits best for you!
      (https://github.com/oantolin/icomplete-vertical): Vertical
      completion system based on Icomplete.  Icomplete-vertical is only
      needed for Emacs 27, built-in on Emacs 28.
-   • embark by Omar Antolín Camarena
-     (https://github.com/oantolin/embark): Completion based on live
-     updating Embark collect buffer.
-   • mct by Protesilaos Stavrou (https://gitlab.com/protesilaos/mct):
-     Minibuffer and Completions in Tandem, which builds on the default
-     completion UI.
 
    You can integrated Consult with special programs or with other
 packages in the wider Emacs ecosystem.  You may want to install some of
@@ -1129,14 +1131,19 @@ theses packages depending on your preferences and requirements.
      Integration with eglot (lsp client).
    • consult-flycheck (https://github.com/minad/consult-flycheck):
      Provides the ‘consult-flycheck’ command.
+   • consult-flyspell (https://gitlab.com/OlMon/consult-flyspell):
+     Additional Flyspell integration.
    • consult-lsp (https://github.com/gagbo/consult-lsp): Integration
      with ‘lsp-mode’ (lsp client).
    • consult-notmuch (https://codeberg.org/jao/consult-notmuch): Access
      the Notmuch (https://notmuchmail.org/) email system using Consult.
    • consult-spotify (https://codeberg.org/jao/espotify): Access the
      Spotify API and control your local music player.
+   • consult-project-extra
+     (https://github.com/Qkessler/consult-project-extra/): Additional
+     project.el extras and buffer sources.
    • consult-projectile (https://gitlab.com/OlMon/consult-projectile/):
-     Projectile integration, buffer sources for Projectile.
+     Additional Projectile integration and buffer sources.
    • consult-recoll (https://codeberg.org/jao/consult-recoll): Access
      the Recoll (https://www.lesbonscomptes.com/recoll/) desktop
      full-text search using Consult.
@@ -1161,6 +1168,8 @@ follow a similar spirit or offer functionality based on
      ‘consult-buffer’.
    • citar (https://github.com/bdarcus/citar): Versatile package for
      citation insertion and bibliography management.
+   • devdocs (https://github.com/astoff/devdocs.el): Emacs viewer for
+     DevDocs with a convenient completion interface.
    • flyspell-correct (https://github.com/d12frosted/flyspell-correct):
      Apply spelling corrections by selecting via ‘completing-read’.
    • wgrep (https://github.com/mhayashi1120/Emacs-wgrep): Editing of
@@ -1188,11 +1197,10 @@ If you find a bug or suspect that there is a problem with Consult,
 please carry out the following steps:
 
   1. *Update all the relevant packages to the newest version*.  This
-     includes Consult, Vertico, Mct, Selectrum, Icomplete-vertical,
-     Marginalia, Embark, Orderless and Prescient in case you are using
-     any of those packages.
+     includes Consult, Vertico or other completion UIs, Marginalia,
+     Embark and Orderless.
   2. Either use the default completion UI or ensure that exactly one of
-     ‘vertico-mode’, ‘selectrum-mode’, ‘mct-mode’, or ‘icomplete-mode’
+     ‘vertico-mode’, ‘mct-mode’, ‘selectrum-mode’, or ‘icomplete-mode’
      is enabled.  Furthermore ‘ivy-mode’ and ‘helm-mode’ must be
      disabled.
   3. Ensure that the ‘completion-styles’ variable is properly
@@ -1241,14 +1249,6 @@ lexical binding
 (https://www.gnu.org/software/emacs/manual/html_node/elisp/Lexical-Binding.html).
 Consult often uses a functional programming style, relying on lambdas
 and lexical closures.
-
-   The Selectrum repository provides a set of scripts
-(https://github.com/raxod502/selectrum/tree/master/test) which allow
-experimenting with multiple package combinations of completion systems
-and Consult.  After cloning the repository, you can execute the scripts
-with ‘cd selectrum/test; ./run.sh <package-combo.el>’.  The scripts do
-not modify your existing Emacs configuration, but create a separate
-Emacs configuration in ‘/tmp’.
 
 
 File: consult.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
@@ -1315,6 +1315,7 @@ original versions.
    • Itai Y.  Efrat (https://github.com/iyefrat)
    • Bruce d’Arcus (https://github.com/bdarcus)
    • J.D.  Smith (https://github.com/jdtsmith)
+   • Enrique Kessler Martínez (https://github.com/Qkessler)
 
    Authors of supplementary ‘consult-*’ packages:
 
@@ -1330,8 +1331,12 @@ original versions.
      (https://github.com/mohkale/consult-company), consult-eglot
      (https://github.com/mohkale/consult-eglot), consult-yasnippet
      (https://github.com/mohkale/consult-yasnippet))
-   • Marco Pawłowski (https://gitlab.com/OlMon) (consult-projectile
+   • Marco Pawłowski (https://gitlab.com/OlMon) (consult-flyspell
+     (https://gitlab.com/OlMon/consult-flyspell), consult-projectile
      (https://gitlab.com/OlMon/consult-projectile))
+   • Enrique Kessler Martínez (https://github.com/Qkessler)
+     (consult-project-extra
+     (https://github.com/Qkessler/consult-project-extra))
 
 
 File: consult.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
@@ -1390,6 +1395,7 @@ File: consult.info,  Node: Function index,  Next: Concept index,  Up: Indices
 * consult-outline:                       Navigation.            (line 6)
 * consult-preview-at-point:              Miscellaneous.         (line 6)
 * consult-preview-at-point-mode:         Miscellaneous.         (line 6)
+* consult-project-buffer:                Virtual Buffers.       (line 6)
 * consult-recent-file:                   Virtual Buffers.       (line 6)
 * consult-register:                      Register.              (line 6)
 * consult-register-format:               Register.              (line 6)
@@ -1440,35 +1446,35 @@ File: consult.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 Tag Table:
 Node: Top205
 Node: Introduction2603
-Node: Available commands5503
-Node: Virtual Buffers7031
-Node: Editing8479
-Node: Register9333
-Node: Navigation11043
-Node: Search12124
-Node: Grep and Find14015
-Node: Compilation16066
-Node: Histories17012
-Node: Modes18041
-Node: Org Mode18519
-Node: Miscellaneous19034
-Node: Special features22233
-Node: Live previews23360
-Node: Narrowing and grouping26210
-Node: Asynchronous search28211
-Node: Multiple sources31291
-Node: Embark integration37838
-Node: Configuration40040
-Node: Use-package example41178
-Node: Custom variables48131
-Node: Fine-tuning51721
-Node: Recommended packages54284
-Node: Bug reports59261
-Node: Contributions62472
-Node: Acknowledgments63379
-Node: Indices66336
-Node: Function index66572
-Node: Concept index70291
+Node: Available commands5345
+Node: Virtual Buffers6873
+Node: Editing8467
+Node: Register9321
+Node: Navigation11031
+Node: Search12112
+Node: Grep and Find14003
+Node: Compilation15999
+Node: Histories16945
+Node: Modes17974
+Node: Org Mode18452
+Node: Miscellaneous18967
+Node: Special features22082
+Node: Live previews23209
+Node: Narrowing and grouping26065
+Node: Asynchronous search28066
+Node: Multiple sources31146
+Node: Embark integration37693
+Node: Configuration39895
+Node: Use-package example41033
+Node: Custom variables48245
+Node: Fine-tuning51908
+Node: Recommended packages54471
+Node: Bug reports59761
+Node: Contributions62455
+Node: Acknowledgments63362
+Node: Indices66598
+Node: Function index66834
+Node: Concept index70626
 
 End Tag Table
 

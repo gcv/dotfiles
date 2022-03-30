@@ -222,12 +222,20 @@ The command supports previewing the currently selected theme.
 (autoload 'consult-buffer "consult" "\
 Enhanced `switch-to-buffer' command with support for virtual buffers.
 
-The command supports recent files, bookmarks, views and project files as virtual
-buffers. Buffers are previewed. Furthermore narrowing to buffers (b), files (f),
-bookmarks (m) and project files (p) is supported via the corresponding keys. In
-order to determine the project-specific files and buffers, the
-`consult-project-root-function' is used. See `consult-buffer-sources' and
-`consult--multi' for the configuration of the virtual buffer sources." t nil)
+The command supports recent files, bookmarks, views and project files as
+virtual buffers. Buffers are previewed. Narrowing to buffers (b), files (f),
+bookmarks (m) and project files (p) is supported via the corresponding
+keys. In order to determine the project-specific files and buffers, the
+`consult-project-function' is used. The virtual buffer SOURCES
+default to `consult-buffer-sources'. See `consult--multi' for the
+configuration of the virtual buffer sources.
+
+\(fn &optional SOURCES)" t nil)
+
+(autoload 'consult-project-buffer "consult" "\
+Enhanced `project-switch-to-buffer' command with support for virtual buffers.
+The command may prompt you for a project directory if it is invoked from
+outside a project. See `consult-buffer' for more details." t nil)
 
 (autoload 'consult-buffer-other-window "consult" "\
 Variant of `consult-buffer' which opens in other window." t nil)
@@ -276,7 +284,7 @@ Here we give a few example inputs:
 The symbol at point is added to the future history. If `consult-grep'
 is called interactively with a prefix argument, the user can specify
 the directory to search in. By default the project directory is used
-if `consult-project-root-function' is defined and returns non-nil.
+if `consult-project-function' is defined and returns non-nil.
 Otherwise the `default-directory' is searched.
 
 \(fn &optional DIR INITIAL)" t nil)
@@ -373,7 +381,7 @@ See also `consult-imenu-multi'." t nil)
 Select item from the imenus of all buffers from the same project.
 
 In order to determine the buffers belonging to the same project, the
-`consult-project-root-function' is used. Only the buffers with the
+`consult-project-function' is used. Only the buffers with the
 same major mode as the current buffer are used. See also
 `consult-imenu' for more details. In order to search a subset of buffers,
 QUERY can be set to a plist according to `consult--buffer-query'.
@@ -422,19 +430,19 @@ SHOW-EMPTY must be t if the window should be shown for an empty register list.
 
 (autoload 'consult-register-format "consult-register" "\
 Enhanced preview of register REG.
-
 This function can be used as `register-preview-function'.
+If COMPLETION is non-nil format the register for completion.
 
-\(fn REG)" nil nil)
+\(fn REG &optional COMPLETION)" nil nil)
 
 (autoload 'consult-register "consult-register" "\
 Load register and either jump to location or insert the stored text.
 
-This command is useful to search the register contents. For quick access to
-registers it is still recommended to use the register functions
-`consult-register-load' and `consult-register-store' or the built-in built-in
-register access functions. The command supports narrowing, see
-`consult-register-narrow'. Marker positions are previewed. See
+This command is useful to search the register contents. For quick access
+to registers it is still recommended to use the register functions
+`consult-register-load' and `consult-register-store' or the built-in
+built-in register access functions. The command supports narrowing, see
+`consult-register--narrow'. Marker positions are previewed. See
 `jump-to-register' and `insert-register' for the meaning of prefix ARG.
 
 \(fn &optional ARG)" t nil)
@@ -442,18 +450,19 @@ register access functions. The command supports narrowing, see
 (autoload 'consult-register-load "consult-register" "\
 Do what I mean with a REG.
 
-For a window configuration, restore it. For a number or text, insert it. For a
-location, jump to it. See `jump-to-register' and `insert-register' for the
-meaning of prefix ARG.
+For a window configuration, restore it. For a number or text, insert it.
+For a location, jump to it. See `jump-to-register' and `insert-register'
+for the meaning of prefix ARG.
 
 \(fn REG &optional ARG)" t nil)
 
 (autoload 'consult-register-store "consult-register" "\
 Store register dependent on current context, showing an action menu.
 
-With an active region, store/append/prepend the contents, optionally deleting
-the region when a prefix ARG is given. With a numeric prefix ARG, store/add the
-number. Otherwise store point, frameset, window or kmacro.
+With an active region, store/append/prepend the contents, optionally
+deleting the region when a prefix ARG is given. With a numeric prefix
+ARG, store or add the number. Otherwise store point, frameset, window or
+kmacro.
 
 \(fn ARG)" t nil)
 

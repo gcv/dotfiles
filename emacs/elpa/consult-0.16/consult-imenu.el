@@ -1,6 +1,6 @@
 ;;; consult-imenu.el --- Consult commands for imenu -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021  Free Software Foundation, Inc.
+;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
 
 ;; This file is part of GNU Emacs.
 
@@ -107,10 +107,10 @@ TYPES is the mode-specific types configuration."
   (let* ((imenu-use-markers t)
          ;; Generate imenu, see `imenu--make-index-alist'.
          (items (imenu--truncate-items
-	         (save-excursion
-		   (save-restriction
-		     (widen)
-		     (funcall imenu-create-index-function)))))
+                 (save-excursion
+                   (save-restriction
+                     (widen)
+                     (funcall imenu-create-index-function)))))
          (config (cdr (seq-find (lambda (x) (derived-mode-p (car x))) consult-imenu-config))))
     ;; Fix toplevel items, e.g., emacs-lisp-mode toplevel items are functions
     (when-let (toplevel (plist-get config :toplevel))
@@ -216,7 +216,7 @@ See also `consult-imenu-multi'."
   "Select item from the imenus of all buffers from the same project.
 
 In order to determine the buffers belonging to the same project, the
-`consult-project-root-function' is used. Only the buffers with the
+`consult-project-function' is used. Only the buffers with the
 same major mode as the current buffer are used. See also
 `consult-imenu' for more details. In order to search a subset of buffers,
 QUERY can be set to a plist according to `consult--buffer-query'."
