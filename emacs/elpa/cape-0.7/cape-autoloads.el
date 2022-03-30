@@ -11,30 +11,34 @@
 
 (autoload 'cape-file "cape" "\
 Complete file name at point.
+See the user option `cape-file-directory-must-exist'.
 If INTERACTIVE is nil the function acts like a capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-symbol "cape" "\
-Complete symbol at point.
+Complete Elisp symbol at point.
 If INTERACTIVE is nil the function acts like a capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-dabbrev "cape" "\
 Complete with Dabbrev at point.
+See the user options `cape-dabbrev-min-length' and
+`cape-dabbrev-check-other-buffers'.
 If INTERACTIVE is nil the function acts like a capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-ispell "cape" "\
-Complete with Ispell at point.
+Complete word at point with Ispell.
 If INTERACTIVE is nil the function acts like a capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-dict "cape" "\
-Complete word at point.
+Complete word from dictionary at point.
+See the custom option `cape-dict-file'.
 If INTERACTIVE is nil the function acts like a capf.
 
 \(fn &optional INTERACTIVE)" t nil)
@@ -49,7 +53,8 @@ If INTERACTIVE is nil the function acts like a capf.
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-keyword "cape" "\
-Complete word at point.
+Complete programming language keyword at point.
+See the variable `cape-keywords'.
 If INTERACTIVE is nil the function acts like a capf.
 
 \(fn &optional INTERACTIVE)" t nil)

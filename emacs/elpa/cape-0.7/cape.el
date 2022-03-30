@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.6
+;; Version: 0.7
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/cape
 
@@ -61,7 +61,10 @@
   :type 'string)
 
 (defcustom cape-dabbrev-min-length 4
-  "Minimum length of dabbrev expansions."
+  "Minimum length of dabbrev expansions.
+This setting ensures that words which are too short
+are not offered as completion candidates, such that
+auto completion does not pop up too aggressively."
   :type 'integer)
 
 (defcustom cape-dabbrev-check-other-buffers t
@@ -352,6 +355,15 @@
     (cape--silent
       (complete-with-action action table str pred))))
 
+(defun cape--nonessential-table (table)
+  "Mark completion TABLE as `non-essential'."
+  (lambda (str pred action)
+    (let ((non-essential t))
+      (let ((result (funcall table str pred action)))
+        (when (and (eq action 'completion--unquote) (functionp (cadr result)))
+          (cl-callf cape--nonessential-table (cadr result)))
+        result))))
+
 (cl-defun cape--table-with-properties (table &key category (sort t) &allow-other-keys)
   "Create completion TABLE with properties.
 CATEGORY is the optional completion category.
@@ -413,16 +425,19 @@ VALID is the input comparator, see `cape--input-valid-p'."
 ;;;###autoload
 (defun cape-file (&optional interactive)
   "Complete file name at point.
+See the user option `cape-file-directory-must-exist'.
 If INTERACTIVE is nil the function acts like a capf."
   (interactive (list t))
   (if interactive
-      (let (cape-file-directory-must-exist)
+      (let ((cape-file-directory-must-exist))
         (cape--interactive #'cape-file))
     (let* ((bounds (cape--bounds 'filename))
+           (non-essential t)
            (file (buffer-substring (car bounds) (cdr bounds))))
       (when (or (not cape-file-directory-must-exist)
                 (and (string-match-p "/" file) (file-exists-p (file-name-directory file))))
-        `(,(car bounds) ,(cdr bounds) ,#'read-file-name-internal
+        `(,(car bounds) ,(cdr bounds)
+          ,(cape--nonessential-table #'read-file-name-internal)
           ,@(and (not (equal file "/")) (string-suffix-p "/" file)
                  '(:company-prefix-length t))
           :exclusive no ,@cape--file-properties)))))
@@ -458,7 +473,7 @@ If INTERACTIVE is nil the function acts like a capf."
 
 ;;;###autoload
 (defun cape-symbol (&optional interactive)
-  "Complete symbol at point.
+  "Complete Elisp symbol at point.
 If INTERACTIVE is nil the function acts like a capf."
   (interactive (list t))
   (if interactive
@@ -486,6 +501,8 @@ If INTERACTIVE is nil the function acts like a capf."
 ;;;###autoload
 (defun cape-dabbrev (&optional interactive)
   "Complete with Dabbrev at point.
+See the user options `cape-dabbrev-min-length' and
+`cape-dabbrev-check-other-buffers'.
 If INTERACTIVE is nil the function acts like a capf."
   (interactive (list t))
   (if interactive
@@ -496,11 +513,12 @@ If INTERACTIVE is nil the function acts like a capf."
             (end (match-end 0)))
         `(,beg ,end
           ,(cape--table-with-properties
-            ;; Use equal, if candidates must be longer than cape-dabbrev-min-length.
             (cape--cached-table beg end
                                 #'cape--dabbrev-list
-                                (if (> cape-dabbrev-min-length 0)
-                                    'equal 'prefix))
+                                ;; TODO: Use equal, if candidates must be longer than cape-dabbrev-min-length.
+                                ;;(if (> cape-dabbrev-min-length 0) 'equal 'prefix)
+                                ;; Problem is that when entering more input, candidates get lost!
+                                'prefix)
             :category 'cape-dabbrev)
           :exclusive no ,@cape--dabbrev-properties)))))
 
@@ -531,7 +549,7 @@ If INTERACTIVE is nil the function acts like a capf."
 
 ;;;###autoload
 (defun cape-ispell (&optional interactive)
-  "Complete with Ispell at point.
+  "Complete word at point with Ispell.
 If INTERACTIVE is nil the function acts like a capf."
   (interactive (list t))
   (if interactive
@@ -556,13 +574,14 @@ If INTERACTIVE is nil the function acts like a capf."
   (or cape--dict-words
       (setq cape--dict-words
             (split-string (with-temp-buffer
-                            (insert-file-contents-literally cape-dict-file)
+                            (insert-file-contents cape-dict-file)
                             (buffer-string))
                           "\n" 'omit-nulls))))
 
 ;;;###autoload
 (defun cape-dict (&optional interactive)
-  "Complete word at point.
+  "Complete word from dictionary at point.
+See the custom option `cape-dict-file'.
 If INTERACTIVE is nil the function acts like a capf."
   (interactive (list t))
   (if interactive
@@ -746,7 +765,8 @@ If INTERACTIVE is nil the function acts like a capf."
 
 ;;;###autoload
 (defun cape-keyword (&optional interactive)
-  "Complete word at point.
+  "Complete programming language keyword at point.
+See the variable `cape-keywords'.
 If INTERACTIVE is nil the function acts like a capf."
   (interactive (list t))
   (if interactive
@@ -801,7 +821,7 @@ If INTERACTIVE is nil the function acts like a capf."
     (when-let (results (delq nil (mapcar #'funcall capfs)))
       (pcase-let* ((`((,beg ,end . ,_)) results)
                    (cache-candidates nil)
-                   (cache-str nil)
+                   (cache-filter nil)
                    (cache-ht (make-hash-table :test #'equal))
                    (extra-fun
                     (lambda (prop)
@@ -831,25 +851,26 @@ If INTERACTIVE is nil the function acts like a capf."
                               (display-sort-function . identity)
                               (cycle-sort-function . identity)))
                   ('t
-                   (unless (equal str cache-str)
-                     (let ((ht (make-hash-table :test #'equal))
-                           (candidates nil))
-                       (cl-loop for (table . plist) in tables do
-                                (let* ((pr (plist-get plist :predicate))
-                                       (md (completion-metadata "" table pr))
-                                       (sort (or (completion-metadata-get md 'display-sort-function)
-                                                 #'identity))
-                                       (cands (funcall sort (all-completions str table pr))))
-                                  (cl-loop for cell on cands
-                                           for cand = (car cell) do
-                                           (if (and (eq (gethash cand ht t) t)
-                                                    (or (not pred) (funcall pred cand)))
-                                               (puthash cand plist ht)
-                                             (setcar cell nil)))
-                                  (setq candidates (nconc candidates cands))))
-                       (setq cache-str str
-                             cache-candidates (delq nil candidates)
-                             cache-ht ht)))
+                   (let ((filter (list str (copy-sequence completion-regexp-list) completion-ignore-case)))
+                     (unless (equal filter cache-filter)
+                       (let ((ht (make-hash-table :test #'equal))
+                             (candidates nil))
+                         (cl-loop for (table . plist) in tables do
+                                  (let* ((pr (plist-get plist :predicate))
+                                         (md (completion-metadata "" table pr))
+                                         (sort (or (completion-metadata-get md 'display-sort-function)
+                                                   #'identity))
+                                         (cands (funcall sort (all-completions str table pr))))
+                                    (cl-loop for cell on cands
+                                             for cand = (car cell) do
+                                             (if (and (eq (gethash cand ht t) t)
+                                                      (or (not pred) (funcall pred cand)))
+                                                 (puthash cand plist ht)
+                                               (setcar cell nil)))
+                                    (setq candidates (nconc candidates cands))))
+                         (setq cache-filter filter
+                               cache-candidates (delq nil candidates)
+                               cache-ht ht))))
                    (copy-sequence cache-candidates))
                   (_
                    (completion--some
@@ -878,23 +899,19 @@ If INTERACTIVE is nil the function acts like a capf."
          (if toi
              (unwind-protect
                  (progn
-                   (funcall fetch (lambda (arg)
-                                    (when (eq res 'cape--waiting)
-                                      (push 'cape--done unread-command-events))
-                                    (setq res arg)))
-                   ;; Force synchronization, interruptible!
-                   (while (eq res 'cape--waiting)
-                     ;; When we've got input, interrupt the computation.
-                     (when unread-command-events (throw toi nil))
-                     (sit-for 0.1 'noredisplay)))
-               ;; Remove cape--done introduced by future callback.
-               ;; NOTE: `sit-for' converts cape--done to (t . cape--done).
-               ;; It seems that `sit-for' does not use a robust method to
-               ;; reinject inputs, maybe the implementation will change in
-               ;; the future.
-               (setq unread-command-events (delq 'cape--done
-                                                 (delete '(t . cape--done)
-                                                         unread-command-events))))
+                   (funcall fetch
+                            (lambda (arg)
+                              (when (eq res 'cape--waiting)
+                                (push 'cape--done unread-command-events)
+                                (setq res arg))))
+                   (when (eq res 'cape--waiting)
+                     (let ((ev (let (input-method-function) (read-event nil t))))
+                       (unless (eq ev 'cape--done)
+                         (push (cons t ev) unread-command-events)
+                         (setq res 'cape--cancelled)
+                         (throw toi t)))))
+               (setq unread-command-events
+                     (delq 'cape--done unread-command-events)))
            (funcall fetch (lambda (arg) (setq res arg)))
            ;; Force synchronization, not interruptible! We use polling
            ;; here and ignore pending input since we don't use
