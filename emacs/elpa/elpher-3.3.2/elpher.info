@@ -2,7 +2,7 @@ This is elpher.info, produced by makeinfo version 6.7 from elpher.texi.
 
 This manual documents Elpher, a gopher and gemini client for Emacs.
 
-   Copyright (C) 2019, 2020, 2021 Tim Vaughan
+   Copyright (C) 2019-2022 Tim Vaughan
 Copyright (C) 2021 Daniel Semyonov
 Copyright (C) 2021 Alex Schroeder
 
@@ -13,7 +13,7 @@ Copyright (C) 2021 Alex Schroeder
 
      Elpher is distributed in the hope that it will be useful, but
      WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNElpher FOR A PARTICULAR PURPOSE. See the GNU
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
      General Public License in the file COPYING in the same directory as
      this file for more details.
 INFO-DIR-SECTION Emacs
@@ -29,7 +29,7 @@ Elpher
 
 This manual documents Elpher, a gopher and gemini client for Emacs.
 
-   Copyright (C) 2019, 2020, 2021 Tim Vaughan
+   Copyright (C) 2019-2022 Tim Vaughan
 Copyright (C) 2021 Daniel Semyonov
 Copyright (C) 2021 Alex Schroeder
 
@@ -40,7 +40,7 @@ Copyright (C) 2021 Alex Schroeder
 
      Elpher is distributed in the hope that it will be useful, but
      WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNElpher FOR A PARTICULAR PURPOSE. See the GNU
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
      General Public License in the file COPYING in the same directory as
      this file for more details.
 
@@ -57,10 +57,11 @@ Copyright (C) 2021 Alex Schroeder
 * Finger support::              Support for the Finger protocol
 * Local files::                 Opening local files in elpher
 * About pages::                 Special pages and how to reference them
+* ANSI support::                Notes in Elpher's ANSI support
 * Customization::               How to customize various aspects of Elpher
 * Command Index::
 * News::                        Changes introduced by major releases
-* Acknowledgements::            Contributors to Elpher
+* Contributors::                Contributors to Elpher
 
  -- The Detailed Node Listing --
 
@@ -110,11 +111,21 @@ File: elpher.info,  Node: Installation,  Next: Quick Start,  Prev: Introduction,
 2 Installation
 **************
 
-Elpher is available from the MELPA package repository.  If you have
-never installed packages from this repository before, you'll need to
-follow the instructions at <https://melpa.org/#/getting-started>.
+2.1 Installing from ELPA or MELPA
+=================================
 
-To install Elpher, enter the following:
+Elpher is available on the non-GNU ELPA package archive.  If you are
+using Emacs 28 or later, this archive should be available on your system
+by default.  For Emacs 27, you'll need to follow the instructions at
+<https://elpa.nongnu.org> to make the archive accessible.
+
+   Alternatively, Elpher is available from the MELPA package archive.
+If you have never installed packages from this repository before, you'll
+need to follow the instructions at
+<https://melpa.org/#/getting-started>.
+
+   Once one of these package archives is installed, enter the following
+to install Elpher:
 
      M-x package-install <RET> elpher <RET>
 
@@ -122,10 +133,13 @@ To uninstall, use
 
      M-x package-delete <RET> elpher <RET>.
 
-   It is also possible to install Elpher directly by downloading the
-file 'elpher.el' from <gopher://thelambdalab.xyz/1/projects/elpher>
-(you'll need to download the "source archive" and extract it), adding it
-to a directory in your 'load-path', and then adding
+2.2 Installing by hand
+======================
+
+It is also possible to install Elpher directly by downloading the file
+'elpher.el' from <gopher://thelambdalab.xyz/1/projects/elpher> (you'll
+need to download the "source archive" and extract it), adding it to a
+directory in your 'load-path', and then adding
 
      (require 'elpher)
 
@@ -291,7 +305,7 @@ described by the following command:
           which to save the content.
 
         * Following links of type 'h' with a selector having the 'URL:'
-          prefix, or unsuported URLs in text files, will result in
+          prefix, or unsupported URLs in text files, will result in
           Elpher using an external programme to open the URL. This will
           be either the default system browser or, if the
           'elpher-open-urls-with-eww' customization variable is non-nil,
@@ -593,7 +607,7 @@ of known certificates, Elpher will offer to create one for you or to
 key will cause Elpher to begin the process of creating a new persistent
 certificate, using some additional details for which you will be
 prompted.  Alternatively, pressing the <i> key will cause Elpher to ask
-for the locations of edisting key and certificate files to add to
+for the locations of existing key and certificate files to add to
 'elpher-certificate-directory' under the chosen name.
 
    Once a certificate is selected, it will be used for all subsequent
@@ -660,6 +674,11 @@ particular their extension.  The current mappings are as follows:
      Plain text documents.  All local text files are assumed to be
      UTF-8-encoded.
 
+'gophermap','gopher'
+
+     Gophermap files, i.e.  files containing a valid directory list as
+     specified by RFC 1436.
+
 'gemini','gmi'
 
      Gemini documents (i.e.  documents of MIME type "text/gemini").  All
@@ -679,12 +698,8 @@ Anything else
      else.  (Obviously this is not useful in its own right, but there's
      not much that elpher can sensibly do with unknown binary files.)
 
-   Gophermap files (i.e.  files containing literally the intended output
-of querying a directory selector according to RFC 1436) cannot yet
-rendered using 'file:'.
-
 
-File: elpher.info,  Node: About pages,  Next: Customization,  Prev: Local files,  Up: Top
+File: elpher.info,  Node: About pages,  Next: ANSI support,  Prev: Local files,  Up: Top
 
 11 About pages
 **************
@@ -697,10 +712,38 @@ type.
    This means that these pages can be bookmarked and, more usefully,
 added to a local file to be rendered as a user-defined start page.
 
-
-File: elpher.info,  Node: Customization,  Next: Command Index,  Prev: About pages,  Up: Top
+   To see the address of a special page, simply visit the page and press
+<I>.
 
-12 Customization
+
+File: elpher.info,  Node: ANSI support,  Next: Customization,  Prev: About pages,  Up: Top
+
+12 ANSI support
+***************
+
+Depending on which parts of the gopher/gemini universe you frequent, you
+may occasionally stumble on sites which use ANSI escape codes to either
+produce specific characters or to colour text.
+
+   By default, elpher uses Emacs' built-in ANSI rendering library,
+'ansi-color', to process ANSI codes.  This robustly interprets the
+escape codes but only supports 8 colours.  Any colours unsupported by
+the library are simply stripped, leaving uncoloured text in the majority
+of cases.
+
+   To drastically improve the number of colours produced, install the
+'xterm-color' package from MELPA. This package will be automatically
+used by elpher if it is available, and supports 256 colours.  This
+should be sufficient to properly render many ANSI colour gopher holes
+and gemini capsules quite nicely.
+
+   In case you prefer to completely strip out the ANSI escape codes
+entirely by customizing the 'elpher-filter-ansi-from-text' variable.
+
+
+File: elpher.info,  Node: Customization,  Next: Command Index,  Prev: ANSI support,  Up: Top
+
+13 Customization
 ****************
 
 Various parts of Elpher can be customized via the variables belonging to
@@ -780,35 +823,59 @@ Command Index
                                                               (line  52)
 
 
-File: elpher.info,  Node: News,  Next: Acknowledgements,  Prev: Command Index,  Up: Top
+File: elpher.info,  Node: News,  Next: Contributors,  Prev: Command Index,  Up: Top
 
-13 News
+14 News
 *******
 
 This chapter documents the major changes introduced by Elpher releases.
 
-13.1 v3.2.0
+14.1 v3.3.0
+===========
+
+This version includes lots of bug fixes, as well as a couple of new
+features.
+
+14.1.1 Local gophermaps
+-----------------------
+
+Local gophermaps can now be displayed using 'file:'.  To render
+correctly, they must have the suffix '.gopher' or '.gophermap'.
+
+14.1.2 IRI support
+------------------
+
+Internationalized Resource Identifiers (IRI) are an extension of URLs
+(or, more accurately, URIs) to support a larger set of characters beyond
+those in the US-ASCII character set.  They map directly onto URIs for
+backwards compatibility, but look like gibberish if not properly
+decoded.  When displaying URLs, Elpher now automatically decodes any IRI
+characters and displays the decoded IRI. (For security reasons, the
+'elpher-info-current' command ('I') always displays both the decoded IRI
+and the URI when they differ.)
+
+14.2 v3.2.0
 ===========
 
 This version introduces several minor changes which, together, make it
 possible to set up alternative start pages configured to your liking.
 
-13.1.1 About pages
+14.2.1 About pages
 ------------------
 
 Special elpher pages such as the welcome page (previously "start" page),
 the bookmarks page, the browsing history stack and list of visited pages
-are now addressible via 'about:' URLs.  For instance, the standard
+are now addressable via 'about:' URLs.  For instance, the standard
 welcome page has the address 'about:welcome'.
 
-13.1.2 Local files
+14.2.2 Local files
 ------------------
 
 Local files can now be opened in elpher using 'file:' URLs.  For
 example, 'g 'file:~/my-start.gmi'' will open '~/my-start.gmi' as a
 text/gemini document.  *note Local files:: for details.
 
-13.1.3 Customizable start pages
+14.2.3 Customizable start pages
 -------------------------------
 
 The new customization variable 'elpher-start-page-url' contains the URL
@@ -816,10 +883,10 @@ of the document to be loaded as elpher's "start page".  By default this
 is set to 'about:welcome', but any elpher-accessible URL is valid.
 *note Customization:: for suggestions.
 
-13.2 v3.1.0
+14.3 v3.1.0
 ===========
 
-13.2.1 Bookmarks system
+14.3.1 Bookmarks system
 -----------------------
 
 While Elpher bookmarks are still handled by the Emacs bookmark system,
@@ -840,10 +907,10 @@ use the customization variable 'elpher-use-emacs-bookmark-menu' to have
 the <B> key open the Emacs bookmark menu directly, as in the previous
 release.
 
-13.3 v3.0.0
+14.4 v3.0.0
 ===========
 
-13.3.1 Bookmarks system
+14.4.1 Bookmarks system
 -----------------------
 
 Bookmarks are now handled by Emacs' own bookmark management system,
@@ -862,7 +929,7 @@ Elpher's old menu, but is much more functional.  Bookmarks can be
 renamed, deleted in groups, and much more.  (Use 'C-h m' with the menu
 open to see the complete list.)
 
-13.3.2 History
+14.4.2 History
 --------------
 
 Browsing history can now be accessed via new bindings to <s> and <S>.
@@ -870,78 +937,78 @@ The former shows the current history "stack" (pages accessible with the
 <u> key), while the latter shows a list of all pages which have been
 visited in the current session.
 
-13.3.3 Socks connections
+14.4.3 Socks connections
 ------------------------
 
 Elpher can now use socks connections to browse via TOR.
 
-13.3.4 browse-url, Org and mu4e integration
+14.4.4 browse-url, Org and mu4e integration
 -------------------------------------------
 
 These integrations provide support for elpher-handling of gemini, gopher
 and finger URLs using 'browse-url', in Org documents, and the mu4e mail
 system.
 
-13.3.5 imenu integration
+14.4.5 imenu integration
 ------------------------
 
 Gemini document headers are now navigable via imenu.  For details, *Note
 (emacs)Imenu::.
 
 
-File: elpher.info,  Node: Acknowledgements,  Prev: News,  Up: Top
+File: elpher.info,  Node: Contributors,  Prev: News,  Up: Top
 
-14 Acknowledgements
-*******************
+15 Contributors
+***************
 
-Elpher was originally written by Tim Vaughan.  Recent maintenance has
-been done by and with the help of Alex Schroeder.  In addition, the
-following people (in alphabetical order) have generously provided
-assistance and/or patches:
+Elpher was originally written and is currently maintained by Tim Vaughan
+<plugd@thelambdalab.xyz>.  Significant improvements and maintenance have
+also been contributed by and with the help of Alex Schroeder
+<alex@gnu.org>.  In addition, the following people have all generously
+provided assistance and/or patches:
 
-   * Alexis
-   * Christopher Brannon
-   * Zhiwei Chen
-   * condy0919
-   * Étienne Deparis
-   * Roy Koushik
-   * Simon Nicolussi
-   * Noodles!
-   * Jens Östlund
-   * Abhiseck Paira
-   * F. Jason Park
-   * Omar Polo
-   * Koushk Roy
-   * Michel Alexandre Salim
-   * Alex Schroeder
-   * Daniel Semyonov
-   * Simon South
-   * Bradley Thornton
-   * Vee
+   * Jens Östlund <jostlund@gmail.com>
+   * F. Jason Park <jp@neverwas.me>
+   * Christopher Brannon <chris@the-brannons.com>
+   * Omar Polo <op@omarpolo.com>
+   * Noodles!  <nnoodle@chiru.no>
+   * Abhiseck Paira <abhiseckpaira@disroot.org>
+   * Zhiwei Chen <chenzhiwei03@kuaishou.com>
+   * condy0919 <condy0919@gmail.com>
+   * Alexis <flexibeast@gmail.com>
+   * Étienne Deparis <etienne@depar.is>
+   * Simon Nicolussi <sinic@sinic.name>
+   * Michel Alexandre Salim <michel@michel-slm.name>
+   * Koushk Roy <kroy@twilio.com>
+   * Vee <vee@vnsf.xyz>
+   * Simon South <simon@simonsouth.net>
+   * Daniel Semyonov <daniel@dsemy.com>
+   * Bradley Thornton <bradley@northtech.us>
 
 
 
 Tag Table:
-Node: Top963
-Node: Introduction3030
-Node: Installation4219
-Node: Quick Start5020
-Node: Navigation7108
-Node: Within-page navigation7983
-Node: Between-page navigation10084
-Node: History and Caching12900
-Ref: History and Caching-Footnote-114583
-Node: Bookmarks14962
-Node: Gopher character encodings16864
-Node: Encrypted gopher connections18764
-Node: Gemini support19914
-Node: Finger support26265
-Node: Local files27319
-Node: About pages28593
-Node: Customization29075
-Node: Command Index30513
-Node: News33380
-Node: Acknowledgements37261
+Node: Top953
+Node: Introduction3073
+Node: Installation4262
+Node: Quick Start5511
+Node: Navigation7599
+Node: Within-page navigation8474
+Node: Between-page navigation10575
+Node: History and Caching13392
+Ref: History and Caching-Footnote-115075
+Node: Bookmarks15454
+Node: Gopher character encodings17356
+Node: Encrypted gopher connections19256
+Node: Gemini support20406
+Node: Finger support26757
+Node: Local files27811
+Node: About pages29042
+Node: ANSI support29602
+Node: Customization30659
+Node: Command Index32098
+Node: News34965
+Node: Contributors39687
 
 End Tag Table
 

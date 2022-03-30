@@ -1,26 +1,11 @@
 ;;; elpher.el --- A friendly gopher and gemini client  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021 Jens Östlund <jostlund@gmail.com>
-;; Copyright (C) 2021 F. Jason Park <jp@neverwas.me>
-;; Copyright (C) 2021 Christopher Brannon <chris@the-brannons.com>
-;; Copyright (C) 2021 Omar Polo <op@omarpolo.com>
-;; Copyright (C) 2021 Noodles! <nnoodle@chiru.no>
-;; Copyright (C) 2021 Abhiseck Paira <abhiseckpaira@disroot.org>
-;; Copyright (C) 2020-2021 Alex Schroeder <alex@gnu.org>
-;; Copyright (C) 2020 Zhiwei Chen <chenzhiwei03@kuaishou.com>
-;; Copyright (C) 2020 condy0919 <condy0919@gmail.com>
-;; Copyright (C) 2020 Alexis <flexibeast@gmail.com>
-;; Copyright (C) 2020 Étienne Deparis <etienne@depar.is>
-;; Copyright (C) 2020 Simon Nicolussi <sinic@sinic.name>
-;; Copyright (C) 2020 Michel Alexandre Salim <michel@michel-slm.name>
-;; Copyright (C) 2020 Koushk Roy <kroy@twilio.com>
-;; Copyright (C) 2020 Vee <vee@vnsf.xyz>
-;; Copyright (C) 2020 Simon South <simon@simonsouth.net>
-;; Copyright (C) 2019-2021 Tim Vaughan <plugd@thelambdalab.xyz>
+;; Copyright (C) 2019-2022 Tim Vaughan <plugd@thelambdalab.xyz>
+;; Copyright (C) 2020-2022 Elpher contributors (See info manual for full list)
 
 ;; Author: Tim Vaughan <plugd@thelambdalab.xyz>
 ;; Created: 11 April 2019
-;; Version: 3.2.2
+;; Version: 3.3.2
 ;; Keywords: comm gopher
 ;; Homepage: https://thelambdalab.xyz/elpher
 ;; Package-Requires: ((emacs "27.1"))
@@ -85,7 +70,7 @@
 ;;; Global constants
 ;;
 
-(defconst elpher-version "3.2.2"
+(defconst elpher-version "3.3.2"
   "Current version of elpher.")
 
 (defconst elpher-margin-width 6
@@ -130,8 +115,7 @@
   (defvar bookmark-make-record-function)
   (defvar mu4e~view-beginning-of-url-regexp)
   (defvar eww-use-browse-url)
-  (defvar thing-at-point-uri-schemes)
-  (defvar xterm-color-preserve-properties))
+  (defvar thing-at-point-uri-schemes))
 
 
 ;;; Customization group
@@ -165,8 +149,8 @@ plain text without user input."
 
 (defcustom elpher-filter-ansi-from-text nil
   "If non-nil, filter ANSI escape sequences from text.
-The default behaviour is to use the ansi-color package to interpret these
-sequences."
+The default behaviour is to use the ansi-color package (or xterm-color if it is
+available) to interpret these sequences."
   :type '(boolean))
 
 (defcustom elpher-certificate-directory
@@ -324,15 +308,16 @@ the start page."
 ;; dynamically for and by elpher.  All others represent pages which
 ;; rely on content retrieved over the network.
 
-(defun elpher-address-from-url (url-string)
-  "Create a ADDRESS object corresponding to the given URL-STRING."
+(defun elpher-address-from-url (url-string &optional default-scheme)
+  "Create a ADDRESS object corresponding to the given URL-STRING.
+If DEFAULT-SCHEME is non-nil, this sets the scheme of the URL when one
+is not explicitly given."
   (let ((data (match-data))) ; Prevent parsing clobbering match data
     (unwind-protect
         (let ((url (url-generic-parse-url url-string)))
           (unless (and (not (url-fullness url)) (url-type url))
-            (setf (url-fullness url) t)
             (unless (url-type url)
-              (setf (url-type url) elpher-default-url-type))
+              (setf (url-type url) default-scheme))
             (unless (url-host url)
               (let ((p (split-string (url-filename url) "/" nil nil)))
                 (setf (url-host url) (car p))
@@ -340,6 +325,9 @@ the start page."
                       (if (cdr p)
                           (concat "/" (mapconcat #'identity (cdr p) "/"))
                         ""))))
+            (when (not (string-empty-p (url-host url)))
+              (setf (url-fullness url) t)
+              (setf (url-host url) (puny-encode-domain (url-host url))))
             (when (or (equal "gopher" (url-type url))
                       (equal "gophers" (url-type url)))
               ;; Gopher defaults
@@ -422,7 +410,7 @@ address refers to, via the table `elpher-type-map'."
 
 (defun elpher-address-gopher-p (address)
   "Return non-nill if ADDRESS object is a gopher address."
-  (eq 'gopher (elpher-address-type address)))
+  (pcase (elpher-address-type address) (`(gopher ,_) t)))
 
 (defun elpher-address-protocol (address)
   "Retrieve the transport protocol for ADDRESS."
@@ -435,7 +423,17 @@ For gopher addresses this is a combination of the selector type and selector."
 
 (defun elpher-address-host (address)
   "Retrieve host from ADDRESS object."
-  (url-host address))
+  (let ((host-pre (url-host address)))
+    ;; The following strips out square brackets which sometimes enclose IPv6
+    ;; addresses.  Doing this here rather than at the parsing stage may seem
+    ;; weird, but this lets us way we avoid having to muck with both URL parsing
+    ;; and reconstruction.  It's also more efficient, as this method is not
+    ;; called during page rendering.
+    (if (and (> (length host-pre) 2)
+             (eq (elt host-pre 0) ?\[)
+             (eq (elt host-pre (- (length host-pre) 1)) ?\]))
+        (substring host-pre 1 (- (length host-pre) 1))
+      host-pre)))
 
 (defun elpher-address-user (address)
   "Retrieve user from ADDRESS object."
@@ -498,12 +496,34 @@ If no address is defined, returns 0.  (This is for compatibility with the URL li
   "Set the address corresponding to PAGE to NEW-ADDRESS."
   (setcar (cdr page) new-address))
 
-(defun elpher-page-from-url (url)
+(defun elpher-page-from-url (url &optional default-scheme)
   "Create a page with address and display string defined by URL.
 The URL is unhexed prior to its use as a display string to improve
-readability."
-  (elpher-make-page (elpher-decode (url-unhex-string url))
-                    (elpher-address-from-url url)))
+readability.
+
+If DEFAULT-SCHEME is non-nil, this scheme is applied to the URL
+in the instance that URL itself doesn't specify one."
+  (let ((address (elpher-address-from-url url default-scheme)))
+    (elpher-make-page (elpher-address-to-iri address) address)))
+
+(defun elpher-address-to-iri (address)
+  "Return an IRI for ADDRESS.
+Decode percent-escapes and handle punycode in the domain name.
+Drop the password, if any."
+  (let ((data (match-data)) ; Prevent parsing clobbering match data
+        (host (url-host address))
+        (pass (url-password address)))
+    (unwind-protect
+        (let* ((host (url-host address))
+               (pass (url-password address)))
+          (when host
+            (setf (url-host address) (puny-decode-domain host)))
+          (when pass				 ; RFC 3986 says we should not render
+            (setf (url-password address) nil)) ; the password as clear text
+          (elpher-decode (url-unhex-string (url-recreate-url address))))
+      (setf (url-host address) host)
+      (setf (url-password address) pass)
+      (set-match-data data))))
 
 (defvar elpher-current-page nil
   "The current page for this Elpher buffer.")
@@ -573,6 +593,21 @@ previously-visited pages,unless NO-HISTORY is non-nil."
         (goto-char pos)
       (goto-char (point-min)))))
 
+(defun elpher-get-default-url-scheme ()
+  "Suggest a default URL scheme to use for visiting addresses based on the current page."
+  (if elpher-current-page
+      (let* ((address (elpher-page-address elpher-current-page))
+             (current-type (elpher-address-type address)))
+        (pcase current-type
+          ((or (and 'file (guard (not elpher-history)))
+               `(about ,_))
+           elpher-default-url-type)
+          (`(about ,_)
+           elpher-default-url-type)
+          (_
+           (url-type address))))
+      elpher-default-url-type))
+
 
 ;;; Buffer preparation
 ;;
@@ -603,7 +638,9 @@ previously-visited pages,unless NO-HISTORY is non-nil."
        ;; avoid resetting buffer-local variables
        (elpher-mode))
      (let ((inhibit-read-only t)
-           (ansi-color-context nil)) ;; clean ansi interpreter state
+           (ansi-color-context nil)) ;; clean ansi interpreter state (also next 2 lines)
+       (setq-local xterm-color--current-fg nil)
+       (setq-local xterm-color--current-bg nil)
        (setq-local network-security-level
                    (default-value 'network-security-level))
        (erase-buffer)
@@ -1134,14 +1171,16 @@ If ADDRESS is not supplied or nil the record is rendered as an
     (if (display-images-p)
         (let* ((image (create-image
                        data
-                       nil t))
-               (window (get-buffer-window elpher-buffer-name)))
-          (when window
-            (setf (image-property image :max-width) (window-body-width window t))
-            (setf (image-property image :max-height) (window-body-height window t)))
-          (elpher-with-clean-buffer
-           (insert-image image)
-           (elpher-restore-pos)))
+                       nil t)))
+          (if (not image)
+              (error "Unsupported image format")
+            (let ((window (get-buffer-window elpher-buffer-name)))
+              (when window
+                (setf (image-property image :max-width) (window-body-width window t))
+                (setf (image-property image :max-height) (window-body-height window t))))
+            (elpher-with-clean-buffer
+             (insert-image image)
+             (elpher-restore-pos))))
       (elpher-render-download data))))
 
 ;; Search retrieval and rendering
@@ -1421,25 +1460,27 @@ Returns nil in the event that the contents of the line following the
 
 (defun elpher-gemini-get-link-display-string (link-line)
   "Extract the display string portion of LINK-LINE, a gemini map file link line.
-Returns the url portion in the event that the display-string portion is empty."
+Return nil if this portion is not provided."
   (let* ((rest (string-trim (elt (split-string link-line "=>") 1)))
          (idx (string-match "[ \t]" rest)))
-    (string-trim (if idx
-                     (substring rest (+ idx 1))
-                   rest))))
+    (and idx
+         (elpher-color-filter-apply (string-trim (substring rest (+ idx 1)))))))
 
 (defun elpher-collapse-dot-sequences (filename)
-  "Collapse dot sequences in FILENAME.
-For instance, the filename /a/b/../c/./d will reduce to /a/c/d"
-  (let* ((path (split-string filename "/"))
+  "Collapse dot sequences in the (absolute) FILENAME.
+For instance, the filename \"/a/b/../c/./d\" will reduce to \"/a/c/d\""
+  (let* ((path (split-string filename "/" t))
+         (is-directory (string-match-p (rx (: (or "." ".." "/") line-end)) filename))
          (path-reversed-normalized
           (seq-reduce (lambda (a b)
-                        (cond ((and a (equal b "..") (cdr a)))
-                              ((and (not a) (equal b "..")) a) ;leading .. are dropped
+                        (cond ((equal b "..") (cdr a))
                               ((equal b ".") a)
                               (t (cons b a))))
-                      path nil)))
-    (string-join (reverse path-reversed-normalized) "/")))
+                      path nil))
+         (path-normalized (reverse path-reversed-normalized)))
+    (if path-normalized
+        (concat "/" (string-join path-normalized "/") (and is-directory "/"))
+      "/")))
 
 (defun elpher-address-from-gemini-url (url)
   "Extract address from URL with defaults as per gemini map files.
@@ -1449,16 +1490,18 @@ treatment that a separate function is warranted."
   (let ((address (url-generic-parse-url url))
         (current-address (elpher-page-address elpher-current-page)))
     (unless (and (url-type address) (not (url-fullness address))) ;avoid mangling mailto: urls
-      (setf (url-fullness address) t)
       (if (url-host address) ;if there is an explicit host, filenames are absolute
           (if (string-empty-p (url-filename address))
               (setf (url-filename address) "/")) ;ensure empty filename is marked as absolute
         (setf (url-host address) (url-host current-address))
+        (setf (url-fullness address) (url-host address)) ; set fullness to t if host is set
         (setf (url-portspec address) (url-portspec current-address)) ; (url-port) too slow!
         (unless (string-prefix-p "/" (url-filename address)) ;deal with relative links
           (setf (url-filename address)
                 (concat (file-name-directory (url-filename current-address))
                         (url-filename address)))))
+      (when (url-host address)
+        (setf (url-host address) (puny-encode-domain (url-host address))))
       (unless (url-type address)
         (setf (url-type address) (url-type current-address)))
       (when (equal (url-type address) "gemini")
@@ -1468,28 +1511,27 @@ treatment that a separate function is warranted."
 
 (defun elpher-gemini-insert-link (link-line)
   "Insert link described by LINK-LINE into a text/gemini document."
-  (let* ((url (elpher-gemini-get-link-url link-line))
-         (display-string (elpher-gemini-get-link-display-string link-line))
-         (address (elpher-address-from-gemini-url url))
-         (type (if address (elpher-address-type address) nil))
-         (type-map-entry (cdr (assoc type elpher-type-map))))
-    (when display-string
-      (insert elpher-gemini-link-string)
-      (if type-map-entry
+  (let ((url (elpher-gemini-get-link-url link-line)))
+    (when url
+      (let* ((given-display-string (elpher-gemini-get-link-display-string link-line))
+             (address (elpher-address-from-gemini-url url))
+             (type (if address (elpher-address-type address) nil))
+             (type-map-entry (cdr (assoc type elpher-type-map)))
+             (fill-prefix (make-string (+ 1 (length elpher-gemini-link-string)) ?\s)))
+        (when type-map-entry
+          (insert elpher-gemini-link-string)
           (let* ((face (elt type-map-entry 3))
-                 (filtered-display-string (elpher-color-filter-apply display-string))
-                 (page (elpher-make-page filtered-display-string address)))
-            (insert-text-button filtered-display-string
+                 (display-string (or given-display-string
+                                     (elpher-address-to-iri address)))
+                 (page (elpher-make-page display-string
+                                         address)))
+            (insert-text-button display-string
                                 'face face
                                 'elpher-page page
                                 'action #'elpher-click-link
                                 'follow-link t
                                 'help-echo #'elpher--page-button-help))
-        (insert (propertize display-string 'face 'elpher-unknown)))
-      (insert "\n"))))
-
-(defvar elpher--gemini-page-headings nil
-  "List of headings on the page.")
+          (newline))))))
 
 (defun elpher-gemini-insert-header (header-line)
   "Insert header described by HEADER-LINE into a text/gemini document.
@@ -1507,11 +1549,12 @@ by HEADER-LINE."
                             (/ (* fill-column
                                   (font-get (font-spec :name (face-font 'default)) :size))
                                (font-get (font-spec :name (face-font face)) :size)) fill-column)))
-      (setq elpher--gemini-page-headings (cons (cons header (point))
-                                               elpher--gemini-page-headings))
       (unless (display-graphic-p)
         (insert (make-string level ?#) " "))
-      (insert (propertize header 'face face 'rear-nonsticky t))
+      (insert (propertize header
+                          'face face
+                          'gemini-heading t
+                          'rear-nonsticky t))
       (newline))))
 
 (defun elpher-gemini-insert-text (text-line)
@@ -1520,7 +1563,6 @@ This function uses Emacs' auto-fill to wrap text sensibly to a maximum
 width defined by `elpher-gemini-max-fill-width'."
   (string-match
    (rx (: line-start
-          (* (any " \t"))
           (optional
            (group (or (: "*" (+ (any " \t")))
                       (: ">" (* (any " \t"))))))))
@@ -1538,10 +1580,7 @@ width defined by `elpher-gemini-max-fill-width'."
                      (propertize text-line 'face 'elpher-gemini-quoted))
                     (t text-line))
             text-line))
-         (adaptive-fill-mode t)
-	 ;; fill-prefix is important for adaptive-fill-mode: without
-	 ;; it, multi-line list items are not indented correct
-         (fill-prefix (if (match-string 1 text-line)
+         (fill-prefix (if line-prefix
                           (make-string (length (match-string 0 text-line)) ?\s)
                         nil)))
     (insert (elpher-process-text-for-display processed-text-line))
@@ -1550,9 +1589,9 @@ width defined by `elpher-gemini-max-fill-width'."
 (defun elpher-render-gemini-map (data _parameters)
   "Render DATA as a gemini map file, PARAMETERS is currently unused."
   (elpher-with-clean-buffer
-   (setq elpher--gemini-page-headings nil)
-   (let ((preformatted nil))
-     (auto-fill-mode 1)
+   (auto-fill-mode 1)
+   (let ((preformatted nil)
+         (adaptive-fill-mode nil)) ;Prevent automatic setting of fill-prefix
      (setq-local fill-column (min (window-width) elpher-gemini-max-fill-width))
      (dolist (line (split-string data "\n"))
        (cond
@@ -1564,7 +1603,6 @@ width defined by `elpher-gemini-max-fill-width'."
          (elpher-gemini-insert-link line))
         ((string-prefix-p "#" line) (elpher-gemini-insert-header line))
         (t (elpher-gemini-insert-text line)))))
-   (setq elpher--gemini-page-headings (nreverse elpher--gemini-page-headings))
    (elpher-cache-content
     (elpher-page-address elpher-current-page)
     (buffer-string))))
@@ -1577,6 +1615,19 @@ width defined by `elpher-gemini-max-fill-width'."
     (elpher-page-address elpher-current-page)
     (buffer-string))))
 
+(defun elpher-build-current-imenu-index ()
+  "Build imenu index for current elpher buffer."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((match nil)
+          (headers nil))
+      (while (setq match (text-property-search-forward 'gemini-heading t t))
+        (push (cons
+               (buffer-substring-no-properties (prop-match-beginning match)
+                                               (prop-match-end match))
+               (prop-match-beginning match))
+              headers))
+      (reverse headers))))
 
 ;; Finger page connection
 
@@ -1664,6 +1715,8 @@ Assumes UTF-8 encoding for all text files."
             (elpher-render-text (decode-coding-string body 'utf-8)))
            ((or "jpg" "jpeg" "gif" "png" "bmp" "tif" "tiff")
             (elpher-render-image body))
+           ((or "gopher" "gophermap")
+            (elpher-render-index (elpher-decode body)))
            (_
             (elpher-render-download body))))
        (elpher-restore-pos))))
@@ -1716,15 +1769,14 @@ Assumes UTF-8 encoding for all text files."
                                (elpher-address-from-url "gemini://geminispace.info/search"))
    (insert "\n"
            "Your bookmarks are stored in your ")
-   (let ((help-string "RET,mouse-1: Open bookmark list"))
-     (insert-text-button "bookmark list"
-                         'face 'link
-                         'action #'elpher-click-link
-                         'follow-link t
-                         'help-echo #'elpher--page-button-help
-                         'elpher-page
-                         (elpher-make-page "Elpher Bookmarks"
-                                           (elpher-make-about-address 'bookmarks))))
+   (insert-text-button "bookmark list"
+                       'face 'link
+                       'action #'elpher-click-link
+                       'follow-link t
+                       'help-echo #'elpher--page-button-help
+                       'elpher-page
+                       (elpher-make-page "Elpher Bookmarks"
+                                         (elpher-make-about-address 'bookmarks)))
    (insert ".\n")
    (insert (propertize
             "(Bookmarks from legacy elpher-bookmarks files will be automatically imported.)\n"
@@ -1863,10 +1915,11 @@ then making that buffer the current buffer.  It should not switch
 to the buffer."
   (let* ((url (cdr (assq 'location bookmark)))
          (cleaned-url (string-trim url))
-         (page (elpher-page-from-url cleaned-url)))
+         (page (elpher-page-from-url cleaned-url))
+         (buffer (get-buffer-create elpher-buffer-name)))
     (elpher-with-clean-buffer
      (elpher-visit-page page))
-    (set-buffer (get-buffer elpher-buffer-name))
+    (set-buffer buffer)
     nil))
 
 (defun elpher-bookmark-link ()
@@ -2044,17 +2097,20 @@ supports the old protocol elpher, where the link is self-contained."
      '("^\\(gopher\\|finger\\|gemini\\)://" . elpher-browse-url-elpher))
   ;; Patch `browse-url-browser-function' for older ones. The value of
   ;; that variable is `browse-url-default-browser' by default, so
-  ;; that's the function that gets advised.
-  (advice-add browse-url-browser-function :before-while
-              (lambda (url &rest _args)
-		"Handle gemini, gopher, and finger schemes using Elpher."
-                (let ((scheme (downcase (car (split-string url ":" t)))))
-                  (if (member scheme '("gemini" "gopher" "finger"))
-                      ;; `elpher-go' always returns nil, which will stop the
-                      ;; advice chain here in a before-while
-                      (elpher-go url)
-                    ;; chain must continue, then return t.
-                    t)))))
+  ;; that's the function that gets advised. If the value is an alist,
+  ;; however, we don't know what to do. Better not interfere?
+  (when (and (symbolp browse-url-browser-function)
+             (fboundp browse-url-browser-function))
+    (advice-add browse-url-browser-function :before-while
+		(lambda (url &rest _args)
+		  "Handle gemini, gopher, and finger schemes using Elpher."
+                  (let ((scheme (downcase (car (split-string url ":" t)))))
+                    (if (member scheme '("gemini" "gopher" "finger"))
+			;; `elpher-go' always returns nil, which will stop the
+			;; advice chain here in a before-while
+			(elpher-go url)
+                      ;; chain must continue, then return t.
+                      t))))))
 
 ;; Register "gemini://" as a URI scheme so `browse-url' does the right thing
 (with-eval-after-load 'thingatpt
@@ -2095,11 +2151,14 @@ supports the old protocol elpher, where the link is self-contained."
 (defun elpher-go (host-or-url)
   "Go to a particular gopher site HOST-OR-URL.
 When run interactively HOST-OR-URL is read from the minibuffer."
-  (interactive "sGopher or Gemini URL: ")
+  (interactive (list
+                (read-string (format "Visit URL (default scheme %s): " (elpher-get-default-url-scheme)))))
   (let ((trimmed-host-or-url (string-trim host-or-url)))
     (unless (string-empty-p trimmed-host-or-url)
-      (let ((page (elpher-page-from-url trimmed-host-or-url)))
-        (switch-to-buffer elpher-buffer-name)
+      (let ((page (elpher-page-from-url trimmed-host-or-url
+                                        (elpher-get-default-url-scheme))))
+        (unless (get-buffer-window elpher-buffer-name t)
+          (switch-to-buffer elpher-buffer-name))
         (elpher-with-clean-buffer
          (elpher-visit-page page))
         nil)))) ; non-nil value is displayed by eshell
@@ -2108,9 +2167,8 @@ When run interactively HOST-OR-URL is read from the minibuffer."
   "Go to a particular site read from the minibuffer, initialized with the current URL."
   (interactive)
   (let* ((address (elpher-page-address elpher-current-page))
-         (url (read-string "Gopher or Gemini URL: "
-                           (unless (elpher-address-about-p address)
-                             (elpher-address-to-url address)))))
+         (url (read-string (format "Visit URL (default scheme %s): " (elpher-get-default-url-scheme))
+                           (elpher-address-to-url address))))
     (unless (string-empty-p (string-trim url))
       (elpher-visit-page (elpher-page-from-url url)))))
 
@@ -2220,8 +2278,12 @@ When run interactively HOST-OR-URL is read from the minibuffer."
 
 (defun elpher-info-page (page)
   "Display URL of PAGE in minibuffer."
-  (let ((address (elpher-page-address page)))
-    (message "%s" (elpher-address-to-url address))))
+  (let* ((address (elpher-page-address page))
+         (url (elpher-address-to-url address))
+         (iri (elpher-address-to-iri address)))
+    (if (equal url iri)
+        (message "%s" url)
+      (message "%s (Raw: %s)" iri url))))
 
 (defun elpher-info-link ()
   "Display information on page corresponding to link at point."
@@ -2347,13 +2409,11 @@ When run interactively HOST-OR-URL is read from the minibuffer."
 This mode is automatically enabled by the interactive
 functions which initialize the client, namely
 `elpher', and `elpher-go'."
-  (setq-local elpher--gemini-page-headings nil)
   (setq-local elpher-current-page nil)
   (setq-local elpher-history nil)
   (setq-local elpher-buffer-name (buffer-name))
   (setq-local bookmark-make-record-function #'elpher-bookmark-make-record)
-  (setq-local imenu-create-index-function (lambda () elpher--gemini-page-headings))
-  (setq-local xterm-color-preserve-properties t))
+  (setq-local imenu-create-index-function #'elpher-build-current-imenu-index))
 
 (when (fboundp 'evil-set-initial-state)
   (evil-set-initial-state 'elpher-mode 'motion))
