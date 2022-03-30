@@ -45,7 +45,7 @@ Translate active region from START to END.  FORCE translate even if the region i
 \(fn START END &optional FORCE)" t nil)
 
 (autoload 'reverse-im-translate-word "reverse-im" "\
-Translate word before the point.  With prefix ARG translates ARG words instead of the last one, if ARG is - translate until the beginning of line.
+Translate word before the point.  With prefix ARG translates ARG words instead of the last one, if ARG is 0 - translate until the beginning of line.
 
 \(fn ARG)" t nil)
 
