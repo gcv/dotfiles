@@ -4,8 +4,8 @@
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
-;; Package-Version: 20211226.1843
-;; Package-Commit: f865f17ad04cd270685187b0a5331ec8eb06e541
+;; Package-Version: 20220220.2308
+;; Package-Commit: 67cdd1030b3022d3dc4da2297f55349da57cde01
 ;; Keywords: help, lisp
 ;; Version: 0.19
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
@@ -1839,7 +1839,11 @@ OBJ may be a symbol or a compiled function object."
   "Return non-nil if function SYM is autoloaded."
   (-when-let (file-name (buffer-file-name buf))
     (setq file-name (s-chop-suffix ".gz" file-name))
-    (help-fns--autoloaded-p sym file-name)))
+    (condition-case nil
+        (help-fns--autoloaded-p sym file-name)
+      ; new in Emacs 29.0.50
+      ; see https://github.com/Wilfred/helpful/pull/283
+      (error (help-fns--autoloaded-p sym)))))
 
 (defun helpful--compiled-p (sym)
   "Return non-nil if function SYM is byte-compiled"
