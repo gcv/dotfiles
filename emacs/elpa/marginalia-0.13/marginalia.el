@@ -5,7 +5,7 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 0.12
+;; Version: 0.13
 ;; Package-Requires: ((emacs "26.1"))
 ;; Homepage: https://github.com/minad/marginalia
 
@@ -103,6 +103,7 @@ a relative age."
      (project-file marginalia-annotate-project-file)
      (buffer marginalia-annotate-buffer)
      (library marginalia-annotate-library)
+     (tab marginalia-annotate-tab)
      (multi-category marginalia-annotate-multi-category)))
   "Annotator function registry.
 Associates completion categories with annotation functions.
@@ -136,6 +137,7 @@ determine it."
     ("\\<coding system\\>" . coding-system)
     ("\\<minor mode\\>" . minor-mode)
     ("\\<kill-ring\\>" . kill-ring)
+    ("\\<tab by name\\>" . tab)
     ("\\<[Ll]ibrary\\>" . library))
   "Associates regexps to match against minibuffer prompts with categories."
   :type '(alist :key-type regexp :value-type symbol))
@@ -512,8 +514,8 @@ t cl-type"
                                  advertised-signature-table t)))
        tmp)
       ((setq tmp (help-split-fundoc
-		  (ignore-errors (documentation sym t))
-		  sym))
+                  (ignore-errors (documentation sym t))
+                  sym))
        (substitute-command-keys (car tmp)))
       ((setq tmp (help-function-arglist sym))
        (and
@@ -591,7 +593,7 @@ keybinding since CAND includes it."
           ((pred bool-vector-p) (propertize "#<bool-vector>" 'face 'marginalia-value))
           ((pred hash-table-p) (propertize "#<hash-table>" 'face 'marginalia-value))
           ((pred syntax-table-p) (propertize "#<syntax-table>" 'face 'marginalia-value))
-          ;; Emacs BUG: abbrev-table-p throws an error
+          ;; Emacs bug#53988: abbrev-table-p throws an error
           ((guard (ignore-errors (abbrev-table-p val))) (propertize "#<abbrev-table>" 'face 'marginalia-value))
           ((pred char-table-p) (propertize "#<char-table>" 'face 'marginalia-value))
           ((pred byte-code-function-p) (propertize "#<byte-code-function>" 'face 'marginalia-function))
@@ -702,7 +704,7 @@ keybinding since CAND includes it."
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
-  (when-let* ((pkg-alist (and (bound-and-true-p package-alist) package-alist))
+  (when-let* ((pkg-alist (bound-and-true-p package-alist))
               (pkg (intern-soft (replace-regexp-in-string "-[[:digit:]\\.-]+\\'" "" cand)))
               ;; taken from `describe-package-1'
               (desc (or (car (alist-get pkg pkg-alist))
@@ -735,7 +737,7 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
 
 (defun marginalia-annotate-bookmark (cand)
   "Annotate bookmark CAND with its file name and front context string."
-  (when-let ((bm (assoc cand bookmark-alist)))
+  (when-let ((bm (assoc cand (bound-and-true-p bookmark-alist))))
     (let ((front (bookmark-get-front-context-string bm)))
       (marginalia--fields
        ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
@@ -935,21 +937,33 @@ These annotations are skipped for remote paths."
       (marginalia--time-relative time)
     (marginalia--time-absolute time)))
 
-(defmacro marginalia--project-root ()
+(defvar-local marginalia--project-root 'unset)
+(defun marginalia--project-root ()
   "Return project root."
-  (require 'project)
-  `(when-let (proj (project-current))
-     ,(if (fboundp 'project-root)
-          '(project-root proj)
-        '(car (project-roots proj)))))
+  (with-current-buffer
+      (if-let (win (active-minibuffer-window))
+          (window-buffer win)
+        (current-buffer))
+    (when (eq marginalia--project-root 'unset)
+      (setq marginalia--project-root
+            (or (let ((prompt (minibuffer-prompt)))
+                  (and (string-match
+                        "\\`\\(?:Dired\\|Find file\\) in \\(.*\\): \\'"
+                        prompt)
+                       (match-string 1 prompt)))
+                (when-let (proj (project-current))
+                  (cond
+                   ((fboundp 'project-root) (project-root proj))
+                   ((fboundp 'project-roots) (car (project-roots proj))))))))
+    marginalia--project-root))
 
 (defun marginalia-annotate-project-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
-  ;; TODO project-find-file can be called from outside all projects in
-  ;; which case it prompts for a project first; we don't support that
-  ;; case yet, since there is no current project.
-  (when-let (root (marginalia--project-root))
-    (marginalia-annotate-file (expand-file-name cand root))))
+  ;; Absolute project directories also report project-file category
+  (if (file-name-absolute-p cand)
+      (marginalia-annotate-file cand)
+    (when-let (root (marginalia--project-root))
+      (marginalia-annotate-file (expand-file-name cand root)))))
 
 (defvar-local marginalia--library-cache nil)
 (defun marginalia--library-cache ()
@@ -973,14 +987,8 @@ These annotations are skipped for remote paths."
 
 (defun marginalia--library-name (file)
   "Get name of library FILE."
-  (string-remove-suffix
-   ".el" (string-remove-suffix
-          ".gz" (file-name-nondirectory file))))
-
-(defun marginalia--library-kill ()
-  "Kill temporary buffer."
-  (ignore-errors (kill-buffer " *marginalia library*"))
-  (remove-hook 'minibuffer-exit-hook #'marginalia--library-kill))
+  (replace-regexp-in-string "\\(\\.gz\\|\\.elc?\\)+\\'" ""
+                            (file-name-nondirectory file)))
 
 (defun marginalia--library-doc (file)
   "Return library documentation string for FILE."
@@ -988,28 +996,23 @@ These annotations are skipped for remote paths."
     (unless doc
       ;; Extract documentation string. We cannot use `lm-summary' here,
       ;; since it decompresses the whole file, which is slower.
-      (let ((str (with-current-buffer
-                     (or (get-buffer " *marginalia library*")
-                         (progn
-                           (add-hook 'minibuffer-exit-hook #'marginalia--library-kill)
-                           (get-buffer-create " *marginalia library*")))
-                   (erase-buffer)
-                   (let ((inhibit-message t) (message-log-max nil))
-                     (insert-file-contents file nil 0 200))
-                   (buffer-substring (point-min) (line-end-position)))))
-        (cond
-         ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" str)
-          (setq doc (format "Generated package description from %s.el"
-                            (match-string 1 str))))
-         ((string-match "\\`;+\\s-*" str)
-          (setq doc (substring str (match-end 0)))
-          (when (string-match "\\`[^ \t]+\\s-+-+\\s-+" doc)
-            (setq doc (substring doc (match-end 0))))
-          (when (string-match "\\s-*-\\*-" doc)
-            (setq doc (substring doc 0 (match-beginning 0)))))
-         (t (setq doc "")))
-        ;; Add the documentation string to the cache
-        (put-text-property 0 1 'marginalia--library-doc doc file)))
+      (setq doc (or (ignore-errors
+                      (shell-command-to-string
+                       (format "zcat -f %s | head -n1" (shell-quote-argument file))))
+                 ""))
+      (cond
+       ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" doc)
+        (setq doc (format "Generated package description from %s.el"
+                          (match-string 1 doc))))
+       ((string-match "\\`;+\\s-*" doc)
+        (setq doc (substring doc (match-end 0)))
+        (when (string-match "\\`[^ \t]+\\s-+-+\\s-+" doc)
+          (setq doc (substring doc (match-end 0))))
+        (when (string-match "\\s-*-\\*-" doc)
+          (setq doc (substring doc 0 (match-beginning 0)))))
+       (t (setq doc "")))
+      ;; Add the documentation string to the cache
+      (put-text-property 0 1 'marginalia--library-doc doc file))
     doc))
 
 (defun marginalia-annotate-library (cand)
@@ -1027,6 +1030,32 @@ These annotations are skipped for remote paths."
       :truncate 1.0 :face 'marginalia-documentation)
      ((abbreviate-file-name (file-name-directory file))
       :truncate -0.5 :face 'marginalia-file-name))))
+
+(defun marginalia-annotate-tab (cand)
+  "Annotate named tab CAND with tab index, window and buffer information."
+  (when-let* ((tabs (funcall tab-bar-tabs-function))
+              (index (seq-position
+                      tabs nil
+                      (lambda (tab _) (equal (alist-get 'name tab) cand)))))
+    (let* ((tab (nth index tabs))
+           (ws (alist-get 'ws tab))
+           ;; window-state-buffers requires Emacs 27
+           (bufs (and (fboundp 'window-state-buffers)
+                      (window-state-buffers ws))))
+      ;; NOTE: When the buffer key is present in the window state
+      ;; it is added in front of the window buffer list and gets duplicated.
+      (when (cadr (assq 'buffer ws)) (pop bufs))
+      (concat
+       (format #(" (%s)" 0 5 (face marginalia-key)) index)
+       (marginalia--fields
+        ((if (cdr bufs)
+             (format "%d windows" (length bufs))
+           "1 window ")
+         :face 'marginalia-size)
+        ((if (memq 'current-tab tab)
+             "*current tab*"
+           (string-join bufs " "))
+         :face 'marginalia-documentation))))))
 
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."

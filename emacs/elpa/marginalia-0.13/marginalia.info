@@ -49,11 +49,12 @@ File: marginalia.info,  Node: Configuration,  Next: Information shown by the ann
 2 Configuration
 ***************
 
-It is recommended to use Marginalia together with either the Selectrum
-(https://github.com/raxod502/selectrum), Vertico
-(https://github.com/minad/vertico) or the Icomplete-vertical
-(https://github.com/oantolin/icomplete-vertical) completion system.
-Furthermore Marginalia can be combined with Embark
+It is recommended to use Marginalia together with either the Vertico
+(https://github.com/minad/vertico), Mct
+(https://github.com/protesilaos/mct), Icomplete
+(https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html)
+or the Selectrum (https://github.com/raxod502/selectrum) completion
+system.  Furthermore Marginalia can be combined with Embark
 (https://github.com/oantolin/embark) for action support and Consult
 (https://github.com/minad/consult), which provides many useful commands.
 
@@ -244,10 +245,10 @@ Tag Table:
 Node: Top203
 Node: Introduction626
 Node: Configuration1584
-Node: Information shown by the annotators2730
-Node: Adding custom annotators or classifiers3425
-Node: Disabling annotators builtin or lightweight annotators8227
-Node: Contributions10269
+Node: Information shown by the annotators2790
+Node: Adding custom annotators or classifiers3485
+Node: Disabling annotators builtin or lightweight annotators8287
+Node: Contributions10329
 
 End Tag Table
 
