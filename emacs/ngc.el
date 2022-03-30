@@ -25,6 +25,10 @@
 
   (advice-add #'completing-read-multiple
               :override #'consult-completing-read-multiple)
+
+  :config
+  (consult-customize consult--source-buffer :hidden t :default nil)
+  (add-to-list 'consult-buffer-sources persp-consult-source) ; Perspective integration
   )
 
 
