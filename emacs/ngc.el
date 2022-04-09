@@ -5,10 +5,11 @@
 
   :bind
   (("C-M-y" . consult-yank-from-kill-ring)
+   ("C-M-s" . consult-line)
    ("C-c p s r" . consult-ripgrep))
 
   :custom
-  (consult-preview-key nil)
+  ;;(consult-preview-key nil) ; disable Consult preview
   ;;(consult-project-root-function #'projectile-project-root)
   (consult-project-root-function (lambda ()
                                    (when-let (project (project-current))
