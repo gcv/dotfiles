@@ -5,8 +5,8 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: convenience
-;; Package-Version: 20220329.32
-;; Package-Commit: 06d5caafd58db6b6d7fa14cf8b6f7336486b92ca
+;; Package-Version: 20220406.1246
+;; Package-Commit: 2890e535f55b1f08f379fd761b263fa337a72185
 ;; Version: 0.5
 ;; Homepage: https://github.com/oantolin/embark
 ;; Package-Requires: ((emacs "26.1") (embark "0.12") (consult "0.10"))
@@ -120,6 +120,14 @@
 (setf (alist-get 'consult-location embark-default-action-overrides)
       #'embark-consult-goto-location)
 
+(defun embark-consult--await ()
+  "Wait for a Consult async search commmand to finish."
+  (when-let (((minibufferp))
+             (ov (car (overlays-at (- (minibuffer-prompt-end) 2)))))
+    (while (not (equal (overlay-get ov 'display) ":"))
+      (sit-for 0.3 t))
+    (sit-for 0.3 t)))
+
 (defun embark-consult-export-occur (lines)
   "Create an occur mode buffer listing LINES.
 The elements of LINES are assumed to be values of category `consult-line'."
@@ -175,6 +183,10 @@ This function is meant to be added to `embark-collect-mode-hook'."
 (defvar wgrep-header/footer-parser)
 (declare-function wgrep-setup "ext:wgrep")
 
+(embark-define-keymap embark-consult-export-grep-map
+  "A keymap for Embark Export grep-mode buffers."
+  ("g" revert-buffer))
+
 (defun embark-consult-export-grep (lines)
   "Create a grep mode buffer listing LINES."
   (let ((buf (generate-new-buffer "*Embark Export Grep*")))
@@ -184,7 +196,11 @@ This function is meant to be added to `embark-collect-mode-hook'."
       (goto-char (point-min))
       (grep-mode)
       (setq-local wgrep-header/footer-parser #'ignore)
-      (when (fboundp 'wgrep-setup) (wgrep-setup)))
+      (when (fboundp 'wgrep-setup) (wgrep-setup))
+      (add-hook 'embark--export-pre-revert-hook #'embark-consult--await nil t)
+      (use-local-map (make-composed-keymap
+                      embark-consult-export-grep-map
+                      (current-local-map))))
     (pop-to-buffer buf)))
 
 (defun embark-consult-goto-grep (location)
@@ -205,6 +221,20 @@ This function is meant to be added to `embark-collect-mode-hook'."
       #'embark-consult-goto-grep)
 (setf (alist-get 'consult-grep embark-exporters-alist)
       #'embark-consult-export-grep)
+
+;;; Support for consult-find and consult-locate
+
+(setf (alist-get '(file . consult-find) embark-default-action-overrides)
+      #'find-file)
+
+(setf (alist-get '(file . consult-locate) embark-default-action-overrides)
+      #'find-file)
+
+(defun embark-consult--wait-for-find ()
+  (when (eq embark--command 'consult-find)
+    (add-hook 'embark--export-pre-revert-hook #'embark-consult--await nil t)))
+
+(add-hook 'embark-after-export-hook #'embark-consult--wait-for-find)
 
 ;;; Support for consult-isearch
 
