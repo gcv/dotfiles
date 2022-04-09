@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "0.21"))
+;; Package-Requires: ((emacs "27.1") (vertico "0.22"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -93,7 +93,10 @@
   (let* ((action vertico-buffer-display-action) tmp win
          (_ (unwind-protect
                 (progn
-                  (setq tmp (generate-new-buffer "*vertico*")
+                  (setf tmp (generate-new-buffer "*vertico-buffer*")
+                        ;; Set a fake major mode such that `display-buffer-reuse-mode-window'
+                        ;; does not take over!
+                        (buffer-local-value 'major-mode tmp) 'vertico-buffer-mode
                         ;; Temporarily select the original window such
                         ;; that `display-buffer-same-window' works.
                         win (with-minibuffer-selected-window (display-buffer tmp action)))

@@ -247,14 +247,25 @@ Insert candidate using quick keys." t nil)
 ;;;;;;  0))
 ;;; Generated autoloads from vertico-repeat.el
 
-(autoload 'vertico-repeat "vertico-repeat" "\
-Repeat last Vertico completion session." t nil)
-
 (autoload 'vertico-repeat-save "vertico-repeat" "\
-Save Vertico status for `vertico-repeat'.
+Save Vertico session for `vertico-repeat'.
 This function must be registered as `minibuffer-setup-hook'." nil nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "vertico-repeat" '("vertico-repeat--")))
+(autoload 'vertico-repeat-last "vertico-repeat" "\
+Repeat last Vertico completion SESSION.
+
+\(fn &optional SESSION)" t nil)
+
+(autoload 'vertico-repeat-select "vertico-repeat" "\
+Select a Vertico session from the session history and repeat it." t nil)
+
+(autoload 'vertico-repeat "vertico-repeat" "\
+Repeat last Vertico session.
+If prefix ARG is non-nil, offer completion menu to select from session history.
+
+\(fn &optional ARG)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "vertico-repeat" '("vertico-repeat-")))
 
 ;;;***
 
