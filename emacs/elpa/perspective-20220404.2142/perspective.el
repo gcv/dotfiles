@@ -6,8 +6,8 @@
 
 ;; Author: Natalie Weizenbaum <nex342@gmail.com>
 ;; URL: http://github.com/nex3/perspective-el
-;; Package-Version: 20220320.437
-;; Package-Commit: d3afc52ed098b713b6607943bd1ee0ef899db267
+;; Package-Version: 20220404.2142
+;; Package-Commit: 4b3111cd23f980fc2bda83bd0f23066c78d910cd
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
 ;; Version: 2.17
 ;; Created: 2008-03-05
@@ -550,13 +550,15 @@ REQUIRE-MATCH can take the same values as in `completing-read'."
   (let ((old (cl-gensym)))
     `(progn
        (let ((,old (with-current-perspective (persp-current-name)))
-             (last-persp-cache (persp-last)))
+             (last-persp-cache (persp-last))
+             (result))
          (unwind-protect
              (progn
                (persp-switch ,name 'norecord)
-               ,@body)
+               (setq result (progn ,@body)))
            (when ,old (persp-switch ,old 'norecord)))
-         (set-frame-parameter nil 'persp--last last-persp-cache)))))
+         (set-frame-parameter nil 'persp--last last-persp-cache)
+         result))))
 
 (defun persp-reset-windows ()
   "Remove all windows, ensure the remaining one has no window parameters.
