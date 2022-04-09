@@ -6,14 +6,6 @@
                          (or (file-name-directory #$) (car load-path))))
 
 
-;;;### (autoloads nil "modus-operandi-theme" "modus-operandi-theme.el"
-;;;;;;  (0 0 0 0))
-;;; Generated autoloads from modus-operandi-theme.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "modus-operandi-theme" '("modus-operandi")))
-
-;;;***
-
 ;;;### (autoloads nil "modus-themes" "modus-themes.el" (0 0 0 0))
 ;;; Generated autoloads from modus-themes.el
 
@@ -70,15 +62,8 @@ by virtue of calling either of `modus-themes-load-operandi' and
 
 ;;;***
 
-;;;### (autoloads nil "modus-vivendi-theme" "modus-vivendi-theme.el"
-;;;;;;  (0 0 0 0))
-;;; Generated autoloads from modus-vivendi-theme.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "modus-vivendi-theme" '("modus-vivendi")))
-
-;;;***
-
-;;;### (autoloads nil nil ("modus-themes-pkg.el") (0 0 0 0))
+;;;### (autoloads nil nil ("modus-operandi-theme.el" "modus-themes-pkg.el"
+;;;;;;  "modus-vivendi-theme.el") (0 0 0 0))
 
 ;;;***
 
