@@ -378,8 +378,20 @@ completion candidates is `delete-file' itself.  You may prefer to
 make `find-file' the default action for all files, even if they
 wre obtained from a `delete-file' prompt.  In that case you can
 configure that by adding an entry to this variable pairing `file'
-with `find-file'."
-  :type '(alist :key-type symbol :value-type function))
+with `find-file'.
+
+In addition to target types, you can also use as keys in this
+alist, pairs of a target type and a command name.  Such a pair
+indicates that the override only applies if the target was
+obtained from minibuffer completion from that command.  For
+example adding an entry '((file . delete-file) . find-file) to
+this alist would indicate that for files at the prompt of the
+`delete-file' command, `find-file' should be used as the default
+action."
+  :type '(alist :key-type (choice (symbol :tag "Type")
+                                  (cons (symbol :tag "Type")
+                                        (symbol :tag "Command")))
+                :value-type (function :tag "Default action")))
 
 (make-obsolete-variable
    'embark-allow-edit-actions
@@ -684,6 +696,9 @@ This function is meant to be added to `minibuffer-setup-hook'."
 (defvar-local embark-collect--candidates nil
   "List of candidates in current collect buffer.")
 
+(defvar-local embark--export-pre-revert-hook nil
+  "Hook run before reverting an Embark Export buffer.")
+
 ;;; Core functionality
 
 (defconst embark--verbose-indicator-buffer " *Embark Actions*")
@@ -957,7 +972,8 @@ their own target finder.  See for example
         (setq beg (previous-single-property-change beg 'mouse-face))
         (setq end (or (next-single-property-change end 'mouse-face)
                       (point-max)))
-        (let ((raw (buffer-substring beg end)))
+        (let ((raw (or (get-text-property beg 'completion--string)
+                       (buffer-substring beg end))))
           `(,embark--type
             ,(if (eq embark--type 'file)
                  (abbreviate-file-name (expand-file-name raw))
@@ -1950,7 +1966,9 @@ For targets that do not come from minibuffer completion
 type is not listed in `embark-default-action-overrides', the
 default action is given by whatever binding RET has in the action
 keymap for the given type."
-  (or (alist-get type embark-default-action-overrides)
+  (or (alist-get (cons type embark--command) embark-default-action-overrides
+                 nil nil #'equal)
+      (alist-get type embark-default-action-overrides)
       (alist-get t embark-default-action-overrides)
       embark--command
       (lookup-key (symbol-value (or (alist-get type embark-keymap-alist)
@@ -2855,7 +2873,6 @@ candidate."
 
 The function `generate-new-buffer-name' is used to ensure the
 buffer has a unique name."
-  (interactive)
   (let ((buffer (generate-new-buffer buffer-name)))
     (with-current-buffer buffer
       ;; we'll run the mode hooks once the buffer is displayed, so
@@ -2879,6 +2896,16 @@ buffer has a unique name."
       (set-window-dedicated-p window t)
       buffer)))
 
+(defun embark--descriptive-buffer-name (type)
+  "Return a descriptive name for an Embark collect or export buffer.
+TYPE should be either `collect' or `export'."
+  (format "*Embark %s: %s*"
+          (capitalize (symbol-name type))
+          (if (minibufferp)
+              (format "M-x %s RET %s" embark--command
+                      (minibuffer-contents-no-properties))
+            (buffer-name))))
+
 ;;;###autoload
 (defun embark-collect ()
   "Create an Embark Collect buffer.
@@ -2886,12 +2913,7 @@ buffer has a unique name."
 To control the display, add an entry to `display-buffer-alist'
 with key \"Embark Collect\"."
   (interactive)
-  (let ((buffer (embark--collect
-                 (format "*Embark Collect: %s*"
-                         (if (minibufferp)
-                             (format "M-x %s RET %s" embark--command
-                                     (minibuffer-contents-no-properties))
-                           (buffer-name))))))
+  (let ((buffer (embark--collect (embark--descriptive-buffer-name 'collect))))
     (when (minibufferp)
       (embark--run-after-command #'pop-to-buffer buffer)
       (embark--quit-and-run #'message nil))))
@@ -2926,17 +2948,55 @@ with key \"Embark Live\"."
                            (funcall stop-collect)
                          (embark-collect--update-candidates live-buffer)
                          (with-current-buffer live-buffer
-                           (save-excursion (revert-buffer)))
+                           ;; TODO figure out why I can't restore point
+                           (tabulated-list-print nil t))
                          (setq timer nil))))))))
     (add-hook 'after-change-functions run-collect nil t)
     (when (minibufferp)
       (add-hook 'change-major-mode-hook stop-collect nil t))))
 
+(defun embark--export-revert-function ()
+  "Return an appropriate revert function for an export buffer in this context."
+  (let ((buffer (or embark--target-buffer (embark--target-buffer))))
+    (cl-flet ((reverter (wrapper)
+                (lambda (&rest _)
+                  (let ((windows (get-buffer-window-list nil nil t))
+                        (old (current-buffer))
+                        (hook embark--export-pre-revert-hook))
+                    (kill-buffer old)
+                    (with-current-buffer
+                        (if (buffer-live-p buffer) buffer (current-buffer))
+                      (funcall wrapper
+                               (lambda ()
+                                 (let ((embark--export-pre-revert-hook hook))
+                                   (run-hooks 'embark--export-pre-revert-hook))
+                                 (embark-export windows))))))))
+        (if (minibufferp)
+          (reverter
+           (let ((command embark--command)
+                 (input (minibuffer-contents-no-properties)))
+             (lambda (export)
+               (minibuffer-with-setup-hook
+                   (lambda ()
+                     (delete-minibuffer-contents)
+                     (insert input)
+                     (add-hook 'post-command-hook
+                               (lambda ()
+                                 (let ((embark--command command)
+                                       (embark--target-buffer buffer))
+                                   (funcall export)))
+                               nil t))
+                 (command-execute command)))))
+          (reverter #'funcall)))))
+
 ;;;###autoload
-(defun embark-export ()
+(defun embark-export (&optional windows)
   "Create a type-specific buffer to manage current candidates.
 The variable `embark-exporters-alist' controls how to make the
-buffer for each type of completion."
+buffer for each type of completion.
+
+If WINDOWS is nil, display the buffer using `pop-to-buffer',
+otherwise display it in each of the WINDOWS."
   (interactive)
   (let* ((transformed (embark--maybe-transform-candidates))
          (candidates (or (plist-get transformed :candidates)
@@ -2946,16 +3006,23 @@ buffer for each type of completion."
                         (alist-get t embark-exporters-alist))))
       (if (eq exporter 'embark-collect)
           (embark-collect)
-        (let ((dir (embark--default-directory))
-              (after embark-after-export-hook))
+        (let ((after embark-after-export-hook)
+              (cmd embark--command)
+              (name (embark--descriptive-buffer-name 'export))
+              (revert (embark--export-revert-function)))
           (embark--quit-and-run
            (lambda ()
-             ;; TODO see embark--quit-and-run and embark--run-after-command,
-             ;; there the default-directory is also smuggled to the lambda.
-             ;; This should be fixed properly.
-             (let ((default-directory dir) ;; dired needs this info
-                   (embark-after-export-hook after))
-               (funcall exporter candidates)
+             (let ((display-buffer-alist
+                    '(("" display-buffer-no-window (allow-no-window . t)))))
+               (funcall exporter candidates))
+             (rename-buffer name t)
+             (setq-local revert-buffer-function revert)
+             (if windows
+                 (dolist (window windows)
+                   (set-window-buffer window (current-buffer)))
+               (pop-to-buffer (current-buffer)))
+             (let ((embark-after-export-hook after)
+                   (embark--command cmd))
                (run-hooks 'embark-after-export-hook)))))))))
 
 (defmacro embark--export-rename (buffer title &rest body)
@@ -2965,20 +3032,18 @@ buffer for each type of completion."
     `(let ((,saved (embark-rename-buffer
                     ,buffer " *Embark Saved*" t)))
        ,@body
-       (pop-to-buffer (embark-rename-buffer
-                       ,buffer ,(format "*Embark Export %s*" title) t))
+       (set-buffer (embark-rename-buffer
+                    ,buffer ,(format "*Embark Export %s*" title) t))
        (when ,saved (embark-rename-buffer ,saved ,buffer)))))
 
-(defun embark--export-customize (items title type pred)
+(defun embark--export-customize (items type pred)
   "Create a customization buffer listing ITEMS.
 TYPE is the items type.
-TITLE is the buffer title.
 PRED is a predicate function used to filter the items."
   (custom-buffer-create
    (cl-loop for item in items
             for sym = (intern-soft item)
-            when (and sym (funcall pred sym)) collect `(,sym ,type))
-   (format "*Embark Export %s*" title)))
+            when (and sym (funcall pred sym)) collect `(,sym ,type))))
 
 (autoload 'apropos-parse-pattern "apropos")
 (autoload 'apropos-symbols-internal "apropos")
@@ -2988,14 +3053,11 @@ PRED is a predicate function used to filter the items."
     (apropos-parse-pattern "") ;; Initialize apropos pattern
     (apropos-symbols-internal
      (delq nil (mapcar #'intern-soft symbols))
-     (bound-and-true-p apropos-do-all))
-    (with-current-buffer "*Apropos*"
-      ;; Reverting the apropos buffer is not possible
-      (setq-local revert-buffer-function #'revert-buffer--default))))
+     (bound-and-true-p apropos-do-all))))
 
 (defun embark-export-customize-face (faces)
   "Create a customization buffer listing FACES."
-  (embark--export-customize faces "Faces" 'custom-face #'facep))
+  (embark--export-customize faces 'custom-face #'facep))
 
 (defun embark-export-customize-variable (variables)
   "Create a customization buffer listing VARIABLES."
@@ -3014,7 +3076,7 @@ PRED is a predicate function used to filter the items."
                 (let ((str (funcall orig-write widget val)))
                   (puthash str val ht)
                   str))))
-    (embark--export-customize variables "Variables" 'custom-variable #'boundp)))
+    (embark--export-customize variables 'custom-variable #'boundp)))
 
 (defun embark-export-ibuffer (buffers)
   "Create an ibuffer buffer listing BUFFERS."

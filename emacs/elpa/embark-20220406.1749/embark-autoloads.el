@@ -155,7 +155,12 @@ with key \"Embark Live\"." t nil)
 (autoload 'embark-export "embark" "\
 Create a type-specific buffer to manage current candidates.
 The variable `embark-exporters-alist' controls how to make the
-buffer for each type of completion." t nil)
+buffer for each type of completion.
+
+If WINDOWS is nil, display the buffer using `pop-to-buffer',
+otherwise display it in each of the WINDOWS.
+
+\(fn &optional WINDOWS)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "embark" '("embark-")))
 
