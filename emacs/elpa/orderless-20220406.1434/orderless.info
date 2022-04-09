@@ -64,15 +64,14 @@ literal matches are enabled.
 front-end that provides a completion UI.  Any completion style can be
 used with the default Emacs completion UI (sometimes called minibuffer
 tab completion), with the built-in Icomplete package (which is similar
-to the more well-known Ido Mode), or with some third party minibuffer
-completion frameworks such as Vertico
-(https://github.com/minad/vertico), Selectrum
-(https://github.com/raxod502/selectrum) (in its default configuration),
-or icomplete-vertical (https://github.com/oantolin/icomplete-vertical)
-(note there is also a _built-in_ package named icomplete-vertical in the
-unreleased version 28 of Emacs, which will eventually make the third
-party icomplete-vertical obsolete —orderless works equally well with
-both icomplete-vertical packages).
+to the more well-known Ido Mode), the icomplete-vertical variant from
+Emacs 28 (see the external icomplete-vertical
+(https://github.com/oantolin/icomplete-vertical) package to get that
+functionality on earlier versions of Emacs), or with some third party
+minibuffer completion frameworks such as Mct
+(https://gitlab.com/protesilaos/mct), Vertico
+(https://github.com/minad/vertico), or Selectrum
+(https://github.com/raxod502/selectrum) (in its default configuration).
 
    All the completion UIs just mentioned are for minibuffer completion,
 used when Emacs commands prompt the user in the minibuffer for some
@@ -104,13 +103,27 @@ via ‘package-install’.  If you use ‘use-package’, you can use:
 
      (use-package orderless
        :ensure t
-       :custom (completion-styles '(orderless)))
+       :custom
+       (completion-styles '(orderless basic))
+       (completion-category-overrides '((file (styles basic partial-completion)))))
 
    Alternatively, put ‘orderless.el’ somewhere on your ‘load-path’, and
 use the following configuration:
 
      (require 'orderless)
-     (setq completion-styles '(orderless))
+     (setq completion-styles '(orderless basic)
+           completion-category-overrides '((file (styles basic partial-completion))))
+
+   The ‘basic’ completion style is specified as fallback in addition to
+‘orderless’ in order to ensure that completion commands which rely on
+dynamic completion tables, e.g., ‘completion-table-dynamic’ or
+‘completion-table-in-turn’, work correctly.  Furthermore the ‘basic’
+completion style needs to be tried _first_ (not as a fallback) for TRAMP
+hostname completion to work.  In order to achieve that, we add an entry
+for the ‘file’ completion category in the
+‘completion-category-overrides’ variable.  In addition, the
+‘partial-completion’ style allows you to use wildcards for file
+completion and partial paths, e.g., ‘/u/s/l’ for ‘/usr/share/local’.
 
    Bug reports are highly welcome and appreciated!
 
@@ -493,7 +506,7 @@ for example, Icomplete users could, instead of using this package,
 install Helm and configure Icomplete to use it as follows:
 
      (require 'helm)
-     (setq completion-styles '(helm))
+     (setq completion-styles '(helm basic))
      (icomplete-mode)
 
    (Of course, if you install Helm, you might as well use the Helm UI in
@@ -510,12 +523,12 @@ provides matching of space-separated components in any order and it can
 be used with either the Selectrum
 (https://github.com/raxod502/selectrum) or Ivy
 (https://github.com/abo-abo/swiper) completion UIs (it does not offer a
-completion-style that could be used with Emacs’ default completion UI or
-with Icomplete).  The components can be matched literally, as regexps,
-as initialisms or in the flex style (called “fuzzy” in prescient).  In
-addition to matching, ‘prescient.el’ also supports sorting of candidates
-(‘orderless’ leaves that up to the candidate source and the completion
-UI).
+completion-style that could be used with Emacs’ default completion UI,
+Mct, Vertico or with Icomplete).  The components can be matched
+literally, as regexps, as initialisms or in the flex style (called
+“fuzzy” in prescient).  In addition to matching, ‘prescient.el’ also
+supports sorting of candidates (‘orderless’ leaves that up to the
+candidate source and the completion UI).
 
 
 File: orderless.info,  Node: Restricting to current matches in Icicles Ido and Ivy,  Prev: Prescient,  Up: Related packages
@@ -545,22 +558,22 @@ out of order matching!
 Tag Table:
 Node: Top221
 Node: Overview946
-Node: Customization4179
-Node: Component matching styles4537
-Node: Style dispatchers6647
-Node: Component separator regexp8898
-Node: Defining custom orderless styles10135
-Node: Faces for component matches12027
-Node: Pattern compiler12831
-Node: Interactively changing the configuration13433
-Node: Integration with other completion UIs14896
-Node: Ivy15687
-Node: Selectrum16044
-Node: Company16718
-Node: Related packages18211
-Node: Ivy and Helm18509
-Node: Prescient19848
-Node: Restricting to current matches in Icicles Ido and Ivy20702
+Node: Customization4983
+Node: Component matching styles5341
+Node: Style dispatchers7451
+Node: Component separator regexp9702
+Node: Defining custom orderless styles10939
+Node: Faces for component matches12831
+Node: Pattern compiler13635
+Node: Interactively changing the configuration14237
+Node: Integration with other completion UIs15700
+Node: Ivy16491
+Node: Selectrum16848
+Node: Company17522
+Node: Related packages19015
+Node: Ivy and Helm19313
+Node: Prescient20658
+Node: Restricting to current matches in Icicles Ido and Ivy21526
 
 End Tag Table
 
