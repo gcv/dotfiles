@@ -4,7 +4,7 @@
 
 ;; Author: "Francis J. Wright" <F.J.Wright@qmul.ac.uk>
 ;; Maintainer: emacs-devel@gnu.org
-;; Version: 1.18
+;; Version: 1.19
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
 ;; Keywords: convenience
 
@@ -839,7 +839,8 @@ the mode line after `csv-field-index-delay' seconds of Emacs idle time."
     (let ((start (point))
 	  (field 0))
       (beginning-of-line)
-      (while (< (point) start)
+      (while (and (<= (point) start)
+                  (not (eolp)))
 	(csv-end-of-field)
 	(unless (eolp)
 	  (forward-char 1))
@@ -1321,7 +1322,10 @@ point is assumed to be at the beginning of the line."
 	(split-string row-text csv-separator-regexp)
       (save-excursion
 	(while (< (setq field-start (point)) row-end-position)
-	  (csv-forward-field 1)
+          ;; csv-forward-field will skip a separator if point is on
+          ;; it, and we'll miss an empty field
+          (unless (memq (following-char) csv-separator-chars)
+	    (csv-forward-field 1))
 	  (push
 	   (buffer-substring-no-properties field-start (point))
 	   fields)
