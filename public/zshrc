@@ -294,7 +294,7 @@ case $TERM in
         }
         preexec_functions+=( preexec_xterm )
         ;;
-    screen)
+    screen*)
         function precmd_screen() {
             print -Pn "\e]0;%n@%m (%y): %5~\a"
             print -Pn "\ek \e\\"

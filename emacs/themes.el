@@ -80,7 +80,7 @@
   (interactive)
   (/theme-before-enable)
   (load-theme 'zenburn t)
-  (let ((bg-default "grey18")
+  (let ((bg-default (if (display-graphic-p) "grey18" "grey8"))
         (fg-default "#cbcbbb")
         (bg-ml "grey30")
 	(fg-ml "grey68")
