@@ -37,6 +37,7 @@ nix-env -iA \
     nixpkgs.fdupes \
     nixpkgs.ffmpeg \
     nixpkgs.findutils \
+    nixpkgs.fish \
     nixpkgs.fzf \
     nixpkgs.git \
     nixpkgs.git-lfs \
@@ -50,6 +51,7 @@ nix-env -iA \
     nixpkgs.libvterm-neovim \
     nixpkgs.magic-wormhole \
     nixpkgs.mosh \
+    nixpkgs.miniserve \
     nixpkgs.nix-direnv \
     nixpkgs.nmap \
     nixpkgs.notmuch \
@@ -57,13 +59,16 @@ nix-env -iA \
     nixpkgs.p7zip \
     nixpkgs.pandoc \
     nixpkgs.password-store \
+    nixpkgs.pastel \
     nixpkgs.pv \
     nixpkgs.ranger \
     nixpkgs.rclone \
     nixpkgs.restic \
     nixpkgs.ripgrep \
     nixpkgs.rlwrap \
+    nixpkgs.sd \
     nixpkgs.silver-searcher \
+    nixpkgs.starship \
     nixpkgs.tectonic \
     nixpkgs.texinfo \
     nixpkgs.tmux \
@@ -71,6 +76,7 @@ nix-env -iA \
     nixpkgs.unrar \
     nixpkgs.watch \
     nixpkgs.wget \
+    nixpkgs.xcp \
     nixpkgs.xz \
     nixpkgs.youtube-dl \
     nixpkgs.yt-dlp
