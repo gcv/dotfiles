@@ -33,6 +33,7 @@ nix-env -iA \
     nixpkgs.direnv \
     nixpkgs.exa \
     nixpkgs.exif \
+    nixpkgs.fd \
     nixpkgs.fdupes \
     nixpkgs.ffmpeg \
     nixpkgs.findutils \
