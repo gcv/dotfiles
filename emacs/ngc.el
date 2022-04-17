@@ -30,6 +30,12 @@
   :config
   (consult-customize consult--source-buffer :hidden t :default nil)
   (add-to-list 'consult-buffer-sources persp-consult-source) ; Perspective integration
+
+  (consult-customize consult-theme :preview-key '(:debounce 0.5 any))
+
+  ;; turn off preview for a bunch of modes that don't play well with
+  ;; vertico-buffer-display-action set to '(display-buffer-same-window)
+  (consult-customize consult-ripgrep consult-git-grep consult-grep :preview-key nil)
   )
 
 
