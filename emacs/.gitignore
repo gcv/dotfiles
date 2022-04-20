@@ -1,6 +1,7 @@
 *.elc
 *.eln
 auto-save-list/
+eln-cache/
 elpa/archives
 elpa/gnupg
 elpa/vterm*/build
