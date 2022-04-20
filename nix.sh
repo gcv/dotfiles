@@ -25,15 +25,16 @@ nix-env -iA \
     nixpkgs.autojump \
     nixpkgs.automake \
     nixpkgs.awscli2 \
-    nixpkgs.bat \
+    nixpkgs.bat \               # cat replacement
+    nixpkgs.bitwarden-cli \     # password manager
     nixpkgs.cmake \
     nixpkgs.coreutils \
-    nixpkgs.croc \
+    nixpkgs.croc \              # peer-to-peer file transfer, directory capable
     nixpkgs.ctags \
     nixpkgs.direnv \
-    nixpkgs.exa \
+    nixpkgs.exa \               # ls replacement
     nixpkgs.exif \
-    nixpkgs.fd \
+    nixpkgs.fd \                # find replacement
     nixpkgs.fdupes \
     nixpkgs.ffmpeg \
     nixpkgs.findutils \
@@ -44,39 +45,40 @@ nix-env -iA \
     nixpkgs.gnupg \
     nixpkgs.htop \
     nixpkgs.jq \
-    nixpkgs.joshuto \
-    nixpkgs.lazydocker \
-    nixpkgs.lazygit \
+    nixpkgs.joshuto \           # file manager
+    nixpkgs.lazydocker \        # Docker UI
+    nixpkgs.lazygit \           # Git UI
     nixpkgs.ledger \
     nixpkgs.libvterm-neovim \
-    nixpkgs.magic-wormhole \
+    nixpkgs.magic-wormhole \    # peer-to-peer file transfer
     nixpkgs.mosh \
-    nixpkgs.miniserve \
+    nixpkgs.miniserve \         # HTTP server
+    nixpkgs.ngrok \             # expose local service over a secure tunnel
     nixpkgs.nix-direnv \
     nixpkgs.nmap \
-    nixpkgs.notmuch \
-    nixpkgs.offlineimap \
+    nixpkgs.notmuch \           # mail indexer
+    nixpkgs.offlineimap \       # mail fetcher
     nixpkgs.p7zip \
     nixpkgs.pandoc \
-    nixpkgs.password-store \
-    nixpkgs.pastel \
-    nixpkgs.pv \
-    nixpkgs.ranger \
+    nixpkgs.password-store \    # password manager
+    nixpkgs.pastel \            # color utility
+    nixpkgs.pv \                # pipe viewer
+    nixpkgs.ranger \            # file manager
     nixpkgs.rclone \
     nixpkgs.restic \
     nixpkgs.ripgrep \
     nixpkgs.rlwrap \
-    nixpkgs.sd \
-    nixpkgs.silver-searcher \
-    nixpkgs.starship \
-    nixpkgs.tectonic \
+    nixpkgs.sd \                # a simpler sed for common cases
+    nixpkgs.silver-searcher \   # ag
+    nixpkgs.starship \          # fancy prompt, good with fish
+    nixpkgs.tectonic \          # (La)TeX environment
     nixpkgs.texinfo \
     nixpkgs.tmux \
     nixpkgs.tree \
     nixpkgs.unrar \
     nixpkgs.watch \
     nixpkgs.wget \
-    nixpkgs.xcp \
+    nixpkgs.xcp \               # cp replacement
     nixpkgs.xz \
-    nixpkgs.youtube-dl \
-    nixpkgs.yt-dlp
+    nixpkgs.youtube-dl \        # outdated?
+    nixpkgs.yt-dlp              # new youtube-dl
