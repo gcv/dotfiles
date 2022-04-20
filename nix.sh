@@ -60,7 +60,7 @@ nix-env -iA \
     nixpkgs.offlineimap \       # mail fetcher
     nixpkgs.p7zip \
     nixpkgs.pandoc \
-    nixpkgs.password-store \    # password manager
+    nixpkgs.pass \              # password manager
     nixpkgs.pastel \            # color utility
     nixpkgs.pv \                # pipe viewer
     nixpkgs.ranger \            # file manager
