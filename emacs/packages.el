@@ -816,11 +816,11 @@
   :pin melpa
 
   :bind
-  (("C-c C-p" . perspective-map)
-   ("H-p" . perspective-map)
+  (("H-p" . perspective-map)
    ("C-c M-p" . persp-switch))
 
   :custom
+  (persp-mode-prefix-key (kbd "C-c C-p"))
   (persp-interactive-completion-function 'completing-read)
   (persp-sort 'access)
   :init
