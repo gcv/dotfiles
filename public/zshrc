@@ -282,6 +282,12 @@ PROMPT='%(!.${COLOR_RED}.${COLOR_NONE})[%m:$(shorten_path_disambiguate_keep_last
 RPROMPT='%(?..${COLOR_RED}[%?]${COLOR_NONE})'
 
 
+### fix colors in tmux
+if [[ $TERM == "screen" ]]; then
+    export TERM=screen-256color
+fi
+
+
 ### title bar or status bar
 case $TERM in
     xterm*|rxvt*|cygwin)
