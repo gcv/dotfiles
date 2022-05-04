@@ -147,7 +147,7 @@
      ((< from to) (+ f by))
      (t f))))
 
-(defun /color-shift-hex (from to)
+(cl-defun /color-shift-hex (from to &key (by 27))
   "Move color FROM towards TO. FROM and TO are hex values."
   (if (or (string-match-p "^unspecified" (format "%s" from))
           (string-match-p "^unspecified" (format "%s" to)))
@@ -155,9 +155,9 @@
     (let* ((from (color-values from))
            (to (color-values to)))
       (format "#%02x%02x%02x"
-              (/color-shift (car from) (car to))
-              (/color-shift (cadr from) (cadr to))
-              (/color-shift (caddr from) (caddr to))))))
+              (/color-shift (car from) (car to) :by by)
+              (/color-shift (cadr from) (cadr to) :by by)
+              (/color-shift (caddr from) (caddr to) :by by)))))
 
 (defun /color-shift-frame-bg (&optional frame)
   "Calculate a shifted background color from FRAME background."
