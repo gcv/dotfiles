@@ -284,7 +284,7 @@ RPROMPT='%(?..${COLOR_RED}[%?]${COLOR_NONE})'
 
 ### fix colors in tmux
 if [[ $TERM == "screen" ]]; then
-    export TERM=screen-256color
+    export TERM=screen-24bit
 fi
 
 
