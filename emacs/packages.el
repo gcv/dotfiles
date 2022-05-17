@@ -529,6 +529,13 @@
   )
 
 
+(use-package imenu-list
+  :pin melpa
+  :custom
+  (imenu-list-position 'left)
+  (imenu-list-size 30))
+
+
 (use-package js2-mode
   :pin melpa
 
