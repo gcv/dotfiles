@@ -1,7 +1,7 @@
 This is orderless.info, produced by makeinfo version 6.7 from
 orderless.texi.
 
-INFO-DIR-SECTION Emacs
+INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
 * Orderless: (orderless). Completion style for matching regexps in any order.
 END-INFO-DIR-ENTRY
@@ -556,24 +556,24 @@ out of order matching!
 
 
 Tag Table:
-Node: Top221
-Node: Overview946
-Node: Customization4983
-Node: Component matching styles5341
-Node: Style dispatchers7451
-Node: Component separator regexp9702
-Node: Defining custom orderless styles10939
-Node: Faces for component matches12831
-Node: Pattern compiler13635
-Node: Interactively changing the configuration14237
-Node: Integration with other completion UIs15700
-Node: Ivy16491
-Node: Selectrum16848
-Node: Company17522
-Node: Related packages19015
-Node: Ivy and Helm19313
-Node: Prescient20658
-Node: Restricting to current matches in Icicles Ido and Ivy21526
+Node: Top235
+Node: Overview960
+Node: Customization4997
+Node: Component matching styles5355
+Node: Style dispatchers7465
+Node: Component separator regexp9716
+Node: Defining custom orderless styles10953
+Node: Faces for component matches12845
+Node: Pattern compiler13649
+Node: Interactively changing the configuration14251
+Node: Integration with other completion UIs15714
+Node: Ivy16505
+Node: Selectrum16862
+Node: Company17536
+Node: Related packages19029
+Node: Ivy and Helm19327
+Node: Prescient20672
+Node: Restricting to current matches in Icicles Ido and Ivy21540
 
 End Tag Table
 
