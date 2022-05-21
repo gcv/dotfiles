@@ -252,7 +252,9 @@ Macros containing mouse clicks are omitted.
 \(fn ARG)" t nil)
 
 (autoload 'consult-grep "consult" "\
-Search for regexp with grep in DIR with INITIAL input.
+Search with `grep' for files in DIR where the content matches a regexp.
+
+The initial input is given by the INITIAL argument.
 
 The input string is split, the first part of the string (grep input) is
 passed to the asynchronous grep process and the second part of the string is
@@ -290,21 +292,21 @@ Otherwise the `default-directory' is searched.
 \(fn &optional DIR INITIAL)" t nil)
 
 (autoload 'consult-git-grep "consult" "\
-Search for regexp with grep in DIR with INITIAL input.
-
-See `consult-grep' for more details.
+Search with `git grep' for files in DIR where the content matches a regexp.
+The initial input is given by the INITIAL argument. See `consult-grep'
+for more details.
 
 \(fn &optional DIR INITIAL)" t nil)
 
 (autoload 'consult-ripgrep "consult" "\
-Search for regexp with rg in DIR with INITIAL input.
-
-See `consult-grep' for more details.
+Search with `rg' for files in DIR where the content matches a regexp.
+The initial input is given by the INITIAL argument. See `consult-grep'
+for more details.
 
 \(fn &optional DIR INITIAL)" t nil)
 
 (autoload 'consult-find "consult" "\
-Search for regexp with find in DIR with INITIAL input.
+Search for files in DIR matching input regexp given INITIAL input.
 
 The find process is started asynchronously, similar to `consult-grep'.
 See `consult-grep' for more details regarding the asynchronous search.
@@ -312,18 +314,23 @@ See `consult-grep' for more details regarding the asynchronous search.
 \(fn &optional DIR INITIAL)" t nil)
 
 (autoload 'consult-locate "consult" "\
-Search for regexp with locate with INITIAL input.
+Search with `locate' for files which match input given INITIAL input.
 
-The locate process is started asynchronously, similar to `consult-grep'.
-See `consult-grep' for more details regarding the asynchronous search.
+The input is treated literally such that locate can take advantage of
+the locate database index. Regular expressions would often force a slow
+linear search through the entire database. The locate process is started
+asynchronously, similar to `consult-grep'. See `consult-grep' for more
+details regarding the asynchronous search.
 
 \(fn &optional INITIAL)" t nil)
 
 (autoload 'consult-man "consult" "\
-Search for regexp with man with INITIAL input.
+Search for man page given INITIAL input.
 
-The man process is started asynchronously, similar to `consult-grep'.
-See `consult-grep' for more details regarding the asynchronous search.
+The input string is not preprocessed and passed literally to the
+underlying man commands. The man process is started asynchronously,
+similar to `consult-grep'. See `consult-grep' for more details regarding
+the asynchronous search.
 
 \(fn &optional INITIAL)" t nil)
 

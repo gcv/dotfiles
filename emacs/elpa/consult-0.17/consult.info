@@ -1,7 +1,7 @@
 This is consult.info, produced by makeinfo version 6.7 from
 consult.texi.
 
-INFO-DIR-SECTION Emacs
+INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
 * Consult: (consult).   Useful commands built on completing-read.
 END-INFO-DIR-ENTRY
@@ -398,7 +398,7 @@ File: consult.info,  Node: Miscellaneous,  Prev: Org Mode,  Up: Available comman
    • ‘consult-preview-at-point’ and ‘consult-preview-at-point-mode’:
      Command and minor mode which previews the candidate at point in the
      ‘*Completions*’ buffer.  This mode is relevant if you use Mct
-     (https://gitlab.com/protesilaos/mct) or the default ‘*Completions*’
+     (https://git.sr.ht/~protesilaos/mct) or the default ‘*Completions*’
      UI.
    • ‘consult-completion-in-region’: In case you don’t use Corfu
      (https://github.com/minad/corfu) as your in-buffer completion UI,
@@ -493,20 +493,20 @@ where the preview may be expensive due to file loading.
       consult-bookmark consult-recent-file consult-xref
       consult--source-bookmark consult--source-recent-file
       consult--source-project-recent-file
-      :preview-key (kbd "M-."))
+      ;; :preview-key '(:debounce 0.2 any) ;; Option 1: Delay preview
+      :preview-key (kbd "M-."))            ;; Option 2: Manual preview
 
    In this case one may wonder what the difference is between using an
 Embark action on the current candidate in comparison to a manually
 triggered preview.  The main difference is that the files opened by
 manual preview are closed again after the completion session.
 Furthermore during preview some functionality is disabled to improve the
-performance, see for example ‘consult-preview-excluded-hooks’.  Files
+performance, see for example the customization variables
+‘consult-preview-allowed-hooks’ and ‘consult-preview-variables’.  Files
 larger than ‘consult-preview-raw-size’ are previewed literally without
-syntax highlighting and without changing the major mode.
-
-   Delaying the preview is particularly useful for ‘consult-theme’,
-since the theme preview is a little bit slow.  The delay can result in a
-smoother UI.
+syntax highlighting and without changing the major mode.  Delaying the
+preview is also useful for ‘consult-theme’, since the theme preview is
+slow.  The delay results in a smoother UI experience.
 
      ;; Preview on any key press, but delay 0.5s
      (consult-customize consult-theme :preview-key '(:debounce 0.5 any))
@@ -661,7 +661,9 @@ defined.
    • ‘:history’ Name of history variable to add selected candidate.
    • ‘:default’ Must be t if the first item of the source is the default
      value.
-   • ‘:action’ Action function called with the selected candidate.
+   • ‘:action’ Function called with the selected candidate.
+   • ‘:new’ Function called with new candidate name, only if
+     ‘:require-match’ is nil.
    • ‘:state’ State constructor for the source, must return the state
      function.
    • Other source fields can be added specifically to the use case.
@@ -670,28 +672,16 @@ defined.
 explanation.  The ‘:action’ function takes a single argument and is only
 called after selection with the selected candidate, if the selection has
 not been aborted.  This functionality is provided for convenience and
-easy definition of sources.  The ‘:state’ field is more complicated and
-general.  The ‘:state’ function is a constructor function without
-arguments, which can perform some setup necessary for the preview.  It
-must return a closure with two arguments: The first argument is the
-candidate string, the second argument is the restore flag.  The state
-function is called during preview, if a preview key has been pressed,
-with the selected candidate or nil and the restore argument being nil.
-Furthermore the state function is always called after selection with the
-selected candidate or nil.  The state function is called with nil for
-the candidate if for example the selection process has been aborted or
-if the original preview state should be restored during preview.  The
-restore flag is t for the final call.  The final call happens even if
-preview is disabled.  For this reason you can also use the final call to
-the state function in a similar way as ‘:action’.  You probably only
-want to specify both ‘:state’ and ‘:action’ if ‘:state’ is purely
-responsible for preview and ‘:action’ is then responsible for the real
-action after selection.
+easy definition of sources.  The ‘:state’ field is more general.  The
+‘:state’ function is a constructor function without arguments, which can
+perform some setup necessary for the preview.  It must return a closure
+which takes an ACTION and a CANDIDATE argument.  See the docstring of
+‘consult--with-preview’ for more details about the ACTION argument.
 
-   In order to avoid slowness, ‘consult-buffer’ only preview buffers by
-default.  Loading recent files, bookmarks or views can result in
-expensive operations.  However it is possible to configure the bookmark
-and file sources to also perform preview.
+   By default, ‘consult-buffer’ previews buffers, bookmarks and files.
+Loading recent files, bookmarks or views can result in expensive
+operations.  However it is possible to configure a manual preview as
+follows.
 
      (consult-customize
       consult--source-bookmark consult--source-recent-file
@@ -724,38 +714,32 @@ buffers from a library like <https://github.com/minad/bookmark-view/>.
                                         (alist-get 'handler (cdr x))))
                                   bookmark-alist)))))
 
-   Other useful sources allow the creation of terminal and eshell
-buffers if they do not exist yet.
+   Another useful source lists all Org buffers and lets you create new
+ones.  One can create similar sources for other major modes, e.g., for
+Eshell.
 
-     (defun mode-buffer-exists-p (mode)
-       (seq-some (lambda (buf)
-                   (provided-mode-derived-p
-                    (buffer-local-value 'major-mode buf)
-                    mode))
-                 (buffer-list)))
+     (defvar org-source
+       (list :name     "Org Buffer"
+             :category 'buffer
+             :narrow   ?o
+             :face     'consult-buffer
+             :history  'buffer-name-history
+             :state    #'consult--buffer-state
+             :new
+             (lambda (name)
+               (with-current-buffer (get-buffer-create name)
+                 (insert "#+title: " name "\n\n")
+                 (org-mode)
+                 (consult--buffer-action (current-buffer))))
+             :items
+             (lambda ()
+               (mapcar #'buffer-name
+                       (seq-filter
+                        (lambda (x)
+                          (eq (buffer-local-value 'major-mode x) 'org-mode))
+                        (buffer-list))))))
 
-     (defvar eshell-source
-       `(:category 'consult-new
-         :face     'font-lock-constant-face
-         :action   ,(lambda (_) (eshell))
-         :items
-         ,(lambda ()
-            (unless (mode-buffer-exists-p 'eshell-mode)
-              '("*eshell* (new)")))))
-
-     (defvar term-source
-       `(:category 'consult-new
-         :face     'font-lock-constant-face
-         :action
-         ,(lambda (_)
-            (ansi-term (or (getenv "SHELL") "/bin/sh")))
-         :items
-         ,(lambda ()
-            (unless (mode-buffer-exists-p 'term-mode)
-              '("*ansi-term* (new)")))))
-
-     (add-to-list 'consult-buffer-sources 'eshell-source 'append)
-     (add-to-list 'consult-buffer-sources 'term-source 'append)
+     (add-to-list 'consult-buffer-sources 'org-source 'append)
 
    For more details, see the documentation of ‘consult-buffer’ and of
 the internal ‘consult--multi’ API.  The ‘consult--multi’ function can be
@@ -782,9 +766,9 @@ example the ‘delete-file’ command is offered.  With Embark you can
 execute arbitrary commands on the currently selected candidate via
 ‘M-x’.
 
-   Furthermore Embark provides the ‘embark-collect-snapshot’ command,
-which collects candidates and presents them in an Embark collect buffer,
-where further actions can be applied to them.  A related feature is the
+   Furthermore Embark provides the ‘embark-collect’ command, which
+collects candidates and presents them in an Embark collect buffer, where
+further actions can be applied to them.  A related feature is the
 ‘embark-export’ command, which exports candidate lists to a buffer of a
 special type.  For example in the case of file completion, a Dired
 buffer is opened.
@@ -824,9 +808,8 @@ where additional configuration examples can be contributed.
    *IMPORTANT:* It is strongly recommended that you enable lexical
 binding
 (https://www.gnu.org/software/emacs/manual/html_node/elisp/Lexical-Binding.html)
-in your configuration.  Consult uses a functional programming style,
-relying on lambdas and lexical closures.  For this reason many
-Consult-related snippets require lexical binding.
+in your configuration.  Consult relies on lambdas and lexical closures.
+For this reason many Consult-related snippets require lexical binding.
 
 * Menu:
 
@@ -1015,13 +998,13 @@ consult-mode-command-filter        Filter for ‘consult-mode-command’
 consult-mode-histories             Mode-specific history variables
 consult-narrow-key                 Narrowing prefix key during completion
 consult-preview-key                Keys which triggers preview
-consult-preview-excluded-hooks     List of ‘find-file’ hooks to avoid during preview
+consult-preview-allowed-hooks      List of ‘find-file’ hooks to enable during preview
 consult-preview-max-count          Maximum number of files to keep open during preview
 consult-preview-max-size           Files larger than this size are not previewed
 consult-preview-raw-size           Files larger than this size are previewed in raw form
+consult-preview-variables          Alist of variables to bind during preview
 consult-project-buffer-sources     List of virtual project buffer sources
 consult-project-function           Function which returns current project root
-consult-recent-file-filter         Filter for ‘consult-recent-file’
 consult-register-prefix            Prefix string for register keys during completion
 consult-ripgrep-args               Command line arguments for ripgrep
 consult-themes                     List of themes to be presented for selection
@@ -1072,6 +1055,20 @@ future versions of the package.
       consult-line :prompt "Search: "
       :preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
 
+   The configuration values are evaluated at runtime, just before the
+completion session is started.  Therefore you can use for example
+‘thing-at-point’ to adjust the initial input or the future hitory.
+
+     (consult-customize
+      consult-line
+      :add-history (seq-some #'thing-at-point '(region symbol)))
+
+     (defalias 'consult-line-thing-at-point 'consult-line)
+
+     (consult-customize
+      consult-line-thing-at-point
+      :initial (thing-at-point 'symbol))
+
    Generally it is possible to modify commands for your individual needs
 by the following techniques:
 
@@ -1108,7 +1105,7 @@ model fits best for you!
 
    • The builtin completion UI, which pops up the ‘*Completions*’
      buffer.
-   • mct by Protesilaos Stavrou (https://gitlab.com/protesilaos/mct):
+   • mct by Protesilaos Stavrou (https://git.sr.ht/~protesilaos/mct):
      Minibuffer and Completions in Tandem, which builds on the default
      completion UI.
    • selectrum by Radon Rosborough
@@ -1134,9 +1131,11 @@ theses packages depending on your preferences and requirements.
    • consult-flyspell (https://gitlab.com/OlMon/consult-flyspell):
      Additional Flyspell integration.
    • consult-lsp (https://github.com/gagbo/consult-lsp): Integration
-     with ‘lsp-mode’ (lsp client).
+     with lsp-mode (lsp client).
    • consult-notmuch (https://codeberg.org/jao/consult-notmuch): Access
      the Notmuch (https://notmuchmail.org/) email system using Consult.
+   • consult-org-roam (https://github.com/jgru/consult-org-roam):
+     Integration with org-roam.
    • consult-spotify (https://codeberg.org/jao/espotify): Access the
      Spotify API and control your local music player.
    • consult-project-extra
@@ -1218,12 +1217,12 @@ please carry out the following steps:
      (require 'consult)
      (require 'vertico)
      (vertico-mode)
-     (setq completion-styles '(substring))
+     (setq completion-styles '(substring basic))
 
    Minimal setup with the default completion system for ‘emacs -Q’:
      (package-initialize)
      (require 'consult)
-     (setq completion-styles '(substring))
+     (setq completion-styles '(substring basic))
 
    Please provide the necessary important information with your bug
 report:
@@ -1247,8 +1246,7 @@ report:
    When evaluating Consult-related code snippets you should enable
 lexical binding
 (https://www.gnu.org/software/emacs/manual/html_node/elisp/Lexical-Binding.html).
-Consult often uses a functional programming style, relying on lambdas
-and lexical closures.
+Consult often relies on lambdas and lexical closures.
 
 
 File: consult.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
@@ -1304,7 +1302,7 @@ original versions.
    Advice and useful discussions:
    • Clemens Radermacher (https://github.com/clemera/)
    • Omar Antolín Camarena (https://github.com/oantolin/)
-   • Protesilaos Stavrou (https://gitlab.com/protesilaos/)
+   • Protesilaos Stavrou (https://protesilaos.com)
    • Steve Purcell (https://github.com/purcell/)
    • Adam Porter (https://github.com/alphapapa/)
    • Manuel Uberti (https://github.com/manuel-uberti/)
@@ -1337,6 +1335,8 @@ original versions.
    • Enrique Kessler Martínez (https://github.com/Qkessler)
      (consult-project-extra
      (https://github.com/Qkessler/consult-project-extra))
+   • Jan Gru (https://github.com/jgru) (consult-org-roam
+     (https://github.com/jgru/consult-org-roam))
 
 
 File: consult.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
@@ -1444,37 +1444,37 @@ File: consult.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
 
 Tag Table:
-Node: Top205
-Node: Introduction2603
-Node: Available commands5345
-Node: Virtual Buffers6873
-Node: Editing8467
-Node: Register9321
-Node: Navigation11031
-Node: Search12112
-Node: Grep and Find14003
-Node: Compilation15999
-Node: Histories16945
-Node: Modes17974
-Node: Org Mode18452
-Node: Miscellaneous18967
-Node: Special features22082
-Node: Live previews23209
-Node: Narrowing and grouping26065
-Node: Asynchronous search28066
-Node: Multiple sources31146
-Node: Embark integration37693
-Node: Configuration39895
-Node: Use-package example41033
-Node: Custom variables48245
-Node: Fine-tuning51908
-Node: Recommended packages54471
-Node: Bug reports59761
-Node: Contributions62455
-Node: Acknowledgments63362
-Node: Indices66598
-Node: Function index66834
-Node: Concept index70626
+Node: Top219
+Node: Introduction2617
+Node: Available commands5359
+Node: Virtual Buffers6887
+Node: Editing8481
+Node: Register9335
+Node: Navigation11045
+Node: Search12126
+Node: Grep and Find14017
+Node: Compilation16013
+Node: Histories16959
+Node: Modes17988
+Node: Org Mode18466
+Node: Miscellaneous18981
+Node: Special features22096
+Node: Live previews23223
+Node: Narrowing and grouping26235
+Node: Asynchronous search28236
+Node: Multiple sources31316
+Node: Embark integration37021
+Node: Configuration39214
+Node: Use-package example40313
+Node: Custom variables47525
+Node: Fine-tuning51194
+Node: Recommended packages54234
+Node: Bug reports59618
+Node: Contributions62286
+Node: Acknowledgments63193
+Node: Indices66529
+Node: Function index66765
+Node: Concept index70557
 
 End Tag Table
 
