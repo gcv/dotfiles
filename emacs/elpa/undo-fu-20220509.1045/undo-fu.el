@@ -5,9 +5,9 @@
 
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
-;; URL: https://gitlab.com/ideasman42/emacs-undo-fu
-;; Package-Version: 20220211.548
-;; Package-Commit: e81c8da4416b15cac9d5ac7574e11471417a65ca
+;; URL: https://codeberg.com/ideasman42/emacs-undo-fu
+;; Package-Version: 20220509.1045
+;; Package-Commit: 97e7f4f6e0754fd1b01db9638b3f534b5b4941c2
 ;; Version: 0.4
 ;; Package-Requires: ((emacs "25.1"))
 
@@ -85,7 +85,7 @@ Instead, explicitly call `undo-fu-disable-checkpoint'."
   (interactive "*p")
   (cond
     ((not (undo-fu--backport-undo--last-change-was-undo-p buffer-undo-list))
-      (user-error "No undo to undo"))
+      (user-error "No undone changes to redo"))
     (t
       (let*
         (
@@ -94,7 +94,7 @@ Instead, explicitly call `undo-fu-disable-checkpoint'."
             (let ((undo-in-progress t))
               (while (and (consp ul) (eq (car ul) nil))
                 (setq ul (cdr ul)))
-              (primitive-undo arg ul)))
+              (primitive-undo (or arg 1) ul)))
           (new-pul (undo-fu--backport-undo--last-change-was-undo-p new-ul)))
         (message
           "Redo%s"
@@ -178,11 +178,13 @@ since in this case `keyboard-quit' cannot be used
 to perform unconstrained undo/redo actions."
   (interactive)
   ;; Display an appropriate message.
-  (if (undo-fu--was-undo-or-redo)
-    (if (and undo-fu--respect)
-      (message "Undo checkpoint cleared!")
+  (cond
+    ((not (undo-fu--was-undo-or-redo))
+      (message "Undo checkpoint disabled for next undo action!"))
+    ((not undo-fu--respect)
       (message "Undo checkpoint already cleared!"))
-    (message "Undo checkpoint disabled for next undo action!"))
+    (t
+      (message "Undo checkpoint cleared!")))
 
   (undo-fu--checkpoint-disable))
 
@@ -220,9 +222,11 @@ Optional argument ARG The number of steps to redo."
       (was-redo (and was-undo-or-redo undo-fu--was-redo))
       (was-undo (and was-undo-or-redo (null was-redo)))
       (undo-fu-quit-command
-        (if undo-fu-ignore-keyboard-quit
-          'undo-fu-disable-checkpoint
-          'keyboard-quit)))
+        (cond
+          (undo-fu-ignore-keyboard-quit
+            'undo-fu-disable-checkpoint)
+          (t
+            'keyboard-quit))))
 
     ;; Reset the option to not respect the checkpoint
     ;; after running non-undo related commands.
@@ -246,7 +250,7 @@ Optional argument ARG The number of steps to redo."
     ;; This allows explicitly over-stepping the boundary,
     ;; in cases when users want to bypass this constraint.
     (when undo-fu--respect
-      (when (member last-command (list undo-fu-quit-command 'undo-fu-disable-checkpoint))
+      (when (memq last-command (list undo-fu-quit-command 'undo-fu-disable-checkpoint))
         (undo-fu--checkpoint-disable)
         (message "Redo checkpoint stepped over!")))
 
@@ -261,9 +265,11 @@ Optional argument ARG The number of steps to redo."
         ;; It's important to clamp the number of steps before assigning
         ;; 'last-command' since it's used when checking the available steps.
         (steps
-          (if (numberp arg)
-            arg
-            1))
+          (cond
+            ((numberp arg)
+              arg)
+            (t
+              1)))
         (last-command
           (cond
             (was-undo
@@ -283,13 +289,13 @@ Optional argument ARG The number of steps to redo."
         (success
           (condition-case err
             (progn
-              (undo-fu--with-message-suffix
-                (if undo-fu--respect
-                  ""
-                  " (unconstrained)")
-                (if undo-fu--respect
-                  (undo-fu--backport-undo-redo steps)
-                  (undo steps)))
+              (cond
+                (undo-fu--respect
+                  (undo-fu--backport-undo-redo steps))
+                (t
+                  (undo-fu--with-message-suffix " (unconstrained)"
+                    (let ((undo-no-redo nil))
+                      (undo steps)))))
               t)
             (error
               (progn
@@ -318,9 +324,11 @@ Optional argument ARG the number of steps to undo."
       (was-undo-or-redo (undo-fu--was-undo-or-redo))
       (was-redo (and was-undo-or-redo undo-fu--was-redo))
       (undo-fu-quit-command
-        (if undo-fu-ignore-keyboard-quit
-          'undo-fu-disable-checkpoint
-          'keyboard-quit)))
+        (cond
+          (undo-fu-ignore-keyboard-quit
+            'undo-fu-disable-checkpoint)
+          (t
+            'keyboard-quit))))
 
     ;; Reset the option to not respect the checkpoint
     ;; after running non-undo related commands.
@@ -344,7 +352,7 @@ Optional argument ARG the number of steps to undo."
     ;; This allows explicitly over-stepping the boundary,
     ;; in cases when users want to bypass this constraint.
     (when undo-fu--respect
-      (when (member last-command (list undo-fu-quit-command 'undo-fu-disable-checkpoint))
+      (when (memq last-command (list undo-fu-quit-command 'undo-fu-disable-checkpoint))
         (undo-fu--checkpoint-disable)
         (message "Undo checkpoint ignored!")))
 
@@ -373,13 +381,13 @@ Optional argument ARG the number of steps to undo."
         (success
           (condition-case err
             (progn
-              (undo-fu--with-message-suffix
-                (if undo-fu--respect
-                  ""
-                  " (unconstrained)")
-                (if (or (not undo-fu--respect) undo-fu--in-region)
-                  (undo steps)
-                  (undo-only steps)))
+              (cond
+                ((and undo-fu--respect (not undo-fu--in-region))
+                  (undo-only steps))
+                (t
+                  (undo-fu--with-message-suffix " (unconstrained)"
+                    (let ((undo-no-redo nil))
+                      (undo steps)))))
               t)
             (error
               (progn
@@ -397,17 +405,15 @@ Optional argument ARG the number of steps to undo."
 ;; Don't let these commands repeat.
 ;;
 ;; Notes:
-;; - Use `with-eval-after-load' once Emacs version 24.4 is the minimum supported version.
 ;; - Package lint complains about using this command,
 ;;   however it's needed to avoid issues with `evil-mode'.
 (declare-function evil-declare-not-repeat "ext:evil-common")
-(eval-after-load 'evil '(mapc #'evil-declare-not-repeat undo-fu--commands))
+(with-eval-after-load 'evil (mapc #'evil-declare-not-repeat undo-fu--commands))
 
-;; `aggressive-indent-mode’ (setup if in use).
+;; `aggressive-indent-mode' (setup if in use).
 (defvar aggressive-indent-protected-commands)
-(eval-after-load
-  'aggressive-indent
-  '(nconc aggressive-indent-protected-commands undo-fu--commands))
+(with-eval-after-load 'aggressive-indent
+  (nconc aggressive-indent-protected-commands undo-fu--commands))
 
 (provide 'undo-fu)
 ;;; undo-fu.el ends here
