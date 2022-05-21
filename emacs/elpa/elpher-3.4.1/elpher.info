@@ -623,6 +623,26 @@ attempted, or the following command is issued:
 certificate file pair are erased from memory.  Furthermore, in the case
 of throw-away certificates, the corresponding files are deleted.
 
+8.2 Hiding preformatted text in text/gemini documents
+=====================================================
+
+Preformatted text is often used to display "ASCII art" or other similar
+text-based artwork.  While for many this is a fun way to introduce
+personality into their gemini documents, such text can pose difficulties
+for screen readers.
+
+   Setting the 'elpher-gemini-hide-preformatted' customization option to
+non-nil causes Elpher to hide all preformatted text blocks by default.
+In place of the preformatted text, Elpher instead displays the "alt
+text" (if any is available), along with a button which can be used to
+make specific blocks visible as required.
+
+   Other related customization options are
+'elpher-gemini-preformatted-toggle-label', which is the label used for
+the toggle button, and 'elpher-gemini-preformatted-toggle-bullet', which
+is the margin string used to distinguish the line replacing the
+preformatted text.
+
 
 File: elpher.info,  Node: Finger support,  Next: Local files,  Prev: Gemini support,  Up: Top
 
@@ -830,19 +850,34 @@ File: elpher.info,  Node: News,  Next: Contributors,  Prev: Command Index,  Up: 
 
 This chapter documents the major changes introduced by Elpher releases.
 
-14.1 v3.3.0
+14.1 v3.4.0
+===========
+
+14.1.1 Toggling preformatted text visibility
+--------------------------------------------
+
+This version introduces the ability to hide preformatted text in
+text/gemini documents by default.  To enable this, set the customization
+variable 'elpher-gemini-hide-preformatted' to non-nil.  This causes all
+preformated text blocks to be replaced with their "alt-text" (if any is
+available) and a button for toggling the visibility of the text block.
+
+   This feature is intended to make it easier for people using screen
+readers to read text/gemini documents.
+
+14.2 v3.3.0
 ===========
 
 This version includes lots of bug fixes, as well as a couple of new
 features.
 
-14.1.1 Local gophermaps
+14.2.1 Local gophermaps
 -----------------------
 
 Local gophermaps can now be displayed using 'file:'.  To render
 correctly, they must have the suffix '.gopher' or '.gophermap'.
 
-14.1.2 IRI support
+14.2.2 IRI support
 ------------------
 
 Internationalized Resource Identifiers (IRI) are an extension of URLs
@@ -854,13 +889,13 @@ characters and displays the decoded IRI. (For security reasons, the
 'elpher-info-current' command ('I') always displays both the decoded IRI
 and the URI when they differ.)
 
-14.2 v3.2.0
+14.3 v3.2.0
 ===========
 
 This version introduces several minor changes which, together, make it
 possible to set up alternative start pages configured to your liking.
 
-14.2.1 About pages
+14.3.1 About pages
 ------------------
 
 Special elpher pages such as the welcome page (previously "start" page),
@@ -868,14 +903,14 @@ the bookmarks page, the browsing history stack and list of visited pages
 are now addressable via 'about:' URLs.  For instance, the standard
 welcome page has the address 'about:welcome'.
 
-14.2.2 Local files
+14.3.2 Local files
 ------------------
 
 Local files can now be opened in elpher using 'file:' URLs.  For
 example, 'g 'file:~/my-start.gmi'' will open '~/my-start.gmi' as a
 text/gemini document.  *note Local files:: for details.
 
-14.2.3 Customizable start pages
+14.3.3 Customizable start pages
 -------------------------------
 
 The new customization variable 'elpher-start-page-url' contains the URL
@@ -883,10 +918,10 @@ of the document to be loaded as elpher's "start page".  By default this
 is set to 'about:welcome', but any elpher-accessible URL is valid.
 *note Customization:: for suggestions.
 
-14.3 v3.1.0
+14.4 v3.1.0
 ===========
 
-14.3.1 Bookmarks system
+14.4.1 Bookmarks system
 -----------------------
 
 While Elpher bookmarks are still handled by the Emacs bookmark system,
@@ -907,10 +942,10 @@ use the customization variable 'elpher-use-emacs-bookmark-menu' to have
 the <B> key open the Emacs bookmark menu directly, as in the previous
 release.
 
-14.4 v3.0.0
+14.5 v3.0.0
 ===========
 
-14.4.1 Bookmarks system
+14.5.1 Bookmarks system
 -----------------------
 
 Bookmarks are now handled by Emacs' own bookmark management system,
@@ -929,7 +964,7 @@ Elpher's old menu, but is much more functional.  Bookmarks can be
 renamed, deleted in groups, and much more.  (Use 'C-h m' with the menu
 open to see the complete list.)
 
-14.4.2 History
+14.5.2 History
 --------------
 
 Browsing history can now be accessed via new bindings to <s> and <S>.
@@ -937,19 +972,19 @@ The former shows the current history "stack" (pages accessible with the
 <u> key), while the latter shows a list of all pages which have been
 visited in the current session.
 
-14.4.3 Socks connections
+14.5.3 Socks connections
 ------------------------
 
 Elpher can now use socks connections to browse via TOR.
 
-14.4.4 browse-url, Org and mu4e integration
+14.5.4 browse-url, Org and mu4e integration
 -------------------------------------------
 
 These integrations provide support for elpher-handling of gemini, gopher
 and finger URLs using 'browse-url', in Org documents, and the mu4e mail
 system.
 
-14.4.5 imenu integration
+14.5.5 imenu integration
 ------------------------
 
 Gemini document headers are now navigable via imenu.  For details, *Note
@@ -1001,14 +1036,14 @@ Node: Bookmarks15454
 Node: Gopher character encodings17356
 Node: Encrypted gopher connections19256
 Node: Gemini support20406
-Node: Finger support26757
-Node: Local files27811
-Node: About pages29042
-Node: ANSI support29602
-Node: Customization30659
-Node: Command Index32098
-Node: News34965
-Node: Contributors39687
+Node: Finger support27695
+Node: Local files28749
+Node: About pages29980
+Node: ANSI support30540
+Node: Customization31597
+Node: Command Index33036
+Node: News35903
+Node: Contributors41205
 
 End Tag Table
 
