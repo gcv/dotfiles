@@ -64,7 +64,7 @@ Major mode for editing files of tab-separated value type.
 ;;;;;;  0))
 ;;; Generated autoloads from csv-mode-tests.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "csv-mode-tests" '("csv-mode-tests--align-fields")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "csv-mode-tests" '("csv-tests--")))
 
 ;;;***
 
