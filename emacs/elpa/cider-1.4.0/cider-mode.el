@@ -158,19 +158,6 @@ the related commands `cider-repl-clear-buffer' and
       (cider-repl-clear-output))
     (switch-to-buffer origin-buffer)))
 
-(defun cider-undef ()
-  "Undefine a symbol from the current ns."
-  (interactive)
-  (cider-ensure-op-supported "undef")
-  (cider-read-symbol-name
-   "Undefine symbol: "
-   (lambda (sym)
-     (cider-nrepl-send-request
-      `("op" "undef"
-        "ns" ,(cider-current-ns)
-        "sym" ,sym)
-      (cider-interactive-eval-handler (current-buffer))))))
-
 ;;; cider-run
 (defvar cider--namespace-history nil
   "History of user input for namespace prompts.")
@@ -515,6 +502,7 @@ higher precedence."
     (define-key map (kbd "C-c M-p") #'cider-insert-last-sexp-in-repl)
     (define-key map (kbd "C-c M-:") #'cider-read-and-eval)
     (define-key map (kbd "C-c C-u") #'cider-undef)
+    (define-key map (kbd "C-c C-M-u") #'cider-undef-all)
     (define-key map (kbd "C-c C-m") #'cider-macroexpand-1)
     (define-key map (kbd "C-c M-m") #'cider-macroexpand-all)
     (define-key map (kbd "C-c M-n") 'cider-ns-map)
@@ -634,7 +622,8 @@ The value can also be t, which means to font-lock as much as possible."
   :package-version '(cider . "0.10.0"))
 
 (defcustom cider-font-lock-reader-conditionals t
-  "Apply font-locking to unused reader conditional expressions depending on the buffer CIDER connection type."
+  "Apply font-locking to unused reader conditional expressions.
+The result depends on the buffer CIDER connection type."
   :type 'boolean
   :group 'cider
   :package-version '(cider . "0.15.0"))
@@ -990,7 +979,8 @@ SYM and INFO is passed to `cider-docview-render'"
      (buffer-substring-no-properties (point-min) (1- (point))))))
 
 (defcustom cider-use-tooltips t
-  "If non-nil, CIDER displays mouse-over tooltips, as well as the `help-echo' mechanism."
+  "If non-nil, CIDER displays mouse-over tooltips.
+It does this as well as the `help-echo' mechanism."
   :group 'cider
   :type 'boolean
   :package-version '(cider "0.12.0"))
@@ -1004,7 +994,8 @@ See \(info \"(elisp) Special Properties\")"
   (while-no-input
     (when (and (bufferp obj)
                (cider-connected-p)
-               cider-use-tooltips (not help-at-pt-display-when-idle))
+               cider-use-tooltips
+               (not (eq help-at-pt-display-when-idle t)))
       (with-current-buffer obj
         (ignore-errors
           (save-excursion
@@ -1073,11 +1064,11 @@ property."
           (add-hook 'xref-backend-functions #'cider--xref-backend cider-xref-fn-depth 'local))
         (setq next-error-function #'cider-jump-to-compilation-error))
     ;; Mode cleanup
-    (mapc #'kill-local-variable '(completion-at-point-functions
-                                  next-error-function
+    (mapc #'kill-local-variable '(next-error-function
                                   x-gtk-use-system-tooltips
                                   font-lock-fontify-region-function
                                   clojure-get-indent-function))
+    (remove-hook 'completion-at-point-functions #'cider-complete-at-point t)
     (when cider-use-xref
       (remove-hook 'xref-backend-functions #'cider--xref-backend 'local))
     (remove-hook 'font-lock-mode-hook #'cider-refresh-dynamic-font-lock 'local)

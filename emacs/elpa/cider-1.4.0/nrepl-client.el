@@ -111,7 +111,9 @@
   :type 'boolean)
 
 (defcustom nrepl-use-ssh-fallback-for-remote-hosts nil
-  "If non-nil, attempt to connect via ssh to remote hosts when unable to connect directly."
+  "If non-nil, Use ssh as a fallback to connect to remote hosts.
+It will attempt to connect via ssh to remote hosts when unable to connect
+directly."
   :type 'boolean)
 
 (defcustom nrepl-sync-request-timeout 10
@@ -902,8 +904,9 @@ If TOOLING, use the tooling session rather than the standard session."
                  (setq time0 (current-time)))
         ;; break out in case we don't receive a response for a while
         (when (and nrepl-sync-request-timeout
-                   (> (cadr (time-subtract (current-time) time0))
-                      nrepl-sync-request-timeout))
+                   (time-less-p
+                    nrepl-sync-request-timeout
+                    (time-subtract nil time0)))
           (error "Sync nREPL request timed out %s" request)))
       ;; Clean up the response, otherwise we might repeatedly ask for input.
       (nrepl-dict-put response "status" (remove "need-input" status))

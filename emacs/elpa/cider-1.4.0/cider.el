@@ -11,8 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: http://www.github.com/clojure-emacs/cider
-;; Version: 1.3.0
-;; Package-Requires: ((emacs "26") (clojure-mode "5.12") (parseedn "1.0.6") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
+;; Version: 1.4.0
+;; Package-Requires: ((emacs "26") (clojure-mode "5.14") (parseedn "1.0.6") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -92,10 +92,10 @@
 (require 'sesman)
 (require 'package)
 
-(defconst cider-version "1.3.0"
+(defconst cider-version "1.4.0"
   "The current version of CIDER.")
 
-(defconst cider-codename "Ukraine"
+(defconst cider-codename "Kyiv"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -297,7 +297,8 @@ This variable is used by `cider-connect'."
   :package-version '(cider . "0.9.0"))
 
 (defcustom cider-inject-dependencies-at-jack-in t
-  "When nil, do not inject repl dependencies (most likely nREPL middlewares) at `cider-jack-in' time."
+  "When nil, do not inject repl dependencies at `cider-jack-in' time.
+The repl dependendcies are most likely to be nREPL middlewares."
   :type 'boolean
   :safe #'booleanp
   :version '(cider . "0.11.0"))
@@ -1636,6 +1637,21 @@ assume the command is available."
                            (executable-find command)
                            (executable-find (concat command ".bat")))))
     (shell-quote-argument command)))
+
+(defcustom cider-connection-message-fn #'cider-random-words-of-inspiration
+  "The function to use to generate the message displayed on connect.
+When set to nil no additional message will be displayed.  A good
+alternative to the default is `cider-random-tip'."
+  :type 'function
+  :group 'cider
+  :package-version '(cider . "0.11.0"))
+
+(defun cider--maybe-inspire-on-connect ()
+  "Display an inspiration connection message."
+  (when cider-connection-message-fn
+    (message "Connected! %s" (funcall cider-connection-message-fn))))
+
+(add-hook 'cider-connected-hook #'cider--maybe-inspire-on-connect)
 
 ;;;###autoload
 (with-eval-after-load 'clojure-mode

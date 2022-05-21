@@ -45,7 +45,7 @@
   "Extra commands to be added to eldoc's safe commands list.")
 
 (defcustom cider-eldoc-max-num-sexps-to-skip 30
-  "The maximum number of sexps to skip while searching the beginning of current sexp."
+  "Max number of sexps to skip while searching the beginning of current sexp."
   :type 'integer
   :group 'cider
   :package-version '(cider . "0.10.1"))
@@ -286,7 +286,7 @@ if the maximum number of sexps to skip is exceeded."
             (error))
           (while
               (let ((p (point)))
-                (forward-sexp -1)
+                (clojure-backward-logical-sexp 1)
                 (when (< (point) p)
                   (setq num-skipped-sexps
                         (unless (and cider-eldoc-max-num-sexps-to-skip
@@ -346,7 +346,7 @@ Then go back to the point and return its eldoc."
 
 (defun cider-eldoc-info-in-current-sexp ()
   "Return eldoc information from the sexp.
-If `cider-eldoc-display-for-symbol-at-poin' is non-nil and
+If `cider-eldoc-display-for-symbol-at-point' is non-nil and
 the symbol at point has a valid eldoc available, return that.
 Otherwise return the eldoc of the first symbol of the sexp."
   (or (when cider-eldoc-display-for-symbol-at-point
@@ -412,7 +412,7 @@ This includes the arglist and ns and symbol name (if available)."
                                         "type" type)))
                 ;; add context dependent args if requested by defcustom
                 ;; do not cache this eldoc info to avoid showing info
-                                        ;: of the previous context
+                ;; of the previous context
                 (if cider-eldoc-display-context-dependent-info
                     (cond
                      ;; add inputs of datomic query

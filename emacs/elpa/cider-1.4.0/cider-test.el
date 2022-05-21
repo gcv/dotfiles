@@ -28,6 +28,7 @@
 
 ;;; Code:
 
+(require 'ansi-color)
 (require 'button)
 (require 'cl-lib)
 (require 'easymenu)
@@ -187,7 +188,6 @@ Add to this list to have CIDER recognize additional test defining macros."
     ;; "run the test at point".  But it's not as nice as rerunning all tests in
     ;; this buffer.
     (define-key map "g" #'cider-test-run-test)
-    (define-key map "q" #'cider-popup-buffer-quit-function)
     (easy-menu-define cider-test-report-mode-menu map
       "Menu for CIDER's test result mode"
       '("Test-Report"
@@ -208,7 +208,7 @@ Add to this list to have CIDER recognize additional test defining macros."
         ["Display expected/actual diff" cider-test-ediff]))
     map))
 
-(define-derived-mode cider-test-report-mode fundamental-mode "Test Report"
+(define-derived-mode cider-test-report-mode cider-popup-buffer-mode "Test Report"
   "Major mode for presenting Clojure test results.
 
 \\{cider-test-report-mode-map}"
@@ -395,9 +395,11 @@ With the actual value, the outermost '(not ...)' s-expression is removed."
                 (insert-align-label (s)
                   (insert (format "%12s" s)))
                 (insert-rect (s)
-                  (insert-rectangle (thread-first s
-                                      cider-font-lock-as-clojure
-                                      (split-string "\n")))
+                  (let ((start (point)))
+                    (insert-rectangle (thread-first s
+                                        cider-font-lock-as-clojure
+                                        (split-string "\n")))
+                    (ansi-color-apply-on-region start (point)))
                   (beginning-of-line)))
         (cider-propertize-region (cider-intern-keys (cdr test))
           (let ((beg (point))
