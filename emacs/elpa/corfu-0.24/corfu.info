@@ -1,6 +1,6 @@
 This is corfu.info, produced by makeinfo version 6.7 from corfu.texi.
 
-INFO-DIR-SECTION Emacs
+INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
 * Corfu: (corfu).       Completion Overlay Region FUnction.
 END-INFO-DIR-ENTRY
@@ -17,9 +17,9 @@ corfu.el - Completion Overlay Region FUnction
 * Features::
 * Installation and Configuration::
 * Key bindings::
+* Extensions::
 * Complementary packages::
 * Alternatives::
-* Caveats::
 * Contributions::
 
 — The Detailed Node Listing —
@@ -58,9 +58,12 @@ Capfs provided by other programming language packages are usually
 sufficient.  A few additional Capfs and completion utilities are
 provided by the Cape (https://github.com/minad/cape) package.
 
-   *NOTE*: Corfu uses child frames to show the popup.  For now Corfu
-falls back to the default setting of the ‘completion-in-region-function’
-on non-graphical displays.
+   *NOTE*: Corfu uses child frames to show the popup and falls back to
+the default setting of the ‘completion-in-region-function’ on
+non-graphical displays.  There is a package in the works
+(https://codeberg.org/akib/emacs-corfu-popup) which uses overlays for
+the popup such that Corfu can be used when Emacs is running in a
+terminal.
 
    <https://github.com/minad/corfu/blob/screenshots/light.png?raw=true>
 
@@ -87,12 +90,13 @@ File: corfu.info,  Node: Features,  Next: Installation and Configuration,  Prev:
      characters, after inserting a space via ‘M-SPC’ (configurable via
      ‘corfu-quit-at-boundary’ and ‘corfu-separator’).
    • Deferred completion style highlighting for performance.
-   • Jumping to location/documentation of current candidate.
    • Support for candidate annotations and documentation in the echo
      area.
    • Deprecated candidates are crossed out in the display.
    • Icons can be provided by an external package via margin formatter
      functions.
+   • Extensions: Quick keys, Index keys, Sorting by history, Candidate
+     documentation
 
 
 File: corfu.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
@@ -103,17 +107,17 @@ File: corfu.info,  Node: Installation and Configuration,  Next: Key bindings,  P
 Corfu is available from GNU ELPA
 (http://elpa.gnu.org/packages/corfu.html), such that it can be installed
 directly via ‘package-install’.  After installation, the global minor
-mode can be enabled with ‘M-x corfu-global-mode’.  In order to configure
+mode can be enabled with ‘M-x global-corfu-mode’.  In order to configure
 Corfu and other packages in your init.el, you may want to use
 ‘use-package’.
 
    Corfu is highly flexible and customizable via ‘corfu-*’ customization
 variables, such that you can adapt it precisely to your requirements.
 However in order to quickly try out the Corfu completion package, it
-should be sufficient to activate ‘corfu-global-mode’.  Then you
+should be sufficient to activate ‘global-corfu-mode’.  You can
 experiment with manual completion for example in an Elisp buffer or in
 an Eshell or Shell buffer.  For auto completion, set ‘corfu-auto=t’
-before turning on ‘corfu-global-mode’.
+before turning on ‘global-corfu-mode’.
 
    Here is an example configuration:
 
@@ -131,21 +135,16 @@ before turning on ‘corfu-global-mode’.
        ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
        ;; (corfu-scroll-margin 5)        ;; Use scroll margin
 
-       ;; You may want to enable Corfu only for certain modes.
+       ;; Enable Corfu only for certain modes.
        ;; :hook ((prog-mode . corfu-mode)
        ;;        (shell-mode . corfu-mode)
        ;;        (eshell-mode . corfu-mode))
 
        ;; Recommended: Enable Corfu globally.
-       ;; This is recommended since dabbrev can be used globally (M-/).
+       ;; This is recommended since Dabbrev can be used globally (M-/).
+       ;; See also `corfu-excluded-modes'.
        :init
-       (corfu-global-mode))
-
-     ;; Use dabbrev with Corfu!
-     (use-package dabbrev
-       ;; Swap M-/ and C-M-/
-       :bind (("M-/" . dabbrev-completion)
-              ("C-M-/" . dabbrev-expand)))
+       (global-corfu-mode))
 
      ;; A few more useful configurations...
      (use-package emacs
@@ -161,6 +160,21 @@ before turning on ‘corfu-global-mode’.
        ;; Enable indentation+completion using the TAB key.
        ;; `completion-at-point' is often bound to M-TAB.
        (setq tab-always-indent 'complete))
+
+   Dabbrev completion is based on ‘completion-in-region’ and can be used
+with Corfu.  You may want to swap the ‘dabbrev-completion’ with the
+‘dabbrev-expand’ key for easier access, if you prefer completion.  Also
+take a look at the ‘cape-dabbrev’ completion at point function provided
+by my Cape (https://github.com/minad/cape) package.
+
+     ;; Use Dabbrev with Corfu!
+     (use-package dabbrev
+       ;; Swap M-/ and C-M-/
+       :bind (("M-/" . dabbrev-completion)
+              ("C-M-/" . dabbrev-expand))
+       ;; Other useful Dabbrev configurations.
+       :custom
+       (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
 
    If you start to configure the package more deeply, I recommend to
 give the Orderless completion style a try for filtering.  Orderless
@@ -235,7 +249,7 @@ File: corfu.info,  Node: Completing with Corfu in the minibuffer,  Next: Complet
 ===========================================
 
 Corfu can be used for completion in the minibuffer, since it relies on
-child frames to display the candidates.  By default, ‘corfu-global-mode’
+child frames to display the candidates.  By default, ‘global-corfu-mode’
 does not activate ‘corfu-mode’ in the minibuffer, to avoid interference
 with specialised minibuffer completion UIs like Vertico or Mct.  However
 you may still want to enable Corfu completion for commands like ‘M-:’
@@ -283,21 +297,18 @@ widely used shells like Bash, Zsh or Fish.
 currently selected candidate, but it does not send the prompt input to
 Eshell or the comint process.  Therefore you often have to press ‘RET’
 twice which feels like an unnecessary double confirmation.  Fortunately
-it is easy to improve this!  In my configuration I define the command
-‘corfu-insert-and-send’ which performs the two steps at once.
+it is easy to improve this!  In my configuration I define the advice
+‘corfu-send-shell’ which sends the candidate after insertion.
 
-     (defun corfu-insert-and-send ()
-       (interactive)
-       ;; 1. First insert the completed candidate
-       (corfu-insert)
-       ;; 2. Send the entire prompt input to the shell
+     (defun corfu-send-shell (&rest _)
+       "Send completion candidate when inside comint/eshell."
        (cond
         ((and (derived-mode-p 'eshell-mode) (fboundp 'eshell-send-input))
          (eshell-send-input))
-        ((and (derived-mode-p 'comint-mode) (fboundp 'comint-send-input))
+        ((and (derived-mode-p 'comint-mode)  (fboundp 'comint-send-input))
          (comint-send-input))))
 
-     (define-key corfu-map "\r" #'+corfu-insert-and-send)
+     (advice-add #'corfu-insert :after #'corfu-send-shell)
 
    Shell completion uses the flexible ‘pcomplete’ mechanism internally,
 which allows you to program the completions per shell command.  If you
@@ -378,7 +389,7 @@ components.
        ;; Another key binding can be used, such as S-SPC.
        ;; (:map corfu-map ("M-SPC" . corfu-insert-separator))
        :init
-       (corfu-global-mode))
+       (global-corfu-mode))
 
      ;; Manual completion example
      (use-package corfu
@@ -388,7 +399,7 @@ components.
        ;; Configure SPC for separator insertion
        (:map corfu-map ("SPC" . corfu-insert-separator))
        :init
-       (corfu-global-mode))
+       (global-corfu-mode))
 
 
 File: corfu.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
@@ -418,7 +429,7 @@ candidate explicitly with ‘RET’.
              ([backtab] . corfu-previous))
 
        :init
-       (corfu-global-mode))
+       (global-corfu-mode))
 
 
 File: corfu.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
@@ -448,7 +459,7 @@ via ‘completing-read’.
      (define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
 
 
-File: corfu.info,  Node: Key bindings,  Next: Complementary packages,  Prev: Installation and Configuration,  Up: Top
+File: corfu.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
 
 4 Key bindings
 **************
@@ -465,16 +476,47 @@ bindings:
    • ‘previous-line’, ‘up’, ‘M-p’ -> ‘corfu-previous’
    • ‘completion-at-point’, ‘TAB’ -> ‘corfu-complete’
    • ‘RET’ -> ‘corfu-insert’
-   • ‘M-g’ -> ‘corfu-show-location’
-   • ‘M-h’ -> ‘corfu-show-documentation’
+   • ‘M-g’ -> ‘corfu-info-location’
+   • ‘M-h’ -> ‘corfu-info-documentation’
    • ‘M-SPC’ -> ‘corfu-insert-separator’
    • ‘C-g’ -> ‘corfu-quit’
    • ‘keyboard-escape-quit’ -> ‘corfu-reset’
 
 
-File: corfu.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Key bindings,  Up: Top
+File: corfu.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
 
-5 Complementary packages
+5 Extensions
+************
+
+We maintain small extension packages to Corfu in this repository in the
+subdirectory extensions/
+(https://github.com/minad/corfu/tree/main/extensions).  The extensions
+are installed together with Corfu if you pull the package from ELPA.
+The extensions are inactive by default and can be enabled manually if
+desired.  Furthermore it is possible to install all of the files
+separately, both ‘corfu.el’ and the ‘corfu-*.el’ extensions.  Currently
+the following extensions come with the Corfu ELPA package:
+
+   • corfu-history
+     (https://github.com/minad/corfu/blob/main/extensions/corfu-history.el):
+     ‘corfu-history-mode’ to remember selected candidates and to improve
+     sorting.
+   • corfu-indexed
+     (https://github.com/minad/corfu/blob/main/extensions/corfu-indexed.el):
+     ‘corfu-indexed-mode’ to select indexed candidates with prefix
+     arguments.
+   • corfu-info
+     (https://github.com/minad/corfu/blob/main/extensions/corfu-info.el):
+     Candidate actions to access the candidate location and
+     documentation.
+   • corfu-quick
+     (https://github.com/minad/corfu/blob/main/extensions/corfu-quick.el):
+     Commands to select using Avy-style quick keys.
+
+
+File: corfu.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
+
+6 Complementary packages
 ************************
 
 Corfu works well together with all packages providing code completion
@@ -488,15 +530,14 @@ look into complementary packages to enhance your setup.
      filtering expressions are separated by spaces or another character
      (see ‘corfu-separator’).
 
-   • Cape (https://github.com/minad/cape): I collect additional Capf
-     backends and ‘completion-in-region’ commands in my Cape
-     (https://github.com/minad/cape) package.  The package provides a
-     file path, a dabbrev completion backend and a backend which allows
-     you to enter unicode characters in the form of TeX commands.  Cape
-     provides an adapter to reuse Company backends in Corfu.
-     Furthermore the function ‘cape-super-capf’ can merge/groups
-     multiple Capfs, such that the candidates of multiple Capfs are
-     displayed together at the same time.
+   • Cape (https://github.com/minad/cape): Additional Capf backends and
+     ‘completion-in-region’ commands are provided by the Cape
+     (https://github.com/minad/cape) package.  Among others, the package
+     supplies a file path and a dabbrev completion backend.  Cape
+     provides the ‘cape-company-to-capf’ adapter to reuse Company
+     backends in Corfu.  Furthermore the function ‘cape-super-capf’ can
+     merge multiple Capfs, such that the candidates of multiple Capfs
+     are displayed together at the same time.
 
    • kind-icon (https://github.com/jdtsmith/kind-icon): Icons are
      supported by Corfu via an external package.  For example the
@@ -524,26 +565,26 @@ look into complementary packages to enhance your setup.
      Vertico is the minibuffer completion counterpart of Corfu.
 
 
-File: corfu.info,  Node: Alternatives,  Next: Caveats,  Prev: Complementary packages,  Up: Top
+File: corfu.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
 
-6 Alternatives
+7 Alternatives
 **************
 
    • Company (https://github.com/company-mode/company-mode): Company is
      a widely used and mature completion package, which implements a
      similar interaction model and popup UI as Corfu.  While Corfu
      relies exclusively on the standard Emacs completion API (Capfs),
-     Company defines its own API for the backends.  Furthermore Company
-     includes its completion backends, which are incompatible with the
-     Emacs completion infrastructure.  As a result of this design,
-     Company is a more complex package than Corfu.  Company by default
-     uses overlays to display the popup in contrast to the child frames
-     used by Corfu.  Overall both packages work well.  Company is more
-     mature but the integration into Emacs is a bit less tight, since
-     for example the ‘completion-at-point’ command (or the
-     ‘completion-in-region’ function) does not invoke Company.
+     Company defines its own API for the backends.  Company includes its
+     completion backends, which are incompatible with the Emacs
+     completion infrastructure.  As a result of this design, Company is
+     a more complex package than Corfu.  Company by default uses
+     overlays for the popup in contrast to the child frames used by
+     Corfu.  Overall both packages work well, but Company integrates
+     less tightly with Emacs.  The ‘completion-styles’ support is more
+     limited and the ‘completion-at-point’ command and the
+     ‘completion-in-region’ function do not invoke Company.
 
-   • Mct (https://gitlab.com/protesilaos/mct): Protesilaos’ Minibuffer
+   • Mct (https://git.sr.ht/~protesilaos/mct): Protesilaos’ Minibuffer
      Confines Transcended package supports both minibuffer completion
      and completion in region.  It reuses the default completion UI for
      this purpose and installs a timer which live updates the completion
@@ -567,25 +608,7 @@ File: corfu.info,  Node: Alternatives,  Next: Caveats,  Prev: Complementary pack
      ‘consult-completion-in-region’ is your best option.
 
 
-File: corfu.info,  Node: Caveats,  Next: Contributions,  Prev: Alternatives,  Up: Top
-
-7 Caveats
-*********
-
-Corfu is robust in most scenarios.  There are a few known technical
-caveats.
-
-   • Corfu uses child frames to show the popup.  For now Corfu falls
-     back to the default setting of the ‘completion-in-region-function’
-     on non-graphical displays.  You can use one of the alternatives in
-     terminals.
-
-   • Corfu does not sort by history, since ‘completion-at-point’ does
-     not maintain a history (See branch ‘history’ for a possible
-     solution).
-
-
-File: corfu.info,  Node: Contributions,  Prev: Caveats,  Up: Top
+File: corfu.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
 
 8 Contributions
 ***************
@@ -597,21 +620,21 @@ copyright assignment to the FSF.
 
 
 Tag Table:
-Node: Top195
-Node: Introduction794
-Node: Features2318
-Node: Installation and Configuration3705
-Node: Auto completion8915
-Node: Completing with Corfu in the minibuffer9764
-Node: Completing with Corfu in the Eshell or Shell11621
-Node: Orderless completion14609
-Node: TAB-and-Go completion17717
-Node: Transfer completion to the minibuffer18832
-Node: Key bindings20171
-Node: Complementary packages21174
-Node: Alternatives23721
-Node: Caveats26154
-Node: Contributions26740
+Node: Top209
+Node: Introduction811
+Node: Features2501
+Node: Installation and Configuration3917
+Node: Auto completion9646
+Node: Completing with Corfu in the minibuffer10495
+Node: Completing with Corfu in the Eshell or Shell12352
+Node: Orderless completion15257
+Node: TAB-and-Go completion18365
+Node: Transfer completion to the minibuffer19480
+Node: Key bindings20819
+Node: Extensions21810
+Node: Complementary packages23143
+Node: Alternatives25639
+Node: Contributions28067
 
 End Tag Table
 
