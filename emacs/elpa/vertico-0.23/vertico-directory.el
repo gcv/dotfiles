@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "0.22"))
+;; Package-Requires: ((emacs "27.1") (vertico "0.23"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -57,9 +57,9 @@
   (interactive)
   (if (and (>= vertico--index 0)
            (let ((cand (vertico--candidate)))
-	     (or (string-suffix-p "/" cand)
-		 (and (vertico--remote-p cand)
-		      (string-suffix-p ":" cand))))
+             (or (string-suffix-p "/" cand)
+                 (and (vertico--remote-p cand)
+                      (string-suffix-p ":" cand))))
            (vertico-directory--completing-file-p))
       (vertico-insert)
     (vertico-exit)))

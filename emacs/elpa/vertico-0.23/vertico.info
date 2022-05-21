@@ -1,7 +1,7 @@
 This is vertico.info, produced by makeinfo version 6.7 from
 vertico.texi.
 
-INFO-DIR-SECTION Emacs
+INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
 * Vertico: (vertico).   VERTical Interactive COmpletion.
 END-INFO-DIR-ENTRY
@@ -439,7 +439,8 @@ off the mode.
    Furthermore you can tune buffer-local settings per command or
 category.
 
-     ;; Change the default sorting function
+     ;; Change the default sorting function.
+     ;; See `vertico-sort-function' and `vertico-sort-override-function'.
      (setq vertico-multiform-commands
            '((describe-symbol (vertico-sort-function . vertico-sort-alpha))))
 
@@ -585,7 +586,7 @@ part in how the users interacts with Emacs.
    There are other interactive completion UIs, which follow a similar
 philosophy:
 
-   • Mct (https://gitlab.com/protesilaos/mct): Minibuffer and
+   • Mct (https://git.sr.ht/~protesilaos/mct): Minibuffer and
      Completions in Tandem.  Mct reuses the default ‘*Completions*’
      buffer and enhances it with automatic updates and additional
      keybindings, to select a candidate and move between minibuffer and
@@ -841,29 +842,29 @@ files!
 
 
 Tag Table:
-Node: Top196
-Node: Introduction1023
-Node: Features1858
-Node: Key bindings2889
-Node: Configuration4119
-Node: Completion styles and TAB completion8087
-Node: Completion-at-point and completion-in-region10403
-Node: Completing-read-multiple (CRM)11728
-Node: Extensions12147
-Node: Configure Vertico per command or completion category15810
-Node: Complementary packages20213
-Node: Child frames and Popups22467
-Node: Alternatives23842
-Node: Resources27439
-Node: Contributions28458
-Node: Problematic completion commands28746
-Node: org-refile29322
-Node: org-agenda-filter30917
-Node: tmm-menubar31616
-Node: ffap-menu32215
-Node: completion-table-dynamic32848
-Node: Submitting the empty string33959
-Node: Tramp hostname completion35402
+Node: Top210
+Node: Introduction1037
+Node: Features1872
+Node: Key bindings2903
+Node: Configuration4133
+Node: Completion styles and TAB completion8101
+Node: Completion-at-point and completion-in-region10417
+Node: Completing-read-multiple (CRM)11742
+Node: Extensions12161
+Node: Configure Vertico per command or completion category15824
+Node: Complementary packages20302
+Node: Child frames and Popups22556
+Node: Alternatives23931
+Node: Resources27528
+Node: Contributions28547
+Node: Problematic completion commands28835
+Node: org-refile29411
+Node: org-agenda-filter31006
+Node: tmm-menubar31705
+Node: ffap-menu32304
+Node: completion-table-dynamic32937
+Node: Submitting the empty string34048
+Node: Tramp hostname completion35491
 
 End Tag Table
 
