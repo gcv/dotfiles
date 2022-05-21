@@ -4,10 +4,10 @@
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/deadgrep
-;; Package-Version: 20220209.719
-;; Package-Commit: 0a3ba239c458ffc4f63a180b43d0e70b81742a3e
+;; Package-Version: 20220507.1755
+;; Package-Commit: ae333e4069e296e98bf9631088c8198f50891d55
 ;; Keywords: tools
-;; Version: 0.11
+;; Version: 0.12
 ;; Package-Requires: ((emacs "25.1") (dash "2.12.0") (s "1.11.0") (spinner "1.7.3"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@
 (require 's)
 (require 'dash)
 (require 'spinner)
+(require 'project)
 
 (defgroup deadgrep nil
   "A powerful text search UI using ripgrep."
@@ -182,6 +183,8 @@ It is used to create `imenu' index.")
   (rx "\x1b[" (+ digit) "m")
   "Regular expression for an ANSI color code.")
 
+(defvar deadgrep--incremental-active nil)
+
 (defun deadgrep--insert-output (output &optional finished)
   "Propertize OUTPUT from rigrep and write to the current buffer."
   ;; If we had an unfinished line from our last call, include that.
@@ -303,7 +306,8 @@ It is used to create `imenu' index.")
               (insert output))))
 
         (run-hooks 'deadgrep-finished-hook)
-        (message "Deadgrep finished")))))
+        (unless deadgrep--incremental-active
+          (message "Deadgrep finished"))))))
 
 (defun deadgrep--process-filter (process output)
   ;; Searches may see a lot of output, but it's really useful to have
@@ -641,6 +645,15 @@ with a text face property `deadgrep-match-face'."
    (deadgrep--buffer-name deadgrep--search-term default-directory))
   (deadgrep-restart))
 
+(defun deadgrep-parent-directory ()
+  "Restart the search in the parent directory."
+  (interactive)
+  (setq default-directory
+        (file-name-directory (directory-file-name default-directory)))
+  (rename-buffer
+   (deadgrep--buffer-name deadgrep--search-term default-directory))
+  (deadgrep-restart))
+
 (defun deadgrep--button (text type &rest properties)
   ;; `make-text-button' mutates the string to add properties, so copy
   ;; TEXT first.
@@ -921,7 +934,9 @@ Returns a list ordered by the most recently accessed."
 
     (define-key map (kbd "S") #'deadgrep-search-term)
     (define-key map (kbd "D") #'deadgrep-directory)
+    (define-key map (kbd "^") #'deadgrep-parent-directory)
     (define-key map (kbd "g") #'deadgrep-restart)
+    (define-key map (kbd "I") #'deadgrep-incremental)
 
     ;; TODO: this should work when point is anywhere in the file, not
     ;; just on its heading.
@@ -1430,6 +1445,30 @@ for a string, offering the current word as a default."
       (push search-term deadgrep-history))
     search-term))
 
+(defun deadgrep-incremental ()
+  (interactive)
+  (catch 'break
+    (let ((deadgrep--incremental-active t)
+          (search-term (or deadgrep--search-term "")))
+      (while t
+        (let ((next-char
+               (read-char
+                ;; TODO: Use the same prompt format as other search options.
+                (format "%s %s"
+                        (apply #'propertize "Incremental Search (RET when done):" minibuffer-prompt-properties)
+                        search-term))))
+          (cond
+           ((eq next-char ?\C-m)
+            (throw 'break nil))
+           ((eq next-char ?\C-?)
+            (setq search-term (s-left -1 search-term)))
+           (t
+            (setq search-term (concat search-term (list next-char))))))
+        (when (> (length search-term) 2)
+          (setq deadgrep--search-term search-term)
+          (deadgrep-restart))))))
+
+
 (defun deadgrep--normalise-dirname (path)
   "Expand PATH and ensure that it doesn't end with a slash.
 If PATH is remote path, it is not expanded."
@@ -1460,12 +1499,19 @@ Otherwise, return PATH as is."
   (let ((root default-directory)
         (project (project-current)))
     (when project
-      (-when-let (roots (project-roots project))
-        (setq root (car roots))))
+      (cond ((fboundp 'project-root)
+             ;; This function was defined in Emacs 28.
+             (setq root (project-root project)))
+            (t
+             ;; Older Emacsen.
+             (-when-let (roots (project-roots project))
+               (setq root (car roots))))))
     (when root
       (deadgrep--lookup-override root))))
 
 (defun deadgrep--write-postponed ()
+  "Write a message to the current buffer informing the user that
+deadgrep is ready but not yet searching."
   (let* ((inhibit-read-only t)
          (restart-key
           (where-is-internal #'deadgrep-restart deadgrep-mode-map t)))
@@ -1600,3 +1646,7 @@ This is intended for use with `next-error-function', which see."
 
 (provide 'deadgrep)
 ;;; deadgrep.el ends here
+
+;; Local Variables:
+;; byte-compile-warnings: (not obsolete)
+;; End:
