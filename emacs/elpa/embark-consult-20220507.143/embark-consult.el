@@ -1,15 +1,15 @@
 ;;; embark-consult.el --- Consult integration for Embark -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021  Free Software Foundation, Inc.
+;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
 
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: convenience
-;; Package-Version: 20220406.1246
-;; Package-Commit: 2890e535f55b1f08f379fd761b263fa337a72185
+;; Package-Version: 20220507.143
+;; Package-Commit: 97270d725761ee02db461b45b18ec16ae31f203e
 ;; Version: 0.5
 ;; Homepage: https://github.com/oantolin/embark
-;; Package-Requires: ((emacs "26.1") (embark "0.12") (consult "0.10"))
+;; Package-Requires: ((emacs "27.1") (embark "0.12") (consult "0.10"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -76,8 +76,7 @@
 
 (defun embark-consult--collect-candidate ()
   "Return candidate at point in collect buffer."
-  (and (derived-mode-p 'embark-collect-mode)
-       (get-text-property (point) 'embark--candidate)))
+  (cadr (embark-target-collect-candidate)))
 
 (add-hook 'consult--completion-candidate-hook #'embark-consult--collect-candidate)
 
@@ -119,14 +118,6 @@
 
 (setf (alist-get 'consult-location embark-default-action-overrides)
       #'embark-consult-goto-location)
-
-(defun embark-consult--await ()
-  "Wait for a Consult async search commmand to finish."
-  (when-let (((minibufferp))
-             (ov (car (overlays-at (- (minibuffer-prompt-end) 2)))))
-    (while (not (equal (overlay-get ov 'display) ":"))
-      (sit-for 0.3 t))
-    (sit-for 0.3 t)))
 
 (defun embark-consult-export-occur (lines)
   "Create an occur mode buffer listing LINES.
@@ -170,9 +161,8 @@ The elements of LINES are assumed to be values of category `consult-line'."
   "Upgrade consult-location cheap markers to real markers.
 This function is meant to be added to `embark-collect-mode-hook'."
   (when (eq embark--type 'consult-location)
-    (let ((fn (if (consp (car embark-collect--candidates)) #'car #'identity)))
-      (mapc (lambda (x) (consult--get-location (funcall fn x)))
-            embark-collect--candidates))))
+    (mapc (lambda (entry) (consult--get-location (car entry)))
+          tabulated-list-entries)))
 
 (setf (alist-get 'consult-location embark-exporters-alist)
       #'embark-consult-export-occur)
@@ -183,8 +173,9 @@ This function is meant to be added to `embark-collect-mode-hook'."
 (defvar wgrep-header/footer-parser)
 (declare-function wgrep-setup "ext:wgrep")
 
-(embark-define-keymap embark-consult-export-grep-map
-  "A keymap for Embark Export grep-mode buffers."
+(embark-define-keymap embark-consult-revert-map
+  "A keymap with a binding for revert-buffer."
+  :parent nil
   ("g" revert-buffer))
 
 (defun embark-consult-export-grep (lines)
@@ -195,12 +186,13 @@ This function is meant to be added to `embark-collect-mode-hook'."
       (dolist (line lines) (insert line "\n"))
       (goto-char (point-min))
       (grep-mode)
-      (setq-local wgrep-header/footer-parser #'ignore)
-      (when (fboundp 'wgrep-setup) (wgrep-setup))
-      (add-hook 'embark--export-pre-revert-hook #'embark-consult--await nil t)
+      ;; Set up keymap before possible wgrep-setup, so that wgrep
+      ;; restores our binding too when the user finishes editing.
       (use-local-map (make-composed-keymap
-                      embark-consult-export-grep-map
-                      (current-local-map))))
+                      embark-consult-revert-map
+                      (current-local-map)))
+      (setq-local wgrep-header/footer-parser #'ignore)
+      (when (fboundp 'wgrep-setup) (wgrep-setup)))
     (pop-to-buffer buf)))
 
 (defun embark-consult-goto-grep (location)
@@ -222,6 +214,50 @@ This function is meant to be added to `embark-collect-mode-hook'."
 (setf (alist-get 'consult-grep embark-exporters-alist)
       #'embark-consult-export-grep)
 
+;;; Support for consult-xref
+
+(declare-function xref--show-xref-buffer "ext:xref")
+(declare-function consult-xref "ext:consult-xref")
+(defvar xref-auto-jump-to-first-xref)
+(defvar consult-xref--fetcher)
+
+(defun embark-consult-export-xref (items)
+  "Create an xref buffer listing ITEMS."
+  (cl-flet ((xref-items (items)
+              (mapcar (lambda (item) (get-text-property 0 'consult-xref item))
+                      items)))
+    (let ((fetcher consult-xref--fetcher)
+          (input (minibuffer-contents)))
+      (set-buffer
+       (xref--show-xref-buffer
+        (lambda ()
+          (let ((candidates (funcall fetcher)))
+            (if (null (cdr candidates))
+                candidates
+              (catch 'xref-items
+                (minibuffer-with-setup-hook
+                    (lambda ()
+                      (insert input)
+                      (add-hook
+                       'minibuffer-exit-hook
+                       (lambda ()
+                         (throw 'xref-items
+                           (xref-items
+                            (or
+                             (plist-get
+                              (embark--maybe-transform-candidates)
+                              :candidates)
+                             (user-error "No candidates for export")))))
+                       nil t))
+                  (consult-xref fetcher))))))
+        `((fetched-xrefs . ,(xref-items items))
+          (window . ,(embark--target-window))
+          (auto-jump . ,xref-auto-jump-to-first-xref)
+          (display-action)))))))
+
+(setf (alist-get 'consult-xref embark-exporters-alist)
+      #'embark-consult-export-xref)
+
 ;;; Support for consult-find and consult-locate
 
 (setf (alist-get '(file . consult-find) embark-default-action-overrides)
@@ -229,12 +265,6 @@ This function is meant to be added to `embark-collect-mode-hook'."
 
 (setf (alist-get '(file . consult-locate) embark-default-action-overrides)
       #'find-file)
-
-(defun embark-consult--wait-for-find ()
-  (when (eq embark--command 'consult-find)
-    (add-hook 'embark--export-pre-revert-hook #'embark-consult--await nil t)))
-
-(add-hook 'embark-after-export-hook #'embark-consult--wait-for-find)
 
 ;;; Support for consult-isearch
 
@@ -254,8 +284,8 @@ This function is meant to be added to `embark-collect-mode-hook'."
   "Keymap for Consult sync search commands"
   :parent nil
   ("o" consult-outline)
-  ("i" consult-imenu)
-  ("I" consult-imenu-multi)
+  ("i" 'consult-imenu)
+  ("I" 'consult-imenu-multi)
   ("l" consult-line)
   ("L" consult-line-multi))
 
@@ -304,26 +334,33 @@ This is intended to be used in `embark-target-injection-hooks'."
   (cl-pushnew #'embark-consult--unique-match
               (alist-get cmd embark-target-injection-hooks)))
 
-(defun embark-consult--add-async-separator (&rest _)
-  "Add Consult's async separator at the beginning.
-This is intended to be used in `embark-target-injection-hooks' for any action
-that is a Consult async command."
+(cl-defun embark-consult--prep-async (&key type target &allow-other-keys)
+  "Either add Consult's async separator or ignore the TARGET depending on TYPE.
+If the TARGET of the given TYPE has an associated notion of
+directory, we don't want to search for the text of target, but
+rather just start a search in the associated directory.
+
+This is intended to be used in `embark-target-injection-hooks'
+for any action that is a Consult async command."
   (let* ((style (alist-get consult-async-split-style
                            consult-async-split-styles-alist))
          (initial (plist-get style :initial))
-         (separator (plist-get style :separator)))
-    (cond
-     (initial
+         (separator (plist-get style :separator))
+         (directory (embark--associated-directory target type)))
+    (when directory
+      (delete-minibuffer-contents))
+    (when initial
       (goto-char (minibuffer-prompt-end))
       (insert initial)
       (goto-char (point-max)))
-     (separator
+    (when (and separator (null directory))
       (goto-char (point-max))
-      (insert separator)))))
+      (insert separator))))
 
 (map-keymap
  (lambda (_key cmd)
-   (cl-pushnew #'embark-consult--add-async-separator
+   (cl-pushnew #'embark--cd (alist-get cmd embark-pre-action-hooks))
+   (cl-pushnew #'embark-consult--prep-async
                (alist-get cmd embark-target-injection-hooks)))
  embark-consult-async-search-map)
 
@@ -334,21 +371,35 @@ that is a Consult async command."
   (cons 'consult-location (consult--outline-candidates)))
 
 (autoload 'consult-imenu--items "consult-imenu")
+
 (defun embark-consult-imenu-candidates ()
   "Collect all imenu items in the current buffer."
   (cons 'imenu (mapcar #'car (consult-imenu--items))))
 
-(setf (alist-get 'imenu embark-default-action-overrides) #'consult-imenu)
-(add-to-list 'embark-candidate-collectors #'embark-consult-outline-candidates 'append)
+(declare-function consult-imenu--group "ext:consult-imenu")
 
-;; consult-completing-read-multiple
+(defun embark-consult--imenu-group-function (type prop)
+  "Return a suitable group-function for imenu.
+TYPE is the completion category.
+PROP is the metadata property.
+Meant as :after-until advice for `embark-collect--metadatum'."
+  (when (and (eq type 'imenu) (eq prop 'group-function))
+    (consult-imenu--group)))
 
-(defun embark-consult--crm-selected ()
-  "Return selected candidates from `consult-completing-read-multiple'."
-  (when-let (cands (consult--crm-selected))
-    (cons (completion-metadata-get (embark--metadata) 'category) cands)))
+(advice-add #'embark-collect--metadatum :after-until
+            #'embark-consult--imenu-group-function)
 
-(add-hook 'embark-candidate-collectors #'embark-consult--crm-selected)
+(defun embark-consult-imenu-or-outline-candidates ()
+  "Collect imenu items in prog modes buffer or outline headings otherwise."
+  (if (derived-mode-p 'prog-mode)
+      (embark-consult-imenu-candidates)
+    (embark-consult-outline-candidates)))
+
+(setf (alist-get 'imenu embark-default-action-overrides) 'consult-imenu)
+
+(add-to-list 'embark-candidate-collectors
+             #'embark-consult-imenu-or-outline-candidates
+             'append)
 
 (provide 'embark-consult)
 ;;; embark-consult.el ends here
