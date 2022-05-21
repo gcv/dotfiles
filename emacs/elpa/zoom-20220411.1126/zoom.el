@@ -1,6 +1,6 @@
 ;;; zoom.el --- Fixed and automatic balanced window layout
 
-;; Copyright (c) 2020 Andrea Cardaci <cyrus.and@gmail.com>
+;; Copyright (c) 2022 Andrea Cardaci <cyrus.and@gmail.com>
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining a copy
 ;; of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
 ;; SOFTWARE.
 
 ;; Author: Andrea Cardaci <cyrus.and@gmail.com>
-;; Version: 0.2.2
-;; Package-Version: 20201215.1913
-;; Package-Commit: c7beef180bc4037404e2d56b9ab9b7c76d1713a0
+;; Version: 0.2.4
+;; Package-Version: 20220411.1126
+;; Package-Commit: 2104abb074682db79b9ff3a748e8e2e760a4d8cf
 ;; URL: https://github.com/cyrus-and/zoom
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: frames
