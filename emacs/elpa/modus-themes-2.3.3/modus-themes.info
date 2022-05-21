@@ -49,6 +49,10 @@ as such.
 
    Current development target is 2.4.0-dev.
 
+   • Homepage: <https://protesilaos.com/emacs/modus-themes>.
+   • Git repository: <https://git.sr.ht/~protesilaos/modus-themes>.
+   • Mailing list: <https://lists.sr.ht/~protesilaos/modus-themes>.
+
 * Menu:
 
 * Overview::
@@ -61,7 +65,7 @@ as such.
 * Frequently Asked Questions::
 * Contributing::
 * Acknowledgements::
-* Meta::
+* Other notes about the project::
 * GNU Free Documentation License::
 * Indices::
 
@@ -152,7 +156,6 @@ Face coverage
 
 Notes on individual packages
 
-* Note on avy hints::
 * Note on calendar.el weekday and weekend colors: Note on calendarel weekday and weekend colors.
 * Note on underlines in compilation buffers::
 * Note on inline Latex in Org buffers::
@@ -4116,6 +4119,7 @@ have lots of extensions, so the “full support” may not be 100% true…
    • breakpoint (provided by the built-in ‘gdb-mi.el’ library)
    • calendar and diary
    • calfw
+   • calibredb [ part of 2.4.0-dev ]
    • centaur-tabs
    • cfrs
    • change-log and log-view (such as ‘vc-print-log’,
@@ -4131,6 +4135,7 @@ have lots of extensions, so the “full support” may not be 100% true…
    • completions
    • consult
    • corfu
+   • corfu-quick [ part of 2.4.0-dev ]
    • counsel*
    • counsel-css
    • cov
@@ -4364,6 +4369,7 @@ have lots of extensions, so the “full support” may not be 100% true…
    • tomatinho
    • transient (pop-up windows such as Magit’s)
    • trashed
+   • tree-sitter
    • treemacs
    • tty-menu
    • tuareg
@@ -4419,6 +4425,7 @@ supported by the themes.
    • dtache
    • easy-kill
    • edit-indirect
+   • egerrit
    • elfeed-summary
    • evil-owl
    • flyspell-correct
@@ -4456,7 +4463,6 @@ individual packages.
 
 * Menu:
 
-* Note on avy hints::
 * Note on calendar.el weekday and weekend colors: Note on calendarel weekday and weekend colors.
 * Note on underlines in compilation buffers::
 * Note on inline Latex in Org buffers::
@@ -4478,40 +4484,9 @@ individual packages.
 * Note on the Notmuch logo::
 
 
-File: modus-themes.info,  Node: Note on avy hints,  Next: Note on calendarel weekday and weekend colors,  Up: Notes on individual packages
+File: modus-themes.info,  Node: Note on calendarel weekday and weekend colors,  Next: Note on underlines in compilation buffers,  Up: Notes on individual packages
 
-7.1 Note on avy hints
-=====================
-
-Hints can appear everywhere, in wildly varying contexts, hence, their
-appearance, by necessity, is a compromise.  However, there are various
-options for making them stand out.  First is dimming the surroundings:
-
-     (setq avy-background t)
-
-   Dimming works well when you find it difficult to spot hints, any
-hint.  Second is limiting the number of faces used by hints:
-
-     (setq avy-lead-faces
-           '(avy-lead-face
-             avy-lead-face-1
-             avy-lead-face-1
-             avy-lead-face-1
-             avy-lead-face-1))
-
-   Limiting the number of faces works well with longer hints when you
-find it difficult to identify individual hints, especially with hints
-touching each other.  The first character of the hint will have an
-intense color, the remaining ones the same neutral color.
-
-   Third is preferring commands that produce fewer candidates.  Fewer
-hints is less noise: ‘avy-goto-char-timer’ is an excellent alternative
-to ‘avy-goto-char’.
-
-
-File: modus-themes.info,  Node: Note on calendarel weekday and weekend colors,  Next: Note on underlines in compilation buffers,  Prev: Note on avy hints,  Up: Notes on individual packages
-
-7.2 Note on calendar.el weekday and weekend colors
+7.1 Note on calendar.el weekday and weekend colors
 ==================================================
 
 By default, the ‘M-x calendar’ interface differentiates weekdays from
@@ -4539,7 +4514,7 @@ anew.
 
 File: modus-themes.info,  Node: Note on underlines in compilation buffers,  Next: Note on inline Latex in Org buffers,  Prev: Note on calendarel weekday and weekend colors,  Up: Notes on individual packages
 
-7.3 Note on underlines in compilation buffers
+7.2 Note on underlines in compilation buffers
 =============================================
 
 Various buffers that produce compilation results or run tests on code
@@ -4561,7 +4536,7 @@ to render the affected text with the ‘italic’ face:
 
 File: modus-themes.info,  Node: Note on inline Latex in Org buffers,  Next: Note on dimmerel,  Prev: Note on underlines in compilation buffers,  Up: Notes on individual packages
 
-7.4 Note on inline Latex in Org buffers
+7.3 Note on inline Latex in Org buffers
 =======================================
 
 Org can work with inline latex and related syntax.  To actually fontify
@@ -4575,7 +4550,7 @@ the desired list of values (per its doc string).  For example:
 
 File: modus-themes.info,  Node: Note on dimmerel,  Next: Note on display-fill-column-indicator-mode,  Prev: Note on inline Latex in Org buffers,  Up: Notes on individual packages
 
-7.5 Note on dimmer.el
+7.4 Note on dimmer.el
 =====================
 
 The ‘dimmer.el’ library by Neil Okamoto can be configured to
@@ -4610,7 +4585,7 @@ of this package: it draws too much attention to unfocused windows.
 
 File: modus-themes.info,  Node: Note on display-fill-column-indicator-mode,  Next: Note on highlight-parenthesesel,  Prev: Note on dimmerel,  Up: Notes on individual packages
 
-7.6 Note on display-fill-column-indicator-mode
+7.5 Note on display-fill-column-indicator-mode
 ==============================================
 
 The ‘display-fill-column-indicator-mode’ uses a typographic character to
@@ -4641,7 +4616,7 @@ For example:
 
 File: modus-themes.info,  Node: Note on highlight-parenthesesel,  Next: Note on mmm-modeel background colors,  Prev: Note on display-fill-column-indicator-mode,  Up: Notes on individual packages
 
-7.7 Note on highlight-parentheses.el
+7.6 Note on highlight-parentheses.el
 ====================================
 
 The ‘highlight-parentheses’ package provides contextual coloration of
@@ -4763,7 +4738,7 @@ implementation:
 
 File: modus-themes.info,  Node: Note on mmm-modeel background colors,  Next: Note for prism,  Prev: Note on highlight-parenthesesel,  Up: Notes on individual packages
 
-7.8 Note on mmm-mode.el background colors
+7.7 Note on mmm-mode.el background colors
 =========================================
 
 The faces used by ‘mmm-mode.el’ are expected to have a colorful
@@ -4812,7 +4787,7 @@ the very high cost of degraded legibility.
 
 File: modus-themes.info,  Node: Note for prism,  Next: Note for god-mode,  Prev: Note on mmm-modeel background colors,  Up: Notes on individual packages
 
-7.9 Note on prism.el
+7.8 Note on prism.el
 ====================
 
 This package by Adam Porter, aka “alphapapa” or “github-alphapapa”,
@@ -4901,8 +4876,8 @@ examples with the 4, 8, 16 colors):
 
 File: modus-themes.info,  Node: Note for god-mode,  Next: Note on company-mode overlay pop-up,  Prev: Note for prism,  Up: Notes on individual packages
 
-7.10 Note on god-mode.el
-========================
+7.9 Note on god-mode.el
+=======================
 
 The ‘god-mode’ library does not provide faces that could be configured
 by the Modus themes.  Users who would like to get some visual feedback
@@ -4935,7 +4910,7 @@ start by consulting the documentation string of ‘set-face-attribute’.
 
 File: modus-themes.info,  Node: Note on company-mode overlay pop-up,  Next: Note on ERC escaped color sequences,  Prev: Note for god-mode,  Up: Notes on individual packages
 
-7.11 Note on company-mode overlay pop-up
+7.10 Note on company-mode overlay pop-up
 ========================================
 
 By default, the ‘company-mode’ pop-up that lists completion candidates
@@ -4956,7 +4931,7 @@ instead of overlays.(1)(2)
 
 File: modus-themes.info,  Node: Note on ERC escaped color sequences,  Next: Note on powerline or spaceline,  Prev: Note on company-mode overlay pop-up,  Up: Notes on individual packages
 
-7.12 Note on ERC escaped color sequences
+7.11 Note on ERC escaped color sequences
 ========================================
 
 The built-in IRC client ‘erc’ has the ability to colorise any text using
@@ -4994,7 +4969,7 @@ Emacs: <https://www.mirc.com/colors.html>
 
 File: modus-themes.info,  Node: Note on powerline or spaceline,  Next: Note on SHR colors,  Prev: Note on ERC escaped color sequences,  Up: Notes on individual packages
 
-7.13 Note on powerline or spaceline
+7.12 Note on powerline or spaceline
 ===================================
 
 Both Powerline and Spaceline package users will likely need to use the
@@ -5004,7 +4979,7 @@ and/or mode line setup.
 
 File: modus-themes.info,  Node: Note on SHR colors,  Next: Note on SHR fonts,  Prev: Note on powerline or spaceline,  Up: Notes on individual packages
 
-7.14 Note on SHR colors
+7.13 Note on SHR colors
 =======================
 
 Emacs’ HTML rendering library (‘shr.el’) may need explicit configuration
@@ -5016,7 +4991,7 @@ webpage provides.
 
 File: modus-themes.info,  Node: Note on SHR fonts,  Next: Note on Ement colors and fonts,  Prev: Note on SHR colors,  Up: Notes on individual packages
 
-7.15 Note on SHR fonts
+7.14 Note on SHR fonts
 ======================
 
 By default, packages that build on top of the Simple HTML Remember
@@ -5037,7 +5012,7 @@ the standard font instead, set that variable to nil.
 
 File: modus-themes.info,  Node: Note on Ement colors and fonts,  Next: Note on Helm grep,  Prev: Note on SHR fonts,  Up: Notes on individual packages
 
-7.16 Note on Ement colors and fonts
+7.15 Note on Ement colors and fonts
 ===================================
 
 The ‘ement.el’ library by Adam Porter (also known as “alphapapa”)
@@ -5073,7 +5048,7 @@ everyone conforms with it.
 
 File: modus-themes.info,  Node: Note on Helm grep,  Next: Note on vc-annotate-background-mode,  Prev: Note on Ement colors and fonts,  Up: Notes on individual packages
 
-7.17 Note on Helm grep
+7.16 Note on Helm grep
 ======================
 
 There is one face from the Helm package that is meant to highlight the
@@ -5104,7 +5079,7 @@ ANSI color number 1 (red) from the already-supported array of
 
 File: modus-themes.info,  Node: Note on vc-annotate-background-mode,  Next: Note on pdf-tools link hints,  Prev: Note on Helm grep,  Up: Notes on individual packages
 
-7.18 Note on vc-annotate-background-mode
+7.17 Note on vc-annotate-background-mode
 ========================================
 
 Due to the unique way ‘vc-annotate’ (‘C-x v g’) applies colors, support
@@ -5123,7 +5098,7 @@ report as much or send patches (*note Contributing::).
 
 File: modus-themes.info,  Node: Note on pdf-tools link hints,  Next: Note on the Notmuch logo,  Prev: Note on vc-annotate-background-mode,  Up: Notes on individual packages
 
-7.19 Note on pdf-tools link hints
+7.18 Note on pdf-tools link hints
 =================================
 
 Hints are drawn by ImageMagick (https://imagemagick.org/), not Emacs,
@@ -5172,7 +5147,7 @@ your initialization file after you’ve customized any faces.
 
 File: modus-themes.info,  Node: Note on the Notmuch logo,  Prev: Note on pdf-tools link hints,  Up: Notes on individual packages
 
-7.20 Note on the Notmuch logo
+7.19 Note on the Notmuch logo
 =============================
 
 By default, the “hello” buffer of Notmuch includes a header with the
@@ -5312,8 +5287,8 @@ and hints of green give us suitable shades of purple.
 
    Due to the need of maintaining some difference in hueness between
 adjacent colors, it is not possible to make red, green, and yellow the
-primary colors, because blue could not be used to control their
-luminance and, thus the relevant space would shrink considerably.
+main colors, because blue cannot be used to control their luminance and,
+thus the relevant space will shrink considerably.
 
    *note Is the contrast ratio about adjacent colors?::
 
@@ -5573,7 +5548,8 @@ File: modus-themes.info,  Node: Issues you can help with,  Next: Patches require
 
 A few tasks you can help with by sending an email to the general
 modus-themes public mailing list
-(https://lists.sr.ht/~protesilaos/modus-themes).
+(https://lists.sr.ht/~protesilaos/modus-themes) (or use the command
+‘modus-themes-report-bug’ [part of 2.4.0-dev]).
 
    • Suggest refinements to packages that are covered.
    • Report packages not covered thus far.
@@ -5589,6 +5565,10 @@ modus-themes public mailing list
    It is preferable that your feedback includes some screenshots, GIFs,
 or short videos, as well as further instructions to reproduce a given
 setup.  Though this is not a requirement.
+
+   Also consider mentioning the version of the themes you are using,
+such as by invoking the command ‘modus-themes-version’ [part of
+2.4.0-dev].
 
    Whatever you do, bear in mind the overarching objective of the Modus
 themes: to keep a contrast ratio that is greater or equal to 7:1 between
@@ -5621,7 +5601,7 @@ you to make contributions to Emacs in general.
 
      Please use your full legal name (in ASCII characters) as the subject
      line of the message.
-     ----------------------------------------------------------------------
+
      REQUEST: SEND FORM FOR PAST AND FUTURE CHANGES
 
      [What is the name of the program or package you're contributing to?]
@@ -5659,7 +5639,7 @@ you to make contributions to Emacs in general.
 
 
 
-File: modus-themes.info,  Node: Acknowledgements,  Next: Meta,  Prev: Contributing,  Up: Top
+File: modus-themes.info,  Node: Acknowledgements,  Next: Other notes about the project,  Prev: Contributing,  Up: Top
 
 10 Acknowledgements
 *******************
@@ -5682,30 +5662,31 @@ Contributions to code or documentation
 Ideas and user feedback
      Aaron Jensen, Adam Porter, Adam Spiers, Adrian Manea, Alex Griffin,
      Alex Koen, Alex Peitsinis, Alexey Shmalko, Alok Singh, Anders
-     Johansson, André Alexandre Gomes, Antonio Hernández Blas, Arif
-     Rezai, Augusto Stoffel, Basil L. Contovounesios, Burgess Chang,
-     Christian Tietze, Christopher Dimech, Christopher League, Damien
-     Cassou, Daniel Mendler, Dario Gjorgjevski, David Edmondson, Davor
-     Rotim, Divan Santana, Eliraz Kedmi, Emanuele Michele Alberto
+     Johansson, André Alexandre Gomes, Andrew Tropin, Antonio Hernández
+     Blas, Arif Rezai, Augusto Stoffel, Basil L. Contovounesios, Burgess
+     Chang, Christian Tietze, Christopher Dimech, Christopher League,
+     Damien Cassou, Daniel Mendler, Dario Gjorgjevski, David Edmondson,
+     Davor Rotim, Divan Santana, Eliraz Kedmi, Emanuele Michele Alberto
      Monterosso, Farasha Euker, Feng Shu, Gautier Ponsinet, Gerry
      Agbobada, Gianluca Recchia, Guilherme Semente, Gustavo Barros,
-     Hörmetjan Yiltiz, Ilja Kocken, Iris Garcia, Jeremy Friesen, Jerry
-     Zhang, Johannes Grødem, John Haman, Jorge Morais, Joshua O’Connor,
-     Julio C.  Villasante, Kenta Usami, Kevin Fleming, Kévin Le Gouguec,
-     Kostadin Ninev, Len Trigg, Lennart C.  Karssen, Magne Hov, Manuel
-     Uberti, Mark Bestley, Mark Burton, Markus Beppler, Mauro Aranda,
-     Michael Goldenberg, Morgan Smith, Morgan Willcock, Murilo Pereira,
-     Nicky van Foreest, Nicolas De Jaeghere, Paul Poloskov, Pengji
-     Zhang, Pete Kazmier, Peter Wu, Philip Kaludercic, Pierre
-     Téchoueyres, Robert Hepple, Roman Rudakov, Ryan Phillips, Rytis
-     Paškauskas, Rudolf Adamkovič, Sam Kleinman, Samuel Culpepper, Saša
-     Janiška, Shreyas Ragavan, Simon Pugnet, Tassilo Horn, Thibaut
-     Verron, Thomas Heartman, Togan Muftuoglu, Tony Zorman, Trey
-     Merkley, Tomasz Hołubowicz, Toon Claes, Uri Sharf, Utkarsh Singh,
-     Vincent Foley.  As well as users: Ben, CsBigDataHub1, Emacs
-     Contrib, Eugene, Fourchaux, Fredrik, Moesasji, Nick, TheBlob42,
-     Trey, bepolymathe, bit9tream, derek-upham, doolio, fleimgruber,
-     gitrj95, iSeeU, jixiuf, okamsn, pRot0ta1p.
+     Hörmetjan Yiltiz, Ilja Kocken, Iris Garcia, Ivan Popovych, Jeremy
+     Friesen, Jerry Zhang, Johannes Grødem, John Haman, Jorge Morais,
+     Joshua O’Connor, Julio C.  Villasante, Kenta Usami, Kevin Fleming,
+     Kévin Le Gouguec, Kostadin Ninev, Len Trigg, Lennart C.  Karssen,
+     Magne Hov, Manuel Uberti, Mark Bestley, Mark Burton, Markus
+     Beppler, Mauro Aranda, Michael Goldenberg, Morgan Smith, Morgan
+     Willcock, Murilo Pereira, Nicky van Foreest, Nicolas De Jaeghere,
+     Paul Poloskov, Pengji Zhang, Pete Kazmier, Peter Wu, Philip
+     Kaludercic, Pierre Téchoueyres, Przemysław Kryger, Robert Hepple,
+     Roman Rudakov, Ryan Phillips, Rytis Paškauskas, Rudolf Adamkovič,
+     Sam Kleinman, Samuel Culpepper, Saša Janiška, Shreyas Ragavan,
+     Simon Pugnet, Tassilo Horn, Thibaut Verron, Thomas Heartman, Togan
+     Muftuoglu, Tony Zorman, Trey Merkley, Tomasz Hołubowicz, Toon
+     Claes, Uri Sharf, Utkarsh Singh, Vincent Foley.  As well as users:
+     Ben, CsBigDataHub1, Emacs Contrib, Eugene, Fourchaux, Fredrik,
+     Moesasji, Nick, TheBlob42, Trey, bepolymathe, bit9tream,
+     derek-upham, doolio, fleimgruber, gitrj95, iSeeU, jixiuf, okamsn,
+     pRot0ta1p.
 
 Packaging
      Basil L. Contovounesios, Eli Zaretskii, Glenn Morris, Mauro Aranda,
@@ -5722,10 +5703,10 @@ and insightful commentary on key aspects of the themes’ design and/or
 aspects of their functionality.
 
 
-File: modus-themes.info,  Node: Meta,  Next: GNU Free Documentation License,  Prev: Acknowledgements,  Up: Top
+File: modus-themes.info,  Node: Other notes about the project,  Next: GNU Free Documentation License,  Prev: Acknowledgements,  Up: Top
 
-11 Meta
-*******
+11 Other notes about the project
+********************************
 
 If you are curious about the principles that govern the development of
 this project read the essay On the design of the Modus themes
@@ -5769,8 +5750,14 @@ details of this sort):
    • Re: VSCode or Vim ports of the Emacs modus-themes?
      (https://protesilaos.com/codelog/2022-01-03-modus-themes-port-faq/)
      (2022-01-03)
+   • Modus themes: case study on Avy faces and colour combinations
+     (https://protesilaos.com/codelog/2022-04-20-modus-themes-case-study-avy/)
+     (2022-04-20)
+   • Emacs: colour theory and techniques used in the Modus themes
+     (https://protesilaos.com/codelog/2022-04-21-modus-themes-colour-theory/)
+     (2022-04-21)
 
-   And here are the canonical sources of this project’s documentation:
+   And here are the canonical sources of this project:
 
 Manual
      <https://protesilaos.com/emacs/modus-themes>
@@ -5778,9 +5765,13 @@ Change Log
      <https://protesilaos.com/emacs/modus-themes-changelog>
 Screenshots
      <https://protesilaos.com/emacs/modus-themes-pictures>
+Git repository
+     <https://git.sr.ht/~protesilaos/modus-themes>
+Mailing list
+     <https://lists.sr.ht/~protesilaos/modus-themes>
 
 
-File: modus-themes.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Meta,  Up: Top
+File: modus-themes.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Other notes about the project,  Up: Top
 
 Appendix A GNU Free Documentation License
 *****************************************
@@ -6283,23 +6274,27 @@ B.1 Function index
 * Menu:
 
 * modus-themes-color:                    Case-by-case face specs using the themes' palette.
-                                                                (line 6)
+                                                               (line  6)
 * modus-themes-color-alts:               Case-by-case face specs using the themes' palette.
-                                                                (line 6)
+                                                               (line  6)
 * modus-themes-contrast:                 Measure color contrast.
-                                                                (line 6)
+                                                               (line  6)
 * modus-themes-list-colors:              Visualize the active Modus theme's palette.
-                                                                (line 6)
+                                                               (line  6)
 * modus-themes-list-colors-current:      Visualize the active Modus theme's palette.
-                                                                (line 6)
-* modus-themes-load-operandi:            Enable and load.       (line 6)
-* modus-themes-load-themes:              Enable and load.       (line 6)
-* modus-themes-load-vivendi:             Enable and load.       (line 6)
-* modus-themes-toggle:                   Enable and load.       (line 6)
+                                                               (line  6)
+* modus-themes-load-operandi:            Enable and load.      (line  6)
+* modus-themes-load-themes:              Enable and load.      (line  6)
+* modus-themes-load-vivendi:             Enable and load.      (line  6)
+* modus-themes-report-bug:               Issues you can help with.
+                                                               (line  6)
+* modus-themes-toggle:                   Enable and load.      (line  6)
+* modus-themes-version:                  Issues you can help with.
+                                                               (line 26)
 * modus-themes-wcag-formula:             Measure color contrast.
-                                                                (line 6)
+                                                               (line  6)
 * modus-themes-with-colors:              Face specs at scale using the themes' palette.
-                                                                (line 6)
+                                                               (line  6)
 
 
 File: modus-themes.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
@@ -6373,7 +6368,8 @@ B.3 Concept index
                                                                 (line 6)
 * Decrease mode line height:             Decrease mode line height.
                                                                 (line 6)
-* Development notes:                     Meta.                  (line 6)
+* Development notes:                     Other notes about the project.
+                                                                (line 6)
 * Essential configuration:               Enable and load.       (line 6)
 * Explicitly supported packages:         Supported packages.    (line 6)
 * Extracting colors en masse:            Face specs at scale using the themes' palette.
@@ -6427,117 +6423,116 @@ B.3 Concept index
 
 Tag Table:
 Node: Top872
-Node: Overview7385
-Node: How do the themes look like9509
-Node: Learn about the latest changes10023
-Node: Installation10411
-Node: Install manually from source10892
-Node: Install from the archives11717
-Node: Install on GNU/Linux12494
-Node: Debian 11 Bullseye12942
-Node: GNU Guix13252
-Node: Enable and load13535
-Node: Sample configuration with and without use-package17074
-Node: Differences between loading and enabling19978
-Node: Customization Options21987
-Node: Custom reload theme30367
-Node: Deuteranopia style31157
-Node: Bold constructs32588
-Node: Italic constructs33422
-Node: Syntax styles34189
-Node: Mixed fonts36321
-Node: Link styles37585
-Node: Box buttons40059
-Node: Command prompts43356
-Node: Mode line45177
-Node: Tab style50672
-Node: Completion UIs51335
-Node: Mail citations55189
-Node: Fringes56335
-Node: Language checkers57075
-Node: Line highlighting59517
-Node: Line numbers61114
-Node: Mouse hover effects62195
-Node: Markup62810
-Node: Matching parentheses64410
-Node: Active region65787
-Node: Diffs67200
-Node: Org mode blocks68851
-Node: Org agenda71241
-Node: Heading styles80057
-Node: UI typeface84824
-Node: Advanced customization85723
-Node: More accurate colors in terminal emulators87394
-Node: Range of color with terminal emulators88635
-Node: Visualize the active Modus theme's palette91340
-Node: Per-theme customization settings92336
-Node: Case-by-case face specs using the themes' palette93692
-Node: Face specs at scale using the themes' palette98240
-Node: Remap face with local value103041
-Node: Cycle through arbitrary colors105466
-Node: Override colors111894
-Node: Override color saturation117132
-Node: Override colors through blending122813
-Node: Font configurations for Org and others125670
-Ref: Font configurations for Org and others-Footnote-1128486
-Node: Configure bold and italic faces128673
-Node: Custom Org todo keyword and priority faces132821
-Node: Custom Org emphasis faces136494
-Node: Update Org block delimiter fontification141295
-Node: Measure color contrast143212
-Node: Load theme depending on time of day145935
-Node: Backdrop for pdf-tools146928
-Node: Decrease mode line height149780
-Node: Toggle themes without reloading them153902
-Node: A theme-agnostic hook for theme loading155181
-Node: Diffs with only the foreground157583
-Node: Ediff without diff color-coding160697
-Node: Near-monochrome syntax highlighting162836
-Node: Face coverage171803
-Node: Supported packages172255
-Node: Indirectly covered packages178842
-Node: Notes on individual packages179899
-Node: Note on avy hints180992
-Node: Note on calendarel weekday and weekend colors182160
-Node: Note on underlines in compilation buffers183343
-Node: Note on inline Latex in Org buffers184190
-Node: Note on dimmerel184800
-Node: Note on display-fill-column-indicator-mode186285
-Node: Note on highlight-parenthesesel187683
-Node: Note on mmm-modeel background colors193672
-Node: Note for prism195987
-Node: Note for god-mode199141
-Node: Note on company-mode overlay pop-up200745
-Ref: Note on company-mode overlay pop-up-Footnote-1201435
-Ref: Note on company-mode overlay pop-up-Footnote-2201502
-Node: Note on ERC escaped color sequences201557
-Ref: Note on ERC escaped color sequences-Footnote-1202985
-Node: Note on powerline or spaceline203095
-Node: Note on SHR colors203509
-Node: Note on SHR fonts203933
-Node: Note on Ement colors and fonts204566
-Node: Note on Helm grep206065
-Node: Note on vc-annotate-background-mode207542
-Node: Note on pdf-tools link hints208427
-Node: Note on the Notmuch logo210892
-Node: Frequently Asked Questions211390
-Node: Is the contrast ratio about adjacent colors?212021
-Node: What does it mean to avoid exaggerations?213528
-Node: Why are colors mostly variants of blue magenta cyan?215357
-Node: What is the best setup for legibility?219670
-Node: Are these color schemes?222315
-Node: Port the Modus themes to other platforms?226035
-Node: Contributing228816
-Node: Sources of the themes229213
-Node: Issues you can help with229912
-Node: Patches require copyright assignment to the FSF231303
-Node: Acknowledgements233598
-Node: Meta236831
-Node: GNU Free Documentation License239310
-Node: Indices264662
-Node: Function index264841
-Node: Variable index266364
-Node: Concept index268651
+Node: Overview7592
+Node: How do the themes look like9716
+Node: Learn about the latest changes10230
+Node: Installation10618
+Node: Install manually from source11099
+Node: Install from the archives11924
+Node: Install on GNU/Linux12701
+Node: Debian 11 Bullseye13149
+Node: GNU Guix13459
+Node: Enable and load13742
+Node: Sample configuration with and without use-package17281
+Node: Differences between loading and enabling20185
+Node: Customization Options22194
+Node: Custom reload theme30574
+Node: Deuteranopia style31364
+Node: Bold constructs32795
+Node: Italic constructs33629
+Node: Syntax styles34396
+Node: Mixed fonts36528
+Node: Link styles37792
+Node: Box buttons40266
+Node: Command prompts43563
+Node: Mode line45384
+Node: Tab style50879
+Node: Completion UIs51542
+Node: Mail citations55396
+Node: Fringes56542
+Node: Language checkers57282
+Node: Line highlighting59724
+Node: Line numbers61321
+Node: Mouse hover effects62402
+Node: Markup63017
+Node: Matching parentheses64617
+Node: Active region65994
+Node: Diffs67407
+Node: Org mode blocks69058
+Node: Org agenda71448
+Node: Heading styles80264
+Node: UI typeface85031
+Node: Advanced customization85930
+Node: More accurate colors in terminal emulators87601
+Node: Range of color with terminal emulators88842
+Node: Visualize the active Modus theme's palette91547
+Node: Per-theme customization settings92543
+Node: Case-by-case face specs using the themes' palette93899
+Node: Face specs at scale using the themes' palette98447
+Node: Remap face with local value103248
+Node: Cycle through arbitrary colors105673
+Node: Override colors112101
+Node: Override color saturation117339
+Node: Override colors through blending123020
+Node: Font configurations for Org and others125877
+Ref: Font configurations for Org and others-Footnote-1128693
+Node: Configure bold and italic faces128880
+Node: Custom Org todo keyword and priority faces133028
+Node: Custom Org emphasis faces136701
+Node: Update Org block delimiter fontification141502
+Node: Measure color contrast143419
+Node: Load theme depending on time of day146142
+Node: Backdrop for pdf-tools147135
+Node: Decrease mode line height149987
+Node: Toggle themes without reloading them154109
+Node: A theme-agnostic hook for theme loading155388
+Node: Diffs with only the foreground157790
+Node: Ediff without diff color-coding160904
+Node: Near-monochrome syntax highlighting163043
+Node: Face coverage172010
+Node: Supported packages172462
+Node: Indirectly covered packages179148
+Node: Notes on individual packages180220
+Node: Note on calendarel weekday and weekend colors181291
+Node: Note on underlines in compilation buffers182448
+Node: Note on inline Latex in Org buffers183295
+Node: Note on dimmerel183905
+Node: Note on display-fill-column-indicator-mode185390
+Node: Note on highlight-parenthesesel186788
+Node: Note on mmm-modeel background colors192777
+Node: Note for prism195092
+Node: Note for god-mode198246
+Node: Note on company-mode overlay pop-up199848
+Ref: Note on company-mode overlay pop-up-Footnote-1200538
+Ref: Note on company-mode overlay pop-up-Footnote-2200605
+Node: Note on ERC escaped color sequences200660
+Ref: Note on ERC escaped color sequences-Footnote-1202088
+Node: Note on powerline or spaceline202198
+Node: Note on SHR colors202612
+Node: Note on SHR fonts203036
+Node: Note on Ement colors and fonts203669
+Node: Note on Helm grep205168
+Node: Note on vc-annotate-background-mode206645
+Node: Note on pdf-tools link hints207530
+Node: Note on the Notmuch logo209995
+Node: Frequently Asked Questions210493
+Node: Is the contrast ratio about adjacent colors?211124
+Node: What does it mean to avoid exaggerations?212631
+Node: Why are colors mostly variants of blue magenta cyan?214460
+Node: What is the best setup for legibility?218766
+Node: Are these color schemes?221411
+Node: Port the Modus themes to other platforms?225131
+Node: Contributing227912
+Node: Sources of the themes228309
+Node: Issues you can help with229008
+Node: Patches require copyright assignment to the FSF230620
+Node: Acknowledgements232840
+Node: Other notes about the project236153
+Node: GNU Free Documentation License239151
+Node: Indices264528
+Node: Function index264707
+Node: Variable index266510
+Node: Concept index268797
 
 End Tag Table
 

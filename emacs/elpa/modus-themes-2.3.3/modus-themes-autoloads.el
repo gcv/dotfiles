@@ -9,6 +9,16 @@
 ;;;### (autoloads nil "modus-themes" "modus-themes.el" (0 0 0 0))
 ;;; Generated autoloads from modus-themes.el
 
+(autoload 'modus-themes-version "modus-themes" "\
+Print `modus-themes--version' in the echo area.
+If optional INSERT argument is provided from Lisp or as a prefix
+argument, insert the `modus-themes--version' at point.
+
+\(fn &optional INSERT)" t nil)
+
+(autoload 'modus-themes-report-bug "modus-themes" "\
+Submit a bug report or issue to the Modus themes developers." nil nil)
+
 (autoload 'modus-themes-contrast "modus-themes" "\
 Measure WCAG contrast ratio between C1 and C2.
 C1 and C2 are color values written in hexadecimal RGB.
