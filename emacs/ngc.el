@@ -48,8 +48,17 @@
   (corfu-quit-no-match t)
 
   :init
-  (corfu-global-mode 1)
+  (global-corfu-mode 1)
   (setq tab-always-indent 'complete)
+  )
+
+
+(use-package corfu-doc
+  :pin melpa
+  ;;:hook (corfu-mode . corfu-doc-mode)
+  :bind
+  (:map corfu-map
+        ("M-d" . corfu-doc-toggle))
   )
 
 
