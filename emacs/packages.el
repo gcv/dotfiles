@@ -582,7 +582,7 @@
   :pin melpa
 
   :custom
-  (julia-snail-company-doc-enable nil)
+  (julia-snail-repl-display-eval-results t)
 
   :hook
   (julia-mode . julia-snail-mode)
