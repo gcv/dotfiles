@@ -25,6 +25,16 @@ hs.alert("Reloading Hammerspoon configuration")
 -- )
 -- eventtapHandler:start()
 
+-- Bitwarden launcher:
+hs.hotkey.bind(
+   {"cmd", "alt"}, "\\",
+   function()
+      hs.application.launchOrFocus("Bitwarden")
+      local app = hs.application.find("Bitwarden")
+      app:selectMenuItem({"View", "Search Vault"})
+   end
+)
+
 --- external scripts
 dofile("./dark-mode.lua")
 dofile("./windows.lua")
