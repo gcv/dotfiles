@@ -44,6 +44,19 @@ hs.hotkey.bind(
 )
 
 --- Ctrl-Alt-Cmd-<down>: Take up the central part of the screen, leaving sides and top and bottom open
+-- hs.hotkey.bind(
+--    {"ctrl", "alt", "cmd"}, "down",
+--    function()
+--       local win = hs.window.focusedWindow()
+--       local f = win:frame()
+--       local screen = win:screen()
+--       local max = screen:frame()
+--       frameFillMostOfScreenCenter1(f, max)
+--       win:setFrame(f)
+--    end
+-- )
+
+--- Ctrl-Alt-Cmd-Shift-<down>: Take up the central part of the screen, leaving sides and top and bottom open
 hs.hotkey.bind(
    {"ctrl", "alt", "cmd"}, "down",
    function()
@@ -51,20 +64,71 @@ hs.hotkey.bind(
       local f = win:frame()
       local screen = win:screen()
       local max = screen:frame()
-      frameFillMostOfScreenCenter1(f, max)
+      frameFillMostOfScreenCenter2(f, max)
       win:setFrame(f)
    end
 )
 
---- Ctrl-Alt-Cmd-Shift-<down>: Take up the central part of the screen, leaving sides and top and bottom open
+--- Ctrl-Alt-Cmd-Shift-<up>: Take up the upper left quarter of the screen
 hs.hotkey.bind(
-   {"shift", "ctrl", "alt", "cmd"}, "down",
+   {"ctrl", "alt", "cmd", "shift"}, "up",
    function()
       local win = hs.window.focusedWindow()
       local f = win:frame()
       local screen = win:screen()
       local max = screen:frame()
-      frameFillMostOfScreenCenter2(f, max)
+      f.x = max.x
+      f.y = max.y
+      f.w = max.w / 2
+      f.h = max.h / 2
+      win:setFrame(f)
+   end
+)
+
+--- Ctrl-Alt-Cmd-Shift-<left>: Take up the lower left quarter of the screen
+hs.hotkey.bind(
+   {"ctrl", "alt", "cmd", "shift"}, "left",
+   function()
+      local win = hs.window.focusedWindow()
+      local f = win:frame()
+      local screen = win:screen()
+      local max = screen:frame()
+      f.x = max.x
+      f.y = max.y + (max.h / 2)
+      f.w = max.w / 2
+      f.h = max.h / 2
+      win:setFrame(f)
+   end
+)
+
+--- Ctrl-Alt-Cmd-Shift-<down>: Take up the lower right quarter of the screen
+hs.hotkey.bind(
+   {"ctrl", "alt", "cmd", "shift"}, "down",
+   function()
+      local win = hs.window.focusedWindow()
+      local f = win:frame()
+      local screen = win:screen()
+      local max = screen:frame()
+      f.x = max.x + (max.w / 2)
+      f.y = max.y + (max.h / 2)
+      f.w = max.w / 2
+      f.h = max.h / 2
+      win:setFrame(f)
+   end
+)
+
+--- Ctrl-Alt-Cmd-Shift-<right>: Take up the lower right quarter of the screen
+hs.hotkey.bind(
+   {"ctrl", "alt", "cmd", "shift"}, "right",
+   function()
+      local win = hs.window.focusedWindow()
+      local f = win:frame()
+      local screen = win:screen()
+      local max = screen:frame()
+      f.x = max.x + (max.w / 2)
+      f.y = max.y
+      f.w = max.w / 2
+      f.h = max.h / 2
       win:setFrame(f)
    end
 )
