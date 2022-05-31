@@ -529,6 +529,10 @@
   )
 
 
+(use-package inspector
+  :pin gnu)
+
+
 (use-package imenu-list
   :pin melpa
   :custom
