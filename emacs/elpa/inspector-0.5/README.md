@@ -1,5 +1,7 @@
 # EMACS-INSPECTOR
 
+![elpa-badge](https://elpa.gnu.org/packages/inspector.svg)
+
 ## Overview
 
 Inspector tool for Emacs Lisp objects.
@@ -10,20 +12,9 @@ Similar to inspectors available for Smalltalk and Common Lisp, but for Emacs Lis
 
 ## Installation
 
-This is work in progress at the moment. Just download and load the file into Emacs for now.
+This package is available from ELPA.
 
-### Via el-get
-
-This is the [el-get](https://www.emacswiki.org/emacs/el-get "el-get") recipe:
-
-```lisp
-(push '(:name emacs-inspector
-       :type git
-       :url "git://github.com/mmontone/emacs-inspector.git"
-       :features inspector
-       :compile "inspector.el")
-      el-get-sources)
-```
+`M-x package-install RET inspector RET`
 
 ## Usage
 
@@ -45,3 +36,5 @@ Finally, you can use `M-x eval-expression` bound to letter `e`, to evaluate an e
 ### From the Emacs debugger
 
 When on an Emacs debugging backtrace, press letter `i` to inspect the pointed frame and its local variables.
+
+When on edebug-mode, use `C-c C-i` for inspecting expressions in the debugger.

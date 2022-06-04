@@ -26,11 +26,21 @@ Evaluate sexp before point and inspect the result." t nil)
 (autoload 'inspect-debugger-locals "inspector" "\
 Inspect local variables of the frame at point in debugger backtrace." t nil)
 
+(autoload 'inspect-debugger-local "inspector" "\
+Inspect local variable named VARNAME of frame at point in debugger backtrace.
+
+\(fn VARNAME)" t nil)
+
 (autoload 'inspect-debugger-current-frame "inspector" "\
 Inspect current frame in debugger backtrace." t nil)
 
 (autoload 'inspect-debugger-frame-and-locals "inspector" "\
 Inspect current frame and locals in debugger backtrace." t nil)
+
+(autoload 'inspect-edebug-expression "inspector" "\
+Evaluate EXPR in edebug-mode, and inspect the result.
+
+\(fn EXPR)" t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "inspector" '("inspector-")))
 
