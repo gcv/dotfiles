@@ -1,0 +1,9 @@
+export TERM=vt100
+
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+
+alias v="ls -lahF"
+alias rm="rm -i"
