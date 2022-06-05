@@ -203,8 +203,8 @@
   (("C-c d" . deft))
 
   :config
-  (setq deft-extensions '( "org" "note" "txt" "tex")
-        deft-directory "~/Notes/"
+  (setq deft-extensions '("org" "note" "txt" "tex")
+        deft-directory "~/Files/Notes/"
         deft-recursive t
         deft-text-mode 'org-mode)
 
