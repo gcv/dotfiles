@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 
 set -Eeuo pipefail
@@ -15,10 +15,10 @@ for f in *; do
     hidden_version="~/.${f}"
     real_version=$(readlinkf "${f}")
     eval hidden_version="${hidden_version}"
-    if [[ -e "${hidden_version}" ]]; then
+    if [[ -L "${hidden_version}" || -e "${hidden_version}" ]]; then
         echo " -> $f already exists, ignoring"
     else
-        echo "$hidden_version -> $f"
+        echo "linking $hidden_version to ${real_version}"
         ln -s "$real_version" "$hidden_version"
     fi
 done
