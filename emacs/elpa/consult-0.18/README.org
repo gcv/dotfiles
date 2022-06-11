@@ -99,6 +99,8 @@ their descriptions.
   order to narrow to recent files. Press =SPC= to show ephemeral buffers.
   Supported narrowing keys:
   - b Buffers
+  - SPC Hidden buffers
+  - * Modified buffers
   - f Files (Requires =recentf-mode=)
   - m Bookmarks
   - p Project
@@ -275,17 +277,13 @@ their descriptions.
 
 #+findex: consult-compile-error
 #+findex: consult-flymake
-#+findex: consult-flycheck
 #+findex: consult-xref
 - =consult-compile-error=: Jump to a compilation error. Supports live preview
   narrowing and recursive editing.
 - =consult-flymake=: Jump to flymake diagnostic. Supports live preview and
   recursive editing. The command supports narrowing. Press =e SPC=, =w SPC=, =n SPC=
   to only show errors, warnings and notes respectively.
-- =consult-flycheck=: Jump to flycheck error, similar to =consult-flymake=. This
-  command requires the installation of the additional =consult-flycheck= package
-  since the main =consult= package only depends on Emacs core components.
-- =consult-xref=: Integration with xref. This function can be set as as
+- =consult-xref=: Integration with xref. This function can be set as
   =xref-show-xrefs-function= and =xref-show-definitions-function=.
 
 ** Histories
@@ -301,9 +299,11 @@ their descriptions.
   =command-history=. This command is a =completing-read= version of
   =repeat-complex-command= and is also a replacement for the =command-history=
   command from chistory.el.
-- =consult-history=: Insert a string from the current buffer history. You can
-  invoke this command from the minibuffer. In that case =consult-history= uses the
-  history stored in the =minibuffer-history-variable=.
+- =consult-history=: Insert a string from the current buffer history, for example
+  the Eshell or Comint history. You can also invoke this command from the
+  minibuffer. In that case =consult-history= uses the history stored in the
+  =minibuffer-history-variable=. If you prefer =completion-at-point=, take a look at
+  =cape-history= from the [[https://github.com/minad/cape][Cape]] package.
 - =consult-isearch-history=: During an Isearch session, this command picks a
   search string from history and continues the search with the newly selected
   string. Outside of Isearch, the command allows you to pick a string from the
@@ -348,7 +348,6 @@ their descriptions.
 #+findex: consult-apropos
 #+findex: consult-file-externally
 #+findex: consult-completion-in-region
-#+findex: consult-completing-read-multiple
 #+findex: consult-theme
 #+findex: consult-man
 #+findex: consult-preview-at-point
@@ -368,8 +367,8 @@ their descriptions.
 - =consult-completion-in-region=: In case you don't use [[https://github.com/minad/corfu][Corfu]] as your in-buffer
   completion UI, this function can be set as =completion-in-region-function=. Then
   your minibuffer completion UI (e.g., Vertico or Icomplete) will be used for
-  =completion-at-point=. Note that Selectrum provides its own function similar to
-  =consult-completion-in-region=. If you use Mct, you may want to use the
+  =completion-at-point=. Note that Selectrum provides its own variant of
+  =consult-completion-in-region=. If you use Mct, you may want to try
   =mct-region-mode= instead.
   #+begin_src emacs-lisp
     ;; Use `consult-completion-in-region' if Vertico is enabled.
@@ -382,18 +381,14 @@ their descriptions.
                    args)))
   #+end_src
   Instead of =consult-completion-in-region=, you may prefer to see the
-  completions directly in the buffer as a small popup. In that case, I
-  recommend either the [[https://github.com/minad/corfu][Corfu]] or the [[https://github.com/company-mode/company-mode][Company]] package. There is a technical
-  caveat of =consult-completion-in-region= in combination with Lsp-mode or Eglot.
-  The Lsp server relies on the input at point, in order to generate refined
-  candidate strings. Since the completion is transferred from the original
-  buffer to the minibuffer, the server does not receive the updated input. Lsp
-  completion should work with Corfu or Company though, which perform the
-  completion directly in the original buffer.
-- =consult-completing-read-multiple=: Enhanced drop-in replacement for
-  =completing-read-multiple= which works better for long candidates. You can
-  select/deselect multiple candidates by pressing ~RET~. Afterwards the selections
-  are confirmed by pressing ~RET~ again.
+  completions directly in the buffer as a small popup. In that case, I recommend
+  either the [[https://github.com/minad/corfu][Corfu]] or the [[https://github.com/company-mode/company-mode][Company]] package. There is a technical limitation of
+  =consult-completion-in-region= in combination with Lsp-mode or Eglot. The Lsp
+  server relies on the input at point, in order to generate refined candidate
+  strings. Since the completion is transferred from the original buffer to the
+  minibuffer, the server does not receive the updated input. LSP completion
+  works with Corfu or Company though, which perform the completion directly in
+  the original buffer.
 
 * Special features
 :properties:
@@ -829,9 +824,6 @@ configuration examples.
     ;; This adds thin lines, sorting and hides the mode line of the window.
     (advice-add #'register-preview :override #'consult-register-window)
 
-    ;; Optionally replace `completing-read-multiple' with an enhanced version.
-    (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
-
     ;; Use Consult to select xref locations with preview
     (setq xref-show-xrefs-function #'consult-xref
           xref-show-definitions-function #'consult-xref)
@@ -902,7 +894,6 @@ an overview of all Consult variables and functions with their descriptions.
 | consult-bookmark-narrow          | Narrowing configuration for =consult-bookmark=          |
 | consult-buffer-filter            | Filter for =consult-buffer=                             |
 | consult-buffer-sources           | List of virtual buffer sources                        |
-| consult-crm-prefix               | Prefix string for CRM candidates                      |
 | consult-find-args                | Command line arguments for find                       |
 | consult-fontify-max-size         | Buffers larger than this limit are not fontified      |
 | consult-fontify-preserve         | Preserve fontification for line-based commands.       |
@@ -1027,30 +1018,32 @@ You can integrated Consult with special programs or with other packages in the
 wider Emacs ecosystem. You may want to install some of theses packages depending
 on your preferences and requirements.
 
-- [[https://github.com/mohkale/consult-company][consult-company]]: Completion at point using the company backends.
+- [[https://github.com/yadex205/consult-ag][consult-ag]]: Support for the [[https://github.com/ggreer/the_silver_searcher][Silver Searcher]] in the style of =consult-grep=.
+- [[https://github.com/mohkale/consult-company][consult-company]]: Completion at point using the [[https://github.com/company-mode/company-mode][Company]] backends.
 - [[https://github.com/karthink/consult-dir][consult-dir]]: Directory jumper using Consult multi sources.
-- [[https://github.com/mohkale/consult-eglot][consult-eglot]]: Integration with eglot (lsp client).
-- [[https://github.com/minad/consult-flycheck][consult-flycheck]]: Provides the =consult-flycheck= command.
+- [[https://github.com/mohkale/consult-eglot][consult-eglot]]: Integration with Eglot (LSP client).
+- [[https://github.com/minad/consult-flycheck][consult-flycheck]]: Additional Flycheck integration.
 - [[https://gitlab.com/OlMon/consult-flyspell][consult-flyspell]]: Additional Flyspell integration.
-- [[https://github.com/gagbo/consult-lsp][consult-lsp]]: Integration with lsp-mode (lsp client).
+- [[https://github.com/rcj/consult-ls-git][consult-ls-git]]: List files from git via Consult.
+- [[https://github.com/gagbo/consult-lsp][consult-lsp]]: Integration with Lsp-mode (LSP client).
 - [[https://codeberg.org/jao/consult-notmuch][consult-notmuch]]: Access the [[https://notmuchmail.org/][Notmuch]] email system using Consult.
-- [[https://github.com/jgru/consult-org-roam][consult-org-roam]]: Integration with org-roam.
-- [[https://codeberg.org/jao/espotify][consult-spotify]]: Access the Spotify API and control your local music player.
+- [[https://github.com/jgru/consult-org-roam][consult-org-roam]]: Integration with [[https://github.com/org-roam/org-roam][Org-roam]].
 - [[https://github.com/Qkessler/consult-project-extra/][consult-project-extra]]: Additional project.el extras and buffer sources.
-- [[https://gitlab.com/OlMon/consult-projectile/][consult-projectile]]: Additional Projectile integration and buffer sources.
+- [[https://gitlab.com/OlMon/consult-projectile/][consult-projectile]]: Additional [[https://github.com/bbatsov/projectile][Projectile]] integration and buffer sources.
 - [[https://codeberg.org/jao/consult-recoll][consult-recoll]]: Access the [[https://www.lesbonscomptes.com/recoll/][Recoll]] desktop full-text search using Consult.
-- [[https://github.com/mohkale/consult-yasnippet][consult-yasnippet]]: Integration with yasnippet.
-- [[https://github.com/minad/affe][affe]]: Asynchronous Fuzzy Finder for Emacs (uses Consult under the hood).
+- [[https://codeberg.org/jao/espotify][consult-spotify]]: Access the Spotify API and control your local music player.
+- [[https://github.com/mohkale/consult-yasnippet][consult-yasnippet]]: Integration with Yasnippet.
+- [[https://github.com/minad/affe][affe]]: Asynchronous Fuzzy Finder for Emacs based on Consult.
 
 Not directly related to Consult, but maybe still of interest are the following
 packages. These packages should work well with Consult, follow a similar spirit or
 offer functionality based on ~completing-read~.
 
-- [[https://github.com/minad/corfu][corfu]]: Completion systems for =completion-at-point= using small popups (Alternative to [[https://github.com/company-mode/company-mode][company]]).
+- [[https://github.com/minad/corfu][corfu]]: Completion systems for =completion-at-point= using small popups (Alternative to [[https://github.com/company-mode/company-mode][Company]]).
 - [[https://github.com/minad/cape][cape]]: Completion At Point Extensions, which can be used with =consult-completion-in-region= and [[https://github.com/minad/corfu][Corfu]].
 - [[https://github.com/minad/bookmark-view][bookmark-view]]: Store window configuration as bookmarks, possible integration with =consult-buffer=.
 - [[https://github.com/bdarcus/citar][citar]]: Versatile package for citation insertion and bibliography management.
-- [[https://github.com/astoff/devdocs.el][devdocs]]: Emacs viewer for DevDocs with a convenient completion interface.
+- [[https://github.com/astoff/devdocs.el][devdocs]]: Emacs viewer for [[https://devdocs.io/][DevDocs]] with a convenient completion interface.
 - [[https://github.com/d12frosted/flyspell-correct][flyspell-correct]]: Apply spelling corrections by selecting via =completing-read=.
 - [[https://github.com/mhayashi1120/Emacs-wgrep][wgrep]]: Editing of grep buffers, use together with =consult-grep= via =embark-export=.
 - [[https://github.com/iyefrat/all-the-icons-completion][all-the-icons-completion]]: Icons for the completion UI.
@@ -1061,7 +1054,7 @@ to get started with only default completion and Consult and add more components
 later to the mix. For example you can omit Marginalia if you don't need
 annotations. I highly recommend the Embark package, but in order to familarize
 yourself with the other components, you can first start without it - or you could
-even start with Embark right away and add the other components later on.
+use with Embark right away and add the other components later on.
 
 * Bug reports
 :properties:
@@ -1076,7 +1069,7 @@ out the following steps:
    and Orderless.
 2. Either use the default completion UI or ensure that exactly one of
    =vertico-mode=, =mct-mode=, =selectrum-mode=, or =icomplete-mode= is enabled.
-   Furthermore =ivy-mode= and =helm-mode= must be disabled.
+   The unsupported modes =ivy-mode=, =helm-mode= and =ido-ubiquitous-mode= must be disabled.
 3. Ensure that the =completion-styles= variable is properly configured. Try to set
    =completion-styles= to a list including =substring= or =orderless=.
 4. Try to reproduce the issue by starting a bare bone Emacs instance with =emacs -Q=
@@ -1105,15 +1098,16 @@ Please provide the necessary important information with your bug report:
 
 - The minimal configuration snippet used to reproduce the issue.
 - Your completion UI (Default completion, Vertico, Mct, Selectrum or Icomplete).
-- The full stack trace in case the bug triggers an exception.
+- A stack trace in case the bug triggers an exception.
 - Your Emacs version, since bugs may be fixed or introduced in newer versions.
 - Your operating system, since Emacs behavior varies between Linux, Mac and
   Windows.
 - The package manager, e.g., straight.el or package.el, used to install
   the Emacs packages, in order to exclude update issues. Did you install
   Consult as part of the Doom or Spacemacs Emacs distributions?
-- If you are using Evil or other packages which change Emacs fundamentally,
-  since Consult does not provide Evil integration out of the box.
+- Do you use Evil or other packages which apply deep changes?
+  Consult does not provide Evil integration out of the box, but there is some
+  support in [[https://github.com/emacs-evil/evil-collection][evil-collection]].
 
 When evaluating Consult-related code snippets you should enable [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Lexical-Binding.html][lexical binding]].
 Consult often relies on lambdas and lexical closures.
@@ -1186,6 +1180,8 @@ Authors of supplementary =consult-*= packages:
 - [[https://gitlab.com/OlMon][Marco Pawłowski]] ([[https://gitlab.com/OlMon/consult-flyspell][consult-flyspell]], [[https://gitlab.com/OlMon/consult-projectile][consult-projectile]])
 - [[https://github.com/Qkessler][Enrique Kessler Martínez]] ([[https://github.com/Qkessler/consult-project-extra][consult-project-extra]])
 - [[https://github.com/jgru][Jan Gru]] ([[https://github.com/jgru/consult-org-roam][consult-org-roam]])
+- [[https://github.com/yadex205][Kanon Kakuno]] ([[https://github.com/yadex205/consult-ag][consult-ag]])
+- [[https://github.com/rcj][Robin Joy]] ([[https://github.com/rcj/consult-ls-git][consult-ls-git]])
 
 #+html: <!--
 

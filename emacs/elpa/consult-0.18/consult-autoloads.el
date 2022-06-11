@@ -32,10 +32,9 @@ These configuration options are supported:
 \(fn START END COLLECTION &optional PREDICATE)" nil nil)
 
 (autoload 'consult-completing-read-multiple "consult" "\
-Enhanced replacement for `completing-read-multiple'.
-See `completing-read-multiple' for the documentation of the arguments.
+Deprecated function; call `completing-read-multiple' with ARGS.
 
-\(fn PROMPT TABLE &optional PRED REQUIRE-MATCH INITIAL-INPUT HIST DEF INHERIT-INPUT-METHOD)" nil nil)
+\(fn &rest ARGS)" nil nil)
 
 (autoload 'consult-multi-occur "consult" "\
 Improved version of `multi-occur' based on `completing-read-multiple'.
@@ -195,9 +194,8 @@ This command can act as a drop-in replacement for `repeat-complex-command'." t n
 
 (autoload 'consult-history "consult" "\
 Insert string from HISTORY of current buffer.
-
 In order to select from a specific HISTORY, pass the history variable
-as argument.
+as argument. See also `cape-history' from the Cape package.
 
 \(fn &optional HISTORY)" t nil)
 
