@@ -12,7 +12,7 @@
   (require 'ob-calc)
   (require 'ob-emacs-lisp)
   (require 'ob-gnuplot)
-  (require 'ob-ledger)
+  (unless (version< emacs-version "28") (require 'ob-ledger))
   (require 'ob-lilypond)
   (require 'ob-lua)
   (require 'ob-octave)

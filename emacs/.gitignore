@@ -2,7 +2,7 @@
 *.eln
 auto-save-list/
 eln-cache/
-elpa/archives
-elpa/gnupg
-elpa/vterm*/build
-elpa/vterm*/*.dylib
+elpa/*/archives
+elpa/*/gnupg
+elpa/*/vterm*/build
+elpa/*/vterm*/*.dylib
