@@ -38,6 +38,14 @@
 
 ;;;***
 
+;;;### (autoloads nil "doom-ayu-dark-theme" "doom-ayu-dark-theme.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from doom-ayu-dark-theme.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "doom-ayu-dark-theme" '("doom-ayu-dark")))
+
+;;;***
+
 ;;;### (autoloads nil "doom-ayu-light-theme" "doom-ayu-light-theme.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from doom-ayu-light-theme.el
@@ -182,6 +190,14 @@
 
 ;;;***
 
+;;;### (autoloads nil "doom-lantern-theme" "doom-lantern-theme.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from doom-lantern-theme.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "doom-lantern-theme" '("doom-lantern")))
+
+;;;***
+
 ;;;### (autoloads nil "doom-laserwave-theme" "doom-laserwave-theme.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from doom-laserwave-theme.el
@@ -291,6 +307,14 @@
 ;;; Generated autoloads from doom-moonlight-theme.el
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "doom-moonlight-theme" '("doom-moonlight")))
+
+;;;***
+
+;;;### (autoloads nil "doom-nord-aurora-theme" "doom-nord-aurora-theme.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from doom-nord-aurora-theme.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "doom-nord-aurora-theme" '("doom-nord-aurora")))
 
 ;;;***
 
