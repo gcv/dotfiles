@@ -1,4 +1,0 @@
-/Users/kostya/Code/dotfiles/emacs/elpa/vterm-20220429.21/build/CMakeFiles/vterm-module.dir
-/Users/kostya/Code/dotfiles/emacs/elpa/vterm-20220429.21/build/CMakeFiles/run.dir
-/Users/kostya/Code/dotfiles/emacs/elpa/vterm-20220429.21/build/CMakeFiles/edit_cache.dir
-/Users/kostya/Code/dotfiles/emacs/elpa/vterm-20220429.21/build/CMakeFiles/rebuild_cache.dir
