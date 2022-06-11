@@ -11,7 +11,6 @@
 (use-package green-phosphor-theme :pin melpa)
 (use-package leuven-theme :pin melpa)
 (use-package material-theme)
-(use-package modus-themes)
 (use-package nord-theme)
 (use-package solarized-theme)
 (use-package zenburn-theme)
