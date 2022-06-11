@@ -1333,12 +1333,12 @@ buffer, else display in a popup buffer."
 (defun cider-eval-ns-form (&optional undef-all)
   "Evaluate the current buffer's namespace form.
 When UNDEF-ALL is non-nil, unmap all symbols and aliases first."
-  (interactive "p")
-  (when (clojure-find-ns)
+  (interactive "P")
+  (when-let ((ns (clojure-find-ns)))
     (save-excursion
       (goto-char (match-beginning 0))
       (when undef-all
-        (cider-undef-all (match-string 0)))
+        (cider-undef-all ns))
       (cider-eval-defun-at-point))))
 
 (defun cider-read-and-eval (&optional value)

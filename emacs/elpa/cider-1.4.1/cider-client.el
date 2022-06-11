@@ -480,6 +480,8 @@ contain a `candidates' key, it is returned as is."
           info)
       var-info)))
 
+;; FIXME: Now that nREPL supports a lookup op natively, we should
+;; remove this eval-based hack at some point.
 (defconst cider-info-form "
 (do
   (require 'clojure.java.io)
@@ -593,12 +595,13 @@ Do nothing if PATH is already absolute."
 
 Sometimes the classpath contains entries like src/main and we need to
 resolve those to absolute paths."
-  (let ((classpath (thread-first "(seq (.split (System/getProperty \"java.class.path\") \":\"))"
-                     (cider-sync-tooling-eval)
-                     (nrepl-dict-get "value")
-                     read))
-        (project (clojure-project-dir)))
-    (mapcar (lambda (path) (cider--get-abs-path path project)) classpath)))
+  (when (cider-runtime-clojure-p)
+    (let ((classpath (thread-first "(seq (.split (System/getProperty \"java.class.path\") \":\"))"
+                       (cider-sync-tooling-eval)
+                       (nrepl-dict-get "value")
+                       read))
+          (project (clojure-project-dir)))
+      (mapcar (lambda (path) (cider--get-abs-path path project)) classpath))))
 
 (defun cider-classpath-entries ()
   "Return a list of classpath entries."
