@@ -21,7 +21,7 @@ Returns a list, each element of which is list of
 
    (LINE COL TYPE MESSAGE)
 
-where TYPE is either 'warning or 'error.
+where TYPE is either `warning' or `error'.
 
 Current buffer is used if none is specified.
 

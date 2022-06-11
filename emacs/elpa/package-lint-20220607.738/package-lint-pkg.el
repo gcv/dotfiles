@@ -1,8 +1,8 @@
-(define-package "package-lint" "20220412.1648" "A linting library for elisp package authors"
+(define-package "package-lint" "20220607.738" "A linting library for elisp package authors"
   '((cl-lib "0.5")
     (emacs "24.1")
     (let-alist "1.0.6"))
-  :commit "80a9d9815ab2919c992ad29ae4846443dec43a35" :authors
+  :commit "70529b2ecba5f3a037be8b2c6ecbca769c64b00e" :authors
   '(("Steve Purcell" . "steve@sanityinc.com")
     ("Fanael Linithien" . "fanael4@gmail.com"))
   :maintainer
