@@ -4,8 +4,8 @@
 
 ;; Author: Augusto Stoffel <arstoffel@gmail.com>
 ;; Keywords: convenience, outlines
-;; Package-Version: 20220305.1320
-;; Package-Commit: 8660bdeedee360e5eb632f1eb1356eb09d7dfbee
+;; Package-Version: 20220606.852
+;; Package-Commit: 27ac22bc0be905f31abf8c09e63d371b0b0059d3
 ;; URL: https://github.com/astoff/code-cells.el
 ;; Package-Requires: ((emacs "27.1"))
 ;; Version: 0.2
@@ -393,6 +393,7 @@ program name followed by arguments."
 ;;;###autoload
 (defun code-cells-convert-ipynb ()
   "Convert buffer from ipynb format to a regular script."
+  (interactive)
   (goto-char (point-min))
   (let* ((nb (cl-letf ;; Skip over the possibly huge "cells" section
                  (((symbol-function 'json-read-array) 'forward-sexp))

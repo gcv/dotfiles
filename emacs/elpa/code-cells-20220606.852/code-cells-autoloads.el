@@ -108,7 +108,7 @@ Turn on `code-cells-mode' if the buffer appears to contain cells.
 This function is useful when added to a major mode hook." nil nil)
 
 (autoload 'code-cells-convert-ipynb "code-cells" "\
-Convert buffer from ipynb format to a regular script." nil nil)
+Convert buffer from ipynb format to a regular script." t nil)
 
 (autoload 'code-cells-write-ipynb "code-cells" "\
 Convert buffer to ipynb format and write to FILE.
