@@ -1,6 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
-(setq package-user-dir (file-truename "~/.emacs.d/elpa/"))
+(setq package-user-dir (file-truename (concat "~/.emacs.d/elpa/" (number-to-string emacs-major-version))))
 (setq user-emacs-directory (file-truename "~/.emacs.d/user/"))
 
 (when (fboundp 'tool-bar-mode)
