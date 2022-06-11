@@ -308,7 +308,7 @@ In addition to target types, you can also use as keys in this alist,
 pairs of a target type and a command name. Such a pair indicates that
 the override only applies if the target was obtained from minibuffer
 completion from that command. For example adding an
-entry (cons (cons 'file 'delete-file) 'find-file) to this alist would
+entry (cons (cons \\='file \\='delete-file) \\='find-file) to this alist would
 indicate that for files at the prompt of the `delete-file' command,
 `find-file' should be used as the default action."
   :type '(alist :key-type (choice (symbol :tag "Type")
@@ -1071,7 +1071,8 @@ UPDATE is the indicator update function."
         update))
       ((or 'minibuffer-keyboard-quit 'abort-recursive-edit 'abort-minibuffers)
        nil)
-      ((guard (lookup-key keymap keys))  ; if directly bound, then obey
+      ((guard (let ((def (lookup-key keymap keys))) ; if directly bound, then obey
+                (and def (not (numberp def))))) ; number means "invalid prefix"
        cmd)
       ('self-insert-command
        (minibuffer-message "Not an action")
@@ -1096,7 +1097,7 @@ UPDATE is the indicator update function."
   "Return an appropriate name for CMD.
 If CMD is a symbol, use its symbol name; for lambdas, use the
 first line of the documentation string; otherwise use the word
-'unnamed'."
+\"unnamed\"."
   (concat ; fresh copy, so we can freely add text properties
    (cond
     ((stringp (car-safe cmd)) (car cmd))
