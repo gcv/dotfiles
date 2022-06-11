@@ -148,9 +148,9 @@ export LS_COLORS="no=00:fi=00:di=95:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40
 
 
 ### shell history settings
-HISTSIZE=50000
-HISTFILE=~/.history
-SAVEHIST=50000
+HISTSIZE=100000
+HISTFILE=~/.zsh_history
+SAVEHIST=100000
 
 
 ### shell command timing
