@@ -10,30 +10,42 @@ script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 pushd "${basedir}" > /dev/null
 
-ln -s $(readlinkf "${basedir}/public/direnvrc") "~/.direnvrc"
-ln -s $(readlinkf "${basedir}/public/editrc") "~/.editrc"
-ln -s $(readlinkf "${basedir}/public/gitattributes") "~/.gitattributes"
-ln -s $(readlinkf "${basedir}/public/gitconfig") "~/.gitconfig"
-ln -s $(readlinkf "${basedir}/public/hammerspoon") "~/.hammerspoon"
-ln -s $(readlinkf "${basedir}/public/hushlogin") "~/.hushlogin"
-ln -s $(readlinkf "${basedir}/public/screenrc") "~/.screenrc"
-ln -s $(readlinkf "${basedir}/public/sqliterc") "~/.sqliterc"
-ln -s $(readlinkf "${basedir}/public/terminfo") "~/.terminfo"
-ln -s $(readlinkf "${basedir}/public/tmux.conf") "~/.tmux.conf"
+link() {
+    local from=$(readlinkf "${basedir}/$1")
+    local to="~/$2"
+    eval to="${to}"
+    if [[ -L "${to}" || -e "${to}" ]]; then
+        echo " -> ${to} already exists, ignoring"
+    else
+        echo "linking ${from} to ${to}"
+        ln -s "${from}" "${to}"
+    fi
+}
 
-ln -s $(readlinkf "${basedir}/public/bash_profile") "~/.bash_profile"
-ln -s $(readlinkf "${basedir}/public/bashrc") "~/.bashrc"
-ln -s $(readlinkf "${basedir}/public/profile") "~/.profile"
+link "public/direnvrc" ".direnvrc"
+link "public/editrc" ".editrc"
+link "public/gitattributes" ".gitattributes"
+link "public/gitconfig" ".gitconfig"
+link "public/hammerspoon" ".hammerspoon"
+link "public/hushlogin" ".hushlogin"
+link "public/screenrc" ".screenrc"
+link "public/sqliterc" ".sqliterc"
+link "public/terminfo" ".terminfo"
+link "public/tmux.conf" ".tmux.conf"
 
-ln -s $(readlinkf "${basedir}/public/zshrc") "~/.zshrc"
+link "public/bash_profile" ".bash_profile"
+link "public/bashrc" ".bashrc"
+link "public/profile" ".profile"
 
-ln -s $(readlinkf "${basedir}/public/fish") "~/.config/fish"
-ln -s $(readlinkf "${basedir}/public/starship.toml") "~/.config/starship.toml"
+link "public/zshrc" ".zshrc"
 
-ln -s $(readlinkf "${basedir}/emacs") "~/.emacs.d"
+link "public/fish" ".config/fish"
+link "public/starship.toml" ".config/starship.toml"
 
-ln -s $(readlinkf "${basedir}/private/notmuch-config") "~/.notmuch-config"
-ln -s $(readlinkf "${basedir}/private/offlineimaprc") "~/.offlineimaprc"
+link "emacs" ".emacs.d"
+
+link "private/notmuch-config" ".notmuch-config"
+link "private/offlineimaprc" ".offlineimaprc"
 
 # XXX: Too aggressive; breaks on .config directories.
 # cd public
