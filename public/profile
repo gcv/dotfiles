@@ -1,9 +1,11 @@
-export TERM=vt100
+# .profile should work with all non-Bash POSIX sh compatible shells (ash, dash,
+# and ideally ksh and sh). This version probably does not yet.
 
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
 
+alias ls="ls --color=auto"
 alias v="ls -lahF"
 alias rm="rm -i"

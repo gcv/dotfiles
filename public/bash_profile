@@ -1,0 +1,8 @@
+# .bash_profile is only executed for interactive shells
+
+shopt -s autocd
+
+PS1='[\u@\h:\W]\$ '
+
+# additional non-Bash sh-type shell configuration:
+[[ -f ~/.profile ]] && . ~/.profile
