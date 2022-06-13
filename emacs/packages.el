@@ -353,6 +353,10 @@
   )
 
 
+(use-package fish-mode
+  :pin melpa)
+
+
 (use-package flycheck
   :pin melpa)
 
