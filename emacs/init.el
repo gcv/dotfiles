@@ -358,6 +358,7 @@
             '(:eval (if (fboundp '/mode-line-abbrev-file-name)
                         (/mode-line-abbrev-file-name)
                       ""))
+            ;;'(:eval (concat " — " (format-time-string "%b %d")))
             '(:eval (if (and (fboundp 'persp-curr) (persp-curr))
                         (concat " — " (persp-name (persp-curr)))
                       "")))

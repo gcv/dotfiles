@@ -684,7 +684,7 @@
 
   (minibuffer-line-format
    '("" (:eval
-         (let ((time-str (format-time-string "%R")))
+         (let ((time-str (format-time-string "%m/%d  %R")))
            (concat
             (propertize
              " "
