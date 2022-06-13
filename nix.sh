@@ -9,7 +9,7 @@ if [[ ! -d "${NIX_HOME}" ]]; then
 fi
 
 
-# Recent macOS releases provide reasonable versions of:
+# Recent Darwin releases provide reasonable versions of:
 # - bash
 # - zsh
 # - git
@@ -26,6 +26,7 @@ nix-env -iA \
     nixpkgs.automake \
     nixpkgs.awscli2 \
     nixpkgs.bat \               # cat replacement
+    nixpkgs.bashInteractive \   # when needed
     nixpkgs.bitwarden-cli \     # password manager
     nixpkgs.cmake \
     nixpkgs.coreutils \
@@ -65,11 +66,13 @@ nix-env -iA \
     nixpkgs.pv \                # pipe viewer
     nixpkgs.ranger \            # file manager
     nixpkgs.rclone \
-    nixpkgs.restic \
+    nixpkgs.restic \            # backup utility
     nixpkgs.ripgrep \
     nixpkgs.rlwrap \
+    nixpkgs.rsync \
     nixpkgs.sd \                # a simpler sed for common cases
     nixpkgs.silver-searcher \   # ag
+    nixpkgs.sqlite \
     nixpkgs.starship \          # fancy prompt, good with fish
     nixpkgs.tectonic \          # (La)TeX environment
     nixpkgs.texinfo \
@@ -81,4 +84,5 @@ nix-env -iA \
     nixpkgs.xcp \               # cp replacement
     nixpkgs.xz \
     nixpkgs.youtube-dl \        # outdated?
-    nixpkgs.yt-dlp              # new youtube-dl
+    nixpkgs.yt-dlp \            # new youtube-dl
+    nixpkgs.zsh
