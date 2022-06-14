@@ -192,6 +192,14 @@
   :pin gnu)
 
 
+;; color API
+;; e.g.:
+;; (ct-distance "blanchedalmond" "papayawhip") => 1.8387780600973087
+;; (ct-pastel "#4fa5e8") => "#77a3c5"
+(use-package ct
+  :pin melpa)
+
+
 (use-package deadgrep
   :pin melpa
   :custom
@@ -595,6 +603,11 @@
   :hook
   (julia-mode . julia-snail-mode)
   )
+
+
+;; color adjustment package
+;; kurecolor-decrease-brightness-by-step is especially useful for theme work
+(use-package kurecolor)
 
 
 (use-package ledger-mode
