@@ -203,6 +203,7 @@ setopt pushd_ignore_dups          # no duplicates in directory stack
 
 
 ### keyboard settings
+### hint: use ctrl-v in a terminal to print out a key sequence
 bindkey '^?' backward-delete-char     # Mac keyboard backspace
 bindkey '^P' history-beginning-search-backward
 bindkey '^N' history-beginning-search-forward
@@ -227,8 +228,24 @@ bindkey '^[W' copy-region-as-kill
 bindkey ' ' magic-space
 bindkey '\ee' edit-command-line
 bindkey '\C-xu' universal-argument
+# not sure which terminal emulator sends this (originally added in 2009):
 bindkey '^[^[[D' backward-word
 bindkey '^[^[[C' forward-word
+# Blink
+bindkey '[1;5D' backward-word
+bindkey '[1;3D' backward-word
+bindkey '[1;5C' forward-word
+bindkey '[1;3C' forward-word
+# iTerm: xterm emulation
+bindkey '[1;5D' backward-word # ctrl
+bindkey '[1;9D' backward-word # alt
+bindkey '[1;5C' forward-word # ctrl
+bindkey '[1;9C' forward-word # alt
+# iTerm: Apple Terminal.app emulation
+bindkey '[5D' backward-word # ctrl
+bindkey 'b' backward-word # alt
+bindkey '[5C' forward-word # ctrl
+bindkey 'f' forward-word # alt
 
 
 ### command completion

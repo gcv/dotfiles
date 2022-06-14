@@ -422,6 +422,37 @@
                           ))
 
 
+;;; terminal mode: fix key bindings
+;;; use ctrl-v in a terminal to capture the exact code to remap
+(add-hook 'tty-setup-hook
+  '(lambda ()
+     ;; function-key-map also works
+     ;; iTerm xterm emulation:
+     (define-key input-decode-map "\e[1;9A" [M-up])
+     (define-key input-decode-map "\e[1;9B" [M-down])
+     (define-key input-decode-map "\e[1;9C" [M-right])
+     (define-key input-decode-map "\e[1;9D" [M-left])
+     (define-key input-decode-map "[1;10A" [M-S-up])
+     (define-key input-decode-map "[1;10B" [M-S-down])
+     (define-key input-decode-map "[1;10D" [M-S-left])
+     (define-key input-decode-map "[1;10C" [M-S-right])
+     ;; iTerm Apple Terminal.app emulation:
+     (define-key input-decode-map "[A" [M-up])
+     (define-key input-decode-map "[B" [M-down])
+     (define-key input-decode-map "b" [M-left])
+     (define-key input-decode-map "f" [M-right])
+     ;; Blink:
+     (define-key input-decode-map "[1;3A" [M-up])
+     (define-key input-decode-map "[1;3B" [M-down])
+     (define-key input-decode-map "[1;3D" [M-left])
+     (define-key input-decode-map "[1;3C" [M-right])
+     (define-key input-decode-map "[1;4A" [M-S-up])
+     (define-key input-decode-map "[1;4B" [M-S-down])
+     (define-key input-decode-map "[1;4D" [M-S-left])
+     (define-key input-decode-map "[1;4C" [M-S-right])
+     ))
+
+
 ;;; ----------------------------------------------------------------------------
 ;;; global key bindings, not specific to other modes or functionality
 ;;; ----------------------------------------------------------------------------
