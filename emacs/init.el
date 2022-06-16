@@ -359,7 +359,7 @@
                         (/mode-line-abbrev-file-name)
                       ""))
             ;;'(:eval (concat " — " (format-time-string "%b %d")))
-            '(:eval (if (and (fboundp 'persp-curr) (persp-curr))
+            '(:eval (if (and (fboundp 'persp-curr) (boundp 'persp-mode) persp-mode (persp-curr))
                         (concat " — " (persp-name (persp-curr)))
                       "")))
       ;; org-mode needs a copy of this for when it might manipulate the frame title
