@@ -5,7 +5,8 @@
 
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
-(scroll-bar-mode -1)
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1))
 (unless (and window-system (eq 'darwin system-type))
   ;; For some reason, fullscreen mode on Mac does not work with menu-bar-mode
   ;; turned off. Otherwise, it should be turned off.
