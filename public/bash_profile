@@ -5,4 +5,5 @@ shopt -s autocd
 PS1='[\u@\h:\W]\$ '
 
 # additional non-Bash sh-type shell configuration:
-[[ -f ~/.profile ]] && . ~/.profile
+# commented out because it loads automatically in most cases?
+#[[ -f ~/.profile ]] && . ~/.profile
