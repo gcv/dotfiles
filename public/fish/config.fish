@@ -14,4 +14,6 @@ if status is-interactive
        source /usr/local/share/fzf/fzf-key-bindings.fish && fzf_key_bindings
    end
 
+   set fish_history "fish_$(hostname -s)"
+
 end
