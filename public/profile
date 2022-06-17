@@ -1,8 +1,17 @@
 # .profile should work with all non-Bash POSIX sh compatible shells (ash, dash,
 # and ideally ksh and sh). This version probably does not yet.
+#
+# Known POSIX incompatibilities:
+# - use of local
 
 path_add () {
-    if ! echo "$PATH" | /bin/grep -Eq "(^|:)$1($|:)" ; then
+    local _grep
+    if [ -e /bin/grep ]; then
+        _grep=/bin/grep
+    elif [ -e /usr/bin/grep ]; then
+        _grep=/usr/bin/grep
+    fi
+    if ! echo "$PATH" | "${_grep}" -Eq "(^|:)$1($|:)" ; then
         if [ "$2" = "after" ] ; then
             PATH="$PATH:$1"
         else
@@ -21,3 +30,4 @@ alias .....="cd ../../../.."
 alias ls="ls --color=auto"
 alias v="ls -lahF"
 alias rm="rm -i"
+
