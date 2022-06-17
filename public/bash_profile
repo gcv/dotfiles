@@ -7,8 +7,16 @@
 
 PS1="[\u@\h:\W]\$ "
 
+# history configuration
+shopt -s histappend
 HISTFILE="${HOME}/.bash_history_$(hostname -s)"
 HISTCONTROL=ignorespace:ignoredups:erasedups
+# force timestamps into the history file
+HISTTIMEFORMAT="%F %T "
+# force history flush on every command (zsh-style), see https://unix.stackexchange.com/a/18443/459230
+# note the various versions of this are quite buggy!
+#PROMPT_COMMAND="history -a; history -r; $PROMPT_COMMAND"
+#PROMPT_COMMAND="history -n; history -w; history -c; history -r; $PROMPT_COMMAND"
 
 # bash version 4+ only:
 if ((BASH_VERSINFO[0] > 3)); then
