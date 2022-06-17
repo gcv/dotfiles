@@ -1,7 +1,12 @@
-# .bashrc is only executed for non-interactive shells
+# -*- mode: shell-script; -*-
+#
+# .bashrc (only!) is executed for interactive non-login shells. All interesting
+# configuration for interactive shells should be in .bash_profile, since no one
+# has cared about login versus non-login shell distinctions since 1970.
 
-# If not running interactively, don't do anything: special case for remote
-# shells.
+# If somehow not running interactively, don't do anything: this is a special
+# case for remote shells.
 [[ $- != *i* ]] && return
 
+# Load .bash_profile, which does all the real work:
 [[ -f ~/.bash_profile ]] && . ~/.bash_profile

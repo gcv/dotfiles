@@ -1,8 +1,16 @@
-# .bash_profile is only executed for interactive shells
+# -*- mode: shell-script; -*-
+#
+# .bash_profile is executed for interactive login shells. 
 
-shopt -s autocd
-
-PS1='[\u@\h:\W]\$ '
-
-# additional non-Bash sh-type shell configuration (some 
+# shared non-Bash sh-type shell configuration:
 [[ -f ~/.profile ]] && . ~/.profile
+
+PS1="[\u@\h:\W]\$ "
+
+HISTFILE="${HOME}/.bash_history_$(hostname -s)"
+HISTCONTROL=ignorespace:ignoredups:erasedups
+
+# bash version 4+ only:
+if ((BASH_VERSINFO[0] > 3)); then
+    shopt -s autocd
+fi

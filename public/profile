@@ -1,8 +1,12 @@
+# -*- mode: shell-script; -*-
+#
 # .profile should work with all non-Bash POSIX sh compatible shells (ash, dash,
 # and ideally ksh and sh). This version probably does not yet.
 #
 # Known POSIX incompatibilities:
 # - use of local
+
+### path setup
 
 path_add () {
     local _grep
@@ -22,6 +26,9 @@ path_add () {
 
 path_add "${HOME}/.local/bin" after
 
+
+### aliases
+
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
@@ -30,4 +37,3 @@ alias .....="cd ../../../.."
 alias ls="ls --color=auto"
 alias v="ls -lahF"
 alias rm="rm -i"
-
