@@ -8,12 +8,18 @@ basedir=$(dirname "$(readlinkf "$0")")
 script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 
-pushd "${basedir}" > /dev/null
+# FIXME: Rename link.sh to install
+# FIXME: Allow installing from GitHub?
+# FIXME: This should really use enhanced getopt to only link in things that are truly needed.
+
+
+DOTFILES="${HOME}/.dotfiles"
+
 
 link() {
-    local from=$(readlinkf "${basedir}/$1")
+    local from="${DOTFILES}/$1" # $(readlinkf "${basedir}/$1")
     local to="~/$2"
-    eval to="${to}"
+    eval to="${to}" # force ~ expansion
     if [[ -L "${to}" || -e "${to}" ]]; then
         echo " -> ${to} already exists, ignoring"
     else
@@ -21,6 +27,15 @@ link() {
         ln -s "${from}" "${to}"
     fi
 }
+
+
+# link the checkout directory to ~/.dotfiles (i.e.: ~/.dotfiles -> /path/to/dotfiles):
+if [[ -L "${DOTFILES}" || -e "${DOTFILES}" ]]; then
+    echo " -> ${DOTFILES} already exists, ignoring"
+else
+    ln -s "${basedir}" "${DOTFILES}"
+fi
+
 
 link "public/direnvrc" ".direnvrc"
 link "public/editrc" ".editrc"
@@ -40,25 +55,16 @@ link "public/profile" ".profile"
 link "public/zshrc" ".zshrc"
 
 link "public/fish" ".config/fish"
-link "public/starship.toml" ".config/starship.toml"
+link "private/history-files/fish_$(hostname -s)_history" ".local/share/fish"
+link "public/starship.toml" ".config"
+
+link "public/nix" ".config"
+link "public/nixpkgs" ".config"
 
 link "emacs" ".emacs.d"
 
+link "public/bin/fzf-history-all" ".local/bin"
+link "public/bin/gpgd" ".local/bin"
+
 link "private/notmuch-config" ".notmuch-config"
 link "private/offlineimaprc" ".offlineimaprc"
-
-# XXX: Too aggressive; breaks on .config directories.
-# cd public
-# for f in *; do
-#     hidden_version="~/.${f}"
-#     real_version=$(readlinkf "${f}")
-#     eval hidden_version="${hidden_version}"
-#     if [[ -L "${hidden_version}" || -e "${hidden_version}" ]]; then
-#         echo " -> $f already exists, ignoring"
-#     else
-#         echo "linking $hidden_version to ${real_version}"
-#         ln -s "$real_version" "$hidden_version"
-#     fi
-# done
-
-popd > /dev/null

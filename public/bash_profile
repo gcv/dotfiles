@@ -9,7 +9,7 @@ PS1="[\u@\h:\W]\$ "
 
 # history configuration
 shopt -s histappend
-HISTFILE="${HOME}/.bash_history_$(hostname -s)"
+HISTFILE="${HOME}/.dotfiles/private/history-files/bash_history_$(hostname -s)"
 HISTCONTROL=ignorespace:ignoredups:erasedups
 # force timestamps into the history file
 HISTTIMEFORMAT="%F %T "
