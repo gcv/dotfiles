@@ -18,6 +18,16 @@ HISTTIMEFORMAT="%F %T "
 #PROMPT_COMMAND="history -a; history -r; $PROMPT_COMMAND"
 #PROMPT_COMMAND="history -n; history -w; history -c; history -r; $PROMPT_COMMAND"
 
+# fzf with custom multi-shell history search:
+if [[ $(command -v fzf) && $(command -v fzf-history-all) ]]; then
+    fzf-history-all-widget () {
+        local selected=$(fzf-history-all bash)
+        READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
+        READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
+    }
+    bind -x '"\er":fzf-history-all-widget'
+fi
+
 # bash version 4+ only:
 if ((BASH_VERSINFO[0] > 3)); then
     shopt -s autocd

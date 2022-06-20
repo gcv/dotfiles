@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+#
+# This script allows history search across multiple shells and histories from
+# multiple machines (provided they all reside in the same well-known directory).
+# It delegates the work of parsing out shell history to the actual shells,
+# collects the results, and calls fzf.
+
+
+set -Eeuo pipefail
+shopt -s nullglob
+
+readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
+basedir=$(dirname "$(readlinkf "$0")")
+script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
+
+
+### sanity checks
+
+if [[ ! $(command -v fzf) ]]; then
+    echo "fzf not found" 1>&2
+    exit 1
+fi
+
+if [[ ! $(command -v fzf) ]]; then
+    echo "fzf not found" 1>&2
+    exit 1
+fi
+
+
+if [[ ! -d "${HOME}/.dotfiles/private/history-files/" ]]; then
+    echo "common shell history-files directory not found" 1>&2
+    exit 1
+fi
+
+
+### process preferred shell parameter
+
+prefer=""
+if [[ "$#" -eq 0 ]]; then
+    prefer=$(basename $SHELL)
+elif [[ ! -z "$1" ]]; then
+    prefer="$1"
+fi
+
+
+### shared
+
+host=$(hostname -s)
+
+
+### shell-specific command history retrieval template functions:
+
+# FIXME: Fix multiline history. In fish, it's -z with --read0 --print0 to fzf.
+# Other shells, not sure yet.
+
+tmpl_bash() {
+    local hf="$1"
+    echo "bash -c 'history -r "$hf"; history | cut -c 8-'"
+}
+
+
+tmpl_zsh() {
+    local hf="$1"
+    echo "HISTSIZE=1000000 zsh -c 'fc -R "$hf"; history -r -n 1'"
+}
+
+
+tmpl_fish() {
+    echo "fish_history=fish_${host} fish -c 'history | cat'"
+}
+
+
+### go:
+
+export FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --layout=reverse --inline-info -n2..,.. --tiebreak=index +m"
+
+commands=""
+
+# ensure the current host + shell file comes up first:
+prefer_host_history_file=""
+if [[ "${prefer}" = "zsh" ]]; then
+    prefer_host_history_file=zsh_history_${host}
+    commands="( $(tmpl_zsh "${HOME}/.dotfiles/private/history-files/${prefer_host_history_file}")"
+elif [[ "${prefer}" = "fish" ]]; then
+    prefer_host_history_file=fish_${host}_history
+    commands="( $(tmpl_fish "${HOME}/.dotfiles/private/history-files/${prefer_host_history_file}")"
+elif [[ "${prefer}" = "bash" ]]; then
+    prefer_host_history_file=bash_history_${host}
+    commands="( $(tmpl_bash "${HOME}/.dotfiles/private/history-files/${prefer_host_history_file}")"
+else
+    echo "unsupported shell type or version" 1>&2
+    exit 1
+fi
+
+# XXX: Note the use of && which makes history dumps sequential. While less
+# efficient than & (which makes individual history commands output to stdout and
+# interleave), it makes preferred ordering work. Without ordering, the current
+# shell's history will probably not be at the top.
+for f in "${HOME}/.dotfiles/private/history-files/"*; do
+    bf=$(basename ${f})
+    [[ "${bf}" = "${prefer_host_history_file}" ]] && continue
+    if [[ "${bf}" =~ ^bash ]]; then
+        commands="${commands} && $(tmpl_bash "${f}")"
+    elif [[ "${bf}" =~ ^zsh ]]; then
+        commands="${commands} && $(tmpl_zsh "${f}")"
+    elif [[ "${bf}" =~ ^fish ]]; then
+        commands="${commands} && $(tmpl_fish "${f}")"
+    else
+        echo "unknown history file type: ${f}" 1>&2
+        exit 1
+    fi
+done
+commands="${commands} ) | uniq | fzf"
+
+eval $commands

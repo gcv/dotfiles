@@ -349,20 +349,15 @@ elif [[ $(command -v brew) && -f `brew --prefix`/etc/autojump.sh ]]; then
 fi
 
 
-### Turn on fzf (fuzzy finder) integration if found.
-if [[ $(command -v fzf) ]]; then
-    export FZF_DEFAULT_OPTS='--layout=reverse --inline-info'
-    if [[ -d "${NIX_USER_PROFILE_DIR}/profile/share/fzf" ]]; then
-        source "${NIX_USER_PROFILE_DIR}/profile/share/fzf/completion.zsh" 2>/dev/null
-        source "${NIX_USER_PROFILE_DIR}/profile/share/fzf/key-bindings.zsh"
-    elif [[ $(command -v brew) ]]; then
-        [[ $- == *i* ]] && source "$(brew --cellar)/fzf/$(fzf --version | awk '{print $1}')/shell/completion.zsh" 2>/dev/null
-        source "$(brew --cellar)/fzf/$(fzf --version | awk '{print $1}')/shell/key-bindings.zsh"
-    fi
-    # change keybindings to be more palatable
-    bindkey '^R' history-incremental-search-backward # restore default
-    bindkey '\er' fzf-history-widget # Esc-r to use fzf's history search
-    bindkey '\et' fzf-file-widget # Esc-t to use fzf's file search
+### Turn on fzf (fuzzy finder) integration with custom multi-shell history search:
+if [[ $(command -v fzf) && $(command -v fzf-history-all) ]]; then
+    fzf-history-all-widget () {
+        local selected=$(fzf-history-all zsh)
+        zle reset-prompt
+        LBUFFER+="${selected}${RBUFFER}"
+    }
+    zle -N fzf-history-all-widget
+    bindkey '\er' fzf-history-all-widget
 fi
 
 
