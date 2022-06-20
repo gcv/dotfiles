@@ -249,7 +249,13 @@ bindkey 'f' forward-word # alt
 
 
 ### command completion
-compinit -i                                                # no insecure files
+# cache: https://gist.github.com/ctechols/ca1035271ad134841284
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+    compinit -i
+    touch .zcompdump
+else
+    compinit -C
+fi
 zstyle ':completion:*' completer _expand _complete _correct _approximate
 zstyle ':completion:*' completions 1
 zstyle ':completion:*' expand prefix suffix
