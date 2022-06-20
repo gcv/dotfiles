@@ -50,8 +50,12 @@ host=$(hostname -s)
 
 ### shell-specific command history retrieval template functions:
 
-# FIXME: Fix multiline history. In fish, it's -z with --read0 --print0 to fzf.
-# Other shells, not sure yet.
+# TODO: Fix multiline history.
+# - In fish, it's -z with --read0 --print0 to fzf.
+# - In zsh, it's pretty difficult: history retrieval the way I do it converts \n
+#   to \\n which does not round-trip. fzf's own widget uses 'zle
+#   vi-fetch-history' which presumably does the right thing internally.
+# - In bash, not sure.
 
 tmpl_bash() {
     local hf="$1"
