@@ -11,7 +11,10 @@ PS1="[\u@\h:\W]\$ "
 shopt -s histappend
 HISTFILE="${HOME}/.dotfiles/private/history-files/bash_history_$(hostname -s)"
 HISTCONTROL=ignorespace:ignoredups:erasedups
-# force timestamps into the history file
+# attempt to fix broken multiline history handling (still broken in bash version < 5, see https://askubuntu.com/a/1210371)
+shopt -s cmdhist
+shopt -s lithist
+# force timestamps into the history file _and_ force multiline history separation in bash version >= 5
 HISTTIMEFORMAT="%F %T "
 # force history flush on every command (zsh-style), see https://unix.stackexchange.com/a/18443/459230
 # note the various versions of this are quite buggy!
@@ -28,7 +31,12 @@ if [[ $(command -v fzf) && $(command -v fzf-history-all) ]]; then
     bind -x '"\er":fzf-history-all-widget'
 fi
 
-# bash version 4+ only:
+# bash version >4 only:
 if ((BASH_VERSINFO[0] > 3)); then
     shopt -s autocd
+fi
+
+# bash version <5 warning:
+if ((BASH_VERSINFO[0] < 5)); then
+    echo "warning: bash version < 5 detected; multiline history will not work between sessions" 1>&2
 fi

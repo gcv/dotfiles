@@ -4,6 +4,17 @@
 # multiple machines (provided they all reside in the same well-known directory).
 # It delegates the work of parsing out shell history to the actual shells,
 # collects the results, and calls fzf.
+#
+# It expects to find history files in ~/.dotfiles/private/history-files/ (except for
+# fish, see below).
+#
+# Limitations:
+# 1. For fish search to work across multiple files, the files must all be
+#    (symlinked) in ~/.local/share/fish/.
+# 2. For bash search to support multiline inputs, bash version 5+ is required,
+#    bash itself must be configured to preserve timestamps (HISTTIMEFORMAT set
+#    when history files are written), and bash must have lithist and cmdhist
+#    options set (shopt -s lithist cmdhist).
 
 
 set -Eeuo pipefail
@@ -21,16 +32,19 @@ if [[ ! $(command -v fzf) ]]; then
     exit 1
 fi
 
-if [[ ! $(command -v fzf) ]]; then
-    echo "fzf not found" 1>&2
+if [[ ! $(command -v perl) ]]; then
+    echo "perl not found" 1>&2
     exit 1
 fi
-
 
 if [[ ! -d "${HOME}/.dotfiles/private/history-files/" ]]; then
     echo "common shell history-files directory not found" 1>&2
     exit 1
 fi
+
+exists_bash=$(command -v bash)
+exists_zsh=$(command -v zsh)
+exists_fish=$(command -v fish)
 
 
 ### process preferred shell parameter
@@ -50,27 +64,38 @@ host=$(hostname -s)
 
 ### shell-specific command history retrieval template functions:
 
-# TODO: Fix multiline history.
-# - In fish, it's -z with --read0 --print0 to fzf.
-# - In zsh, it's pretty difficult: history retrieval the way I do it converts \n
-#   to \\n which does not round-trip. fzf's own widget uses 'zle
-#   vi-fetch-history' which presumably does the right thing internally.
-# - In bash, not sure.
-
 tmpl_bash() {
     local hf="$1"
-    echo "bash -c 'history -r "$hf"; history | cut -c 8-'"
+    # XXX: Workaround for the problem of newlines and multiline history entries:
+    # use a bogus timestamp string as a separator. Then replace the bogus
+    # timestamp with a null byte. Only Perl (not sed) can do this reliably on
+    # the command line.
+    echo "bash -c 'HISTTIMEFORMAT=\"!!!COMMAND!!!\" history -r "$hf"; HISTTIMEFORMAT=\"!!!COMMAND!!!\" history | cut -c 8- | perl -pe \"s/!!!COMMAND!!!/\0/g\"'"
 }
 
 
 tmpl_zsh() {
     local hf="$1"
-    echo "HISTSIZE=1000000 zsh -c 'fc -R "$hf"; history -r -n 1'"
+    # Solution 1:
+    # fc -l, which causes history to print to stdout, does not support a
+    # "separate by null bytes" option. Worse, it converts newlines to the
+    # literal string "\n", which is ambiguous because "\n" is a reasonable
+    # string to appear in a command (e.g. printf "\n"). However, fc -e editcmd
+    # does not mess with anything, so when it's turned into the moral equivalent
+    # of cat /and/ fails, it actually returns the unaltered history item. Which
+    # leaves the question of how to separate out commands. Workaround: use a
+    # bogus timestamp string as a separator. Then replace the bogus timestamp
+    # with a null byte. Only Perl (not sed) can do this reliably on the command
+    # line.
+    #echo "HISTSIZE=1000000 zsh -c 'fc -R "$hf"; hist() { cat "$1"; return 1; }; fc -e hist -t "<<<COMMAND>>>" -nr 1' | perl -pe "s/\<\<\<COMMAND\>\>\>  /\0/g""
+    # Solution 2 (https://unix.stackexchange.com/a/706918/459230):
+    echo "HISTSIZE=1000000 zsh -c 'fc -R "$hf"; print -rNC1 -- \$history'"
 }
 
 
 tmpl_fish() {
-    echo "fish_history=fish_${host} fish -c 'history | cat'"
+    local hf=$(basename "$1" | perl -pe "s/(fish_.*?)_history/\1/")
+    echo "fish_history=${hf} fish -c 'history -z'"
 }
 
 
@@ -82,15 +107,15 @@ commands=""
 
 # ensure the current host + shell file comes up first:
 prefer_host_history_file=""
-if [[ "${prefer}" = "zsh" ]]; then
-    prefer_host_history_file=zsh_history_${host}
-    commands="( $(tmpl_zsh "${HOME}/.dotfiles/private/history-files/${prefer_host_history_file}")"
-elif [[ "${prefer}" = "fish" ]]; then
-    prefer_host_history_file=fish_${host}_history
-    commands="( $(tmpl_fish "${HOME}/.dotfiles/private/history-files/${prefer_host_history_file}")"
-elif [[ "${prefer}" = "bash" ]]; then
+if [[ "${prefer}" = "bash" && ! -z exists_bash ]]; then
     prefer_host_history_file=bash_history_${host}
     commands="( $(tmpl_bash "${HOME}/.dotfiles/private/history-files/${prefer_host_history_file}")"
+elif [[ "${prefer}" = "fish" && ! -z exists_fish ]]; then
+    prefer_host_history_file=fish_${host}_history
+    commands="( $(tmpl_fish "${HOME}/.dotfiles/private/history-files/${prefer_host_history_file}")"
+elif [[ "${prefer}" = "zsh" && ! -z exists_zsh ]]; then
+    prefer_host_history_file=zsh_history_${host}
+    commands="( $(tmpl_zsh "${HOME}/.dotfiles/private/history-files/${prefer_host_history_file}")"
 else
     echo "unsupported shell type or version" 1>&2
     exit 1
@@ -103,17 +128,17 @@ fi
 for f in "${HOME}/.dotfiles/private/history-files/"*; do
     bf=$(basename ${f})
     [[ "${bf}" = "${prefer_host_history_file}" ]] && continue
-    if [[ "${bf}" =~ ^bash ]]; then
+    if [[ "${bf}" =~ ^bash && ! -z exists_bash ]]; then
         commands="${commands} && $(tmpl_bash "${f}")"
-    elif [[ "${bf}" =~ ^zsh ]]; then
-        commands="${commands} && $(tmpl_zsh "${f}")"
-    elif [[ "${bf}" =~ ^fish ]]; then
+    elif [[ "${bf}" =~ ^fish && ! -z exists_fish ]]; then
         commands="${commands} && $(tmpl_fish "${f}")"
+    elif [[ "${bf}" =~ ^zsh && ! -z exists_zsh ]]; then
+        commands="${commands} && $(tmpl_zsh "${f}")"
     else
         echo "unknown history file type: ${f}" 1>&2
         exit 1
     fi
 done
-commands="${commands} ) | uniq | fzf"
+commands="${commands} ) | uniq | fzf --read0"
 
 eval $commands
