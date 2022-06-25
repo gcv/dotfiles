@@ -1,5 +1,5 @@
 [include]
-        path = ~/Files/Code/dotfiles/private/gitconfig
+        path = ~/Files/Systems/dotfiles/private/gitconfig
 [color]
 	ui = auto
 [diff]

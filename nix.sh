@@ -79,6 +79,7 @@ nix-env -iA \
     nixpkgs.tmux \
     nixpkgs.tree \
     nixpkgs.unrar \
+    nixpkgs.viddy \             # watch replacement
     nixpkgs.watch \
     nixpkgs.wget \
     nixpkgs.xcp \               # cp replacement
