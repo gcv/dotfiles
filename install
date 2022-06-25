@@ -68,3 +68,5 @@ link "public/bin/gpgd" ".local/bin"
 
 link "private/notmuch-config" ".notmuch-config"
 link "private/offlineimaprc" ".offlineimaprc"
+
+# TODO: Handle Unison profiles?
