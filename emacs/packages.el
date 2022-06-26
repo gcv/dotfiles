@@ -1212,6 +1212,15 @@
   )
 
 
+(use-package xclip
+  :pin gnu
+  :if (not window-system)
+
+  :init
+  (xclip-mode 1)
+  )
+
+
 (use-package yaml-mode
   :hook
   (yaml-mode . /yaml-mode-hook)
