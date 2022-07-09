@@ -10,7 +10,8 @@ PS1="[\u@\h:\W]\$ "
 # history configuration
 shopt -s histappend
 HISTFILE="${HOME}/.dotfiles/private/history-files/bash_history_$(hostname -s)"
-HISTFILESIZE=100000
+HISTSIZE=500000
+HISTFILESIZE=500000
 HISTCONTROL=ignorespace:ignoredups:erasedups
 # attempt to fix broken multiline history handling (still broken in bash version < 5, see https://askubuntu.com/a/1210371)
 shopt -s cmdhist
