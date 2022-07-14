@@ -92,6 +92,7 @@ fi
 
 ### aliases
 alias rm='rm -i'
+alias cp='cp -p'
 alias dir='ls -aCF'
 alias v='ls -lahF'
 if [[ -x $(whence exa) ]]; then

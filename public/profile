@@ -37,3 +37,4 @@ alias .....="cd ../../../.."
 alias ls="ls --color=auto"
 alias v="ls -lahF"
 alias rm="rm -i"
+alias cp='cp -p'
