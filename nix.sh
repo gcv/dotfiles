@@ -58,7 +58,6 @@ nix-env -iA \
     nixpkgs.nix-direnv \
     nixpkgs.nmap \
     nixpkgs.notmuch \           # mail indexer
-    nixpkgs.offlineimap \       # mail fetcher
     nixpkgs.p7zip \
     nixpkgs.pandoc \
     nixpkgs.pass \              # password manager
