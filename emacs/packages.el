@@ -229,6 +229,18 @@
   )
 
 
+;;; A standardized note-tracking format system. Might be worth converting to.
+(use-package denote
+  :pin gnu
+
+  :custom
+  (denote-directory (expand-file-name "~/Files/Notes/"))
+  (denote-known-keywords '("emacs" "unix"))
+  (denote-infer-keywords t)
+  (denote-sort-keywords t)
+  )
+
+
 (use-package devdocs
   :pin gnu)
 
