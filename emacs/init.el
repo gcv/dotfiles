@@ -535,11 +535,12 @@
         dired-recursive-copies 'always)
 
   ;; quick hack for using GNU ls
-  (let ((gnu-ls (executable-find "ls")))
-    (when gnu-ls
-      (setq insert-directory-program gnu-ls)
-      (setq dired-listing-switches "-gGha")
-      (setq dired-use-ls-dired t)))
+  (let* ((ls-binary (executable-find "ls"))
+         (gnu-ls? (= 0 (shell-command (concat ls-binary " --version")))))
+    (setq insert-directory-program ls-binary)
+    (if gnu-ls?
+        (setq dired-listing-switches "-g --almost-all --human-readable --time-style=long-iso --no-group --indicator-style=slash")
+      (setq dired-listing-switches "-lAgh")))
 
   (defun /dired-mode-hook ()
     (dired-hide-details-mode 1)
