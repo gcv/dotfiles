@@ -286,6 +286,62 @@
   )
 
 
+(use-package dirvish
+  :pin melpa
+
+  :bind
+  (("C-c f" . dirvish-fd)
+   :map dirvish-mode-map
+   ("RET" . dired-find-file)
+   ("^"   . dired-up-directory)
+   ;;("h" . dired-up-directory)
+   ;;("j" . dired-next-line)
+   ;;("k" . dired-previous-line)
+   ;;("l" . dired-find-file)
+   ("i"     . wdired-change-to-wdired-mode)
+   ;;("." . dired-omit-mode)
+   ("b"   . dirvish-bookmark-jump)
+   ("f"   . dirvish-file-info-menu)
+   ("y"   . dirvish-yank-menu)
+   ("N"   . dirvish-narrow)
+   ("h"   . dirvish-history-jump) ; remapped `describe-mode'
+   ("s"   . dirvish-quicksort)    ; remapped `dired-sort-toggle-or-edit'
+   ("TAB" . dirvish-subtree-toggle)
+   ("M-]" . dirvish-history-go-forward)
+   ("M-[" . dirvish-history-go-backward)
+   ("M-l" . dirvish-ls-switches-menu)
+   ("M-m" . dirvish-mark-menu)
+   ("M-f" . dirvish-toggle-fullscreen)
+   ("M-s" . dirvish-setup-menu)
+   ("M-e" . dirvish-emerge-menu)
+   ("M-j" . dirvish-fd-jump))
+
+  :custom
+  (dirvish-bookmark-entries
+   '(("h" "~/" "Home") ;; `bh' to go back home
+     ("f" "~/Files" "Files")
+     ))
+  (dirvish-header-line-format
+   '(:left (path)))
+  (dirvish-mode-line-format
+   '(:left (sort " " file-time " " file-size symlink)
+     :right (omit yank index)))
+  ;;(dirvish-attributes '(all-the-icons file-size collapse subtree-state vc-state git-msg))
+  ;;(dirvish-all-the-icons-height 0.8)  ; fix icon sizes?
+  ;;(dirvish-hide-details nil)
+
+  :init
+  ;;(dirvish-override-dired-mode) ; not ready yet
+
+  :config
+  ;;(dirvish-peek-mode 1)
+  (setq dired-dwim-target t)
+  ;;(setq delete-by-moving-to-trash t)
+  ;;(setq dired-mouse-drag-files t)                   ; added in Emacs 29
+  ;;(setq mouse-drag-and-drop-region-cross-program t) ; added in Emacs 29
+  )
+
+
 (use-package disk-usage
   :pin gnu
 
