@@ -27,8 +27,8 @@ corfu.el - Completion Overlay Region FUnction
 Installation and Configuration
 
 * Auto completion::
-* Completing with Corfu in the minibuffer::
-* Completing with Corfu in the Eshell or Shell::
+* Completing in the minibuffer::
+* Completing in the Eshell or Shell::
 * Orderless completion::
 * TAB-and-Go completion::
 * Transfer completion to the minibuffer::
@@ -215,14 +215,14 @@ completion in the Elisp manual
 * Menu:
 
 * Auto completion::
-* Completing with Corfu in the minibuffer::
-* Completing with Corfu in the Eshell or Shell::
+* Completing in the minibuffer::
+* Completing in the Eshell or Shell::
 * Orderless completion::
 * TAB-and-Go completion::
 * Transfer completion to the minibuffer::
 
 
-File: corfu.info,  Node: Auto completion,  Next: Completing with Corfu in the minibuffer,  Up: Installation and Configuration
+File: corfu.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
 
 3.1 Auto completion
 ===================
@@ -236,17 +236,50 @@ when it appeared unexpectedly.
      (setq corfu-auto t
            corfu-quit-no-match 'separator) ;; or t
 
-   In general, I recommend to experiment a bit with the various settings
-and key bindings to find a configuration which works for you.  There is
-no one size fits all solution.  Some people like auto completion, some
-like manual completion, some want to cycle with TAB and some with the
-arrow keys...
+   I recommend to experiment a bit with the various settings and key
+bindings to find a configuration which works for you.  There is no one
+size fits all solution.  Some people like auto completion, some like
+manual completion, some want to cycle with TAB and some with the arrow
+keys.
+
+   In case you like aggressive auto completion settings, where the
+completion popup appears immediately, I recommend to use a cheap
+completion style like ‘basic’, which performs prefix filtering.  In this
+case Corfu completion should still be very fast in buffers with
+efficient completion backends.  You can try the following settings in an
+Elisp buffer or the Emacs scratch buffer.
+
+     ;; Aggressive completion, cheap prefix filtering.
+     (setq-local corfu-auto t
+                 corfu-auto-delay 0
+                 corfu-auto-prefix 0
+                 completion-styles '(basic))
+
+   If you want to combine fast prefix filtering and Orderless filtering
+you can still do that by defining a custom Orderless completion style
+via ‘orderless-define-completion-style’.  We use a custom style
+dispatcher, which enables prefix filtering for input shorter than 4
+characters.  Note that such a setup is quite advanced.  Please refer to
+the Orderless documentation and source code for further details.
+
+     (defun orderless-fast-dispatch (word index total)
+       (and (= index 0) (= total 1) (length< word 4)
+            `(orderless-regexp . ,(concat "^" (regexp-quote word)))))
+
+     (orderless-define-completion-style orderless-fast
+       (orderless-dispatch '(orderless-fast-dispatch))
+       (orderless-matching-styles '(orderless-literal orderless-regexp)))
+
+     (setq-local corfu-auto t
+                 corfu-auto-delay 0
+                 corfu-auto-prefix 0
+                 completion-styles '(orderless-fast))
 
 
-File: corfu.info,  Node: Completing with Corfu in the minibuffer,  Next: Completing with Corfu in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
+File: corfu.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
 
-3.2 Completing with Corfu in the minibuffer
-===========================================
+3.2 Completing in the minibuffer
+================================
 
 Corfu can be used for completion in the minibuffer, since it relies on
 child frames to display the candidates.  By default, ‘global-corfu-mode’
@@ -278,10 +311,10 @@ the desired result.
      (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
-File: corfu.info,  Node: Completing with Corfu in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing with Corfu in the minibuffer,  Up: Installation and Configuration
+File: corfu.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
 
-3.3 Completing with Corfu in the Eshell or Shell
-================================================
+3.3 Completing in the Eshell or Shell
+=====================================
 
 When completing in the Eshell I recommend conservative local settings
 without auto completion, such that the completion behavior is similar to
@@ -336,7 +369,7 @@ achieve a sane Eshell experience.*
      (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
 
 
-File: corfu.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing with Corfu in the Eshell or Shell,  Up: Installation and Configuration
+File: corfu.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
 
 3.4 Orderless completion
 ========================
@@ -626,20 +659,20 @@ copyright assignment to the FSF.
 
 Tag Table:
 Node: Top209
-Node: Introduction811
-Node: Features2504
-Node: Installation and Configuration3920
-Node: Auto completion9649
-Node: Completing with Corfu in the minibuffer10498
-Node: Completing with Corfu in the Eshell or Shell12355
-Node: Orderless completion15260
-Node: TAB-and-Go completion18368
-Node: Transfer completion to the minibuffer19483
-Node: Key bindings20822
-Node: Extensions21813
-Node: Complementary packages23196
-Node: Alternatives25894
-Node: Contributions28322
+Node: Introduction789
+Node: Features2482
+Node: Installation and Configuration3898
+Node: Auto completion9605
+Node: Completing in the minibuffer11960
+Node: Completing in the Eshell or Shell13773
+Node: Orderless completion16634
+Node: TAB-and-Go completion19731
+Node: Transfer completion to the minibuffer20846
+Node: Key bindings22185
+Node: Extensions23176
+Node: Complementary packages24559
+Node: Alternatives27257
+Node: Contributions29685
 
 End Tag Table
 

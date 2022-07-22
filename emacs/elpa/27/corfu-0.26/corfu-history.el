@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.25"))
+;; Package-Requires: ((emacs "27.1") (corfu "0.26"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -84,7 +84,8 @@
   "Advice for `corfu--insert'."
   (when (>= corfu--index 0)
     (add-to-history 'corfu-history
-                    (nth corfu--index corfu--candidates)
+                    (substring-no-properties
+                     (nth corfu--index corfu--candidates))
                     corfu-history-length)
     (setq corfu-history--hash nil)))
 
