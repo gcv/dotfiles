@@ -9,16 +9,23 @@
 ;;;### (autoloads nil "cape" "cape.el" (0 0 0 0))
 ;;; Generated autoloads from cape.el
 
+(autoload 'cape-history "cape" "\
+Complete from Eshell, Comint or minibuffer history.
+See also `consult-history' for a more flexible variant based on
+`completing-read'. If INTERACTIVE is nil the function acts like a Capf.
+
+\(fn &optional INTERACTIVE)" t nil)
+
 (autoload 'cape-file "cape" "\
 Complete file name at point.
 See the user option `cape-file-directory-must-exist'.
-If INTERACTIVE is nil the function acts like a capf.
+If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-symbol "cape" "\
 Complete Elisp symbol at point.
-If INTERACTIVE is nil the function acts like a capf.
+If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
@@ -26,42 +33,33 @@ If INTERACTIVE is nil the function acts like a capf.
 Complete with Dabbrev at point.
 See the user options `cape-dabbrev-min-length' and
 `cape-dabbrev-check-other-buffers'.
-If INTERACTIVE is nil the function acts like a capf.
+If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-ispell "cape" "\
 Complete word at point with Ispell.
-If INTERACTIVE is nil the function acts like a capf.
+If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-dict "cape" "\
 Complete word from dictionary at point.
 See the custom option `cape-dict-file'.
-If INTERACTIVE is nil the function acts like a capf.
+If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
- (autoload 'cape-tex "cape" nil t)
- (autoload 'cape-sgml "cape" nil t)
- (autoload 'cape-rfc1345 "cape" nil t)
 
 (autoload 'cape-abbrev "cape" "\
 Complete abbreviation at point.
-If INTERACTIVE is nil the function acts like a capf.
-
-\(fn &optional INTERACTIVE)" t nil)
-
-(autoload 'cape-keyword "cape" "\
-Complete programming language keyword at point.
-See the variable `cape-keywords'.
-If INTERACTIVE is nil the function acts like a capf.
+If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
 (autoload 'cape-line "cape" "\
-Complete current line from other lines in buffer.
-If INTERACTIVE is nil the function acts like a capf.
+Complete current line from other lines.
+The buffers returned by `cape-line-buffer-function' are scanned for lines.
+If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
@@ -119,18 +117,56 @@ Call CAPF and return a non-interruptible completion table.
 
 \(fn CAPF)" nil nil)
 
+(autoload 'cape-wrap-prefix-length "cape" "\
+Call CAPF and ensure that prefix length is greater or equal than LENGTH.
+If the prefix is long enough, enforce auto completion.
+
+\(fn CAPF LENGTH)" nil nil)
+
 (autoload 'cape-wrap-purify "cape" "\
 Call CAPF and ensure that it does not modify the buffer.
 
 \(fn CAPF)" nil nil)
- (autoload 'cape-capf-noninterruptible "cape")
- (autoload 'cape-capf-case-fold "cape")
- (autoload 'cape-capf-silent "cape")
- (autoload 'cape-capf-predicate "cape")
- (autoload 'cape-capf-properties "cape")
+
+(autoload 'cape-wrap-accept-all "cape" "\
+Call CAPF and return a completion table which accepts every input.
+
+\(fn CAPF)" nil nil)
+ (autoload 'cape-capf-accept-all "cape")
  (autoload 'cape-capf-buster "cape")
+ (autoload 'cape-capf-case-fold "cape")
+ (autoload 'cape-capf-noninterruptible "cape")
+ (autoload 'cape-capf-predicate "cape")
+ (autoload 'cape-capf-prefix-length "cape")
+ (autoload 'cape-capf-properties "cape")
+ (autoload 'cape-capf-purify "cape")
+ (autoload 'cape-capf-silent "cape")
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cape" '("cape-")))
+
+;;;***
+
+;;;### (autoloads nil "cape-char" "cape-char.el" (0 0 0 0))
+;;; Generated autoloads from cape-char.el
+ (autoload 'cape-tex "cape-char" nil t)
+ (autoload 'cape-sgml "cape-char" nil t)
+ (autoload 'cape-rfc1345 "cape-char" nil t)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cape-char" '("cape-char--define")))
+
+;;;***
+
+;;;### (autoloads nil "cape-keyword" "cape-keyword.el" (0 0 0 0))
+;;; Generated autoloads from cape-keyword.el
+
+(autoload 'cape-keyword "cape-keyword" "\
+Complete programming language keyword at point.
+See the variable `cape-keyword-list'.
+If INTERACTIVE is nil the function acts like a capf.
+
+\(fn &optional INTERACTIVE)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cape-keyword" '("cape-")))
 
 ;;;***
 
