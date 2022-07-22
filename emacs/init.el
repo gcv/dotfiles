@@ -540,7 +540,8 @@
     (setq insert-directory-program ls-binary)
     (if gnu-ls?
         (setq dired-listing-switches "-g --almost-all --human-readable --time-style=long-iso --no-group --indicator-style=slash")
-      (setq dired-listing-switches "-lAgh")))
+      (setq dired-listing-switches "-lAgh")
+      (setq dired-use-ls-dired nil)))
 
   (defun /dired-mode-hook ()
     (dired-hide-details-mode 1)
