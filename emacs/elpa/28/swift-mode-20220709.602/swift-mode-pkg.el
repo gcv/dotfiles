@@ -1,7 +1,7 @@
-(define-package "swift-mode" "20220313.542" "Major-mode for Apple's Swift programming language"
+(define-package "swift-mode" "20220709.602" "Major-mode for Apple's Swift programming language"
   '((emacs "24.4")
     (seq "2.3"))
-  :commit "0d1ef0ef183398143b13fb8c76c1284df0d5e616" :authors
+  :commit "cdd194cbadcee724a9813da386f0a612082b1ab1" :authors
   '(("taku0 (http://github.com/taku0)")
     ("Chris Barrett" . "chris.d.barrett@me.com")
     ("Bozhidar Batsov" . "bozhidar@batsov.com")

@@ -197,8 +197,7 @@ the value of `swift-mode:ios-project-scheme' is used.
 
 ;;;***
 
-;;;### (autoloads nil nil ("src-autoloads.el" "swift-mode-pkg.el")
-;;;;;;  (0 0 0 0))
+;;;### (autoloads nil nil ("swift-mode-pkg.el") (0 0 0 0))
 
 ;;;***
 
