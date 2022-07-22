@@ -718,7 +718,7 @@ end tell")))
            (lines (-filter #'nil-blank-string (s-split "\n" raw)))
            (no-tag (cl-loop for l in lines collect
                             (when (> (length l) 2) (substring l 3))))
-           (matcher (rx (group "emacs/elpa/")
+           (matcher (rx (group "emacs/elpa/" (opt (+ num) "/"))
                         (group (*? anything))
                         (group "-" (+ (any num ".")) (any "/" ".signed"))))
            (to-version (cl-loop for l in lines collect
