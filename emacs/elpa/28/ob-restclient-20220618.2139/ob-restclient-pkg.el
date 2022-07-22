@@ -1,0 +1,2 @@
+;;; Generated package description from ob-restclient.el  -*- no-byte-compile: t -*-
+(define-package "ob-restclient" "20220618.2139" "org-babel functions for restclient-mode" '((restclient "0")) :commit "3ac834b02b8276aae1b760312612c3b940598f90" :authors '(("Alf Lervåg")) :maintainer '("Alf Lervåg") :keywords '("literate programming" "reproducible research") :url "https://github.com/alf/ob-restclient.el")
