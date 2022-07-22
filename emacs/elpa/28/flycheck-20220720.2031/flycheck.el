@@ -1,6 +1,6 @@
 ;;; flycheck.el --- On-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2020 Flycheck contributors
+;; Copyright (C) 2017-2021 Flycheck contributors
 ;; Copyright (C) 2012-2016 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
@@ -4327,7 +4327,17 @@ show the indicator."
    #b00110110
    #b01101100
    #b11011000]
-  "Bitmaps used to indicate errors in the fringes.")
+  "Bitmaps used to indicate errors in the left fringes.")
+
+(defconst flycheck-fringe-bitmap-double-left-arrow
+  [#b00011011
+   #b00110110
+   #b01101100
+   #b11011000
+   #b01101100
+   #b00110110
+   #b00011011]
+  "Bitmaps used to indicate errors in the right fringes.")
 
 (defconst flycheck-fringe-bitmap-double-arrow-hi-res
   [#b1111001111000000
@@ -4342,7 +4352,22 @@ show the indicator."
    #b0011110011110000
    #b0111100111100000
    #b1111001111000000]
-  "High-resolution bitmap used to indicate errors in the fringes.")
+  "High-resolution bitmap used to indicate errors in the left fringes.")
+
+(defconst flycheck-fringe-bitmap-double-left-arrow-hi-res
+  [#b0000001111001111
+   #b0000011110011110
+   #b0000111100111100
+   #b0001111001111000
+   #b0011110011110000
+   #b0111100111100000
+   #b0111100111100000
+   #b0011110011110000
+   #b0001111001111000
+   #b0000111100111100
+   #b0000011110011110
+   #b0000001111001111]
+  "High-resolution bitmap used to indicate errors in the right fringes.")
 
 (defconst flycheck-fringe-bitmap-continuation
   [#b1000000010000000
@@ -4358,6 +4383,13 @@ show the indicator."
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-double-arrow-hi-res
     flycheck-fringe-bitmap-double-arrow-hi-res
+    nil 16)
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-double-left-arrow
+    flycheck-fringe-bitmap-double-left-arrow)
+  (define-fringe-bitmap
+    'flycheck-fringe-bitmap-double-left-arrow-hi-res
+    flycheck-fringe-bitmap-double-left-arrow-hi-res
     nil 16)
   (define-fringe-bitmap
     'flycheck-fringe-bitmap-continuation
@@ -8722,7 +8754,7 @@ See Info Node `(elisp)Byte Compilation'."
             (kill-buffer)))))))
 
 (defconst flycheck-emacs-lisp-checkdoc-variables
-  '(checkdoc-symbol-words
+  `(checkdoc-symbol-words
     checkdoc-arguments-in-order-flag
     checkdoc-force-history-flag
     checkdoc-permit-comma-termination-flag
@@ -8731,7 +8763,9 @@ See Info Node `(elisp)Byte Compilation'."
     checkdoc-spellcheck-documentation-flag
     checkdoc-verb-check-experimental-flag
     checkdoc-max-keyref-before-warn
-    sentence-end-double-space)
+    sentence-end-double-space
+    ,@(and (>= emacs-major-version 28)
+           '(checkdoc-column-zero-backslash-before-paren)))
   "Variables inherited by the checkdoc subprocess.")
 
 (defun flycheck-emacs-lisp-checkdoc-variables-form ()
@@ -8832,8 +8866,10 @@ See URL `http://www.erlang.org/'."
             "-Wall"
             source)
   :error-patterns
-  ((warning line-start (file-name) ":" line ": Warning:" (message) line-end)
-   (error line-start (file-name) ":" line ": " (message) line-end))
+  ((warning line-start (file-name) ":" line ":" (optional column ":")
+            " Warning:" (message) line-end)
+   (error line-start (file-name) ":" line ":" (optional column ":") " "
+          (message) line-end))
   :modes erlang-mode
   :enabled (lambda () (string-suffix-p ".erl" (buffer-file-name))))
 
@@ -8903,10 +8939,10 @@ directory name is \"test\" or \"eqc\", or else \"default\"."
   :command ("rebar3" "as" (eval (flycheck-erlang-rebar3-get-profile)) "compile")
   :error-parser flycheck-parse-with-patterns-without-color
   :error-patterns
-  ((warning line-start
-            (file-name) ":" line ": Warning:" (message) line-end)
-   (error line-start
-          (file-name) ":" line ": " (message) line-end))
+  ((warning line-start (file-name) ":" line ":" (optional column ":")
+            " Warning:" (message) line-end)
+   (error line-start (file-name) ":" line ":" (optional column ":") " "
+          (message) line-end))
   :modes erlang-mode
   :enabled flycheck-rebar3-project-root
   :predicate flycheck-buffer-saved-p
