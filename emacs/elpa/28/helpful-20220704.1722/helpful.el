@@ -4,8 +4,8 @@
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
-;; Package-Version: 20220513.302
-;; Package-Commit: 209971ba9f576ba080352642cfbf25df5692b1d7
+;; Package-Version: 20220704.1722
+;; Package-Commit: 94a07d49a80f66f8ebc54a49a4b4f6899a65fbe3
 ;; Keywords: help, lisp
 ;; Version: 0.20
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
@@ -1686,20 +1686,21 @@ POSITION-HEADS takes the form ((123 (defun foo)) (456 (defun bar)))."
 
 (defun helpful--primitive-p (sym callable-p)
   "Return t if SYM is defined in C."
-  (cond
-   ((and callable-p (helpful--advised-p sym))
-    (subrp (helpful--without-advice sym)))
-   (callable-p
-    (and (not (and (fboundp 'subr-native-elisp-p)
-                   (subr-native-elisp-p (indirect-function sym))))
-         (subrp (indirect-function sym))))
-   (t
-    (let ((filename (find-lisp-object-file-name sym 'defvar)))
-      (or (eq filename 'C-source)
-          (and (stringp filename)
-               (let ((ext (file-name-extension filename)))
-                 (or (equal ext "c")
-                     (equal ext "rs")))))))))
+  (let ((subrp (if (fboundp 'subr-primitive-p)
+                   #'subr-primitive-p
+                 #'subrp)))
+    (cond
+     ((and callable-p (helpful--advised-p sym))
+      (funcall subrp (helpful--without-advice sym)))
+     (callable-p
+      (funcall subrp (indirect-function sym)))
+     (t
+      (let ((filename (find-lisp-object-file-name sym 'defvar)))
+        (or (eq filename 'C-source)
+            (and (stringp filename)
+                 (let ((ext (file-name-extension filename)))
+                   (or (equal ext "c")
+                       (equal ext "rs"))))))))))
 
 (defun helpful--sym-value (sym buf)
   "Return the value of SYM in BUF."
