@@ -5,8 +5,8 @@
 ;; Author: James Nguyen <james@jojojames.com>
 ;; Maintainer: James Nguyen <james@jojojames.com>
 ;; URL: https://github.com/jojojames/dired-sidebar
-;; Package-Version: 20220609.515
-;; Package-Commit: dfc135b24c3f225222dddf691fece32dc7668b05
+;; Package-Version: 20220618.237
+;; Package-Commit: f08bf15cb6cb3c44102731f50ffd812d8d68316c
 ;; Version: 0.0.1
 ;; Package-Requires: ((emacs "25.1") (dired-subtree "0.0.1"))
 ;; Keywords: dired, files, tools
@@ -38,8 +38,9 @@
 
 (require 'dired)
 (require 'dired-subtree)
-(require 'face-remap)
 (eval-when-compile (require 'subr-x)) ; `if-let*' and `when-let*'
+
+(declare-function buffer-face-mode-invoke "face-remap")
 
 ;; Compatibility
 
@@ -865,8 +866,9 @@ the relevant file-directory clicked on by the mouse."
 
 Set font to a variable width (proportional) in the current buffer."
   (interactive)
+  (require 'face-remap)
   (setq-local buffer-face-mode-face 'dired-sidebar-face)
-  (buffer-face-mode))
+  (buffer-face-mode-invoke 'variable-pitch t))
 
 (defun dired-sidebar-set-mode-line ()
   "Customize modeline in `dired-sidebar'."
@@ -1072,7 +1074,8 @@ This is somewhat experimental/hacky."
 (defun dired-sidebar-advice-hide-temporarily (f &rest args)
   "A function meant to be used with advice to temporarily hide itself.
 
-This function hides the sidebar before executing F and then reshows itself after."
+This function hides the sidebar before executing F and then reshows itself
+after."
   (if (not (dired-sidebar-showing-sidebar-p))
       (apply f args)
     (let ((sidebar (dired-sidebar-buffer)))
