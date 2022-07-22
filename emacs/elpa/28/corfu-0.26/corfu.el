@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.25
+;; Version: 0.26
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/corfu
 
@@ -354,6 +354,9 @@ The completion backend can override this with
     (left-margin-width . 0)
     (right-margin-width . 0)
     (fringes-outside-margins . 0)
+    (fringe-indicator-alist . nil)
+    (indicate-empty-lines . nil)
+    (indicate-buffer-boundaries . nil)
     (buffer-read-only . t))
   "Default child frame buffer parameters.")
 
@@ -492,10 +495,18 @@ A scroll bar is displayed from LO to LO+BAR."
 (defun corfu--popup-hide ()
   "Hide Corfu popup."
   (when (frame-live-p corfu--frame)
-    (make-frame-invisible corfu--frame)
-    (with-current-buffer (window-buffer (frame-root-window corfu--frame))
-      (let ((inhibit-read-only t))
-        (erase-buffer)))))
+    (run-at-time
+     0 nil
+     (lambda ()
+       (when (frame-live-p corfu--frame)
+         ;; Redisplay such that the input becomes immediately visible before the popup
+         ;; hiding, which is slow (Issue #48). See also corresponding vertico#89.
+         (redisplay)
+         (make-frame-invisible corfu--frame)
+         (with-current-buffer (window-buffer (frame-root-window corfu--frame))
+           (let ((inhibit-modification-hooks t)
+                 (inhibit-read-only t))
+             (erase-buffer))))))))
 
 (defun corfu--popup-support-p ()
   "Return non-nil if child frames are supported."
@@ -1071,9 +1082,6 @@ Quit if no candidate is selected."
 
 (defun corfu--teardown ()
   "Teardown Corfu."
-  ;; Redisplay such that the input becomes immediately visible before the popup
-  ;; hiding, which is slow (Issue #48). See also corresponding vertico#89.
-  (redisplay)
   (corfu--popup-hide)
   (remove-hook 'pre-command-hook #'corfu--pre-command 'local)
   (remove-hook 'post-command-hook #'corfu--post-command)
@@ -1185,8 +1193,8 @@ See `completion-in-region' for the arguments BEG, END, TABLE, PRED."
   (when corfu--auto-timer
     (cancel-timer corfu--auto-timer)
     (setq corfu--auto-timer nil))
-  (when (and (not completion-in-region-mode)
-             (not defining-kbd-macro)
+  (when (and (not defining-kbd-macro)
+             (not buffer-read-only)
              (corfu--match-symbol-p corfu-auto-commands this-command)
              (corfu--popup-support-p))
     ;; NOTE: Do not use idle timer since this leads to unacceptable slowdowns,
