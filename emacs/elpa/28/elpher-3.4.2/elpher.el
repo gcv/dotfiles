@@ -5,7 +5,7 @@
 
 ;; Author: Tim Vaughan <plugd@thelambdalab.xyz>
 ;; Created: 11 April 2019
-;; Version: 3.4.1
+;; Version: 3.4.2
 ;; Keywords: comm gopher
 ;; Homepage: https://thelambdalab.xyz/elpher
 ;; Package-Requires: ((emacs "27.1"))
@@ -70,7 +70,7 @@
 ;;; Global constants
 ;;
 
-(defconst elpher-version "3.4.1"
+(defconst elpher-version "3.4.2"
   "Current version of elpher.")
 
 (defconst elpher-margin-width 6
@@ -314,6 +314,10 @@ meaningfully."
   '((t :inherit font-lock-doc-face))
   "Face used for gemini quoted texts.")
 
+(defface elpher-gemini-preformatted
+  '((t :inherit default))
+  "Face used for gemini preformatted text.")
+
 (defface elpher-gemini-preformatted-toggle
   '((t :inherit button))
   "Face used for buttons used to toggle display of preformatted text.")
@@ -425,11 +429,11 @@ address refers to, via the table `elpher-type-map'."
     (_ 'other-url)))
 
 (defun elpher-address-about-p (address)
-  "Return non-nil if ADDRESS is an  about address."
+  "Return non-nil if ADDRESS is an about address."
   (pcase (elpher-address-type address) (`(about ,_) t)))
 
 (defun elpher-address-gopher-p (address)
-  "Return non-nill if ADDRESS object is a gopher address."
+  "Return non-nil if ADDRESS object is a gopher address."
   (pcase (elpher-address-type address) (`(gopher ,_) t)))
 
 (defun elpher-address-protocol (address)
@@ -463,7 +467,8 @@ For gopher addresses this is a combination of the selector type and selector."
   "Retrieve port from ADDRESS object.
 If no address is defined, returns 0.  (This is for compatibility with
 the URL library.)"
-  (url-port address))
+  (let ((port (url-portspec address))) ; (url-port) is too slow!
+    (if port port 0)))
 
 (defun elpher-gopher-address-selector (address)
   "Retrieve gopher selector from ADDRESS object."
@@ -724,7 +729,8 @@ away CRs and any terminating period."
                           'face 'button)))
     (buffer-string)))
 
-;;; ANSI colors or XTerm colors (application and filtering)
+
+;; ANSI colors or XTerm colors (application and filtering)
 
 (or (require 'xterm-color nil t)
     (require 'ansi-color))
@@ -743,17 +749,25 @@ away CRs and any terminating period."
     #'ansi-color-apply)
   "A function to apply ANSI escape sequences.")
 
-;;; Processing text for display
+(defun elpher-text-has-ansi-escapes-p (string)
+  "Return non-nil if STRING includes an ANSI escape code."
+  (save-match-data
+    (string-match "\x1b\\[" string)))
+
+
+;; Processing text for display
 
 (defun elpher-process-text-for-display (string)
   "Perform any desired processing of STRING prior to display as text.
 Currently includes buttonifying URLs and processing ANSI escape codes."
-  (elpher-buttonify-urls (if elpher-filter-ansi-from-text
-                             (elpher-color-filter-apply string)
-                           (elpher-color-apply string))))
+  (elpher-buttonify-urls (if (elpher-text-has-ansi-escapes-p string)
+                             (if elpher-filter-ansi-from-text
+                                 (elpher-color-filter-apply string)
+                               (elpher-color-apply string))
+                           string)))
 
 
-;;; Network error reporting
+;;; General network communication
 ;;
 
 (defun elpher-network-error (address error)
@@ -766,9 +780,6 @@ ERROR can be either an error object or a string."
            (propertize "\n----------------\n\n" 'face 'error)
            "Press 'u' to return to the previous page.")))
 
-
-;;; General network communication
-;;
 
 (defvar elpher-network-timer nil
   "Timer used for network connections.")
@@ -1085,7 +1096,9 @@ once they are retrieved from the gopher server."
         (error
          (elpher-network-error address the-error))))))
 
-;; Index rendering
+
+;;; Gopher index rendering
+;;
 
 (defun elpher-insert-margin (&optional type-name)
   "Insert index margin, optionally containing the TYPE-NAME, into current buffer."
@@ -1169,7 +1182,9 @@ If ADDRESS is not supplied or nil the record is rendered as an
      (elpher-cache-content (elpher-page-address elpher-current-page)
                            (buffer-string)))))
 
-;; Text rendering
+
+;;; Gopher text rendering
+;;
 
 (defun elpher-render-text (data &optional _mime-type-string)
   "Render DATA as text.  MIME-TYPE-STRING is unused."
@@ -1181,7 +1196,9 @@ If ADDRESS is not supplied or nil the record is rendered as an
       (elpher-page-address elpher-current-page)
       (buffer-string)))))
 
-;; Image retrieval
+
+;;; Image retrieval
+;;
 
 (defun elpher-render-image (data &optional _mime-type-string)
   "Display DATA as image.  MIME-TYPE-STRING is unused."
@@ -1202,7 +1219,9 @@ If ADDRESS is not supplied or nil the record is rendered as an
              (elpher-restore-pos))))
       (elpher-render-download data))))
 
-;; Search retrieval and rendering
+
+;;; Gopher search retrieval and rendering
+;;
 
 (defun elpher-get-gopher-query-page (renderer)
   "Getter for gopher addresses requiring input.
@@ -1231,7 +1250,9 @@ The response is rendered using the rendering function RENDERER."
         (if aborted
             (elpher-visit-previous-page))))))
 
-;; Raw server response rendering
+
+;;; Raw server response rendering
+;;
 
 (defun elpher-render-raw (data &optional mime-type-string)
   "Display raw DATA in buffer.  MIME-TYPE-STRING is also displayed if provided."
@@ -1244,7 +1265,9 @@ The response is rendered using the rendering function RENDERER."
      (goto-char (point-min)))
     (message "Displaying raw server response.  Reload or redraw to return to standard view.")))
 
-;; File save "rendering"
+
+;;; File save "rendering"
+;;
 
 (defun elpher-render-download (data &optional _mime-type-string)
   "Save DATA to file.  MIME-TYPE-STRING is unused."
@@ -1266,7 +1289,9 @@ The response is rendered using the rendering function RENDERER."
             (insert data)))
         (message (format "Saved to file %s." filename))))))
 
-;; HTML rendering
+
+;;; HTML rendering
+;;
 
 (defun elpher-render-html (data &optional _mime-type-string)
   "Render DATA as HTML using shr.  MIME-TYPE-STRING is unused."
@@ -1278,7 +1303,9 @@ The response is rendered using the rendering function RENDERER."
                   (libxml-parse-html-region (point-min) (point-max)))))
        (shr-insert-document dom)))))
 
-;; Gemini page retrieval
+
+;;; Gemini page retrieval
+;;
 
 (defvar elpher-gemini-redirect-chain)
 
@@ -1433,6 +1460,9 @@ is a list of possible answers."
           (elpher-get-gemini-response address renderer))
       (error
        (elpher-network-error address the-error)))))
+
+;;; Gemini page rendering
+;;
 
 (defun elpher-render-gemini (body &optional mime-type-string)
   "Render gemini response BODY with rendering MIME-TYPE-STRING."
@@ -1637,7 +1667,9 @@ If non-nil, ALT-TEXT is displayed alongside the button."
   "Insert a LINE of preformatted text.
 PREF-ID is the value assigned to the \"invisible\" text attribute, which
 can be used to toggle the display of the preformatted text."
-  (insert (propertize (concat (elpher-process-text-for-display line) "\n")
+  (insert (propertize (concat (elpher-process-text-for-display
+                               (propertize line 'face 'elpher-gemini-preformatted))
+                              "\n")
                       'invisible pref-id
                       'rear-nonsticky t)))
 
@@ -1692,7 +1724,8 @@ can be used to toggle the display of the preformatted text."
       (reverse headers))))
 
 
-;; Finger page connection
+;;; Finger page connection
+;;
 
 (defun elpher-get-finger-page (renderer)
   "Opens a finger connection to the current page address.
@@ -1718,7 +1751,8 @@ The result is rendered using RENDERER."
          (elpher-network-error address the-error))))))
 
 
-;; Telnet page connection
+;;; Telnet page connection
+;;
 
 (defun elpher-get-telnet-page (renderer)
   "Opens a telnet connection to the current page address (RENDERER must be nil)."
@@ -1734,7 +1768,8 @@ The result is rendered using RENDERER."
       (telnet host))))
 
 
-;; Other URL page opening
+;;; Other URL page opening
+;;
 
 (defun elpher-get-other-url-page (renderer)
   "Getter which attempts to open the URL specified by the current page.
@@ -1751,7 +1786,8 @@ The RENDERER argument to this getter must be nil."
       (browse-url url))))
 
 
-;; File page
+;;; File page
+;;
 
 (defun elpher-get-file-page (renderer)
   "Getter which renders a local file using RENDERER.
@@ -1787,7 +1823,8 @@ Assumes UTF-8 encoding for all text files."
        (elpher-restore-pos))))
 
 
-;; Welcome page retrieval
+;;; Welcome page retrieval
+;;
 
 (defun elpher-get-welcome-page (renderer)
   "Getter which displays the welcome page (RENDERER must be nil)."
@@ -1881,7 +1918,8 @@ Assumes UTF-8 encoding for all text files."
    (elpher-restore-pos)))
 
 
-;; History page retrieval
+;;; History page retrieval
+;;
 
 (defun elpher-show-history ()
   "Show the current contents of elpher's history stack.
@@ -1938,6 +1976,7 @@ This is rendered using `elpher-get-visited-pages-page' via `elpher-type-map'."
 
 
 ;;; Bookmarks
+;;
 
 ;; This code allows Elpher to use the standard Emacs bookmarks: `C-x r
 ;; m' to add a bookmark, `C-x r l' to list bookmarks (which is where
@@ -2148,7 +2187,7 @@ supports the old protocol elpher, where the link is self-contained."
 
 (add-hook 'org-mode-hook #'elpher-org-mode-integration)
 
-;;; Browse URL
+;; Browse URL
 
 ;;;###autoload
 (defun elpher-browse-url-elpher (url &rest _args)
@@ -2183,13 +2222,13 @@ supports the old protocol elpher, where the link is self-contained."
 (with-eval-after-load 'thingatpt
   (add-to-list 'thing-at-point-uri-schemes "gemini://"))
 
-;;; Mu4e:
+;; Mu4e:
 
 ;; Make mu4e aware of the gemini world
 (setq mu4e~view-beginning-of-url-regexp
       "\\(?:https?\\|gopher\\|finger\\|gemini\\)://\\|mailto:")
 
-;;; eww:
+;; eww:
 
 ;; Let elpher handle gemini, gopher links in eww buffer.
 (setq eww-use-browse-url
