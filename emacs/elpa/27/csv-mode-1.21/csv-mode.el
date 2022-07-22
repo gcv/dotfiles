@@ -4,7 +4,7 @@
 
 ;; Author: "Francis J. Wright" <F.J.Wright@qmul.ac.uk>
 ;; Maintainer: emacs-devel@gnu.org
-;; Version: 1.20
+;; Version: 1.21
 ;; Package-Requires: ((emacs "27.1") (cl-lib "0.5"))
 ;; Keywords: convenience
 
@@ -53,6 +53,15 @@
 
 ;; - C-c C-t (`csv-transpose') interchanges rows and columns.  For
 ;;   details, see the documentation for the individual commands.
+
+;; - `csv-set-separator' sets the CSV separator of the current buffer,
+;;   while `csv-guess-set-separator' guesses and sets the separator
+;;   based on the current buffer's contents.
+;;   `csv-guess-set-separator' can be useful to add to the mode hook
+;;   to have CSV mode guess and set the separator automatically when
+;;   visiting a buffer:
+;;
+;;     (add-hook 'csv-mode-hook 'csv-guess-set-separator)
 
 ;; CSV mode can recognize fields separated by any of several single
 ;; characters, specified by the value of the customizable user option
@@ -1519,10 +1528,11 @@ setting works better)."
     (delete-overlay ol)))
 
 (defun csv--jit-unalign (beg end)
-  (remove-text-properties beg end
-                          '(display nil csv--jit nil invisible nil
-                            cursor-sensor-functions nil csv--revealed nil))
-  (remove-overlays beg end 'csv--jit t))
+  (with-silent-modifications
+    (remove-text-properties beg end
+                            '( display nil csv--jit nil invisible nil
+                               cursor-sensor-functions nil csv--revealed nil))
+    (remove-overlays beg end 'csv--jit t)))
 
 (defun csv--jit-flush (beg end)
   "Cause all the buffer (except for the BEG...END region) to be re-aligned."
