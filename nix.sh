@@ -52,6 +52,7 @@ nix-env -iA \
     nixpkgs.ledger \
     nixpkgs.libvterm-neovim \
     nixpkgs.magic-wormhole \    # peer-to-peer file transfer
+    nixpkgs.mediainfo \
     nixpkgs.mosh \              # may need to be built from mosh-git.nix derivation
     nixpkgs.miniserve \         # HTTP server
     nixpkgs.ngrok \             # expose local service over a secure tunnel
