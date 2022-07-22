@@ -4,8 +4,8 @@
 
 ;; Author: Yuwei Tian <ibluefocus@NOSPAM.gmail.com>
 ;; URL: https://github.com/galeo/corfu-doc
-;; Package-Version: 20220611.1234
-;; Package-Commit: 5dd2a2987a9e470112151d89be3f35d95c633be5
+;; Package-Version: 20220621.1554
+;; Package-Commit: da931367802d01e87e1e496ba5b51aa9126a705d
 ;; Version: 0.7
 ;; Keywords: corfu popup documentation convenience
 ;; Package-Requires: ((emacs "27.1")(corfu "0.25"))
@@ -78,7 +78,7 @@ documentation update delay."
           (const :tag "clear content" clear)
           (const :tag "hide popup" hide)))
 
-(defcustom corfu-doc-max-width 60
+(defcustom corfu-doc-max-width 80
   "The max width of the corfu doc frame in characters."
   :type 'integer)
 
