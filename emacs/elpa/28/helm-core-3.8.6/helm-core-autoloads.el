@@ -29,7 +29,7 @@ E.g.
       (interactive)
       (message \"Run baz\"))
 
-\(helm-define-multi-key global-map (kbd \"<f5> q\") '(foo bar baz) 2)
+\(helm-define-multi-key global-map (kbd \"<f5> q\") \\='(foo bar baz) 2)
 
 Each time \"<f5> q\" is pressed, the next function is executed.
 Waiting more than 2 seconds between key presses switches back to
@@ -59,8 +59,8 @@ Arg OTHER-SUBKEYS is an alist specifying other short key bindings
 to use once started, e.g.:
 
     (helm-define-key-with-subkeys global-map
-       (kbd \"C-x v n\") ?n 'git-gutter:next-hunk
-       '((?p . git-gutter:previous-hunk)))
+       (kbd \"C-x v n\") ?n \\='git-gutter:next-hunk
+       \\='((?p . git-gutter:previous-hunk)))
 
 In this example, `C-x v n' will run `git-gutter:next-hunk'
 subsequent \"n\" will run this command again and subsequent \"p\"
@@ -140,7 +140,7 @@ Minibuffer prompt. Default value is `helm--prompt'.
 If t, allow resumption of the previous session of this Helm
 command, skipping initialization.
 
-If 'noresume, this instance of `helm' cannot be resumed.
+If \\='noresume, this instance of `helm' cannot be resumed.
 
 *** :preselect
 
@@ -195,7 +195,7 @@ Allow running this Helm command in a running Helm session.
 Other keywords are interpreted as local variables of this Helm
 session. The `helm-' prefix can be omitted. For example,
 
-\(helm :sources 'helm-source-buffers-list
+\(helm :sources \\='helm-source-buffers-list
        :buffer \"*helm buffers*\"
        :candidate-number-limit 10)
 
