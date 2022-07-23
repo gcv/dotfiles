@@ -51,15 +51,6 @@ otherwise it defaults to variable `buffer-file-name'.
 
 ;;;***
 
-;;;### (autoloads nil "dirvish-bookmark" "dirvish-bookmark.el" (0
-;;;;;;  0 0 0))
-;;; Generated autoloads from dirvish-bookmark.el
- (autoload 'dirvish-bookmark-jump "dirvish-bookmark" nil t)
-
-(register-definition-prefixes "dirvish-bookmark" '("dirvish-bookmark-entries"))
-
-;;;***
-
 ;;;### (autoloads nil "dirvish-collapse" "dirvish-collapse.el" (0
 ;;;;;;  0 0 0))
 ;;; Generated autoloads from dirvish-collapse.el
@@ -141,19 +132,6 @@ FILESET defaults to `dired-get-marked-files'.
 (autoload 'dirvish-rename-space-to-underscore "dirvish-extras" "\
 Rename marked files by replacing space to underscore." t nil)
 
-(autoload 'dirvish-switch-layout "dirvish-extras" "\
-Switch Dirvish layout according to RECIPE.
-If RECIPE is not provided, switch to the recipe next to the
-current layout defined in `dirvish-layout-recipes'.
-
-\(fn &optional RECIPE)" t nil)
-
-(autoload 'dirvish-dwim "dirvish-extras" "\
-Start a Dirvish session with optional PATH.
-The session takes the whole frame when `one-window-p'.
-
-\(fn &optional PATH)" t nil)
-
 (register-definition-prefixes "dirvish-extras" '("dirvish-"))
 
 ;;;***
@@ -210,6 +188,36 @@ ARG defaults to 1.
 ;;; Generated autoloads from dirvish-icons.el
 
 (register-definition-prefixes "dirvish-icons" '("dirvish-"))
+
+;;;***
+
+;;;### (autoloads nil "dirvish-layout" "dirvish-layout.el" (0 0 0
+;;;;;;  0))
+;;; Generated autoloads from dirvish-layout.el
+
+(define-obsolete-function-alias 'dirvish-toggle-fullscreen #'dirvish-layout-toggle "Jul 22, 2022")
+
+(autoload 'dirvish-layout-toggle "dirvish-layout" "\
+Toggle layout of current Dirvish session.
+A session with layout means it has a companion preview window and
+possibly one or more parent windows." t nil)
+
+(define-obsolete-function-alias 'dirvish-switch-layout #'dirvish-layout-switch "Jul 22, 2022")
+
+(autoload 'dirvish-layout-switch "dirvish-layout" "\
+Switch Dirvish layout according to RECIPE.
+If RECIPE is not provided, switch to the recipe next to the
+current layout defined in `dirvish-layout-recipes'.
+
+\(fn &optional RECIPE)" t nil)
+
+(autoload 'dirvish-dwim "dirvish-layout" "\
+Start a Dirvish session with optional PATH.
+The session takes the whole frame when `one-window-p'.
+
+\(fn &optional PATH)" t nil)
+
+(register-definition-prefixes "dirvish-layout" '("dirvish-layout-recipes"))
 
 ;;;***
 
@@ -287,6 +295,19 @@ it is disabled.
 
 ;;;***
 
+;;;### (autoloads nil "dirvish-quick-access" "dirvish-quick-access.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from dirvish-quick-access.el
+
+(define-obsolete-variable-alias 'dirvish-bookmark-entries 'dirvish-quick-access-entries "Jul 22, 2022")
+
+(define-obsolete-function-alias 'dirvish-bookmark-jump 'dirvish-quick-access "Jul 22, 2022")
+ (autoload 'dirvish-quick-access "dirvish-quick-access" nil t)
+
+(register-definition-prefixes "dirvish-quick-access" '("dirvish-quick-access-entries"))
+
+;;;***
+
 ;;;### (autoloads nil "dirvish-side" "dirvish-side.el" (0 0 0 0))
 ;;; Generated autoloads from dirvish-side.el
  (autoload 'dirvish-project-ml "dirvish-side" nil t)
@@ -311,6 +332,12 @@ otherwise it defaults to `project-current'.
 ;;;### (autoloads nil "dirvish-subtree" "dirvish-subtree.el" (0 0
 ;;;;;;  0 0))
 ;;; Generated autoloads from dirvish-subtree.el
+
+(autoload 'dirvish-subtree-up "dirvish-subtree" "\
+Jump to beginning of current subtree." t nil)
+
+(autoload 'dirvish-subtree-clear "dirvish-subtree" "\
+Clear all subtrees in the buffer." t nil)
 
 (autoload 'dirvish-subtree-toggle "dirvish-subtree" "\
 Insert subtree at point or remove it if it was not present." t nil)

@@ -1,7 +1,7 @@
-(define-package "dirvish" "20220721.1645" "A modern file manager based on dired mode"
+(define-package "dirvish" "20220723.816" "A modern file manager based on dired mode"
   '((emacs "27.1")
     (transient "0.3.7"))
-  :commit "4a6576eb4e707067f533d7480d2eb7a2de4014e0" :authors
+  :commit "425e1c05bff3992476161b2f1dae6285818793ac" :authors
   '(("Alex Lu <https://github.com/alexluigit>"))
   :maintainer
   '("Alex Lu <https://github.com/alexluigit>")

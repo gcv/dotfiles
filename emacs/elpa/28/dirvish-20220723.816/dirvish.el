@@ -327,7 +327,7 @@ ALIST is window arguments passed to `window--display-buffer'."
 
 (defun dirvish--normalize-util-windows (windows)
   "Normalize the size of utility WINDOWS, like header line window."
-  (when (> emacs-major-version 28)
+  (when (and (display-graphic-p) (> emacs-major-version 28))
     (dolist (win windows)
       (let ((window-safe-min-height 0)
             (window-resize-pixelwise t))
@@ -807,7 +807,9 @@ If ALL-FRAMES, search target directories in all frames."
 (defun dirvish-wdired-enter-ad (&rest _)
   "Advisor function for `wdired-change-to-wdired-mode'."
   (dired-move-to-end-of-filename t)
-  (setq-local cursor-type '(bar 4))
+  (setq-local cursor-type '(bar . 4))
+  (when (boundp 'evil-normal-state-cursor)
+    (setq-local evil-normal-state-cursor 'hollow))
   (dolist (ov (mapcar #'car (dv-attribute-fns (dirvish-curr))))
     (remove-overlays (point-min) (point-max) ov t))
   (remove-hook 'post-command-hook #'dirvish-update-body-h t))
@@ -1094,7 +1096,7 @@ use `car'.  If HEADER, use `dirvish-header-line-height' instead."
             (this-cmd this-command))
         (dirvish-debounce layout
           (if (not (dv-layout dv))
-              (and (< emacs-major-version 28) (force-mode-line-update))
+              (and (< emacs-major-version 29) (force-mode-line-update))
             (when (and (not (eq dirvish-mode-line-position 'disable))
                        (buffer-live-p f-buf))
               (with-current-buffer f-buf (force-mode-line-update)))
@@ -1325,7 +1327,7 @@ If VEC, the attributes are retrieved by parsing the output of
            (proc (if vec (start-file-process-shell-command
                           (buffer-name outbuf) outbuf cmd)
                    (start-process (buffer-name outbuf) outbuf
-                                  "emacs" "-q" "-batch" "--eval" cmd))))
+                                  "emacs" "-Q" "-batch" "--eval" cmd))))
       (process-put proc 'entry entry)
       (process-put proc 'dv-buf buffer)
       (process-put proc 'vec vec)
@@ -1406,24 +1408,6 @@ If VEC, the attributes are retrieved by parsing the output of
     (dirvish-kill dv dirvish-reuse-session)
     (and dirvish-reuse-session dirvish--props (quit-window))))
 
-(defun dirvish-toggle-fullscreen ()
-  "Toggle fullscreen of current Dirvish."
-  (interactive)
-  (let* ((dv (dirvish-curr))
-         (old-layout (dv-layout dv))
-         (new-layout (unless old-layout (dv-last-fs-layout dv)))
-         (buf (current-buffer)))
-    (if old-layout
-        (set-window-configuration (dv-window-conf dv))
-      (with-selected-window (dv-root-window dv)
-        (let (quit-window-hook) (quit-window))))
-    (setf (dv-layout dv) new-layout)
-    (dirvish--save-env dv)
-    (with-selected-window (dirvish--create-root-window dv)
-      (dirvish-with-no-dedication (switch-to-buffer buf))
-      (dirvish--build dv)
-      (dirvish-debounce layout (dirvish-preview-update)))))
-
 ;;;###autoload
 (define-minor-mode dirvish-override-dired-mode
   "Let Dirvish take over Dired globally."
@@ -1457,27 +1441,27 @@ otherwise it defaults to variable `buffer-file-name'."
    ["Essential commands"
     ("e" "  Open file"              dired-find-file)
     ("o" "  Open file other window" dired-find-file-other-window)
-    ("/" "  Search for files"       dirvish-fd)
+    ("/" "  Perform a fd search"    dirvish-fd)
     ("s" "  Sort current buffer"    dirvish-quicksort)
     ("g" "  Refresh buffer"         revert-buffer)
     ("M-s" "Setup Dirvish"          dirvish-setup-menu)
     ("TAB" "Toggle subtree"         dirvish-subtree-toggle)
-    ("M-f" "Toggle fullscreen"      dirvish-toggle-fullscreen)]
+    ("M-f" "Toggle fullscreen"      dirvish-layout-toggle)]
    ["File operations"
-    ("a" "  Add an empty file"      dired-create-empty-file)
+    ("." "  Add an empty file"      dired-create-empty-file)
     ("+" "  Add a directory"        dired-create-directory)
     ("@" "  Rename files"           dirvish-renaming-menu)
     ("X" "  Delete files"           dired-do-delete)
     ("v" "  View this file"         dired-view-file)
     ("y" "  Yank marked files"      dirvish-yank-menu)
-    ("." "  Manage pinned groups"   dirvish-emerge-menu)
+    ("P" "  Manage pinned groups"   dirvish-emerge-menu)
     ("*" "  Manage marks"           dirvish-mark-menu)]]
   [["Navigation"
-    ("j" "  Goto to line for file"  dired-goto-file)
-    ("b" "  Jump to bookmarks"      dirvish-bookmark-jump)
+    ("a" "  Quick access"           dirvish-quick-access)
+    ("j" "  Go to line for file"    dired-goto-file)
     ("^" "  Go to parent directory" dired-up-directory)
-    ("r" "  Roam the file system"   dirvish-fd-jump)
     ("m" "  Go to the MRU buffer"   dirvish-history-last)
+    ("r" "  Roam the file system"   dirvish-fd-jump)
     ("n" "  Forward history"        dirvish-history-go-forward :transient t)
     ("p" "  Backward history"       dirvish-history-go-backward :transient t)
     ("SPC" "Recently visited"       dirvish-history-jump)]
@@ -1485,7 +1469,7 @@ otherwise it defaults to variable `buffer-file-name'."
     ("l" "  Setup listing switches" dirvish-ls-switches-menu)
     ("f" "  Setup fd switches"      dirvish-fd-switches-menu :if (lambda () dirvish-fd-actual-switches))
     ("i" "  Get file information"   dirvish-file-info-menu)
-    ("S" "  Manage subdirs"         dirvish-subdir-menu)
+    ("d" "  Manage subdirs"         dirvish-subdir-menu)
     ("(" "  Toggle details"         dired-hide-details-mode)
     ("=" "  Compare files"          dired-diff)
     (":" "  GnuPG helpers"          dirvish-epa-dired-menu)
