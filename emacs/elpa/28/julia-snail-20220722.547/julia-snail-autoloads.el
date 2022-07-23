@@ -18,7 +18,8 @@ To create multiple REPLs, give these variables distinct values (e.g.:
 *julia my-project-1* and 10012)." t nil)
 
 (autoload 'julia-snail-mode "julia-snail" "\
-A minor mode for interactive Julia development. Should only be turned on in source buffers.
+A minor mode for interactive Julia development.
+Should only be turned on in source buffers.
 
 This is a minor mode.  If called interactively, toggle the
 `Julia-Snail mode' mode.  If the prefix argument is positive,
@@ -40,8 +41,8 @@ The following keys are set:
 \(fn &optional ARG)" t nil)
 
 (autoload 'julia-snail-repl-mode "julia-snail" "\
-A minor mode for interactive Julia development. Should only be
-turned on in REPL buffers.
+A minor mode for interactive Julia development.
+Should only be turned on in REPL buffers.
 
 This is a minor mode.  If called interactively, toggle the
 `Julia-Snail-Repl mode' mode.  If the prefix argument is
@@ -57,6 +58,9 @@ evaluate `julia-snail-repl-mode'.
 
 The mode's hook is called both when the mode is enabled and when
 it is disabled.
+
+The following keys are set:
+\\{julia-snail-repl-mode-map}
 
 \(fn &optional ARG)" t nil)
 
