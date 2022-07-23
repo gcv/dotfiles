@@ -312,7 +312,7 @@
    ;;("l" . dired-find-file)
    ("i"     . wdired-change-to-wdired-mode)
    ;;("." . dired-omit-mode)
-   ("b"   . dirvish-bookmark-jump)
+   ("b"   . dirvish-quick-access)
    ("f"   . dirvish-file-info-menu)
    ("y"   . dirvish-yank-menu)
    ("N"   . dirvish-narrow)
@@ -329,8 +329,10 @@
    ("M-j" . dirvish-fd-jump))
 
   :custom
-  (dirvish-bookmark-entries
-   '(("h" "~/" "Home") ;; `bh' to go back home
+  (dirvish-preview-dispatchers
+   '(archive))
+  (dirvish-quick-access-entries
+   '(("h" "~/" "Home") ;; e.g.: `qh' to go back home
      ("f" "~/Files" "Files")
      ))
   (dirvish-header-line-format
