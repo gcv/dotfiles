@@ -143,7 +143,7 @@ will visit the latest `project-root' after executing
   "Called before opening a file in Dirvish-side session DV."
   (unless (dv-layout dv)
     (select-window (funcall dirvish-side-open-file-window-function)))
-  (dirvish-reclaim)
+  (dirvish-focus-change-h)
   (when-let ((dv (dirvish-curr))) (dirvish-kill dv)))
 
 (defun dirvish-side-quit-window-fn (dv)
@@ -172,13 +172,8 @@ will visit the latest `project-root' after executing
                        (dirvish--get-project-root))))
       (when (and (eq state 'visible) (window-live-p win) dirname)
         (with-selected-window win
-          (dirvish-reclaim)
-          (setf (dv-index-dir dv) dirname)
-          (dirvish-with-no-dedication
-           (switch-to-buffer (dirvish--find-entry dv dirname)))
-          (when (and filename (not (file-directory-p filename)))
-            (dirvish-prop :child filename))
-          (dirvish--build dv))))))
+          (dirvish-focus-change-h)
+          (dirvish-find-entry-ad dirname))))))
 
 ;;;###autoload (autoload 'dirvish-project-ml "dirvish-side" nil t)
 (dirvish-define-mode-line project
@@ -206,7 +201,6 @@ otherwise it defaults to `project-current'."
   (pcase-let ((`(,dv . ,state) (dirvish-side--get-state)))
     (cl-case state
       ('visible
-       (when (dv-layout dv) (dirvish-toggle-fullscreen))
        (dirvish-side--set-state dv 'exists)
        (let ((win (dv-root-window dv)))
          (unless (window-live-p win)
@@ -214,12 +208,10 @@ otherwise it defaults to `project-current'."
             "Session closed unexpectedly, call `%s' again to reset" this-command))
          (delete-window win)))
       ('exists
-       (let ((followed (buffer-file-name))
-             (last (dv-index-dir dv)))
+       (let ((followed (buffer-file-name)))
          (with-selected-window (dirvish--create-root-window dv)
            (dirvish-with-no-dedication
-            (switch-to-buffer (dirvish--find-entry dv last)))
-           (dirvish-reclaim)
+            (switch-to-buffer (cdr (dv-index-dir dv))))
            (if (and dirvish-side-follow-buffer-file followed)
                (progn
                  (dirvish-find-entry-ad (file-name-directory followed))

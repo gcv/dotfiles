@@ -50,6 +50,7 @@ max number of cache processes."
   (cl-loop for dp in '(image video epub) collect (intern (format "dirvish-%s-preview-dp" dp))))
 (defconst dirvish-media--embedded-video-thumb
   (string-match "prefer embedded image" (shell-command-to-string "ffmpegthumbnailer -h")))
+(defconst dirvish-media--img-max-width 2400)
 (defconst dirvish-media--img-scale-h 0.75)
 (defconst dirvish-media--img-scale-w 0.92)
 (defconst dirvish-media--info
@@ -91,26 +92,27 @@ A new directory is created unless NO-MKDIR."
           (process-put proc 'path path)
           (set-process-sentinel proc #'dirvish-media--cache-sentinel))))))
 
-(defun dirvish-media--cache-imgs (&optional dv)
-  "Cache image/video-thumbnail for index directory in DV."
-  (setq dv (or dv (dirvish-curr)))
-  (with-current-buffer (window-buffer (dv-root-window dv))
-    (when (and (< (length (dirvish-prop :files))
-                  (car dirvish-media-auto-cache-threshold))
-               (dv-layout dv)
-               (not (dirvish-prop :tramp)))
-      (cl-loop
-       with win = (dv-preview-window dv)
-       with width = (window-width win)
-       for file in (dirvish-prop :files)
-       for ext = (downcase (or (file-name-extension file) ""))
-       for (cmd . args) = (cl-loop
-                           for fn in dirvish-media--cache-img-fns
-                           for (type . payload) = (funcall fn file ext win dv)
-                           thereis (and (eq type 'media-cache) payload))
-       when cmd do (push (cons (format "%s-%s-img-cache" file width)
-                               (list file width cmd args))
-                         dirvish-media--cache-pool)))))
+(defun dirvish-media--cache-imgs ()
+  "Cache image/video-thumbnail for index directory."
+  (when-let* ((dv (dirvish-curr))
+              (buf (window-buffer (dv-root-window dv))))
+    (with-current-buffer buf
+      (when (and (< (length (dirvish-prop :files))
+                    (car dirvish-media-auto-cache-threshold))
+                 (dv-layout dv)
+                 (not (dirvish-prop :tramp)))
+        (cl-loop
+         with win = (dv-preview-window dv)
+         with width = (window-width win)
+         for file in (dirvish-prop :files)
+         for ext = (downcase (or (file-name-extension file) ""))
+         for (cmd . args) = (cl-loop
+                             for fn in dirvish-media--cache-img-fns
+                             for (type . payload) = (funcall fn file ext win dv)
+                             thereis (and (eq type 'media-cache) payload))
+         when cmd do (push (cons (format "%s-%s-img-cache" file width)
+                                 (list file width cmd args))
+                           dirvish-media--cache-pool))))))
 
 (defun dirvish-media--group-heading (group-titles)
   "Format media group heading in Dirvish preview buffer.
@@ -235,18 +237,24 @@ GROUP-TITLES is a list of group titles."
 
 (defun dirvish-media--img-size (window &optional height)
   "Get corresponding image width or HEIGHT in WINDOW."
-  (floor (* (if height dirvish-media--img-scale-h dirvish-media--img-scale-w)
-            (funcall (if height #'window-pixel-height #'window-pixel-width) window))))
+  (let ((size (if height (* dirvish-media--img-scale-h (window-pixel-height window))
+                (min (* dirvish-media--img-scale-w (window-pixel-width window))
+                     dirvish-media--img-max-width))))
+    (floor size)))
 
 (defun dirvish-media--clean-caches ()
   "Clean cache files for marked files."
-  (clear-image-cache)
-  (let ((win (dv-preview-window (dirvish-curr))) size)
-    (when (window-live-p win)
-      (setq size (dirvish-media--img-size win))
-      (dolist (file (dired-get-marked-files))
-        (mapc #'delete-file (file-expand-wildcards
-                             (dirvish-media--cache-path file (format "images/%s" size) ".*" t) t))))))
+  (when-let* ((has-gui (display-graphic-p))
+              (win (dv-preview-window (dirvish-curr)))
+              (size (and (window-live-p win)
+                         (dirvish-media--img-size win))))
+    (clear-image-cache)
+    (setq size (dirvish-media--img-size win))
+    (dolist (file (dired-get-marked-files))
+      (mapc #'delete-file (file-expand-wildcards
+                           (dirvish-media--cache-path
+                            file (format "images/%s" size) ".*" t)
+                           t)))))
 
 (add-hook 'dirvish-after-revert-hook #'dirvish-media--clean-caches)
 (add-hook 'dirvish-setup-hook #'dirvish-media--cache-imgs)
