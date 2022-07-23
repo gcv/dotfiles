@@ -536,7 +536,7 @@
 
   ;; quick hack for using GNU ls
   (let* ((ls-binary (executable-find "ls"))
-         (gnu-ls? (= 0 (shell-command (concat ls-binary " --version")))))
+         (gnu-ls? (= 0 (call-process ls-binary nil nil nil "--version"))))
     (setq insert-directory-program ls-binary)
     (if gnu-ls?
         (setq dired-listing-switches "-g --almost-all --human-readable --time-style=long-iso --no-group --indicator-style=slash")
