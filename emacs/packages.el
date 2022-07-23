@@ -319,8 +319,8 @@
    ("h"   . dirvish-history-jump) ; remapped `describe-mode'
    ("s"   . dirvish-quicksort)    ; remapped `dired-sort-toggle-or-edit'
    ("TAB" . dirvish-subtree-toggle)
-   ("M-]" . dirvish-history-go-forward)
-   ("M-[" . dirvish-history-go-backward)
+   ("C-M-]" . dirvish-history-go-forward)
+   ("C-M-[" . dirvish-history-go-backward)
    ("M-l" . dirvish-ls-switches-menu)
    ("M-m" . dirvish-mark-menu)
    ("M-f" . dirvish-toggle-fullscreen)
@@ -345,7 +345,7 @@
   ;;(dirvish-hide-details nil)
 
   :init
-  ;;(dirvish-override-dired-mode) ; not ready yet
+  (dirvish-override-dired-mode)
 
   :config
   ;;(dirvish-peek-mode 1)
