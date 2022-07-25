@@ -312,7 +312,9 @@
 
 (define-minor-mode sensitive-mode
   "Disable backup creation and auto saving for sensitive files."
-  nil " Sensitive" nil
+  :init-value nil
+  :lighter " Sensitive"
+  :keymap nil
   (if (symbol-value sensitive-mode)
       (progn (set (make-local-variable 'backup-inhibited) t)
              (when auto-save-default
