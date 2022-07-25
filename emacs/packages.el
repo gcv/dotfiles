@@ -329,8 +329,7 @@
    ("M-j" . dirvish-fd-jump))
 
   :custom
-  (dirvish-preview-dispatchers
-   '(archive))
+  (dirvish-media-auto-cache-threshold '(0)) ; disable auto cache
   (dirvish-quick-access-entries
    '(("h" "~/" "Home") ;; e.g.: `qh' to go back home
      ("f" "~/Files" "Files")
@@ -353,6 +352,14 @@
   ;;(setq delete-by-moving-to-trash t)
   ;;(setq dired-mouse-drag-files t)                   ; added in Emacs 29
   ;;(setq mouse-drag-and-drop-region-cross-program t) ; added in Emacs 29
+
+  (dirvish-define-preview no-media (ext)
+    "Disable preview for media files."
+    (when (member ext (append dirvish-image-exts dirvish-video-exts
+                              dirvish-audio-exts '("pdf" "epub" "gif")))
+      '(info . "Preview disabled for media files")))
+
+  (setq dirvish-preview-dispatchers '(archive no-media))
   )
 
 
