@@ -6,7 +6,7 @@
 ;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
 ;; URL: https://git.sr.ht/~protesilaos/denote
 ;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
-;; Version: 0.3.1
+;; Version: 0.4.0
 ;; Package-Requires: ((emacs "27.2"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -258,7 +258,8 @@ format is always [[denote:IDENTIFIER]]."
   (let (matches)
     (save-excursion
       (goto-char (point-min))
-      (while (re-search-forward regexp nil t)
+      (while (or (re-search-forward regexp nil t)
+                 (re-search-forward denote-link--regexp-plain nil t))
         (push (match-string-no-properties 1) matches)))
     matches))
 
@@ -356,6 +357,7 @@ then you do not need this.
 
 When called from Lisp, with optional BEG and END as buffer
 positions, limit the process to the region in-between."
+  (interactive)
   (when (and (not (derived-mode-p 'org-mode)) (denote--current-file-is-note-p))
     (save-excursion
       (goto-char (or beg (point-min)))
@@ -486,15 +488,70 @@ inserts links with just the identifier."
 
 (defalias 'denote-link-insert-links-matching-regexp (symbol-function 'denote-link-add-links))
 
+;;;; Links from Dired marks
+
+;; NOTE 2022-07-21: I don't think we need a history for this one.
+(defun denote-link--buffer-prompt (buffers)
+  "Select buffer from BUFFERS visiting Denote notes."
+  (completing-read
+   "Select note buffer: "
+   (denote--completion-table 'buffer buffers)
+   nil t))
+
+(declare-function dired-get-marked-files "dired" (&optional localp arg filter distinguish-one-marked error))
+
+(defun denote-link--map-over-notes ()
+  "Return list of `denote--only-note-p' from Dired marked items."
+  (delq nil
+        (mapcar
+	     (lambda (f)
+           (when (and (denote--only-note-p f)
+                      (denote--dir-in-denote-directory-p default-directory))
+             f))
+         (dired-get-marked-files))))
+
+;;;###autoload
+(defun denote-link-dired-marked-notes (files buffer &optional id-only)
+  "Insert Dired marked FILES as links in BUFFER.
+
+FILES are Denote notes, meaning that they have our file-naming
+scheme, are writable/regular files, and use the appropriate file
+type extension (per `denote-file-type').  Furthermore, the marked
+files need to be inside the variable `denote-directory' or one of
+its subdirectories.  No other file is recognised (the list of
+marked files ignores whatever does not count as a note for our
+purposes).
+
+The BUFFER is one which visits a Denote note file.  If there are
+multiple buffers, prompt with completion for one among them.  If
+there isn't one, throw an error.
+
+With optional ID-ONLY as a prefix argument, insert links with
+just the identifier (same principle as with `denote-link').
+
+This command is meant to be used from a Dired buffer."
+  (interactive
+   (list
+    (denote-link--map-over-notes)
+    (let ((buffers (denote--buffer-file-names)))
+      (get-buffer
+       (cond
+        ((null buffers)
+         (user-error "No buffers visiting Denote notes"))
+        ((eq (length buffers) 1)
+         (car buffers))
+        (t
+         (denote-link--buffer-prompt buffers)))))
+    current-prefix-arg)
+   dired-mode)
+  (if (null files)
+      (user-error "No note files to link to")
+    (when (y-or-n-p (format "Create links at point in %s?" buffer))
+      (with-current-buffer buffer
+        (insert (denote-link--prepare-links files (buffer-file-name) id-only))
+        (denote-link-buttonize-buffer)))))
+
 ;;;; Register `denote:' custom Org hyperlink
-
-(autoload 'org-link-set-parameters "ol.el")
-
-(org-link-set-parameters
- "denote"
- :follow #'denote-link-ol-follow
- :complete #'denote-link-ol-complete
- :export #'denote-link-ol-export)
 
 (declare-function org-link-open-as-file "ol" (path arg))
 
@@ -551,6 +608,23 @@ backend."
      ((eq format 'ascii) (format "[%s] <denote:%s>" desc path)) ; NOTE 2022-06-16: May be tweaked further
      ((eq format 'md) (format "[%s](%s.md)" desc p))
      (t path))))
+
+;; The `eval-after-load' part with the quoted lambda is adapted from
+;; Elfeed: <https://github.com/skeeto/elfeed/>.
+
+;;;###autoload
+(eval-after-load 'org
+  `(funcall
+    ;; The extra quote below is necessary because uncompiled closures
+    ;; do not evaluate to themselves. The quote is harmless for
+    ;; byte-compiled function objects.
+    ',(lambda ()
+        (with-no-warnings
+          (org-link-set-parameters
+           "denote"
+           :follow #'denote-link-ol-follow
+           :complete #'denote-link-ol-complete
+           :export #'denote-link-ol-export)))))
 
 (provide 'denote-link)
 ;;; denote-link.el ends here

@@ -6,7 +6,7 @@
 ;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
 ;; URL: https://git.sr.ht/~protesilaos/denote
 ;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
-;; Version: 0.3.1
+;; Version: 0.4.0
 ;; Package-Requires: ((emacs "27.2"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -66,9 +66,9 @@
   "String with format specifiers for `org-capture-templates'.
 Check that variable's documentation for the details.
 
-This string is appended to new notes in the `denote-org-capture'
-function.  Every new note has the standard front matter we
-define."
+The string can include arbitrary text.  It is appended to new
+notes via the `denote-org-capture' function.  Every new note has
+the standard front matter we define."
   :type 'string
   :group 'denote-org-capture)
 
@@ -83,14 +83,17 @@ expanded with the usual specifiers or strings that
 Note that this function ignores the `denote-file-type': it always
 sets the Org file extension for the created note to ensure that
 the capture process works as intended, especially for the desired
-output of the `denote-org-capture-specifiers'.
+output of the `denote-org-capture-specifiers' (which can include
+arbitrary text).
 
 Consult the manual for template samples."
   (let ((title (denote--title-prompt))
         (keywords (denote--keywords-prompt))
         (denote-file-type nil)) ; we enforce the .org extension for `org-capture'
     (denote--path title keywords)
-    (denote--prepare-note denote-last-title denote-last-keywords denote-last-path)
+    (setq denote-last-front-matter (denote--file-meta-header
+                                    title (denote--date nil) keywords
+                                    (format-time-string denote--id-format nil)))
     (denote--keywords-add-to-history denote-last-keywords)
     (concat denote-last-front-matter denote-org-capture-specifiers)))
 

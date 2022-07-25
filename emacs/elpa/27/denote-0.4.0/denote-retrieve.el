@@ -6,7 +6,7 @@
 ;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
 ;; URL: https://git.sr.ht/~protesilaos/denote
 ;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
-;; Version: 0.3.1
+;; Version: 0.4.0
 ;; Package-Requires: ((emacs "27.2"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -45,6 +45,10 @@
   "^\\(?:#\\+\\)?\\(?:date\\)\\s-*[:=]"
   "Regular expression for date key.")
 
+(defconst denote-retrieve--keywords-front-matter-key-regexp
+  "^\\(?:#\\+\\)?\\(?:tags\\|filetags\\)\\s-*[:=]"
+  "Regular expression for keywords key.")
+
 (defun denote-retrieve--filename-identifier (file)
   "Extract identifier from FILE name."
   (if (file-exists-p file)
@@ -56,19 +60,20 @@
 (defun denote-retrieve--search (file key-regexp &optional key)
   "Return value of KEY-REGEXP key in current buffer from FILE.
 If optional KEY is non-nil, return the key instead."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char (point-min))
-        (when (re-search-forward key-regexp nil t 1)
-          (if key
-              (match-string-no-properties 0)
-            (let ((trims "[ \t\n\r\"']+"))
-              (string-trim
-               (buffer-substring-no-properties (point) (point-at-eol))
-               trims trims))))))))
+  (when (denote--only-note-p file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (save-excursion
+        (save-restriction
+          (widen)
+          (goto-char (point-min))
+          (when (re-search-forward key-regexp nil t 1)
+            (if key
+                (match-string-no-properties 0)
+              (let ((trims "[ \t\n\r\"']+"))
+                (string-trim
+                 (buffer-substring-no-properties (point) (point-at-eol))
+                 trims trims)))))))))
 
 (defun denote-retrieve--value-title (file &optional key)
   "Return title value from FILE.
@@ -79,6 +84,11 @@ If optional KEY is non-nil, return the key instead."
   "Return date value from FILE.
 If optional KEY is non-nil, return the key instead."
   (denote-retrieve--search file denote-retrieve--date-front-matter-key-regexp key))
+
+(defun denote-retrieve--value-keywords (file &optional key)
+  "Return keywords value from FILE.
+If optional KEY is non-nil, return the key instead."
+  (denote-retrieve--search file denote-retrieve--keywords-front-matter-key-regexp key))
 
 (defun denote-retrieve--read-file-prompt ()
   "Prompt for regular file in variable `denote-directory'."
