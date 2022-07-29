@@ -389,6 +389,27 @@ if [[ -n "$SSH_CONNECTION" || -n "$TMUX" ]]; then
 fi
 
 
+### Deal with ssh-agent (trying to stick to POSIX shell here):
+if [ -z "${SSH_AUTH_SOCK}" ]; then
+    if [ "${UNAME}" = "Darwin" ]; then
+        # launchd manages ssh-agent on Mac, but individual shells can sometimes lose SSH_AUTH_SOCK
+        ssh_agent_pid=$(ps uwx | grep "${USER}" | grep ssh-agent | grep -v grep | awk '{print $2}')
+        if [ -z ${ssh_agent_pid} ]; then
+            # try to restart ssh-agent
+            launchctl start gui/$(id -u)/com.openssh.ssh-agent
+            ssh_agent_pid=$(ps uwx | grep "${USER}" | grep ssh-agent | grep -v grep | awk '{print $2}')
+        fi
+        export SSH_AUTH_SOCK=$(lsof -p ${ssh_agent_pid} | grep com.apple.launchd | grep Listeners | awk '{print $8}' | head -1)
+    else
+        ssh_agent_sock_file="${HOME}/.ssh/ssh-agent-$(hostname -s)-$(id -un).sock"
+        if [ ! -S "${ssh_agent_sock_file}" ]; then
+            ssh-agent -s -a "${ssh_agent_sock_file}" > /dev/null
+        fi
+        export SSH_AUTH_SOCK="${ssh_agent_sock_file}"
+    fi
+fi
+
+
 ### pskill <process name>
 function pskill() {
    kill -9 $(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')
