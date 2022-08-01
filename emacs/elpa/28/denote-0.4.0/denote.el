@@ -6,7 +6,7 @@
 ;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
 ;; URL: https://git.sr.ht/~protesilaos/denote
 ;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
-;; Version: 0.3.1
+;; Version: 0.4.0
 ;; Package-Requires: ((emacs "27.2"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -96,7 +96,7 @@
 ;;; Code:
 
 (require 'seq)
-(eval-when-compile (require 'cl-lib))
+(eval-when-compile (require 'subr-x))
 
 (defgroup denote ()
   "Simple notes with an efficient file-naming scheme."
@@ -181,7 +181,7 @@ The value is a list of symbols, which includes any of the following:
   file names are included in the list of candidates.  The
   `keywords' prompt uses `completing-read-multiple', meaning that
   it can accept multiple keywords separated by a comma (or
-  whatever the value of `crm-sepator' is).
+  whatever the value of `crm-separator' is).
 
 - `file-type': Prompts with completion for the file type of the
   new note.  Available candidates are those specified in the user
@@ -308,24 +308,32 @@ are described in the doc string of `format-time-string'."
 
 ;;;; Main variables
 
+;; For character classes, evaluate: (info "(elisp) Char Classes")
 (defconst denote--id-format "%Y%m%dT%H%M%S"
   "Format of ID prefix of a note's filename.")
 
 (defconst denote--id-regexp "\\([0-9]\\{8\\}\\)\\(T[0-9]\\{6\\}\\)"
   "Regular expression to match `denote--id-format'.")
 
-(defconst denote--title-regexp "--\\([0-9A-Za-z-]*\\)"
-  "Regular expression to match keywords.")
+(defconst denote--title-regexp "--\\([[:alnum:][:nonascii:]-]*\\)"
+  "Regular expression to match the title field.")
 
-(defconst denote--keywords-regexp "__\\([0-9A-Za-z_-]*\\)"
+(defconst denote--keywords-regexp "__\\([[:alnum:][:nonascii:]_-]*\\)"
   "Regular expression to match keywords.")
 
 (defconst denote--extension-regexp "\\.\\(org\\|md\\|txt\\)"
   "Regular expression to match supported Denote extensions.")
 
 (defconst denote--punctuation-regexp "[][{}!@#$%^&*()_=+'\"?,.\|;:~`‘’“”/]*"
-  "Regular expression of punctionation that should be removed.
+  "Punctionation that is removed from file names.
 We consider those characters illigal for our purposes.")
+
+(defvar denote-punctuation-excluded-extra-regexp nil
+  "Additional punctuation that is removed from file names.
+This variable is for advanced users who need to extend the
+`denote--punctuation-regexp'.  Once we have a better
+understanding of what we should be omitting, we will update
+things accordingly.")
 
 (defvar denote-last-path nil "Store last path.")
 (defvar denote-last-title nil "Store last title.")
@@ -353,7 +361,9 @@ We consider those characters illigal for our purposes.")
 
 (defun denote--slug-no-punct (str)
   "Convert STR to a file name slug."
-  (replace-regexp-in-string denote--punctuation-regexp "" str))
+  (replace-regexp-in-string
+   (concat denote--punctuation-regexp denote-punctuation-excluded-extra-regexp)
+   "" str))
 
 (defun denote--slug-hyphenate (str)
   "Replace spaces with hyphens in STR.
@@ -436,27 +446,22 @@ names that are relative to the variable `denote-directory'."
        (lambda (s) (denote--file-name-relative-to-denote-directory s))
        files))))
 
-(declare-function cl-find-if "cl-seq" (cl-pred cl-list &rest cl-keys))
-
 (defun denote--get-note-path-by-id (id)
   "Return the absolute path of ID note in variable `denote-directory'."
-  (cl-find-if
+  (seq-find
    (lambda (f)
      (string-prefix-p id (file-name-nondirectory f)))
    (denote--directory-files :absolute)))
 
-(defun denote--directory-files-matching-regexp (regexp &optional no-check-current)
-  "Return list of files matching REGEXP.
-With optional NO-CHECK-CURRENT do not test if the current file is
-part of the list."
+(defun denote--directory-files-matching-regexp (regexp)
+  "Return list of files matching REGEXP."
   (delq
    nil
    (mapcar
     (lambda (f)
       (when (and (denote--only-note-p f)
                  (string-match-p regexp f)
-                 (or no-check-current
-                     (not (string= (file-name-nondirectory (buffer-file-name)) f))))
+                 (not (string= (file-name-nondirectory (buffer-file-name)) f)))
         f))
     (denote--directory-files))))
 
@@ -490,9 +495,10 @@ existing notes and combine them into a list with
 
 (defun denote--keywords-crm (keywords)
   "Use `completing-read-multiple' for KEYWORDS."
-  (completing-read-multiple
-   "File keyword: " keywords
-   nil nil nil 'denote--keyword-history))
+  (delete-dups
+   (completing-read-multiple
+    "File keyword: " keywords
+    nil nil nil 'denote--keyword-history)))
 
 (defun denote--keywords-prompt ()
   "Prompt for one or more keywords.
@@ -564,7 +570,7 @@ be `toml' or, in the future, some other spec that needss special
 treatment)."
   (let ((kw (denote--sluggify-keywords keywords)))
     (pcase type
-      ('toml (format "[%s]" (denote--map-quote-downcase kw)))
+      ('markdown-toml (format "[%s]" (denote--map-quote-downcase kw)))
       (_ (mapconcat #'downcase kw "  ")))))
 
 (defvar denote-toml-front-matter
@@ -633,7 +639,7 @@ TITLE, DATE, KEYWORDS, FILENAME, ID are all strings which are
 Optional FILETYPE is one of the values of `denote-file-type',
 else that variable is used."
   (let ((kw-space (denote--file-meta-keywords keywords))
-        (kw-toml (denote--file-meta-keywords keywords 'toml)))
+        (kw-toml (denote--file-meta-keywords keywords 'markdown-toml)))
     (pcase (or filetype denote-file-type)
       ('markdown-toml (format denote-toml-front-matter title date kw-toml id))
       ('markdown-yaml (format denote-yaml-front-matter title date kw-space id))
@@ -686,23 +692,21 @@ With optional DATE, use it else use the current one."
      (t
       (denote--date-org-timestamp date)))))
 
-(defun denote--prepare-note (title keywords &optional path date id)
-  "Use TITLE and KEYWORDS to prepare new note file.
-Use optional PATH, else create it with `denote--path'.  When PATH
-is provided, refrain from writing to a buffer (useful for org
-capture).
+(defun denote--prepare-note (title keywords date id directory file-type)
+  "Prepare a new note file.
 
-Optional DATE is passed to `denote--date', while optional ID is
-used to construct the path's identifier."
-  (let* ((default-directory (denote-directory))
-         (p (or path (denote--path title keywords default-directory id)))
-         (buffer (unless path (find-file p)))
+Arguments TITLE, KEYWORDS, DATE, ID, DIRECTORY, and FILE-TYPE
+should be valid for note creation."
+  (let* ((default-directory directory)
+         (denote-file-type file-type)
+         (path (denote--path title keywords default-directory id))
+         (buffer (find-file path))
          (header (denote--file-meta-header
                   title (denote--date date) keywords
-                  (format-time-string denote--id-format date))))
-    (unless path
-      (with-current-buffer buffer (insert header))
-      (setq denote-last-buffer buffer))
+                  (format-time-string denote--id-format date)
+                  file-type)))
+    (with-current-buffer buffer (insert header))
+    (setq denote-last-buffer buffer)
     (setq denote-last-front-matter header)))
 
 (defvar denote--title-history nil
@@ -720,6 +724,13 @@ Optional DEFAULT-TITLE is used as the default value."
 
 ;;;;; The `denote' command
 
+(defun denote--dir-in-denote-directory-p (directory)
+  "Return DIRECTORY if in variable `denote-directory', else nil."
+  (when-let* ((dir directory)
+              ((string-prefix-p (expand-file-name (denote-directory))
+                                (expand-file-name dir))))
+    dir))
+
 ;;;###autoload
 (defun denote (&optional title keywords file-type subdirectory date)
   "Create a new note with the appropriate metadata and file name.
@@ -736,9 +747,11 @@ When called from Lisp, all arguments are optional.
 
 - FILE-TYPE is a symbol among those described in `denote-file-type'.
 
-- SUBDIRECTORY is a string representing the path to either the value of
-  the variable `denote-directory' or a subdirectory thereof.  The
-  subdirectory must exist: Denote will not create it.
+- SUBDIRECTORY is a string representing the path to either the
+  value of the variable `denote-directory' or a subdirectory
+  thereof.  The subdirectory must exist: Denote will not create
+  it.  If SUBDIRECTORY does not resolve to a valid path, the
+  variable `denote-directory' is used instead.
 
 - DATE is a string representing a date like 2022-06-30 or a date
   and time like 2022-06-16 14:30.  A nil value or an empty string
@@ -753,14 +766,16 @@ When called from Lisp, all arguments are optional.
          ('subdirectory (aset args 3 (denote--subdirs-prompt)))
          ('date (aset args 4 (denote--date-prompt)))))
      (append args nil)))
-  (let* ((denote-file-type (denote--file-type-symbol (or file-type denote-file-type)))
+  (let* ((file-type (denote--file-type-symbol (or file-type denote-file-type)))
          (date (if (or (null date) (string-empty-p date))
                    (current-time)
                  (denote--valid-date date)))
          (id (format-time-string denote--id-format date))
-         (denote-directory (or subdirectory (denote-directory))))
+         (directory (if (denote--dir-in-denote-directory-p subdirectory)
+                        (file-name-as-directory subdirectory)
+                      (denote-directory))))
     (denote--barf-duplicate-id id)
-    (denote--prepare-note (or title "") keywords nil date id)
+    (denote--prepare-note (or title "") keywords date id directory file-type)
     (denote--keywords-add-to-history keywords)))
 
 (defalias 'denote-create-note (symbol-function 'denote))
@@ -793,7 +808,7 @@ here for clarity."
   "Create note while prompting for a file type.
 
 This is the equivalent to calling `denote' when `denote-prompts'
-is set to \\'(file-type title keywords)."
+is set to \\='(file-type title keywords)."
   (declare (interactive-only t))
   (interactive)
   (let ((denote-prompts '(file-type title keywords)))
@@ -812,22 +827,56 @@ is set to \\'(file-type title keywords)."
    "DATE and TIME for note (e.g. 2022-06-16 14:30): "
    nil 'denote--date-history))
 
+(defun denote--date-add-current-time (date)
+  "Add current time to DATE, if necessary.
+The idea is to turn 2020-01-15 into 2020-01-15 16:19 so that the
+hour and minute component is not left to 00:00.
+
+This reduces the burden on the user who would otherwise need to
+input that value in order to avoid the error of duplicate
+identifiers.
+
+It also addresses a difference between Emacs 28 and Emacs 29
+where the former does not read dates without a time component."
+  (if (<= (length date) 10)
+      (format "%s %s" date (format-time-string "%H:%M:%S" (current-time)))
+    date))
+
 (defun denote--valid-date (date)
   "Return DATE if parsed by `date-to-time', else signal error."
-  (date-to-time date))
+  (let ((datetime (denote--date-add-current-time date)))
+    (date-to-time datetime)))
+
+(defun denote--buffer-file-names ()
+  "Return file names of active buffers."
+  (mapcar
+   (lambda (name)
+     (file-name-nondirectory name))
+   (seq-filter
+    (lambda (name) (denote--only-note-p name))
+    (delq nil
+          (mapcar
+           (lambda (buf)
+             (buffer-file-name buf))
+           (buffer-list))))))
 
 ;; This should only be relevant for `denote-date', otherwise the
 ;; identifier is always unique (we trust that no-one writes multiple
 ;; notes within fractions of a second).
-(defun denote--id-exists-p (identifier no-check-current)
-  "Return non-nil if IDENTIFIER already exists.
-NO-CHECK-CURRENT passes the appropriate flag to
-`denote--directory-files-matching-regexp'."
-  (denote--directory-files-matching-regexp identifier no-check-current))
+(defun denote--id-exists-p (identifier)
+  "Return non-nil if IDENTIFIER already exists."
+  (let ((current-buffer-name (when (buffer-file-name)
+                               (file-name-nondirectory (buffer-file-name)))))
+    (or (seq-some (lambda (file)
+                    (string-match-p (concat "\\`" identifier) file))
+                  (delete current-buffer-name (denote--buffer-file-names)))
+        (delete current-buffer-name
+                (denote--directory-files-matching-regexp
+                 (concat "\\`" identifier))))))
 
 (defun denote--barf-duplicate-id (identifier)
   "Throw a user-error if IDENTIFIER already exists else return t."
-  (if (denote--id-exists-p identifier :no-check-current)
+  (if (denote--id-exists-p identifier)
       (user-error "`%s' already exists; aborting new note creation" identifier)
     t))
 
@@ -839,7 +888,7 @@ The date can be in YEAR-MONTH-DAY notation like 2022-06-30 or
 that plus the time: 2022-06-16 14:30
 
 This is the equivalent to calling `denote' when `denote-prompts'
-is set to \\'(date title keywords)."
+is set to \\='(date title keywords)."
   (declare (interactive-only t))
   (interactive)
   (let ((denote-prompts '(date title keywords)))
@@ -889,7 +938,7 @@ Available candidates include the value of the variable
 `denote-directory' and any subdirectory thereof.
 
 This is equivalent to calling `denote' when `denote-prompts' is set to
-\\'(subdirectory title keywords)."
+\\='(subdirectory title keywords)."
   (declare (interactive-only t))
   (interactive)
   (let ((denote-prompts '(subdirectory title keywords)))
