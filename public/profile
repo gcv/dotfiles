@@ -41,11 +41,13 @@ if [ -z "${SSH_AUTH_SOCK}" ]; then
         fi
         export SSH_AUTH_SOCK=$(lsof -p ${ssh_agent_pid} | grep com.apple.launchd | grep Listeners | awk '{print $8}' | head -1)
     else
-        ssh_agent_sock_file="${HOME}/.ssh/ssh-agent-$(hostname -s)-$(id -un).sock"
-        if [ ! -S "${ssh_agent_sock_file}" ]; then
-            ssh-agent -s -a "${ssh_agent_sock_file}" > /dev/null
+        if $(command -v ssh-agent); then
+            ssh_agent_sock_file="${HOME}/.ssh/ssh-agent-$(hostname -s)-$(id -un).sock"
+            if [ ! -S "${ssh_agent_sock_file}" ]; then
+                ssh-agent -s -a "${ssh_agent_sock_file}" > /dev/null
+            fi
+            export SSH_AUTH_SOCK="${ssh_agent_sock_file}"
         fi
-        export SSH_AUTH_SOCK="${ssh_agent_sock_file}"
     fi
 fi
 
