@@ -20,6 +20,12 @@
 (defvar dirvish-subtree--prefix-unit-len 2)
 (defvar-local dirvish-subtree--overlays nil "Subtree overlays in this buffer.")
 
+(defcustom dirvish-subtree-listing-switches nil
+  "Listing SWITCHES used in subtrees.
+The value may be a string of options or nil which means the
+working switches of current buffer will be used."
+  :type '(choice symbol string) :group 'dirvish)
+
 (defcustom dirvish-subtree-line-prefix "  "
   "A string put into each nested subtree.
 The prefix is repeated \"depth\" times."
@@ -86,8 +92,13 @@ LOCALP is the arg for `dired-current-directory', which see."
   "Advice for FN-ARGS `dired-get-subdir'."
   (unless (dirvish-subtree--parent) (apply fn-args)))
 
-(advice-add 'dired-current-directory :around #'dirvish-curr-dir-ad)
-(advice-add 'dired-get-subdir :around #'dirvish-get-subdir-ad)
+(setq dirvish-advice-alist
+      (append dirvish-advice-alist
+              '((advice dired-current-directory dirvish-curr-dir-ad   :around)
+                (advice dired-get-subdir        dirvish-get-subdir-ad :around))))
+(when dirvish-override-dired-mode
+  (dirvish-override-dired-mode -1)
+  (dirvish-override-dired-mode 1))
 
 (defun dirvish-subtree--goto-file (filename)
   "Go to line describing FILENAME."
@@ -127,13 +138,15 @@ LOCALP is the arg for `dired-current-directory', which see."
 
 (defun dirvish-subtree--readin (dirname)
   "Readin the directory DIRNAME as a string."
-  (let ((switches (or dired-actual-switches dired-listing-switches)))
+  (let* ((switches (or dirvish-subtree-listing-switches
+                       dired-actual-switches
+                       dired-listing-switches))
+         (trim (if (member "--all" (split-string switches)) 3 1)))
     (with-temp-buffer
-      (insert-directory (file-name-as-directory dirname)
-                        (concat switches " -A") nil t)
+      (insert-directory (file-name-as-directory dirname) switches nil t)
       (delete-char -1)
       (goto-char (point-min))
-      (delete-region (point) (progn (forward-line 1) (point)))
+      (delete-region (point) (progn (forward-line trim) (point)))
       (goto-char (point-min))
       (unless (looking-at-p "  ")
         (let ((indent-tabs-mode nil))
@@ -142,13 +155,7 @@ LOCALP is the arg for `dired-current-directory', which see."
 
 (defun dirvish-subtree--insert ()
   "Insert subtree under this directory."
-  (let* ((filename (dired-get-filename))
-         (dirname (pcase (progn (back-to-indentation) (char-after)) ; first char in priv
-                    (108 (let ((true (file-truename filename))) ; "l" = 108 = symlink
-                           (prog1 true (unless (file-directory-p true)
-                                         (user-error "Not a directory")))))
-                    (100 filename) ; "d" = 100 = directory
-                    (_ (user-error "Not a directory"))))
+  (let* ((dirname (dired-get-filename))
          (listing (dirvish-subtree--readin dirname))
          buffer-read-only beg end)
     (dirvish--print-directory (dirvish-prop :tramp) (current-buffer) dirname t)

@@ -221,7 +221,6 @@ Each function takes DV, ENTRY and BUFFER as its arguments.")
     (advice burly-open-bookmark               dirvish-burly-open-ad          :around)
     (advice find-file                         dirvish-find-file-ad           :around)
     (advice recentf-track-opened-file         dirvish-ignore-ad              :around)
-    (advice recentf-track-closed-file         dirvish-ignore-ad              :around)
     (advice winner-save-old-configurations    dirvish-ignore-ad              :around)
     (advice meow--update-cursor               dirvish-ignore-ad              :around)
     (advice flycheck-buffer                   dirvish-ignore-ad              :around)
@@ -338,7 +337,10 @@ ALIST is window arguments passed to `window--display-buffer'."
 
 (defun dirvish--kill-buffer (buffer)
   "Kill BUFFER when it is a live one."
-  (and (buffer-live-p buffer) (kill-buffer buffer)))
+  (and (buffer-live-p buffer)
+       (cl-letf (((symbol-function 'undo-tree-save-history-from-hook) #'ignore)
+                 ((symbol-function 'recentf-track-closed-file) #'ignore))
+         (kill-buffer buffer))))
 
 (defun dirvish--get-project-root ()
   "Get root path of current project."
@@ -744,9 +746,8 @@ DIRNAME and SWITCHES are the same args in `dired'."
 (defun dirvish-dired-other-frame-ad (dirname &optional switches)
   "Override `dired-other-frame' command.
 DIRNAME and SWITCHES are the same args in `dired'."
-  (let (after-focus-change-function)
-    (switch-to-buffer-other-frame (dirvish--util-buffer))
-    (dirvish-new t :path dirname :ls-switches switches :layout dirvish-default-layout)))
+  (switch-to-buffer-other-frame (dirvish--util-buffer))
+  (dirvish-new t :path dirname :ls-switches switches :layout dirvish-default-layout))
 
 (defun dirvish-dired-jump-ad (&optional other-window file-name)
   "Override `dired-jump' command.
@@ -755,9 +756,7 @@ OTHER-WINDOW and FILE-NAME are the same args in `dired-jump'."
     (and other-window (switch-to-buffer-other-window (dirvish--util-buffer)))
     (if (dirvish-curr)
         (dirvish-find-entry-ad file-name)
-      (dirvish--reuse-session file-name)
-      (unless (dirvish-prop :dv)
-        (dirvish-new t :path file-name)))))
+      (or (dirvish--reuse-session file-name) (dirvish-new t :path file-name)))))
 
 (defun dirvish-find-entry-ad (&optional entry)
   "Find file in dirvish buffer.
@@ -765,11 +764,12 @@ ENTRY can be a filename or a string with format of
 `dirvish-fd-bufname' used to query or create a `fd' result
 buffer, it defaults to filename under the cursor when it is nil."
   (let* ((entry (or entry (dired-get-filename nil t)))
-         (buffer (dirvish--find-entry (dirvish-curr) entry)))
+         (dv (or (dirvish-curr) (user-error "Not in a dirvish session")))
+         (buffer (dirvish--find-entry dv entry)))
     (if buffer
         (dirvish-with-no-dedication
          (switch-to-buffer buffer)
-         (when-let ((dv (dirvish-curr))) (dirvish--build dv)))
+         (dirvish--build dv))
       (find-file entry))))
 
 (defun dirvish-up-directory-ad (&optional other-window)
@@ -900,14 +900,15 @@ FILENAME and WILDCARD are their args."
 
 (defun dirvish--preview-inhibit-long-line (file)
   "Preview FILE unless it contains long lines."
-  (let* ((vc-follow-symlinks t)
-         (buf (find-file-noselect file t)))
-    (with-current-buffer buf
-      (if (funcall so-long-predicate)
-          (progn
-            (kill-buffer buf)
-            `(info . ,(format "File %s contains very long lines, preview skipped." file)))
-        `(buffer . ,buf)))))
+  (cl-letf (((symbol-function 'undo-tree-save-history-from-hook) #'ignore))
+    (let* ((vc-follow-symlinks t)
+           (buf (find-file-noselect file t)))
+      (with-current-buffer buf
+        (if (funcall so-long-predicate)
+            (let ((fmt "File %s contains very long lines, preview skipped."))
+              (kill-buffer buf)
+              `(info . ,(format fmt file)))
+          `(buffer . ,buf))))))
 
 (defun dirvish--preview-fill-string-sentinel (proc _exitcode)
   "A sentinel for dirvish preview process.
@@ -1156,7 +1157,6 @@ Dirvish sets `revert-buffer-function' to this function."
            (let (dired-hide-details-mode-hook)
              (dired-hide-details-mode t))))
     (dirvish--render-attributes dv)
-    (dirvish-prop :dv dv)
     (setq mode-line-format
           (cond ((or layout (eq dirvish-mode-line-position 'disable)) nil)
                 (t (dv-mode-line-format dv))))
@@ -1164,7 +1164,6 @@ Dirvish sets `revert-buffer-function' to this function."
           (cond ((or layout (eq dirvish-header-line-position 'disable)) nil)
                 ((dirvish-prop :fd-header) (dirvish-prop :fd-header))
                 (t (dv-header-line-format dv)))))
-  (add-hook 'window-buffer-change-functions #'dirvish-focus-change-h nil t)
   (add-hook 'post-command-hook #'dirvish-update-body-h nil t)
   (add-hook 'kill-buffer-hook #'dirvish-kill-buffer-h nil t)
   (run-hooks 'dirvish-mode-hook)
@@ -1207,6 +1206,7 @@ If the buffer is not available, create it with `dired-noselect'."
                (dirvish--init-dired-buffer)
                (let* ((trampp (tramp-tramp-file-p entry))
                       (vec (and trampp (tramp-dissect-file-name entry))))
+                 (dirvish-prop :dv dv)
                  (dirvish-prop :tramp vec)
                  (dirvish-prop :child (or bname entry))
                  (unless trampp
