@@ -336,6 +336,9 @@ otherwise it defaults to `project-current'.
 (autoload 'dirvish-subtree-up "dirvish-subtree" "\
 Jump to beginning of current subtree." t nil)
 
+(autoload 'dirvish-subtree-remove "dirvish-subtree" "\
+Remove subtree at point." t nil)
+
 (autoload 'dirvish-subtree-clear "dirvish-subtree" "\
 Clear all subtrees in the buffer." t nil)
 
