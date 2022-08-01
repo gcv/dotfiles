@@ -6,7 +6,7 @@
 ;; Keywords: help
 ;; URL: https://github.com/astoff/devdocs.el
 ;; Package-Requires: ((emacs "27.1"))
-;; Version: 0.4
+;; Version: 0.5
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@
 
 ;;; Code:
 
-(require 'org-src)
 (require 'seq)
 (require 'shr)
 (require 'url-expand)
@@ -89,6 +88,9 @@ name and a count."
   "Whether to fontify code snippets inside pre tags.
 Fontification is done using the `org-src' library, which see."
   :type 'boolean)
+
+(defface devdocs-code-block '((t nil))
+  "Additional face to apply to code blocks in DevDocs buffers.")
 
 (defvar devdocs-history nil
   "History of documentation entries.")
@@ -202,8 +204,10 @@ DOC is a document metadata alist."
          pages)
     (with-temp-buffer
       (url-insert-file-contents (format "%s/%s/db.json?%s" devdocs-cdn-url slug mtime))
-      (dolist (entry (let ((json-key-type 'string))
-                       (json-read)))
+      (dolist-with-progress-reporter
+          (entry (let ((json-key-type 'string))
+                   (json-read)))
+          "Installing documentation..."
         (with-temp-file (expand-file-name
                          (url-hexify-string (format "%s.html" (car entry))) temp)
           (push (car entry) pages)
@@ -277,6 +281,7 @@ DOC is a document metadata alist."
 
 (define-derived-mode devdocs-mode special-mode "DevDocs"
   "Major mode for viewing DevDocs documents."
+  :interactive nil
   (setq-local
    browse-url-browser-function 'devdocs--browse-url
    buffer-undo-list t
@@ -421,10 +426,22 @@ Interactively, read a page name with completion."
 (defun devdocs--shr-tag-pre (dom)
   "Insert and fontify pre-tag represented by DOM."
   (let ((start (point)))
-    (shr-tag-pre dom)
-    (when-let ((lang (and devdocs-fontify-code-blocks
-                          (dom-attr dom 'data-language))))
-      (org-src-font-lock-fontify-block (downcase lang) start (point)))))
+    (if-let ((lang (and devdocs-fontify-code-blocks
+                        (dom-attr dom 'data-language)))
+             (mode (or (cdr (assoc lang '(("cpp" . c++-mode)
+                                          ("shell" . sh-mode))))
+                       (intern (concat lang "-mode"))))
+             (buffer (and (fboundp mode) (current-buffer))))
+        (insert
+         (with-temp-buffer
+           (shr-tag-pre dom)
+           (let ((inhibit-message t)
+	         (message-log-max nil))
+             (ignore-errors (delay-mode-hooks (funcall mode)))
+             (font-lock-ensure))
+           (buffer-string)))
+      (shr-tag-pre dom))
+    (add-face-text-property start (point) 'devdocs-code-block t)))
 
 (defun devdocs--render (entry)
   "Render a DevDocs documentation entry, returning a buffer.
@@ -436,9 +453,9 @@ fragment part of ENTRY.path."
     (unless (eq major-mode 'devdocs-mode)
       (devdocs-mode))
     (let-alist entry
-      (let ((buffer-read-only nil)
-            (shr-external-rendering-functions (cons '(pre . devdocs--shr-tag-pre)
-                                                    shr-external-rendering-functions))
+      (let ((inhibit-read-only t)
+            (shr-external-rendering-functions `((pre . devdocs--shr-tag-pre)
+                                                ,@shr-external-rendering-functions))
             (file (expand-file-name (format "%s/%s.html"
                                             .doc.slug
                                             (url-hexify-string (devdocs--path-file .path)))
@@ -453,6 +470,7 @@ fragment part of ENTRY.path."
       (set-buffer-modified-p nil)
       (setq-local devdocs-current-docs (list .doc.slug))
       (push entry devdocs--stack)
+      (setq-local list-buffers-directory (format-mode-line devdocs-header-line nil nil (current-buffer)))
       (devdocs-goto-target)
       (current-buffer))))
 
@@ -566,6 +584,16 @@ If INITIAL-INPUT is not nil, insert it into the minibuffer."
   "Read a document from the first page."
   (interactive (list (devdocs--read-document "Peruse documentation: ")))
   (pop-to-buffer (devdocs-goto-page doc 0)))
+
+;; Don't show devdocs-mode specific commands in M-x
+(dolist (sym '(devdocs-goto-target devdocs-go-back devdocs-go-forward
+               devdocs-next-entry devdocs-previous-entry devdocs-goto-page
+               devdocs-first-page devdocs-last-page devdocs-next-page
+               devdocs-previous-page devdocs-copy-url))
+  (put sym 'completion-predicate (lambda (_ buffer)
+                                   (provided-mode-derived-p
+                                    (buffer-local-value 'major-mode buffer)
+                                    'devdocs-mode))))
 
 ;;; Compatibility with the old devdocs package
 
