@@ -6,8 +6,8 @@
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
 ;; URL: https://codeberg.org/ideasman42/emacs-undo-fu
-;; Package-Version: 20220710.351
-;; Package-Commit: 913cbb4ff3659d8537c764e56953dbb1b85e73c9
+;; Package-Version: 20220731.2326
+;; Package-Commit: b0d6eba024ac87a0aaf7fa66ae76d76f6c764d46
 ;; Version: 0.5
 ;; Package-Requires: ((emacs "25.1"))
 
@@ -133,7 +133,7 @@ Argument SUFFIX is the text to add at the start of the message.
 Optional argument BODY runs with the message suffix."
   (declare (indent 1))
   `
-  (undo-fu--with-advice 'message
+  (undo-fu--with-advice #'message
     :around
     (lambda (fn-orig arg &rest args)
       (apply fn-orig (append (list (concat arg "%s")) args (list ,suffix))))
@@ -144,11 +144,11 @@ Optional argument BODY runs with the message suffix."
   (declare (indent 1))
   `
   (let ((temp-message-list (list)))
-    (undo-fu--with-advice 'message
+    (undo-fu--with-advice #'message
       :around
       (lambda (_ &rest args)
         (when message-log-max
-          (let ((message-text (apply 'format-message args)))
+          (let ((message-text (apply #'format-message args)))
             (unless (equal message-text (car temp-message-list))
               (push message-text temp-message-list)))))
       (unwind-protect
