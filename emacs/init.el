@@ -556,7 +556,8 @@
          (gnu-ls? (= 0 (call-process ls-binary nil nil nil "--version"))))
     (setq insert-directory-program ls-binary)
     (if gnu-ls?
-        (setq dired-listing-switches "-g --almost-all --human-readable --time-style=long-iso --no-group --indicator-style=slash")
+        ;; XXX: DO NOT use --indicator-style flags with ls! They confuse dired!
+        (setq dired-listing-switches "-g --almost-all --human-readable --time-style=long-iso --no-group")
       (setq dired-listing-switches "-lAgh")
       (setq dired-use-ls-dired nil)))
 
