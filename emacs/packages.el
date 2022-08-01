@@ -212,7 +212,7 @@
 
   :config
   (setq deft-extensions '("org" "note" "txt" "tex")
-        deft-directory "~/Files/Notes/"
+        deft-directory "~/Files/Notes/Deft/"
         deft-recursive t
         deft-text-mode 'org-mode)
 
@@ -234,8 +234,8 @@
   :pin gnu
 
   :custom
-  (denote-directory (expand-file-name "~/Files/Notes/"))
-  (denote-known-keywords '("emacs" "unix"))
+  (denote-directory (expand-file-name "~/Files/Notes/Denote/"))
+  (denote-known-keywords '("emacs" "unix" "hacking" "media" "writing" "services"))
   (denote-infer-keywords t)
   (denote-sort-keywords t)
   )
