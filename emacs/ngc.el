@@ -42,8 +42,10 @@
   :commands (consult-notes consult-notes-search-in-all-notes)
   :config
   (setq consult-notes-sources
-        '(("Deft" ?f "~/Files/Notes/Deft/")
-          ("Denote" ?n "~/Files/Notes/Denote/")))
+        '(("Denote" ?n "~/Files/Notes/Denote/")
+          ("Deft" ?f "~/Files/Notes/Deft/")
+          ("Computing"  ?c "~/Files/Notes/Deft/Computing/")))
+  (add-to-list 'vertico-multiform-commands '(consult-notes buffer))
   )
 
 
