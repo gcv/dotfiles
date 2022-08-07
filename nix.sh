@@ -4,7 +4,7 @@
 NIX_HOME=/nix
 
 if [[ ! -d "${NIX_HOME}" ]]; then
-    sudo mkdir -m 0755 /nix && chown `whoami` /nix
+    sudo mkdir -m 0755 "${NIX_HOME}" && chown `whoami` "${NIX_HOME}"
     sh <(curl https://nixos.org/nix/install) --no-daemon
 fi
 
@@ -19,71 +19,78 @@ fi
 # - bat and cat
 # - exa and ls
 # - ranger and joshuto (file managers)
-nix-env -iA \
-    nixpkgs.aspell \
-    nixpkgs.autoconf \
-    nixpkgs.autojump \
-    nixpkgs.automake \
-    nixpkgs.awscli2 \
-    nixpkgs.bat \               # cat replacement
-    nixpkgs.bashInteractive \   # when needed
-    nixpkgs.bitwarden-cli \     # password manager
-    nixpkgs.cmake \
-    nixpkgs.coreutils \
-    nixpkgs.croc \              # peer-to-peer file transfer, directory capable
-    nixpkgs.ctags \
-    nixpkgs.direnv \
-    nixpkgs.exa \               # ls replacement
-    nixpkgs.exif \
-    nixpkgs.fd \                # find replacement
-    nixpkgs.fdupes \
-    nixpkgs.ffmpeg \
-    nixpkgs.findutils \
-    nixpkgs.fish \
-    nixpkgs.fzf \
-    nixpkgs.git \
-    nixpkgs.git-lfs \
-    nixpkgs.gnupg \
-    nixpkgs.htop \
-    nixpkgs.jq \
-    nixpkgs.joshuto \           # file manager
-    nixpkgs.lazydocker \        # Docker UI
-    nixpkgs.lazygit \           # Git UI
-    nixpkgs.ledger \
-    nixpkgs.libvterm-neovim \
-    nixpkgs.magic-wormhole \    # peer-to-peer file transfer
-    nixpkgs.mediainfo \
-    nixpkgs.mosh \              # may need to be built from mosh-git.nix derivation
-    nixpkgs.miniserve \         # HTTP server
-    nixpkgs.ngrok \             # expose local service over a secure tunnel
-    nixpkgs.nix-direnv \
-    nixpkgs.nmap \
-    nixpkgs.notmuch \           # mail indexer
-    nixpkgs.p7zip \
-    nixpkgs.pandoc \
-    nixpkgs.pass \              # password manager
-    nixpkgs.pastel \            # color utility
-    nixpkgs.pv \                # pipe viewer
-    nixpkgs.ranger \            # file manager
-    nixpkgs.rclone \
-    nixpkgs.restic \            # backup utility
-    nixpkgs.ripgrep \
-    nixpkgs.rlwrap \
-    nixpkgs.rsync \
-    nixpkgs.sd \                # a simpler sed for common cases
-    nixpkgs.silver-searcher \   # ag
-    nixpkgs.sqlite \
-    nixpkgs.starship \          # fancy prompt, good with fish
-    nixpkgs.tectonic \          # (La)TeX environment
-    nixpkgs.texinfo \
-    nixpkgs.tmux \
-    nixpkgs.tree \
-    nixpkgs.unrar \
-    nixpkgs.viddy \             # watch replacement
-    nixpkgs.watch \
-    nixpkgs.wget \
-    nixpkgs.xcp \               # cp replacement
-    nixpkgs.xz \
-    nixpkgs.youtube-dl \        # outdated?
-    nixpkgs.yt-dlp \            # new youtube-dl
-    nixpkgs.zsh
+packages=(
+    aspell 
+    autoconf 
+    autojump 
+    automake 
+    awscli2 
+    bat                # cat replacement
+    bashInteractive    # when needed
+    bitwarden-cli      # password manager
+    cmake 
+    coreutils 
+    croc               # peer-to-peer file transfer, directory capable
+    ctags 
+    direnv 
+    emacs-nox 
+    exa                # ls replacement
+    exif 
+    fd                 # find replacement
+    fdupes 
+    ffmpeg 
+    findutils 
+    fish 
+    fzf 
+    git 
+    git-lfs 
+    gnupg 
+    htop 
+    jq 
+    joshuto            # file manager
+    lazydocker         # Docker UI
+    lazygit            # Git UI
+    ledger 
+    libvterm-neovim 
+    magic-wormhole     # peer-to-peer file transfer
+    mediainfo 
+    mosh               # may need to be built from mosh-git.nix derivation
+    miniserve          # HTTP server
+    ngrok              # expose local service over a secure tunnel
+    nix-direnv 
+    nmap 
+    notmuch            # mail indexer
+    p7zip 
+    pandoc 
+    pass               # password manager
+    pastel             # color utility
+    pv                 # pipe viewer
+    ranger             # file manager
+    rclone 
+    restic             # backup utility
+    ripgrep 
+    rlwrap 
+    rsync 
+    sd                 # a simpler sed for common cases
+    silver-searcher    # ag
+    sqlite 
+    starship           # fancy prompt, good with fish
+    tectonic           # (La)TeX environment
+    texinfo 
+    tmux 
+    tree 
+    unrar 
+    viddy             # watch replacement
+    watch
+    wget
+    xcp               # cp replacement
+    xz
+    youtube-dl        # outdated?
+    yt-dlp            # new youtube-dl
+    zsh
+)
+
+
+for pkg in "${packages[@]}"; do
+    nix-env -iA nixpkgs."${pkg}"
+done
