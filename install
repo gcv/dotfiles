@@ -142,7 +142,7 @@ if [[ $link_all = "1" || $link_git = "1" ]]; then
 fi
 
 if [[ $link_all = "1" || $link_hammerspoon = "1" ]]; then
-    if [[ "${UNAME}" = "Darwin" ]]; then
+    if [[ $(uname) = "Darwin" ]]; then
         link "public/hammerspoon" ".hammerspoon"
     fi
 fi
