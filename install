@@ -1,23 +1,85 @@
 #!/usr/bin/env bash
 
 
-set -Eeuo pipefail
-
 readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
 basedir=$(dirname "$(readlinkf "$0")")
-script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
+[[ ${#BASH_SOURCE[@]} > 0 ]] && script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}") || script="" # set script to "" if run from stdin (i.e. curl | bash piped invocation)
 
 
-# FIXME: Rename link.sh to install
-# FIXME: Allow installing from GitHub?
-# FIXME: This should really use enhanced getopt to only link in things that are truly needed.
+set -Eeuo pipefail
 
 
+### deal with running from outside a dotfiles checkout (i.e. from curl)
+
+if [[ ${script} = "" ]]; then
+    if [[ -d "dotfiles" ]]; then
+        echo "dotfiles already exists in pwd; run install from inside it" 1>&2
+        exit 1
+    fi
+    dotfiles_tarball=$(curl --silent -w "%{filename_effective}" --location --remote-header-name --remote-name https://github.com/gcv/dotfiles/tarball/master || echo "")
+    dotfiles_tarball_extension="${dotfiles_tarball#*.}"
+    dotfiles_tarball_basename="${dotfiles_tarball%.$dotfiles_tarball_extension}"
+    tar zxf "${dotfiles_tarball}"
+    mv "${dotfiles_tarball_basename}" "dotfiles"
+    rm -f "${dotfiles_tarball}"
+    exec "dotfiles/install"
+fi
+
+
+### parameters (not supported from curl, assume --all)
+
+parse_params() {
+    # default values of variables set from params
+    link_all=1
+    link_bin=0
+    link_direnv=0
+    link_emacs=0
+    link_fish=0
+    link_git=0
+    link_hammerspoon=0
+    link_misc=0
+    link_notmuch=0
+    link_nix=0
+    link_sh=0
+    link_sqlite=0
+    link_tmux=0
+    link_zsh=0
+
+    while :; do
+        case "${1-}" in
+            -a | --all) link_all=1 ;;
+            --bin) link_all=0; link_bin=1 ;;
+            --direnv) link_all=0; link_direnv=1 ;;
+            --emacs) link_all=0; link_emacs=1 ;;
+            --fish) link_all=0; link_fish=1 ;;
+            --git) link_all=0; link_git=1 ;;
+            --hammerspoon) link_all=0; link_hammerspoon=1 ;;
+            --misc) link_all=0; link_misc=1 ;;
+            --notmuch) link_all=0; link_notmuch=1 ;;
+            --nix) link_all=0; link_nix=1 ;;
+            --sh) link_all=0; link_sh=1 ;;
+            --sqlite) link_all=0; link_sqlite=1 ;;
+            --tmux) link_all=0; link_tmux=1 ;;
+            --zsh) link_all=0; link_zsh=1 ;;
+            -?*) die "unknown option: $1" ;;
+            *) break ;;
+        esac
+        shift
+    done
+  return 0
+}
+
+parse_params "$@"
+
+
+### helper(s)
+
+# make the symlinks nice and clean, without leading absolute paths
 DOTFILES="${HOME}/.dotfiles"
 
-
 link() {
-    local from="${DOTFILES}/$1" # $(readlinkf "${basedir}/$1")
+    pushd "${HOME}" >& /dev/null
+    local from=".dotfiles/$1" # $(readlinkf "${basedir}/$1")
     local to="~/$2"
     eval to="${to}" # force ~ expansion
     if [[ -L "${to}" || -e "${to}" ]]; then
@@ -26,47 +88,96 @@ link() {
         echo "linking ${from} to ${to}"
         ln -s "${from}" "${to}"
     fi
+    popd >& /dev/null
 }
 
+
+### checks
 
 # link the checkout directory to ~/.dotfiles (i.e.: ~/.dotfiles -> /path/to/dotfiles):
 if [[ -L "${DOTFILES}" || -e "${DOTFILES}" ]]; then
     echo " -> ${DOTFILES} already exists, ignoring"
 else
+    # XXX: Do not use the link() function here!
     ln -s "${basedir}" "${DOTFILES}"
 fi
 
+# make sure ~/.config exists
+if [[ ! -d "${HOME}/.config" ]]; then
+    mkdir "${HOME}/.config"
+fi
 
-link "public/direnvrc" ".direnvrc"
-link "public/editrc" ".editrc"
-link "public/gitattributes" ".gitattributes"
-link "public/gitconfig" ".gitconfig"
-link "public/hammerspoon" ".hammerspoon"
-link "public/hushlogin" ".hushlogin"
-link "public/screenrc" ".screenrc"
-link "public/sqliterc" ".sqliterc"
-link "public/terminfo" ".terminfo"
-link "public/tmux.conf" ".tmux.conf"
+# make sure ~/.local/bin exists
+if [[ ! -d "${HOME}/.local/bin" ]]; then
+    mkdir -p "${HOME}/.local/bin"
+fi
 
-link "public/bash_profile" ".bash_profile"
-link "public/bashrc" ".bashrc"
-link "public/profile" ".profile"
 
-link "public/zshrc" ".zshrc"
+### links
 
-link "public/fish" ".config/fish"
-link "private/history-files/fish_$(hostname -s)_history" ".local/share/fish"
-link "public/starship.toml" ".config"
+if [[ $link_all = "1" || $link_bin = "1" ]]; then
+    link "public/bin/gpgd" ".local/bin/gpgd"
+    link "public/bin/fzf-history-all" ".local/bin/fzf-history-all"
+fi
 
-link "public/nix" ".config"
-link "public/nixpkgs" ".config"
+if [[ $link_all = "1" || $link_direnv = "1" ]]; then
+    link "public/direnvrc" ".direnvrc"
+fi
 
-link "emacs" ".emacs.d"
+if [[ $link_all = "1" || $link_emacs = "1" ]]; then
+    link "emacs" ".emacs.d"
+fi
 
-link "public/bin/fzf-history-all" ".local/bin"
-link "public/bin/gpgd" ".local/bin"
+if [[ $link_all = "1" || $link_fish = "1" ]]; then
+    link "public/fish" ".config/fish"
+    link "public/starship.toml" ".config"
+    if [[ -L "private" ]]; then
+        link "private/history-files/fish_$(hostname -s)_history" ".local/share/fish"
+    fi
+fi
 
-link "private/notmuch-config" ".notmuch-config"
-link "private/offlineimaprc" ".offlineimaprc"
+if [[ $link_all = "1" || $link_git = "1" ]]; then
+    link "public/gitattributes" ".gitattributes"
+    link "public/gitconfig" ".gitconfig"
+fi
 
-# TODO: Handle Unison profiles?
+if [[ $link_all = "1" || $link_hammerspoon = "1" ]]; then
+    if [[ "${UNAME}" = "Darwin" ]]; then
+        link "public/hammerspoon" ".hammerspoon"
+    fi
+fi
+
+if [[ $link_all = "1" || $link_misc = "1" ]]; then
+    link "public/editrc" ".editrc"
+    link "public/hushlogin" ".hushlogin"
+    link "public/terminfo" ".terminfo"
+fi
+
+if [[ $link_all = "1" || $link_notmuch = "1" ]]; then
+   if [[ -L "private" ]]; then
+       link "private/notmuch-config" ".notmuch-config"
+   fi
+fi
+
+if [[ $link_all = "1" || $link_nix = "1" ]]; then
+    link "public/nix" ".config"
+    link "public/nixpkgs" ".config"
+fi
+
+if [[ $link_all = "1" || $link_sh = "1" ]]; then
+    link "public/bash_profile" ".bash_profile"
+    link "public/bashrc" ".bashrc"
+    link "public/profile" ".profile"
+fi
+
+if [[ $link_all = "1" || $link_sqlite = "1" ]]; then
+    link "public/sqliterc" ".sqliterc"
+fi
+
+if [[ $link_all = "1" || $link_tmux = "1" ]]; then
+    link "public/tmux.conf" ".tmux.conf"
+fi
+
+if [[ $link_all = "1" || $link_zsh = "1" ]]; then
+    link "public/zshrc" ".zshrc"
+fi
