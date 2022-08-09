@@ -1112,7 +1112,7 @@ See `eshell-prompt-regexp'."
                       ;;"selectrum.el"
                       "../private/emacs-private.el")))
   (dolist (f startup-files)
-    (load-file (expand-file-name (concat "../" f) (file-truename user-emacs-directory)))))
+    (load-file (expand-file-name (concat "../../" f) (file-truename user-emacs-directory)))))
 
 ;; reset normal garbage collection limits (disabled in early-init.el)
 (setq gc-cons-threshold 800000
