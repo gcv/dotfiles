@@ -1,10 +1,13 @@
 ;;; -*- lexical-binding: t -*-
 
 (setq package-user-dir (file-truename (concat "~/.emacs.d/elpa/" (number-to-string emacs-major-version))))
-(let ((system-hostname (or (ignore-errors
-                             (car (split-string (system-name) "\\.")))
-                           "unknown-host")))
-  (setq user-emacs-directory (file-truename (concat "~/.emacs.d/user/" system-hostname "/"))))
+(let* ((system-hostname (or (ignore-errors
+                              (car (split-string (system-name) "\\.")))
+                            "unknown-host"))
+       (user-data-dir (file-truename (concat "~/.emacs.d/user/" system-hostname "/")))
+       (site-lisp-dir (concat user-data-dir "site-lisp/")))
+  (unless (file-directory-p site-lisp-dir) (make-directory site-lisp-dir))
+  (setq user-emacs-directory user-data-dir))
 
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
