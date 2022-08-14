@@ -74,12 +74,25 @@ parse_params "$@"
 
 ### helper(s)
 
-# make the symlinks nice and clean, without leading absolute paths
+# make the symlinks nice and clean: avoid leading absolute paths for links inside
+# the same directory, but use them otherwise for clarity
 DOTFILES="${HOME}/.dotfiles"
 
 link() {
     pushd "${HOME}" >& /dev/null
-    local from=".dotfiles/$1" # $(readlinkf "${basedir}/$1")
+    local from=""
+    # Try to keep links simple: for example the link from
+    # "~/.dotfiles/public/profile" to "~/.profile" is ".profile ->
+    # .dotfiles/public/profile" because it's easier to read than an absolute
+    # path. But the link from "~/.dotfiles/public/bin/gpgd" to
+    # "~/.local/bin/gpgd" is "gpgd ->
+    # /expanded/path/to/home/.dotfiles/public/bin/gpgd" because a relative path
+    # would be difficult to read.
+    if [[ "$2" =~ "/" ]]; then
+        eval from="~/.dotfiles/$1" # force expansion
+    else
+        from=".dotfiles/$1"
+    fi
     local to="~/$2"
     eval to="${to}" # force ~ expansion
     if [[ -L "${to}" || -e "${to}" ]]; then
