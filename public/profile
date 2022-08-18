@@ -7,6 +7,19 @@
 # - use of local
 
 
+### enable Nix (must happen early for correct path setup)
+
+if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
+    . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+fi
+
+
+### environment variables
+
+export DO_NOT_TRACK=1 # https://consoledonottrack.com
+export LESSHISTFILE=/dev/null
+
+
 ### path setup
 
 path_add () {
@@ -25,7 +38,7 @@ path_add () {
     fi
 }
 
-path_add "${HOME}/.local/bin" after
+path_add "${HOME}/.local/bin" before
 
 
 ### deal with ssh-agent

@@ -1,6 +1,29 @@
-set fish_greeting
+### enable Nix (must happen early for correct path setup)
 
-# commands to run in interactive sessions can go here:
+if not set -q NIX_PATH
+    [ -e ~/.nix-defexpr ] && set NIX_PATH "nixpkgs=$HOME/.nix-defexpr/channels/nixpkgs"
+    [ -e ~/.nix-profile ] && set NIX_SSL_CERT_FILE "$HOME/.nix-profile/etc/ssl/certs/ca-bundle.crt"
+end
+[ -e "/nix/var/nix/profiles/per-user/$USER" ] && set NIX_USER_PROFILE_DIR "/nix/var/nix/profiles/per-user/$USER"
+
+
+### environment variables
+
+set fish_greeting
+set DO_NOT_TRACK 1 # https://consoledonottrack.com
+set LESSHISTFILE /dev/nul
+
+
+### path setup
+
+fish_add_path --path --prepend ~/.nix-profile/sbin
+fish_add_path --path --prepend ~/.nix-profile/bin
+fish_add_path --path --prepend ~/.local/sbin
+fish_add_path --path --prepend ~/.local/bin
+
+
+### interactive mode only sessions:
+
 if status is-interactive
 
    type -q autojump && source ~/.nix-profile/share/autojump/autojump.fish

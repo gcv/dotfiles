@@ -351,9 +351,9 @@ fi
 
 ### Turn on autojump (https://github.com/joelthelion/autojump).
 if [[ -f /usr/share/autojump/autojump.sh ]]; then
-    . /usr/share/autojump/autojump.sh
-elif [[ -f "${NIX_USER_PROFILE_DIR}/profile/etc/profile.d/autojump.sh" ]]; then
-    . "${NIX_USER_PROFILE_DIR}/profile/etc/profile.d/autojump.sh"
+    . /usr/share/autojump/autojump.bash
+elif [[ -f "${HOME}/.nix-profile/share/autojump/autojump.zsh" ]]; then
+    . "${HOME}/.nix-profile/share/autojump/autojump.zsh"
 elif [[ $(command -v brew) && -f `brew --prefix`/etc/autojump.sh ]]; then
     . `brew --prefix`/etc/autojump.sh
 fi
