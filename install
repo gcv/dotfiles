@@ -144,7 +144,7 @@ fi
 if [[ $link_all = "1" || $link_fish = "1" ]]; then
     link "public/fish" ".config/fish"
     link "public/starship.toml" ".config"
-    if [[ -L "private" ]]; then
+    if [[ -L "${basedir}/private" ]]; then
         link "private/history-files/fish_$(hostname -s)_history" ".local/share/fish"
     fi
 fi
@@ -167,7 +167,7 @@ if [[ $link_all = "1" || $link_misc = "1" ]]; then
 fi
 
 if [[ $link_all = "1" || $link_notmuch = "1" ]]; then
-   if [[ -L "private" ]]; then
+   if [[ -L "${basedir}/private" ]]; then
        link "private/notmuch-config" ".notmuch-config"
    fi
 fi
