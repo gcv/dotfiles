@@ -38,7 +38,6 @@
 
 
 (use-package consult-notes
-  :quelpa (consult-notes :fetcher github :repo "mclear-tools/consult-notes")
   :commands (consult-notes consult-notes-search-in-all-notes)
   :config
   (setq consult-notes-sources
