@@ -2,18 +2,18 @@
 
 ;; Copyright (C) 2007         Tamas Patrovics
 ;;               2008 ~ 2011  rubikitch <rubikitch@ruby-lang.org>
-;;               2011 ~ 2021  Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;;               2011 ~ 2021  Thierry Volpiatto 
 
 ;; This is a fork of anything.el wrote by Tamas Patrovics.
 
 ;; Authors of anything.el: Tamas Patrovics
 ;;                         rubikitch <rubikitch@ruby-lang.org>
-;;                         Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;;                         Thierry Volpiatto
 
-;; Author: Thierry Volpiatto <thierry.volpiatto@gmail.com>
-;; Version: 3.8.5
+;; Author: Thierry Volpiatto <thievol@posteo.net>
+;; Version: 3.8.7
 ;; URL: https://emacs-helm.github.io/helm/
-;; Package-Requires: ((helm-core "3.8.4") (popup "0.5.3"))
+;; Package-Requires: ((helm-core "3.8.7") (popup "0.5.3"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 ;;; Code:
 
 (require 'helm-core)
+(require 'helm-global-bindings)
 
 (provide 'helm)
 

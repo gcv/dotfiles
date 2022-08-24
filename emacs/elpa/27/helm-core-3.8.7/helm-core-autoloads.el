@@ -9,9 +9,6 @@
 ;;;### (autoloads nil "helm-core" "helm-core.el" (0 0 0 0))
 ;;; Generated autoloads from helm-core.el
 
-(autoload 'helm-configuration "helm-core" "\
-Customize Helm." t nil)
-
 (autoload 'helm-define-multi-key "helm-core" "\
 In KEYMAP, define key sequence KEY for function list FUNCTIONS.
 Each function runs sequentially for each KEY press.
@@ -29,7 +26,7 @@ E.g.
       (interactive)
       (message \"Run baz\"))
 
-\(helm-define-multi-key global-map (kbd \"<f5> q\") '(foo bar baz) 2)
+\(helm-define-multi-key global-map (kbd \"<f5> q\") \\='(foo bar baz) 2)
 
 Each time \"<f5> q\" is pressed, the next function is executed.
 Waiting more than 2 seconds between key presses switches back to
@@ -59,8 +56,8 @@ Arg OTHER-SUBKEYS is an alist specifying other short key bindings
 to use once started, e.g.:
 
     (helm-define-key-with-subkeys global-map
-       (kbd \"C-x v n\") ?n 'git-gutter:next-hunk
-       '((?p . git-gutter:previous-hunk)))
+       (kbd \"C-x v n\") ?n \\='git-gutter:next-hunk
+       \\='((?p . git-gutter:previous-hunk)))
 
 In this example, `C-x v n' will run `git-gutter:next-hunk'
 subsequent \"n\" will run this command again and subsequent \"p\"
@@ -76,11 +73,16 @@ in MAP and then exit the loop running EXIT-FN, if specified.
 If DELAY an integer is specified exit after DELAY seconds.
 
 NOTE: SUBKEY and OTHER-SUBKEYS bindings support only char syntax
-and vectors, so don't use strings to define them.
+and vectors, so don't use strings to define them.  While defining
+or executing a kbd macro no SUBKEY or OTHER-SUBKEYS are provided,
+i.e. the loop is not entered after running COMMAND.
 
-\(fn MAP KEY SUBKEY COMMAND &optional OTHER-SUBKEYS PROMPT EXIT-FN DELAY)" nil nil)
+\(fn MAP KEY SUBKEY COMMAND &optional OTHER-SUBKEYS PROMPT EXIT-FN DELAY DOCSTRING)" nil nil)
 
 (function-put 'helm-define-key-with-subkeys 'lisp-indent-function '1)
+
+(autoload 'helm-configuration "helm-core" "\
+Customize Helm." t nil)
 
 (autoload 'helm-debug-open-last-log "helm-core" "\
 Open Helm log file or buffer of last Helm session." t nil)
@@ -140,7 +142,7 @@ Minibuffer prompt. Default value is `helm--prompt'.
 If t, allow resumption of the previous session of this Helm
 command, skipping initialization.
 
-If 'noresume, this instance of `helm' cannot be resumed.
+If \\='noresume, this instance of `helm' cannot be resumed.
 
 *** :preselect
 
@@ -195,7 +197,7 @@ Allow running this Helm command in a running Helm session.
 Other keywords are interpreted as local variables of this Helm
 session. The `helm-' prefix can be omitted. For example,
 
-\(helm :sources 'helm-source-buffers-list
+\(helm :sources \\='helm-source-buffers-list
        :buffer \"*helm buffers*\"
        :candidate-number-limit 10)
 
