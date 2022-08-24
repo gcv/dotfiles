@@ -4,8 +4,8 @@
 
 ;; Author: Alf Lervåg
 ;; Keywords: literate programming, reproducible research
-;; Package-Version: 20220202.1609
-;; Package-Commit: 586f1fa07f76aaca13cb3f86945759f4b9fb8db7
+;; Package-Version: 20220819.2228
+;; Package-Commit: 1b021ce1c67c97fa1aa4d2c0816edb7add129e48
 ;; Homepage: https://github.com/alf/ob-restclient.el
 ;; Version: 0.02
 ;; Package-Requires: ((restclient "0"))
@@ -56,6 +56,7 @@ This function is called by `org-babel-execute-src-block'"
   (with-temp-buffer
     (let ((results-buffer (current-buffer))
           (restclient-same-buffer-response t)
+          (restclient-response-body-only (org-babel-restclient--should-hide-headers-p params))
           (restclient-same-buffer-response-name (buffer-name))
           (display-buffer-alist
            (cons
@@ -83,11 +84,6 @@ This function is called by `org-babel-execute-src-block'"
       (when (equal (buffer-name) (buffer-string))
         (error "Restclient encountered an error"))
 
-      (when (or (org-babel-restclient--return-pure-payload-result-p params)
-                (assq :noheaders params)
-                (assq :jq params))
-        (org-babel-restclient--hide-headers))
-
        (when-let* ((jq-header (assoc :jq params))
                   (jq-path "jq"))
         (shell-command-on-region
@@ -109,6 +105,16 @@ This function is called by `org-babel-execute-src-block'"
 
       (buffer-string))))
 
+;;;###autoload
+(defun org-babel-variable-assignments:restclient (params)
+  "Return a list of restclient statements assigning the block's variables specified in PARAMS."
+  (mapcar
+   (lambda (pair)
+     (let ((name (car pair))
+           (value (cdr pair)))
+       (format ":%s = %s" name value)))
+   (org-babel--get-vars params)))
+
 (defun org-babel-restclient--wrap-result ()
   "Wrap the contents of the buffer in an `org-mode' src block."
   (let ((mode-name (substring (symbol-name major-mode) 0 -5)))
@@ -116,18 +122,11 @@ This function is called by `org-babel-execute-src-block'"
     (goto-char (point-max))
     (insert "#+END_SRC\n")))
 
-(defun org-babel-restclient--hide-headers ()
-  "Just return the payload."
-  (let ((comments-start
-         (save-excursion
-           (goto-char (point-max))
-           (while (comment-only-p (line-beginning-position) (line-end-position))
-             (forward-line -1))
-           ;; Include the last line as well
-           (forward-line)
-           (point))))
-    (narrow-to-region (point-min) comments-start)))
-
+(defun org-babel-restclient--should-hide-headers-p (params)
+  "Return `t' if headers should be hidden."
+  (or (org-babel-restclient--return-pure-payload-result-p params)
+                (assq :noheaders params)
+                (assq :jq params)))
 
 (defun org-babel-restclient--return-pure-payload-result-p (params)
   "Return `t' if the `:results' key in PARAMS contains `value' or `table'."
