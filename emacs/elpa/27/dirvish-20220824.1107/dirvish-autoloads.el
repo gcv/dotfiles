@@ -32,10 +32,9 @@ and toggle it if ARG is `toggle'; disable the mode otherwise.
 (autoload 'dirvish "dirvish" "\
 Start a full frame Dirvish session with optional PATH.
 If called with \\[universal-arguments], prompt for PATH,
-otherwise it defaults to variable `buffer-file-name'.
+otherwise it defaults to `default-directory'.
 
 \(fn &optional PATH)" t nil)
- (autoload 'dirvish-dispatch "dirvish" nil t)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish" '("dirvish-")))
 
@@ -73,45 +72,29 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 ;;;### (autoloads nil "dirvish-extras" "dirvish-extras.el" (0 0 0
 ;;;;;;  0))
 ;;; Generated autoloads from dirvish-extras.el
- (autoload 'dirvish-free-space-ml "dirvish-extras" nil t)
- (autoload 'dirvish-file-link-number-ml "dirvish-extras" nil t)
- (autoload 'dirvish-file-link-number-ml "dirvish-extras" nil t)
- (autoload 'dirvish-file-group-ml "dirvish-extras" nil t)
- (autoload 'dirvish-file-time-ml "dirvish-extras" nil t)
- (autoload 'dirvish-file-size-ml "dirvish-extras" nil t)
- (autoload 'dirvish-file-modes-ml "dirvish-extras" nil t)
- (autoload 'dirvish-file-inode-number-ml "dirvish-extras" nil t)
- (autoload 'dirvish-file-device-number-ml "dirvish-extras" nil t)
-
-(autoload 'dirvish-find-file-true-path "dirvish-extras" "\
-Open truename of (maybe) symlink file under the cursor." t nil)
-
-(autoload 'dirvish-copy-file-true-path "dirvish-extras" "\
-Copy truename of (maybe) symlink file under the cursor." t nil)
 
 (autoload 'dirvish-copy-file-name "dirvish-extras" "\
 Copy filename of marked files.
-If MULTI-LINE, make every name occupy a separate line.
+If MULTI-LINE, make every name occupy a new line.
 
 \(fn &optional MULTI-LINE)" t nil)
 
 (autoload 'dirvish-copy-file-path "dirvish-extras" "\
 Copy filepath of marked files.
-If MULTI-LINE, make every path occupy a separate line.
+If MULTI-LINE, make every path occupy a new line.
 
 \(fn &optional MULTI-LINE)" t nil)
-
-(autoload 'dirvish-copy-file-directory "dirvish-extras" "\
-Copy directory name of file under the cursor." t nil)
 
 (autoload 'dirvish-total-file-size "dirvish-extras" "\
 Echo total file size of FILESET.
 FILESET defaults to `dired-get-marked-files'.
 
 \(fn &optional FILESET)" t nil)
-
-(autoload 'dirvish-rename-space-to-underscore "dirvish-extras" "\
-Rename marked files by replacing space to underscore." t nil)
+ (autoload 'dirvish-file-info-menu "dirvish-extras" nil t)
+ (autoload 'dirvish-chxxx-menu "dirvish-extras" nil t)
+ (autoload 'dirvish-mark-menu "dirvish-extras" nil t)
+ (autoload 'dirvish-dired-cheatsheet "dirvish-extras" nil t)
+ (autoload 'dirvish-setup-menu "dirvish-extras" nil t)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-extras" '("dirvish-")))
 
@@ -121,6 +104,11 @@ Rename marked files by replacing space to underscore." t nil)
 ;;; Generated autoloads from dirvish-fd.el
  (autoload 'dirvish-fd-switches-menu "dirvish-fd" nil t)
 
+(autoload 'dirvish-fd-jump "dirvish-fd" "\
+Browse all directories using `fd' command.
+This command takes a while to index all the directories the first
+time you run it.  After the indexing, it fires up instantly." t nil)
+
 (autoload 'dirvish-fd "dirvish-fd" "\
 Run `fd' on DIR and go into Dired mode on a buffer of the output.
 The command run is essentially:
@@ -129,11 +117,6 @@ The command run is essentially:
      --exec-batch `dirvish-fd-ls-program' `dired-listing-switches' --directory.
 
 \(fn DIR PATTERN)" t nil)
-
-(autoload 'dirvish-fd-jump "dirvish-fd" "\
-Browse all directories using `fd' command.
-This command takes a while to index all the directories the first
-time you run it.  After the indexing, it fires up instantly." t nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-fd" '("dirvish-fd-")))
 
@@ -160,6 +143,7 @@ Navigate to previous ARG directory in history.
 ARG defaults to 1.
 
 \(fn ARG)" t nil)
+ (autoload 'dirvish-history-menu "dirvish-history" nil t)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-history" '("dirvish-history-")))
 
@@ -218,17 +202,6 @@ The session takes the whole frame when `one-window-p'.
 
 ;;;***
 
-;;;### (autoloads nil "dirvish-menu" "dirvish-menu.el" (0 0 0 0))
-;;; Generated autoloads from dirvish-menu.el
- (autoload 'dirvish-chxxx-menu "dirvish-menu" nil t)
- (autoload 'dirvish-mark-menu "dirvish-menu" nil t)
- (autoload 'dirvish-file-info-menu "dirvish-menu" nil t)
- (autoload 'dirvish-setup-menu "dirvish-menu" nil t)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-menu" '("dirvish-menu-")))
-
-;;;***
-
 ;;;### (autoloads nil "dirvish-narrow" "dirvish-narrow.el" (0 0 0
 ;;;;;;  0))
 ;;; Generated autoloads from dirvish-narrow.el
@@ -282,15 +255,14 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 
 ;;;### (autoloads nil "dirvish-side" "dirvish-side.el" (0 0 0 0))
 ;;; Generated autoloads from dirvish-side.el
- (autoload 'dirvish-project-ml "dirvish-side" nil t)
 
 (autoload 'dirvish-side "dirvish-side" "\
 Toggle a Dirvish session at the side window.
-- If the side window is visible hide it.
-- If a side session within the current `dirvish-side-scope'
-  exists but is not visible, show it.
-- If there is no session exists within the scope,
-  create the session with PATH and display it.
+
+- If the current window is a side session window, hide it.
+- If a side session is visible, select it.
+- If a side session exists but is not visible, show it.
+- If there is no side session exists,create a new one with PATH.
 
 If called with \\[universal-arguments], prompt for PATH,
 otherwise it defaults to `project-current'.
@@ -316,6 +288,7 @@ Clear all subtrees in the buffer." t nil)
 
 (autoload 'dirvish-subtree-toggle "dirvish-subtree" "\
 Insert subtree at point or remove it if it was not present." t nil)
+ (autoload 'dirvish-subtree-menu "dirvish-subtree" nil t)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-subtree" '("dirvish-")))
 
@@ -323,19 +296,28 @@ Insert subtree at point or remove it if it was not present." t nil)
 
 ;;;### (autoloads nil "dirvish-vc" "dirvish-vc.el" (0 0 0 0))
 ;;; Generated autoloads from dirvish-vc.el
- (autoload 'dirvish-vc-info-ml "dirvish-vc" nil t)
+ (autoload 'dirvish-vc-menu "dirvish-vc" nil t)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-vc" '("dirvish-")))
 
 ;;;***
 
+;;;### (autoloads nil "dirvish-widgets" "dirvish-widgets.el" (0 0
+;;;;;;  0 0))
+;;; Generated autoloads from dirvish-widgets.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-widgets" '("dirvish-")))
+
+;;;***
+
 ;;;### (autoloads nil "dirvish-yank" "dirvish-yank.el" (0 0 0 0))
 ;;; Generated autoloads from dirvish-yank.el
- (autoload 'dirvish-yank-ml "dirvish-yank" nil t)
+ (autoload 'dirvish-yank-menu "dirvish-yank" nil t)
 
 (autoload 'dirvish-yank "dirvish-yank" "\
-Paste marked files to DEST (which defaults to `dired-current-directory').
-Prompt for DEST when prefixed with \\[universal-argument].
+Paste marked files to DEST.
+Prompt for DEST when prefixed with \\[universal-argument], it
+defaults to `dired-current-directory.'
 
 If you want to use this command and friends (such as
 `dirvish-move') for file transfer involving remote hosts, you'll
@@ -354,33 +336,36 @@ node `(tramp)Frequently Asked Questions' to speed it up.
 \(fn &optional DEST)" t nil)
 
 (autoload 'dirvish-move "dirvish-yank" "\
-Move marked files to DEST (which defaults to `dired-current-directory').
-Prompt for DEST when prefixed with \\[universal-argument].  Also
-see `dirvish-yank' for additional information.
+Move marked files to DEST.
+Prompt for DEST when prefixed with \\[universal-argument], it
+defaults to `dired-current-directory'.  See `dirvish-yank' for
+additional information.
 
 \(fn &optional DEST)" t nil)
 
 (autoload 'dirvish-symlink "dirvish-yank" "\
-Symlink marked files to DEST (which defaults to `dired-current-directory').
-Prompt for DEST when prefixed with \\[universal-argument].  Also
-see `dirvish-yank' for additional information.
+Symlink marked files to DEST.
+Prompt for DEST when prefixed with \\[universal-argument], it
+defaults to `dired-current-directory'.  See `dirvish-yank' for
+additional information.
 
 \(fn &optional DEST)" t nil)
 
 (autoload 'dirvish-relative-symlink "dirvish-yank" "\
 Similar to `dirvish-symlink', but link files relatively.
-Prompt for DEST when prefixed with \\[universal-argument].  Also
-see `dirvish-yank' for additional information.
+Prompt for DEST when prefixed with \\[universal-argument], it
+defaults to `dired-current-directory'.  See `dirvish-yank' for
+additional information.
 
 \(fn &optional DEST)" t nil)
 
 (autoload 'dirvish-hardlink "dirvish-yank" "\
-Hardlink marked files to DEST (which defaults to `dired-current-directory').
-Prompt for DEST when prefixed with \\[universal-argument].  Also
-see `dirvish-yank' for additional information.
+Hardlink marked files to DEST.
+Prompt for DEST when prefixed with \\[universal-argument], it
+defaults to `dired-current-directory'.  See `dirvish-yank' for
+additional information.
 
 \(fn &optional DEST)" t nil)
- (autoload 'dirvish-yank-menu "dirvish-yank" nil t)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-yank" '("dirvish-yank-")))
 

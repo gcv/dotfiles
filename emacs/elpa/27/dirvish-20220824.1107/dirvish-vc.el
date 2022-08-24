@@ -19,6 +19,9 @@
 (require 'dirvish)
 (define-fringe-bitmap 'dirvish-vc-gutter [250] nil nil '(center repeated))
 
+(defclass dirvish-vc-preview (transient-switches) ()
+  "Class for dirvish vc-* preview dispatchers.")
+
 (defcustom dirvish-vc-state-face-alist
   '((up-to-date       . nil)
     (edited           . vc-edited-state)
@@ -54,9 +57,42 @@ vc-hooks.el) for detail explanation of these states."
   "Face for commit message overlays."
   :group 'dirvish)
 
+(defconst dirvish-vc-inhibit-exts
+  (append dirvish-image-exts dirvish-video-exts
+          dirvish-audio-exts '("pdf" "epub" "gif")))
+(defvar vc-dir-process-buffer)
+
+(cl-defmethod transient-infix-set ((obj dirvish-vc-preview) value)
+  "Set relevant value in DIRVISH-VC-PREVIEW instance OBJ to VALUE."
+  (oset obj value value)
+  (let* ((dv (dirvish-curr))
+         (buf (current-buffer))
+         (old-layout (dv-layout dv))
+         (new-layout (unless old-layout (dv-last-fs-layout dv)))
+         (dv-dps (dv-preview-dispatchers dv))
+         (new-dps (seq-difference dv-dps '(vc-diff vc-log vc-blame))))
+    (when value (push (intern (format "%s" value)) new-dps))
+    (setf (dv-preview-dispatchers dv) new-dps)
+    (dirvish--refresh-slots dv)
+    (if (not new-layout)
+        (dirvish-preview-update dv)
+      (quit-window nil (dv-root-window dv))
+      (delete-window transient--window)
+      (dirvish--save-env dv)
+      (setf (dv-layout dv) new-layout)
+      (dirvish-with-no-dedication (switch-to-buffer buf))
+      (dirvish--build dv))))
+
+(transient-define-infix dirvish-vc-preview-ifx ()
+  :description "Preview style"
+  :class 'dirvish-vc-preview
+  :argument-format "vc-%s"
+  :argument-regexp "\\(vc-\\(log\\|diff\\|blame\\)\\)"
+  :choices '("log" "diff" "blame"))
+
 (dirvish-define-attribute vc-state
   "The version control state at left fringe."
-  (:if (and (eq (dv-root-window dv) (selected-window))
+  (:if (and (dirvish-prop :root)
             (dirvish-prop :vc-backend)
             (or (set-window-fringes nil 5 1) t)))
   (let* ((state (dirvish-attribute-cache f-name :vc-state))
@@ -69,7 +105,7 @@ vc-hooks.el) for detail explanation of these states."
 
 (dirvish-define-attribute git-msg
   "Append git commit message to filename."
-  (:if (and (eq (dv-root-window dv) (selected-window))
+  (:if (and (dirvish-prop :root)
             (eq (dirvish-prop :vc-backend) 'Git)
             (not (dirvish-prop :tramp))))
   (let* ((info (dirvish-attribute-cache f-name :git-msg))
@@ -83,15 +119,48 @@ vc-hooks.el) for detail explanation of these states."
     (add-face-text-property 0 (if overflow remain len) face t str)
     (overlay-put ov 'after-string str) ov))
 
-(dirvish-define-preview vc-diff ()
-  "Show output of `vc-diff' as preview."
+(dirvish-define-preview vc-diff (ext)
+  "Use output of `vc-diff' as preview."
   (when (and (dirvish-prop :vc-backend)
+             (not (member ext dirvish-vc-inhibit-exts))
              (cl-letf (((symbol-function 'pop-to-buffer) #'ignore)
                        ((symbol-function 'message) #'ignore))
                (vc-diff)))
     '(buffer . "*vc-diff*")))
 
-;;;###autoload (autoload 'dirvish-vc-info-ml "dirvish-vc" nil t)
+(dirvish-define-preview vc-log ()
+  "Use output of `vc-print-log' as preview."
+  (when (and (dirvish-prop :vc-backend)
+             (cl-letf (((symbol-function 'pop-to-buffer) #'ignore))
+               (prog1 t (vc-print-log))))
+    '(buffer . "*vc-change-log*")))
+
+(dirvish-define-preview vc-blame (file ext preview-window dv)
+  "Use output of `vc-annotate' (file) or `vc-dir' (dir) as preview."
+  (when-let* ((bk (dirvish-prop :vc-backend))
+              (orig-buflist (buffer-list))
+              (display-buffer-alist
+               '(("\\*\\(Annotate \\|vc-dir\\).*\\*"
+                  (display-buffer-same-window)))))
+    (if (file-directory-p file)
+        (with-selected-window preview-window
+          (vc-dir file bk)
+          (cl-pushnew vc-dir-process-buffer (dv-preview-buffers dv))
+          `(buffer . ,(current-buffer)))
+      (when-let* ((file (and (not (member ext dirvish-vc-inhibit-exts))
+                             (not (memq (vc-state file bk)
+                                        '(unregistered ignored)))
+                             file))
+                  (f-buf (find-file-noselect file)))
+        (unless (memq f-buf orig-buflist)
+          (push f-buf (dv-preview-buffers dv)))
+        (with-selected-window preview-window
+          (with-current-buffer f-buf
+            (cl-letf (((symbol-function 'message) #'ignore))
+              (vc-annotate file nil 'fullscale nil nil bk))
+            (cl-pushnew (window-buffer) (dv-preview-buffers dv))
+            `(buffer . ,(window-buffer))))))))
+
 (dirvish-define-mode-line vc-info
   "Version control info such as git branch."
   (when-let* ((bk (dirvish-prop :vc-backend))
@@ -120,6 +189,20 @@ vc-hooks.el) for detail explanation of these states."
   "Unstage vc diffs of FILESET using `magit-unstage-file'."
   (interactive)
   (dirvish--magit-on-files #'magit-unstage-file fileset))
+
+;;;###autoload (autoload 'dirvish-vc-menu "dirvish-vc" nil t)
+(transient-define-prefix dirvish-vc-menu ()
+  "Help menu for features in `dirvish-vc'."
+  :init-value
+  (lambda (o) (oset o value (mapcar (lambda (d) (format "%s" d))
+                               (dv-preview-dispatchers (dirvish-curr)))))
+  [:description
+   (lambda () (dirvish--format-menu-heading "Version control commands"))
+   ("v" dirvish-vc-preview-ifx
+    :if (lambda () (dirvish-prop :vc-backend)))
+   ("n" "Do the next action" dired-vc-next-action
+    :if (lambda () (dirvish-prop :vc-backend)))
+   ("c" "Create repo" vc-create-repo)])
 
 (provide 'dirvish-vc)
 ;;; dirvish-vc.el ends here

@@ -365,8 +365,7 @@ When RE-READ, read groups from .dir-locals.el regardless of cache."
 (defun dirvish-emerge--readin-groups (&optional _dv _entry buffer)
   "Readin emerge groups in BUFFER for session DV."
   (with-current-buffer (or buffer (current-buffer))
-    (unless (dirvish-prop :fd-header)
-      (dirvish-emerge--readin-groups-1))))
+    (dirvish-emerge--readin-groups-1)))
 
 (defvar dirvish-emerge-group-heading-map
   (let ((map (make-sparse-keymap)))
@@ -425,7 +424,7 @@ BEG and END, if provided, determine the boundary of groups."
 (defun dirvish-emerge--apply-1 (preds)
   "Helper for `dirvish-emerge--apply'.
 PREDS are locally composed predicates."
-  (let ((old-file (dirvish-prop :child))
+  (let ((old-file (dirvish-prop :index))
         (groups (cl-loop
                  with grs = (append dirvish-emerge-groups
                                     '(("-" nil nil)))
@@ -557,7 +556,7 @@ Press again to set the value for the group"))
   (cl-loop
    with curr-ov = (dirvish-emerge--get-group-overlay)
    with groups = ()
-   with pos = (if (dirvish-prop :child) (overlay-start curr-ov) (point))
+   with pos = (if (dirvish-prop :index) (overlay-start curr-ov) (point))
    for o in dirvish-emerge--group-overlays
    for (idx desc hide files) = (overlay-get o 'dirvish-emerge)
    do (when (eq curr-ov o)
