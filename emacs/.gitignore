@@ -6,3 +6,4 @@ elpa/*/archives
 elpa/*/gnupg
 elpa/*/vterm*/build
 elpa/*/vterm*/*.dylib
+elpa/*/vterm*/*.so
