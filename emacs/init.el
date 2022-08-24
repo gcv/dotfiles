@@ -124,9 +124,10 @@
 (defun add-to-system-path (path-raw)
   "Add a path to the exec-path variable and the Emacs process' PATH environmental variable."
   (let ((path (expand-file-name path-raw)))
-    (unless (member path exec-path)
-      (add-to-list 'exec-path path))
-    (add-to-env "PATH" path)
+    (when (and (file-exists-p path) (file-directory-p path))
+      (unless (member path exec-path)
+        (add-to-list 'exec-path path))
+      (add-to-env "PATH" path))
     exec-path))
 
 (defun add-subdirs-to-load-path (dir)

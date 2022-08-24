@@ -38,6 +38,7 @@ path_add () {
     fi
 }
 
+path_add "${HOME}/.local/sbin" before
 path_add "${HOME}/.local/bin" before
 
 

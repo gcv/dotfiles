@@ -50,6 +50,7 @@ function path_reset() {
         # Nix and NixOS
         /run/wrappers/bin
 	~/.nix-profile/bin
+	~/.nix-profile/sbin
 	/etc/profiles/per-user/${USER}/bin
 	/nix/var/nix/profiles/default/bin
 	/run/current-system/sw/bin
