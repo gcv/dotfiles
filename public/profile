@@ -9,9 +9,11 @@
 
 ### enable Nix (must happen early for correct path setup)
 
-if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
-    . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+if [[ -z "${NIX_PATH}" ]]; then
+    [[ -e ~/.nix-defexpr ]] && export NIX_PATH=nixpkgs=${HOME}/.nix-defexpr/channels/nixpkgs
+    [[ -e ~/.nix-profile ]] && export NIX_SSL_CERT_FILE=${HOME}/.nix-profile/etc/ssl/certs/ca-bundle.crt
 fi
+[[ -e "/nix/var/nix/profiles/per-user/${USER}" ]] && export NIX_USER_PROFILE_DIR=/nix/var/nix/profiles/per-user/${USER}
 
 
 ### environment variables
@@ -38,6 +40,8 @@ path_add () {
     fi
 }
 
+path_add "${HOME}/.nix-profile/sbin" before
+path_add "${HOME}/.nix-profile/bin" before
 path_add "${HOME}/.local/sbin" before
 path_add "${HOME}/.local/bin" before
 
