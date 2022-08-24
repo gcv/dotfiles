@@ -1,0 +1,2 @@
+;; Generated package description from inspector.el  -*- no-byte-compile: t -*-
+(define-package "inspector" "0.6" "Tool for inspection of Emacs Lisp objects." '((emacs "27")) :commit "9404e8a6b9933ae8c6fd48826ff0069445eac031" :authors '(("Mariano Montone" . "marianomontone@gmail.com")) :maintainer '("Mariano Montone" . "marianomontone@gmail.com") :keywords '("debugging" "tool" "emacs-lisp" "development") :url "https://github.com/mmontone/emacs-inspector")

@@ -5,7 +5,7 @@
 ;; Author: Mariano Montone <marianomontone@gmail.com>
 ;; URL: https://github.com/mmontone/emacs-inspector
 ;; Keywords: debugging, tool, emacs-lisp, development
-;; Version: 0.5
+;; Version: 0.6
 ;; Package-Requires: ((emacs "27"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -315,8 +315,10 @@ is expected to be used.")
     (newline)
     (dolist (slot (eieio-class-slots (eieio-object-class object)))
       (insert (format "%s: " (cl--slot-descriptor-name slot)))
-      (inspector--insert-inspect-button
-       (slot-value object (cl--slot-descriptor-name slot)))
+      (if (not (slot-boundp object (cl--slot-descriptor-name slot)))
+          (insert "unbound")
+        (inspector--insert-inspect-button
+         (slot-value object (cl--slot-descriptor-name slot))))
       (newline)))
    ((cl-struct-p object)
     (inspector--insert-title (format "%s struct" (type-of object)))
@@ -644,14 +646,14 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
   (interactive
    (list
     (completing-read "Inspect local variable: "
-		     (with-current-buffer "*Backtrace*"
-		       ;; The addition of 0 to the return value of (debugger-frame-number) is necessary here. Why?? Ugly hack ...
-		       ;; On Emacs 29.0.50 with native comp at least ..
-		       (let ((n (+ (debugger-frame-number) 0)))
-			 (mapcar #'car (backtrace--locals n)))))))
+                     (with-current-buffer "*Backtrace*"
+                       ;; The addition of 0 to the return value of (debugger-frame-number) is necessary here. Why?? Ugly hack ...
+                       ;; On Emacs 29.0.50 with native comp at least ..
+                       (let ((n (+ (debugger-frame-number) 0)))
+                         (mapcar #'car (backtrace--locals n)))))))
   (with-current-buffer "*Backtrace*"
     (let* ((n (debugger-frame-number))
-	   (locals (backtrace--locals n)))
+           (locals (backtrace--locals n)))
       (inspector-inspect (cdr (assoc (intern varname) locals))))))
 
 ;;;###autoload
