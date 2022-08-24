@@ -115,19 +115,19 @@
 ;;   )
 
 
-(use-package helm-projectile
-  :defer 2.0
-  :config
-  ;;(helm-projectile-toggle 1)
-  )
+;; (use-package helm-projectile
+;;   :defer 2.0
+;;   :config
+;;   ;;(helm-projectile-toggle 1)
+;;   )
 
 
-(use-package helm-swoop
-  :bind
-  (("C-M-S-i" . (lambda () (interactive) (helm-swoop :query "")))
-   :map isearch-mode-map
-   ("C-M-S-i" . helm-swoop-from-isearch))
+;; (use-package helm-swoop
+;;   :bind
+;;   (("C-M-S-i" . (lambda () (interactive) (helm-swoop :query "")))
+;;    :map isearch-mode-map
+;;    ("C-M-S-i" . helm-swoop-from-isearch))
 
-  :config
-  (setq helm-swoop-split-with-multiple-windows t)
-  )
+;;   :config
+;;   (setq helm-swoop-split-with-multiple-windows t)
+;;   )
