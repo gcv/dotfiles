@@ -3581,13 +3581,7 @@ Command `flycheck-mode' is only enabled if
 (define-globalized-minor-mode global-flycheck-mode flycheck-mode
   flycheck-mode-on-safe
   :init-value nil
-  ;; Do not expose Global Flycheck Mode on customize interface, because the
-  ;; interaction between package.el and customize is currently broken.  See
-  ;; https://github.com/flycheck/flycheck/issues/595
-
-  ;; :require 'flycheck :group
-  ;; 'flycheck
-  )
+  :group 'flycheck)
 
 (defun flycheck-global-teardown (&optional ignore-local)
   "Teardown Flycheck in all buffers.
@@ -10547,7 +10541,7 @@ Otherwise, return a list starting with -c (-m is not enough
 because it adds the current directory to Python's path)."
   (when (flycheck-python-needs-module-p checker)
     `("-c" ,(concat "import sys;sys.path.pop(0);import runpy;"
-                    (format "runpy.run_module(%S)" module-name)))))
+                    (format "runpy.run_module(%S, run_name='__main__')" module-name )))))
 
 (defcustom flycheck-python-project-files
   '("pyproject.toml" "setup.cfg" "mypy.ini" "pyrightconfig.json")
@@ -10578,7 +10572,8 @@ parent directory that doesn't have a __init__.py file."
          start (lambda (dir)
                  (not (file-exists-p (expand-file-name "__init__.py" dir))))))))
 
-(flycheck-def-config-file-var flycheck-flake8rc python-flake8  ".flake8rc")
+(flycheck-def-config-file-var flycheck-flake8rc python-flake8
+                              '(".flake8" "setup.cfg" "tox.ini"))
 
 (flycheck-def-option-var flycheck-flake8-error-level-alist
     '(("^E9.*$"  . error)               ; Syntax errors from pep8
