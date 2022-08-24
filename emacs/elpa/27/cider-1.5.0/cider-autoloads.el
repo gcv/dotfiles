@@ -247,6 +247,16 @@ opposite of what that option dictates.
 ;;;;;;  0 0 0))
 ;;; Generated autoloads from cider-connection.el
 
+(defvar cider-merge-sessions nil "\
+Controls session combination behaviour.
+
+Symbol `host' combines all sessions of a project associated with the same host.
+Symbol `project' combines all sessions of a project.
+
+All other values do not combine any sessions.")
+
+(custom-autoload 'cider-merge-sessions "cider-connection" t)
+
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-connection" '("cider-")))
 
 ;;;***

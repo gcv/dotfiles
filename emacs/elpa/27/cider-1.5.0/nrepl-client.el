@@ -237,6 +237,16 @@ PARAMS is as in `nrepl-make-buffer-name'."
       (nrepl--port-from-file (expand-file-name "target/repl-port" dir))
       (nrepl--port-from-file (expand-file-name ".shadow-cljs/nrepl.port" dir))))
 
+(defun nrepl-extract-ports (dir)
+  "Read ports from applicable repl-port files in directory DIR."
+  (delq nil
+        (list (nrepl--port-from-file (expand-file-name "repl-port" dir))
+              (nrepl--port-from-file (expand-file-name ".nrepl-port" dir))
+              (nrepl--port-from-file (expand-file-name "target/repl-port" dir))
+              (nrepl--port-from-file (expand-file-name ".shadow-cljs/nrepl.port" dir)))))
+
+(make-obsolete 'nrepl-extract-port 'nrepl-extract-ports "1.5.0")
+
 (defun nrepl--port-from-file (file)
   "Attempts to read port from a file named by FILE."
   (when (file-exists-p file)
@@ -576,7 +586,8 @@ If NO-ERROR is non-nil, show messages instead of throwing an error."
         (error "[nREPL] SSH port forwarding failed.  Check the '%s' buffer" tunnel-buf)
       (message "[nREPL] SSH port forwarding established to localhost:%s" port)
       (let ((endpoint (nrepl--direct-connect "localhost" port)))
-        (thread-first endpoint
+        (thread-first
+          endpoint
           (plist-put :tunnel tunnel)
           (plist-put :remote-host host))))))
 
@@ -1301,7 +1312,8 @@ EVENT gives the button position on window."
   "Return the color to use when pretty-printing the nREPL message with ID.
 If ID is nil, return nil."
   (when id
-    (thread-first (string-to-number id)
+    (thread-first
+      (string-to-number id)
       (mod (length nrepl-message-colors))
       (nth nrepl-message-colors))))
 
