@@ -8,6 +8,7 @@
 
 
 (use-package doom-themes :pin melpa)
+(use-package ef-themes :pin gnu)
 (use-package green-phosphor-theme :pin melpa)
 (use-package leuven-theme :pin melpa)
 (use-package material-theme)
