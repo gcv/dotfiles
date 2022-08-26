@@ -15,6 +15,11 @@ This function is called by `org-babel-execute-src-block'
 
 \(fn BODY PARAMS)" nil nil)
 
+(autoload 'org-babel-variable-assignments:restclient "ob-restclient" "\
+Return a list of restclient statements assigning the block's variables specified in PARAMS.
+
+\(fn PARAMS)" nil nil)
+
 (register-definition-prefixes "ob-restclient" '("org-babel-"))
 
 ;;;***
