@@ -61,6 +61,19 @@ available) and the matching REPL buffer."
   :safe #'booleanp
   :package-version '(cider . "0.9.0"))
 
+;;;###autoload
+(defcustom cider-merge-sessions nil
+  "Controls session combination behaviour.
+
+Symbol `host' combines all sessions of a project associated with the same host.
+Symbol `project' combines all sessions of a project.
+
+All other values do not combine any sessions."
+  :type 'symbol
+  :group 'cider
+  :safe #'symbolp
+  :package-version '(cider . "1.5"))
+
 (defconst cider-required-nrepl-version "0.6.0"
   "The minimum nREPL version that's known to work properly with CIDER.")
 
@@ -119,15 +132,18 @@ PROC-BUFFER is either server or client buffer, defaults to current buffer."
                           nrepl-server-buffer)))
         (cl-loop for l on nrepl-endpoint by #'cddr
                  do (setq params (plist-put params (car l) (cadr l))))
-        (setq params (thread-first params
+        (setq params (thread-first
+                       params
                        (plist-put :project-dir nrepl-project-dir)))
         (when (buffer-live-p server-buf)
-          (setq params (thread-first params
+          (setq params (thread-first
+                         params
                          (plist-put :server (get-buffer-process server-buf))
                          (plist-put :server-command nrepl-server-command))))
         ;; repl-specific parameters (do not pollute server params!)
         (unless (nrepl-server-p proc-buffer)
-          (setq params (thread-first params
+          (setq params (thread-first
+                         params
                          (plist-put :session-name cider-session-name)
                          (plist-put :repl-type cider-repl-type)
                          (plist-put :cljs-repl-type cider-cljs-repl-type)
@@ -154,7 +170,8 @@ buffer."
         (cider--close-buffer nrepl-tunnel-buffer))
       (when no-kill
         ;; inform sentinel not to kill the server, if any
-        (thread-first (get-buffer-process repl)
+        (thread-first
+          (get-buffer-process repl)
           (process-plist)
           (plist-put :keep-server t))))
     (let ((proc (get-buffer-process repl)))
@@ -343,7 +360,8 @@ process buffer."
   "Retrieve the underlying connection's Java version."
   (with-current-buffer (cider-current-repl)
     (when nrepl-versions
-      (thread-first nrepl-versions
+      (thread-first
+        nrepl-versions
         (nrepl-dict-get "java")
         (nrepl-dict-get "version-string")))))
 
@@ -351,7 +369,8 @@ process buffer."
   "Retrieve the underlying connection's Clojure version."
   (with-current-buffer (cider-current-repl)
     (when nrepl-versions
-      (thread-first nrepl-versions
+      (thread-first
+        nrepl-versions
         (nrepl-dict-get "clojure")
         (nrepl-dict-get "version-string")))))
 
@@ -359,7 +378,8 @@ process buffer."
   "Retrieve the underlying connection's nREPL version."
   (with-current-buffer (cider-current-repl)
     (when nrepl-versions
-      (thread-first nrepl-versions
+      (thread-first
+        nrepl-versions
         (nrepl-dict-get "nrepl")
         (nrepl-dict-get "version-string")))))
 
@@ -443,7 +463,8 @@ entire session."
   (let* ((repl (or repl
                    (sesman-browser-get 'object)
                    (cider-current-repl nil 'ensure)))
-         (params (thread-first ()
+         (params (thread-first
+                   ()
                    (cider--gather-connect-params repl)
                    (plist-put :session-name (sesman-session-name-for-object 'CIDER repl))
                    (plist-put :repl-buffer repl))))
@@ -535,7 +556,8 @@ REPL defaults to the current REPL."
                               (process-put proc :cached-classpath cp)
                               cp)))
              (classpath-roots (or (process-get proc :cached-classpath-roots)
-                                  (let ((cp (thread-last classpath
+                                  (let ((cp (thread-last
+                                              classpath
                                               (seq-filter (lambda (path) (not (string-match-p "\\.jar$" path))))
                                               (mapcar #'file-name-directory)
                                               (seq-remove  #'null)
@@ -604,7 +626,8 @@ Fallback on `cider' command."
              ;; 4) restart the repls reusing the buffer
              (dolist (r repls)
                (cider-nrepl-connect
-                (thread-first ()
+                (thread-first
+                  ()
                   (cider--gather-connect-params r)
                   ;; server params (:port, :project-dir etc) have precedence
                   (cider--gather-connect-params server-buf)
@@ -616,7 +639,8 @@ Fallback on `cider' command."
       (dolist (r repls)
         (cider--close-connection r 'no-kill)
         (cider-nrepl-connect
-         (thread-first ()
+         (thread-first
+           ()
            (cider--gather-connect-params r)
            (plist-put :session-name ses-name)
            (plist-put :repl-buffer r)))))))
@@ -673,7 +697,8 @@ removed."
          (ses-name (or (plist-get params :session-name)
                        (format-spec cider-session-name-template specs)))
          (specs (append `((?s . ,ses-name)) specs)))
-    (thread-last (format-spec template specs)
+    (thread-last
+      (format-spec template specs)
       ;; remove extraneous separators
       (replace-regexp-in-string "\\([:-]\\)[:-]+" "\\1")
       (replace-regexp-in-string "\\(^[:-]\\)\\|\\([:-]$\\)" "")
@@ -862,6 +887,33 @@ no linked session or there is no REPL of TYPE within the current session."
           ((listp type) (member buffer-repl-type type))
           (t (string= type buffer-repl-type)))))
 
+(defun cider--get-host-from-session (session)
+  "Returns the host associated with SESSION."
+  (plist-get (cider--gather-session-params session)
+             :host))
+
+(defun cider--make-sessions-list-with-hosts (sessions)
+  "Makes a list of SESSIONS and their hosts.
+Returns a list of the form ((session1 host1) (session2 host2) ...)."
+  (mapcar (lambda (session)
+            (list session (cider--get-host-from-session session)))
+          sessions))
+
+(defun cider--get-sessions-with-same-host (session sessions)
+  "Returns a list of SESSIONS with the same host as SESSION."
+  (mapcar #'car
+          (seq-filter (lambda (x)
+                        (string-equal (cadr x)
+                                      (cider--get-host-from-session session)))
+                      (cider--make-sessions-list-with-hosts sessions))))
+
+(defun cider--extract-connections (sessions)
+  "Returns a flattened list of all session buffers in SESSIONS."
+  (cl-reduce (lambda (x y)
+               (append x (cdr y)))
+             sessions
+             :initial-value '()))
+
 (defun cider-repls (&optional type ensure)
   "Return cider REPLs of TYPE from the current session.
 If TYPE is nil or multi, return all REPLs.  If TYPE is a list of types,
@@ -871,9 +923,24 @@ throw an error if no linked session exists."
                ((listp type)
                 (mapcar #'cider-maybe-intern type))
                ((cider-maybe-intern type))))
-        (repls (cdr (if ensure
-                        (sesman-ensure-session 'CIDER)
-                      (sesman-current-session 'CIDER)))))
+        (repls (pcase cider-merge-sessions
+                 ('host
+                  (if ensure
+                      (or (cider--extract-connections (cider--get-sessions-with-same-host
+                                                       (sesman-current-session 'CIDER)
+                                                       (sesman-current-sessions 'CIDER)))
+                          (user-error "No linked %s sessions" 'CIDER))
+                    (cider--extract-connections (cider--get-sessions-with-same-host
+                                                 (sesman-current-session 'CIDER)
+                                                 (sesman-current-sessions 'CIDER)))))
+                 ('project
+                  (if ensure
+                      (or (cider--extract-connections (sesman-current-sessions 'CIDER))
+                          (user-error "No linked %s sessions" 'CIDER))
+                    (cider--extract-connections (sesman-current-sessions 'CIDER))))
+                 (_ (cdr (if ensure
+                             (sesman-ensure-session 'CIDER)
+                           (sesman-current-session 'CIDER)))))))
     (or (seq-filter (lambda (b)
                       (cider--match-repl-type type b))
                     repls)
