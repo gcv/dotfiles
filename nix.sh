@@ -28,6 +28,7 @@ packages=(
     bat                # cat replacement
     bashInteractive    # when needed
     bitwarden-cli      # password manager
+    cacert             # SSL certificates
     cmake 
     coreutils 
     croc               # peer-to-peer file transfer, directory capable
