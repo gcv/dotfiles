@@ -35,9 +35,12 @@
   (dirvish-attribute-cache f-name :collapse
     (let ((path f-name) should-collapse files dirp)
       (while (and (setq dirp (file-directory-p path))
-                  (setq files (ignore-errors (directory-files path t)))
+                  (setq files (ignore-errors (directory-files path)))
                   (= 3 (length files)))
-        (setq should-collapse t path (nth 2 files)))
+        (setq should-collapse t
+              path (expand-file-name
+                    (thread-last files (remove ".") (remove "..") car)
+                    path)))
       (cond
        ((and (eq (length files) 2) (not should-collapse)) (cons 'empty t))
        (should-collapse
@@ -55,8 +58,8 @@
 
 (dirvish-define-attribute collapse
   "Collapse unique nested paths."
-  (:if (and (eq (dv-root-window dv) (selected-window))
-            (not (dirvish-prop :fd-header))
+  (:if (and (dirvish-prop :root)
+            (not (dirvish-prop :fd-arglist))
             (or (not (dirvish-prop :tramp))
                 (tramp-local-host-p (dirvish-prop :tramp)))))
   (when-let* ((cache (dirvish-collapse--cache f-name))

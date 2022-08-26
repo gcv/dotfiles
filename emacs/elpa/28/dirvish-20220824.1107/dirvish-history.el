@@ -24,7 +24,7 @@
 (defvar dirvish-history--ring nil)
 (defun dirvish-history-insert-entry-h (_dv entry buffer)
   "Add ENTRY name for BUFFER to `dirvish-history--ring'."
-  (let ((entry (if (string-prefix-p "FD####" entry)
+  (let ((entry (if (string-prefix-p "🔍" entry)
                    (buffer-name buffer) entry)))
     (ring-insert dirvish-history--ring entry)))
 (defcustom dirvish-history-length 50
@@ -71,11 +71,10 @@
   "Navigate to next ARG directory in history.
 ARG defaults to 1."
   (interactive "^p")
-  (let* ((dirs (reverse
-                (mapcar #'car (dv-roots (dirvish-curr)))))
+  (let* ((dv (or (dirvish-curr) (user-error "Not in a dirvish session")))
+         (dirs (reverse (mapcar #'car (dv-roots dv))))
          (len (length dirs))
-         (idx (cl-position
-               (car (dv-index-dir (dirvish-curr))) dirs :test #'equal))
+         (idx (cl-position (car (dv-index-dir dv)) dirs :test #'equal))
          (new-idx (+ idx arg)))
     (cond ((>= new-idx len)
            (dirvish-find-entry-ad (nth (- len 1) dirs))
@@ -91,6 +90,16 @@ ARG defaults to 1."
 ARG defaults to 1."
   (interactive "^p")
   (dirvish-history-go-forward (- 0 arg)))
+
+;;;###autoload (autoload 'dirvish-history-menu "dirvish-history" nil t)
+(transient-define-prefix dirvish-history-menu ()
+  "Help menu for `dirvish-history-*' commands."
+  [:description
+   (lambda () (dirvish--format-menu-heading "Go to history entries"))
+   ("f" "Forward history"        dirvish-history-go-forward :transient t)
+   ("b" "Backward history"       dirvish-history-go-backward :transient t)
+   ("l" "Go to most recent used" dirvish-history-last)
+   ("a" "Access history entries" dirvish-history-jump)])
 
 (provide 'dirvish-history)
 ;;; dirvish-history.el ends here

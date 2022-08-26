@@ -17,12 +17,10 @@
 
 (require 'dirvish)
 
-(defconst dirvish-media-exts
-  (append dirvish-image-exts dirvish-video-exts
-          dirvish-audio-exts '("pdf" "epub" "gif")))
-
 (defvar dirvish-media--cache-pool '())
 (defvar dirvish-media--auto-cache-timer nil)
+(add-to-list 'dirvish--no-update-preview-cmds 'dirvish-media-properties)
+
 (defcustom dirvish-media-auto-cache-threshold '(500 . 4)
   "Generate cache images automatically.
 The value should be a cons cell (FILES . PROCS).  Directories
@@ -39,6 +37,11 @@ max number of cache processes."
          (unless (eq (car v) 0)
            (setq dirvish-media--auto-cache-timer
                  (run-with-timer 0 0.25 #'dirvish-media--autocache)))))
+
+(defcustom dirvish-media-auto-properties
+  (and (executable-find "mediainfo") (executable-find "pdfinfo"))
+  "Show media properties automatically in preview window."
+  :group 'dirvish :type 'boolean)
 
 (defface dirvish-media-info-heading
   '((t :inherit (dired-header bold)))
@@ -78,9 +81,9 @@ A new directory is created unless NO-MKDIR."
 (defun dirvish-media--cache-sentinel (proc _exitcode)
   "Sentinel for image cache process PROC."
   (when-let* ((dv (dirvish-curr))
-              (path (dirvish-prop :child)))
+              (path (dirvish-prop :index)))
     (and (equal path (process-get proc 'path))
-         (dirvish-debounce layout (dirvish-preview-update dv)))))
+         (dirvish-debounce nil (dirvish-preview-update dv)))))
 
 (defun dirvish-media--autocache ()
   "Pop and run the cache tasks in `dirvish-media--cache-pool'."
@@ -116,6 +119,17 @@ GROUP-TITLES is a list of group titles."
                         (format "mediainfo --Output=$'%s' %s"
                                 dirvish-media--info
                                 (shell-quote-argument file))))))
+
+(defun dirvish-media--metadata-from-pdfinfo (file)
+  "Return result string from command `pdfinfo' for FILE."
+  (cl-loop with out = (shell-command-to-string
+                       (format "pdfinfo %s" (shell-quote-argument file)))
+           with lines = (remove "" (split-string out "\n"))
+           for line in lines
+           for (title content) = (split-string line ":\s+")
+           concat (format "       %s:\t%s\n"
+                          (propertize title 'face 'dirvish-media-info-property-key)
+                          content)))
 
 (defun dirvish-media--format-metadata (mediainfo properties)
   "Return a formatted string of PROPERTIES from MEDIAINFO."
@@ -154,18 +168,23 @@ GROUP-TITLES is a list of group titles."
             (dirvish-media--format-metadata
              minfo '(Audio-codec Audio-bitrate Audio-sampling-rate Audio-channels)))))
 
+(cl-defmethod dirvish-media-metadata ((file (head pdf)))
+  "Get metadata for pdf FILE."
+  (format "%s%s" (dirvish-media--group-heading '("PDF info"))
+          (dirvish-media--metadata-from-pdfinfo (cdr file))))
+
 (defun dirvish-media--type (ext)
   "Return media file type from file name extension EXT."
   (cond ((member ext dirvish-image-exts) 'image)
         ((member ext dirvish-video-exts) 'video)
+        ((and (memq 'pdf-preface dirvish-preview-dispatchers)
+              (equal ext "pdf") 'pdf))
         (t (user-error "Not a media file"))))
 
 (defun dirvish-media-properties ()
   "Display media file's metadata in preview window."
   (interactive)
-  (unless (executable-find "mediainfo")
-    (user-error "`dirvish-media-properties' command requires `mediainfo' executable"))
-  (let* ((file (or (dirvish-prop :child)
+  (let* ((file (or (dirvish-prop :index)
                    (user-error "No file under the cursor")))
          (ext (downcase (or (file-name-extension file) "")))
          (type (dirvish-media--type ext))
@@ -193,15 +212,27 @@ GROUP-TITLES is a list of group titles."
         (let* ((p-window (dv-preview-window dv))
                (w-offset (max (round (/ (- (window-width p-window) iw) 2)) 0))
                (h-offset (max (round (/ (- (window-height p-window) ih) 2)) 0)))
+          (and dirvish-media-auto-properties (setq h-offset 3))
           (goto-char 1)
           (insert (make-string h-offset ?\n))
-          (dirvish-prop :mediainfo-pivot (point-marker))
-          (insert (make-string w-offset ?\s))))
+          (dirvish-prop :mediainfo-pivot
+            (if dirvish-media-auto-properties 0 (point-marker)))
+          (insert (make-string w-offset ?\s))
+          (when dirvish-media-auto-properties
+            (let* ((beg (progn (goto-char (point-max)) (point)))
+                   (file (with-current-buffer (cdr(dv-index-dir dv))
+                           (dirvish-prop :index)))
+                   (type (dirvish-media--type
+                          (downcase (or (file-name-extension file) "")))))
+              (insert "\n\n\n")
+              (insert (dirvish-media-metadata (cons type file)))
+              (align-regexp beg (point) "\\(\\\t\\)[^\\\t\\\n]+" 1 4 t))
+            (goto-char 1))))
       buf)))
 
 (cl-defmethod dirvish-preview-dispatch ((recipe (head media-cache)) dv)
   "Generate cache image according to RECIPE and session DV."
-  (let* ((path (dirvish-prop :child))
+  (let* ((path (dirvish-prop :index))
          (buf (dirvish--util-buffer 'preview dv))
          (name (format "%s-%s-img-cache" path
                        (window-width (dv-preview-window dv)))))
@@ -227,24 +258,22 @@ GROUP-TITLES is a list of group titles."
 (defun dirvish-media-cache-imgs-h ()
   "Cache image/video-thumbnail for index directory."
   (when-let* ((dv (dirvish-curr))
-              (buf (window-buffer (dv-root-window dv))))
-    (with-current-buffer buf
-      (when (and (< (length (dirvish-prop :files))
-                    (car dirvish-media-auto-cache-threshold))
-                 (dv-layout dv)
-                 (not (dirvish-prop :tramp)))
-        (cl-loop
-         with win = (dv-preview-window dv)
-         with width = (window-width win)
-         for file in (dirvish-prop :files)
-         for ext = (downcase (or (file-name-extension file) ""))
-         for (cmd . args) = (cl-loop
-                             for fn in dirvish-media--cache-img-fns
-                             for (type . payload) = (funcall fn file ext win dv)
-                             thereis (and (eq type 'media-cache) payload))
-         when cmd do (push (cons (format "%s-%s-img-cache" file width)
-                                 (list file width cmd args))
-                           dirvish-media--cache-pool))))))
+              ((dv-layout dv))
+              (win (dv-preview-window dv))
+              ((window-live-p win))
+              (width (window-width win))
+              (files (hash-table-keys dirvish--attrs-hash))
+              ((< (length files) (car dirvish-media-auto-cache-threshold))))
+    (cl-loop
+     for file in files
+     for ext = (downcase (or (file-name-extension file) ""))
+     for (cmd . args) = (cl-loop
+                         for fn in dirvish-media--cache-img-fns
+                         for (type . payload) = (funcall fn file ext win dv)
+                         thereis (and (eq type 'media-cache) payload))
+     when cmd do (push (cons (format "%s-%s-img-cache" file width)
+                             (list file width cmd args))
+                       dirvish-media--cache-pool))))
 
 (defun dirvish-media-clean-caches-h ()
   "Clean cache files for marked files."
@@ -276,8 +305,6 @@ Require: `mediainfo' (executable)"
 
 (dirvish-define-preview image (file ext preview-window)
   "Preview image files.
-Note: you can preview images without this dispatcher,
-      but that would be very slow, almost unusable.
 Require: `convert' (executable from `imagemagick' suite)"
   :require ("convert")
   (when (member ext dirvish-image-exts)
@@ -328,8 +355,6 @@ Require: `epub-thumbnailer' (executable)"
 
 (dirvish-define-preview pdf (file ext)
   "Preview pdf files.
-Note: you can preview pdf files without this dispatcher,
-      but that would be very slow, almost unusable.
 Require: `pdf-tools' (Emacs package)"
   (when (equal ext "pdf")
     (if (featurep 'pdf-tools) `(buffer . ,(find-file-noselect file t nil))
@@ -349,18 +374,11 @@ Require: `pdf-tools' (Emacs package)"
 
 (dirvish-define-preview archive (file ext)
   "Preview archive files.
-Note: you can preview archive files without this dispatcher,
-      but that would be very slow, almost unusable.
 Require: `zipinfo' (executable)
 Require: `tar' (executable)"
   :require ("zipinfo" "tar")
   (cond ((equal ext "zip") `(shell . ("zipinfo" ,file)))
         ((member ext '("tar" "zst")) `(shell . ("tar" "-tvf" ,file)))))
-
-(dirvish-define-preview no-media (ext)
-  "Disable preview for media files."
-  (when (member ext dirvish-media-exts)
-    '(info . "Preview disabled for media files")))
 
 (provide 'dirvish-media)
 ;;; dirvish-media.el ends here

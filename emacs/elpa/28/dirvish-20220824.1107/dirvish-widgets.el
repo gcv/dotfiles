@@ -1,4 +1,4 @@
-;;; dirvish-extras.el --- Extra commands and mode line segments -*- lexical-binding: t -*-
+;;; dirvish-widgets.el --- Core mode line segments and attributes for dirvish -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
@@ -11,18 +11,14 @@
 
 ;; This library provided:
 ;;
-;; Commands
-;; - `dirvish-find-file-true-path'
-;; - `dirvish-copy-file-name'
-;; - `dirvish-copy-file-path'
-;; - `dirvish-copy-file-directory'
-;; - `dirvish-total-file-size'
-;; - `dirvish-rename-space-to-underscore'
-;;
 ;; Attributes
 ;; - `file-size'
 ;;
 ;; Mode-line segments
+;; - `path'
+;; - `symlink'
+;; - `omit'
+;; - `index'
 ;; - `free-space'
 ;; - `file-link-number'
 ;; - `file-user'
@@ -100,7 +96,7 @@ This value is passed to function `format-time-string'."
 
 (defun dirvish--file-size-add-spaces (str)
   "Fill file size STR with leading spaces."
-  (let* ((spc (concat str " "))
+  (let* ((spc (concat str (if (dirvish-prop :gui) " " "")))
          (len (- dirvish--file-size-str-len (length spc))))
     (if (> len 0) (concat (make-string len ?\ ) spc) spc)))
 
@@ -139,33 +135,106 @@ This value is passed to function `format-time-string'."
 
 (defun dirvish--format-file-attr (attr-name)
   "Return a string of cursor file's attribute ATTR-NAME."
-  (when-let* ((name (or (dirvish-prop :child) (dired-get-filename nil t)))
-              (f-name (file-local-name name))
-              (attrs (dirvish-attribute-cache f-name :builtin))
+  (when-let* ((name (dirvish-prop :index))
+              (attrs (dirvish-attribute-cache name :builtin))
               (attr-getter (intern (format "file-attribute-%s" attr-name)))
               (attr-face (intern (format "dirvish-file-%s" attr-name)))
               (attr-val (and attrs (funcall attr-getter attrs))))
     (propertize (format "%s" attr-val) 'face attr-face)))
 
+;;;; Attributes
+
 (dirvish-define-attribute file-size
   "Show file size or directories file count at right fringe."
-  (:if (and (eq (dv-root-window dv) (selected-window))
-            dired-hide-details-mode)
+  (:if (and (dirvish-prop :root) dired-hide-details-mode)
        :width (1+ dirvish--file-size-str-len))
   (let* ((str (dirvish--get-file-size-or-count f-name f-attrs))
          (ov-pos (if (> remain f-wid) l-end (+ f-beg remain)))
          (face (or hl-face 'dirvish-file-size))
-         (spc (propertize " " 'display
-                          `(space :align-to (- right-fringe
-                                               ,dirvish--file-size-str-len))
-                          'face face))
+         (dp-spec `(space :align-to (- right-fringe
+                                       ,dirvish--file-size-str-len
+                                       ,(if (dirvish-prop :gui) 0 2))))
+         (spc (propertize " " 'display dp-spec 'face face))
          (ov (make-overlay ov-pos ov-pos)))
     (setq str (concat spc str))
     (add-face-text-property 0 (1+ dirvish--file-size-str-len) face t str)
     (overlay-put ov 'after-string str)
     ov))
 
-;;;###autoload (autoload 'dirvish-free-space-ml "dirvish-extras" nil t)
+;;;; Mode line segments
+
+(defun dirvish--register-path-seg (segment path face)
+  "Register mode line path SEGMENT with target PATH and FACE."
+  (propertize
+   segment 'face face 'mouse-face 'highlight
+   'help-echo "mouse-1: visit this directory"
+   'keymap `(header-line keymap
+                         (mouse-1 . (lambda (_ev)
+                                      (interactive "e")
+                                      (dirvish-find-entry-ad ,path))))))
+
+(dirvish-define-mode-line path
+  "Path of file under the cursor."
+  (let* ((index (dired-current-directory))
+         (face (if (dirvish--window-selected-p dv) 'dired-header 'shadow))
+         (abvname (abbreviate-file-name (file-local-name index)))
+         (rmt (dirvish-prop :tramp-handler))
+         (host (propertize (if rmt (concat " " (substring rmt 1)) "")
+                           'face 'font-lock-builtin-face))
+         (segs (nbutlast (split-string abvname "/")))
+         (scope (pcase (car segs)
+                  ("~" (dirvish--register-path-seg
+                        " ⌂ " (concat rmt "~/") face))
+                  ("" (dirvish--register-path-seg
+                       " ∀ " (concat rmt "/") face))))
+         (path (cl-loop for idx from 2
+                        for sp = (format
+                                  "%s%s" (or rmt "")
+                                  (mapconcat #'concat (seq-take segs idx) "/"))
+                        for s in (cdr segs) concat
+                        (format "%s%s" (if (eq idx 2) "" " ⋗ ")
+                                (dirvish--register-path-seg s sp face)))))
+    (replace-regexp-in-string "%" "%%%%" (format "%s%s%s " host scope path))))
+
+(dirvish-define-mode-line sort
+  "Current sort criteria."
+  (let* ((switches (split-string dired-actual-switches))
+         (crit (cond (dired-sort-inhibit "DISABLED")
+                     ((member "--sort=none" switches) "none")
+                     ((member "--sort=time" switches) "time")
+                     ((member "--sort=version" switches) "version")
+                     ((member "--sort=size" switches) "size")
+                     ((member "--sort=extension" switches) "extension")
+                     ((member "--sort=width" switches) "width")
+                     (t "name")))
+         (time (cond ((member "--time=use" switches) "use")
+                     ((member "--time=ctime" switches) "ctime")
+                     ((member "--time=birth" switches) "birth")
+                     (t "mtime")))
+         (rev (if (member "--reverse" switches) "↓" "↑")))
+    (format " %s %s|%s "
+            (propertize rev 'face 'font-lock-doc-markup-face)
+            (propertize crit 'face 'font-lock-type-face)
+            (propertize time 'face 'font-lock-doc-face))))
+
+(dirvish-define-mode-line omit
+  "A `dired-omit-mode' indicator."
+  (and (bound-and-true-p dired-omit-mode) (propertize "Omit" 'face 'font-lock-negation-char-face)))
+
+(dirvish-define-mode-line symlink
+  "Show the truename of symlink file under the cursor."
+  (when-let* ((name (dirvish-prop :index))
+              (truename (cdr (dirvish-attribute-cache name :type))))
+    (format " %s %s "
+            (propertize "→" 'face 'font-lock-comment-delimiter-face)
+            (propertize truename 'face 'dired-symlink))))
+
+(dirvish-define-mode-line index
+  "Current file's index and total files count."
+  (let ((cur-pos (- (line-number-at-pos (point)) 1))
+        (fin-pos (number-to-string (- (line-number-at-pos (point-max)) 2))))
+    (format " %d / %s " cur-pos (propertize fin-pos 'face 'bold))))
+
 (dirvish-define-mode-line free-space
   "Amount of free space on `default-directory''s file system."
   (let ((free-space (or (dirvish-prop :free-space)
@@ -174,136 +243,54 @@ This value is passed to function `format-time-string'."
     (format " %s %s " (propertize free-space 'face 'dirvish-free-space)
             (propertize "free" 'face 'font-lock-doc-face))))
 
-;;;###autoload (autoload 'dirvish-file-link-number-ml "dirvish-extras" nil t)
 (dirvish-define-mode-line file-link-number
   "Number of links to file."
   (dirvish--format-file-attr 'link-number))
 
-;;;###autoload (autoload 'dirvish-file-link-number-ml "dirvish-extras" nil t)
 (dirvish-define-mode-line file-user
   "User name of file."
-  (when-let* ((name (or (dirvish-prop :child) (dired-get-filename nil t)))
-              (f-name (file-local-name name))
-              (attrs (dirvish-attribute-cache f-name :builtin))
+  (when-let* ((name (dirvish-prop :index))
+              (attrs (dirvish-attribute-cache name :builtin))
               (uid (and attrs (file-attribute-user-id attrs)))
               (uname (if (dirvish-prop :tramp) uid (user-login-name uid))))
     (propertize uname 'face 'dirvish-file-user-id)))
 
-;;;###autoload (autoload 'dirvish-file-group-ml "dirvish-extras" nil t)
 (dirvish-define-mode-line file-group
   "Group name of file."
-  (when-let* ((name (or (dirvish-prop :child) (dired-get-filename nil t)))
-              (f-name (file-local-name name))
-              (attrs (dirvish-attribute-cache f-name :builtin))
+  (when-let* ((name (dirvish-prop :index))
+              (attrs (dirvish-attribute-cache name :builtin))
               (gid (and attrs (file-attribute-group-id attrs)))
               (gname (if (dirvish-prop :tramp) gid (group-name gid))))
     (propertize gname 'face 'dirvish-file-group-id)))
 
-;;;###autoload (autoload 'dirvish-file-time-ml "dirvish-extras" nil t)
 (dirvish-define-mode-line file-time
   "Last modification time of file."
-  (when-let* ((name (or (dirvish-prop :child) (dired-get-filename nil t)))
-              (f-name (file-local-name name))
-              (attrs (dirvish-attribute-cache f-name :builtin))
+  (when-let* ((name (or (dirvish-prop :index) (dired-get-filename nil t)))
+              (attrs (dirvish-attribute-cache name :builtin))
               (f-mtime (file-attribute-modification-time attrs))
               (time-string
                (if (dirvish-prop :tramp) f-mtime
                  (format-time-string dirvish-time-format-string f-mtime))))
     (format "%s" (propertize time-string 'face 'dirvish-file-time))))
 
-;;;###autoload (autoload 'dirvish-file-size-ml "dirvish-extras" nil t)
 (dirvish-define-mode-line file-size
   "File size of files or file count of directories."
-  (when-let* ((name (or (dirvish-prop :child) (dired-get-filename nil t)))
-              (f-name (file-local-name name))
-              (attrs (dirvish-attribute-cache f-name :builtin))
-              (size (and attrs (dirvish--get-file-size-or-count f-name attrs))))
+  (when-let* ((name (dirvish-prop :index))
+              (attrs (dirvish-attribute-cache name :builtin))
+              (size (and attrs (dirvish--get-file-size-or-count name attrs))))
     (format "%s" (propertize size 'face 'dirvish-file-size))))
 
-;;;###autoload (autoload 'dirvish-file-modes-ml "dirvish-extras" nil t)
 (dirvish-define-mode-line file-modes
   "File modes, as a string of ten letters or dashes as in ls -l."
   (dirvish--format-file-attr 'modes))
 
-;;;###autoload (autoload 'dirvish-file-inode-number-ml "dirvish-extras" nil t)
 (dirvish-define-mode-line file-inode-number
   "File's inode number, as a nonnegative integer."
   (dirvish--format-file-attr 'inode-number))
 
-;;;###autoload (autoload 'dirvish-file-device-number-ml "dirvish-extras" nil t)
 (dirvish-define-mode-line file-device-number
   "Filesystem device number, as an integer."
   (dirvish--format-file-attr 'device-number))
 
-;;;###autoload
-(defun dirvish-find-file-true-path ()
-  "Open truename of (maybe) symlink file under the cursor."
-  (interactive)
-  (dired-jump nil (file-truename (dired-get-filename nil t))))
-
-(defun dirvish--kill-and-echo (string)
-  "Echo last killed STRING."
-  (kill-new string)
-  (let ((hint (propertize
-               "Copied: " 'face 'font-lock-builtin-face)))
-    (message "%s" (format "%s%s" hint string))))
-
-;;;###autoload
-(defun dirvish-copy-file-true-path ()
-  "Copy truename of (maybe) symlink file under the cursor."
-  (interactive)
-  (dirvish--kill-and-echo
-   (file-truename (dired-get-filename nil t))))
-
-;;;###autoload
-(defun dirvish-copy-file-name (&optional multi-line)
-  "Copy filename of marked files.
-If MULTI-LINE, make every name occupy a separate line."
-  (interactive "P")
-  (let* ((files (dired-get-marked-files t))
-         (names (mapconcat #'concat files (if multi-line "\n" " "))))
-    (dirvish--kill-and-echo (if multi-line (concat "\n" names) names))))
-
-;;;###autoload
-(defun dirvish-copy-file-path (&optional multi-line)
-  "Copy filepath of marked files.
-If MULTI-LINE, make every path occupy a separate line."
-  (interactive "P")
-  (let* ((files (dired-get-marked-files))
-         (names (mapconcat #'concat files (if multi-line "\n" " "))))
-    (dirvish--kill-and-echo (if multi-line (concat "\n" names) names))))
-
-;;;###autoload
-(defun dirvish-copy-file-directory ()
-  "Copy directory name of file under the cursor."
-  (interactive)
-  (dirvish--kill-and-echo
-   (expand-file-name default-directory)))
-
-;;;###autoload
-(defun dirvish-total-file-size (&optional fileset)
-  "Echo total file size of FILESET.
-FILESET defaults to `dired-get-marked-files'."
-  (interactive)
-  (let* ((fileset (or fileset (dired-get-marked-files)))
-         (count (propertize (number-to-string (length fileset))
-                            'face 'font-lock-builtin-face))
-         (size (file-size-human-readable (dirvish--count-file-size fileset))))
-    (message "%s" (format "Total size of %s entries: %s" count size))))
-
-;;;###autoload
-(defun dirvish-rename-space-to-underscore ()
-  "Rename marked files by replacing space to underscore."
-  (interactive)
-  (require 'dired-aux)
-  (if (derived-mode-p 'dired-mode)
-      (let ((markedFiles (dired-get-marked-files )))
-        (mapc (lambda (x)
-                (when (string-match " " x )
-                  (dired-rename-file x (replace-regexp-in-string " " "_" x) nil)))
-              markedFiles)
-        (revert-buffer))
-    (user-error "Not in a Dired buffer")))
-
-(provide 'dirvish-extras)
-;;; dirvish-extras.el ends here
+(provide 'dirvish-widgets)
+;;; dirvish-widgets.el ends here

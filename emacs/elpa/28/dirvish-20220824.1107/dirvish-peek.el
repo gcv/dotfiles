@@ -72,7 +72,7 @@ one of categories in `dirvish-peek-categories'."
       (dirvish-peek--prepare-cand-fetcher)
       (add-hook 'post-command-hook #'dirvish-peek-update-h 99 t)
       (unless (and old-dv (dv-preview-window old-dv))
-        (setq new-dv (dirvish-new nil))
+        (setq new-dv (dirvish-new))
         (setf (dv-preview-window new-dv)
               (display-buffer-in-side-window
                (dirvish--util-buffer)
@@ -99,8 +99,8 @@ one of categories in `dirvish-peek-categories'."
                                              (car (minibuffer-history-value))))))
       ('library
        (setq cand (file-truename (or (ignore-errors (find-library-name cand)) "")))))
-    (dirvish-prop :child cand)
-    (dirvish-debounce layout (dirvish-preview-update))))
+    (dirvish-prop :index cand)
+    (dirvish-debounce nil (dirvish-preview-update (dirvish-curr)))))
 
 ;;;###autoload
 (define-minor-mode dirvish-peek-mode

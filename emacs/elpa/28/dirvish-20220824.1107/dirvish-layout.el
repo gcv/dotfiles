@@ -42,14 +42,13 @@ possibly one or more parent windows."
          (buf (current-buffer)))
     (if old-layout
         (set-window-configuration (dv-window-conf dv))
-      (with-selected-window (dv-root-window dv)
-        (let (quit-window-hook) (quit-window))))
+      (with-selected-window (dv-root-window dv) (quit-window)))
     (setf (dv-layout dv) new-layout)
     (dirvish--save-env dv)
     (with-selected-window (dirvish--create-root-window dv)
       (dirvish-with-no-dedication (switch-to-buffer buf))
       (dirvish--build dv)
-      (dirvish-debounce layout (dirvish-preview-update)))))
+      (dirvish-debounce nil (dirvish-preview-update dv)))))
 
 ;;;###autoload
 (define-obsolete-function-alias 'dirvish-switch-layout #'dirvish-layout-switch "Jul 22, 2022")
@@ -84,10 +83,12 @@ current layout defined in `dirvish-layout-recipes'."
 The session takes the whole frame when `one-window-p'."
   (interactive (list (and current-prefix-arg (read-directory-name "Dirvish: "))))
   (let ((path (expand-file-name (or path default-directory)))
-        (fullscreen (one-window-p)))
-    (or (dirvish--reuse-session path fullscreen)
-        (dirvish-new t :path path
-          :layout (and fullscreen dirvish-default-layout)))))
+        (layout (and (one-window-p) dirvish-default-layout))
+        (dv (dirvish-prop :dv)))
+    (if (and dv (dv-layout dv))
+        (dirvish-find-entry-ad path)
+      (or (dirvish--reuse-session path layout)
+          (dirvish-new :path path :layout layout)))))
 
 (provide 'dirvish-layout)
 ;;; dirvish-layout.el ends here
