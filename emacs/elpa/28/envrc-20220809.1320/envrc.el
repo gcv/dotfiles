@@ -4,10 +4,10 @@
 
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;; Keywords: processes, tools
-;; Package-Commit: 7f36664fc6d97a7ca77c6c3e0c6577b72fa0b70d
+;; Package-Commit: 2a6257b5fdf51e77e41038c934fe81015c85fbde
 ;; Homepage: https://github.com/purcell/envrc
 ;; Package-Requires: ((seq "2") (emacs "25.1") (inheritenv "0.1"))
-;; Package-Version: 20220604.1519
+;; Package-Version: 20220809.1320
 ;; Package-X-Original-Version: 0
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -397,10 +397,13 @@ in a temp buffer.  ARGS is as for ORIG."
 ;;; Major mode for .envrc files
 
 (defvar envrc-file-extra-keywords
-  '("MANPATH_add" "PATH_add" "direnv_layout_dir" "direnv_load" "dotenv"
-    "expand_path" "find_up" "has" "join_args" "layout" "load_prefix"
-    "log_error" "log_status" "path_add" "rvm" "source_env" "source_up"
-    "use" "use_guix" "use_flake" "use_nix" "user_rel_path" "watch_file")
+  '("MANPATH_add" "PATH_add" "PATH_rm" "direnv_apply_dump" "direnv_layout_dir"
+    "direnv_load" "direnv_version" "dotenv" "dotenv_if_exists"
+    "env_vars_required" "expand_path" "fetchurl" "find_up" "has" "join_args"
+    "layout" "load_prefix" "log_error" "log_status" "on_git_branch" "path_add"
+    "path_rm" "rvm" "semver_search" "source_env" "source_env_if_exists"
+    "source_up" "source_up_if_exists" "source_url" "strict_env" "unstrict_env"
+    "use" "user_rel_path" "watch_dir" "watch_file")
   "Useful direnv keywords to be highlighted.")
 
 ;;;###autoload
