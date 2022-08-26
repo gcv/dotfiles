@@ -1,5 +1,8 @@
 [include]
         path = ~/Files/Systems/dotfiles/private/gitconfig
+[core]
+	checkStat = minimal
+        trustctime = false
 [color]
 	ui = auto
 [diff]
