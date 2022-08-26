@@ -25,11 +25,16 @@
 ;; Find here the functionality added in Emacs 25.1, needed by older
 ;; versions.
 ;;
-;; Do NOT load this library manually.  Instead require `compat'.
+;; Only load this library if you need to use one of the following
+;; functions:
+;;
+;; - `compat-sort'
 
 ;;; Code:
 
-(eval-when-compile (require 'compat-macs))
+(require 'compat-macs "compat-macs.el")
+
+(compat-declare-version "25.1")
 
 ;;;; Defined in alloc.c
 
@@ -313,5 +318,5 @@ recursion."
             (push (concat dir "/" file) files)))))
     (nconc result (nreverse files))))
 
-(provide 'compat-25)
+(compat--inhibit-prefixed (provide 'compat-25))
 ;;; compat-25.el ends here
