@@ -2,7 +2,13 @@
 
 if not set -q NIX_PATH
     [ -e ~/.nix-defexpr ] && set NIX_PATH "nixpkgs=$HOME/.nix-defexpr/channels/nixpkgs"
-    [ -e ~/.nix-profile ] && set NIX_SSL_CERT_FILE "$HOME/.nix-profile/etc/ssl/certs/ca-bundle.crt"
+    if [ -e /etc/ssl/certs/ca-certificates.crt ]    # NixOS, Ubuntu, Debian, Gentoo, Arch
+        set NIX_SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt
+    else if [ -e /etc/pki/tls/certs/ca-bundle.crt ] # Fedora, CentOS
+        set NIX_SSL_CERT_FILE /etc/pki/tls/certs/ca-bundle.crt
+    else if [ -e ~/.nix-profile ]
+        set NIX_SSL_CERT_FILE "$HOME/.nix-profile/etc/ssl/certs/ca-bundle.crt"
+    end
 end
 [ -e "/nix/var/nix/profiles/per-user/$USER" ] && set NIX_USER_PROFILE_DIR "/nix/var/nix/profiles/per-user/$USER"
 

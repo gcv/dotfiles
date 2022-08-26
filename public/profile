@@ -4,6 +4,7 @@
 # and ideally ksh and sh). This version probably does not yet.
 #
 # Known POSIX incompatibilities:
+# - use of [[ ]] instead of [ ]
 # - use of local
 
 
@@ -11,7 +12,13 @@
 
 if [[ -z "${NIX_PATH}" ]]; then
     [[ -e ~/.nix-defexpr ]] && export NIX_PATH=nixpkgs=${HOME}/.nix-defexpr/channels/nixpkgs
-    [[ -e ~/.nix-profile ]] && export NIX_SSL_CERT_FILE=${HOME}/.nix-profile/etc/ssl/certs/ca-bundle.crt
+    if [[ -e /etc/ssl/certs/ca-certificates.crt ]]; then # NixOS, Ubuntu, Debian, Gentoo, Arch
+        export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+    elif [[ -e /etc/pki/tls/certs/ca-bundle.crt ]]; then # Fedora, CentOS
+        export NIX_SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
+    elif [[ -e ~/.nix-profile ]]; then
+        export NIX_SSL_CERT_FILE=${HOME}/.nix-profile/etc/ssl/certs/ca-bundle.crt
+    fi
 fi
 [[ -e "/nix/var/nix/profiles/per-user/${USER}" ]] && export NIX_USER_PROFILE_DIR=/nix/var/nix/profiles/per-user/${USER}
 
