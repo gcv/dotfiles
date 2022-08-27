@@ -26,6 +26,8 @@ fi
 ### environment variables
 
 export DO_NOT_TRACK=1 # https://consoledonottrack.com
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 export LESSHISTFILE=/dev/null
 
 

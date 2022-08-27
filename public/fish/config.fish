@@ -17,7 +17,9 @@ end
 
 set fish_greeting
 set DO_NOT_TRACK 1 # https://consoledonottrack.com
-set LESSHISTFILE /dev/nul
+set LANG en_US.UTF-8
+set LC_ALL en_US.UTF-8
+set LESSHISTFILE /dev/null
 
 
 ### path setup
