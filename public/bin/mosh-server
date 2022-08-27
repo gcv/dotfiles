@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+if [ -e "${HOME}/.nix-profile/bin/mosh-server" ]; then
+    if [ -e /usr/lib/locale/locale-archive ]; then
+        export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
+    fi
+    exec "${HOME}/.nix-profile/bin/mosh-server" "$@"
+else
+    mosh_server=$(command -v mosh-server)
+    if [[ -z "${mosh_server}" ]]; then
+        echo "mosh-server not found" 1>&2
+        exit 1
+    fi
+    exec "${git}" "$@"
+fi
+    
