@@ -197,6 +197,7 @@ targets."
 
   :bind
   (("C-x b" . persp-switch-to-buffer*)
+   ("C-c r" . vertico-repeat)
    (:map vertico-map
          ("TAB" . /vertico-smart-tab)
          ("M-g" . vertico-multiform-grid)
@@ -269,6 +270,9 @@ targets."
                                         (cl-letf (((symbol-function #'minibuffer-completion-help)
                                                    #'ignore))
                                           (apply args))))
+
+  ;; enable repeat
+  (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
   )
 
 (use-package vertico-posframe
