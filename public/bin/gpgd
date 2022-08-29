@@ -1,50 +1,62 @@
 #!/usr/bin/env zsh
 
-# Enables mounting GPG-encrypted tar files as directories. Upon
-# dismount, updates the encrypted tar file.
-#
-# Usage:
-#  gpgd init my-new-archive.gpg recipient1 recipient2 recipient3
-#  gpgd mount my-new-archive.gpg "~/Secure Files"
-#    ... edit files in "~/Secure Files/my-new-archive"
-#  gpgd umount "~/Secure Files/my-new-archive"
-#    ... after the unmount, my-new-archive.gpg will be updated
-#    and "~/Secure Files/my-new-archive" securely deleted.
-#
-# Features:
-#  - securely removes traces of unencrypted files after unmounting
-#
-# Limitations:
-#  - currently requires the basename of the archive file to match
-#    the name of the mount point (e.g., my-archive.gpg needs to be
-#    mounted to a directory called my-archive); renaming the archive
-#    will break it; moving the archive when it's mounted will also
-#    break it (not irrevocably, it'll just require editing the
-#    internal .gpgd-archive-file while mounted)
-#  - public-key encryption only; mainly to avoid the hassle of
-#    typing a passphrase on unmount when using GPG in symmetric mode
-#  - written in shell script for convenience of installation, but
-#    the code does suffer for it
-#  - zsh only
-#  - not ideal for larger encrypted directories: sync of encrypted
-#    archives will not allow any block optimizations, secure rm
-#    is fairly slow
+### Enables mounting GPG-encrypted tar files as directories. Upon
+### dismount, updates the encrypted tar file.
+###
+### Usage:
+###  gpgd init my-new-archive.gpg recipient1 recipient2 recipient3
+###  gpgd mount my-new-archive.gpg "~/Secure Files"
+###    ... edit files in "~/Secure Files/my-new-archive"
+###  gpgd umount "~/Secure Files/my-new-archive"
+###    ... after the unmount, my-new-archive.gpg will be updated
+###    and "~/Secure Files/my-new-archive" securely deleted.
+###
+### Features:
+###  - securely removes traces of unencrypted files after unmounting
+###
+### Limitations:
+###  - currently requires the basename of the archive file to match
+###    the name of the mount point (e.g., my-archive.gpg needs to be
+###    mounted to a directory called my-archive); renaming the archive
+###    will break it; moving the archive when it's mounted will also
+###    break it (not irrevocably, it'll just require editing the
+###    internal .gpgd-archive-file while mounted)
+###  - public-key encryption only; mainly to avoid the hassle of
+###    typing a passphrase on unmount when using GPG in symmetric mode
+###  - written in shell script for convenience of installation, but
+###    the code does suffer for it
+###  - zsh only
+###  - not ideal for larger encrypted directories: sync of encrypted
+###    archives will not allow any block optimizations, secure rm
+###    is fairly slow
 
-# environment check
+
+### environment check
+
 if [[ -z $(command -v gpg) ]]; then
     echo "no gpg found" 1>&2
     return 1
 fi
+
 if [[ -z $(command -v tar) ]]; then
     echo "no tar found" 1>&2
     return 1
 fi
+
 if [[ -z $(command -v mktemp) ]]; then
     echo "no mktemp found" 1>&2
     return 1
 fi
 
-function gpgd_readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
+
+### helpers
+
+function gpgd_readlinkf() {
+    perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"
+}
+
+
+### main implementation
 
 function gpgd_help() {
     echo "usage:"
@@ -86,7 +98,7 @@ function gpgd_init() {
     local archive_filename="$(basename ${archive_file})"
     local archive_filename_noext="${archive_filename%.*}"
     if [[ "${archive_filename_noext}" == "${archive_filename}" ]]; then
-        echo "an extension to ${archive_filename} is required, consider using .gpg"
+        echo "an extension to ${archive_filename} is required, consider using .gpgd"
         return 1
     fi
     if [[ -e "${archive_filename_noext}" ]]; then
@@ -138,7 +150,6 @@ function gpgd_mount() {
     # NB: This will not help detect the case of a symlink from
     # a shared directory into a directory into the secure path.
     gpgd_check_shared_mount_points "${mount_point_parent_directory}"
-    gpgd_check_shared_mount_points "$3"
     local archive_file_dir="$(dirname ${archive_file})"
     local archive_filename="$(basename ${archive_file})"
     local archive_filename_noext="${archive_filename%.*}"
@@ -152,7 +163,7 @@ function gpgd_mount() {
     local tmpfile=$(mktemp XXXXX)
     rm -f "${tmpfile}"
     ln -s "${archive_file}" "${tmpfile}"
-    gpg -q --decrypt "${tmpfile}" | tar xk -
+    gpg -q --decrypt "${tmpfile}" | tar xzk
     rm -f "${tmpfile}"
     if [[ ! -d "${archive_filename_noext}" ]]; then
         # TODO: Deal with the problem of archive filenames differing from the root of the archive.
@@ -238,9 +249,13 @@ function gpgd_umount() {
     popd
 }
 
-# command dispatch
+
+### command dispatch
+
 local cmd=$1
+
 if [[ -z ${cmd} ]]; then
     cmd="help"
 fi
+
 gpgd_${cmd} $* || return 1
