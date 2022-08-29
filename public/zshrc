@@ -39,55 +39,36 @@ fi
 [[ -e "/nix/var/nix/profiles/per-user/${USER}" ]] && export NIX_USER_PROFILE_DIR=/nix/var/nix/profiles/per-user/${USER}
 
 
-### Paths include locally-installed packages under ~/.local as symbolic links to
-### the active version:
-###   ./configure --prefix=~/.local/package-version && make && make install
-###   ln -s ~/.local/package-version ~/.local/package
-typeset -U path
-function path_reset() {
-    local homebrew_dir="/opt/brew"
-    [[ ${UNAME} == "Linux" ]] && homebrew_dir="${HOME}/.linuxbrew"
-    path=(
-        ~/.local/bin ~/.local/sbin
-        ~/.local/*(@Ne:'[[ -d ${REPLY}/bin ]] && REPLY=${REPLY}/bin':)
-        ~/.local/*(@Ne:'[[ -d ${REPLY}/sbin ]] && REPLY=${REPLY}/sbin':)
-    )
-    local candidates=(
-        # Nix and NixOS
-        /run/wrappers/bin
-	~/.nix-profile/bin
-	~/.nix-profile/sbin
-	/etc/profiles/per-user/${USER}/bin
-	/nix/var/nix/profiles/default/bin
-	/run/current-system/sw/bin
-        # Homebrew
-        ${homebrew_dir}/bin
-	${homebrew_dir}/sbin
-    )
-    local c
-    for c in ${candidates}; do
-        [[ -d "${c}" ]] && path+=("${c}")
-    done
-    path+=(
-        /usr/local/bin /usr/local/sbin
-        /usr/bin /usr/sbin
-        /bin /sbin
-    )
-}
-path_reset
+### Path wrangling:
+path_prepend() { [[ -d "$2" ]] && eval "${(L)1}[1,0]=\"$2\"" }
+path_append() { [[ -d "${2}" ]] && eval "${(L)1}+=(\"${2}\")" }
 
-typeset -U manpath
-manpath+=(
-    ~/.local/share/man
-    ~/.local/*(@Ne:'[[ -d ${REPLY}/man ]] && REPLY=${REPLY}/man':)
-    ~/.local/*(@Ne:'[[ -d ${REPLY}/share/man ]] && REPLY=${REPLY}/share/man':)
-    ~/.nix-profile/share/man
-    /opt/brew/share/man
-)
-export MANPATH=${MANPATH}:                                 # append colon
+path=()
+path_prepend PATH /sbin
+path_prepend PATH /bin
+path_prepend PATH /usr/sbin
+path_prepend PATH /usr/bin
+path_prepend PATH /usr/local/sbin
+path_prepend PATH /usr/local/bin
+path_prepend PATH /opt/brew/sbin
+path_prepend PATH /opt/brew/bin
+path_prepend PATH ~/.linuxbrew/sbin
+path_prepend PATH ~/.linuxbrew/bin
+path_prepend PATH /run/current-system/sw/bin
+path_prepend PATH /run/wrappers/bin
+path_prepend PATH ~/.nix-profile/sbin
+path_prepend PATH ~/.nix-profile/bin
+path_prepend PATH ~/.local/sbin
+path_prepend PATH ~/.local/bin
+typeset -U path                 # dedup
 
-typeset -U fpath
-fpath+=(/opt/brew/share/zsh/site-functions)
+path_prepend MANPATH ~/.nix-profile/share/man
+path_prepend MANPATH /opt/brew/share/man
+path_prepend MANPATH ~/.local/share/man
+typeset -U manpath              # dedup
+
+path_prepend FPATH /opt/brew/share/zsh/site-functions
+typeset -U fpath                # dedup
 
 
 ### Switch to a more recent zsh if found in path. Be sure not to

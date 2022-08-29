@@ -142,6 +142,8 @@
 (add-to-system-path "/usr/local/sbin")
 (add-to-system-path "/opt/brew/bin")
 (add-to-system-path "/opt/brew/sbin")
+(add-to-system-path "~/.linuxbrew/bin")
+(add-to-system-path "~/.linuxbrew/sbin")
 (add-to-system-path "~/.nix-profile/bin")
 (add-to-system-path "~/.nix-profile/sbin")
 (add-to-system-path "~/.local/bin")
