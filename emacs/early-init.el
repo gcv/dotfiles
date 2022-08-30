@@ -1,5 +1,8 @@
 ;;; -*- lexical-binding: t -*-
 
+;; turn off the native compiler by default
+(setq native-comp-speed -1)
+
 (setq package-user-dir (file-truename (concat "~/.emacs.d/elpa/" (number-to-string emacs-major-version))))
 (let* ((system-hostname (or (ignore-errors
                               (car (split-string (system-name) "\\.")))
