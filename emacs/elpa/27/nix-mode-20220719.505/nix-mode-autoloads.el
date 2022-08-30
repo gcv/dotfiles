@@ -19,7 +19,12 @@ Completion for the nix command." nil nil)
 ;;;### (autoloads nil "nix-build" "nix-build.el" (0 0 0 0))
 ;;; Generated autoloads from nix-build.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-build" '("nix-build")))
+(autoload 'nix-build "nix-build" "\
+Run nix-build in a compilation buffer.
+FILE the file to parse.
+ATTR the attribute to build.
+
+\(fn &optional FILE ATTR)" t nil)
 
 ;;;***
 
@@ -27,21 +32,56 @@ Completion for the nix command." nil nil)
 ;;; Generated autoloads from nix-drv-mode.el
 
 (autoload 'nix-drv-mode "nix-drv-mode" "\
-Pretty print Nix’s .drv files." t nil)
+Pretty print Nix’s .drv files.
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-drv-mode" '("nix-drv-mode")))
+\(fn)" t nil)
+
+(add-to-list 'auto-mode-alist '("\\`/nix/store/.+\\.drv\\'" . nix-drv-mode))
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-drv-mode" '("nix-drv-mode-dejsonify-buffer")))
 
 ;;;***
 
 ;;;### (autoloads nil "nix-edit" "nix-edit.el" (0 0 0 0))
 ;;; Generated autoloads from nix-edit.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-edit" '("nix-edit")))
+(autoload 'nix-edit "nix-edit" "\
+Open the nix log.
+FILE the nix file to load from.
+ATTR the attribute to find in nix expressions.
+
+\(fn &optional FILE ATTR)" t nil)
+
+;;;***
+
+;;;### (autoloads nil "nix-flake" "nix-flake.el" (0 0 0 0))
+;;; Generated autoloads from nix-flake.el
+ (autoload 'nix-flake-dispatch "nix-flake" nil t)
+
+(autoload 'nix-flake "nix-flake" "\
+Dispatch a transient interface for Nix commands.
+
+DIR is a directory on the file system in which flake.nix resides.
+
+Alternatively, you can specify FLAKE-REF which follows the syntax
+of flake-url. It can refer to a remote url, a local file path, or
+whatever supported by Nix.
+
+\(fn DIR &key FLAKE-REF)" t nil)
+ (autoload 'nix-flake-init "nix-flake" nil t)
+
+(autoload 'nix-flake-init "nix-flake" "\
+Run \"nix flake init\" command via a transient interface." t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-flake" '("nix-flake-")))
 
 ;;;***
 
 ;;;### (autoloads nil "nix-format" "nix-format.el" (0 0 0 0))
 ;;; Generated autoloads from nix-format.el
+
+(autoload 'nix-format-before-save "nix-format" "\
+Add this to `before-save-hook' to run nixfmt when saving." nil nil)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-format" '("nix-")))
 
@@ -58,7 +98,12 @@ Pretty print Nix’s .drv files." t nil)
 ;;;### (autoloads nil "nix-log" "nix-log.el" (0 0 0 0))
 ;;; Generated autoloads from nix-log.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-log" '("nix-log")))
+(autoload 'nix-log "nix-log" "\
+Open the nix log.
+FILE nix file to parse.
+ATTR attribute to load the log of.
+
+\(fn FILE ATTR)" t nil)
 
 ;;;***
 
@@ -167,7 +212,7 @@ See `nix-prettify-mode' for more information on Nix-Prettify mode.
 
 \(fn &optional ARG)" t nil)
 
-(define-obsolete-function-alias 'global-nix-prettify-mode 'nix-prettify-global-mode)
+(define-obsolete-function-alias 'global-nix-prettify-mode 'nix-prettify-global-mode "v1.2.2")
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-prettify-mode" '("nix-prettify-")))
 
@@ -190,14 +235,24 @@ See `completion-at-point-functions'." nil nil)
 ;;;### (autoloads nil "nix-search" "nix-search.el" (0 0 0 0))
 ;;; Generated autoloads from nix-search.el
 
+(autoload 'nix-search--search "nix-search" "\
+
+
+\(fn SEARCH FILE &optional NO-CACHE USE-FLAKES)" nil nil)
+
+(autoload 'nix-search--display "nix-search" "\
+
+
+\(fn RESULTS &optional DISPLAY-BUFFER USE-FLAKES SEARCH FILE)" nil nil)
+
 (autoload 'nix-search "nix-search" "\
 Run nix search.
 SEARCH a search term to use.
 FILE a Nix expression to search in.
 
-\(fn &optional SEARCH FILE)" t nil)
+\(fn SEARCH &optional FILE DISPLAY-BUFFER)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-search" '("nix-search-read-attr")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-search" '("nix-search-")))
 
 ;;;***
 
@@ -266,7 +321,7 @@ ATTR an attribute of the Nix file to use.
 ;;;### (autoloads nil "nix-store" "nix-store.el" (0 0 0 0))
 ;;; Generated autoloads from nix-store.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-store" '("nix-store-realise")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nix-store" '("nix-")))
 
 ;;;***
 
