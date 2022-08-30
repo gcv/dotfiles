@@ -1,9 +1,11 @@
-;;; nix-instantiate.el -- run nix commands in Emacs -*- lexical-binding: t -*-
+;;; nix-instantiate.el --- Run nix commands -*- lexical-binding: t -*-
 
 ;; Author: Matthew Bauer <mjbauer95@gmail.com>
 ;; Homepage: https://github.com/NixOS/nix-mode
+;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: nix
 ;; Version: 1.4.0
+
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -17,19 +19,8 @@
 (defun nix-instantiate--parsed (drv)
   "Get the parsed version of the .drv file.
 DRV file to load from."
-  (let ((stdout (generate-new-buffer "nix show-derivation"))
-	result)
-    (call-process nix-executable nil (list stdout nil) nil
-		  "show-derivation" drv)
-    (setq result
-	  (cdar (with-current-buffer stdout
-		  (when (eq (buffer-size) 0)
-		    (error "Nix’s show-derivation %s failed to produce any output"
-			   drv))
-		  (goto-char (point-min))
-		  (json-read))))
-    (kill-buffer stdout)
-    result))
+  (cdar
+    (nix--process-json "show-derivation" drv)))
 
 (defun nix-instantiate (nix-file &optional attribute parse)
   "Run nix-instantiate on a Nix expression.

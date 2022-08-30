@@ -2,7 +2,11 @@
 
 ;; This file is NOT part of GNU Emacs.
 
+;; Homepage: https://github.com/NixOS/nix-mode
 ;; Version: 1.4.5
+;; Package-Requires: ((emacs "24.4"))
+
+;; This file is NOT part of GNU Emacs.
 
 ;;; Commentary:
 
@@ -14,12 +18,12 @@
 (require 'nix)
 
 (defgroup nix-repl nil
-  "nix-repl customizations"
+  "Nix-repl customizations."
   :group 'nix)
 
 (defcustom nix-repl-executable-args '("repl")
   "Arguments to provide to nix-repl."
-  :type 'list)
+  :type '(repeat string))
 
 (defvar nix-repl-completion-redirect-buffer
   " *nix-repl completions redirect*"
@@ -34,10 +38,34 @@
     (define-key map "\t" 'completion-at-point)
     map))
 
+(defun nix-repl-save-all-histories ()
+  "Call `comint-write-input-ring' for all `nix-repl-mode' buffers."
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (eq major-mode 'nix-repl-mode)
+        (comint-write-input-ring)))))
+
 (define-derived-mode nix-repl-mode comint-mode "Nix-REPL"
   "Interactive prompt for Nix."
+  :interactive nil
   (setq-local comint-prompt-regexp nix-prompt-regexp)
   (setq-local comint-prompt-read-only t)
+  (let* ((is-remote (file-remote-p default-directory))
+         (maybe-xdg-data-home (if is-remote
+                                  (shell-command-to-string "echo -n $XDG_DATA_HOME")
+                                (or (getenv "XDG_DATA_HOME")
+                                    "")))
+         (path-prefix (if (string-empty-p maybe-xdg-data-home)
+                          "~/.local/share"
+                        maybe-xdg-data-home))
+         (history-path (concat
+                        is-remote
+                        path-prefix
+                        "/nix/repl-history")))
+    (setq-local comint-input-ring-file-name history-path))
+  (comint-read-input-ring t)
+  (add-hook 'kill-buffer-hook #'comint-write-input-ring nil 'local)
+  (add-hook 'kill-emacs-hook #'nix-repl-save-all-histories nil 'local)
   (add-hook 'completion-at-point-functions
             #'nix-repl-completion-at-point nil 'local))
 
@@ -148,14 +176,16 @@ guarantees they will be grabbed in a single call."
   "Completion at point function for Nix using \"nix-repl\".
 See `completion-at-point-functions'."
   (save-excursion
-    (let ((prefix (and (derived-mode-p 'nix-repl-mode)
-                       (executable-find nix-executable)
-                       (nix--prefix-bounds))))
+    (let* ((proc (get-buffer-process (current-buffer)))
+           (prefix (and (derived-mode-p 'nix-repl-mode)
+                        proc
+                        (executable-find nix-executable)
+                        (nix--prefix-bounds))))
       (pcase prefix
         (`(,beg . ,end)
          (list beg end
                (nix-get-completions
-                (get-buffer-process (current-buffer))
+                proc
                 (buffer-substring beg end))
                :exclusive 'no))))))
 
