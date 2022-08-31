@@ -294,15 +294,6 @@ PROMPT='%(!.${COLOR_RED}.${COLOR_NONE})[%m:$(shorten_path_disambiguate_keep_last
 RPROMPT='%(?..${COLOR_RED}[%?]${COLOR_NONE})'
 
 
-### fix colors in tmux
-if [[ $TERM == "screen" || $TERM == "screen-256color" ]]; then
-    export TERM=screen-24bit
-fi
-if [[ $TERM == "tmux" || $TERM == "tmux-256color" ]]; then
-    export TERM=tmux-24bit
-fi
-
-
 ### title bar or status bar
 case $TERM in
     xterm*|rxvt*|cygwin)
@@ -315,7 +306,7 @@ case $TERM in
         }
         preexec_functions+=( preexec_xterm )
         ;;
-    screen*)
+    screen*|tmux*)
         function precmd_screen() {
             print -Pn "\e]0;%n@%m (%y): %5~\a"
             print -Pn "\ek \e\\"
