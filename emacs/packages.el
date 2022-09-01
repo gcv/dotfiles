@@ -1287,7 +1287,10 @@
   :if (not window-system)
 
   :init
-  (xclip-mode 1)
+  (condition-case _
+      (xclip-mode 1)
+    ;; handle the problem of xclip-program not being found on GUI-less systems
+    (file-error nil))
   )
 
 
