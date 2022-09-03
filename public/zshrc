@@ -381,7 +381,10 @@ if [ -z "${SSH_AUTH_SOCK}" ]; then
             launchctl start gui/$(id -u)/com.openssh.ssh-agent
             ssh_agent_pid=$(ps uwx | grep "${USER}" | grep ssh-agent | grep -v grep | awk '{print $2}')
         fi
-        export SSH_AUTH_SOCK=$(lsof -p ${ssh_agent_pid} | grep com.apple.launchd | grep Listeners | awk '{print $8}' | head -1)
+        # launchd may fail to restart the ssh-agent, sigh
+        if [ ! -z ${ssh_agent_pid} ]; then
+            export SSH_AUTH_SOCK=$(lsof -p ${ssh_agent_pid} | grep com.apple.launchd | grep Listeners | awk '{print $8}' | head -1)
+        fi
     else
         ssh_agent_sock_file="${HOME}/.ssh/ssh-agent-$(hostname -s)-$(id -un).sock"
         if [ ! -S "${ssh_agent_sock_file}" ]; then
