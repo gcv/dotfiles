@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
 
+### $ ./install --all
+### or:
+### $ curl https://github.com/gcv/dotfiles/install | bash
+###
+### It may make sense to replace parts of this with some combination of:
+### - https://www.gnu.org/software/stow/ (symlink manager)
+### - https://www.chezmoi.io/ (golang binary dotfiles installer)
+### - https://yadm.io/ (single bash-script dotfiles installer; built on Git)
+
+
 readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
 basedir=$(dirname "$(readlinkf "$0")")
 [[ ${#BASH_SOURCE[@]} > 0 ]] && script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}") || script="" # set script to "" if run from stdin (i.e. curl | bash piped invocation)
