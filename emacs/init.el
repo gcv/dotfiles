@@ -560,7 +560,7 @@
     (setq insert-directory-program ls-binary)
     (if gnu-ls?
         ;; XXX: DO NOT use --indicator-style flags with ls! They confuse dired!
-        (setq dired-listing-switches "-g --almost-all --human-readable --time-style=long-iso --no-group")
+        (setq dired-listing-switches "-g --almost-all --human-readable --time-style=long-iso --sort=version --no-group")
       (setq dired-listing-switches "-lAgh")
       (setq dired-use-ls-dired nil)))
 
