@@ -795,6 +795,7 @@
 
 
 (use-package nix-mode
+  :pin melpa
   :mode "\\.nix$")
 
 
