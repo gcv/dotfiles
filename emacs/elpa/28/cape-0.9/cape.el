@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.8
+;; Version: 0.9
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/cape
 
@@ -57,7 +57,7 @@
   :group 'convenience
   :prefix "cape-")
 
-(defcustom cape-dict-file "/etc/dictionaries-common/words"
+(defcustom cape-dict-file "/usr/share/dict/words"
   "Dictionary word list file."
   :type 'string)
 
@@ -84,7 +84,7 @@ Any other non-nil value only checks some other buffers, as per
 
 (defcustom cape-file-directory-must-exist t
   "The parent directory must exist for file completion."
-  :type 'integer)
+  :type 'boolean)
 
 (defcustom cape-line-buffer-function #'cape--buffers-major-mode
   "Function which returns list of buffers.
@@ -113,33 +113,39 @@ The buffers are scanned for completion candidates by `cape-line'."
   (let ((completion-at-point-functions (list capf)))
     (or (completion-at-point) (user-error "%s: No completions" capf))))
 
+(defmacro cape--wrapped-table (wrap body)
+  "Create wrapped completion table, handle `completion--unquote'.
+WRAP is the wrapper function.
+BODY is the wrapping expression."
+  (declare (indent 1))
+  `(lambda (str pred action)
+     (,@body
+      (let ((result (complete-with-action action table str pred)))
+        (when (and (eq action 'completion--unquote) (functionp (cadr result)))
+          (cl-callf ,wrap (cadr result)))
+        result))))
+
 (defun cape--accept-all-table (table)
   "Create completion TABLE which accepts all input."
-  (lambda (str pred action)
-    (or (eq action 'lambda) (complete-with-action action table str pred))))
+  (cape--wrapped-table cape--accept-all-table
+    (or (eq action 'lambda))))
 
 (defun cape--noninterruptible-table (table)
   "Create non-interruptible completion TABLE."
-  (lambda (str pred action)
-    (let (throw-on-input)
-      (complete-with-action action table str pred))))
+  (cape--wrapped-table cape--noninterruptible-table
+    (let (throw-on-input))))
 
 (defun cape--silent-table (table)
   "Create a new completion TABLE which is silent (no messages, no errors)."
-  (lambda (str pred action)
-    (cape--silent
-      (complete-with-action action table str pred))))
+  (cape--wrapped-table cape--silent-table
+    (cape--silent)))
 
 (defun cape--nonessential-table (table)
   "Mark completion TABLE as `non-essential'."
   (let ((dir default-directory))
-    (lambda (str pred action)
+    (cape--wrapped-table cape--nonessential-table
       (let ((default-directory dir)
-            (non-essential t))
-        (let ((result (funcall table str pred action)))
-          (when (and (eq action 'completion--unquote) (functionp (cadr result)))
-            (cl-callf cape--nonessential-table (cadr result)))
-          result)))))
+            (non-essential t))))))
 
 (cl-defun cape--table-with-properties (table &key category (sort t) &allow-other-keys)
   "Create completion TABLE with properties.
@@ -227,7 +233,7 @@ See also `consult-history' for a more flexible variant based on
 ;;;;; cape-file
 
 (defvar cape--file-properties
-  (list :annotation-function (lambda (s) (if (string-suffix-p "/" s) " Folder" " File"))
+  (list :annotation-function (lambda (s) (if (string-suffix-p "/" s) " Dir" " File"))
         :company-kind (lambda (s) (if (string-suffix-p "/" s) 'folder 'file))
         :exclusive 'no)
   "Completion extra properties for `cape-file'.")
@@ -239,7 +245,7 @@ See the user option `cape-file-directory-must-exist'.
 If INTERACTIVE is nil the function acts like a Capf."
   (interactive (list t))
   (if interactive
-      (let ((cape-file-directory-must-exist))
+      (let (cape-file-directory-must-exist)
         (cape--interactive #'cape-file))
     (let* ((default-directory (pcase cape-file-directory
                                 ('nil default-directory)
@@ -250,14 +256,14 @@ If INTERACTIVE is nil the function acts like a Capf."
            (file (buffer-substring (car bounds) (cdr bounds)))
            ;; Support org links globally, see `org-open-at-point-global'.
            (org (string-prefix-p "file:" file)))
-      (when org (setf (car bounds) (+ 5 (car bounds))))
+      (when org (setcar bounds (+ 5 (car bounds))))
       (when (or org
                 (not cape-file-directory-must-exist)
                 (and (string-match-p "/" file)
                      (file-exists-p (file-name-directory file))))
         `(,(car bounds) ,(cdr bounds)
           ,(cape--nonessential-table #'read-file-name-internal)
-          ,@(when (or org (string-match-p "./\\'" file))
+          ,@(when (or org (string-match-p "./" file))
               '(:company-prefix-length t))
           ,@cape--file-properties)))))
 
