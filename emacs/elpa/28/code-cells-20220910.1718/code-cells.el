@@ -4,8 +4,8 @@
 
 ;; Author: Augusto Stoffel <arstoffel@gmail.com>
 ;; Keywords: convenience, outlines
-;; Package-Version: 20220606.852
-;; Package-Commit: 27ac22bc0be905f31abf8c09e63d371b0b0059d3
+;; Package-Version: 20220910.1718
+;; Package-Commit: 9da2ff44d1324b7c827b5d475391ba0a16c34239
 ;; URL: https://github.com/astoff/code-cells.el
 ;; Package-Requires: ((emacs "27.1"))
 ;; Version: 0.2
@@ -55,6 +55,7 @@
 
 (require 'map)
 (require 'json)
+(require 'outline)
 (require 'pulse)
 (require 'subr-x)
 (eval-when-compile
@@ -68,24 +69,36 @@
 
 ;;; Cell navigation
 
-(defcustom code-cells-boundary-markers
-  (list (rx "%" (group-n 1 (+ "%")))
-        (rx (group-n 1 (+ "*")))
-        (rx " In[" (* (any space digit)) "]:"))
+(defcustom code-cells-boundary-markers nil
   "List of regular expressions specifying cell boundaries.
 They should match immediately after a comment start at the
 beginning of a line.  The length of the first capture determines
 the outline level."
-  :type '(repeat sexp))
+  :type '(repeat regexp))
+(make-obsolete-variable 'code-cells-boundary-markers
+                        'code-cells-boundary-regexp
+                        "0.3")
+
+(defcustom code-cells-boundary-regexp
+  (rx (+ (syntax comment-start))
+      (or (seq (* (syntax whitespace)) "%" (group-n 1 (+ "%")))
+          (group-n 1 (+ "*"))
+          (seq " In[" (* (any space digit)) "]:")))
+  "Regular expression specifying cell boundaries.
+It should match at the beginning of a line.  The length of the
+first capture determines the outline level."
+  :type 'regexp)
 
 (defun code-cells-boundary-regexp ()
   "Return a regexp matching comment lines that serve as cell boundary."
-  (concat (rx line-start)
-          (or comment-start-skip
-              (rx (+ (syntax comment-start)) (* (syntax whitespace))))
-          "\\(?:"
-          (string-join code-cells-boundary-markers "\\|")
-          "\\)"))
+  (if code-cells-boundary-markers
+      (concat (rx line-start)
+              (or comment-start-skip
+                  (rx (+ (syntax comment-start)) (* (syntax whitespace))))
+              "\\(?:"
+              (string-join code-cells-boundary-markers "\\|")
+              "\\)")
+    (rx line-start (regexp code-cells-boundary-regexp))))
 
 ;;;###autoload
 (defun code-cells-forward-cell (&optional arg)
@@ -94,6 +107,8 @@ With ARG, repeat this that many times.  If ARG is negative, move
 backward."
   (interactive "p")
   (let ((page-delimiter (code-cells-boundary-regexp)))
+    (when (and (< 0 arg) (looking-at page-delimiter))
+      (forward-char))
     (forward-page arg)
     (unless (eobp)
       (move-beginning-of-line 1))))
@@ -119,27 +134,6 @@ region bounds instead."
                         (point))))
         (code-cells-backward-cell (abs count))
         (list (point) end)))))
-
-;;;###autoload
-(defmacro code-cells-do (&rest body)
-  "Find current cell bounds and evaluate BODY.
-Inside BODY, the variables `start' and `end' are bound to the
-limits of the current cell.
-
-If the first element of BODY is the keyword `:use-region' and the
-region is active, use its bounds instead.  In this case,
-`using-region' is non-nil in BODY."
-  `(pcase (if (and ,(eq (car body) :use-region) (use-region-p))
-              (list t (region-end) (region-beginning))
-            (save-excursion
-              (list nil
-                    (progn (code-cells-forward-cell) (point))
-                    (progn (code-cells-backward-cell) (point)))))
-     (`(,using-region ,end ,start)
-      ;; Avoid compiler warnings if one of those is unused in body
-      (ignore using-region end start)
-      ,@body)))
-(make-obsolete 'code-cells-do 'code-cells--bounds "2021-05-29")
 
 (defun code-cells--bounds-of-cell-relative-from (distance)
   "Return the bounds of the code cell which is DISTANCE cells away
@@ -307,26 +301,28 @@ level."
   `((,(rx (regexp (code-cells-boundary-regexp)) (* any) "\n")
      0 'code-cells-header-line append)))
 
-(defvar outline-heading-end-regexp)
-
 ;;;###autoload
 (define-minor-mode code-cells-mode
   "Minor mode for cell-oriented code."
   :keymap (make-sparse-keymap)
   (if code-cells-mode
       (progn
-        (require 'outline)
-        (setq-local code-cells--saved-vars (list outline-level
-                                                 outline-regexp
-                                                 outline-heading-end-regexp)
-                    outline-level 'code-cells--outline-level
-                    outline-regexp (rx (or (regexp (code-cells-boundary-regexp))
-                                           (regexp outline-regexp)))
-                    outline-heading-end-regexp "\n")
+        (setq-local
+         code-cells--saved-vars (list outline-level
+                                      outline-regexp
+                                      outline-heading-end-regexp
+                                      paragraph-start)
+         outline-level 'code-cells--outline-level
+         outline-regexp (rx (or (regexp (code-cells-boundary-regexp))
+                                (regexp outline-regexp)))
+         outline-heading-end-regexp "\n"
+         paragraph-separate (rx (or (regexp paragraph-separate)
+                                    (regexp (code-cells-boundary-regexp)))))
         (font-lock-add-keywords nil (code-cells--font-lock-keywords)))
-    (setq-local outline-level (nth 0 code-cells--saved-vars)
-                outline-regexp (nth 1 code-cells--saved-vars)
-                outline-heading-end-regexp (nth 2 code-cells--saved-vars))
+    (setq-local outline-level (pop code-cells--saved-vars)
+                outline-regexp (pop code-cells--saved-vars)
+                outline-heading-end-regexp (pop code-cells--saved-vars)
+                paragraph-separate (pop code-cells--saved-vars))
     (font-lock-remove-keywords nil (code-cells--font-lock-keywords)))
   (font-lock-flush))
 

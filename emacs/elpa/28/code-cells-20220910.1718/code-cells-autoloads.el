@@ -23,17 +23,6 @@ forward.
 
 \(fn &optional ARG)" t nil)
 
-(autoload 'code-cells-do "code-cells" "\
-Find current cell bounds and evaluate BODY.
-Inside BODY, the variables `start' and `end' are bound to the
-limits of the current cell.
-
-If the first element of BODY is the keyword `:use-region' and the
-region is active, use its bounds instead.  In this case,
-`using-region' is non-nil in BODY.
-
-\(fn &rest BODY)" nil t)
-
 (autoload 'code-cells-move-cell-up "code-cells" "\
 Move current code cell vertically up ARG cells.
 
