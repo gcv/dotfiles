@@ -104,6 +104,8 @@ Delete N directories or words before point.
 (autoload 'vertico-directory-tidy "vertico-directory" "\
 Tidy shadowed file name, see `rfn-eshadow-overlay'." nil nil)
 
+(register-definition-prefixes "vertico-directory" '("vertico-directory--completing-file-p"))
+
 ;;;***
 
 ;;;### (autoloads nil "vertico-flat" "vertico-flat.el" (0 0 0 0))
@@ -211,7 +213,7 @@ it is disabled.
 
 \(fn &optional ARG)" t nil)
 
-(register-definition-prefixes "vertico-indexed" '("vertico-indexed--"))
+(register-definition-prefixes "vertico-indexed" '("vertico-indexed-"))
 
 ;;;***
 
@@ -315,11 +317,16 @@ This function must be registered as `minibuffer-setup-hook'." nil nil)
 
 (autoload 'vertico-repeat-last "vertico-repeat" "\
 Repeat last Vertico completion SESSION.
+If called interactively from an existing Vertico session,
+`vertico-repeat-last' will restore the last input and
+last selected candidate for the current command.
 
 \(fn &optional SESSION)" t nil)
 
 (autoload 'vertico-repeat-select "vertico-repeat" "\
-Select a Vertico session from the session history and repeat it." t nil)
+Select a Vertico session from the session history and repeat it.
+If called from an existing Vertico session, you can select among
+previous sessions for the current command." t nil)
 
 (autoload 'vertico-repeat "vertico-repeat" "\
 Repeat last Vertico session.
