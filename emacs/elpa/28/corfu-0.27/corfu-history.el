@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.26"))
+;; Package-Requires: ((emacs "27.1") (corfu "0.27"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -74,7 +74,7 @@
   ;; shorter than 2**16 entries.
   (cl-loop for cand on candidates do
            (setcar cand (cons (car cand)
-                              (+ (lsh (gethash (car cand) corfu-history--hash #xFFFF) 13)
+                              (+ (ash (gethash (car cand) corfu-history--hash #xFFFF) 13)
                                  (length (car cand))))))
   (setq candidates (sort candidates #'corfu-history--sort-predicate))
   (cl-loop for cand on candidates do (setcar cand (caar cand)))

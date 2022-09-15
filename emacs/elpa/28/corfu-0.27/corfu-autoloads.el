@@ -127,7 +127,7 @@ it is disabled.
 
 \(fn &optional ARG)" t nil)
 
-(register-definition-prefixes "corfu-indexed" '("corfu-indexed--"))
+(register-definition-prefixes "corfu-indexed" '("corfu-indexed-"))
 
 ;;;***
 
