@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -33,13 +33,6 @@ being used at runtime."
   "Minibuffer metadata categories to show file preview."
   :group 'dirvish :type 'list)
 
-(defcustom dirvish-peek-display-alist
-  '((side . right)
-    (slot . -1)
-    (window-width . 0.5))
-  "Display alist for preview window of `dirvish-peek'."
-  :group 'dirvish :type 'alist)
-
 (defvar dirvish-peek--cand-fetcher nil)
 (defun dirvish-peek--prepare-cand-fetcher ()
   "Set candidate fetcher according to current completion framework."
@@ -53,65 +46,63 @@ being used at runtime."
                   (selectrum--get-candidate
                    selectrum--current-candidate-index))))
               ((bound-and-true-p ivy-mode) (lambda () (ivy-state-current ivy-last)))
-              ((bound-and-true-p icomplete-mode) (lambda () (car completion-all-sorted-completions))))))
+              ((bound-and-true-p icomplete-mode)
+               (lambda () (car completion-all-sorted-completions))))))
 
-(defun dirvish-peek--create ()
+(defvar dirvish-peek--curr-category nil)
+(defun dirvish-peek-setup-h ()
   "Create dirvish minibuffer preview window.
 The window is created only when metadata in current minibuffer is
 one of categories in `dirvish-peek-categories'."
-  (let* ((old-dv (dirvish-curr))
-         (meta (ignore-errors
+  (let* ((meta (ignore-errors
                  (completion-metadata
                   (buffer-substring-no-properties (field-beginning) (point))
                   minibuffer-completion-table
                   minibuffer-completion-predicate)))
          (category (completion-metadata-get meta 'category))
-         (preview-category (and (memq category dirvish-peek-categories) category))
+         (p-category (and (memq category dirvish-peek-categories) category))
          new-dv)
-    (when preview-category
+    (setq dirvish-peek--curr-category p-category)
+    (when p-category
       (dirvish-peek--prepare-cand-fetcher)
-      (add-hook 'post-command-hook #'dirvish-peek-update-h 99 t)
-      (unless (and old-dv (dv-preview-window old-dv))
-        (setq new-dv (dirvish-new))
+      (add-hook 'post-command-hook #'dirvish-peek-update-h 90 t)
+      (add-hook 'minibuffer-exit-hook #'dirvish-peek-exit-h nil t)
+      (unless (and dirvish--this (dv-preview-window dirvish--this))
+        (setq new-dv (dirvish-new :type 'peek))
         (setf (dv-preview-window new-dv)
-              (display-buffer-in-side-window
-               (dirvish--util-buffer)
-               dirvish-peek-display-alist))))
-    (set-frame-parameter nil 'dirvish--peek
-                         `(:category ,preview-category :old ,old-dv))))
-
-(defun dirvish-peek--teardown ()
-  "Teardown dirvish minibuffer preview window."
-  (let* ((dv-mini (frame-parameter nil 'dirvish--peek))
-         (old-dv (plist-get dv-mini :old)))
-    (set-frame-parameter nil 'dirvish--curr old-dv)))
+              (or (minibuffer-selected-window) (next-window)))))))
 
 (defun dirvish-peek-update-h ()
   "Hook for `post-command-hook' to update peek window."
-  (when-let* ((category
-               (plist-get (frame-parameter nil 'dirvish--peek) :category))
+  (when-let* ((dirvish-peek--curr-category)
               (cand (funcall dirvish-peek--cand-fetcher)))
-    (pcase category
+    (pcase dirvish-peek--curr-category
       ('file
        (setq cand (expand-file-name cand)))
       ('project-file
-       (setq cand (expand-file-name cand (or (dirvish--get-project-root)
-                                             (car (minibuffer-history-value))))))
+       (setq cand (expand-file-name
+                   cand (or (dirvish--get-project-root)
+                            (car (minibuffer-history-value))))))
       ('library
-       (setq cand (file-truename (or (ignore-errors (find-library-name cand)) "")))))
+       (setq cand (file-truename
+                   (or (ignore-errors (find-library-name cand)) "")))))
     (dirvish-prop :index cand)
-    (dirvish-debounce nil (dirvish-preview-update (dirvish-curr)))))
+    (dirvish-debounce nil (dirvish-preview-update dirvish--this))))
+
+(defun dirvish-peek-exit-h ()
+  "Hook for `minibuffer-exit-hook' to destroy peek session."
+  (dolist (dv (hash-table-values dirvish--session-hash))
+    (when (eq (dv-type dv) 'peek)
+      (dirvish-kill dv)
+      (remhash (dv-name dv) dirvish--session-hash))))
 
 ;;;###autoload
 (define-minor-mode dirvish-peek-mode
   "Show file preview when narrowing candidates using minibuffer."
   :group 'dirvish :global t
   (if dirvish-peek-mode
-      (progn
-        (add-hook 'minibuffer-setup-hook #'dirvish-peek--create)
-        (add-hook 'minibuffer-exit-hook #'dirvish-peek--teardown))
-    (remove-hook 'minibuffer-setup-hook #'dirvish-peek--create)
-    (remove-hook 'minibuffer-exit-hook #'dirvish-peek--teardown)))
+      (add-hook 'minibuffer-setup-hook #'dirvish-peek-setup-h)
+    (remove-hook 'minibuffer-setup-hook #'dirvish-peek-setup-h)))
 
 (provide 'dirvish-peek)
 ;;; dirvish-peek.el ends here

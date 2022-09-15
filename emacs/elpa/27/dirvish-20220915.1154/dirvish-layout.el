@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -41,12 +41,11 @@ possibly one or more parent windows."
          (new-layout (unless old-layout (dv-last-fs-layout dv)))
          (buf (current-buffer)))
     (if old-layout
-        (set-window-configuration (dv-window-conf dv))
+        (set-window-configuration (dv-winconf dv))
       (with-selected-window (dv-root-window dv) (quit-window)))
     (setf (dv-layout dv) new-layout)
-    (dirvish--save-env dv)
     (with-selected-window (dirvish--create-root-window dv)
-      (dirvish-with-no-dedication (switch-to-buffer buf))
+      (dirvish-save-dedication (switch-to-buffer buf))
       (dirvish--build dv)
       (dirvish-debounce nil (dirvish-preview-update dv)))))
 
@@ -76,19 +75,6 @@ current layout defined in `dirvish-layout-recipes'."
      (setf (dv-layout dv) new-recipe)
      (setf (dv-last-fs-layout dv) new-recipe)
      (dirvish--build dv))))
-
-;;;###autoload
-(defun dirvish-dwim (&optional path)
-  "Start a Dirvish session with optional PATH.
-The session takes the whole frame when `one-window-p'."
-  (interactive (list (and current-prefix-arg (read-directory-name "Dirvish: "))))
-  (let ((path (expand-file-name (or path default-directory)))
-        (layout (and (one-window-p) dirvish-default-layout))
-        (dv (dirvish-prop :dv)))
-    (if (and dv (dv-layout dv))
-        (dirvish-find-entry-ad path)
-      (or (dirvish--reuse-session path layout)
-          (dirvish-new :path path :layout layout)))))
 
 (provide 'dirvish-layout)
 ;;; dirvish-layout.el ends here

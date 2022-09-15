@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -38,6 +38,10 @@
 This value is passed to function `format-time-string'."
   :group 'dirvish :type 'string)
 
+(defcustom dirvish-path-separators '(:home " ⌂ " :root " ∀ " :sep " ⋗ ")
+  "Separators in path mode line segment."
+  :group 'dirvish :type 'plist)
+
 (defface dirvish-free-space
   '((t (:inherit font-lock-constant-face)))
   "Face used for `free-space' mode-line segment."
@@ -64,7 +68,7 @@ This value is passed to function `format-time-string'."
   :group 'dirvish)
 
 (defface dirvish-file-size
-  '((t (:inherit completions-annotations)))
+  '((t (:inherit completions-annotations :underline nil :italic nil)))
   "Face used for display file size attributes / mode-line segment."
   :group 'dirvish)
 
@@ -103,7 +107,7 @@ This value is passed to function `format-time-string'."
 (defun dirvish--get-file-size-or-count (name attrs)
   "Get file size of file NAME from ATTRS."
   (let ((type (file-attribute-type attrs)))
-    (cond ((dirvish-prop :tramp)
+    (cond ((dirvish-prop :remote)
            (dirvish--file-size-add-spaces
             (or (file-attribute-size attrs) "?")))
           ((stringp type)
@@ -149,7 +153,10 @@ This value is passed to function `format-time-string'."
   (:if (and (dirvish-prop :root) dired-hide-details-mode)
        :width (1+ dirvish--file-size-str-len))
   (let* ((str (dirvish--get-file-size-or-count f-name f-attrs))
-         (ov-pos (if (> remain f-wid) l-end (+ f-beg remain)))
+         (ov-pos (if (> remain f-wid) l-end
+                   (let* ((end (+ f-beg remain))
+                          (offset (- f-wid (length f-str))))
+                     (- end offset))))
          (face (or hl-face 'dirvish-file-size))
          (dp-spec `(space :align-to (- right-fringe
                                        ,dirvish--file-size-str-len
@@ -171,28 +178,32 @@ This value is passed to function `format-time-string'."
    'keymap `(header-line keymap
                          (mouse-1 . (lambda (_ev)
                                       (interactive "e")
-                                      (dirvish-find-entry-ad ,path))))))
+                                      (dirvish-find-entry-a ,path))))))
 
 (dirvish-define-mode-line path
   "Path of file under the cursor."
   (let* ((index (dired-current-directory))
          (face (if (dirvish--window-selected-p dv) 'dired-header 'shadow))
          (abvname (abbreviate-file-name (file-local-name index)))
-         (rmt (dirvish-prop :tramp-handler))
+         (rmt (dirvish-prop :remote))
          (host (propertize (if rmt (concat " " (substring rmt 1)) "")
                            'face 'font-lock-builtin-face))
          (segs (nbutlast (split-string abvname "/")))
          (scope (pcase (car segs)
                   ("~" (dirvish--register-path-seg
-                        " ⌂ " (concat rmt "~/") face))
+                        (plist-get dirvish-path-separators :home)
+                        (concat rmt "~/") face))
                   ("" (dirvish--register-path-seg
-                       " ∀ " (concat rmt "/") face))))
+                        (plist-get dirvish-path-separators :root)
+                       (concat rmt "/") face))))
          (path (cl-loop for idx from 2
                         for sp = (format
                                   "%s%s" (or rmt "")
                                   (mapconcat #'concat (seq-take segs idx) "/"))
                         for s in (cdr segs) concat
-                        (format "%s%s" (if (eq idx 2) "" " ⋗ ")
+                        (format "%s%s"
+                                (if (eq idx 2) ""
+                                  (plist-get dirvish-path-separators :sep))
                                 (dirvish--register-path-seg s sp face)))))
     (replace-regexp-in-string "%" "%%%%" (format "%s%s%s " host scope path))))
 
@@ -219,7 +230,8 @@ This value is passed to function `format-time-string'."
 
 (dirvish-define-mode-line omit
   "A `dired-omit-mode' indicator."
-  (and (bound-and-true-p dired-omit-mode) (propertize "Omit" 'face 'font-lock-negation-char-face)))
+  (and (bound-and-true-p dired-omit-mode)
+       (propertize "Omit" 'face 'font-lock-negation-char-face)))
 
 (dirvish-define-mode-line symlink
   "Show the truename of symlink file under the cursor."
@@ -252,7 +264,7 @@ This value is passed to function `format-time-string'."
   (when-let* ((name (dirvish-prop :index))
               (attrs (dirvish-attribute-cache name :builtin))
               (uid (and attrs (file-attribute-user-id attrs)))
-              (uname (if (dirvish-prop :tramp) uid (user-login-name uid))))
+              (uname (if (dirvish-prop :remote) uid (user-login-name uid))))
     (propertize uname 'face 'dirvish-file-user-id)))
 
 (dirvish-define-mode-line file-group
@@ -260,7 +272,7 @@ This value is passed to function `format-time-string'."
   (when-let* ((name (dirvish-prop :index))
               (attrs (dirvish-attribute-cache name :builtin))
               (gid (and attrs (file-attribute-group-id attrs)))
-              (gname (if (dirvish-prop :tramp) gid (group-name gid))))
+              (gname (if (dirvish-prop :remote) gid (group-name gid))))
     (propertize gname 'face 'dirvish-file-group-id)))
 
 (dirvish-define-mode-line file-time
@@ -269,7 +281,7 @@ This value is passed to function `format-time-string'."
               (attrs (dirvish-attribute-cache name :builtin))
               (f-mtime (file-attribute-modification-time attrs))
               (time-string
-               (if (dirvish-prop :tramp) f-mtime
+               (if (dirvish-prop :remote) f-mtime
                  (format-time-string dirvish-time-format-string f-mtime))))
     (format "%s" (propertize time-string 'face 'dirvish-file-time))))
 

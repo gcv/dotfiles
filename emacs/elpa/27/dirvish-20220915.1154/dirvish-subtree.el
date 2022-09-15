@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -20,30 +20,31 @@
 (defvar dirvish-subtree--prefix-unit-len 2)
 (defvar-local dirvish-subtree--overlays nil "Subtree overlays in this buffer.")
 
+(dolist (sym-a '((dired-current-directory . dirvish-curr-dir-a)
+                 (dired-subdir-index . dirvish-subdir-index-a)
+                 (dired-get-subdir . dirvish-get-subdir-a)))
+  (advice-add (car sym-a) :around (cdr sym-a)))
+
 (defcustom dirvish-subtree-listing-switches nil
   "Listing SWITCHES used in subtrees.
 The value may be a string of options or nil which means the
 working switches of current buffer will be used."
   :type '(choice symbol string) :group 'dirvish)
 
-(defcustom dirvish-subtree-line-prefix "  "
+(define-obsolete-variable-alias 'dirvish-subtree-line-prefix 'dirvish-subtree-prefix "Sep 1, 2022")
+(defcustom dirvish-subtree-prefix " │"
   "A string put into each nested subtree.
 The prefix is repeated \"depth\" times."
   :type 'string :group 'dirvish
-  :set (lambda (k v)
-         (set k v)
-         (setq dirvish-subtree--prefix-unit-len
-               (cond ((bound-and-true-p dired-subtree-line-prefix)
-                      (or (ignore-errors (length (bound-and-true-p dired-subtree-line-prefix))) 2))
-                     (t (length v))))))
+  :set (lambda (k v) (set k v) (setq dirvish-subtree--prefix-unit-len (length v))))
 
 (defcustom dirvish-subtree-save-on-revert t
   "Non-nil means `revert-buffer' keeps all expanded subtrees."
   :type 'boolean :group 'dirvish
   :set (lambda (k v)
          (set k v)
-         (if v (add-hook 'dirvish-setup-hook #'dirvish-subtree--revert 10)
-           (remove-hook 'dirvish-setup-hook #'dirvish-subtree--revert))))
+         (if v (add-hook 'dirvish-after-revert-hook #'dirvish-subtree--revert)
+           (remove-hook 'dirvish-after-revert-hook #'dirvish-subtree--revert))))
 
 (defcustom dirvish-subtree-always-show-state nil
   "Non-nil means always show the subtree state indicator."
@@ -76,7 +77,12 @@ The value can be one of: `plus', `arrow', `chevron'."
                :v-adjust 0.1 :face 'dirvish-subtree-state)))))))
 
 (defface dirvish-subtree-state
-  '((t (:inherit font-lock-doc-face)))
+  '((t (:inherit font-lock-doc-face :underline nil)))
+  "Face used for `expanded-state' attribute."
+  :group 'dirvish)
+
+(defface dirvish-subtree-guide
+  '((t (:inherit font-lock-comment-face :underline nil)))
   "Face used for `expanded-state' attribute."
   :group 'dirvish)
 
@@ -97,21 +103,11 @@ LOCALP is the arg for `dired-current-directory', which see."
 Ensure correct DIR when inside of a subtree."
   (save-excursion
     (let ((count 0) ov)
-      (while (and (setq ov (dirvish-subtree--parent))
-                  (setq count (1+ count)))
+      (while (and (setq ov (dirvish-subtree--parent)) (cl-incf count))
         (goto-char (overlay-start ov))
         (dired-previous-line 1))
       (unless (eq count 0) (setq dir (dired-current-directory))))
     (funcall fn dir)))
-
-(setq dirvish-advice-alist
-      (append dirvish-advice-alist
-              '((advice dired-current-directory dirvish-curr-dir-a     :around)
-                (advice dired-subdir-index      dirvish-subdir-index-a :around)
-                (advice dired-get-subdir        dirvish-get-subdir-a   :around))))
-(when dirvish-override-dired-mode
-  (dirvish-override-dired-mode -1)
-  (dirvish-override-dired-mode 1))
 
 (defun dirvish-subtree--goto-file (filename)
   "Go to line describing FILENAME."
@@ -149,39 +145,24 @@ Ensure correct DIR when inside of a subtree."
    (when (> depth max) (setq pov ov) (setq max depth))
    finally return pov))
 
-(defun dirvish-subtree--readin (dirname)
-  "Readin the directory DIRNAME as a string."
-  (let* ((switches (or dirvish-subtree-listing-switches
-                       dired-actual-switches
-                       dired-listing-switches))
-         (trim (if (member "--all" (split-string switches)) 3 1)))
-    (with-temp-buffer
-      (insert-directory (file-name-as-directory dirname) switches nil t)
-      (delete-char -1)
-      (goto-char (point-min))
-      (delete-region (point) (progn (forward-line trim) (point)))
-      (goto-char (point-min))
-      (unless (looking-at-p "  ")
-        (let ((indent-tabs-mode nil))
-          (indent-rigidly (point-min) (point-max) 2)))
-      (buffer-string))))
-
 (defun dirvish-subtree--insert ()
   "Insert subtree under this directory."
-  (let* ((dirname (dired-get-filename))
-         (listing (dirvish-subtree--readin dirname))
+  (let* ((dir (dired-get-filename))
+         (listing (dirvish-readin-dir dir dirvish-subtree-listing-switches))
          buffer-read-only beg end)
-    (dirvish--print-directory (dirvish-prop :tramp) (current-buffer) dirname t)
+    (dirvish-data-for-dir dir (current-buffer) nil)
     (with-silent-modifications
       (save-excursion
         (setq beg (progn (move-end-of-line 1) (insert "\n") (point)))
         (setq end (progn (insert listing) (1+ (point))))))
     (let* ((ov (make-overlay beg end))
            (parent (dirvish-subtree--parent (1- beg)))
-           (depth (or (and parent (1+ (overlay-get parent 'dired-subtree-depth))) 1)))
+           (p-depth (and parent (1+ (overlay-get parent 'dired-subtree-depth))))
+           (depth (or p-depth 1))
+           (prefix (apply #'concat (make-list depth dirvish-subtree-prefix))))
       (overlay-put ov 'line-prefix
-                   (apply #'concat (make-list depth dirvish-subtree-line-prefix)))
-      (overlay-put ov 'dired-subtree-name dirname)
+                   (propertize prefix 'face 'dirvish-subtree-guide))
+      (overlay-put ov 'dired-subtree-name dir)
       (overlay-put ov 'dired-subtree-depth depth)
       (overlay-put ov 'evaporate t)
       (push ov dirvish-subtree--overlays))))
@@ -199,7 +180,7 @@ When CLEAR, remove all subtrees in the buffer."
    (setq dirvish-subtree--overlays nil)
    (cl-loop for (_ . name) in (sort maps (lambda (a b) (< (car a) (car b))))
             when (dirvish-subtree--goto-file name) do
-            (cond (clear
+            (cond ((or clear (bound-and-true-p dirvish-emerge--group-overlays))
                    (dired-next-line 1)
                    (dirvish-subtree-remove))
                   ((not (dirvish-subtree--expanded-p))
@@ -214,29 +195,33 @@ When CLEAR, remove all subtrees in the buffer."
                 (setq f-beg (dired-move-to-filename)))
       (and (eq depth (dirvish-subtree--depth))
            (equal file (buffer-substring f-beg (dired-move-to-end-of-filename)))
-           (setq stop t)))))
+           (setq stop t)))
+    stop))
 
 (defun dirvish-subtree-expand-to (target)
   "Go to line describing TARGET and expand its parent directories."
-  (let ((file (dired-get-filename))
-        (dir (dired-current-directory)))
+  (let ((file (dired-get-filename nil t)) (dir (dired-current-directory)))
     (cond ((equal file target) target)
           ((string-prefix-p file target)
            (unless (dirvish-subtree--expanded-p) (dirvish-subtree--insert))
-           (dirvish-subtree--move-to-file
-            (car (split-string (substring target (1+ (length file))) "/"))
-            (1+ (dirvish-subtree--depth)))
+           (let ((depth (1+ (dirvish-subtree--depth)))
+                 (next (car (split-string
+                            (substring target (1+ (length file))) "/"))))
+             (when (dirvish-subtree--move-to-file next depth)
+               (dirvish-subtree-expand-to target)))
            (dirvish-subtree-expand-to target))
           ((string-prefix-p dir target)
-           (let ((depth (dirvish-subtree--depth)))
+           (let ((depth (dirvish-subtree--depth))
+                 (next (car (split-string (substring target (length dir)) "/"))))
              (goto-char (dired-subdir-min))
-             (and dirvish--dired-free-space (forward-line))
-             (dirvish-subtree--move-to-file
-              (car (split-string (substring target (length dir)) "/")) depth)
-             (dirvish-subtree-expand-to target)))
+             (goto-char (next-single-property-change (point) 'dired-filename))
+             (forward-line -1)
+             ;; TARGET is either not exist or being hidden (#135)
+             (when (dirvish-subtree--move-to-file next depth)
+               (dirvish-subtree-expand-to target))))
           ((string-prefix-p (expand-file-name default-directory) dir)
            (goto-char (dired-subdir-min))
-           (forward-line (if dirvish--dired-free-space 2 1))
+           (goto-char (next-single-property-change (point) 'dired-filename))
            (dirvish-subtree-expand-to target))
           ('invalid-target nil))))
 
@@ -312,7 +297,7 @@ This command takes a mouse event EV as its argment."
       (goto-char pos)
       (condition-case nil
           (dirvish-subtree-toggle)
-        (error (find-file (dired-get-file-for-visit)))))
+        (error (dirvish-find-entry-a (dired-get-file-for-visit)))))
     (when (window-live-p win) (select-window win))))
 
 ;;;###autoload (autoload 'dirvish-subtree-menu "dirvish-subtree" nil t)

@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -27,6 +27,7 @@
 
 (require 'dired-aux)
 (require 'dirvish)
+(require 'dirvish-tramp)
 
 (defcustom dirvish-yank-sources 'all
   "The way to collect source files.
@@ -87,7 +88,7 @@ invoke the CMD, DOC is the documentation string."
          (lambda () (dirvish--format-menu-heading "Select yank operation on marked files:"))
          ,@v]
         (interactive)
-        (if (derived-mode-p 'dirvish-mode)
+        (if (derived-mode-p 'dired-mode)
             (transient-setup 'dirvish-yank-menu)
           (user-error "Not in a Dirvish buffer"))))))
 
@@ -105,7 +106,7 @@ results of `dirvish-yank--get-remote-port'.")
   "Return the remote port we shall use for the reverse port-forward."
   (+ 50000 (length
             (seq-filter
-             (lambda (p) (string-prefix-p "*Dirvish-yank" (process-name p)))
+             (lambda (p) (string-prefix-p " *Dirvish-yank" (process-name p)))
              (process-list)))))
 
 (defun dirvish-yank--get-srcs (&optional range)
@@ -176,8 +177,7 @@ RANGE can be `buffer', `session', `frame', `all'."
               (dv-buf (window-buffer (dv-root-window dv))))
     (when (and (buffer-live-p dv-buf)
                (or (eq dv-buf (current-buffer))
-                   (not (with-current-buffer dv-buf
-                          (dirvish-prop :tramp)))))
+                   (not (with-current-buffer dv-buf (dirvish-prop :remote)))))
       (with-current-buffer dv-buf (revert-buffer)))))
 
 (defun dirvish-yank--execute (cmd)
@@ -191,7 +191,7 @@ RANGE can be `buffer', `session', `frame', `all'."
     (when dirvish-yank-auto-unmark
       (cl-loop for buf in (reverse (dirvish-get-all 'roots t t)) by 'cddr
                do (with-current-buffer buf (dired-unmark-all-marks))))
-    (setq dirvish-yank-task-counter (1+ dirvish-yank-task-counter))))
+    (cl-incf dirvish-yank-task-counter)))
 
 (defun dirvish-yank--newbase (base-name fileset dest)
   "Ensure an unique filename for BASE-NAME at DEST with FILESET."
@@ -237,7 +237,7 @@ RANGE can be `buffer', `session', `frame', `all'."
 SRCS and DEST are source files and destination."
   (dirvish-yank--prepare-dest-names srcs dest)
   (cl-loop with fn = (alist-get method dirvish-yank-fallback-methods)
-           for src in srcs do (apply fn src dest t)))
+           for src in srcs do (funcall fn src dest t)))
 
 (defun dirvish-yank--l2l-handler (method srcs dest)
   "Execute a local yank command with type of METHOD.
@@ -297,8 +297,8 @@ This command sync SRCS on SHOST to DEST on DHOST."
      ((and (memq method dirvish-yank--link-methods)
            (not (equal shost dhost)))
       (user-error "Dirvish[error]: can not make links between different hosts"))
-     ((and (not (and (or (not svec) (dirvish--host-in-whitelist-p svec))
-                     (or (not dvec) (dirvish--host-in-whitelist-p dvec))))
+     ((and (not (and (or (not svec) (dirvish-tramp--async-p svec))
+                     (or (not dvec) (dirvish-tramp--async-p dvec))))
            (not (memq method dirvish-yank--link-methods)))
       (dirvish-yank--fallback-handler method srcs dest))
      ((equal shost dhost)

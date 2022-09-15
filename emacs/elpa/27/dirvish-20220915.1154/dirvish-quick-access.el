@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -21,6 +21,11 @@
 ;;; Code:
 
 (require 'dirvish)
+
+(defcustom dirvish-quick-access-function 'dired
+  "Function used to access `dirvish-quick-access-entries'.
+The function takes the entry as the sole argument."
+  :group 'dirvish :type 'function)
 
 ;;;###autoload
 (define-obsolete-variable-alias 'dirvish-bookmark-entries 'dirvish-quick-access-entries "Jul 22, 2022")
@@ -61,7 +66,7 @@ Here is a sample value for this variable.
                             (propertize path 'face 'font-lock-comment-face))
                     `(lambda ()
                        (interactive)
-                       (dired-jump current-prefix-arg ,path))))])))))
+                       (funcall dirvish-quick-access-function ,path))))])))))
 
 (provide 'dirvish-quick-access)
 ;;; dirvish-quick-access.el ends here
