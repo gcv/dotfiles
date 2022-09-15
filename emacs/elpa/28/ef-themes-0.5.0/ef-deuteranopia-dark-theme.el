@@ -67,9 +67,9 @@
       (yellow-warmer   "#cfaf00")
       (yellow-cooler   "#bfaf7a")
       (yellow-faint    "#af9a6a")
-      (blue            "#3f95f6")
+      (blue            "#3f90f0")
       (blue-warmer     "#6a9fff")
-      (blue-cooler     "#1f90ff")
+      (blue-cooler     "#009fff")
       (blue-faint      "#7a94df")
       (magenta         "#b379bf")
       (magenta-warmer  "#af80ea")
@@ -87,6 +87,13 @@
       (bg-blue     "#264fa0")
       (bg-magenta  "#8040cf")
       (bg-cyan     "#00709e")
+
+      (bg-red-subtle      "#72002a")
+      (bg-green-subtle    "#00422a")
+      (bg-yellow-subtle   "#603000")
+      (bg-blue-subtle     "#242679")
+      (bg-magenta-subtle  "#5a105f")
+      (bg-cyan-subtle     "#004065")
 
       ;; Diffs
       (bg-added          "#00234f")
@@ -132,6 +139,10 @@
       (cursor        "#ffff00")
       (fg-intense    "#ffffff")
 
+      (modeline-err     "#ffff00")
+      (modeline-warning "#ddb300")
+      (modeline-info    "#aaaaff")
+
       ;; Mappings
       (err yellow-warmer)
       (warning yellow)
@@ -142,17 +153,21 @@
       (date yellow-cooler)
       (name blue-warmer)
       (keybind yellow-warmer)
+      (prompt yellow)
 
       (builtin blue-warmer)
       (comment yellow-faint)
       (constant blue-cooler)
       (fnname yellow-cooler)
       (keyword yellow-warmer)
-      (preprocessor green-cooler)
+      (preprocessor yellow)
       (docstring cyan-faint)
       (string blue)
       (type magenta-cooler)
       (variable cyan-cooler)
+
+      (rx-escape yellow-faint) ; compare with `string'
+      (rx-construct yellow-warmer)
 
       (accent-0 blue-cooler)
       (accent-1 yellow-warmer)
@@ -164,13 +179,14 @@
       (mail-2 blue-cooler)
       (mail-3 yellow-cooler)
       (mail-4 cyan)
+      (mail-5 cyan-cooler)
 
       (rainbow-0 yellow-warmer)
       (rainbow-1 blue)
       (rainbow-2 yellow-cooler)
       (rainbow-3 blue-warmer)
       (rainbow-4 yellow)
-      (rainbow-5 blue-cooler)
+      (rainbow-5 cyan-warmer)
       (rainbow-6 yellow-faint)
       (rainbow-7 blue-faint)
       (rainbow-8 magenta-faint))

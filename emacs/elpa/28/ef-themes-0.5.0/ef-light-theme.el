@@ -1,4 +1,4 @@
-;;; ef-light-theme.el --- Legible light theme -*- lexical-binding:t -*-
+;;; ef-light-theme.el --- Legible light theme with blue, magenta, cyan, purple colors -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2022  Free Software Foundation, Inc.
 
@@ -37,7 +37,7 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-light "Legible light theme.")
+  (deftheme ef-light "Legible light theme with blue, magenta, cyan, purple colors.")
 
   (defconst ef-light-palette
     '(;; Basic tones
@@ -85,6 +85,13 @@
       (bg-magenta  "#ff9fef")
       (bg-cyan     "#88c8ff")
 
+      (bg-red-subtle      "#ffcfbf")
+      (bg-green-subtle    "#b3fabf")
+      (bg-yellow-subtle   "#fff576")
+      (bg-blue-subtle     "#ccdfff")
+      (bg-magenta-subtle  "#ffddff")
+      (bg-cyan-subtle     "#bfefff")
+
       ;; Diffs
       (bg-added          "#d5f8d5")
       (bg-added-faint    "#e5ffe5")
@@ -125,20 +132,25 @@
       (bg-warning    "#ffeabb") ; check with warning
       (bg-info       "#d0efda") ; check with info
 
-      (border        "#cecfff")
+      (border        "#c4cadf")
       (cursor        "#0033cc")
       (fg-intense    "#000000")
+
+      (modeline-err     "#9f0000")
+      (modeline-warning "#5f0070")
+      (modeline-info    "#002fa0")
 
       ;; Mappings
       (err red-warmer)
       (warning yellow-warmer)
       (info green)
 
-      (link blue-cooler)
+      (link blue)
       (link-alt magenta)
-      (date cyan)
-      (name blue)
+      (date cyan-cooler)
+      (name magenta-cooler)
       (keybind blue-cooler)
+      (prompt green-cooler)
 
       (builtin magenta)
       (comment yellow-faint)
@@ -151,16 +163,20 @@
       (type green-cooler)
       (variable cyan-cooler)
 
+      (rx-escape green-cooler) ; compare with `string'
+      (rx-construct magenta)
+
       (accent-0 blue-warmer)
       (accent-1 magenta-warmer)
       (accent-2 green-cooler)
-      (accent-3 red)
+      (accent-3 yellow-warmer)
 
       (mail-0 blue-warmer)
       (mail-1 magenta)
       (mail-2 cyan-cooler)
       (mail-3 yellow-cooler)
       (mail-4 cyan-warmer)
+      (mail-5 green-warmer)
 
       (rainbow-0 green-cooler)
       (rainbow-1 blue)
