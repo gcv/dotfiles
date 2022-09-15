@@ -32,6 +32,11 @@
 (require 'inspector)
 (require 'ert)
 
+(defun inspector-tests-run ()
+  "Run inspector tests."
+  (interactive)
+  (ert "^inspector-tests-"))
+
 (ert-deftest inspector-tests--inspect-integer-test ()
   (inspector-inspect 22)
   (let ((buffer-string (buffer-string)))
