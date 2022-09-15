@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -32,6 +32,7 @@
 ;;; Code:
 
 (require 'dirvish)
+(eval-when-compile (require 'dirvish-tramp))
 (declare-function dirvish--count-file-size "dirvish-widgets")
 
 (defclass dirvish-attribute (transient-infix)
@@ -112,15 +113,13 @@ If MULTI-LINE, make every path occupy a new line."
   "Copy remote path of marked files.
 If MULTI-LINE, make every path occupy a new line."
   (interactive "P")
-  (unless (dirvish-prop :tramp) (user-error "Not in a remote directory"))
-  (let* ((files
-          (cl-loop for file in (dired-get-marked-files)
-                   for tramp-struct = (tramp-dissect-file-name file)
-                   for user = (tramp-file-name-user tramp-struct)
-                   for host = (tramp-file-name-host tramp-struct)
-                   for localname = (tramp-file-local-name file)
-                   collect (format "%s%s%s:%s" (or user "")
-                                   (if user "@" "") host localname)))
+  (let* ((tramp (or (dirvish-prop :tramp) (user-error "Not a remote folder")))
+         (files (cl-loop for file in (dired-get-marked-files)
+                         for user = (tramp-file-name-user tramp)
+                         for host = (tramp-file-name-host tramp)
+                         for localname = (file-local-name file)
+                         collect (format "%s%s%s:%s" (or user "")
+                                         (if user "@" "") host localname)))
          (names (mapconcat #'concat files (if multi-line "\n" " "))))
     (dirvish--kill-and-echo (if multi-line (concat "\n" names) names))))
 
@@ -180,7 +179,7 @@ FILESET defaults to `dired-get-marked-files'."
     dirvish-copy-file-path)
    ("P"   "Copy remote PATHs in one line <P> / multiple lines <C-u P>"
     dirvish-copy-remote-path
-    :if (lambda () (dirvish-prop :tramp)))
+    :if (lambda () (dirvish-prop :remote)))
    ("d"   "Copy file DIRECTORY"                dirvish-copy-file-directory)
    ("l"   "Copy symlink's truename"            dirvish-copy-file-true-path
     :if (lambda () (file-symlink-p (dired-get-filename nil t))))
@@ -304,11 +303,11 @@ FILESET defaults to `dired-get-marked-files'."
 (defcustom dirvish-ui-setup-items
   '(("s"  file-size      attr     "File size")
     ("c"  collapse       attr     "Collapse unique nested paths"
-     (or (not (dirvish-prop :tramp)) (tramp-local-host-p (dirvish-prop :tramp))))
+     (not (dirvish-prop :remote)))
     ("v"  vc-state       attr     "Version control state"
      (and (display-graphic-p) (dirvish-prop :vc-backend)))
     ("m"  git-msg        attr     "Git commit messages"
-     (and (dirvish-prop :vc-backend) (not (dirvish-prop :tramp))))
+     (and (dirvish-prop :vc-backend) (not (dirvish-prop :remote))))
     ("1" '(0 nil  0.4)   layout   "     -       | current (60%) | preview (40%)")
     ("2" '(0 nil  0.8)   layout   "     -       | current (20%) | preview (80%)")
     ("3" '(1 0.08 0.8)   layout   "parent (8%)  | current (12%) | preview (80%)")
@@ -352,7 +351,7 @@ keyword in that prefix or infix."
              :if (lambda () (dv-layout (dirvish-curr)))
              ,@(mapcar #'layout-option layout-alist)]
             ["Actions:"
-             ("M-f" "Toggle fullscreen" dirvish-layout-toggle)
+             ("M-t" "Toggle fullscreen" dirvish-layout-toggle)
              ("RET" "Quit and revert buffer"
               (lambda () (interactive) (dirvish--build (dirvish-curr)) (revert-buffer)))]
             (interactive)

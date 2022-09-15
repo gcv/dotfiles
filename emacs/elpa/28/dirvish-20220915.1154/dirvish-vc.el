@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -53,7 +53,7 @@ vc-hooks.el) for detail explanation of these states."
   :group 'dirvish)
 
 (defface dirvish-git-commit-message-face
-  '((t (:inherit font-lock-comment-face)))
+  '((t (:inherit font-lock-comment-face :underline nil)))
   "Face for commit message overlays."
   :group 'dirvish)
 
@@ -78,9 +78,8 @@ vc-hooks.el) for detail explanation of these states."
         (dirvish-preview-update dv)
       (quit-window nil (dv-root-window dv))
       (delete-window transient--window)
-      (dirvish--save-env dv)
       (setf (dv-layout dv) new-layout)
-      (dirvish-with-no-dedication (switch-to-buffer buf))
+      (dirvish-save-dedication (switch-to-buffer buf))
       (dirvish--build dv))))
 
 (transient-define-infix dirvish-vc-preview-ifx ()
@@ -107,7 +106,8 @@ vc-hooks.el) for detail explanation of these states."
   "Append git commit message to filename."
   (:if (and (dirvish-prop :root)
             (eq (dirvish-prop :vc-backend) 'Git)
-            (not (dirvish-prop :tramp))))
+            (not (dirvish-prop :remote))
+            (>= (window-width) 40)))
   (let* ((info (dirvish-attribute-cache f-name :git-msg))
          (face (or hl-face 'dirvish-git-commit-message-face))
          (str (substring (concat "  " info) 0 -1))
@@ -151,7 +151,8 @@ vc-hooks.el) for detail explanation of these states."
                              (not (memq (vc-state file bk)
                                         '(unregistered ignored)))
                              file))
-                  (f-buf (find-file-noselect file)))
+                  (f-buf (cdr (dirvish--find-file-temporarily file)))
+                  ((bufferp f-buf)))
         (unless (memq f-buf orig-buflist)
           (push f-buf (dv-preview-buffers dv)))
         (with-selected-window preview-window

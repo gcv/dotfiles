@@ -46,6 +46,14 @@ otherwise it defaults to `default-directory'.
 
 \(fn &optional PATH)" t nil)
 
+(autoload 'dirvish-dwim "dirvish" "\
+Start a fullframe session only when `one-window-p'.
+If called with \\[universal-arguments], prompt for PATH,
+otherwise it defaults to `default-directory'.
+If `one-window-p' returns nil, open PATH using regular Dired.
+
+\(fn &optional PATH)" t nil)
+
 (register-definition-prefixes "dirvish" '("dirvish-"))
 
 ;;;***
@@ -124,9 +132,18 @@ FILESET defaults to `dired-get-marked-files'.
  (autoload 'dirvish-fd-switches-menu "dirvish-fd" nil t)
 
 (autoload 'dirvish-fd-jump "dirvish-fd" "\
-Browse all directories using `fd' command.
+Browse directories using `fd' command.
 This command takes a while to index all the directories the first
-time you run it.  After the indexing, it fires up instantly." t nil)
+time you run it.  After the indexing, it fires up instantly.
+
+If called with \\`C-u' or if CURRENT-DIR-P holds the value 4,
+search for directories in the current directory.  Otherwise,
+search for directories in `dirvish-fd-default-dir'.
+
+If prefixed twice with \\`C-u' or if CURRENT-DIR-P holds the
+value 16, let the user choose the root directory of their search.
+
+\(fn &optional CURRENT-DIR-P)" t nil)
 
 (autoload 'dirvish-fd "dirvish-fd" "\
 Run `fd' on DIR and go into Dired mode on a buffer of the output.
@@ -194,12 +211,6 @@ If RECIPE is not provided, switch to the recipe next to the
 current layout defined in `dirvish-layout-recipes'.
 
 \(fn &optional RECIPE)" t nil)
-
-(autoload 'dirvish-dwim "dirvish-layout" "\
-Start a Dirvish session with optional PATH.
-The session takes the whole frame when `one-window-p'.
-
-\(fn &optional PATH)" t nil)
 
 (register-definition-prefixes "dirvish-layout" '("dirvish-layout-recipes"))
 
@@ -277,7 +288,7 @@ it is disabled.
 (define-obsolete-function-alias 'dirvish-bookmark-jump 'dirvish-quick-access "Jul 22, 2022")
  (autoload 'dirvish-quick-access "dirvish-quick-access" nil t)
 
-(register-definition-prefixes "dirvish-quick-access" '("dirvish-quick-access-entries"))
+(register-definition-prefixes "dirvish-quick-access" '("dirvish-quick-access-"))
 
 ;;;***
 
@@ -319,6 +330,13 @@ Insert subtree at point or remove it if it was not present." t nil)
  (autoload 'dirvish-subtree-menu "dirvish-subtree" nil t)
 
 (register-definition-prefixes "dirvish-subtree" '("dirvish-"))
+
+;;;***
+
+;;;### (autoloads nil "dirvish-tramp" "dirvish-tramp.el" (0 0 0 0))
+;;; Generated autoloads from dirvish-tramp.el
+
+(register-definition-prefixes "dirvish-tramp" '("dirvish-tramp-"))
 
 ;;;***
 

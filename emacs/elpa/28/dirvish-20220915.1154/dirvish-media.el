@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2021-2022 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 1.9.23
+;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -20,6 +20,10 @@
 (defvar dirvish-media--cache-pool '())
 (defvar dirvish-media--auto-cache-timer nil)
 (add-to-list 'dirvish--no-update-preview-cmds 'dirvish-media-properties)
+
+(dolist (sym-h '((dirvish-after-revert-hook . dirvish-media-clean-caches-h)
+                 (dirvish-setup-hook . dirvish-media-cache-imgs-h)))
+  (add-hook (car sym-h) (cdr sym-h)))
 
 (defcustom dirvish-media-auto-cache-threshold '(500 . 4)
   "Generate cache images automatically.
@@ -71,7 +75,7 @@ Audio;(Audio-codec . \"\"%CodecID%\"\")(Audio-bitrate . \"\"%BitRate/String%\"\"
 BASE is a string indicating the subdir of `dirvish-cache-dir' to
 use.  EXT is a suffix such as \".jpg\" that is attached to FILE.
 A new directory is created unless NO-MKDIR."
-  (let* ((file (if dirvish--os-windows-p
+  (let* ((file (if (memq system-type '(windows-nt ms-dos))
                    (concat "/" (replace-regexp-in-string ":" "" file)) file))
          (cache (concat dirvish-cache-dir base file)))
     (and (not no-mkdir) (not (file-exists-p cache))
@@ -80,7 +84,7 @@ A new directory is created unless NO-MKDIR."
 
 (defun dirvish-media--cache-sentinel (proc _exitcode)
   "Sentinel for image cache process PROC."
-  (when-let* ((dv (dirvish-curr))
+  (when-let* ((dv (or (dirvish-curr) dirvish--this))
               (path (dirvish-prop :index)))
     (and (equal path (process-get proc 'path))
          (dirvish-debounce nil (dirvish-preview-update dv)))))
@@ -188,11 +192,11 @@ GROUP-TITLES is a list of group titles."
                    (user-error "No file under the cursor")))
          (ext (downcase (or (file-name-extension file) "")))
          (type (dirvish-media--type ext))
-         (buf (dirvish--util-buffer 'preview (dirvish-curr) t)))
+         (buf (dirvish--util-buffer 'preview (dirvish-curr) t t)))
     (with-current-buffer buf
       (let ((pivot (dirvish-prop :mediainfo-pivot)) beg)
         (when (eq pivot 0) (user-error "Media properties already displayed"))
-        (when (> pivot 3) (delete-region 3 pivot))
+        (when (> pivot 2) (delete-region 2 pivot))
         (goto-char (point-max))
         (insert "\n\n\n")
         (setq beg (point))
@@ -202,17 +206,18 @@ GROUP-TITLES is a list of group titles."
 
 (cl-defmethod dirvish-preview-dispatch ((recipe (head media-img)) dv)
   "Insert RECIPE as an image at preview window of DV."
-  (let ((buf (dirvish--util-buffer 'preview dv))
+  (let ((buf (dirvish--util-buffer 'preview dv nil t))
         (img (cdr recipe)))
     (with-current-buffer buf
       (erase-buffer) (remove-overlays)
+      (font-lock-mode -1)
       (insert " ")
       (add-text-properties 1 2 `(display ,img rear-nonsticky t keymap ,image-map))
       (pcase-let ((`(,iw . ,ih) (image-size img)))
         (let* ((p-window (dv-preview-window dv))
                (w-offset (max (round (/ (- (window-width p-window) iw) 2)) 0))
                (h-offset (max (round (/ (- (window-height p-window) ih) 2)) 0)))
-          (and dirvish-media-auto-properties (setq h-offset 3))
+          (and dirvish-media-auto-properties (setq h-offset 2))
           (goto-char 1)
           (insert (make-string h-offset ?\n))
           (dirvish-prop :mediainfo-pivot
@@ -220,7 +225,7 @@ GROUP-TITLES is a list of group titles."
           (insert (make-string w-offset ?\s))
           (when dirvish-media-auto-properties
             (let* ((beg (progn (goto-char (point-max)) (point)))
-                   (file (with-current-buffer (cdr(dv-index-dir dv))
+                   (file (with-current-buffer (cdr (dv-index dv))
                            (dirvish-prop :index)))
                    (type (dirvish-media--type
                           (downcase (or (file-name-extension file) "")))))
@@ -233,7 +238,7 @@ GROUP-TITLES is a list of group titles."
 (cl-defmethod dirvish-preview-dispatch ((recipe (head media-cache)) dv)
   "Generate cache image according to RECIPE and session DV."
   (let* ((path (dirvish-prop :index))
-         (buf (dirvish--util-buffer 'preview dv))
+         (buf (dirvish--util-buffer 'preview dv nil t))
          (name (format "%s-%s-img-cache" path
                        (window-width (dv-preview-window dv)))))
     (unless (get-process name)
@@ -258,14 +263,15 @@ GROUP-TITLES is a list of group titles."
 (defun dirvish-media-cache-imgs-h ()
   "Cache image/video-thumbnail for index directory."
   (when-let* ((dv (dirvish-curr))
+              ((not (dirvish-prop :remote)))
               ((dv-layout dv))
               (win (dv-preview-window dv))
               ((window-live-p win))
               (width (window-width win))
-              (files (hash-table-keys dirvish--attrs-hash))
-              ((< (length files) (car dirvish-media-auto-cache-threshold))))
+              (md5s (hash-table-keys dirvish--attrs-hash))
+              ((< (length md5s) (car dirvish-media-auto-cache-threshold))))
     (cl-loop
-     for file in files
+     for file in (directory-files default-directory t)
      for ext = (downcase (or (file-name-extension file) ""))
      for (cmd . args) = (cl-loop
                          for fn in dirvish-media--cache-img-fns
@@ -289,14 +295,6 @@ GROUP-TITLES is a list of group titles."
                             file (format "images/%s" size) ".*" t)
                            t)))))
 
-(setq dirvish-advice-alist
-      (append dirvish-advice-alist
-              '((hook dirvish-after-revert-hook dirvish-media-clean-caches-h)
-                (hook dirvish-setup-hook        dirvish-media-cache-imgs-h))))
-(when dirvish-override-dired-mode
-  (dirvish-override-dired-mode -1)
-  (dirvish-override-dired-mode 1))
-
 (dirvish-define-preview audio (file ext)
   "Preview audio files by printing its metadata.
 Require: `mediainfo' (executable)"
@@ -319,13 +317,12 @@ Require: `convert' (executable from `imagemagick' suite)"
 (dirvish-define-preview gif (file ext)
   "Preview gif images with animations."
   (when (equal ext "gif")
-    (let ((gif-buf (find-file-noselect file t))
-          (callback (lambda (buf)
-                      (when (buffer-live-p buf)
+    (let ((gif (dirvish--find-file-temporarily file))
+          (callback (lambda (rcp)
+                      (when-let* ((buf (cdr rcp)) ((buffer-live-p buf)))
                         (with-current-buffer buf
                           (image-animate (get-char-property 1 'display)))))))
-      (run-with-idle-timer 1 nil callback gif-buf)
-      `(buffer . ,gif-buf))))
+      (run-with-idle-timer 1 nil callback gif) gif)))
 
 (dirvish-define-preview video (file ext preview-window)
   "Preview video files.
@@ -357,7 +354,7 @@ Require: `epub-thumbnailer' (executable)"
   "Preview pdf files.
 Require: `pdf-tools' (Emacs package)"
   (when (equal ext "pdf")
-    (if (featurep 'pdf-tools) `(buffer . ,(find-file-noselect file t nil))
+    (if (featurep 'pdf-tools) (dirvish--find-file-temporarily file)
       '(info . "Emacs package 'pdf-tools' is required to preview pdf documents"))))
 
 (dirvish-define-preview pdf-preface (file ext preview-window)
@@ -378,7 +375,8 @@ Require: `zipinfo' (executable)
 Require: `tar' (executable)"
   :require ("zipinfo" "tar")
   (cond ((equal ext "zip") `(shell . ("zipinfo" ,file)))
-        ((member ext '("tar" "zst")) `(shell . ("tar" "-tvf" ,file)))))
+        ((member ext '("tar" "zst" "bz2" "bz" "gz" "xz" "tgz"))
+         `(shell . ("tar" "-tvf" ,file)))))
 
 (provide 'dirvish-media)
 ;;; dirvish-media.el ends here
