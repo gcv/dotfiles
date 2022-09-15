@@ -1,4 +1,4 @@
-;;; ef-day-theme.el --- Legible light theme -*- lexical-binding:t -*-
+;;; ef-day-theme.el --- Legible light theme with warm, varied colors (yellow, red, green, purple) -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2022  Free Software Foundation, Inc.
 
@@ -37,7 +37,7 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-day "Legible light theme.")
+  (deftheme ef-day "Legible light theme with warm, varied colors (yellow, red, green, purple).")
 
   (defconst ef-day-palette
     '(;; Basic tones
@@ -85,18 +85,25 @@
       (bg-magenta  "#ff9fee")
       (bg-cyan     "#88cfd0")
 
+      (bg-red-subtle      "#ffc6bf")
+      (bg-green-subtle    "#c4f2af")
+      (bg-yellow-subtle   "#f0f07f")
+      (bg-blue-subtle     "#ccdfff")
+      (bg-magenta-subtle  "#fad3ff")
+      (bg-cyan-subtle     "#bfefff")
+
       ;; Diffs
-      (bg-added          "#d6efd2")
-      (bg-added-faint    "#e5f5e0")
-      (bg-added-refine   "#c8e3c0")
+      (bg-added          "#ccefcf")
+      (bg-added-faint    "#e0f3e0")
+      (bg-added-refine   "#bae0c0")
 
       (bg-changed        "#ffe5b9")
       (bg-changed-faint  "#ffefc5")
       (bg-changed-refine "#ffd09f")
 
-      (bg-removed        "#ffd8d8")
-      (bg-removed-faint  "#ffe5e5")
-      (bg-removed-refine "#ffc0b0")
+      (bg-removed        "#ffd4d8")
+      (bg-removed-faint  "#ffe3e3")
+      (bg-removed-refine "#ffc0ca")
 
       ;; Graphs
       (red-graph-0-bg     "#ef7969")
@@ -125,20 +132,25 @@
       (bg-warning    "#ffe0aa") ; check with warning
       (bg-info       "#ddf5cc") ; check with info
 
-      (border        "#ded0bb")
+      (border        "#cdc2bb")
       (cursor        "#cf1f00")
       (fg-intense    "#000000")
+
+      (modeline-err     "#900000")
+      (modeline-warning "#66008f")
+      (modeline-info    "#1f409f")
 
       ;; Mappings
       (err red-warmer)
       (warning yellow-warmer)
       (info green)
 
-      (link red)
+      (link cyan-warmer)
       (link-alt green-warmer)
-      (date cyan-warmer)
+      (date cyan-cooler)
       (name yellow)
-      (keybind red-cooler)
+      (keybind red-warmer)
+      (prompt yellow)
 
       (builtin red-cooler)
       (comment green-faint)
@@ -151,6 +163,9 @@
       (type green-cooler)
       (variable magenta-cooler)
 
+      (rx-escape blue) ; compare with `string'
+      (rx-construct magenta-warmer)
+
       (accent-0 red)
       (accent-1 green-cooler)
       (accent-2 yellow)
@@ -161,6 +176,7 @@
       (mail-2 yellow)
       (mail-3 green-cooler)
       (mail-4 yellow-cooler)
+      (mail-5 blue)
 
       (rainbow-0 yellow)
       (rainbow-1 red)

@@ -46,7 +46,7 @@
     '(;; Basic tones
       (bg-main     "#f5f5ff")
       (fg-main     "#1a1a2f")
-      (bg-dim      "#e4e4f0")
+      (bg-dim      "#e8e8ea")
       (fg-dim      "#70627f")
       (bg-alt      "#d3d3e0")
       (fg-alt      "#6f6336")
@@ -88,8 +88,15 @@
       (bg-magenta  "#ff9fef")
       (bg-cyan     "#88c8ff")
 
+      (bg-red-subtle      "#ffcfbf")
+      (bg-green-subtle    "#afffbf")
+      (bg-yellow-subtle   "#fff576")
+      (bg-blue-subtle     "#ccdfff")
+      (bg-magenta-subtle  "#ffddff")
+      (bg-cyan-subtle     "#bfefff")
+
       ;; Diffs
-      (bg-added          "#dfdfff")
+      (bg-added          "#dbdbff")
       (bg-added-faint    "#e4e4ff")
       (bg-added-refine   "#c0c0ef")
 
@@ -98,7 +105,7 @@
       (bg-changed-refine "#e0b0d0")
 
       (bg-removed        "#fff0af")
-      (bg-removed-faint  "#efe6cf")
+      (bg-removed-faint  "#efefcb")
       (bg-removed-refine "#f0da88")
 
       ;; Graphs
@@ -128,9 +135,13 @@
       (bg-warning    "#ffe0aa") ; check with warning
       (bg-info       "#d0dfff") ; check with info
 
-      (border        "#bbbbef")
+      (border        "#c0c0d4")
       (cursor        "#0000bb")
       (fg-intense    "#000000")
+
+      (modeline-err     "#000000") ; too dark to have red/yellow here
+      (modeline-warning "#0a0a1f")
+      (modeline-info    "#2222c3")
 
       ;; Mappings
       (err yellow-warmer)
@@ -142,17 +153,21 @@
       (date yellow-cooler)
       (name blue-warmer)
       (keybind yellow-warmer)
+      (prompt blue)
 
       (builtin cyan)
       (comment yellow-faint)
       (constant yellow-cooler)
       (fnname blue-cooler)
       (keyword blue-warmer)
-      (preprocessor green-cooler)
+      (preprocessor magenta-cooler)
       (docstring cyan-faint)
       (string yellow-warmer)
       (type yellow)
       (variable cyan-cooler)
+
+      (rx-escape cyan-faint) ; compare with `string'
+      (rx-construct blue-warmer)
 
       (accent-0 blue-cooler)
       (accent-1 yellow-warmer)
@@ -164,6 +179,7 @@
       (mail-2 cyan-cooler)
       (mail-3 yellow)
       (mail-4 cyan)
+      (mail-5 blue-cooler)
 
       (rainbow-0 blue)
       (rainbow-1 yellow)

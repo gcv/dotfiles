@@ -16,7 +16,11 @@ When called from Lisp, THEME is a symbol.
 \(fn THEME)" t nil)
 
 (autoload 'ef-themes-toggle "ef-themes" "\
-Toggle between the two `ef-themes-to-toggle'." t nil)
+Toggle between the two `ef-themes-to-toggle'.
+If `ef-themes-to-toggle' does not specify two Ef themes, inform
+the user about it while prompting with completion for a theme
+among our collection (this is practically the same as the
+`ef-themes-select' command)." t nil)
 
 (autoload 'ef-themes-load-random "ef-themes" "\
 Load an Ef theme at random, excluding the current one.
@@ -55,9 +59,9 @@ Those are stored in `ef-themes-faces' and
 
 ;;;### (autoloads nil nil ("ef-autumn-theme.el" "ef-dark-theme.el"
 ;;;;;;  "ef-day-theme.el" "ef-deuteranopia-dark-theme.el" "ef-deuteranopia-light-theme.el"
-;;;;;;  "ef-light-theme.el" "ef-night-theme.el" "ef-spring-theme.el"
-;;;;;;  "ef-summer-theme.el" "ef-themes-pkg.el" "ef-winter-theme.el")
-;;;;;;  (0 0 0 0))
+;;;;;;  "ef-duo-dark-theme.el" "ef-duo-light-theme.el" "ef-light-theme.el"
+;;;;;;  "ef-night-theme.el" "ef-spring-theme.el" "ef-summer-theme.el"
+;;;;;;  "ef-themes-pkg.el" "ef-winter-theme.el") (0 0 0 0))
 
 ;;;***
 
