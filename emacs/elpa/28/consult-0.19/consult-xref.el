@@ -61,19 +61,21 @@
         (funcall preview action
                  (when-let (loc (and cand (eq action 'preview)
                                      (xref-item-location cand)))
-                   ;; Only preview file and buffer markers
-                   (cl-typecase loc
-                     (xref-buffer-location
-                      (xref-location-marker loc))
-                     (xref-file-location
-                      (consult--position-marker
-                       (funcall open
-                                ;; xref-location-group returns the file name
-                                (let ((xref-file-name-display 'abs))
-                                  (xref-location-group loc)))
-                       (xref-location-line loc)
-                       (xref-file-location-column loc)))
-                     (t (message "No preview for %s" (type-of loc)) nil))))))))
+                   (let ((type (type-of loc)))
+                     ;; Only preview file and buffer markers
+                     (pcase type
+                       ('xref-buffer-location
+                        (xref-location-marker loc))
+                       ((or 'xref-file-location 'xref-etags-location)
+                        (consult--position-marker
+                         (funcall open
+                                  ;; xref-location-group returns the file name
+                                  (let ((xref-file-name-display 'abs))
+                                    (xref-location-group loc)))
+                         (xref-location-line loc)
+                         (if (eq type 'xref-file-location)
+                             (xref-file-location-column loc)
+                           0)))))))))))
 
 (defun consult-xref--group (cand transform)
   "Return title for CAND or TRANSFORM the candidate."
@@ -89,7 +91,7 @@ This function can be used for `xref-show-xrefs-function'.
 See `xref-show-xrefs-function' for the description of the
 FETCHER and ALIST arguments."
   (let* ((consult-xref--fetcher fetcher)
-         (candidates (consult--with-increased-gc (consult-xref--candidates)))
+         (candidates (consult-xref--candidates))
          (display (alist-get 'display-action alist)))
     (xref-pop-to-location
      (if (cdr candidates)

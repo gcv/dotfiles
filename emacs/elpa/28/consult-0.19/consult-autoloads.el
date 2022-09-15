@@ -31,11 +31,6 @@ These configuration options are supported:
 
 \(fn START END COLLECTION &optional PREDICATE)" nil nil)
 
-(autoload 'consult-completing-read-multiple "consult" "\
-Deprecated function; call `completing-read-multiple' with ARGS.
-
-\(fn &rest ARGS)" nil nil)
-
 (autoload 'consult-multi-occur "consult" "\
 Improved version of `multi-occur' based on `completing-read-multiple'.
 
@@ -356,7 +351,11 @@ preview of the currently selected error." t nil)
 ;;; Generated autoloads from consult-flymake.el
 
 (autoload 'consult-flymake "consult-flymake" "\
-Jump to Flymake diagnostic." t nil)
+Jump to Flymake diagnostic.
+When PROJECT is non-nil then prompt with diagnostics from all
+buffers in the current project instead of just the current buffer.
+
+\(fn &optional PROJECT)" t nil)
 
 (register-definition-prefixes "consult-flymake" '("consult-flymake--"))
 

@@ -12,12 +12,6 @@
 #+html: <a href="https://melpa.org/#/consult"><img alt="MELPA" src="https://melpa.org/packages/consult-badge.svg"/></a>
 #+html: <a href="https://stable.melpa.org/#/consult"><img alt="MELPA Stable" src="https://stable.melpa.org/packages/consult-badge.svg"/></a>
 
-* Introduction
-:properties:
-:description: Why Consult?
-:end:
-#+cindex: introduction
-
 Consult provides practical commands based on the Emacs completion function
 [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Minibuffer-Completion.html][completing-read]]. Completion allows you to quickly select an item from a list of
 candidates. Consult offers in particular an advanced buffer switching command
@@ -30,7 +24,7 @@ the command =consult-imenu= presents a flat list of the Imenu with [[#live-previ
 
 Consult is fully compatible with completion systems based on the standard Emacs
 =completing-read= API, notably the default completion system, [[https://github.com/minad/vertico][Vertico]], [[https://github.com/protesilaos/mct][Mct]],
-[[https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html][Icomplete]] and [[https://github.com/raxod502/selectrum][Selectrum]].
+[[https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html][Icomplete]] and [[https://github.com/radian-software/selectrum][Selectrum]].
 
 This package keeps the completion system specifics to a minimum. The ability of
 the Consult commands to work well with arbitrary completion systems is one of
@@ -49,7 +43,9 @@ Additionally Embark offers a facility to collect completion candidates in a
 collect buffer. The section [[#embark-integration][Embark integration]] documents in greater detail how
 Consult and Embark work together.
 
-** Screenshots                                                     :noexport:
+#+toc: headlines 8
+
+* Screenshots :noexport:
 
 #+caption: consult-grep
 [[https://github.com/minad/consult/blob/screenshots/consult-grep.gif?raw=true]]
@@ -431,8 +427,13 @@ following settings are possible:
 - Disabled =nil=
 
 A safe recommendation is to leave automatic immediate previews enabled in
-general and disable the automatic preview only for commands, where the preview
-may be expensive due to file loading.
+general and disable the automatic preview only for commands where the preview
+may be expensive due to file loading. Internally, Consult uses the
+value of =this-command= to determine the =:preview-key=
+customized. This means that if you wrap a =consult-*= command within
+your own function or command, you will also need to add the name of
+/your custom command/ to the =consult-customize= call in order for it
+to be considered.
 
 #+begin_src emacs-lisp
   (consult-customize
@@ -440,6 +441,7 @@ may be expensive due to file loading.
    consult-bookmark consult-recent-file consult-xref
    consult--source-bookmark consult--source-recent-file
    consult--source-project-recent-file
+   ;; my/command-wrapping-consult       ;; disable auto previews inside my command
    ;; :preview-key '(:debounce 0.2 any) ;; Option 1: Delay preview
    :preview-key (kbd "M-."))            ;; Option 2: Manual preview
 #+end_src
@@ -610,8 +612,8 @@ must return a closure which takes an ACTION and a CANDIDATE argument. See the
 docstring of =consult--with-preview= for more details about the ACTION argument.
 
 By default, =consult-buffer= previews buffers, bookmarks and files. Loading recent
-files, bookmarks or views can result in expensive operations. However it is
-possible to configure a manual preview as follows.
+files or bookmarks can result in expensive operations. However it is possible to
+configure a manual preview as follows.
 
 #+begin_src emacs-lisp
   (consult-customize
@@ -619,9 +621,9 @@ possible to configure a manual preview as follows.
    consult--source-project-recent-file :preview-key (kbd "M-."))
 #+end_src
 
-Sources can be added directly to the =consult-buffer-source= list for
-convenience. For example views can be added to the list of virtual buffers
-from a library like https://github.com/minad/bookmark-view/.
+Sources can be added directly to the =consult-buffer-source= list for convenience.
+For example views/perspectives can be added to the list of virtual buffers from
+a library like https://github.com/minad/bookmark-view/.
 
 #+begin_src emacs-lisp
 ;; Configure new bookmark-view source
@@ -912,6 +914,7 @@ an overview of all Consult variables and functions with their descriptions.
 | consult-narrow-key               | Narrowing prefix key during completion                |
 | consult-preview-key              | Keys which triggers preview                           |
 | consult-preview-allowed-hooks    | List of =find-file= hooks to enable during preview      |
+| consult-preview-excluded-files   | Regexps matched against file names during preview     |
 | consult-preview-max-count        | Maximum number of files to keep open during preview   |
 | consult-preview-max-size         | Files larger than this size are not previewed         |
 | consult-preview-raw-size         | Files larger than this size are previewed in raw form |
@@ -967,7 +970,7 @@ Useful options are:
 
 The configuration values are evaluated at runtime, just before the completion
 session is started. Therefore you can use for example =thing-at-point= to adjust
-the initial input or the future hitory.
+the initial input or the future history.
 
 #+begin_src emacs-lisp
   (consult-customize
@@ -1008,11 +1011,10 @@ by Consult. Give them a try and find out which interaction model fits best for
 you!
 
 - The builtin completion UI, which pops up the =*Completions*= buffer.
+- The builtin =icomplete-vertical-mode= in Emacs 28.
+- [[https://github.com/radian-software/selectrum][selectrum by Radon Rosborough]]: Alternative vertical UI, predecessor of Vertico.
 - [[https://git.sr.ht/~protesilaos/mct][mct by Protesilaos Stavrou]]: Minibuffer and Completions in Tandem, which builds
-  on the default completion UI.
-- [[https://github.com/raxod502/selectrum][selectrum by Radon Rosborough]]: Alternative vertical completion system.
-- [[https://github.com/oantolin/icomplete-vertical][icomplete-vertical by Omar Antolín Camarena]]: Vertical completion system based on Icomplete.
-  Icomplete-vertical is only needed for Emacs 27, built-in on Emacs 28.
+  on the default completion UI (development [[https://protesilaos.com/codelog/2022-04-14-emacs-discontinue-mct/][discontinued]]).
 
 You can integrated Consult with special programs or with other packages in the
 wider Emacs ecosystem. You may want to install some of theses packages depending
@@ -1021,12 +1023,14 @@ on your preferences and requirements.
 - [[https://github.com/yadex205/consult-ag][consult-ag]]: Support for the [[https://github.com/ggreer/the_silver_searcher][Silver Searcher]] in the style of =consult-grep=.
 - [[https://github.com/mohkale/consult-company][consult-company]]: Completion at point using the [[https://github.com/company-mode/company-mode][Company]] backends.
 - [[https://github.com/karthink/consult-dir][consult-dir]]: Directory jumper using Consult multi sources.
+- [[https://codeberg.org/ravi/consult-dash][consult-dash]]: Consult interface to [[https://github.com/dash-docs-el/dash-docs][Dash documentation]]
 - [[https://github.com/mohkale/consult-eglot][consult-eglot]]: Integration with Eglot (LSP client).
 - [[https://github.com/minad/consult-flycheck][consult-flycheck]]: Additional Flycheck integration.
 - [[https://gitlab.com/OlMon/consult-flyspell][consult-flyspell]]: Additional Flyspell integration.
 - [[https://github.com/rcj/consult-ls-git][consult-ls-git]]: List files from git via Consult.
 - [[https://github.com/gagbo/consult-lsp][consult-lsp]]: Integration with Lsp-mode (LSP client).
 - [[https://codeberg.org/jao/consult-notmuch][consult-notmuch]]: Access the [[https://notmuchmail.org/][Notmuch]] email system using Consult.
+- [[https://github.com/mclear-tools/consult-notes][consult-notes]]: Searching notes with Consult.
 - [[https://github.com/jgru/consult-org-roam][consult-org-roam]]: Integration with [[https://github.com/org-roam/org-roam][Org-roam]].
 - [[https://github.com/Qkessler/consult-project-extra/][consult-project-extra]]: Additional project.el extras and buffer sources.
 - [[https://gitlab.com/OlMon/consult-projectile/][consult-projectile]]: Additional [[https://github.com/bbatsov/projectile][Projectile]] integration and buffer sources.
@@ -1052,7 +1056,7 @@ Note that all packages are independent and can be exchanged with alternative
 components, since there exist no hard dependencies. Furthermore it is possible
 to get started with only default completion and Consult and add more components
 later to the mix. For example you can omit Marginalia if you don't need
-annotations. I highly recommend the Embark package, but in order to familarize
+annotations. I highly recommend the Embark package, but in order to familiarize
 yourself with the other components, you can first start without it - or you could
 use with Embark right away and add the other components later on.
 
@@ -1133,10 +1137,9 @@ small configuration or command snippets.
 :description: Contributors and Sources of Inspiration
 :end:
 
-You probably guessed from the name that this package took inspiration from
-[[https://github.com/abo-abo/swiper#counsel][Counsel]] by Oleh Krehel. Some of the Consult commands originated in the Counsel
-package or the [[https://github.com/raxod502/selectrum/wiki/Useful-Commands][Selectrum wiki]]. The commands have been rewritten and greatly
-enhanced in comparison to the original versions.
+This package took inspiration from [[https://github.com/abo-abo/swiper#counsel][Counsel]] by Oleh Krehel. Some of the Consult
+commands originated in the Counsel package or the [[https://github.com/radian-software/selectrum/wiki/Useful-Commands][Selectrum wiki]]. The commands
+have been rewritten and greatly enhanced in comparison to the original versions.
 
 Code contributions:
 - [[https://github.com/oantolin/][Omar Antolín Camarena]]
@@ -1154,6 +1157,7 @@ Code contributions:
 - [[https://github.com/mohamed-abdelnour][Mohamed Abdelnour]]
 - [[https://github.com/thisirs][Sylvain Rousseau]]
 - [[https://github.com/jdtsmith][J.D. Smith]]
+- [[https://github.com/mohkale][Mohsin Kaleem]]
 
 Advice and useful discussions:
 - [[https://github.com/clemera/][Clemens Radermacher]]
@@ -1182,6 +1186,8 @@ Authors of supplementary =consult-*= packages:
 - [[https://github.com/jgru][Jan Gru]] ([[https://github.com/jgru/consult-org-roam][consult-org-roam]])
 - [[https://github.com/yadex205][Kanon Kakuno]] ([[https://github.com/yadex205/consult-ag][consult-ag]])
 - [[https://github.com/rcj][Robin Joy]] ([[https://github.com/rcj/consult-ls-git][consult-ls-git]])
+- [[https://codeberg.org/ravi][Ravi R Kiran]] [[https://codeberg.org/ravi/consult-dash][(consult-dash]])
+- [[https://github.com/mclearc][Colin McLear]] ([[https://github.com/mclear-tools/consult-notes][consult-notes]])
 
 #+html: <!--
 

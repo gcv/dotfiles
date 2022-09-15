@@ -2,6 +2,17 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 0.19 (2022-09-09)
+
+- Bugfixes
+- Allow =consult-flymake= to work across all buffers in a project
+- Remove deprecated =consult-completing-read-multiple=
+- =consult-grep/git-grep/ripgrep=: Add =--fixed-strings= support
+- =consult-grep=: Respect =grep-find-ignored-directories/files=
+- =consult-org-heading=: Add tags to completion candidates
+- Add =consult-preview-excluded-files=
+- =consult-themes=: Support regexps
+
 * Version 0.18 (2022-05-25)
 
 - Bugfixes
