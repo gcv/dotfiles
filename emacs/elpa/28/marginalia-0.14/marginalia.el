@@ -5,8 +5,8 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 0.13
-;; Package-Requires: ((emacs "26.1"))
+;; Version: 0.14
+;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/marginalia
 
 ;; This file is part of GNU Emacs.
@@ -42,9 +42,6 @@
   :group 'minibuffer
   :prefix "marginalia-")
 
-(define-obsolete-variable-alias 'marginalia-truncate-width
-  'marginalia-field-width "0.11")
-
 (defcustom marginalia-field-width 80
   "Maximum truncation width of annotation fields.
 
@@ -64,13 +61,6 @@ This value is adjusted depending on the `window-width'."
 (defcustom marginalia-align-offset 0
   "Additional offset added to the alignment."
   :type 'integer)
-
-(defvar marginalia-separator-threshold nil)
-(defvar marginalia-margin-min nil)
-(defvar marginalia-margin-threshold nil)
-(make-obsolete-variable 'marginalia-separator-threshold "Deprecated in favor of `marginalia-separator'." "0.11")
-(make-obsolete-variable 'marginalia-margin-min "Deprecated in favor of `marginalia-align'." "0.11")
-(make-obsolete-variable 'marginalia-margin-threshold "Deprecated in favor of `marginalia-threshold'." "0.11")
 
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
   "Maximum relative age in seconds displayed by the file annotator.
@@ -130,7 +120,7 @@ determine it."
     ("\\<color\\>" . color)
     ("\\<face\\>" . face)
     ("\\<environment variable\\>" . environment-variable)
-    ("\\<function\\>" . function)
+    ("\\<function\\|hook to remove\\>" . function)
     ("\\<variable\\>" . variable)
     ("\\<input method\\>" . input-method)
     ("\\<charset\\>" . charset)
@@ -143,7 +133,7 @@ determine it."
   :type '(alist :key-type regexp :value-type symbol))
 
 (defcustom marginalia-censor-variables
-  '("pass")
+  '("pass\\|auth-source-netrc-cache\\|auth-source-.*-nonce")
   "The values of variables matching any of these regular expressions is not shown."
   :type '(repeat (choice symbol regexp)))
 
@@ -404,7 +394,7 @@ FACE is the name of the face, with which the field should be propertized."
 (defun marginalia--annotator (cat)
   "Return annotation function for category CAT."
   (pcase (car (alist-get cat marginalia-annotator-registry))
-    ('none (lambda (_) nil))
+    ('none #'ignore)
     ('builtin nil)
     (fun fun)))
 
@@ -436,8 +426,8 @@ FACE is the name of the face, with which the field should be propertized."
   (let ((flist (indirect-function fun)))
     (advice--p (if (eq 'macro (car-safe flist)) (cdr flist) flist))))
 
-;; Symbol class characters from Emacs 28 `help--symbol-completion-table-affixation'
-;; ! and * are our additions
+;; Symbol class characters from Emacs 28 `help--symbol-class'
+;; ! and & are our additions
 (defun marginalia--symbol-class (s)
   "Return symbol class characters for symbol S.
 
@@ -447,17 +437,20 @@ c command
 C interactive-only command
 m macro
 M special-form
+g cl-generic
 p pure
 s side-effect-free
 @ autoloaded
 ! advised
 - obsolete
+& alias
 
 Variable:
 u custom (U modified compared to global value)
 v variable
 l local (L modified compared to default value)
 - obsolete
+& alias
 
 Other:
 a face
@@ -472,11 +465,13 @@ t cl-type"
         ((get s 'side-effect-free) "s"))
        (cond
         ((commandp s) (if (get s 'interactive-only) "C" "c"))
+        ((cl-generic-p s) "g")
         ((macrop (symbol-function s)) "m")
         ((special-form-p (symbol-function s)) "M")
         (t "f"))
        (and (autoloadp (symbol-function s)) "@")
        (and (marginalia--advised s) "!")
+       (and (symbolp (symbol-function s)) "&")
        (and (get s 'byte-obsolete-info) "-")))
     (when (boundp s)
       (concat
@@ -492,6 +487,7 @@ t cl-type"
                        (eval (car (get s 'standard-value))))))
                "U" "u")
          "v")
+       (ignore-errors (and (not (eq (indirect-variable s) s)) "&"))
        (and (get s 'byte-obsolete-variable) "-")))
     (and (facep s) "a")
     (and (fboundp 'cl-find-class) (cl-find-class s) "t"))))
@@ -607,17 +603,22 @@ keybinding since CAND includes it."
           ((pred numberp) (propertize (number-to-string val) 'face 'marginalia-number))
           (_ (let ((print-escape-newlines t)
                    (print-escape-control-characters t)
-                   (print-escape-multibyte t)
-                   (print-level 10)
+                   ;;(print-escape-multibyte t)
+                   (print-level 3)
                    (print-length marginalia-field-width))
                (propertize
-                (prin1-to-string
-                 (if (stringp val)
-                     ;; Get rid of string properties to save some of the precious space
-                     (substring-no-properties
-                      val 0
-                      (min (length val) marginalia-field-width))
-                   val))
+                (replace-regexp-in-string
+                 ;; `print-escape-control-characters' does not escape Unicode control characters.
+                 "[\x0-\x1F\x7f-\x9f\x061c\x200e\x200f\x202a-\x202e\x2066-\x2069]"
+                 (lambda (x) (format "\\x%x" (string-to-char x)))
+                 (prin1-to-string
+                  (if (stringp val)
+                      ;; Get rid of string properties to save some of the precious space
+                      (substring-no-properties
+                       val 0
+                       (min (length val) marginalia-field-width))
+                    val))
+                 'fixedcase 'literal)
                 'face
                 (cond
                  ((listp val) 'marginalia-list)
@@ -712,10 +713,10 @@ keybinding since CAND includes it."
                             (package--from-builtin built-in)
                           (car (alist-get pkg package-archive-contents))))))
     (marginalia--fields
-     ((package-version-join (package-desc-version desc)) :width 16 :face 'marginalia-version)
+     ((package-version-join (package-desc-version desc)) :truncate 16 :face 'marginalia-version)
      ((cond
        ((package-desc-archive desc) (propertize (package-desc-archive desc) 'face 'marginalia-archive))
-       (t (propertize (or (package-desc-status desc) "orphan") 'face 'marginalia-installed))) :width 10)
+       (t (propertize (or (package-desc-status desc) "orphan") 'face 'marginalia-installed))) :truncate 12)
      ((package-desc-summary desc) :truncate 1.0 :face 'marginalia-documentation))))
 
 (defun marginalia--bookmark-type (bm)
@@ -875,8 +876,7 @@ These annotations are skipped for remote paths."
     (when (or (/= (user-uid) uid) (/= (group-gid) gid))
       (format "%s:%s"
               (or (user-login-name uid) uid)
-              ;; group-name was introduced on Emacs 27
-              (or (and (fboundp 'group-name) (group-name gid)) gid)))))
+              (or (group-name gid) gid)))))
 
 (defun marginalia--file-modes (attrs)
   "Return fontified file modes given the ATTRS."
@@ -924,9 +924,8 @@ These annotations are skipped for remote paths."
   "Format TIME as an absolute age."
   (let ((system-time-locale "C"))
     (format-time-string
-     ;; decoded-time-year is only available on Emacs 27, use nth 5 here.
-     (if (> (nth 5 (decode-time (current-time)))
-            (nth 5 (decode-time time)))
+     (if (> (decoded-time-year (decode-time (current-time)))
+            (decoded-time-year (decode-time time)))
          " %Y %b %d"
        "%b %d %H:%M")
      time)))
@@ -997,8 +996,13 @@ These annotations are skipped for remote paths."
       ;; Extract documentation string. We cannot use `lm-summary' here,
       ;; since it decompresses the whole file, which is slower.
       (setq doc (or (ignore-errors
-                      (shell-command-to-string
-                       (format "zcat -f %s | head -n1" (shell-quote-argument file))))
+                      (let ((shell-file-name "sh")
+                            (shell-command-switch "-c"))
+                        (shell-command-to-string
+                         (format (if (string-suffix-p ".gz" file)
+                                     "gzip -c -q -d %s | head -n1"
+                                   "head -n1 %s")
+                                 (shell-quote-argument file)))))
                  ""))
       (cond
        ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" doc)
@@ -1039,9 +1043,7 @@ These annotations are skipped for remote paths."
                       (lambda (tab _) (equal (alist-get 'name tab) cand)))))
     (let* ((tab (nth index tabs))
            (ws (alist-get 'ws tab))
-           ;; window-state-buffers requires Emacs 27
-           (bufs (and (fboundp 'window-state-buffers)
-                      (window-state-buffers ws))))
+           (bufs (window-state-buffers ws)))
       ;; NOTE: When the buffer key is present in the window state
       ;; it is added in front of the window buffer list and gets duplicated.
       (when (cadr (assq 'buffer ws)) (pop bufs))
