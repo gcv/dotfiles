@@ -25,12 +25,21 @@
 ;; Find here the functionality added in Emacs 26.1, needed by older
 ;; versions.
 ;;
-;; Do NOT load this library manually.  Instead require `compat'.
+;; Only load this library if you need to use one of the following
+;; functions:
+;;
+;; - `compat-sort'
+;; - `line-number-at-pos'
+;; - `compat-alist-get'
+;; - `string-trim-left'
+;; - `string-trim-right'
+;; - `string-trim'
 
 ;;; Code:
 
-(eval-when-compile (require 'compat-macs))
-(declare-function compat-func-arity "compat" (func))
+(require 'compat-macs "compat-macs.el")
+
+(compat-declare-version "26.1")
 
 ;;;; Defined in eval.c
 
@@ -38,8 +47,8 @@
   "Return minimum and maximum number of args allowed for FUNC.
 FUNC must be a function of some kind.
 The returned value is a cons cell (MIN . MAX).  MIN is the minimum number
-of args.  MAX is the maximum number, or the symbol ‘many’, for a
-function with ‘&rest’ args, or ‘unevalled’ for a special form."
+of args.  MAX is the maximum number, or the symbol `many', for a
+function with `&rest' args, or `unevalled' for a special form."
   :realname compat--func-arity
   (cond
    ((or (null func) (and (symbolp func) (not (fboundp func))))
@@ -110,7 +119,7 @@ function with ‘&rest’ args, or ‘unevalled’ for a special form."
 (compat-defun assoc (key alist &optional testfn)
   "Handle the optional argument TESTFN.
 Equality is defined by the function TESTFN, defaulting to
-‘equal’.  TESTFN is called with 2 arguments: a car of an alist
+`equal'.  TESTFN is called with 2 arguments: a car of an alist
 element and KEY.  With no optional argument, the function behaves
 just like `assoc'."
   :prefix t
@@ -619,5 +628,48 @@ If VALUE is nil, PROPERTY is removed from IMAGE."
                     (cdr ,image*)
                     ,property* ,value*)))))))
 
-(provide 'compat-26)
+;;;; Defined in rmc.el
+
+;;*UNTESTED
+(compat-defun read-multiple-choice
+    (prompt choices &optional _help-string _show-help long-form)
+  "Ask user to select an entry from CHOICES, promting with PROMPT.
+This function allows to ask the user a multiple-choice question.
+
+CHOICES should be a list of the form (KEY NAME [DESCRIPTION]).
+KEY is a character the user should type to select the entry.
+NAME is a short name for the entry to be displayed while prompting
+\(if there's no room, it might be shortened).
+
+If LONG-FORM, do a `completing-read' over the NAME elements in
+CHOICES instead."
+  :note "This is a partial implementation of `read-multiple-choice', that
+among other things doesn't offer any help and ignores the
+optional DESCRIPTION field."
+  (if long-form
+      (let ((options (mapconcat #'cadr choices "/"))
+            choice)
+        (setq prompt (concat prompt " (" options "): "))
+        (setq choice (completing-read prompt (mapcar #'cadr choices) nil t))
+        (catch 'found
+          (dolist (option choices)
+            (when (string= choice (cadr option))
+              (throw 'found option)))
+          (error "Invalid choice")))
+    (let ((options
+           (mapconcat
+            (lambda (opt)
+              (format
+               "[%s] %s"
+               (key-description (string (car opt)))
+               (cadr opt)))
+            choices " "))
+          choice)
+      (setq prompt (concat prompt " (" options "): "))
+      (while (not (setq choice (assq (read-char prompt) choices)))
+        (message "Invalid choice")
+        (sit-for 1))
+      choice)))
+
+(compat--inhibit-prefixed (provide 'compat-26))
 ;;; compat-26.el ends here
