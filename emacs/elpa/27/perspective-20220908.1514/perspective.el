@@ -6,8 +6,8 @@
 
 ;; Author: Natalie Weizenbaum <nex342@gmail.com>
 ;; URL: http://github.com/nex3/perspective-el
-;; Package-Version: 20220521.2138
-;; Package-Commit: 794afdbc5188ef6f2d78d26302cd78903ce618fa
+;; Package-Version: 20220908.1514
+;; Package-Commit: 4cb9be75a41b66ec91d95464f1eed34cb1ea3b0a
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
 ;; Version: 2.17
 ;; Created: 2008-03-05
@@ -56,7 +56,7 @@ header line instead."
   :group 'perspective-mode
   :type '(choice (const :tag "Off" nil)
                  (const :tag "Modeline" t)
-                 (const :tag "Header" 'header)))
+                 (const :tag "Header" header)))
 
 (defcustom persp-modestring-dividers '("[" "]" "|")
   "Plist of strings used to create the string shown in the modeline.
@@ -132,10 +132,34 @@ save state when exiting Emacs."
   :group 'perspective-mode
   :type 'boolean)
 
-(defcustom persp-feature-flag-prevent-killing-last-buffer-in-perspective nil
-  "Experimental feature flag: prevent killing the last buffer in a perspective."
+(defcustom persp-avoid-killing-last-buffer-in-perspective t
+  "Avoid killing the last buffer in a perspective.
+
+This should not be set to nil unless there's a bug. This was
+formerly a feature flag (persp-feature-flag-prevent-killing-last-buffer-in-perspective),
+but it seems likely to stick around as a just-in-case for a while. It makes sense
+to upgrade this from an experimental feature flag to a toggle.
+TODO: Eventually eliminate this setting?"
   :group 'perspective-mode
   :type 'boolean)
+(defalias 'persp-avoid-killing-last-buffer-in-perspective
+  'persp-feature-flag-prevent-killing-last-buffer-in-perspective)
+
+(defcustom persp-purge-initial-persp-on-save nil
+  "When non-nil, kills all the buffers in the initial perspective upon state save.
+
+When calling `persp-state-save`, all the buffers in the initial
+perspective (\"main\" by default) are killed, expect the buffers
+whose name match the regexes in
+`persp-purge-initial-persp-on-save-exceptions'."
+  :group 'perspective-mode
+  :type 'boolean)
+
+(defcustom persp-purge-initial-persp-on-save-exceptions nil
+  "Buffer whose name match with any regexp of this list
+won't be killed upon state save if persp-purge-initial-persp-on-save is t"
+  :group 'perspective-mode
+  :type '(repeat regexp))
 
 
 ;;; --- implementation
@@ -1104,7 +1128,7 @@ perspective and no others are killed."
     (run-hooks 'persp-killed-hook)
     (mapc 'persp-remove-buffer (persp-current-buffers))
     (setf (persp-killed (persp-curr)) t))
-  (when persp-feature-flag-prevent-killing-last-buffer-in-perspective
+  (when persp-avoid-killing-last-buffer-in-perspective
     (add-hook 'kill-buffer-query-functions 'persp-maybe-kill-buffer))
   (remhash name (perspectives-hash))
   (when (boundp 'persp--xref-marker-ring) (remhash name persp--xref-marker-ring))
@@ -1358,32 +1382,37 @@ named collections of buffers and window configurations."
   :global t
   :keymap persp-mode-map
   (if persp-mode
-      (persp-protect
-        (when (bound-and-true-p server-process)
-          (setq persp-started-after-server-mode t))
-        ;; TODO: Convert to nadvice, which has been available since 24.4 and is
-        ;; the earliest Emacs version Perspective supports.
-        (ad-activate 'switch-to-buffer)
-        (ad-activate 'display-buffer)
-        (ad-activate 'set-window-buffer)
-        (ad-activate 'switch-to-prev-buffer)
-        (ad-activate 'recursive-edit)
-        (ad-activate 'exit-recursive-edit)
-        (persp--helm-enable)
-        (add-hook 'after-make-frame-functions 'persp-init-frame)
-        (add-hook 'delete-frame-functions 'persp-delete-frame)
-        (add-hook 'ido-make-buffer-list-hook 'persp-set-ido-buffers)
-        (when persp-feature-flag-prevent-killing-last-buffer-in-perspective
-          (add-hook 'kill-buffer-query-functions 'persp-maybe-kill-buffer))
-        (setq read-buffer-function 'persp-read-buffer)
-        (mapc 'persp-init-frame (frame-list))
-        (setf (persp-current-buffers) (buffer-list))
-        (unless (or persp-mode-prefix-key persp-suppress-no-prefix-key-warning)
-          (display-warning
-           'perspective
-           (format-message "persp-mode-prefix-key is not set! If you see this warning, you are using Emacs 28 or later, and have not customized persp-mode-prefix-key. Please refer to the Perspective documentation for further information (https://github.com/nex3/perspective-el). To suppress this warning without choosing a prefix key, set persp-suppress-no-prefix-key-warning to `t'.")
-           :warning))
-        (run-hooks 'persp-mode-hook))
+      ;; activate persp-mode, preferably in an idempotent manner: the presence
+      ;; of a non-nil 'persp--hash parameter in (selected-frame) should be a
+      ;; good proxy for whether the mode is actually active...
+      (unless (frame-parameter nil 'persp--hash)
+        (persp-protect
+          (when (bound-and-true-p server-process)
+            (setq persp-started-after-server-mode t))
+          ;; TODO: Convert to nadvice, which has been available since 24.4 and is
+          ;; the earliest Emacs version Perspective supports.
+          (ad-activate 'switch-to-buffer)
+          (ad-activate 'display-buffer)
+          (ad-activate 'set-window-buffer)
+          (ad-activate 'switch-to-prev-buffer)
+          (ad-activate 'recursive-edit)
+          (ad-activate 'exit-recursive-edit)
+          (persp--helm-enable)
+          (add-hook 'after-make-frame-functions 'persp-init-frame)
+          (add-hook 'delete-frame-functions 'persp-delete-frame)
+          (add-hook 'ido-make-buffer-list-hook 'persp-set-ido-buffers)
+          (when persp-avoid-killing-last-buffer-in-perspective
+            (add-hook 'kill-buffer-query-functions 'persp-maybe-kill-buffer))
+          (setq read-buffer-function 'persp-read-buffer)
+          (mapc 'persp-init-frame (frame-list))
+          (setf (persp-current-buffers) (buffer-list))
+          (unless (or persp-mode-prefix-key persp-suppress-no-prefix-key-warning)
+            (display-warning
+             'perspective
+             (format-message "persp-mode-prefix-key is not set! If you see this warning, you are using Emacs 28 or later, and have not customized persp-mode-prefix-key. Please refer to the Perspective documentation for further information (https://github.com/nex3/perspective-el). To suppress this warning without choosing a prefix key, set persp-suppress-no-prefix-key-warning to `t'.")
+             :warning))
+          (run-hooks 'persp-mode-hook)))
+    ;; deactivate persp-mode
     (persp--helm-disable)
     (ad-deactivate-regexp "^persp-.*")
     (remove-hook 'delete-frame-functions 'persp-delete-frame)
@@ -1919,6 +1948,13 @@ to the perspective's *scratch* buffer."
                         :order persp-names-in-order
                         :merge-list (frame-parameter nil 'persp-merge-list))))))
 
+(defun persp-purge-exception-p (buffer)
+  (if (buffer-live-p buffer)
+      (let (result)
+        (dolist (exception persp-purge-initial-persp-on-save-exceptions result)
+          (setq result (or result (string-match-p exception (buffer-name buffer))))))
+    nil))
+
 ;;;###autoload
 (cl-defun persp-state-save (&optional file interactive?)
   "Save the current perspective state to FILE.
@@ -1975,6 +2011,9 @@ visible in a perspective as windows, they will be saved as
       (user-error "Cancelled persp-state-save"))
     ;; before hook
     (run-hooks 'persp-state-before-save-hook)
+    ;; optionally purge initial perspective of entries
+    (when persp-purge-initial-persp-on-save
+      (mapc 'kill-buffer (cl-remove-if #'persp-purge-exception-p (persp-all-get persp-initial-frame-name nil))))
     ;; actually save
     (persp-save)
     (let ((state-complete (make-persp--state-complete
@@ -2214,6 +2253,7 @@ were merged in from a previous call to `persp-merge'."
       ;; Emacs 29:
       (defun persp--set-xref-marker-ring ()
         "Set xref--history per persp."
+        (defvar xref--history)
         (let ((persp-curr-name (persp-name (persp-curr))))
           (unless (gethash persp-curr-name persp--xref-marker-ring)
             (puthash persp-curr-name (cons nil nil)
@@ -2222,6 +2262,8 @@ were merged in from a previous call to `persp-merge'."
     ;; Emacs 28 and earlier:
     (defun persp--set-xref-marker-ring ()
       "Set xref--marker-ring per persp."
+      (defvar xref-marker-ring-length)
+      (defvar xref--marker-ring)
       (let ((persp-curr-name (persp-name (persp-curr))))
         (unless (gethash persp-curr-name persp--xref-marker-ring)
           (puthash persp-curr-name (make-ring xref-marker-ring-length)
