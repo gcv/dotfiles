@@ -24,6 +24,17 @@
   (setq custom--inhibit-theme-enable nil))
 
 
+;;; XXX: Emacs <28 does not define font-lock-doc-markup-face, but some things
+;;; want it to exist.
+(when (version< emacs-version "28.0")
+  (defface font-lock-doc-markup-face
+    '((t :inherit font-lock-constant-face))
+    "Emacs 28 backfill"
+    :version "28.1"
+    :group 'font-lock-faces)
+  (defvar font-lock-doc-markup-face 'font-lock-doc-markup-face))
+
+
 (defun /theme-before-enable ()
   (disable-all-themes)
   (when (boundp 'mini-frame-frame)
