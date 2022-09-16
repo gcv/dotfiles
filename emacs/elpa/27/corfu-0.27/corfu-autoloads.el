@@ -97,7 +97,7 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "corfu-indexed" '("corfu-indexed--")))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "corfu-indexed" '("corfu-indexed-")))
 
 ;;;***
 

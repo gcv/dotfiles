@@ -10,8 +10,6 @@
 #+html: <a href="http://elpa.gnu.org/packages/corfu.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/corfu.svg"/></a>
 #+html: <a href="http://elpa.gnu.org/devel/corfu.html"><img alt="GNU-devel ELPA" src="https://elpa.gnu.org/devel/corfu.svg"/></a>
 
-* Introduction
-
 Corfu enhances completion at point with a small completion popup. The current
 candidates are shown in a popup below or above the point. Corfu is the
 minimalistic ~completion-in-region~ counterpart of the [[https://github.com/minad/vertico][Vertico]] minibuffer UI.
@@ -31,9 +29,11 @@ setting of the ~completion-in-region-function~ on non-graphical displays. If you
 want to use Corfu in the terminal, install the package [[https://codeberg.org/akib/emacs-corfu-terminal][corfu-terminal]], which
 provides an alternative overlay-based display.
 
-[[https://github.com/minad/corfu/blob/screenshots/light.png?raw=true]]
+#+html: <img src="https://github.com/minad/corfu/blob/screenshots/light.png?raw=true">
 
-[[https://github.com/minad/corfu/blob/screenshots/dark.png?raw=true]]
+#+html: <img src="https://github.com/minad/corfu/blob/screenshots/dark.png?raw=true">
+
+#+toc: headlines 8
 
 * Features
 
@@ -154,10 +154,11 @@ expansion. =partial-completion= is important for file wildcard support. Multiple
 files can be opened at once with =find-file= if you enter a wildcard. You may also
 give the =initials= completion style a try.
 
-See also the [[https://github.com/minad/corfu/wiki][Corfu Wiki]] for additional configuration tips. In particular the
-Lsp-mode configuration is documented in the wiki. For more general documentation
-read the chapter about completion in the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Completion.html][Emacs manual]]. If you want to create
-your own Capfs, you can find documentation about completion in the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Completion.html][Elisp manual]].
+See also the [[https://github.com/minad/corfu/wiki][Corfu Wiki]] and the [[https://github.com/minad/cape][Cape manual]] for additional Capf configuration
+tips. The Lsp-mode configuration is documented in the wiki. For more general
+documentation read the chapter about completion in the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Completion.html][Emacs manual]]. If you want
+to create your own Capfs, you can find documentation about completion in the
+[[https://www.gnu.org/software/emacs/manual/html_node/elisp/Completion.html][Elisp manual]].
 
 ** Auto completion
 
@@ -204,7 +205,7 @@ code for further details.
          `(orderless-regexp . ,(concat "^" (regexp-quote word)))))
 
   (orderless-define-completion-style orderless-fast
-    (orderless-dispatch '(orderless-fast-dispatch))
+    (orderless-style-dispatchers '(orderless-fast-dispatch))
     (orderless-matching-styles '(orderless-literal orderless-regexp)))
 
   (setq-local corfu-auto t
@@ -279,9 +280,9 @@ define the advice ~corfu-send-shell~ which sends the candidate after insertion.
   (advice-add #'corfu-insert :after #'corfu-send-shell)
 #+end_src
 
-Shell completion uses the flexible ~pcomplete~ mechanism internally, which allows
+Shell completion uses the flexible ~Pcomplete~ mechanism internally, which allows
 you to program the completions per shell command. If you want to know more, look
-into this [[https://www.masteringemacs.org/article/pcomplete-context-sensitive-completion-emacs][blog post]], which shows how to configure pcomplete for git commands. I
+into this [[https://www.masteringemacs.org/article/pcomplete-context-sensitive-completion-emacs][blog post]], which shows how to configure Pcomplete for git commands. I
 recommend the [[https://github.com/JonWaltman/pcmpl-args.el][pcmpl-args]] package which extends Pcomplete with completion support
 and helpful annotation support for more commands. Similar to the Fish shell,
 pcmpl-args uses man page parsing and --help output parsing to dynamically
@@ -289,7 +290,7 @@ generate completions. This package brings Eshell completion to another level!
 
 Unfortunately Pcomplete has a few technical issues, which we can work around
 with the [[https://github.com/minad/cape][Cape]] library (Completion at point extensions). Cape provides wrappers,
-which sanitize the pcomplete function. Ideally the bugs in pcomplete should be
+which sanitize the Pcomplete function. Ideally the bugs in Pcomplete should be
 fixed upstream. *For now these two advices are strongly recommended to achieve a
 sane Eshell experience.*
 
@@ -470,7 +471,7 @@ enhance your setup.
 
 - [[https://github.com/minad/cape][Cape]]: Additional Capf backends and =completion-in-region= commands
   are provided by the [[https://github.com/minad/cape][Cape]] package. Among others, the package supplies a file
-  path and a dabbrev completion backend. Cape provides the ~cape-company-to-capf~
+  path and a Dabbrev completion backend. Cape provides the ~cape-company-to-capf~
   adapter to reuse Company backends in Corfu. Furthermore the function
   ~cape-super-capf~ can merge multiple Capfs, such that the candidates of multiple
   Capfs are displayed together at the same time.
@@ -513,7 +514,8 @@ enhance your setup.
   movement such that you can quickly switch between the completions buffer and
   the minibuffer or the region which is being completed. Mct does not support
   timer-based auto completion, but the integration into Emacs is naturally
-  tight.
+  tight. Note that Mct development is currently [[https://protesilaos.com/codelog/2022-04-14-emacs-discontinue-mct/][discontinued]] due to recent
+  changes of the default completion UI on the Emacs master branch.
 
 - [[https://github.com/minad/consult][consult-completion-in-region]]: The Consult package provides the function
   ~consult-completion-in-region~ which can be set as ~completion-in-region-function~
