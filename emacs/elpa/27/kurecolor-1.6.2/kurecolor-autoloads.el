@@ -16,6 +16,36 @@
 ;;;### (autoloads nil "kurecolor" "kurecolor.el" (0 0 0 0))
 ;;; Generated autoloads from kurecolor.el
 
+(autoload 'kurecolor-hex-set-saturation-in-region "kurecolor" "\
+Set the SATURATION of all hex colors found in region.
+When region not active, act on the whole buffer.
+
+\(fn SATURATION)" t nil)
+
+(autoload 'kurecolor-hex-set-brightness-in-region "kurecolor" "\
+Set the BRIGHTNESS of all hex colors found in region.
+When region not active, act on the whole buffer.
+
+\(fn BRIGHTNESS)" t nil)
+
+(autoload 'kurecolor-hex-set-hue-in-region "kurecolor" "\
+Set the HUE of all hex colors found in region (BEGIN END).
+When region not active, act on the whole buffer.
+
+\(fn HUE)" t nil)
+
+(autoload 'kurecolor-hex-adjust-saturation-in-region "kurecolor" "\
+Adjust the SATURATION on all hex colors found in region.
+When region not active, act on the whole buffer.
+
+\(fn SATURATION)" t nil)
+
+(autoload 'kurecolor-hex-adjust-brightness-in-region "kurecolor" "\
+Set the BRIGHTNESS of all hex colors found in region.
+When region not active, act on the whole buffer.
+
+\(fn BRIGHTNESS)" t nil)
+
 (autoload 'kurecolor-increase-brightness-by-step "kurecolor" "\
 Increase brightness on hex color at point (or in region) by step.
 Accepts universal argument X.

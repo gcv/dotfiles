@@ -3,13 +3,14 @@
 ;; Copyright (C) 2022 Jason M23
 ;;
 ;; Author: Jason M23 <jasonm23@gmail.com>
-;; Maintainer: Jason M23 <jasonm23@gmail.com>
+;;
 ;; Created: August 14, 2022
 ;; Modified: August 14, 2022
-;; Version: 1.4.3
-;; Keywords: tests examples documentation markdown
+;; Version: 1.4.5
+;; Keywords: lisp tools extensions
+;;
 ;; Homepage: https://github.com/emacsfodder/kurecolor
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "24.4"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -32,16 +33,25 @@
 
 (require 'ert)
 
+(unless (>= emacs-major-version 24)
+  (error "Requires Emacs 24.1 or later"))
+
+(eval-when-compile
+ (if (= 24 emacs-major-version)
+     (progn
+      (require 'cl)
+      (when (locate-library "cl-lib")
+        (require 'cl-lib)))
+   (require 'cl-lib)))
+
 (defvar etd-testing t "When set to t run tests, when set to nil generate documents.")
 (defvar functions '() "Collected functions.")
 
 (defun examples-to-should-1 (examples)
   "Create one `should' from EXAMPLES."
   (let ((actual (car examples))
-        (expected (car (cddr examples))))
-    `(let ((previous-match-data (match-data)))
-       (should (equal-including-properties ,actual ,expected))
-       (should (equal (match-data) previous-match-data)))))
+        (expected (nth 2 examples)))
+    `(should (equal-including-properties ,actual ,expected))))
 
 (defun examples-to-should (examples)
   "Create `should' for all EXAMPLES."
@@ -77,12 +87,12 @@
 (defun example-to-string (example)
   "EXAMPLE to string."
   (let ((actual (car example))
-        (expected (car (cddr example))))
+        (expected (nth 2 example)))
     (cl-reduce
-     (lambda (string regexp)
+     (lambda (str regexp)
        (replace-regexp-in-string
         (car regexp) (cdr regexp)
-        string t t))
+        str t t))
      '(("\r" . "\\r")
        ("\t" . "\\t")
        ("\\\\\\?" . "?"))
@@ -93,20 +103,20 @@
   (let (result)
     (while examples
       (setq result (cons (example-to-string examples) result))
-      (setq examples (cdddr examples)))
+      (setq examples (cdr (cddr examples))))
     (nreverse result)))
 
 (defun docs--signature (cmd)
-  "Get signature for CMD."
+  "Get function signature for CMD."
   (if (eq 'macro (car cmd))
-      (car (cddr cmd))
+      (nth 2 cmd)
     (cadr cmd)))
 
 (defun docs--docstring (cmd)
   "Get docstring for CMD."
   (if (eq 'macro (car cmd))
-      (car (cdr (cddr cmd)))
-    (car (cddr cmd))))
+      (nth 3 cmd)
+    (nth 2 cmd)))
 
 (defun quote-and-downcase (string)
   "Wrap STRING in backquotes for markdown."
@@ -116,14 +126,20 @@
   "Quote DOCSTRING."
   (if (null docstring)
       ""
-   (let (case-fold-search)
-    (replace-regexp-in-string
-     "`\\([^ ]+\\)'"
-     "`\\1`"
+    (let ((case-fold-search nil))
      (replace-regexp-in-string
-      "\\b\\([A-Z][A-Z0-9-]*\\)\\b"
-      'quote-and-downcase
-      docstring t)))))
+       "\\\\="
+       ""
+       (replace-regexp-in-string
+         "\\([a-z]+\\)`\\([a-z]+\\)"
+         "\\1'\\2"
+         (replace-regexp-in-string
+           "`\\(.*?\\)'"
+           "`\\1`"
+           (replace-regexp-in-string
+            "\\b\\([A-Z][A-Z0-9-]*\\)\\b"
+            'quote-and-downcase
+            docstring t)))))))
 
 (defun function-to-md (function)
   "FUNCTION to markdown."
@@ -131,8 +147,8 @@
       ""
     (let ((command-name (car function))
           (signature (cadr function))
-          (docstring (quote-docstring (caddr function)))
-          (examples (cadddr function)))
+          (docstring (quote-docstring (nth 2 function)))
+          (examples (nth 3 function)))
       (format "### %s %s\n\n%s\n\n```lisp\n%s\n```\n"
               command-name
               (if signature (format "`%s`" signature) "")
@@ -222,8 +238,8 @@
       (setq first (cons (car list) first))
       (when (cadr list)
         (setq first (cons (cadr list) first))
-        (when (caddr list)
-          (setq first (cons (caddr list) first)))))
+        (when (nth 2 list)
+          (setq first (cons (nth 2 list) first)))))
     (nreverse first)))
 
 (provide 'etd)

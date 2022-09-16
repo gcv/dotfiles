@@ -1,7 +1,7 @@
-(define-package "kurecolor" "1.4.3" "color editing goodies"
-  '((emacs "25.1")
+(define-package "kurecolor" "1.6.2" "color editing goodies"
+  '((emacs "24.4")
     (s "1.12"))
-  :commit "528aefe83362b7d41fa7fe212033328b7a1577ef" :authors
+  :commit "553e852e19b01015f84846568d96cde9ef670ba2" :authors
   '(("Jason Milkins" . "jasonm23@gmail.com"))
   :maintainer
   '("Jason Milkins" . "jasonm23@gmail.com")
