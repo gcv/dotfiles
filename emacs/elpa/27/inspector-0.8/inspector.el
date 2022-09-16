@@ -1,12 +1,12 @@
-;;; inspector.el --- Tool for inspection of Emacs Lisp objects.  -*- lexical-binding: t -*-
+;;; inspector.el --- Tool for inspection of Emacs Lisp objects  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
 ;; Author: Mariano Montone <marianomontone@gmail.com>
 ;; URL: https://github.com/mmontone/emacs-inspector
-;; Keywords: debugging, tool, emacs-lisp, development
-;; Version: 0.6
-;; Package-Requires: ((emacs "27"))
+;; Keywords: debugging, tool, lisp, development
+;; Version: 0.8
+;; Package-Requires: ((emacs "27.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,6 +24,28 @@
 ;;; Commentary:
 
 ;; Tool for inspection of Emacs Lisp objects.
+;;
+;; Usage:
+;;
+;;     M-x `inspector-inspect-expression' to evaluate an elisp expression and inspect the result.
+;;     M-x `inspector-inspect-last-sexp' to evaluate last sexp in current buffer and inspect the result.
+;;
+;; Inside the inspector:
+;;
+;;     M-x `inspector-pop' bound to letter l, to navigate to previous object.
+;;     M-x `inspector-quit' bound to letter q, to exit the inspector.
+;;
+;; Also, M-x `forward-button' and M-x `backward-button' are conveniently bound to n and p.
+;; They can be used for fast navigation across the buttons that the inspector displays.
+;;
+;; Finally, you can use M-x `eval-expression' bound to letter e,
+;; to evaluate an elisp expression using the object currently being inspected (it is bound to *).
+;;
+;; From the Emacs debugger:
+;;
+;; When on an Emacs debugging backtrace, press letter i to inspect the pointed frame and its local variables.
+;;
+;; When on edebug-mode, use C-c C-i for inspecting expressions in the debugger.
 
 ;;; Code:
 
@@ -242,7 +264,7 @@ slice in buffer."
 
 ;;--------- Object inspectors ----------------------------------
 
-(cl-defgeneric inspect-object (object)
+(cl-defgeneric inspector-inspect-object (object)
   "Render inspector buffer for OBJECT.
 
 Methods of this generic function are expected to specialize on the type of
@@ -254,7 +276,7 @@ and `inspector--insert-value' for inserting title,and properties and its values.
 For linking to another object, `inspector--insert-inspect-button'
 is expected to be used.")
 
-(cl-defmethod inspect-object ((class (subclass eieio-default-superclass)))
+(cl-defmethod inspector-inspect-object ((class (subclass eieio-default-superclass)))
   "Render inspector buffer for EIEIO CLASS."
   (inspector--insert-title (format "%s class" (eieio-class-name class)))
   (insert "direct superclasses: ")
@@ -273,17 +295,17 @@ is expected to be used.")
      (eieio-class-name subclass) (eieio-class-name subclass))
     (insert " ")))
 
-(cl-defmethod inspect-object ((_object (eql t)))
+(cl-defmethod inspector-inspect-object ((_object (eql t)))
   "Render inspector buffer for boolean T."
   (inspector--insert-title "boolean")
   (insert "value: t"))
 
-(cl-defmethod inspect-object ((_object (eql nil)))
+(cl-defmethod inspector-inspect-object ((_object (eql nil)))
   "Render inspector buffer for nil object."
   (inspector--insert-title "nil")
   (insert "value: nil"))
 
-(cl-defmethod inspect-object ((symbol symbol))
+(cl-defmethod inspector-inspect-object ((symbol symbol))
   "Render inspector buffer for SYMBOL."
   (inspector--insert-title "symbol")
   (inspector--insert-label "name")
@@ -299,7 +321,7 @@ is expected to be used.")
   (inspector--insert-inspect-button (symbol-plist symbol))
   (newline))
 
-(cl-defmethod inspect-object ((object t))
+(cl-defmethod inspector-inspect-object ((object t))
   "Render inspector buffer for OBJECT."
   (cond
    ;; FIXME: Why use this `cond' instead of using separate methods?
@@ -349,9 +371,42 @@ is expected to be used.")
    ((eq (type-of object) 'finalizer)
     (inspector--insert-title "finalizer")
     (inspector--insert-value (inspector--princ-to-string object)))
-   (t (error "Cannot inspect object: %s" object))))
+   ((user-ptrp object)
+    (inspector--insert-title "user-ptr")
+    (inspector--insert-value (inspector--princ-to-string object)))
+   (t ;; Just print the object
+    (inspector--insert-title (inspector--princ-to-string (type-of object)))
+    (inspector--insert-value (inspector--princ-to-string object)))))
 
-(cl-defmethod inspect-object ((cons cons))
+(cl-defmethod inspector-inspect-object ((process process))
+  "Inspect a PROCESS."
+  (inspector--insert-title "process")
+  (inspector--insert-value (inspector--princ-to-string process))
+  (newline 2)
+  (inspector--insert-label "PID")
+  (inspector--insert-value (inspector--princ-to-string (process-id process)))
+  (newline)
+  (inspector--insert-label "Status")
+  (inspector--insert-value (inspector--princ-to-string (process-status process)))
+  (newline)
+  (inspector--insert-label "TTY name")
+  (inspector--insert-value (inspector--princ-to-string (process-tty-name process)))
+  (newline)
+  (inspector--insert-label "Contact")
+  (inspector--insert-value (inspector--princ-to-string (process-contact process)))
+  (newline)
+  (inspector--insert-label "Properties")
+  (newline)
+  (let ((plist (cl-copy-list (process-plist process))))
+    (while plist
+      (let ((key (pop plist)))
+        (inspector--insert-inspect-button key))
+      (insert ": ")
+      (let ((value (pop plist)))
+        (inspector--insert-inspect-button value))
+      (newline))))
+
+(cl-defmethod inspector-inspect-object ((cons cons))
   "Inspect a CONS object."
   (cond
    ((and inspector-use-specialized-inspectors-for-lists
@@ -410,8 +465,7 @@ is expected to be used.")
            (inspector--insert-inspect-button elem)
            (newline))
          ;; A [more] button is inserted or not depending on the boolean returned here:
-         (< i (length cons))
-         ))))
+         (< i (length cons))))))
    (t ;; It is a cons cell
     (inspector--insert-title "cons cell")
     (inspector--insert-label "car")
@@ -420,12 +474,12 @@ is expected to be used.")
     (inspector--insert-label "cdr")
     (inspector--insert-inspect-button (cdr cons)))))
 
-(cl-defmethod inspect-object ((string string))
+(cl-defmethod inspector-inspect-object ((string string))
   "Render inspector buffer for STRING."
   (inspector--insert-title "string")
   (prin1 string (current-buffer)))
 
-(cl-defmethod inspect-object ((array array))
+(cl-defmethod inspector-inspect-object ((array array))
   "Render inspector buffer for ARRAY."
   (inspector--insert-title (inspector--princ-to-string (type-of array)))
   (let ((length (length array)))
@@ -445,10 +499,9 @@ is expected to be used.")
                   (inspector--insert-inspect-button (aref array k))
                   (newline))
          ;; Insert [more] button?:
-         (< i length)
-         )))))
+         (< i length))))))
 
-(cl-defmethod inspect-object ((buffer buffer))
+(cl-defmethod inspector-inspect-object ((buffer buffer))
   "Render inspector buffer for Emacs BUFFER."
   (inspector--insert-title (prin1-to-string buffer))
   (inspector--insert-label "name")
@@ -474,7 +527,7 @@ is expected to be used.")
     (inspector--insert-inspect-button (with-current-buffer buffer
                                         buffer-read-only))))
 
-(cl-defmethod inspect-object ((window window))
+(cl-defmethod inspector-inspect-object ((window window))
   "Render inspector buffer for Emacs WINDOW."
   (inspector--insert-title (prin1-to-string window))
   (inspector--insert-label "parent")
@@ -489,7 +542,7 @@ is expected to be used.")
   (inspector--insert-label "frame")
   (inspector--insert-inspect-button (window-frame window)))
 
-(cl-defmethod inspect-object ((frame frame))
+(cl-defmethod inspector-inspect-object ((frame frame))
   "Render inspector buffer for Emacs FRAME."
   (inspector--insert-title (prin1-to-string frame))
   (inspector--insert-label "first window")
@@ -498,7 +551,7 @@ is expected to be used.")
   (inspector--insert-label "parameters")
   (inspector--insert-inspect-button (frame-parameters frame)))
 
-(cl-defmethod inspect-object ((overlay overlay))
+(cl-defmethod inspector-inspect-object ((overlay overlay))
   "Render inspector buffer for Emacs OVERLAY."
   (inspector--insert-title (prin1-to-string overlay))
   (inspector--insert-label "buffer")
@@ -513,13 +566,13 @@ is expected to be used.")
   (inspector--insert-label "properties")
   (inspector--insert-inspect-button (overlay-properties overlay)))
 
-(cl-defmethod inspect-object ((number number))
+(cl-defmethod inspector-inspect-object ((number number))
   "Render inspector buffer for NUMBER."
   (inspector--insert-title (inspector--princ-to-string (type-of number)))
   (inspector--insert-label "value")
   (insert (inspector--princ-to-string number)))
 
-(cl-defmethod inspect-object ((integer integer))
+(cl-defmethod inspector-inspect-object ((integer integer))
   "Render inspector buffer for INTEGER."
   (inspector--insert-title (inspector--princ-to-string (type-of integer)))
   (inspector--insert-label "integer")
@@ -528,7 +581,7 @@ is expected to be used.")
   (inspector--insert-label "character")
   (insert (inspector--princ-to-string (char-to-string integer))))
 
-(cl-defmethod inspect-object ((hash-table hash-table))
+(cl-defmethod inspector-inspect-object ((hash-table hash-table))
   "Render inspector buffer for HASH-TABLEs."
   (inspector--insert-title (inspector--print-truncated hash-table))
   (inspector--insert-label "size")
@@ -556,8 +609,7 @@ is expected to be used.")
              (inspector--insert-inspect-button (gethash key hash-table))
              (newline))
            ;; Insert [more] button?
-           (< i (length keys))
-           ))))))
+           (< i (length keys))))))))
 
 ;;--- Buffers ------------------------------
 
@@ -577,19 +629,20 @@ is expected to be used.")
 ;;------ Commands -----------------------------
 
 ;;;###autoload
-(defun inspect-expression (exp)
+(defun inspector-inspect-expression (exp)
   "Evaluate EXP and inspect its result."
   (interactive (list (read--expression "Eval and inspect: ")))
 
   (inspector-inspect (eval exp t)))
 
 (defun inspector--basic-inspect (object)
+  "Create and prepare a new buffer for inspecting OBJECT."
   (defvar *)
   (let ((buffer (inspector-make-inspector-buffer)))
     (with-current-buffer buffer
       (setq inspector-inspected-object object)
       (setq * object)
-      (inspect-object object)
+      (inspector-inspect-object object)
       (goto-char 0)
       (setq buffer-read-only t)
       buffer)))
@@ -624,7 +677,7 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
       (inspector--basic-inspect object))))
 
 ;;;###autoload
-(defun inspect-last-sexp ()
+(defun inspector-inspect-last-sexp ()
   "Evaluate sexp before point and inspect the result."
   (interactive)
   (let ((result (eval (eval-sexp-add-defvars (elisp--preceding-sexp)) lexical-binding)))
@@ -633,7 +686,7 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
 ;;-- Inspection from Emacs debugger
 
 ;;;###autoload
-(defun inspect-debugger-locals ()
+(defun inspector-inspect-debugger-locals ()
   "Inspect local variables of the frame at point in debugger backtrace."
   (interactive)
   (let* ((nframe (debugger-frame-number))
@@ -641,7 +694,7 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
     (inspector-inspect (inspector--alist-to-plist locals))))
 
 ;;;###autoload
-(defun inspect-debugger-local (varname)
+(defun inspector-inspect-debugger-local (varname)
   "Inspect local variable named VARNAME of frame at point in debugger backtrace."
   (interactive
    (list
@@ -657,7 +710,7 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
       (inspector-inspect (cdr (assoc (intern varname) locals))))))
 
 ;;;###autoload
-(defun inspect-debugger-current-frame ()
+(defun inspector-inspect-debugger-current-frame ()
   "Inspect current frame in debugger backtrace."
   (interactive)
   (let* ((nframe (debugger-frame-number))
@@ -665,7 +718,7 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
     (inspector-inspect frame)))
 
 ;;;###autoload
-(defun inspect-debugger-frame-and-locals ()
+(defun inspector-inspect-debugger-frame-and-locals ()
   "Inspect current frame and locals in debugger backtrace."
   (interactive)
   (let* ((nframe (debugger-frame-number))
@@ -675,18 +728,18 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
                              :locals (inspector--alist-to-plist locals)))))
 
 ;; Press letter 'i' in debugger backtrace to inspect locals.
-(define-key debugger-mode-map "i" #'inspect-debugger-frame-and-locals)
+(define-key debugger-mode-map "i" #'inspector-inspect-debugger-frame-and-locals)
 
 ;; ----- edebug-mode---------------------------------------
 
 ;;;###autoload
-(defun inspect-edebug-expression (expr)
-  "Evaluate EXPR in edebug-mode, and inspect the result."
+(defun inspector-inspect-edebug-expression (expr)
+  "Evaluate EXPR in `edebug-mode', and inspect the result."
   (interactive "xInspect edebug expression: ")
   (inspector-inspect (edebug-eval expr)))
 
 ;; Press 'C-c C-i' to inspect expression in edebug-mode
-(define-key edebug-mode-map (kbd "C-c C-i") #'inspect-edebug-expression)
+(define-key edebug-mode-map (kbd "C-c C-i") #'inspector-inspect-edebug-expression)
 
 ;;--------- Inspector mode ---------------------------------
 
