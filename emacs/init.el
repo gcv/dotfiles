@@ -241,6 +241,7 @@
             "\\*Shell Command Output\\*"
             "\\*buffer-selection\\*"
             "\\*envrc\\*"
+            "\\*Async-native-compile-log\\*"
             "\\*helm"
             "\\*helm-mode"))
 
