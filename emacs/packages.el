@@ -838,6 +838,11 @@
   )
 
 
+(when (not (version<= emacs-version "28"))
+  (use-package org-contrib
+    :pin nongnu))
+
+
 (use-package origami
   :pin melpa
   :after (hydra)
