@@ -1060,6 +1060,16 @@
 )
 
 
+;;; An alternative to .dir-locals.el for configuring projects.
+;; (use-package sidecar-locals
+;;   :pin melpa
+;;
+;;   :config
+;;   (add-to-list 'sidecar-locals-paths-allow "/path/to/trusted/directory")
+;;   (sidecar-locals-mode 1)
+;;   )
+
+
 (use-package slime
   :config
   (setq slime-net-coding-system 'utf-8-unix)
