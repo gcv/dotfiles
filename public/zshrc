@@ -110,9 +110,9 @@ alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs -nw'
 
 if [[ $(ls --color 2>/dev/null) ]]; then
     # GNU ls probably available
-    alias ls='ls --color'
+    alias ls='ls --color --sort=version'
 elif [[ $(command -v gls) && $(gls --color 2>/dev/null) ]]; then
-    alias ls='gls --color'
+    alias ls='gls --color --sort=version'
 fi
 
 [[ ${UNAME} == "Darwin" && $(command -v brew) ]] && function brewdeps() {

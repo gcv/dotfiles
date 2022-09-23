@@ -1,3 +1,3 @@
-function ls --description 'alias ls=ls --color'
- command ls --color $argv; 
+function ls --description 'alias ls=ls --color --sort=version'
+ command ls --color --sort=version $argv;
 end

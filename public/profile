@@ -89,7 +89,7 @@ alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
 
-alias ls="ls --color=auto"
+alias ls="ls --color=auto --sort=version"
 alias v="ls -lahF"
 alias rm="rm -i"
 alias cp='cp -p'
