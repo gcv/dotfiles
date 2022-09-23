@@ -57,7 +57,7 @@ path_add "${HOME}/.local/bin" before
 
 ### deal with ssh-agent
 
-if [ -z "${SSH_AUTH_SOCK}" ]; then
+if [ -z "${SSH_AUTH_SOCK}" -o ! -e "${SSH_AUTH_SOCK}" ]; then
     if [ "${UNAME}" = "Darwin" ]; then
         # launchd manages ssh-agent on Mac, but individual shells can sometimes lose SSH_AUTH_SOCK
         ssh_agent_pid=$(ps uwx | grep "${USER}" | grep ssh-agent | grep -v grep | awk '{print $2}')
