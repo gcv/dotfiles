@@ -37,55 +37,55 @@
   "Amount of indentation for block contents."
   :type 'integer
   :group 'swift
-  :safe 'integerp)
+  :safe #'integerp)
 
 (defcustom swift-mode:parenthesized-expression-offset 2
   "Amount of indentation inside parentheses and square brackets."
   :type 'integer
   :group 'swift
-  :safe 'integerp)
+  :safe #'integerp)
 
 (defcustom swift-mode:multiline-statement-offset 2
   "Amount of indentation for continuations of expressions."
   :type 'integer
   :group 'swift
-  :safe 'integerp)
+  :safe #'integerp)
 
 (defcustom swift-mode:switch-case-offset 0
   "Amount of indentation for case labels in switch statements."
   :type 'integer
   :group 'swift
-  :safe 'integerp)
+  :safe #'integerp)
 
 (defcustom swift-mode:prepend-asterisk-to-comment-line nil
   "Automatically insert a asterisk to each comment line if non-nil."
   :type 'boolean
   :group 'swift
-  :safe 'booleanp)
+  :safe #'booleanp)
 
 (defcustom swift-mode:insert-space-after-asterisk-in-comment t
   "Automatically insert a space after asterisk in comment if non-nil."
   :type 'boolean
   :group 'swift
-  :safe 'booleanp)
+  :safe #'booleanp)
 
 (defcustom swift-mode:auto-close-multiline-comment t
   "If non-nil, `indent-new-comment-line' automatically close multiline comment."
   :type 'boolean
   :group 'swift
-  :safe 'booleanp)
+  :safe #'booleanp)
 
 (defcustom swift-mode:fix-comment-close t
   "Fix \"* /\" in incomplete multiline comment to \"*/\" if non-nil."
   :type 'boolean
   :group 'swift
-  :safe 'booleanp)
+  :safe #'booleanp)
 
 (defcustom swift-mode:break-line-before-comment-close t
   "If non-nil, break line before the closing delimiter of multiline comments."
   :type 'boolean
   :group 'swift
-  :safe 'booleanp)
+  :safe #'booleanp)
 
 (defcustom swift-mode:highlight-anchor nil
   "Highlight anchor point for indentation if non-nil.
@@ -93,7 +93,7 @@
 Intended for debugging."
   :type 'boolean
   :group 'swift
-  :safe 'booleanp)
+  :safe #'booleanp)
 
 ;;; Constants and variables
 
@@ -225,11 +225,15 @@ declaration and its offset is `swift-mode:basic-offset'."
       (swift-mode:indentation (point) 0)))))
 
 (defun swift-mode:calculate-indent-of-multiline-string ()
-  "Return the indentation of the current line inside a multiline string."
+  "Return the indentation of the current line inside a multiline string.
+
+Also used for regexes."
   (back-to-indentation)
   (let ((string-beginning-position
          (save-excursion (swift-mode:beginning-of-string))))
-    (if (looking-at "\"\"\"")
+    (if (and (looking-at "\\(\"\"\"\\|/\\)#*")
+             (equal (get-text-property (1- (match-end 0)) 'syntax-table)
+                    (string-to-syntax "|")))
         ;; The last line.
         (progn
           (goto-char string-beginning-position)
@@ -240,13 +244,13 @@ declaration and its offset is `swift-mode:basic-offset'."
       (swift-mode:goto-non-interpolated-expression-bol)
       (back-to-indentation)
       (if (<= (point) string-beginning-position)
-          ;; The cursor was on the 2nd line of the comment, so aligns with
+          ;; The cursor was on the 2nd line of the string, so aligns with
           ;; that line with offset.
           (progn
             (goto-char string-beginning-position)
             (swift-mode:calculate-indent-of-expression
              swift-mode:multiline-statement-offset))
-        ;; The cursor was on the 3rd or following lines of the comment, so
+        ;; The cursor was on the 3rd or following lines of the string, so
         ;; aligns with a non-empty preceding line.
         (if (and (bolp) (eolp))
             ;; The cursor is on an empty line, so seeks a non-empty-line.
@@ -1296,7 +1300,7 @@ all tokens.
 STOP-AT-BOL-TOKEN-TYPES is a list of token types that if we hit
 the beginning of a line just before a token with one of given token types,
 the function returns.  Typically, this is a list of token types that starts
-list element (e.g. 'case' of switch statement body).  If STOP-AT-BOL-TOKEN-TYPES
+list element (e.g. `case' of switch statement body).  If STOP-AT-BOL-TOKEN-TYPES
 is the symbol `any', it matches all tokens."
   (let*
       ((parent (swift-mode:backward-token-or-list))
