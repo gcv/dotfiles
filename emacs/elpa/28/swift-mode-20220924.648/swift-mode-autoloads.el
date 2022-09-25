@@ -108,7 +108,7 @@ Runs the hook `swift-repl-mode-hook' (after the `comint-mode-hook' is run).
 
 \(fn CMD &optional DONT-SWITCH KEEP-DEFAULT)" t nil)
 
-(defalias 'run-swift 'swift-mode:run-repl)
+(defalias 'run-swift #'swift-mode:run-repl)
 
 (autoload 'swift-mode:send-region "swift-mode-repl" "\
 Send the current region to the inferior swift process.
@@ -197,8 +197,7 @@ the value of `swift-mode:ios-project-scheme' is used.
 
 ;;;***
 
-;;;### (autoloads nil nil ("src-autoloads.el" "swift-mode-pkg.el")
-;;;;;;  (0 0 0 0))
+;;;### (autoloads nil nil ("swift-mode-pkg.el") (0 0 0 0))
 
 ;;;***
 
