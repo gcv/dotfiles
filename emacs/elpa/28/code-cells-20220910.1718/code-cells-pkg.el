@@ -1,2 +1,0 @@
-;;; Generated package description from code-cells.el  -*- no-byte-compile: t -*-
-(define-package "code-cells" "20220910.1718" "Lightweight notebooks with support for ipynb files" '((emacs "27.1")) :commit "9da2ff44d1324b7c827b5d475391ba0a16c34239" :authors '(("Augusto Stoffel" . "arstoffel@gmail.com")) :maintainer '("Augusto Stoffel" . "arstoffel@gmail.com") :keywords '("convenience" "outlines") :url "https://github.com/astoff/code-cells.el")
