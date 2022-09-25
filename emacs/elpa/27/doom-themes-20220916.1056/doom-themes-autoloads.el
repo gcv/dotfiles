@@ -667,7 +667,7 @@ Enable flashing the mode-line on error." nil nil)
 
 ;;;***
 
-;;;### (autoloads nil nil ("ci.el" "doom-themes-pkg.el") (0 0 0 0))
+;;;### (autoloads nil nil ("doom-themes-pkg.el") (0 0 0 0))
 
 ;;;***
 
