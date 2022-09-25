@@ -53,7 +53,7 @@ vc-hooks.el) for detail explanation of these states."
   :group 'dirvish)
 
 (defface dirvish-git-commit-message-face
-  '((t (:inherit font-lock-comment-face :underline nil)))
+  '((t (:inherit dired-ignored :underline nil :background unspecified)))
   "Face for commit message overlays."
   :group 'dirvish)
 
@@ -69,11 +69,11 @@ vc-hooks.el) for detail explanation of these states."
          (buf (current-buffer))
          (old-layout (dv-layout dv))
          (new-layout (unless old-layout (dv-last-fs-layout dv)))
-         (dv-dps (dv-preview-dispatchers dv))
-         (new-dps (seq-difference dv-dps '(vc-diff vc-log vc-blame))))
+         (new-dps (seq-difference
+                   dirvish-preview-dispatchers '(vc-diff vc-log vc-blame))))
     (when value (push (intern (format "%s" value)) new-dps))
-    (setf (dv-preview-dispatchers dv) new-dps)
-    (dirvish--refresh-slots dv)
+    (setq-local dirvish--working-preview-dispathchers
+                (dirvish--preview-dps-validate new-dps))
     (if (not new-layout)
         (dirvish-preview-update dv)
       (quit-window nil (dv-root-window dv))
@@ -91,33 +91,27 @@ vc-hooks.el) for detail explanation of these states."
 
 (dirvish-define-attribute vc-state
   "The version control state at left fringe."
-  (:if (and (dirvish-prop :root)
-            (dirvish-prop :vc-backend)
-            (or (set-window-fringes nil 5 1) t)))
+  :when (and (dirvish-prop :vc-backend)
+             (or (set-window-fringes nil 5 1) t))
   (let* ((state (dirvish-attribute-cache f-name :vc-state))
          (face (alist-get state dirvish-vc-state-face-alist))
          (display (and face `(left-fringe dirvish-vc-gutter . ,(cons face nil))))
          (gutter-str (and display (propertize "!" 'display display))) ov)
     (when gutter-str
-      (prog1 (setq ov (make-overlay f-beg f-beg))
+      (prog1 `(ov . ,(setq ov (make-overlay f-beg f-beg)))
         (overlay-put ov 'before-string gutter-str)))))
 
 (dirvish-define-attribute git-msg
   "Append git commit message to filename."
-  (:if (and (dirvish-prop :root)
-            (eq (dirvish-prop :vc-backend) 'Git)
-            (not (dirvish-prop :remote))
-            (>= (window-width) 40)))
+  :index 1
+  :when (and (eq (dirvish-prop :vc-backend) 'Git)
+             (not (dirvish-prop :remote))
+             (> win-width 65))
   (let* ((info (dirvish-attribute-cache f-name :git-msg))
          (face (or hl-face 'dirvish-git-commit-message-face))
-         (str (substring (concat "  " info) 0 -1))
-         (remain (max (- remain f-wid) 0))
-         (len (length str))
-         (overflow (< remain len))
-         (ov (make-overlay f-end f-end)))
-    (and overflow (setq str (substring str 0 remain)))
-    (add-face-text-property 0 (if overflow remain len) face t str)
-    (overlay-put ov 'after-string str) ov))
+         (str (concat (substring (concat "  " info) 0 -1) " ")))
+    (add-face-text-property 0 (length str) face t str)
+    `(left . ,str)))
 
 (dirvish-define-preview vc-diff (ext)
   "Use output of `vc-diff' as preview."
@@ -196,7 +190,7 @@ vc-hooks.el) for detail explanation of these states."
   "Help menu for features in `dirvish-vc'."
   :init-value
   (lambda (o) (oset o value (mapcar (lambda (d) (format "%s" d))
-                               (dv-preview-dispatchers (dirvish-curr)))))
+                               dirvish-preview-dispatchers)))
   [:description
    (lambda () (dirvish--format-menu-heading "Version control commands"))
    ("v" dirvish-vc-preview-ifx

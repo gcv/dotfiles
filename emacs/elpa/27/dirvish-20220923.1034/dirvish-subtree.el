@@ -17,14 +17,6 @@
 (declare-function all-the-icons-octicon "all-the-icons")
 (require 'dirvish)
 
-(defvar dirvish-subtree--prefix-unit-len 2)
-(defvar-local dirvish-subtree--overlays nil "Subtree overlays in this buffer.")
-
-(dolist (sym-a '((dired-current-directory . dirvish-curr-dir-a)
-                 (dired-subdir-index . dirvish-subdir-index-a)
-                 (dired-get-subdir . dirvish-get-subdir-a)))
-  (advice-add (car sym-a) :around (cdr sym-a)))
-
 (defcustom dirvish-subtree-listing-switches nil
   "Listing SWITCHES used in subtrees.
 The value may be a string of options or nil which means the
@@ -35,8 +27,7 @@ working switches of current buffer will be used."
 (defcustom dirvish-subtree-prefix " │"
   "A string put into each nested subtree.
 The prefix is repeated \"depth\" times."
-  :type 'string :group 'dirvish
-  :set (lambda (k v) (set k v) (setq dirvish-subtree--prefix-unit-len (length v))))
+  :type 'string :group 'dirvish)
 
 (defcustom dirvish-subtree-save-on-revert t
   "Non-nil means `revert-buffer' keeps all expanded subtrees."
@@ -77,14 +68,21 @@ The value can be one of: `plus', `arrow', `chevron'."
                :v-adjust 0.1 :face 'dirvish-subtree-state)))))))
 
 (defface dirvish-subtree-state
-  '((t (:inherit font-lock-doc-face :underline nil)))
+  '((t (:inherit dired-ignored :underline nil :background unspecified)))
   "Face used for `expanded-state' attribute."
   :group 'dirvish)
 
 (defface dirvish-subtree-guide
-  '((t (:inherit font-lock-comment-face :underline nil)))
+  '((t (:inherit dired-ignored :underline nil :background unspecified)))
   "Face used for `expanded-state' attribute."
   :group 'dirvish)
+
+(defvar-local dirvish-subtree--overlays nil "Subtree overlays in this buffer.")
+
+(dolist (sym-a '((dired-current-directory . dirvish-curr-dir-a)
+                 (dired-subdir-index . dirvish-subdir-index-a)
+                 (dired-get-subdir . dirvish-get-subdir-a)))
+  (advice-add (car sym-a) :around (cdr sym-a)))
 
 (defun dirvish-curr-dir-a (fn &optional localp)
   "Advice for FN `dired-current-directory'.
@@ -120,9 +118,9 @@ Ensure correct DIR when inside of a subtree."
         (dired-move-to-filename)))
     stop))
 
-(defun dirvish-subtree--prefix-length ()
+(defun dirvish-subtree-prefix ()
   "Calculate subtree prefix length at point."
-  (* dirvish-subtree--prefix-unit-len (dirvish-subtree--depth)))
+  (* (length dirvish-subtree-prefix) (dirvish-subtree--depth)))
 
 (defun dirvish-subtree--depth ()
   "Get subtree depth at point."
@@ -141,8 +139,8 @@ Ensure correct DIR when inside of a subtree."
   (cl-loop
    with (pov . max) = (cons nil 0)
    for ov in (overlays-at p)
-   for depth = (or (overlay-get ov 'dired-subtree-depth) 0) do
-   (when (> depth max) (setq pov ov) (setq max depth))
+   for depth = (or (overlay-get ov 'dired-subtree-depth) 0)
+   do (when (> depth max) (setq pov ov) (setq max depth))
    finally return pov))
 
 (defun dirvish-subtree--insert ()
@@ -176,7 +174,7 @@ When CLEAR, remove all subtrees in the buffer."
    for depth = (overlay-get ov 'dired-subtree-depth)
    for name = (overlay-get ov 'dired-subtree-name) do
    (push (cons depth name) maps)
-   finally do
+   finally
    (setq dirvish-subtree--overlays nil)
    (cl-loop for (_ . name) in (sort maps (lambda (a b) (< (car a) (car b))))
             when (dirvish-subtree--goto-file name) do
@@ -227,10 +225,8 @@ When CLEAR, remove all subtrees in the buffer."
 
 (dirvish-define-attribute subtree-state
   "A indicator for directory expanding state."
-  (:if (and (dirvish-prop :root)
-            (or dirvish-subtree-always-show-state
-                dirvish-subtree--overlays))
-       :width 1)
+  :when (or dirvish-subtree-always-show-state dirvish-subtree--overlays)
+  :width 1
   (let ((state-str
          (propertize (if (eq (car f-type) 'dir)
                          (if (dirvish-subtree--expanded-p)
@@ -240,7 +236,8 @@ When CLEAR, remove all subtrees in the buffer."
         (ov (make-overlay (1+ l-beg) (1+ l-beg))))
     (when hl-face
       (add-face-text-property 0 1 hl-face t state-str))
-    (overlay-put ov 'after-string state-str) ov))
+    (overlay-put ov 'after-string state-str)
+    `(ov . ,ov)))
 
 ;;;###autoload
 (defun dirvish-subtree-up ()

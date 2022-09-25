@@ -98,6 +98,13 @@ Echo total file size of FILESET.
 FILESET defaults to `dired-get-marked-files'.
 
 \(fn &optional FILESET)" t nil)
+
+(autoload 'dirvish-create-empty-file "dirvish-extras" "\
+Create an empty file called FILE.
+Same as `dired-create-empty-file', but use
+`dired-current-directory' as the prompt.
+
+\(fn FILE)" t nil)
  (autoload 'dirvish-file-info-menu "dirvish-extras" nil t)
  (autoload 'dirvish-chxxx-menu "dirvish-extras" nil t)
  (autoload 'dirvish-mark-menu "dirvish-extras" nil t)
@@ -302,13 +309,6 @@ Insert subtree at point or remove it if it was not present." t nil)
  (autoload 'dirvish-subtree-menu "dirvish-subtree" nil t)
 
 (if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-subtree" '("dirvish-")))
-
-;;;***
-
-;;;### (autoloads nil "dirvish-tramp" "dirvish-tramp.el" (0 0 0 0))
-;;; Generated autoloads from dirvish-tramp.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "dirvish-tramp" '("dirvish-tramp-")))
 
 ;;;***
 

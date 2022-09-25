@@ -26,8 +26,7 @@
 ;;; Code:
 
 (require 'dired-aux)
-(require 'dirvish)
-(require 'dirvish-tramp)
+(require 'dirvish-extras)
 
 (defcustom dirvish-yank-sources 'all
   "The way to collect source files.
@@ -35,8 +34,7 @@ The value can be a symbol or a function that returns a fileset."
   :group 'dirvish
   :type '(choice (const :tag "Marked files in current buffer" buffer)
                  (const :tag "Marked files in current session" session)
-                 (const :tag "Marked files in all session within selected frame" frame)
-                 (const :tag "Marked files in all sessions" all)
+                 (const :tag "Marked files in all Dired buffers" all)
                  (function :tag "Custom function")))
 
 (defcustom dirvish-yank-auto-unmark t
@@ -101,6 +99,13 @@ invoke the CMD, DOC is the documentation string."
   "An explicit ssh command for rsync to use port forwarded proxy.
 The string is treated as a format string where %d is replaced with the
 results of `dirvish-yank--get-remote-port'.")
+(defvar dirvish-yank-methods-w32
+  '((yank     . dired-do-copy)
+    (move     . dired-do-rename)
+    (symlink  . dired-do-symlink)
+    (relalink . dired-do-relsymlink)
+    (hardlink . dired-do-hardlink))
+  "Yank functions for w32.")
 
 (defun dirvish-yank--get-remote-port ()
   "Return the remote port we shall use for the reverse port-forward."
@@ -120,10 +125,10 @@ RANGE can be `buffer', `session', `frame', `all'."
     with buffers = (pcase range
                      ('buffer (list (current-buffer)))
                      ('session (mapcar #'cdr (dv-roots (dirvish-curr))))
-                     ('frame (cl-loop for i in (reverse (dirvish-get-all 'roots nil t))
-                                      by 'cddr collect i))
-                     ('all (cl-loop for i in (reverse (dirvish-get-all 'roots t t))
-                                    by 'cddr collect i)))
+                     ('all (cl-loop for b in (buffer-list)
+                                    when (with-current-buffer b
+                                           (eq major-mode 'dired-mode))
+                                    collect b)))
     for buffer in (seq-filter #'buffer-live-p buffers) append
     (with-current-buffer buffer
       (when (save-excursion (goto-char (point-min))
@@ -178,7 +183,7 @@ RANGE can be `buffer', `session', `frame', `all'."
     (when (and (buffer-live-p dv-buf)
                (or (eq dv-buf (current-buffer))
                    (not (with-current-buffer dv-buf (dirvish-prop :remote)))))
-      (with-current-buffer dv-buf (revert-buffer)))))
+      (with-current-buffer dv-buf (revert-buffer) (dirvish--build dv)))))
 
 (defun dirvish-yank--execute (cmd)
   "Run yank CMD in the same host."
@@ -189,8 +194,10 @@ RANGE can be `buffer', `session', `frame', `all'."
     (process-put proc 'dv (dirvish-curr))
     (set-process-sentinel proc #'dirvish-yank--sentinel)
     (when dirvish-yank-auto-unmark
-      (cl-loop for buf in (reverse (dirvish-get-all 'roots t t)) by 'cddr
-               do (with-current-buffer buf (dired-unmark-all-marks))))
+      (cl-loop for buf in (buffer-list)
+               do (with-current-buffer buf
+                    (when (eq major-mode 'dired-mode)
+                      (dired-unmark-all-marks)))))
     (cl-incf dirvish-yank-task-counter)))
 
 (defun dirvish-yank--newbase (base-name fileset dest)
@@ -230,7 +237,7 @@ RANGE can be `buffer', `session', `frame', `all'."
             (?N (setq never t)
                 (push (dirvish-yank--newbase base dfiles dest) to-rename))
             (?q (user-error "Dirvish[info]: yank task aborted")))))
-   finally do (cl-loop for (from . to) in to-rename do (rename-file from to))))
+   finally (cl-loop for (from . to) in to-rename do (rename-file from to))))
 
 (defun dirvish-yank--fallback-handler (method srcs dest)
   "Execute a fallback yank command with type of METHOD.
@@ -242,15 +249,18 @@ SRCS and DEST are source files and destination."
 (defun dirvish-yank--l2l-handler (method srcs dest)
   "Execute a local yank command with type of METHOD.
 SRCS and DEST have to be in the same HOST (local or remote)."
-  (let* ((method (alist-get method dirvish-yank-methods))
-         (l-files (cl-loop for f in srcs collect
-                           (shell-quote-argument (file-local-name f))))
-         (files (mapconcat #'concat l-files ","))
-         (cmd (format "%s %s %s" method
-                      (if (> (length srcs) 1) (format "{%s}" files) files)
-                      (shell-quote-argument (file-local-name dest)))))
-    (dirvish-yank--prepare-dest-names srcs dest)
-    (dirvish-yank--execute cmd)))
+  (if (memq system-type '(windows-nt ms-dos))
+      ;; HACK: for now, just redirect to builtin dired functions on windows platform
+      (funcall (alist-get method dirvish-yank-methods-w32))
+    (let* ((method (alist-get method dirvish-yank-methods))
+           (l-files (cl-loop for f in srcs collect
+                             (shell-quote-argument (file-local-name f))))
+           (files (mapconcat #'concat l-files ","))
+           (cmd (format "%s %s %s" method
+                        (if (> (length srcs) 1) (format "{%s}" files) files)
+                        (shell-quote-argument (file-local-name dest)))))
+      (dirvish-yank--prepare-dest-names srcs dest)
+      (dirvish-yank--execute cmd))))
 
 (defun dirvish-yank--l2fr-handler (srcs dest)
   "Execute a local to/from remote rsync command for SRCS and DEST."
