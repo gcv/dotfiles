@@ -320,7 +320,7 @@ If DEMOTE, shift them to the lowest instead."
                            (assoc-delete-all
                             (oref obj description)
                             dirvish-emerge-groups #'equal)))
-           finally do
+           finally
            (let* ((sel (cl-loop for o in (reverse sel) collect
                                 (list (oref o description) (oref o recipe)
                                       (oref o hide) (oref o selected))))
@@ -409,8 +409,7 @@ DESC and HIDE are the group title and visibility respectively."
 POS can be a integer or filename.
 BEG and END determine the boundary of groups."
   (unless (or beg end)
-    (setq beg (cl-loop for o in (overlays-at (point-min)) thereis
-                       (and (overlay-get o 'dired-header) (overlay-end o)))
+    (setq beg (dirvish-prop :content-begin)
           end (- (dired-subdir-max) (if (cdr dired-subdir-alist) 1 0))))
   (with-silent-modifications
     (setq dirvish-emerge--group-overlays nil)
@@ -431,8 +430,7 @@ PREDS are locally composed predicates."
                  for i from 0
                  for (desc _ hide) in grs
                  collect (list i desc hide '())))
-        (beg (cl-loop for o in (overlays-at (goto-char (point-min))) thereis
-                      (and (overlay-get o 'dired-header) (overlay-end o))))
+        (beg (progn (goto-char (point-min)) (dirvish-prop :content-begin)))
         (end (- (dired-subdir-max) (if (cdr dired-subdir-alist) 1 0)))
         (max-idx (length preds))
         (dir (file-local-name (dired-current-directory))))
@@ -455,9 +453,10 @@ PREDS are locally composed predicates."
 
 (defun dirvish-emerge--apply ()
   "Readin `dirvish-emerge-groups' and apply them."
-  (when (or (dirvish-prop :force-emerge)
-            (< (hash-table-count dirvish--attrs-hash)
-               dirvish-emerge-max-file-count))
+  (when (and (not (dirvish-prop :fd-arglist))
+             (or (dirvish-prop :force-emerge)
+                 (< (hash-table-count dirvish--attrs-hash)
+                    dirvish-emerge-max-file-count)))
     (dirvish-emerge--readin-groups)
     (when-let ((preds (dirvish-prop :emerge-preds)))
       (dirvish-emerge--apply-1 preds))))
@@ -570,7 +569,7 @@ Press again to set the value for the group"))
                                        (forward-line 1) (point))
                        (overlay-end o)))))
    do (push (list idx desc hide files) groups)
-   finally do (dirvish-emerge--insert-groups (nreverse groups) pos)))
+   finally (dirvish-emerge--insert-groups (nreverse groups) pos)))
 
 (provide 'dirvish-emerge)
 ;;; dirvish-emerge.el ends here
