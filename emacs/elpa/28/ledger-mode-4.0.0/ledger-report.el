@@ -584,7 +584,7 @@ arguments returned by `ledger-report--compute-extra-args'."
   (set-window-configuration ledger-original-window-cfg)
   (kill-buffer (get-buffer ledger-report-buffer-name)))
 
-(define-obsolete-function-alias 'ledger-report-kill #'ledger-report-quit)
+(define-obsolete-function-alias 'ledger-report-kill #'ledger-report-quit "2018-03-18")
 
 (defun ledger-report-edit-reports ()
   "Edit the defined ledger reports."
