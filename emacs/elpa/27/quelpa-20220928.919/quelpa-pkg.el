@@ -1,6 +1,6 @@
-(define-package "quelpa" "20220730.230" "Emacs Lisp packages built directly from source"
+(define-package "quelpa" "20220928.919" "Emacs Lisp packages built directly from source"
   '((emacs "25.1"))
-  :commit "59bd9bf760f2fdf70c81c220f2875dbee0c29d5c" :authors
+  :commit "37962e3b264795b7a3593109c7f14dbf57d9b77e" :authors
   '(("steckerhalter"))
   :maintainer
   '("steckerhalter")
