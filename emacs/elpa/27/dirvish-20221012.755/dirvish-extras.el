@@ -19,8 +19,9 @@
 ;; - `dirvish-copy-file-name' (autoload)
 ;; - `dirvish-copy-file-path' (autoload)
 ;; - `dirvish-copy-file-directory'
-;; - `dirvish-create-empty-file' (autoload)
 ;; - `dirvish-total-file-size' (autoload)
+;; - `dirvish-layout-toggle' (autoload)
+;; - `dirvish-layout-switch' (autoload)
 ;; - `dirvish-rename-space-to-underscore'
 ;;
 ;; Transient prefixes included (all autoloaded):
@@ -36,6 +37,18 @@
 
 (require 'dirvish)
 (require 'tramp)
+
+(defcustom dirvish-layout-recipes
+  '((0 0    0.4)   ;        | CURRENT | preview
+    (0 0    0.8)   ;        | current | PREVIEW
+    (1 0.08 0.8)   ; parent | current | PREVIEW
+    (1 0.11 0.55)) ; parent | current | preview
+  "Layout RECIPEs for `dirvish-layout-switch' command.
+RECIPE has the same form as `dirvish-default-layout'."
+  :group 'dirvish
+  :type '(repeat (list (integer :tag "number of parent windows")
+                       (float :tag "max width of parent windows")
+                       (float :tag "width of preview window"))))
 
 (defclass dirvish-attribute (transient-infix)
   ((variable  :initarg :variable))
@@ -66,12 +79,67 @@
   (let* ((item (oref obj variable))
          (old-val (purecopy dirvish-attributes))
          (new-val (if (equal value "+") (cl-pushnew item old-val)
-                    (remq item old-val)))
-         (attrs (append '(hl-line symlink-target) new-val)))
+                    (remq item old-val))))
     (mapc #'require '(dirvish-widgets dirvish-vc dirvish-collapse))
     (dirvish--render-attrs 'clear)
-    (setq-local dirvish--working-attrs (dirvish--attrs-expand attrs))
+    (setq-local dirvish-attributes new-val)
+    (setq-local dirvish--working-attrs
+                (dirvish--attrs-expand
+                 (append '(hl-line symlink-target) new-val)))
     (dirvish--render-attrs)))
+
+;;;###autoload (autoload 'dirvish-setup-menu "dirvish-extras" nil t)
+(defcustom dirvish-ui-setup-items
+  '(("s"  file-size     "File size")
+    ("t"  file-time     "File modification time")
+    ("c"  collapse      "Collapse unique nested paths"
+     (not (dirvish-prop :remote)))
+    ("v"  vc-state      "Version control state"
+     (and (display-graphic-p) (dirvish-prop :vc-backend)))
+    ("m"  git-msg       "Git commit messages"
+     (and (dirvish-prop :vc-backend) (not (dirvish-prop :remote))))
+    ("1" '(0 nil  0.4)  "     -       | current (60%) | preview (40%)")
+    ("2" '(0 nil  0.8)  "     -       | current (20%) | preview (80%)")
+    ("3" '(1 0.08 0.8)  "parent (8%)  | current (12%) | preview (80%)")
+    ("4" '(1 0.11 0.55) "parent (11%) | current (33%) | preview (55%)"))
+  "ITEMs for `dirvish-setup-menu'.
+A ITEM is a list consists of (KEY VAR DESC PRED) where KEY is the
+keybinding for the item, VAR can be a valid `dirvish-attributes'
+or a layout recipe (see `dirvish-layout-recipes'), DESC is the
+documentation for the VAR.  The optional PRED is passed as the
+predicate for that infix."
+  :group 'dirvish :type 'alist
+  :set
+  (lambda (key value)
+    (set key value)
+    (cl-loop
+     with (attrs . layouts) = ()
+     for (k v desc pred) in value
+     for name = (and (symbolp v) (intern (format "dirvish-%s-infix" v)))
+     do (if (not name)
+            (push (list k (propertize desc 'face 'font-lock-doc-face)
+                        `(lambda () (interactive) (dirvish-layout-switch ,v)))
+                  layouts)
+          (eval `(transient-define-infix ,name ()
+                   :class 'dirvish-attribute :variable ',v
+                   :description ,desc :if (lambda () ,(if pred `,@pred t))))
+          (push (list k name) attrs))
+     finally
+     (eval
+      `(transient-define-prefix dirvish-setup-menu ()
+         "Configure current Dirvish session."
+         [:description (lambda () (dirvish--format-menu-heading "Setup Dirvish UI"))
+                       ["Attributes:" ,@attrs]]
+         ["Switch layouts:"
+          :if (lambda () (car (dv-layout (dirvish-curr)))) ,@layouts]
+         ["Actions:"
+          ("M-t" "Toggle fullscreen" dirvish-layout-toggle)
+          ("RET" "Apply current settings to future sessions"
+           (lambda () (interactive)
+             (setq-default dirvish-attributes dirvish-attributes)
+             (setq dirvish-default-layout (cdr (dv-layout (dirvish-curr))))
+             (dirvish--init-session (dirvish-curr))
+             (revert-buffer)))])))))
 
 (defconst dirvish-tramp-preview-cmd
   "head -n 1000 %s 2>/dev/null || ls -Alh --group-directories-first %s 2>/dev/null")
@@ -95,39 +163,34 @@
                    :type ,(cons (if f-dirp 'dir 'file) f-truename))
                  dirvish--attrs-hash)))))
 
-(defun dirvish-gnuls-available-p (dir)
-  "Check if GNU ls is available or not over DIR."
-  (with-temp-buffer
-    (cl-letf (((symbol-function 'display-message-or-buffer) #'ignore))
-      (let ((default-directory dir))
-        (= (tramp-handle-shell-command "ls --version") 0)))))
-
 (defun dirvish-noselect-tramp (fn dir flags remote)
   "Return the Dired buffer at DIR with listing FLAGS.
 Save the REMOTE host to `dirvish-tramp-hosts'.
 FN is the original `dired-noselect' closure."
-  (let* ((r-flags (cdr (assoc remote dirvish-tramp-hosts #'equal)))
-         (ftp (tramp-ftp-file-name-p dir))
+  (let* ((saved-flags (cdr (assoc remote dirvish-tramp-hosts #'equal)))
+         (ftp? (tramp-ftp-file-name-p dir))
          (short-flags "-Alh")
-         (gnu? t)
-         (dired-buffers nil) ; disable reuse from dired
-         (buffer (apply fn (list dir (if ftp short-flags (or r-flags flags))))))
-    (unless (or r-flags ftp)
-      (setq gnu? (dirvish-gnuls-available-p dir))
-      (push (cons remote (if gnu? flags short-flags)) dirvish-tramp-hosts))
-    (unless gnu?
-      (kill-buffer buffer)
-      (setq buffer (apply fn (list dir short-flags))))
+         (default-directory dir)
+         (dired-buffers nil)
+         (buffer (cond (ftp? (funcall fn dir short-flags))
+                       (saved-flags (funcall fn dir saved-flags))
+                       ((= (process-file "ls" nil nil nil "--version") 0)
+                        (push (cons remote flags) dirvish-tramp-hosts)
+                        (funcall fn dir flags))
+                       (t (push (cons remote short-flags) dirvish-tramp-hosts)
+                          (funcall fn dir short-flags)))))
     (with-current-buffer buffer
       (dirvish-prop :tramp (tramp-dissect-file-name dir))
       buffer)))
 
-(defun dirvish-tramp--async-p (&optional vec)
+(defun dirvish-tramp--async-p (vec)
   "Return t if tramp connection VEC support async commands."
-  (when-let ((vec (or vec (dirvish-prop :tramp))))
-    (or (tramp-local-host-p vec)
-        (and (tramp-get-method-parameter vec 'tramp-direct-async)
-             (tramp-get-connection-property vec "direct-async-process" nil)))))
+  (or (tramp-local-host-p vec) ; localhost
+      ;; the connection support `direct-async-process' and no password needed
+      (and (stringp (tramp-get-connection-property
+                     vec "first-password-request" nil))
+           (tramp-get-method-parameter vec 'tramp-direct-async)
+           (tramp-get-connection-property vec "direct-async-process" nil))))
 
 (defun dirvish-tramp-dir-data-proc-s (proc _exit)
   "Sentinel for `dirvish-data-for-dir''s process PROC."
@@ -154,27 +217,11 @@ FN is the original `dired-noselect' closure."
       (process-put proc 'meta (list dir buffer setup))
       (set-process-sentinel proc #'dirvish-tramp-dir-data-proc-s))))
 
-(cl-defmethod dirvish-readin-dir
-  (dir &context ((dirvish-prop :remote) string) &optional flags)
-  "DIR FLAGS DIRVISH-PROP."
-  (let* ((ftp (tramp-ftp-file-name-p (dirvish-prop :tramp)))
-         (flags (if ftp "-Alh"
-                  (or flags dired-actual-switches dired-listing-switches))))
-    (with-temp-buffer
-      (insert-directory (file-name-as-directory dir) flags nil t)
-      (delete-char -1)
-      (unless ftp
-        (delete-region (goto-char (point-min))
-                       (progn (forward-line 1) (point))))
-      (unless (looking-at-p "  ")
-        (let ((indent-tabs-mode nil))
-          (indent-rigidly (point-min) (point-max) 2)))
-      (buffer-string))))
-
 (dirvish-define-preview tramp (file _ dv)
   "Preview files with `ls' or `head' for tramp files."
-  (when-let ((vec (dirvish-prop :tramp)))
-    (if (dirvish-tramp--async-p vec)
+  (let ((vec (dirvish-prop :tramp)))
+    (if (not (dirvish-tramp--async-p vec))
+        '(info . "File preview is not supported in current connection")
       (let ((process-connection-type nil)
             (localname (file-remote-p file 'localname))
             (buf (dirvish--util-buffer 'preview dv nil t)) proc)
@@ -191,8 +238,7 @@ FN is the original `dired-noselect' closure."
                 (with-current-buffer (process-buffer proc)
                   (fundamental-mode)
                   (insert str))))
-        `(buffer . ,buf))
-      '(info . "File preview is not supported in current TRAMP connection"))))
+        `(buffer . ,buf)))))
 
 (defun dirvish-find-file-true-path ()
   "Open truename of (maybe) symlink file under the cursor."
@@ -269,14 +315,45 @@ FILESET defaults to `dired-get-marked-files'."
       (message "%s" (format "Total size of %s entries: %s" count size)))))
 
 ;;;###autoload
-(defun dirvish-create-empty-file (file)
-  "Create an empty file called FILE.
-Same as `dired-create-empty-file', but use
-`dired-current-directory' as the prompt."
-  (interactive (list (read-file-name
-                      "Create empty file: " (dired-current-directory))))
-  (dired-create-empty-file file)
-  (unless (file-remote-p file) (revert-buffer)))
+(defun dirvish-layout-toggle ()
+  "Toggle layout of current Dirvish session.
+A session with layout means it has a companion preview window and
+possibly one or more parent windows."
+  (interactive)
+  (let* ((dv (or (dirvish-curr) (user-error "Not a dirvish buffer")))
+         (old-layout (car (dv-layout dv)))
+         (new-layout (unless old-layout (cdr (dv-layout dv))))
+         (buf (current-buffer)))
+    (if old-layout (set-window-configuration (dv-winconf dv))
+      (with-selected-window (dv-root-window dv) (quit-window)))
+    (setcar (dv-layout dv) new-layout)
+    (with-selected-window (dirvish--create-root-window dv)
+      (switch-to-buffer buf)
+      (dirvish--init-session dv))))
+
+;;;###autoload
+(defun dirvish-layout-switch (&optional recipe)
+  "Switch Dirvish layout according to RECIPE.
+If RECIPE is not provided, switch to the recipe next to the
+current layout defined in `dirvish-layout-recipes'."
+  (interactive)
+  (cl-loop
+   with dv = (let ((dv (dirvish-curr)))
+               (unless dv (user-error "Not in a Dirvish session"))
+               (unless (car (dv-layout dv))
+                 (dirvish-layout-toggle)
+                 (user-error "Dirvish: entering fullscreen")) dv)
+   with old-recipe = (car (dv-layout dv))
+   with recipes = (if recipe (list recipe) dirvish-layout-recipes)
+   with l-length = (length recipes)
+   for idx from 1
+   for recipe in recipes
+   when (or (eq idx l-length) (equal old-recipe recipe))
+   return
+   (let* ((new-idx (if (> idx (1- l-length)) 0 idx))
+          (new-recipe (nth new-idx recipes)))
+     (setf (dv-layout dv) (cons new-recipe new-recipe))
+     (dirvish--init-session dv))))
 
 (defun dirvish-rename-space-to-underscore ()
   "Rename marked files by replacing space to underscore."
@@ -323,8 +400,7 @@ Same as `dired-create-empty-file', but use
    ("L"   "Go to symlink's truename"           dirvish-find-file-true-path
     :if (lambda () (file-symlink-p (dired-get-filename nil t))))
    ("s"   "Get total size of marked files"     dirvish-total-file-size)
-   ("t"   "Show file TYPE"                     dired-show-file-type)
-   ("m"   "Show media properties"              dirvish-media-properties)])
+   ("t"   "Show file TYPE"                     dired-show-file-type)])
 
 (transient-define-prefix dirvish-subdir-menu ()
   "Help Menu for Dired subdir management."
@@ -420,7 +496,9 @@ Same as `dired-create-empty-file', but use
           "The keys listed here may be different from the actual bindings"))
    ("n" "  Move to next line"      dired-next-line :transient t)
    ("p" "  Move to prev line"      dired-previous-line :transient t)
-   ("." "  Add an empty file"      dirvish-create-empty-file)
+   (">" "  Move to next dirline"   dired-next-dirline :transient t)
+   ("<" "  Move to prev dirline"   dired-prev-dirline :transient t)
+   ("." "  Add an empty file"      dired-create-empty-file)
    ("+" "  Add a directory"        dired-create-directory)
    ("X" "  Delete files"           dired-do-delete)
    ("v" "  View this file"         dired-view-file)
@@ -435,67 +513,6 @@ Same as `dired-create-empty-file', but use
    ("s" "  Manage subdirs"         dirvish-subdir-menu)
    (":" "  GnuPG helpers"          dirvish-epa-dired-menu)
    ("h" "  More info about Dired"  describe-mode)])
-
-;;;###autoload (autoload 'dirvish-setup-menu "dirvish-extras" nil t)
-(defcustom dirvish-ui-setup-items
-  '(("s"  file-size      attr     "File size")
-    ("t"  file-time      attr     "File modification time")
-    ("c"  collapse       attr     "Collapse unique nested paths"
-     (not (dirvish-prop :remote)))
-    ("v"  vc-state       attr     "Version control state"
-     (and (display-graphic-p) (dirvish-prop :vc-backend)))
-    ("m"  git-msg        attr     "Git commit messages"
-     (and (dirvish-prop :vc-backend) (not (dirvish-prop :remote))))
-    ("1" '(0 nil  0.4)   layout   "     -       | current (60%) | preview (40%)")
-    ("2" '(0 nil  0.8)   layout   "     -       | current (20%) | preview (80%)")
-    ("3" '(1 0.08 0.8)   layout   "parent (8%)  | current (12%) | preview (80%)")
-    ("4" '(1 0.11 0.55)  layout   "parent (11%) | current (33%) | preview (55%)"))
-  "ITEMs for `dirvish-setup-menu'.
-A ITEM is a list consists of (KEY VAR SCOPE DESCRIPTION PRED)
-where KEY is the keybinding for the item, VAR can be valid
-attribute (as in `dirvish-attributes') or a layout recipe (see
-`dirvish-layout-recipes'), SCOPE can be `attr' or `layout'.
-DESCRIPTION is the documentation for the VAR.  PRED, when
-present, is wrapped with a lambda and being put into the `:if'
-keyword in that prefix or infix."
-  :group 'dirvish :type 'alist
-  :set
-  (lambda (k v)
-    (set k v)
-    (let ((attr-alist (seq-filter (lambda (i) (eq (nth 2 i) 'attr)) v))
-          (layout-alist (seq-filter (lambda (i) (eq (nth 2 i) 'layout)) v)))
-      (cl-labels ((new-infix (i)
-                    (let* ((infix-var (nth 1 i))
-                           (infix-name (intern (format "dirvish-%s-infix" (nth 1 i))))
-                           (infix-pred (nth 4 i)))
-                      (eval `(transient-define-infix ,infix-name ()
-                               :class 'dirvish-attribute
-                               :variable ',infix-var
-                               :description ,(nth 3 i)
-                               :if (lambda () ,(if infix-pred `,@infix-pred t))))))
-                  (expand-infix (i) (list (car i) (intern (format "dirvish-%s-infix" (nth 1 i)))))
-                  (layout-option (i) (list (car i)
-                                           (propertize (nth 3 i) 'face 'font-lock-doc-face)
-                                           `(lambda () (interactive) (dirvish-switch-layout ,(nth 1 i))))))
-        (mapc #'new-infix attr-alist)
-        (eval
-         `(transient-define-prefix dirvish-setup-menu ()
-            "Configure current Dirvish session."
-            [:description
-             (lambda () (dirvish--format-menu-heading "Setup Dirvish UI"))
-             ["Attributes:"
-              ,@(mapcar #'expand-infix attr-alist)]]
-            ["Switch layouts:"
-             :if (lambda () (dv-layout (dirvish-curr)))
-             ,@(mapcar #'layout-option layout-alist)]
-            ["Actions:"
-             ("M-t" "Toggle fullscreen" dirvish-layout-toggle)
-             ("RET" "Quit and revert buffer"
-              (lambda () (interactive) (dirvish--build (dirvish-curr)) (revert-buffer)))]
-            (interactive)
-            (if dirvish--props
-                (transient-setup 'dirvish-setup-menu)
-              (user-error "`dirvish-setup-menu' is for Dirvish only"))))))))
 
 (provide 'dirvish-extras)
 ;;; dirvish-extras.el ends here
