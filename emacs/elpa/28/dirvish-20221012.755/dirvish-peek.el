@@ -86,8 +86,8 @@ one of categories in `dirvish-peek-categories'."
       ('library
        (setq cand (file-truename
                    (or (ignore-errors (find-library-name cand)) "")))))
-    (dirvish-prop :index cand)
-    (dirvish-debounce nil (dirvish-preview-update dirvish--this))))
+    (unless (file-remote-p cand)
+      (dirvish-debounce nil (dirvish--preview-update dirvish--this cand)))))
 
 (defun dirvish-peek-exit-h ()
   "Hook for `minibuffer-exit-hook' to destroy peek session."

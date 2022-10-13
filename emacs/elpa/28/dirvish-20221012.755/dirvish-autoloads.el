@@ -99,6 +99,7 @@ it is disabled.
 ;;;### (autoloads nil "dirvish-extras" "dirvish-extras.el" (0 0 0
 ;;;;;;  0))
 ;;; Generated autoloads from dirvish-extras.el
+ (autoload 'dirvish-setup-menu "dirvish-extras" nil t)
 
 (autoload 'dirvish-copy-file-name "dirvish-extras" "\
 Copy filename of marked files.
@@ -118,17 +119,21 @@ FILESET defaults to `dired-get-marked-files'.
 
 \(fn &optional FILESET)" t nil)
 
-(autoload 'dirvish-create-empty-file "dirvish-extras" "\
-Create an empty file called FILE.
-Same as `dired-create-empty-file', but use
-`dired-current-directory' as the prompt.
+(autoload 'dirvish-layout-toggle "dirvish-extras" "\
+Toggle layout of current Dirvish session.
+A session with layout means it has a companion preview window and
+possibly one or more parent windows." t nil)
 
-\(fn FILE)" t nil)
+(autoload 'dirvish-layout-switch "dirvish-extras" "\
+Switch Dirvish layout according to RECIPE.
+If RECIPE is not provided, switch to the recipe next to the
+current layout defined in `dirvish-layout-recipes'.
+
+\(fn &optional RECIPE)" t nil)
  (autoload 'dirvish-file-info-menu "dirvish-extras" nil t)
  (autoload 'dirvish-chxxx-menu "dirvish-extras" nil t)
  (autoload 'dirvish-mark-menu "dirvish-extras" nil t)
  (autoload 'dirvish-dired-cheatsheet "dirvish-extras" nil t)
- (autoload 'dirvish-setup-menu "dirvish-extras" nil t)
 
 (register-definition-prefixes "dirvish-extras" '("dirvish-"))
 
@@ -170,7 +175,7 @@ The command run is essentially:
 ;;; Generated autoloads from dirvish-history.el
 
 (autoload 'dirvish-history-jump "dirvish-history" "\
-Open a target directory from `dirvish-history--ring'." t nil)
+Open a target directory from `dirvish--history'." t nil)
 
 (autoload 'dirvish-history-last "dirvish-history" "\
 Switch to the most recently visited dirvish buffer." t nil)
@@ -188,8 +193,6 @@ ARG defaults to 1.
 \(fn ARG)" t nil)
  (autoload 'dirvish-history-menu "dirvish-history" nil t)
 
-(register-definition-prefixes "dirvish-history" '("dirvish-history-"))
-
 ;;;***
 
 ;;;### (autoloads nil "dirvish-icons" "dirvish-icons.el" (0 0 0 0))
@@ -199,43 +202,12 @@ ARG defaults to 1.
 
 ;;;***
 
-;;;### (autoloads nil "dirvish-layout" "dirvish-layout.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from dirvish-layout.el
-
-(define-obsolete-function-alias 'dirvish-toggle-fullscreen #'dirvish-layout-toggle "Jul 22, 2022")
-
-(autoload 'dirvish-layout-toggle "dirvish-layout" "\
-Toggle layout of current Dirvish session.
-A session with layout means it has a companion preview window and
-possibly one or more parent windows." t nil)
-
-(define-obsolete-function-alias 'dirvish-switch-layout #'dirvish-layout-switch "Jul 22, 2022")
-
-(autoload 'dirvish-layout-switch "dirvish-layout" "\
-Switch Dirvish layout according to RECIPE.
-If RECIPE is not provided, switch to the recipe next to the
-current layout defined in `dirvish-layout-recipes'.
-
-\(fn &optional RECIPE)" t nil)
-
-(register-definition-prefixes "dirvish-layout" '("dirvish-layout-recipes"))
-
-;;;***
-
 ;;;### (autoloads nil "dirvish-ls" "dirvish-ls.el" (0 0 0 0))
 ;;; Generated autoloads from dirvish-ls.el
  (autoload 'dirvish-quicksort "dirvish-ls" nil t)
  (autoload 'dirvish-ls-switches-menu "dirvish-ls" nil t)
 
 (register-definition-prefixes "dirvish-ls" '("dirvish-ls-"))
-
-;;;***
-
-;;;### (autoloads nil "dirvish-media" "dirvish-media.el" (0 0 0 0))
-;;; Generated autoloads from dirvish-media.el
-
-(register-definition-prefixes "dirvish-media" '("dirvish-media-"))
 
 ;;;***
 
@@ -289,10 +261,6 @@ it is disabled.
 ;;;### (autoloads nil "dirvish-quick-access" "dirvish-quick-access.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from dirvish-quick-access.el
-
-(define-obsolete-variable-alias 'dirvish-bookmark-entries 'dirvish-quick-access-entries "Jul 22, 2022")
-
-(define-obsolete-function-alias 'dirvish-bookmark-jump 'dirvish-quick-access "Jul 22, 2022")
  (autoload 'dirvish-quick-access "dirvish-quick-access" nil t)
 
 (register-definition-prefixes "dirvish-quick-access" '("dirvish-quick-access-"))
@@ -344,7 +312,7 @@ Insert subtree at point or remove it if it was not present." t nil)
 ;;; Generated autoloads from dirvish-vc.el
  (autoload 'dirvish-vc-menu "dirvish-vc" nil t)
 
-(register-definition-prefixes "dirvish-vc" '("dirvish-"))
+(register-definition-prefixes "dirvish-vc" '("dirvish-vc-"))
 
 ;;;***
 
@@ -365,55 +333,50 @@ Paste marked files to DEST.
 Prompt for DEST when prefixed with \\[universal-argument], it
 defaults to `dired-current-directory.'
 
-If you want to use this command and friends (such as
-`dirvish-move') for file transfer involving remote hosts, you'll
-need to have proper ssh configuration for those hosts, because an
-asynchronous TRAMP connection and the rsync command (which always
-run locally) require working SSH authentication which bypasses
-the password entering to work, which see Info
-node `(tramp)Improving performance of asynchronous remote
-processes' and the man page `rsync(1)'.  If the remote host does
-not come with proper ssh configuration, the fallback command
-defined in `dirvish-yank-fallback-methods' are used.
-
-To make TRAMP more responsive, follow the instructions in Info
-node `(tramp)Frequently Asked Questions' to speed it up.
-
 \(fn &optional DEST)" t nil)
 
 (autoload 'dirvish-move "dirvish-yank" "\
 Move marked files to DEST.
 Prompt for DEST when prefixed with \\[universal-argument], it
-defaults to `dired-current-directory'.  See `dirvish-yank' for
-additional information.
+defaults to `dired-current-directory'.
 
 \(fn &optional DEST)" t nil)
 
 (autoload 'dirvish-symlink "dirvish-yank" "\
 Symlink marked files to DEST.
 Prompt for DEST when prefixed with \\[universal-argument], it
-defaults to `dired-current-directory'.  See `dirvish-yank' for
-additional information.
+defaults to `dired-current-directory'.
 
 \(fn &optional DEST)" t nil)
 
 (autoload 'dirvish-relative-symlink "dirvish-yank" "\
 Similar to `dirvish-symlink', but link files relatively.
 Prompt for DEST when prefixed with \\[universal-argument], it
-defaults to `dired-current-directory'.  See `dirvish-yank' for
-additional information.
+defaults to `dired-current-directory'.
 
 \(fn &optional DEST)" t nil)
 
 (autoload 'dirvish-hardlink "dirvish-yank" "\
 Hardlink marked files to DEST.
 Prompt for DEST when prefixed with \\[universal-argument], it
-defaults to `dired-current-directory'.  See `dirvish-yank' for
-additional information.
+defaults to `dired-current-directory'.
 
 \(fn &optional DEST)" t nil)
 
-(register-definition-prefixes "dirvish-yank" '("dirvish-yank-"))
+(autoload 'dirvish-rsync "dirvish-yank" "\
+Rsync marked files to DEST, prompt for DEST if not called with.
+If either the sources or the DEST is located in a remote host,
+the `dirvish-yank-rsync-program' and `dirvish-yank-rsync-args'
+are used to transfer the files.
+
+This command requires proper ssh authentication setup to work
+correctly for file transfer involving remote hosts, because rsync
+command is always run locally, the password prompts may lead to
+unexpected errors.
+
+\(fn DEST)" t nil)
+
+(register-definition-prefixes "dirvish-yank" '("dirvish-"))
 
 ;;;***
 
