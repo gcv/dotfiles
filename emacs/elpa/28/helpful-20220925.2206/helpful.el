@@ -4,8 +4,8 @@
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
-;; Package-Version: 20220919.540
-;; Package-Commit: db1e15b3783c83d9781a546f37b900ad53576659
+;; Package-Version: 20220925.2206
+;; Package-Commit: 3aa08da7a151f1928bf0e3d12fc2443b6485b6ef
 ;; Keywords: help, lisp
 ;; Version: 0.20
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
@@ -1250,7 +1250,8 @@ If the source code cannot be found, return the sexp used."
                     (forward-char)
                     (narrow-to-region pos (point)))
                 ;; Narrow to the top-level definition.
-                (narrow-to-defun t))
+                (let ((parse-sexp-ignore-comments t))
+                  (narrow-to-defun t)))
 
               ;; If there was a preceding comment, POS will be
               ;; after that comment. Move the position to include that comment.
