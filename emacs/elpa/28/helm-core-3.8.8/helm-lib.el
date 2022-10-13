@@ -261,15 +261,14 @@ available APPEND is ignored."
                 ((and (consp dired-directory)
                       (cdr dired-directory)
                       files-renamed)
-                 (setcdr dired-directory
-                         ;; Replace in `dired-directory' files that have
-                         ;; been modified with their new name keeping
-                         ;; the ones that are unmodified at the same place.
-                         (cl-loop with old-to-rename = (mapcar 'car files-renamed)
-                                  for f in (cdr dired-directory)
-                                  if (member f old-to-rename)
-                                  collect (assoc-default f files-renamed)
-                                  else collect f))))
+                 (setq dired-directory
+                       ;; Replace in `dired-directory' files that have
+                       ;; been modified with their new name keeping
+                       ;; the ones that are unmodified at the same place.
+                       (cons (car dired-directory)
+                             (cl-loop for f in (cdr dired-directory)
+                                      collect (or (assoc-default f files-renamed)
+                                                  f))))))
 	  ;; Re-sort the buffer if all went well.
 	  (unless (> errors 0) (revert-buffer))
 	  (let ((inhibit-read-only t))
@@ -297,6 +296,19 @@ available APPEND is ignored."
 ;; that no change to file is done.
 ;; This also lead to ask confirmation for every files even when not
 ;; modified and when `wdired-use-interactive-rename' is nil.
+;; Obviously, we could make an :around advice like this:
+;; (defun helm--advice-wdired-get-filename (old--fn &rest args)
+;;   (let* ((file  (apply old--fn args))
+;;          (split (and file (split-string file "//"))))
+;;     (if (and (cdr split)
+;;              (string-match (format "\\(%s/\\)\\1" (car split)) file))
+;;         (replace-match "" nil nil file 1)
+;;       file)))
+;; But for some reasons the original function in emacs-28 is returning
+;; nil in some conditions and operation fails with no errors but with
+;; something like "(no change performed)", so use an old version of
+;; `wdired-get-filename' with its output modified and advice it with
+;; :override.
 (defun helm--advice-wdired-get-filename (&optional no-dir old)
   ;; FIXME: Use dired-get-filename's new properties.
   (let (beg end file)
@@ -921,39 +933,46 @@ hashtable itself."
            unless (string-match-p regexp str)
            collect s))
 
-(defun helm-transform-mapcar (function args)
-  "`mapcar' for candidate-transformer.
+(defun helm-transform-mapcar (fn seq)
+  "Apply function FN on all elements of list SEQ.
+When SEQ is a list of cons cells apply FN on the cdr of each element,
+keeping their car unmodified.
 
-ARGS is (cand1 cand2 ...) or ((disp1 . real1) (disp2 . real2) ...)
+Examples:
 
-\(helm-transform-mapcar \\='upcase \\='(\"foo\" \"bar\"))
-=> (\"FOO\" \"BAR\")
-\(helm-transform-mapcar \\='upcase \\='((\"1st\" . \"foo\") (\"2nd\" . \"bar\")))
-=> ((\"1st\" . \"FOO\") (\"2nd\" . \"BAR\"))
+    (helm-transform-mapcar \\='upcase \\='(\"foo\" \"bar\"))
+    => (\"FOO\" \"BAR\")
+    (helm-transform-mapcar \\='upcase \\='((\"1st\" . \"foo\") (\"2nd\" . \"bar\")))
+    => ((\"1st\" . \"FOO\") (\"2nd\" . \"BAR\"))
 "
-  (cl-loop for arg in args
-        if (consp arg)
-        collect (cons (car arg) (funcall function (cdr arg)))
-        else
-        collect (funcall function arg)))
-
-(defsubst helm-append-1 (elm seq)
-  "Append ELM to SEQ.
-If ELM is not a list transform it in list."
-  (append (helm-mklist elm) seq))
+  (cl-loop for elm in seq
+           if (consp elm)
+           collect (cons (car elm) (funcall fn (cdr elm)))
+           else
+           collect (funcall fn elm)))
 
 (defun helm-append-at-nth (seq elm index)
-  "Append ELM at INDEX in SEQ."
-  (let ((len (length seq)))
-    (setq index (min (max index 0) len))
-    (if (zerop index)
-        (helm-append-1 elm seq)
-      (cl-loop for i in seq
-               for count from 1 collect i
-               when (= count index)
-               if (and (listp elm) (not (functionp elm)))
-               append elm
-               else collect elm))))
+  "Append ELM at INDEX in SEQ.
+When INDEX is > to the SEQ length ELM is added at end of SEQ.
+When INDEX is 0 or negative, ELM is added at beginning of SEQ.
+
+Examples:
+
+    (helm-append-at-nth \\='(a b c d) \\='z 2)
+    =>(a b z c d)
+    (helm-append-at-nth \\='(a b c d) \\='(z) 2)
+    =>(a b z c d)
+    (helm-append-at-nth \\='(a b c d) \\='((x . 1) (y . 2)) 2)
+    =>(a b (x . 1) (y . 2) c d)
+"
+  (setq index (min (max index 0) (length seq))
+        elm   (helm-mklist elm))
+  (if (zerop index)
+      (append elm seq)
+    (let* ((end-part (nthcdr index seq))
+           (len      (length end-part))
+           (beg-part (butlast seq len)))
+      (append beg-part elm end-part))))
 
 (defun helm-take-first-elements (seq n)
   "Return the first N elements of SEQ if SEQ is longer than N.
@@ -1185,14 +1204,13 @@ accepted.
 
 Example:
 
-    (let ((answer (helm-read-answer
-                    \"answer [y,n,!,q]: \"
-                    \\='(\"y\" \"n\" \"!\" \"q\"))))
-      (pcase answer
-          (\"y\" \"yes\")
-          (\"n\" \"no\")
-          (\"!\" \"all\")
-          (\"q\" \"quit\")))
+    (pcase (helm-read-answer
+             \"answer [y,n,!,q]: \"
+             \\='(\"y\" \"n\" \"!\" \"q\"))
+       (\"y\" \"yes\")
+       (\"n\" \"no\")
+       (\"!\" \"all\")
+       (\"q\" \"quit\"))
 
 "
   (helm-awhile (read-key (propertize prompt 'face 'minibuffer-prompt))
@@ -1201,6 +1219,35 @@ Example:
           (cl-return str)
         (message "Please answer by %s" (mapconcat 'identity answer-list ", "))
         (sit-for 1)))))
+
+(defun helm-read-answer-dolist-with-action (prompt list action)
+  "Read answer with PROMPT and execute ACTION on each element of LIST.
+
+Argument PROMPT is a format spec string e.g. \"Do this on %s?\"
+which take each elements of LIST as argument, no need to provide
+the help part i.e. [y,n,!,q] it will be already added.
+
+While looping through LIST, ACTION is executed on each elements
+differently depending of answer:
+
+- y  Execute ACTION on element.
+- n  Skip element.
+- !  Don't ask anymore and execute ACTION on remaining elements.
+- q  Skip all remaining elements."
+  (let (dont-ask)
+    (catch 'break
+      (dolist (elm list)
+        (if dont-ask
+            (funcall action elm)
+          (pcase (helm-read-answer
+                  (format (concat prompt "[y,n,!,q]") elm)
+                  '("y" "n" "!" "q"))
+            ("y" (funcall action elm))
+            ("n" (ignore))
+            ("!" (prog1
+                     (funcall action elm)
+                   (setq dont-ask t)))
+            ("q" (throw 'break nil))))))))
 
 ;;; Symbols routines
 ;;
@@ -1904,6 +1951,7 @@ broken."
      ("(\\<\\(helm-acond\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(helm-aand\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(helm-with-gensyms\\)\\>" 1 font-lock-keyword-face)
+     ("(\\<\\(helm-read-answer-dolist-with-action\\)\\>" 1 font-lock-keyword-face)
      ("(\\<\\(helm-read-answer\\)\\>" 1 font-lock-keyword-face))))
 
 (provide 'helm-lib)
