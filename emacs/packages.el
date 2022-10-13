@@ -667,7 +667,7 @@
 
 
 (use-package julia-snail
-  ;;:load-path "~/Code/julia-snail"
+  ;;:load-path "~/Files/Emacs/julia-snail"
   :pin melpa
 
   :custom
@@ -919,7 +919,7 @@
 
 
 (use-package perspective
-  ;;:load-path "~/Code/perspective-el"
+  ;;:load-path "~/Files/Emacs/perspective-el"
   :pin melpa
 
   :bind
@@ -930,6 +930,7 @@
   (persp-mode-prefix-key (kbd "C-c C-p"))
   (persp-interactive-completion-function 'completing-read)
   (persp-sort 'access)
+
   :init
   (persp-mode)
   (persp-turn-off-modestring)
