@@ -48,9 +48,9 @@ packages=(
     gnupg 
     htop 
     jq 
-    joshuto            # file manager
-    lazydocker         # Docker UI
-    lazygit            # Git UI
+    #joshuto            # file manager
+    #lazydocker         # Docker UI
+    #lazygit            # Git UI
     ledger 
     libvterm-neovim 
     magic-wormhole     # peer-to-peer file transfer
@@ -66,7 +66,7 @@ packages=(
     pass               # password manager
     pastel             # color utility
     pv                 # pipe viewer
-    ranger             # file manager
+    #ranger             # file manager
     rclone 
     restic             # backup utility
     ripgrep 
