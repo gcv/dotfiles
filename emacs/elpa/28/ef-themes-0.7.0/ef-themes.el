@@ -6,7 +6,7 @@
 ;; Maintainer: Ef-Themes Development <~protesilaos/ef-themes@lists.sr.ht>
 ;; URL: https://git.sr.ht/~protesilaos/ef-themes
 ;; Mailing-List: https://lists.sr.ht/~protesilaos/ef-themes
-;; Version: 0.5.0
+;; Version: 0.7.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: faces, theme, accessibility
 
@@ -31,6 +31,14 @@
 ;; Emacs whose goal is to provide colorful ("pretty") yet legible
 ;; options for users who want something with a bit more flair than the
 ;; `modus-themes' (also designed by me).
+;;
+;; "Ef" is a Greek word (ευ), commonly used as a prefix to denote
+;; something good, nice, and/or easy.  For example, eftopia (ευτοπία)
+;; is the opposite of dystopia (δυστοπία): a good place as opposed to
+;; a bad place.
+;;
+;; The backronym of the `ef-themes' is: Extremely Fatigued of Themes
+;; Having Exaggerated Markings, Embellishments, and Sparkles.
 
 ;;; Code:
 
@@ -48,28 +56,17 @@
 
 ;;; User options
 
-(defconst ef-themes-collection
-  '(ef-autumn
-    ef-dark
-    ef-day
-    ef-deuteranopia-dark
-    ef-deuteranopia-light
-    ef-duo-dark
-    ef-duo-light
-    ef-light
-    ef-night
-    ef-spring
-    ef-summer
-    ef-winter)
-  "Symbols of all the Ef themes.")
-
 (defconst ef-themes-light-themes
-  '(ef-day ef-deuteranopia-light ef-duo-light ef-light ef-spring ef-summer)
+  '(ef-day ef-deuteranopia-light ef-duo-light ef-frost ef-light ef-spring ef-summer ef-trio-light)
   "List of symbols with the light Ef themes.")
 
 (defconst ef-themes-dark-themes
-  '(ef-autumn ef-dark ef-deuteranopia-dark ef-duo-dark ef-night ef-winter)
+  '(ef-autumn ef-bio ef-dark ef-deuteranopia-dark ef-duo-dark ef-night ef-trio-dark ef-winter)
   "List of symbols with the dark Ef themes.")
+
+(defconst ef-themes-collection
+  (append ef-themes-light-themes ef-themes-dark-themes)
+  "Symbols of all the Ef themes.")
 
 (defcustom ef-themes-post-load-hook nil
   "Hook that runs after loading an Ef theme.
@@ -355,7 +352,9 @@ Run `ef-themes-post-load-hook'."
 ;;;###autoload
 (defun ef-themes-select (theme)
   "Load an Ef THEME using minibuffer completion.
-When called from Lisp, THEME is a symbol."
+When called from Lisp, THEME is a symbol.
+
+Run `ef-themes-post-load-hook' after loading the theme."
   (interactive (list (ef-themes--select-prompt)))
   (ef-themes--load-theme theme))
 
@@ -373,7 +372,9 @@ When called from Lisp, THEME is a symbol."
 If `ef-themes-to-toggle' does not specify two Ef themes, inform
 the user about it while prompting with completion for a theme
 among our collection (this is practically the same as the
-`ef-themes-select' command)."
+`ef-themes-select' command).
+
+Run `ef-themes-post-load-hook' after loading the theme."
   (interactive)
   (if-let* ((themes (ef-themes--toggle-theme-p))
             (one (car themes))
@@ -407,7 +408,9 @@ With optional VARIANT as either `light' or `dark', limit the set
 to the relevant themes.
 
 When called interactively, VARIANT is the prefix argument which
-prompts with completion for either `light' or `dark'."
+prompts with completion for either `light' or `dark'.
+
+Run `ef-themes-post-load-hook' after loading the theme."
   (interactive
    (list
     (when current-prefix-arg
@@ -544,6 +547,7 @@ Helper function for `ef-themes-preview-colors'."
     `(vertical-border ((,c :foreground ,border)))
 ;;;;; all other basic faces
     `(button ((,c :foreground ,link :underline ,border)))
+    `(child-frame-border ((,c :background ,border)))
     `(comint-highlight-input ((,c :inherit bold)))
     `(comint-highlight-prompt ((,c :inherit minibuffer-prompt)))
     `(edmacro-label ((,c :inherit bold)))
@@ -684,6 +688,7 @@ Helper function for `ef-themes-preview-colors'."
     `(change-log-list ((,c :inherit bold)))
     `(change-log-name ((,c :foreground ,name)))
     `(log-edit-header ((,c :inherit bold)))
+    `(log-edit-headers-separator ((,c :height 1 :background ,border :extend t)))
     `(log-edit-summary ((,c :inherit bold :foreground ,accent-0)))
     `(log-edit-unknown-header ((,c :inherit shadow)))
     `(log-view-commit-body (( )))
@@ -765,6 +770,7 @@ Helper function for `ef-themes-preview-colors'."
 ;;;; diff-mode
     `(diff-added ((,c :background ,bg-added)))
     `(diff-changed ((,c :background ,bg-changed :extend t)))
+    `(diff-changed-unspecified ((,c :inherit diff-changed)))
     `(diff-removed ((,c :background ,bg-removed)))
     `(diff-refine-added ((,c :background ,bg-added-refine :foreground ,fg-intense)))
     `(diff-refine-changed ((,c :background ,bg-changed-refine :foreground ,fg-intense)))
@@ -829,6 +835,10 @@ Helper function for `ef-themes-preview-colors'."
     `(diredfl-write-priv ((,c :foreground ,rainbow-2)))
 ;;;; dirvish
     `(dirvish-hl-line ((,c :background ,bg-hl-line)))
+;;;; display-fill-column-indicator-mode
+    ;; NOTE 2022-09-14: We use the bg-alt mapping as the border mapping
+    ;; is for the `vertical-border'.  We want this to be more subtle.
+    `(fill-column-indicator ((,c :height 1 :background ,bg-alt :foreground ,bg-alt)))
 ;;;; doom-modeline
     `(doom-modeline-bar ((,c :background ,bg-accent)))
     `(doom-modeline-bar-inactive ((,c :background ,bg-alt)))
@@ -1029,7 +1039,7 @@ Helper function for `ef-themes-preview-colors'."
     `(gnus-summary-low-read ((,c :inherit (shadow italic))))
     `(gnus-summary-low-ticked ((,c :inherit italic :foreground ,err)))
     `(gnus-summary-low-undownloaded ((,c :inherit italic :foreground ,warning)))
-    `(gnus-summary-low-unread (( )))
+    `(gnus-summary-low-unread ((,c :inherit italic)))
     `(gnus-summary-normal-ancient (( )))
     `(gnus-summary-normal-read ((,c :inherit shadow)))
     `(gnus-summary-normal-ticked ((,c :foreground ,err)))
@@ -1053,8 +1063,8 @@ Helper function for `ef-themes-preview-colors'."
 ;;;; isearch, occur, and the like
     `(isearch ((,c :background ,bg-yellow :foreground ,fg-intense)))
     `(isearch-fail ((,c :background ,bg-red :foreground ,fg-intense)))
-    `(isearch-group-1 ((,c :background ,bg-magenta :foreground ,fg-intense)))
-    `(isearch-group-2 ((,c :background ,bg-green :foreground ,fg-intense)))
+    `(isearch-group-1 ((,c :background ,bg-green :foreground ,fg-intense)))
+    `(isearch-group-2 ((,c :background ,bg-magenta :foreground ,fg-intense)))
     `(lazy-highlight ((,c :background ,bg-blue :foreground ,fg-intense)))
     `(match ((,c :background ,bg-alt :foreground ,fg-intense)))
     `(query-replace ((,c :background ,bg-red :foreground ,fg-intense)))
@@ -1079,8 +1089,8 @@ Helper function for `ef-themes-preview-colors'."
     ;; scale when using `text-scale-adjust'.
     `(line-number ((,c :inherit (ef-themes-fixed-pitch shadow default))))
     `(line-number-current-line ((,c :inherit (bold line-number) :foreground ,fg-intense)))
-    `(line-number-major-tick ((,c :inherit line-number :background ,bg-alt :foreground ,info)))
-    `(line-number-minor-tick ((,c :inherit line-number :background ,bg-dim :foreground ,warning)))
+    `(line-number-major-tick ((,c :inherit (bold line-number) :foreground ,rainbow-0)))
+    `(line-number-minor-tick ((,c :inherit (bold line-number))))
 ;;;; magit
     `(magit-bisect-bad ((,c :inherit error)))
     `(magit-bisect-good ((,c :inherit success)))
@@ -1321,10 +1331,10 @@ Helper function for `ef-themes-preview-colors'."
 ;;;; org
     `(org-agenda-calendar-event ((,c :foreground ,fg-alt)))
     `(org-agenda-calendar-sexp ((,c :inherit (italic org-agenda-calendar-event))))
-    `(org-agenda-clocking ((,c :background ,bg-alt :foreground ,red-warmer)))
+    `(org-agenda-clocking ((,c :background ,bg-warning :foreground ,warning)))
     `(org-agenda-column-dateline ((,c :background ,bg-alt)))
     `(org-agenda-current-time ((,c :foreground ,variable)))
-    `(org-agenda-date ((,c :inherit ef-themes-heading-3)))
+    `(org-agenda-date ((,c :inherit ef-themes-heading-1)))
     `(org-agenda-date-today ((,c :inherit org-agenda-date :underline t)))
     `(org-agenda-date-weekend ((,c :inherit org-agenda-date)))
     `(org-agenda-date-weekend-today ((,c :inherit org-agenda-date-today)))
@@ -1337,9 +1347,9 @@ Helper function for `ef-themes-preview-colors'."
     `(org-agenda-filter-tags ((,c :inherit bold :foreground ,modeline-err)))
     `(org-agenda-restriction-lock ((,c :background ,bg-dim :foreground ,fg-dim)))
     `(org-agenda-structure ((,c :inherit ef-themes-heading-0)))
-    `(org-agenda-structure-filter ((,c :inherit (warning org-agenda-structure))))
+    `(org-agenda-structure-filter ((,c :inherit org-agenda-structure :foreground ,rainbow-1)))
     `(org-agenda-structure-secondary ((,c :foreground ,rainbow-1)))
-    `(org-archived ((,c :background ,bg-alt :foreground ,fg-alt)))
+    `(org-archived ((,c :background ,bg-alt :foreground ,fg-main)))
     `(org-block ((,c :inherit ef-themes-fixed-pitch :background ,bg-inactive :extend t)))
     `(org-block-begin-line ((,c :inherit (shadow ef-themes-fixed-pitch) :background ,bg-dim :extend t)))
     `(org-block-end-line ((,c :inherit org-block-begin-line)))
@@ -1414,7 +1424,6 @@ Helper function for `ef-themes-preview-colors'."
     `(org-modern-date-active ((,c :inherit (ef-themes-fixed-pitch org-modern-label) :background ,bg-alt)))
     `(org-modern-date-inactive ((,c :inherit (ef-themes-fixed-pitch org-modern-label) :background ,bg-dim :foreground ,fg-dim)))
     `(org-modern-done ((,c :inherit org-modern-label :background ,bg-info :foreground ,info)))
-    `(org-modern-label (( )))
     `(org-modern-priority ((,c :inherit (org-modern-label org-priority) :background ,bg-dim)))
     `(org-modern-statistics ((,c :inherit org-modern-label :background ,bg-dim)))
     `(org-modern-tag ((,c :inherit (org-modern-label org-tag) :background ,bg-dim)))
@@ -1488,8 +1497,8 @@ Helper function for `ef-themes-preview-colors'."
     `(recursion-indicator-minibuffer ((,c :foreground ,modeline-info)))
 ;;;; regexp-builder (re-builder)
     `(reb-match-0 ((,c :background ,bg-cyan :foreground ,fg-intense)))
-    `(reb-match-1 ((,c :background ,bg-magenta :foreground ,fg-intense)))
-    `(reb-match-2 ((,c :background ,bg-red :foreground ,fg-intense)))
+    `(reb-match-1 ((,c :background ,bg-red :foreground ,fg-intense)))
+    `(reb-match-2 ((,c :background ,bg-magenta :foreground ,fg-intense)))
     `(reb-match-3 ((,c :background ,bg-yellow :foreground ,fg-intense)))
     `(reb-regexp-grouping-backslash ((,c :inherit font-lock-regexp-grouping-backslash)))
     `(reb-regexp-grouping-construct ((,c :inherit font-lock-regexp-grouping-construct)))
@@ -1591,17 +1600,19 @@ Helper function for `ef-themes-preview-colors'."
     `(transient-unreachable-key ((,c :inherit shadow)))
     `(transient-value ((,c :inherit success :background ,bg-info)))
 ;;;; vc (vc-dir.el, vc-hooks.el)
-    `(vc-dir-directory ((,c :foreground ,accent-0)))
+    `(vc-dir-directory (( )))
     `(vc-dir-file ((,c :foreground ,name)))
-    `(vc-dir-header ((,c :foreground ,accent-1)))
-    `(vc-dir-header-value ((,c :foreground ,accent-2)))
-    `(vc-dir-mark-indicator ((,c :inherit success)))
-    `(vc-dir-status-edited ((,c :inherit warning)))
+    `(vc-dir-header ((,c :inherit bold)))
+    `(vc-dir-header-value ((,c :foreground ,string)))
+    `(vc-dir-mark-indicator ((,c :foreground ,fg-intense)))
+    `(vc-dir-status-edited ((,c :inherit italic)))
     `(vc-dir-status-ignored ((,c :inherit shadow)))
-    `(vc-dir-status-up-to-date (( )))
+    `(vc-dir-status-up-to-date ((,c :foreground ,info)))
     `(vc-dir-status-warning ((,c :inherit error)))
     `(vc-conflict-state ((,c :inherit error)))
     `(vc-edited-state ((,c :inherit italic)))
+    `(vc-git-log-edit-summary-max-warning ((,c :background ,bg-err :foreground ,err)))
+    `(vc-git-log-edit-summary-target-warning ((,c :background ,bg-warning :foreground ,warning)))
     `(vc-locally-added-state ((,c :inherit italic)))
     `(vc-locked-state ((,c :inherit success)))
     `(vc-missing-state ((,c :inherit error)))

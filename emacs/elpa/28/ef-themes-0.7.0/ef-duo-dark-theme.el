@@ -1,4 +1,4 @@
-;;; ef-duo-dark-theme.el --- Legible dark theme with mostly blue and yellow colors -*- lexical-binding:t -*-
+;;; ef-duo-dark-theme.el --- Legible dark theme with mostly blue and orange colors -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2022  Free Software Foundation, Inc.
 
@@ -40,7 +40,7 @@
   ;; Most of the colors here are defined simply to preserve
   ;; compatibility with the rest of the project.  We don't actually rely
   ;; on them for anything critical.
-  (deftheme ef-duo-dark "Legible dark theme with mostly blue and yellow colors.")
+  (deftheme ef-duo-dark "Legible dark theme with mostly blue and orange colors.")
 
   (defconst ef-duo-dark-palette
     '(;; Basic tones
@@ -85,7 +85,7 @@
       (bg-green    "#20a020")
       (bg-yellow   "#8f5040")
       (bg-blue     "#4648d0")
-      (bg-magenta  "#c040cf")
+      (bg-magenta  "#b04fcf")
       (bg-cyan     "#2270be")
 
       (bg-red-subtle      "#72002a")
@@ -127,7 +127,7 @@
       (bg-accent     "#ffb250") (fg-accent     "#000000")
       (bg-completion "#2f1a5f")
       (bg-hover      "#664f4a")
-      (bg-hover-alt  "#265f4a")
+      (bg-hover-alt  "#264f4a")
       (bg-hl-line    "#301a4f")
       (bg-region     "#042a50")
       (bg-paren      "#2f608e")
@@ -135,7 +135,7 @@
       (bg-warning    "#332600") ; check with warning
       (bg-info       "#002212") ; check with info
 
-      (border        "#444f5f")
+      (border        "#545f6f")
       (cursor        "#ef6f11")
       (fg-intense    "#ffffff")
 
@@ -166,8 +166,8 @@
       (type blue-cooler)
       (variable magenta-cooler)
 
-      (rx-escape cyan) ; compare with `string'
-      (rx-construct red-warmer)
+      (rx-escape magenta-cooler) ; compare with `string'
+      (rx-construct blue)
 
       (accent-0 blue-warmer)
       (accent-1 yellow-warmer)

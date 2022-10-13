@@ -82,7 +82,7 @@
       (bg-green    "#20a020")
       (bg-yellow   "#8f5040")
       (bg-blue     "#4648d0")
-      (bg-magenta  "#c040cf")
+      (bg-magenta  "#a050cf")
       (bg-cyan     "#2270be")
 
       (bg-red-subtle      "#72002a")
@@ -126,14 +126,14 @@
       (bg-hover      "#004a5f")
       (bg-hover-alt  "#551f5a")
       (bg-hl-line    "#002435")
-      (bg-region     "#25164a")
+      (bg-region     "#2a234a")
       (bg-paren      "#20577a")
       (bg-err        "#330d09") ; check with err
       (bg-warning    "#332600") ; check with warning
       (bg-info       "#002212") ; check with info
 
-      (border        "#444f5f")
-      (cursor        "#ff66ff")
+      (border        "#4a4a5a")
+      (cursor        "#ff76ff")
       (fg-intense    "#ffffff")
 
       (modeline-err     "#ff80af")

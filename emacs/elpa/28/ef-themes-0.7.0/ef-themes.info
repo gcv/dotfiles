@@ -1,4 +1,4 @@
-This is ef-themes.info, produced by makeinfo version 6.7 from
+This is docPQJo7W.info, produced by makeinfo version 6.7 from
 ef-themes.texi.
 
 Copyright (C) 2022 Free Software Foundation, Inc.
@@ -20,7 +20,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: ef-themes.info,  Node: Top,  Next: Installation,  Up: (dir)
+File: docPQJo7W.info,  Node: Top,  Next: Installation,  Up: (dir)
 
 ef-themes: colorful and legible themes
 **************************************
@@ -43,11 +43,11 @@ package called ‘ef-themes’, and provides every other piece of
 information pertinent to it.
 
    The documentation furnished herein corresponds to stable version
-0.5.0, released on 2022-09-11.  Any reference to a newer feature which
+0.7.0, released on 2022-10-08.  Any reference to a newer feature which
 does not yet form part of the latest tagged commit, is explicitly marked
 as such.
 
-   Current development target is 0.6.0-dev.
+   Current development target is 0.8.0-dev.
 
    • Package name (GNU ELPA): ‘ef-themes’
    • Official manual: <https://protesilaos.com/emacs/ef-themes>
@@ -58,6 +58,8 @@ as such.
              • GitHub: <https://github.com/protesilaos/ef-themes>
              • GitLab: <https://gitlab.com/protesilaos/ef-themes>
    • Mailing list: <https://lists.sr.ht/~protesilaos/ef-themes>
+   • Backronym: Extremely Fatigued of Themes Having Exaggerated
+     Markings, Embellishments, and Sparkles.
 
    If you are viewing the README.org version of this file, please note
 that the GNU ELPA machinery automatically generates an Info manual out
@@ -97,10 +99,12 @@ Customization options
 
 Do-It-Yourself customizations
 
-* The general approach to DIY changes::
-* Configure bold and italic faces::
+* The general approach to advanced DIY changes::
 * A theme-agnostic hook for theme loading::
 * Add support for hl-todo::
+* Make the modeline like the modus-themes default::
+* Configure bold and italic faces::
+* Tweak org-modern timestamps::
 * Tweak goto-address-mode faces::
 
 Supported packages or face groups
@@ -118,6 +122,7 @@ FAQ
 * What does Ef mean?::
 * Will you stop using the modus-themes?::
 * Then why develop the ef-themes?::
+* Too many options, what should I do?: Too many options what should I do?.
 * Let Org tags inherit the heading color?::
 * Add something like Nord or Zenburn?::
 
@@ -129,7 +134,7 @@ Indices
 
 
 
-File: ef-themes.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
+File: docPQJo7W.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
 
 1 Installation
 **************
@@ -140,7 +145,7 @@ File: ef-themes.info,  Node: Installation,  Next: Sample configuration,  Prev: T
 * Manual installation::
 
 
-File: ef-themes.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
+File: docPQJo7W.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
 
 1.1 GNU ELPA package
 ====================
@@ -159,7 +164,7 @@ archive.  Read:
 <https://protesilaos.com/codelog/2022-05-13-emacs-elpa-devel/>.
 
 
-File: ef-themes.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
+File: docPQJo7W.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
 
 1.2 Manual installation
 =======================
@@ -186,7 +191,7 @@ following commands in a shell prompt:
    Everything is in place to set up the package.
 
 
-File: ef-themes.info,  Node: Sample configuration,  Next: Themes for red-green color deficiency,  Prev: Installation,  Up: Top
+File: docPQJo7W.info,  Node: Sample configuration,  Next: Themes for red-green color deficiency,  Prev: Installation,  Up: Top
 
 2 Sample configuration
 **********************
@@ -226,13 +231,8 @@ File: ef-themes.info,  Node: Sample configuration,  Next: Themes for red-green c
      ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
      (ef-themes-select 'ef-summer)
 
-     ;; The themes we provide:
-     ;;
-     ;; Light: `ef-day', `ef-duo-light', `ef-light', `ef-spring', `ef-summer'.
-     ;; Dark:  `ef-autumn', `ef-duo-dark', `ef-dark', `ef-night', `ef-winter'.
-     ;;
-     ;; Also those which are optimized for deuteranopia (red-green color
-     ;; deficiency): `ef-deuteranopia-dark', `ef-deuteranopia-light'.
+     ;; The themes we provide are recorded in the `ef-themes-dark-themes',
+     ;; `ef-themes-light-themes'.
 
      ;; We also provide these commands, but do not assign them to any key:
      ;;
@@ -243,7 +243,7 @@ File: ef-themes.info,  Node: Sample configuration,  Next: Themes for red-green c
      ;; - `ef-themes-preview-colors-current'
 
 
-File: ef-themes.info,  Node: Themes for red-green color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
+File: docPQJo7W.info,  Node: Themes for red-green color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
 
 3 Themes for red-green color deficiency
 ***************************************
@@ -256,7 +256,7 @@ such users.  The named of the themes are: ‘ef-deuteranopia-dark’ and
 ‘ef-deuteranopia-light’ (*note Loading a theme::).
 
 
-File: ef-themes.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green color deficiency,  Up: Top
+File: docPQJo7W.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green color deficiency,  Up: Top
 
 4 Customization options
 ***********************
@@ -277,7 +277,7 @@ Principles.).
 * Option for headings::
 
 
-File: ef-themes.info,  Node: Toggle between two Ef themes,  Next: Enable mixed fonts,  Up: Customization options
+File: docPQJo7W.info,  Node: Toggle between two Ef themes,  Next: Enable mixed fonts,  Up: Customization options
 
 4.1 Toggle between two Ef themes
 ================================
@@ -298,7 +298,7 @@ either with minibuffer completion or at random (*note Commands to load
 an Ef theme::).
 
 
-File: ef-themes.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Toggle between two Ef themes,  Up: Customization options
+File: docPQJo7W.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Toggle between two Ef themes,  Up: Customization options
 
 4.2 Enable mixed fonts
 ======================
@@ -327,7 +327,7 @@ family of the ‘fixed-pitch’ face.  The ‘fontaine’ package on GNU ELPA
 (by Protesilaos) can be helpful in that regard.
 
 
-File: ef-themes.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
+File: docPQJo7W.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
 
 4.3 UI typeface
 ===============
@@ -351,7 +351,7 @@ family of the ‘variable-pitch’ face.  The ‘fontaine’ package on GNU ELPA
 (by Protesilaos) can be helpful in that regard.
 
 
-File: ef-themes.info,  Node: Option for headings,  Prev: UI typeface,  Up: Customization options
+File: docPQJo7W.info,  Node: Option for headings,  Prev: UI typeface,  Up: Customization options
 
 4.4 Option for headings
 =======================
@@ -434,7 +434,7 @@ original aesthetic for that level.  For example:
              (t . t))) ; default style for all other levels
 
 
-File: ef-themes.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
+File: docPQJo7W.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
 
 5 Loading a theme
 *****************
@@ -456,8 +456,16 @@ asks the user whether they are sure about loading the theme.
    Consider adding code like the above to the user configuration file,
 such as ‘init.el’.
 
+   NOTE: If you plan on using the ‘ef-themes-post-load-hook’, the above
+method will not work.  Instead, you need to load the theme from your
+init file with ‘ef-themes-select’ (*note Commands to load an Ef
+theme::).  For example:
+
+     ;; like `load-theme' but also call `ef-themes-post-load-hook'
+     (ef-themes-select 'ef-summer)
+
 
-File: ef-themes.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
+File: docPQJo7W.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
 
 6 Commands to load an Ef theme
 ******************************
@@ -469,16 +477,23 @@ same goes for ‘ef-themes-toggle’ (*note Toggle between two Ef themes::).
 
    *note A theme-agnostic hook for theme loading::.
 
-   The themes can also be loaded interactively (*note Loading a
-theme::).  The command ‘ef-themes-select’ (call it with ‘M-x’) prompts
-with minibuffer completion for a theme among the collection of items we
-provide.  It then loads the selected theme.  Internally,
-‘ef-themes-select’ takes care to disable any other Ef theme, though it
-does not disable other themes.  This is by design to let users maintain
-theme blending when they want it.  Otherwise, the user is encouraged to
-disable all other themes and stick with the Ef themes:
+   The themes can also be loaded interactively.  The command
+‘ef-themes-select’ (call it with ‘M-x’) prompts with minibuffer
+completion for a theme among the collection of items we provide.  It
+then loads the selected theme.  Internally, ‘ef-themes-select’ takes
+care to disable any other Ef theme, though it does not disable other
+themes.  This is by design to let users maintain theme blending when
+they want it.  Otherwise, the user is encouraged to disable all other
+themes and stick with the Ef themes:
 
      (mapc #'disable-theme custom-enabled-themes)
+
+   The ‘ef-themes-select’ command can also be called from the user’s
+init file to load the theme of their choice (*note Loading a theme::).
+For example:
+
+     ;; like `load-theme' but also call `ef-themes-post-load-hook'
+     (ef-themes-select 'ef-summer)
 
    The command ‘ef-themes-load-random’ is for those who appreciate a bit
 of serendipity in their life.  When call interactively with ‘M-x’ it
@@ -516,7 +531,7 @@ a light/dark theme and then loads an appropriate Ef theme at random:
        (ef-themes-load-random 'light))
 
 
-File: ef-themes.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
+File: docPQJo7W.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
 
 7 Preview theme colors
 **********************
@@ -531,7 +546,7 @@ which reflects the given choice, like ‘ef-summer-preview-colors’ for the
 selection process and just produces a preview for the current Ef theme.
 
 
-File: ef-themes.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
+File: docPQJo7W.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
 
 8 Use colors from the active Ef theme
 *************************************
@@ -560,7 +575,7 @@ color mapping are still possible.  At any rate, we will not outright
 break any code that uses ‘ef-themes-with-colors’.
 
 
-File: ef-themes.info,  Node: Do-It-Yourself customizations,  Next: Supported packages or face groups,  Prev: Use colors from the active Ef theme,  Up: Top
+File: docPQJo7W.info,  Node: Do-It-Yourself customizations,  Next: Supported packages or face groups,  Prev: Use colors from the active Ef theme,  Up: Top
 
 9 Do-It-Yourself customizations
 *******************************
@@ -570,17 +585,19 @@ their liking.
 
 * Menu:
 
-* The general approach to DIY changes::
-* Configure bold and italic faces::
+* The general approach to advanced DIY changes::
 * A theme-agnostic hook for theme loading::
 * Add support for hl-todo::
+* Make the modeline like the modus-themes default::
+* Configure bold and italic faces::
+* Tweak org-modern timestamps::
 * Tweak goto-address-mode faces::
 
 
-File: ef-themes.info,  Node: The general approach to DIY changes,  Next: Configure bold and italic faces,  Up: Do-It-Yourself customizations
+File: docPQJo7W.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
 
-9.1 The general approach to DIY changes
-=======================================
+9.1 The general approach to advanced DIY changes
+================================================
 
 When the user wants to customize Emacs faces there are two
 considerations they need to make if they care about robustness:
@@ -624,8 +641,8 @@ lines from there and tweak them.  Let’s pick a couple of font-lock faces
 
    Each item in the Ef themes collection has its own color mapping.  So
 the color value of the ‘comment’ variable will differ from
-theme-to-theme.  For our purposes, we make variables look like comments
-and comments like variables:
+theme-to-theme.  For the purpose of our demonstration, we make variables
+look like comments and comments like variables:
 
      (defun my-ef-themes-custom-faces ()
        "My customizations on top of the Ef themes.
@@ -663,9 +680,133 @@ mechanism.  We are willing to help and shall provide comprehensive
 documentation where necessary.
 
 
-File: ef-themes.info,  Node: Configure bold and italic faces,  Next: A theme-agnostic hook for theme loading,  Prev: The general approach to DIY changes,  Up: Do-It-Yourself customizations
+File: docPQJo7W.info,  Node: A theme-agnostic hook for theme loading,  Next: Add support for hl-todo,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
-9.2 Configure bold and italic faces
+9.2 A theme-agnostic hook for theme loading
+===========================================
+
+The themes are designed with the intent to be useful to Emacs users of
+varying skill levels, from beginners to experts.  This means that we try
+to make things easier by not expecting anyone reading this document to
+be proficient in Emacs Lisp or programming in general.
+
+   Such a case is with the use of the ‘ef-themes-post-load-hook’, which
+is called after the evaluation of any of the commands we provide for
+loading a theme (*note Commands to load an Ef theme::).  We recommend
+using that hook for advanced customizations, because (1) we know for
+sure that it is available once the themes are loaded, and (2) anyone
+consulting this manual, especially the sections on enabling and loading
+the themes, will be in a good position to benefit from that hook.
+
+   Advanced users who have a need to switch between the Ef themes and
+other items (e.g.  my ‘modus-themes’) will find that such a hook does
+not meet their requirements: it only works with the Ef themes and only
+with the aforementioned functions.
+
+   A theme-agnostic setup can be configured thus:
+
+     (defvar after-enable-theme-hook nil
+        "Normal hook run after enabling a theme.")
+
+     (defun run-after-enable-theme-hook (&rest _args)
+        "Run `after-enable-theme-hook'."
+        (run-hooks 'after-enable-theme-hook))
+
+     (advice-add 'enable-theme :after #'run-after-enable-theme-hook)
+
+   This creates the ‘after-enable-theme-hook’ and makes it run after
+each call to ‘enable-theme’, which means that it will work for all
+themes and also has the benefit that it does not depend on functions
+such as ‘ef-themes-select’ and the others mentioned in this manual.  The
+function ‘enable-theme’ is called internally by ‘load-theme’, so the
+hook works everywhere.
+
+   In this document, we always mention ‘ef-themes-post-load-hook’ though
+the user can replace it with ‘after-enable-theme-hook’ should they need
+to.
+
+
+File: docPQJo7W.info,  Node: Add support for hl-todo,  Next: Make the modeline like the modus-themes default,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
+
+9.3 Add support for hl-todo
+===========================
+
+The ‘hl-todo’ package provides the user option ‘hl-todo-keyword-faces’:
+it specifies an association list of ‘(KEYWORD . COLOR-VALUE)’ pairs.
+There are no faces, which the theme could style seamlessly.  As such, it
+rests on the user to specify appropriate color values.  This can be done
+either by hardcoding colors, which is inefficient, or by using the macro
+‘ef-themes-with-colors’ (*note The general approach to DIY changes: The
+general approach to advanced DIY changes.).  Here we show the latter
+method.
+
+     (defun my-ef-themes-hl-todo-faces ()
+       "Configure `hl-todo-keyword-faces' with Ef themes colors.
+     The exact color values are taken from the active Ef theme."
+       (ef-themes-with-colors
+         (setq hl-todo-keyword-faces
+               `(("HOLD" . ,yellow)
+                 ("TODO" . ,red)
+                 ("NEXT" . ,blue)
+                 ("THEM" . ,magenta)
+                 ("PROG" . ,cyan-warmer)
+                 ("OKAY" . ,green-warmer)
+                 ("DONT" . ,yellow-warmer)
+                 ("FAIL" . ,red-warmer)
+                 ("BUG" . ,red-warmer)
+                 ("DONE" . ,green)
+                 ("NOTE" . ,blue-warmer)
+                 ("KLUDGE" . ,cyan)
+                 ("HACK" . ,cyan)
+                 ("TEMP" . ,red)
+                 ("FIXME" . ,red-warmer)
+                 ("XXX+" . ,red-warmer)
+                 ("REVIEW" . ,red)
+                 ("DEPRECATED" . ,yellow)))))
+
+     (add-hook 'ef-themes-post-load-hook #'my-ef-themes-hl-todo-faces)
+
+   To find the names of the color variables, the user can rely on the
+commands for previewing the palette (*note Preview theme colors::).
+
+
+File: docPQJo7W.info,  Node: Make the modeline like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
+
+9.4 Make the modeline like the ‘modus-themes’ default
+=====================================================
+
+The Ef themes do not use a ‘:box’ attribute for their mode lines, while
+the active one has an accented background.  Users may prefer the
+approach that my ‘modus-themes’ follow by default, where both active and
+inactive mode lines use shades of gray and have a border around them.
+
+   Try something like this, using the approach we have already explained
+about ‘ef-themes-with-colors’ (*note The general approach to DIY
+changes: The general approach to advanced DIY changes.):
+
+     (defun my-ef-themes-mode-line ()
+       "Tweak the style of the mode lines."
+       (ef-themes-with-colors
+         (custom-set-faces
+          `(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
+          `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
+
+     (add-hook 'ef-themes-post-load-hook #'my-ef-themes-mode-line)
+
+   If you want the active mode line to retain its accented background
+but also have a border around it, change this line from the above
+snippet:
+
+     (mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
+
+   To this:
+
+     `(mode-line ((,c :background ,bg-mode-line :foreground ,fg-mode-line :box (:line-width 1 :color ,fg-dim))))
+
+
+File: docPQJo7W.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the modeline like the modus-themes default,  Up: Do-It-Yourself customizations
+
+9.5 Configure bold and italic faces
 ===================================
 
 The Ef themes do not hardcode a ‘:weight’ or ‘:slant’ attribute in the
@@ -715,98 +856,39 @@ pick fonts that work in tandem):
 provides the means to configure font families via faces.
 
 
-File: ef-themes.info,  Node: A theme-agnostic hook for theme loading,  Next: Add support for hl-todo,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
+File: docPQJo7W.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
 
-9.3 A theme-agnostic hook for theme loading
-===========================================
+9.6 Tweak ‘org-modern’ timestamps
+=================================
 
-The themes are designed with the intent to be useful to Emacs users of
-varying skill levels, from beginners to experts.  This means that we try
-to make things easier by not expecting anyone reading this document to
-be proficient in Emacs Lisp or programming in general.
+The ‘org-modern’ package uses faces and text properties to make Org
+buffers more aesthetically pleasing.  It affects tables, timestamps,
+lists, headings, and more.
 
-   Such a case is with the use of the ‘ef-themes-post-load-hook’, which
-is called after the evaluation of any of the commands we provide for
-loading a theme (*note Commands to load an Ef theme::).  We recommend
-using that hook for advanced customizations, because (1) we know for
-sure that it is available once the themes are loaded, and (2) anyone
-consulting this manual, especially the sections on enabling and loading
-the themes, will be in a good position to benefit from that hook.
+   In previous versions of the Ef themes, we mistakenly affected one of
+its faces: the ‘org-modern-label’.  It changed the intended looks and
+prevented the user option ‘org-modern-label-border’ from having its
+desired effect.  As such, we no longer override that face.
 
-   Advanced users who have a need to switch between the Ef themes and
-other items (e.g.  my ‘modus-themes’) will find that such a hook does
-not meet their requirements: it only works with the Ef themes and only
-with the aforementioned functions.
+   Users who were used to the previous design and who generally do not
+configure the user options of ‘org-modern’ may thus notice a change in
+how clocktables (or generally tables with timestamps) are aligned.  The
+simplest solution is to instruct the mode to not prettify timestamps, by
+setting the user option ‘org-modern-timestamp’ to nil.  For example, by
+adding this to the init file:
 
-   A theme-agnostic setup can be configured thus:
+     (setq org-modern-timestamp nil)
 
-     (defvar after-enable-theme-hook nil
-        "Normal hook run after enabling a theme.")
+   Alignment in tables will also depend on the use of proportionately
+spaced fonts.  Enable the relevant option to work with those without any
+further trouble (*note Enable mixed fonts::).
 
-     (defun run-after-enable-theme-hook (&rest _args)
-        "Run `after-enable-theme-hook'."
-        (run-hooks 'after-enable-theme-hook))
-
-     (advice-add 'enable-theme :after #'run-after-enable-theme-hook)
-
-   This creates the ‘after-enable-theme-hook’ and makes it run after
-each call to ‘enable-theme’, which means that it will work for all
-themes and also has the benefit that it does not depend on functions
-such as ‘ef-themes-select’ and the others mentioned in this manual.  The
-function ‘enable-theme’ is called internally by ‘load-theme’, so the
-hook works everywhere.
-
-   In this document, we always mention ‘ef-themes-post-load-hook’ though
-the user can replace it with ‘after-enable-theme-hook’ should they need
-to.
+   For any further issues, you are welcome to ask for help.
 
 
-File: ef-themes.info,  Node: Add support for hl-todo,  Next: Tweak goto-address-mode faces,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
+File: docPQJo7W.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
 
-9.4 Add support for hl-todo
-===========================
-
-The ‘hl-todo’ package provides the user option ‘hl-todo-keyword-faces’:
-it specifies an association list of ‘(KEYWORD . COLOR-VALUE)’ pairs.
-There are no faces, which the theme could style seamlessly.  As such, it
-rests on the user to specify appropriate color values.  This can be done
-either by hardcoding colors, which is inefficient, or by using the macro
-‘ef-themes-with-colors’ (*note The general approach to DIY changes::).
-Here we show the latter method.
-
-     (defun my-ef-themes-hl-todo-faces ()
-       "Configure `hl-todo-keyword-faces' with Ef themes colors.
-     The exact color values are taken from the active Ef theme."
-       (ef-themes-with-colors
-         (setq hl-todo-keyword-faces
-               `(("HOLD" . ,yellow)
-                 ("TODO" . ,red)
-                 ("NEXT" . ,blue)
-                 ("THEM" . ,magenta)
-                 ("PROG" . ,cyan-warmer)
-                 ("OKAY" . ,green-warmer)
-                 ("DONT" . ,yellow-warmer)
-                 ("FAIL" . ,red-warmer)
-                 ("BUG" . ,red-warmer)
-                 ("DONE" . ,green)
-                 ("NOTE" . ,blue-warmer)
-                 ("KLUDGE" . ,cyan)
-                 ("HACK" . ,cyan)
-                 ("TEMP" . ,red)
-                 ("FIXME" . ,red-warmer)
-                 ("XXX+" . ,red-warmer)
-                 ("REVIEW" . ,red)
-                 ("DEPRECATED" . ,yellow)))))
-
-     (add-hook 'ef-themes-post-load-hook #'my-ef-themes-hl-todo-faces)
-
-   To find the names of the color variables, the user can rely on the
-commands for previewing the palette (*note Preview theme colors::).
-
-
-File: ef-themes.info,  Node: Tweak goto-address-mode faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
-
-9.5 Tweak goto-address-mode faces
+9.7 Tweak goto-address-mode faces
 =================================
 
 The built-in ‘goto-address-mode’ uses heuristics to identify URLs and
@@ -829,7 +911,7 @@ addresses stand out more, due to the use of the uncommon ‘@’ caharacter
 but also because they are often enclosed in angled brackets).
 
 
-File: ef-themes.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Do-It-Yourself customizations,  Up: Top
+File: docPQJo7W.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Do-It-Yourself customizations,  Up: Top
 
 10 Supported packages or face groups
 ************************************
@@ -846,7 +928,7 @@ already covers everything most users need.
 * Packages that are hard to support::
 
 
-File: ef-themes.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docPQJo7W.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 10.1 Explicitly supported packages or face groups
 =================================================
@@ -875,6 +957,7 @@ File: ef-themes.info,  Node: Explicitly supported packages or face groups,  Next
    • dired-subtree
    • diredfl
    • dirvish
+   • display-fill-column-indicator-mode
    • doom-modeline
    • ediff
    • eldoc
@@ -935,7 +1018,7 @@ File: ef-themes.info,  Node: Explicitly supported packages or face groups,  Next
    • woman
 
 
-File: ef-themes.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docPQJo7W.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
 
 10.2 Implicitly supported packages or face groups
 =================================================
@@ -963,7 +1046,7 @@ in perfectly.  If there are refinements we need to made, then we need to
 intervene (*note Explicitly supported packages or face groups::).
 
 
-File: ef-themes.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docPQJo7W.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 10.3 Packages that are hard to support
 ======================================
@@ -1045,7 +1128,7 @@ web-mode
    The above list is non-exhaustive though you get the idea.
 
 
-File: ef-themes.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
+File: docPQJo7W.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
 
 11 Principles
 *************
@@ -1086,7 +1169,7 @@ File: ef-themes.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages o
 * Minimal VS maximal scope::
 
 
-File: ef-themes.info,  Node: Minimal VS maximal scope,  Up: Principles
+File: docPQJo7W.info,  Node: Minimal VS maximal scope,  Up: Principles
 
 11.1 Minimal VS maximal scope
 =============================
@@ -1105,7 +1188,7 @@ necessity.  The ‘modus-themes’ are such because:
 such a lofty accessibility target.
 
 
-File: ef-themes.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
+File: docPQJo7W.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
 
 12 FAQ
 ******
@@ -1115,22 +1198,22 @@ File: ef-themes.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  U
 * What does Ef mean?::
 * Will you stop using the modus-themes?::
 * Then why develop the ef-themes?::
+* Too many options, what should I do?: Too many options what should I do?.
 * Let Org tags inherit the heading color?::
 * Add something like Nord or Zenburn?::
 
 
-File: ef-themes.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
+File: docPQJo7W.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
 
 12.1 What does Ef mean?
 =======================
 
-“Ef” is a Greek word (ευ), commonly used as a prefix to denote that
-something is good, nice, and/or easy.  For example, eftopia (ευτοπία) is
-the opposite of dystopia (δυστοπία): a good place as opposed to a bad
-place.
+“Ef” is a Greek word (ευ), commonly used as a prefix to denote something
+good, nice, and/or easy.  For example, eftopia (ευτοπία) is the opposite
+of dystopia (δυστοπία): a good place as opposed to a bad place.
 
 
-File: ef-themes.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
+File: docPQJo7W.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
 
 12.2 Will you stop using the modus-themes?
 ==========================================
@@ -1139,7 +1222,7 @@ No.  For my workflow, accessibility is the most important quality.  The
 ‘modus-themes’ will remain my default choice.
 
 
-File: ef-themes.info,  Node: Then why develop the ef-themes?,  Next: Let Org tags inherit the heading color?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
+File: docPQJo7W.info,  Node: Then why develop the ef-themes?,  Next: Too many options what should I do?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
 
 12.3 Then why develop the ef-themes?
 ====================================
@@ -1152,9 +1235,22 @@ considerations for legibility, and (ii) are not designed on a whimsy.
 fine with a bit more relaxed accessibility target.
 
 
-File: ef-themes.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Then why develop the ef-themes?,  Up: FAQ
+File: docPQJo7W.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Then why develop the ef-themes?,  Up: FAQ
 
-12.4 Let Org tags inherit the heading color?
+12.4 Too many options, what should I do?
+========================================
+
+Take a deep breath, drink some water, get some fresh air, and take it
+one step at a time.  You don’t have to try all the themes outright.  For
+a light theme, go with ‘ef-light’; for a dark one use ‘ef-dark’.  They
+have generic names exactly for this reason.  Then make the necessary
+tweaks to toggle between those two and don’t worry anymore about the
+abundance of choice (*note Toggle between two Ef themes::).  Good luck!
+
+
+File: docPQJo7W.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
+
+12.5 Let Org tags inherit the heading color?
 ============================================
 
 Upstream Org defines tags in headings to have the same color as the rest
@@ -1185,9 +1281,9 @@ Realigning tags by inserting spaces also creates noise in
 version-controlled files, which is undesirable.
 
 
-File: ef-themes.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
+File: docPQJo7W.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
 
-12.5 Add something like Nord or Zenburn?
+12.6 Add something like Nord or Zenburn?
 ========================================
 
 In general, I am not against the idea of drawing inspiration from other
@@ -1214,7 +1310,7 @@ compromises and sub-optimal choices, which make no sense for a project
 with opinionanted design principles.
 
 
-File: ef-themes.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
+File: docPQJo7W.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
 
 13 Acknowledgements
 *******************
@@ -1229,12 +1325,12 @@ Contributions to code or the manual
      Alex Lu, Christopher League, Philip Kaludercic.
 
 Ideas and/or user feedback
-     Alan Schmitt, Anthony Chavez, Iris Garcia, Jean-Philippe Gagné
-     Guay, Jonas Collberg, Spike-Leung, Steve Molitor, Summer Emacs,
-     Zoltán Király.
+     Alan Schmitt, Anthony Chavez, Daniel Mendler, Iris Garcia,
+     Jean-Philippe Gagné Guay, Jonas Collberg, Spike-Leung, Steve
+     Molitor, Summer Emacs, Sven Seebeck, Zoltán Király.
 
 
-File: ef-themes.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
+File: docPQJo7W.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
 
 14 GNU Free Documentation License
 *********************************
@@ -1716,7 +1812,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: ef-themes.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
+File: docPQJo7W.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
 
 15 Indices
 **********
@@ -1728,19 +1824,19 @@ File: ef-themes.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up
 * Concept index::
 
 
-File: ef-themes.info,  Node: Function index,  Next: Variable index,  Up: Indices
+File: docPQJo7W.info,  Node: Function index,  Next: Variable index,  Up: Indices
 
 15.1 Function index
 ===================
 
 
-File: ef-themes.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
+File: docPQJo7W.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
 
 15.2 Variable index
 ===================
 
 
-File: ef-themes.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
+File: docPQJo7W.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 15.3 Concept index
 ==================
@@ -1749,44 +1845,47 @@ File: ef-themes.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 Tag Table:
 Node: Top835
-Node: Installation4046
-Node: GNU ELPA package4228
-Node: Manual installation4792
-Node: Sample configuration5573
-Node: Themes for red-green color deficiency7760
-Node: Customization options8392
-Node: Toggle between two Ef themes9023
-Node: Enable mixed fonts9887
-Node: UI typeface11221
-Node: Option for headings12129
-Node: Loading a theme15515
-Node: Commands to load an Ef theme16339
-Node: Preview theme colors18986
-Node: Use colors from the active Ef theme19636
-Node: Do-It-Yourself customizations20847
-Node: The general approach to DIY changes21348
-Node: Configure bold and italic faces25266
-Node: A theme-agnostic hook for theme loading27692
-Node: Add support for hl-todo29880
-Node: Tweak goto-address-mode faces31732
-Node: Supported packages or face groups32823
-Node: Explicitly supported packages or face groups33428
-Node: Implicitly supported packages or face groups35278
-Node: Packages that are hard to support36177
-Node: Principles38664
-Node: Minimal VS maximal scope40400
-Node: FAQ41154
-Node: What does Ef mean?41454
-Node: Will you stop using the modus-themes?41850
-Node: Then why develop the ef-themes?42207
-Node: Let Org tags inherit the heading color?42789
-Node: Add something like Nord or Zenburn?44609
-Node: Acknowledgements45903
-Node: GNU Free Documentation License46455
-Node: Indices71800
-Node: Function index71978
-Node: Variable index72103
-Node: Concept index72250
+Node: Installation4325
+Node: GNU ELPA package4507
+Node: Manual installation5071
+Node: Sample configuration5852
+Node: Themes for red-green color deficiency7800
+Node: Customization options8432
+Node: Toggle between two Ef themes9063
+Node: Enable mixed fonts9927
+Node: UI typeface11261
+Node: Option for headings12169
+Node: Loading a theme15555
+Node: Commands to load an Ef theme16720
+Node: Preview theme colors19604
+Node: Use colors from the active Ef theme20254
+Node: Do-It-Yourself customizations21465
+Node: The general approach to advanced DIY changes22059
+Node: A theme-agnostic hook for theme loading26032
+Node: Add support for hl-todo28233
+Node: Make the modeline like the modus-themes default30149
+Node: Configure bold and italic faces31716
+Node: Tweak org-modern timestamps34142
+Node: Tweak goto-address-mode faces35523
+Node: Supported packages or face groups36618
+Node: Explicitly supported packages or face groups37223
+Node: Implicitly supported packages or face groups39115
+Node: Packages that are hard to support40014
+Node: Principles42501
+Node: Minimal VS maximal scope44237
+Node: FAQ44991
+Node: What does Ef mean?45366
+Node: Will you stop using the modus-themes?45754
+Node: Then why develop the ef-themes?46111
+Node: Too many options what should I do?46688
+Node: Let Org tags inherit the heading color?47373
+Node: Add something like Nord or Zenburn?49196
+Node: Acknowledgements50490
+Node: GNU Free Documentation License51072
+Node: Indices76417
+Node: Function index76595
+Node: Variable index76720
+Node: Concept index76867
 
 End Tag Table
 

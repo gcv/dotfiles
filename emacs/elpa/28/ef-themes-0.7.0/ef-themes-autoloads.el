@@ -13,6 +13,8 @@
 Load an Ef THEME using minibuffer completion.
 When called from Lisp, THEME is a symbol.
 
+Run `ef-themes-post-load-hook' after loading the theme.
+
 \(fn THEME)" t nil)
 
 (autoload 'ef-themes-toggle "ef-themes" "\
@@ -20,7 +22,9 @@ Toggle between the two `ef-themes-to-toggle'.
 If `ef-themes-to-toggle' does not specify two Ef themes, inform
 the user about it while prompting with completion for a theme
 among our collection (this is practically the same as the
-`ef-themes-select' command)." t nil)
+`ef-themes-select' command).
+
+Run `ef-themes-post-load-hook' after loading the theme." t nil)
 
 (autoload 'ef-themes-load-random "ef-themes" "\
 Load an Ef theme at random, excluding the current one.
@@ -29,6 +33,8 @@ to the relevant themes.
 
 When called interactively, VARIANT is the prefix argument which
 prompts with completion for either `light' or `dark'.
+
+Run `ef-themes-post-load-hook' after loading the theme.
 
 \(fn &optional VARIANT)" t nil)
 
@@ -57,11 +63,13 @@ Those are stored in `ef-themes-faces' and
 
 ;;;***
 
-;;;### (autoloads nil nil ("ef-autumn-theme.el" "ef-dark-theme.el"
-;;;;;;  "ef-day-theme.el" "ef-deuteranopia-dark-theme.el" "ef-deuteranopia-light-theme.el"
-;;;;;;  "ef-duo-dark-theme.el" "ef-duo-light-theme.el" "ef-light-theme.el"
-;;;;;;  "ef-night-theme.el" "ef-spring-theme.el" "ef-summer-theme.el"
-;;;;;;  "ef-themes-pkg.el" "ef-winter-theme.el") (0 0 0 0))
+;;;### (autoloads nil nil ("ef-autumn-theme.el" "ef-bio-theme.el"
+;;;;;;  "ef-dark-theme.el" "ef-day-theme.el" "ef-deuteranopia-dark-theme.el"
+;;;;;;  "ef-deuteranopia-light-theme.el" "ef-duo-dark-theme.el" "ef-duo-light-theme.el"
+;;;;;;  "ef-frost-theme.el" "ef-light-theme.el" "ef-night-theme.el"
+;;;;;;  "ef-spring-theme.el" "ef-summer-theme.el" "ef-themes-pkg.el"
+;;;;;;  "ef-trio-dark-theme.el" "ef-trio-light-theme.el" "ef-winter-theme.el")
+;;;;;;  (0 0 0 0))
 
 ;;;***
 

@@ -4,9 +4,9 @@
 #+language:              en
 #+options:               ':t toc:nil author:t email:t num:t
 #+startup:               content
-#+macro:                 stable-version 0.5.0
-#+macro:                 release-date 2022-09-11
-#+macro:                 development-version 0.6.0-dev
+#+macro:                 stable-version 0.7.0
+#+macro:                 release-date 2022-10-08
+#+macro:                 development-version 0.8.0-dev
 #+export_file_name:      ef-themes.texi
 #+texinfo_filename:      ef-themes.info
 #+texinfo_dir_category:  Emacs misc features
@@ -39,6 +39,8 @@ Current development target is {{{development-version}}}.
     + GitHub: <https://github.com/protesilaos/ef-themes>
     + GitLab: <https://gitlab.com/protesilaos/ef-themes>
 + Mailing list: <https://lists.sr.ht/~protesilaos/ef-themes>
++ Backronym: Extremely Fatigued of Themes Having Exaggerated Markings,
+  Embellishments, and Sparkles.
 
 If you are viewing the README.org version of this file, please note that
 the GNU ELPA machinery automatically generates an Info manual out of it.
@@ -159,13 +161,8 @@ Everything is in place to set up the package.
 ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
 (ef-themes-select 'ef-summer)
 
-;; The themes we provide:
-;;
-;; Light: `ef-day', `ef-duo-light', `ef-light', `ef-spring', `ef-summer'.
-;; Dark:  `ef-autumn', `ef-duo-dark', `ef-dark', `ef-night', `ef-winter'.
-;;
-;; Also those which are optimized for deuteranopia (red-green color
-;; deficiency): `ef-deuteranopia-dark', `ef-deuteranopia-light'.
+;; The themes we provide are recorded in the `ef-themes-dark-themes',
+;; `ef-themes-light-themes'.
 
 ;; We also provide these commands, but do not assign them to any key:
 ;;
@@ -390,6 +387,16 @@ asks the user whether they are sure about loading the theme.
 Consider adding code like the above to the user configuration file, such
 as =init.el=.
 
+NOTE: If you plan on using the ~ef-themes-post-load-hook~, the above
+method will not work.  Instead, you need to load the theme from your
+init file with ~ef-themes-select~ ([[#h:58345e8c-2bec-459c-872c-a85a29e9fe97][Commands to load an Ef theme]]).  For
+example:
+
+#+begin_src emacs-lisp
+;; like `load-theme' but also call `ef-themes-post-load-hook'
+(ef-themes-select 'ef-summer)
+#+end_src
+
 * Commands to load an Ef theme
 :PROPERTIES:
 :CUSTOM_ID: h:58345e8c-2bec-459c-872c-a85a29e9fe97
@@ -404,8 +411,8 @@ for ~ef-themes-toggle~ ([[#h:a58b8e21-0f8f-4763-9b47-185bf7e10043][Toggle betwee
 [[#h:1dbea3c9-de9a-4bb4-b540-654bea70ba4d][A theme-agnostic hook for theme loading]].
 
 #+findex: ef-themes-select
-The themes can also be loaded interactively ([[#h:75d74aea-d17f-497f-a3b8-f0bf4c372de0][Loading a theme]]).  The
-command ~ef-themes-select~ (call it with =M-x=) prompts with minibuffer
+The themes can also be loaded interactively.  The command
+~ef-themes-select~ (call it with =M-x=) prompts with minibuffer
 completion for a theme among the collection of items we provide.  It
 then loads the selected theme.  Internally, ~ef-themes-select~ takes
 care to disable any other Ef theme, though it does not disable other
@@ -415,6 +422,14 @@ themes and stick with the Ef themes:
 
 #+begin_src emacs-lisp
 (mapc #'disable-theme custom-enabled-themes)
+#+end_src
+
+The ~ef-themes-select~ command can also be called from the user's init
+file to load the theme of their choice ([[#h:75d74aea-d17f-497f-a3b8-f0bf4c372de0][Loading a theme]]).  For example:
+
+#+begin_src emacs-lisp
+;; like `load-theme' but also call `ef-themes-post-load-hook'
+(ef-themes-select 'ef-summer)
 #+end_src
 
 #+findex: ef-themes-load-random
@@ -516,7 +531,7 @@ code that uses ~ef-themes-with-colors~.
 This section documents how the user can further tweak the Ef themes to
 their liking.
 
-** The general approach to DIY changes
+** The general approach to advanced DIY changes
 :PROPERTIES:
 :CUSTOM_ID: h:ec0adf54-c037-4c53-81b8-7eab2303794d
 :END:
@@ -565,8 +580,8 @@ This function is added to the `ef-themes-post-load-hook'."
 
 Each item in the Ef themes collection has its own color mapping.  So the
 color value of the =comment= variable will differ from theme-to-theme.
-For our purposes, we make variables look like comments and comments like
-variables:
+For the purpose of our demonstration, we make variables look like
+comments and comments like variables:
 
 #+begin_src emacs-lisp
 (defun my-ef-themes-custom-faces ()
@@ -606,64 +621,6 @@ This function is added to the `ef-themes-post-load-hook'."
 Please contact us if you have specific questions about this mechanism.
 We are willing to help and shall provide comprehensive documentation
 where necessary.
-
-** Configure bold and italic faces
-:PROPERTIES:
-:CUSTOM_ID: h:8c0b05b7-5624-4051-844c-3c4882658782
-:END:
-#+cindex: Bold and italic fonts
-
-The Ef themes do not hardcode a ~:weight~ or ~:slant~ attribute in the
-faces they cover.  Instead, they configure the generic faces called
-~bold~ and ~italic~ to use the appropriate styles and then instruct all
-relevant faces that require emphasis to inherit from them.
-
-This practically means that users can change the particularities of what
-it means for a construct to be bold/italic, by tweaking the ~bold~ and
-~italic~ faces.  Cases where that can be useful include:
-
-+ The default typeface does not have a variant with slanted glyphs
-  (e.g. Fira Mono/Code as of this writing on 2022-08-23), so the user
-  wants to add another family for the italics, such as Hack.
-
-+ The typeface of choice provides a multitude of weights and the user
-  prefers the light one by default.  To prevent the bold weight from
-  being too heavy compared to the light one, they opt to make ~bold~ use a
-  semibold weight.
-
-+ The typeface distinguishes between oblique and italic forms by
-  providing different font variants (the former are just slanted
-  versions of the upright forms, while the latter have distinguishing
-  features as well).  In this case, the user wants to specify the font
-  that applies to the ~italic~ face.
-
-To achieve those effects, one must first be sure that the fonts they use
-have support for those features.
-
-In this example, we set the default font family to Fira Code, while we
-choose to render italics in the Hack typeface (obviously one needs to
-pick fonts that work in tandem):
-
-#+begin_src emacs-lisp
-(set-face-attribute 'default nil :family "Fira Code" :height 110)
-(set-face-attribute 'italic nil :family "Hack")
-#+end_src
-
-And here we play with different weights, using Source Code Pro:
-
-#+begin_src emacs-lisp
-(set-face-attribute 'default nil :family "Source Code Pro" :height 110 :weight 'light)
-(set-face-attribute 'bold nil :weight 'semibold)
-#+end_src
-
-To reset the font family, one can use this:
-
-#+begin_src emacs-lisp
-(set-face-attribute 'italic nil :family 'unspecified)
-#+end_src
-
-Consider the =fontaine= package on GNU ELPA (by Protesilaos) which
-provides the means to configure font families via faces.
 
 ** A theme-agnostic hook for theme loading
 :PROPERTIES:
@@ -756,6 +713,132 @@ The exact color values are taken from the active Ef theme."
 To find the names of the color variables, the user can rely on the
 commands for previewing the palette ([[#h:8dd67bf5-879e-46e5-b277-5bac141f53d1][Preview theme colors]]).
 
+** Make the modeline like the =modus-themes= default
+:PROPERTIES:
+:CUSTOM_ID: h:69ea8788-33b9-42f9-a4f1-92ee22074d2b
+:END:
+
+The Ef themes do not use a =:box= attribute for their mode lines, while
+the active one has an accented background.  Users may prefer the
+approach that my =modus-themes= follow by default, where both active and
+inactive mode lines use shades of gray and have a border around them.
+
+Try something like this, using the approach we have already explained
+about ~ef-themes-with-colors~ ([[#h:ec0adf54-c037-4c53-81b8-7eab2303794d][The general approach to DIY changes]]):
+
+#+begin_src emacs-lisp
+(defun my-ef-themes-mode-line ()
+  "Tweak the style of the mode lines."
+  (ef-themes-with-colors
+    (custom-set-faces
+     `(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
+     `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
+
+(add-hook 'ef-themes-post-load-hook #'my-ef-themes-mode-line)
+#+end_src
+
+If you want the active mode line to retain its accented background but
+also have a border around it, change this line from the above snippet:
+
+#+begin_src emacs-lisp
+(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
+#+end_src
+
+To this:
+
+#+begin_src emacs-lisp
+`(mode-line ((,c :background ,bg-mode-line :foreground ,fg-mode-line :box (:line-width 1 :color ,fg-dim))))
+#+end_src
+
+** Configure bold and italic faces
+:PROPERTIES:
+:CUSTOM_ID: h:8c0b05b7-5624-4051-844c-3c4882658782
+:END:
+#+cindex: Bold and italic fonts
+
+The Ef themes do not hardcode a ~:weight~ or ~:slant~ attribute in the
+faces they cover.  Instead, they configure the generic faces called
+~bold~ and ~italic~ to use the appropriate styles and then instruct all
+relevant faces that require emphasis to inherit from them.
+
+This practically means that users can change the particularities of what
+it means for a construct to be bold/italic, by tweaking the ~bold~ and
+~italic~ faces.  Cases where that can be useful include:
+
++ The default typeface does not have a variant with slanted glyphs
+  (e.g. Fira Mono/Code as of this writing on 2022-08-23), so the user
+  wants to add another family for the italics, such as Hack.
+
++ The typeface of choice provides a multitude of weights and the user
+  prefers the light one by default.  To prevent the bold weight from
+  being too heavy compared to the light one, they opt to make ~bold~ use a
+  semibold weight.
+
++ The typeface distinguishes between oblique and italic forms by
+  providing different font variants (the former are just slanted
+  versions of the upright forms, while the latter have distinguishing
+  features as well).  In this case, the user wants to specify the font
+  that applies to the ~italic~ face.
+
+To achieve those effects, one must first be sure that the fonts they use
+have support for those features.
+
+In this example, we set the default font family to Fira Code, while we
+choose to render italics in the Hack typeface (obviously one needs to
+pick fonts that work in tandem):
+
+#+begin_src emacs-lisp
+(set-face-attribute 'default nil :family "Fira Code" :height 110)
+(set-face-attribute 'italic nil :family "Hack")
+#+end_src
+
+And here we play with different weights, using Source Code Pro:
+
+#+begin_src emacs-lisp
+(set-face-attribute 'default nil :family "Source Code Pro" :height 110 :weight 'light)
+(set-face-attribute 'bold nil :weight 'semibold)
+#+end_src
+
+To reset the font family, one can use this:
+
+#+begin_src emacs-lisp
+(set-face-attribute 'italic nil :family 'unspecified)
+#+end_src
+
+Consider the =fontaine= package on GNU ELPA (by Protesilaos) which
+provides the means to configure font families via faces.
+
+** Tweak =org-modern= timestamps
+:PROPERTIES:
+:CUSTOM_ID: h:32e3b7b2-3b53-4ec2-bd4e-fa24235e447d
+:END:
+
+The =org-modern= package uses faces and text properties to make Org
+buffers more aesthetically pleasing.  It affects tables, timestamps,
+lists, headings, and more.
+
+In previous versions of the Ef themes, we mistakenly affected one of its
+faces: the ~org-modern-label~.  It changed the intended looks and
+prevented the user option ~org-modern-label-border~ from having its
+desired effect.  As such, we no longer override that face.
+
+Users who were used to the previous design and who generally do not
+configure the user options of =org-modern= may thus notice a change in
+how clocktables (or generally tables with timestamps) are aligned.  The
+simplest solution is to instruct the mode to not prettify timestamps, by
+setting the user option ~org-modern-timestamp~ to nil.  For example, by
+adding this to the init file:
+
+#+begin_src emacs-lisp
+(setq org-modern-timestamp nil)
+#+end_src
+
+Alignment in tables will also depend on the use of proportionately
+spaced fonts.  Enable the relevant option to work with those without any
+further trouble ([[#h:621d3bb9-5967-4f97-b253-7470bba9168c][Enable mixed fonts]]).
+
+For any further issues, you are welcome to ask for help.
+
 ** Tweak goto-address-mode faces
 :PROPERTIES:
 :CUSTOM_ID: h:d42f726c-44e5-4dd6-b77e-e6ca0bab3189
@@ -821,6 +904,7 @@ everything most users need.
 - dired-subtree
 - diredfl
 - dirvish
+- display-fill-column-indicator-mode
 - doom-modeline
 - ediff
 - eldoc
@@ -1032,8 +1116,8 @@ lofty accessibility target.
 :CUSTOM_ID: h:22a92ee8-eda6-4c29-b850-b2709a7239c0
 :END:
 
-"Ef" is a Greek word (ευ), commonly used as a prefix to denote that
-something is good, nice, and/or easy.  For example, eftopia (ευτοπία) is
+"Ef" is a Greek word (ευ), commonly used as a prefix to denote
+something good, nice, and/or easy.  For example, eftopia (ευτοπία) is
 the opposite of dystopia (δυστοπία): a good place as opposed to a bad
 place.
 
@@ -1056,6 +1140,19 @@ considerations for legibility, and (ii) are not designed on a whimsy.
 The =ef-themes= are my answer to those who (i) like my =modus-themes=,
 (ii) want something with a bit more flair, and (iii) are fine with a
 bit more relaxed accessibility target.
+
+** Too many options, what should I do?
+:PROPERTIES:
+:CUSTOM_ID: h:3c0201ed-2c06-4981-a3a3-3d15bc4eec00
+:END:
+
+Take a deep breath, drink some water, get some fresh air, and take it
+one step at a time.  You don't have to try all the themes outright.
+For a light theme, go with =ef-light=; for a dark one use =ef-dark=.
+They have generic names exactly for this reason.  Then make the
+necessary tweaks to toggle between those two and don't worry anymore
+about the abundance of choice ([[#h:a58b8e21-0f8f-4763-9b47-185bf7e10043][Toggle between two Ef themes]]).  Good
+luck!
 
 ** Let Org tags inherit the heading color?
 :PROPERTIES:
@@ -1131,9 +1228,9 @@ matters.
 + Contributions to code or the manual :: Alex Lu, Christopher League,
   Philip Kaludercic.
 
-+ Ideas and/or user feedback :: Alan Schmitt, Anthony Chavez, Iris
-  Garcia, Jean-Philippe Gagné Guay, Jonas Collberg, Spike-Leung, Steve
-  Molitor, Summer Emacs, Zoltán Király.
++ Ideas and/or user feedback :: Alan Schmitt, Anthony Chavez, Daniel
+  Mendler, Iris Garcia, Jean-Philippe Gagné Guay, Jonas Collberg,
+  Spike-Leung, Steve Molitor, Summer Emacs, Sven Seebeck, Zoltán Király.
 
 * GNU Free Documentation License
 :PROPERTIES:
