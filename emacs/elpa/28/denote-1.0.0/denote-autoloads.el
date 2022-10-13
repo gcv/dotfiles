@@ -53,7 +53,9 @@ is set to \\='(file-type title keywords)." t nil)
 Create note while prompting for a date.
 
 The date can be in YEAR-MONTH-DAY notation like 2022-06-30 or
-that plus the time: 2022-06-16 14:30
+that plus the time: 2022-06-16 14:30.  When the user option
+`denote-date-prompt-use-org-read-date' is non-nil, the date
+prompt uses the more powerful Org+calendar system.
 
 This is the equivalent to calling `denote' when `denote-prompts'
 is set to \\='(date title keywords)." t nil)
@@ -82,6 +84,12 @@ This is equivalent to calling `denote' when `denote-prompts' is
 set to \\='(template title keywords)." t nil)
 
 (function-put 'denote-template 'interactive-only 't)
+
+(autoload 'denote-open-or-create "denote" "\
+Visit TARGET file in variable `denote-directory'.
+If file does not exist, invoke `denote' to create a file.
+
+\(fn TARGET)" t nil)
 
 (autoload 'denote-rename-file "denote" "\
 Rename file and update existing front matter if appropriate.
@@ -285,13 +293,56 @@ format is always [[denote:IDENTIFIER]].
 (autoload 'denote-link-find-file "denote" "\
 Use minibuffer completion to visit linked file." t nil)
 
+(autoload 'denote-link-after-creating "denote" "\
+Create new note in the background and link to it directly.
+
+Use `denote' interactively to produce the new note.  Its doc
+string explains which prompts will be used and under what
+conditions.
+
+With optional ID-ONLY as a prefix argument create a link that
+consists of just the identifier.  Else try to also include the
+file's title.  This has the same meaning as in `denote-link'.
+
+IMPORTANT NOTE: Normally, `denote' does not save the buffer it
+produces for the new note.  This is a safety precaution to not
+write to disk unless the user wants it (e.g. the user may choose
+to kill the buffer, thus cancelling the creation of the note).
+However, for this command the creation of the note happens in the
+background and the user may miss the step of saving their buffer.
+We thus have to save the buffer in order to (i) establish valid
+links, and (ii) retrieve whatever front matter from the target
+file.
+
+\(fn &optional ID-ONLY)" t nil)
+
+(autoload 'denote-link-or-create "denote" "\
+Use `denote-link' on TARGET file, creating it if necessary.
+
+If TARGET file does not exist, call `denote-link-after-creating'
+which runs the `denote' command interactively to create the file.
+The established link will then be targeting that new file.
+
+With optional ID-ONLY as a prefix argument create a link that
+consists of just the identifier.  Else try to also include the
+file's title.  This has the same meaning as in `denote-link'.
+
+\(fn TARGET &optional ID-ONLY)" t nil)
+
 (autoload 'denote-link-buttonize-buffer "denote" "\
 Make denote: links actionable buttons in the current buffer.
 
-Add this to `find-file-hook'.  It will only work with Denote
-notes and will not do anything in `org-mode' buffers, as buttons
-already work there.  If you do not use Markdown or plain text,
-then you do not need this.
+Buttonization applies to the plain text and Markdown file types,
+per the user option `denote-file-types'.  It will not do anything
+in `org-mode' buffers, as buttons already work there.  If you do
+not use Markdown or plain text, then you do not need this.
+
+Links work when they point to a file inside the variable
+`denote-directory'.
+
+To buttonize links automatically add this function to the
+`find-file-hook'.  Or call it interactively for on-demand
+buttonization.
 
 When called from Lisp, with optional BEG and END as buffer
 positions, limit the process to the region in-between.
@@ -341,7 +392,7 @@ This command is meant to be used from a Dired buffer.
 
 \(fn FILES BUFFER &optional ID-ONLY)" '(dired-mode) nil)
 
-(eval-after-load 'org `(funcall ',(lambda nil (with-no-warnings (org-link-set-parameters "denote" :follow #'denote-link-ol-follow :face #'denote-link-ol-face :complete #'denote-link-ol-complete :export #'denote-link-ol-export)))))
+(eval-after-load 'org `(funcall ',(lambda nil (with-no-warnings (org-link-set-parameters "denote" :follow #'denote-link-ol-follow :face 'denote-faces-link :complete #'denote-link-ol-complete :store #'denote-link-ol-store :export #'denote-link-ol-export)))))
 
 (autoload 'denote-org-capture "denote" "\
 Create new note through `org-capture-templates'.
