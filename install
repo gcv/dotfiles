@@ -184,8 +184,8 @@ if [[ $link_all = "1" || $link_notmuch = "1" ]]; then
 fi
 
 if [[ $link_all = "1" || $link_nix = "1" ]]; then
-    link "public/nix" ".config"
-    link "public/nixpkgs" ".config"
+    link "public/nix" ".config/nix"
+    link "public/nixpkgs" ".config/nixpkgs"
 fi
 
 if [[ $link_all = "1" || $link_sh = "1" ]]; then
