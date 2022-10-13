@@ -1366,16 +1366,24 @@ evaluated in the context of MODULE."
                                    line " \n")))
            (display-str (s-trim-right (apply #'concat lines)))
            (popup (let ((popup-tip-max-width (window-width)))
-                    (popup-tip display-str
-                               :point pt
-                               :around nil
-                               :face (if julia-snail-popup-display-face
-                                         julia-snail-popup-display-face
-                                       `(:background
-                                         ,(julia-snail--color-shift-hex (face-attribute 'default :background) (face-attribute 'default :foreground) :by 63)
-                                         :foreground ,(face-attribute 'default :foreground)))
-                               :nowait t
-                               :nostrip t))))
+                    ;; XXX: Dirty workaround for #110. popup-tip calls
+                    ;; popup-replace-displayable which is SLOW (as of
+                    ;; 2022-09-26). So just bypass it until popup.el releases a
+                    ;; fixed version, and then adjust the Snail dependency
+                    ;; version.
+                    (declare-function popup-replace-displayable "popup.el")
+                    (cl-letf (((symbol-function 'popup-replace-displayable)
+                               (lambda (str &optional _rep) str)))
+                      (popup-tip display-str
+                                 :point pt
+                                 :around nil
+                                 :face (if julia-snail-popup-display-face
+                                           julia-snail-popup-display-face
+                                         `(:background
+                                           ,(julia-snail--color-shift-hex (face-attribute 'default :background) (face-attribute 'default :foreground) :by 63)
+                                           :foreground ,(face-attribute 'default :foreground)))
+                                 :nowait t
+                                 :nostrip t)))))
       (add-to-list 'julia-snail--popups popup)
       (when use-cleanup-kludge
         (setq julia-snail--popup-cleanup-skip-kludge t))
@@ -1482,7 +1490,7 @@ evaluated in the context of MODULE."
         ;; check buffer size and insert separator as needed
         (when (> (buffer-size) 0)
           (goto-char (point-max))
-          (insert "\n"))
+          (insert "\n\n"))
         (if (image-type-available-p 'imagemagick)
             (let ((shortest (car
                              (-sort
@@ -1493,8 +1501,7 @@ evaluated in the context of MODULE."
               (if shortest
                   (insert-image (create-image decoded-img 'imagemagick t :height (round (* 0.80 (window-pixel-height shortest)))))
                 (insert-image (create-image decoded-img 'imagemagick t))))
-          (insert-image (create-image decoded-img nil t)))
-        (insert "\n"))
+          (insert-image (create-image decoded-img nil t))))
       (dolist (win (get-buffer-window-list mm-buf))
         (set-window-point win (point-max)))
       (read-only-mode 1)
