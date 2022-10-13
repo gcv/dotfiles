@@ -295,6 +295,9 @@
   :bind
   (:map dired-mode-map
         ("TAB" . dired-subtree-toggle))
+
+  :init
+  (require 'dired-subtree)
   )
 
 
