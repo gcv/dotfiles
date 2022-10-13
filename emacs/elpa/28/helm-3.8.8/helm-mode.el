@@ -533,11 +533,7 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
 
 (defun helm-cr-default (default cands)
   (delq nil
-        (cond ((and (stringp default)
-                    (not (string= default ""))
-                    (string= helm-pattern ""))
-               (cons default (delete default cands)))
-              ((and (consp default) (string= helm-pattern ""))
+        (cond ((and (consp default) (string= helm-pattern ""))
                (append (cl-loop for d in default
                                 ;; Don't convert
                                 ;; nil to "nil" (i.e the string)
@@ -547,6 +543,10 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
                                 do (setq cands (delete d cands))
                                 when str collect str)
                        cands))
+              ((and (not (equal default ""))
+                    (string= helm-pattern ""))
+               (cons default (delete (helm-stringify default)
+                                     cands)))
               (t cands))))
 
 ;;;###autoload
@@ -1435,6 +1435,7 @@ Keys description:
              :mode-line mode-line
              :help-message 'helm-read-file-name-help-message
              :nohighlight t
+             :candidate-number-limit 'helm-ff-candidate-number-limit
              :candidates
              (lambda ()
                (if test
@@ -1456,6 +1457,7 @@ Keys description:
                                 helm-ff--list-directory-cache))
              :match-on-real t
              :filtered-candidate-transformer (delq nil `(helm-ff-fct
+                                                         helm-ff-maybe-show-thumbnails
                                                          helm-ff-sort-candidates
                                                          ,(and helm-ff-icon-mode
                                                                'helm-ff-icons-transformer)))
