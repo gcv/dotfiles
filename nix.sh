@@ -21,10 +21,12 @@ fi
 # - ranger and joshuto (file managers)
 packages=(
     aspell
+    aspell-dict-en
     autoconf
     autojump
     automake
     awscli2
+    babashka
     bat                # cat replacement
     bashInteractive    # when needed
     bitwarden-cli      # password manager
@@ -46,6 +48,7 @@ packages=(
     git
     git-lfs
     gnupg
+    gnutar
     helix              # modal text editor, alternative to (neo)vi(m)
     htop
     #joshuto           # file manager
@@ -92,7 +95,8 @@ packages=(
     zsh
 )
 
-
+NIXPKGS_ALLOW_UNFREE=1
 for pkg in "${packages[@]}"; do
-    nix-env -iA nixpkgs."${pkg}"
+    nix profile --verbose install --impure "nixpkgs#${pkg}"
 done
+
