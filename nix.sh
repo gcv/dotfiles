@@ -20,67 +20,68 @@ fi
 # - exa and ls
 # - ranger and joshuto (file managers)
 packages=(
-    aspell 
-    autoconf 
-    autojump 
-    automake 
-    awscli2 
+    aspell
+    autoconf
+    autojump
+    automake
+    awscli2
     bat                # cat replacement
     bashInteractive    # when needed
     bitwarden-cli      # password manager
     cacert             # SSL certificates
-    cmake 
-    coreutils 
+    cmake
+    coreutils
     croc               # peer-to-peer file transfer, directory capable
-    ctags 
-    direnv 
-    emacs-nox 
+    ctags
+    direnv
+    emacs-nox
     exa                # ls replacement
-    exif 
+    exif
     fd                 # find replacement
-    fdupes 
-    ffmpeg 
-    findutils 
-    fish 
-    fzf 
-    git 
-    git-lfs 
-    gnupg 
-    htop 
-    jq 
-    #joshuto            # file manager
-    #lazydocker         # Docker UI
-    #lazygit            # Git UI
-    ledger 
-    libvterm-neovim 
+    fdupes
+    ffmpeg
+    findutils
+    fish
+    fzf
+    git
+    git-lfs
+    gnupg
+    helix              # modal text editor, alternative to (neo)vi(m)
+    htop
+    #joshuto           # file manager
+    jq
+    lazydocker         # Docker UI
+    lazygit            # Git UI
+    ledger
+    libvterm-neovim
     magic-wormhole     # peer-to-peer file transfer
-    mediainfo 
-    mosh               # may need to be built from mosh-git.nix derivation
+    mediainfo
+    #mosh              # may need to be built from mosh-git.nix derivation
     miniserve          # HTTP server
     ngrok              # expose local service over a secure tunnel
-    nix-direnv 
-    nmap 
+    nix-direnv
+    nmap
     notmuch            # mail indexer
-    p7zip 
-    pandoc 
+    p7zip
+    pandoc
     pass               # password manager
     pastel             # color utility
     pv                 # pipe viewer
-    #ranger             # file manager
-    rclone 
+    #ranger            # file manager
+    rclone
     restic             # backup utility
-    ripgrep 
-    rlwrap 
-    rsync 
+    ripgrep
+    rlwrap
+    rsync
     sd                 # a simpler sed for common cases
     silver-searcher    # ag
-    sqlite 
+    sqlite
     starship           # fancy prompt, good with fish
     tectonic           # (La)TeX environment
-    texinfo 
-    tmux 
-    tree 
-    unrar 
+    texinfo
+    tmux
+    tree
+    unrar
     viddy             # watch replacement
     watch
     wget
