@@ -26,7 +26,6 @@ packages=(
     autojump
     automake
     awscli2
-    babashka
     bat                # cat replacement
     bashInteractive    # when needed
     bitwarden-cli      # password manager
