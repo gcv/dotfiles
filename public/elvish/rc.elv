@@ -4,8 +4,9 @@ use path
 ### keys
 
 use readline-binding
-# reset C-l to use the directory navigator
+# reset C-l and C-n
 set edit:insert:binding[Ctrl-L] = $edit:location:start~
+set edit:insert:binding[Ctrl-N] = $edit:navigation:start~
 
 
 ### TODO: enable Nix (must happen early for correct path setup)
@@ -21,13 +22,21 @@ set-env LESSHISTFILE /dev/null
 
 ### path setup
 
-set paths = [
+set paths = [ 
   ~/.nix-profile/sbin
   ~/.nix-profile/bin
   ~/.local/sbin
   ~/.local/bin
   $@paths
 ]
+
+
+### aliases
+
+fn ls { |@a| e:ls --color --sort=version $@a }
+fn v { |@a| ls -lahF }
+fn rm { |@a| e:rm -i $@a }
+fn cp { |@a| e:cp -p $@a }
 
 
 ### external tools

@@ -92,4 +92,4 @@ alias .....="cd ../../../.."
 alias ls="ls --color=auto --sort=version"
 alias v="ls -lahF"
 alias rm="rm -i"
-alias cp='cp -p'
+alias cp="cp -p"
