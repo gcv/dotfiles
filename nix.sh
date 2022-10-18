@@ -35,6 +35,7 @@ packages=(
     croc               # peer-to-peer file transfer, directory capable
     ctags
     direnv
+    elvish             # good for shell scripting; as of v0.18 too raw for interactive use
     emacs-nox
     exa                # ls replacement
     exif

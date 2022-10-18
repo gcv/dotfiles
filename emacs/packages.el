@@ -425,6 +425,11 @@
 (use-package elpher)
 
 
+;;; elvish shell script mode
+(use-package elvish-mode
+  :pin melpa)
+
+
 (use-package eshell-autojump)
 
 
