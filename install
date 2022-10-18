@@ -71,6 +71,7 @@ parse_params() {
             --nix) link_all=0; link_nix=1 ;;
             --sh) link_all=0; link_sh=1 ;;
             --sqlite) link_all=0; link_sqlite=1 ;;
+            --starship) link_all=0; link_starship=1 ;;
             --tmux) link_all=0; link_tmux=1 ;;
             --zsh) link_all=0; link_zsh=1 ;;
             -?*) die "unknown option: $1" ;;
@@ -163,7 +164,6 @@ fi
 
 if [[ $link_all = "1" || $link_fish = "1" ]]; then
     link "public/fish" ".config/fish"
-    link "public/starship.toml" ".config"
     if [[ -L "${basedir}/private" ]]; then
         link "private/history-files/fish_$(hostname -s)_history" ".local/share/fish"
     fi
@@ -204,6 +204,10 @@ fi
 
 if [[ $link_all = "1" || $link_sqlite = "1" ]]; then
     link "public/sqliterc" ".sqliterc"
+fi
+
+if [[ $link_all = "1" || $link_starship = "1" ]]; then
+    link "public/starship.toml" ".config"
 fi
 
 if [[ $link_all = "1" || $link_tmux = "1" ]]; then
