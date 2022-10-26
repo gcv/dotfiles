@@ -15,7 +15,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -87,7 +87,7 @@
 
 (defun consult-compile--state ()
   "Like `consult--jump-state', also setting the current compilation error."
-  (let ((state (consult--jump-state 'consult-preview-error)))
+  (let ((jump (consult--jump-state)))
     (lambda (action marker)
       (let ((pos (consult-compile--lookup marker)))
         (when-let (buffer (and (eq action 'return)
@@ -96,7 +96,7 @@
           (with-current-buffer buffer
             (setq compilation-current-error marker
                   overlay-arrow-position marker)))
-        (funcall state action pos)))))
+        (funcall jump action pos)))))
 
 ;;;###autoload
 (defun consult-compile-error ()

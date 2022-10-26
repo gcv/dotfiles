@@ -63,9 +63,9 @@ The symbol at point is added to the future history.
 (autoload 'consult-line "consult" "\
 Search for a matching line.
 
-Depending on the setting `consult-line-point-placement' the command jumps to
-the beginning or the end of the first match on the line or the line beginning.
-The default candidate is the non-empty line next to point. This command obeys
+Depending on the setting `consult-point-placement' the command jumps to the
+beginning or the end of the first match on the line or the line beginning. The
+default candidate is the non-empty line next to point. This command obeys
 narrowing. Optional INITIAL input can be provided. The search starting point is
 changed if the START prefix argument is set. The symbol at point and the last
 `isearch-string' is added to the future history.
@@ -190,9 +190,10 @@ This command can act as a drop-in replacement for `repeat-complex-command'." t n
 (autoload 'consult-history "consult" "\
 Insert string from HISTORY of current buffer.
 In order to select from a specific HISTORY, pass the history variable
-as argument. See also `cape-history' from the Cape package.
+as argument. INDEX is the name of the index variable to update, if any.
+See also `cape-history' from the Cape package.
 
-\(fn &optional HISTORY)" t nil)
+\(fn &optional HISTORY INDEX)" t nil)
 
 (autoload 'consult-isearch-history "consult" "\
 Read a search string with completion from the Isearch history.

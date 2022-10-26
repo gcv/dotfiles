@@ -1,4 +1,4 @@
-This is consult.info, produced by makeinfo version 6.7 from
+This is docWqsD3N.info, produced by makeinfo version 6.7 from
 consult.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: consult.info,  Node: Top,  Next: Available commands,  Up: (dir)
+File: docWqsD3N.info,  Node: Top,  Next: Available commands,  Up: (dir)
 
 consult.el - Consulting completing-read
 ***************************************
@@ -27,21 +27,17 @@ preview: Live previews, *note grouping and narrowing: Narrowing and
 grouping.  Please take a look at the *note full list of commands:
 Available commands.
 
-   Consult is fully compatible with completion systems based on the
-standard Emacs ‘completing-read’ API, notably the default completion
+   Consult is fully compatible with completion systems centered around
+the standard Emacs ‘completing-read’ API, notably the default completion
 system, Vertico (https://github.com/minad/vertico), Mct
-(https://github.com/protesilaos/mct), Icomplete
-(https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html)
-and Selectrum (https://github.com/radian-software/selectrum).
+(https://github.com/protesilaos/mct), and Icomplete
+(https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html).
 
    This package keeps the completion system specifics to a minimum.  The
 ability of the Consult commands to work well with arbitrary completion
 systems is one of the main advantages of the package.  Consult fits well
 into existing setups and it helps you to create a full completion
-environment out of small and independent components.  Note that, if you
-use Ivy (https://github.com/abo-abo/swiper#ivy) or Helm
-(https://github.com/emacs-helm/helm), you probably don’t need Consult,
-since both packages bring their own Consult-like functionality.
+environment out of small and independent components.
 
    You can combine the complementary packages Marginalia
 (https://github.com/minad/marginalia/), Embark
@@ -105,7 +101,7 @@ Indices
 
 
 
-File: consult.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
+File: docWqsD3N.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
 
 1 Available commands
 ********************
@@ -137,7 +133,7 @@ their descriptions.
 * Miscellaneous::                Various other useful commands
 
 
-File: consult.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
+File: docWqsD3N.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
 
 1.1 Virtual Buffers
 ===================
@@ -171,7 +167,7 @@ File: consult.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available comma
      ‘recentf-mode’ enables tracking of recent files.
 
 
-File: consult.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
+File: docWqsD3N.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
 
 1.2 Editing
 ===========
@@ -189,7 +185,7 @@ File: consult.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up
    • ‘consult-kmacro’: Select macro from the macro ring and execute it.
 
 
-File: consult.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
+File: docWqsD3N.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
 
 1.3 Register
 ============
@@ -220,7 +216,7 @@ File: consult.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Ava
         • ‘C-u 100 M-' x’: Store number in register ‘x’.
 
 
-File: consult.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
+File: docWqsD3N.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
 
 1.4 Navigation
 ==============
@@ -241,7 +237,7 @@ File: consult.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Avai
      imenu-anywhere (https://github.com/vspinu/imenu-anywhere).
 
 
-File: consult.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
+File: docWqsD3N.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
 
 1.5 Search
 ==========
@@ -274,7 +270,7 @@ File: consult.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up:
      region restricts the filtering.
 
 
-File: consult.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
+File: docWqsD3N.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
 
 1.6 Grep and Find
 =================
@@ -301,14 +297,14 @@ File: consult.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up
      ‘consult-grep’ is invoked with prefix argument ‘C-u M-s g’, you can
      specify the directory manually.
    • ‘consult-find’, ‘consult-locate’: Find file by matching the path
-     against a regexp.  Like for ‘consult-grep,’ either the project root
+     against a regexp.  Like for ‘consult-grep’, either the project root
      or the current directory is the root directory for the search.  The
      input string is treated similarly to ‘consult-grep’, where the
      first part is passed to find, and the second part is used for Emacs
      filtering.
 
 
-File: consult.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
+File: docWqsD3N.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
 
 1.7 Compilation
 ===============
@@ -323,7 +319,7 @@ File: consult.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find, 
      ‘xref-show-xrefs-function’ and ‘xref-show-definitions-function’.
 
 
-File: consult.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
+File: docWqsD3N.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
 
 1.8 Histories
 =============
@@ -346,7 +342,7 @@ File: consult.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Ava
      ‘isearch-edit-string’.
 
 
-File: consult.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
+File: docWqsD3N.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
 
 1.9 Modes
 =========
@@ -359,7 +355,7 @@ File: consult.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Availa
      local-minor/global-minor/major mode via the keys ‘l/g/m’.
 
 
-File: consult.info,  Node: Org Mode,  Next: Miscellaneous,  Prev: Modes,  Up: Available commands
+File: docWqsD3N.info,  Node: Org Mode,  Next: Miscellaneous,  Prev: Modes,  Up: Available commands
 
 1.10 Org Mode
 =============
@@ -372,7 +368,7 @@ File: consult.info,  Node: Org Mode,  Next: Miscellaneous,  Prev: Modes,  Up: Av
      live preview and recursive editing.
 
 
-File: consult.info,  Node: Miscellaneous,  Prev: Org Mode,  Up: Available commands
+File: docWqsD3N.info,  Node: Miscellaneous,  Prev: Org Mode,  Up: Available commands
 
 1.11 Miscellaneous
 ==================
@@ -397,9 +393,8 @@ File: consult.info,  Node: Miscellaneous,  Prev: Org Mode,  Up: Available comman
      (https://github.com/minad/corfu) as your in-buffer completion UI,
      this function can be set as ‘completion-in-region-function’.  Then
      your minibuffer completion UI (e.g., Vertico or Icomplete) will be
-     used for ‘completion-at-point’.  Note that Selectrum provides its
-     own variant of ‘consult-completion-in-region’.  If you use Mct, you
-     may want to try ‘mct-region-mode’ instead.
+     used for ‘completion-at-point’.  If you use Mct, you can give
+     ‘mct-region-mode’ a try.
           ;; Use `consult-completion-in-region' if Vertico is enabled.
           ;; Otherwise use the default `completion--in-region' function.
           (setq completion-in-region-function
@@ -422,7 +417,7 @@ File: consult.info,  Node: Miscellaneous,  Prev: Org Mode,  Up: Available comman
      the original buffer.
 
 
-File: consult.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
+File: docWqsD3N.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
 
 2 Special features
 ******************
@@ -446,7 +441,7 @@ advanced features.
 * Embark integration::           Actions, Grep/Occur-buffer export
 
 
-File: consult.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
+File: docWqsD3N.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
 
 2.1 Live previews
 =================
@@ -512,7 +507,7 @@ slow.  The delay results in a smoother UI experience.
                               :debounce 1 'any))
 
 
-File: consult.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
+File: docWqsD3N.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
 
 2.2 Narrowing and grouping
 ==========================
@@ -547,7 +542,7 @@ keys are automatically shown in the which-key window after pressing the
 ‘consult-narrow-key’.
 
 
-File: consult.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
+File: docWqsD3N.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
 
 2.3 Asynchronous search
 =======================
@@ -613,7 +608,7 @@ status:
      provided.
 
 
-File: consult.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
+File: docWqsD3N.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
 
 2.4 Multiple sources
 ====================
@@ -682,8 +677,8 @@ However it is possible to configure a manual preview as follows.
 
    Sources can be added directly to the ‘consult-buffer-source’ list for
 convenience.  For example views/perspectives can be added to the list of
-virtual buffers from a library like
-<https://github.com/minad/bookmark-view/>.
+virtual buffers from a library like bookmark-view
+(https://github.com/minad/bookmark-view/).
 
      ;; Configure new bookmark-view source
      (add-to-list 'consult-buffer-sources
@@ -741,7 +736,7 @@ used to create new multi-source commands, but is part of the internal
 API as of now, since some details may still change.
 
 
-File: consult.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
+File: docWqsD3N.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
 
 2.5 Embark integration
 ======================
@@ -785,13 +780,13 @@ package is installed.  These three workflows are symmetric.
      ‘wdired-change-to-wdired-mode’ for editing.
 
 
-File: consult.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
+File: docWqsD3N.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
 
 3 Configuration
 ***************
 
 Consult can be installed from ELPA
-(http://elpa.gnu.org/packages/consult.html) or MELPA
+(https://elpa.gnu.org/packages/consult.html) or MELPA
 (https://melpa.org/#/consult) via the Emacs built-in package manager.
 Alternatively it can be directly installed from the development
 repository via other non-standard package managers.
@@ -812,7 +807,7 @@ For this reason many Consult-related snippets require lexical binding.
 * Fine-tuning::                  Fine-grained configuration for special requirements
 
 
-File: consult.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
+File: docWqsD3N.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
 
 3.1 Use-package example
 =======================
@@ -948,7 +943,7 @@ additional configuration examples.
      )
 
 
-File: consult.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
+File: docWqsD3N.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
 
 3.2 Custom variables
 ====================
@@ -980,13 +975,13 @@ consult-grep-max-columns           Maximal number of columns of the matching lin
 consult-grep-args                  Command line arguments for grep
 consult-imenu-config               Mode-specific configuration for ‘consult-imenu’
 consult-line-numbers-widen         Show absolute line numbers when narrowing is active.
-consult-line-point-placement       Placement of the point used by ‘consult-line’
 consult-line-start-from-top        Start the ‘consult-line’ search from the top
 consult-locate-args                Command line arguments for locate
 consult-man-args                   Command line arguments for man
 consult-mode-command-filter        Filter for ‘consult-mode-command’
 consult-mode-histories             Mode-specific history variables
 consult-narrow-key                 Narrowing prefix key during completion
+consult-point-placement            Placement of the point when jumping to matches
 consult-preview-key                Keys which triggers preview
 consult-preview-allowed-hooks      List of ‘find-file’ hooks to enable during preview
 consult-preview-excluded-files     Regexps matched against file names during preview
@@ -1002,7 +997,7 @@ consult-themes                     List of themes to be presented for selection
 consult-widen-key                  Widening key during completion
 
 
-File: consult.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
+File: docWqsD3N.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
 
 3.3 Fine-tuning of individual commands
 ======================================
@@ -1073,7 +1068,7 @@ by the following techniques:
   5. Write or propose a patch.
 
 
-File: consult.info,  Node: Recommended packages,  Next: Bug reports,  Prev: Configuration,  Up: Top
+File: docWqsD3N.info,  Node: Recommended packages,  Next: Bug reports,  Prev: Configuration,  Up: Top
 
 4 Recommended packages
 **********************
@@ -1097,12 +1092,9 @@ model fits best for you!
    • The builtin completion UI, which pops up the ‘*Completions*’
      buffer.
    • The builtin ‘icomplete-vertical-mode’ in Emacs 28.
-   • selectrum by Radon Rosborough
-     (https://github.com/radian-software/selectrum): Alternative
-     vertical UI, predecessor of Vertico.
    • mct by Protesilaos Stavrou (https://git.sr.ht/~protesilaos/mct):
      Minibuffer and Completions in Tandem, which builds on the default
-     completion UI (development discontinued
+     completion UI (development currently discontinued
      (https://protesilaos.com/codelog/2022-04-14-emacs-discontinue-mct/)).
 
    You can integrated Consult with special programs or with other
@@ -1189,7 +1181,7 @@ components, you can first start without it - or you could use with
 Embark right away and add the other components later on.
 
 
-File: consult.info,  Node: Bug reports,  Next: Contributions,  Prev: Recommended packages,  Up: Top
+File: docWqsD3N.info,  Node: Bug reports,  Next: Contributions,  Prev: Recommended packages,  Up: Top
 
 5 Bug reports
 *************
@@ -1201,9 +1193,9 @@ please carry out the following steps:
      includes Consult, Vertico or other completion UIs, Marginalia,
      Embark and Orderless.
   2. Either use the default completion UI or ensure that exactly one of
-     ‘vertico-mode’, ‘mct-mode’, ‘selectrum-mode’, or ‘icomplete-mode’
-     is enabled.  The unsupported modes ‘ivy-mode’, ‘helm-mode’ and
-     ‘ido-ubiquitous-mode’ must be disabled.
+     ‘vertico-mode’, ‘mct-mode’, or ‘icomplete-mode’ is enabled.  The
+     unsupported modes ‘ivy-mode’, ‘helm-mode’ and ‘ido-ubiquitous-mode’
+     must be disabled.
   3. Ensure that the ‘completion-styles’ variable is properly
      configured.  Try to set ‘completion-styles’ to a list including
      ‘substring’ or ‘orderless’.
@@ -1230,8 +1222,7 @@ please carry out the following steps:
 report:
 
    • The minimal configuration snippet used to reproduce the issue.
-   • Your completion UI (Default completion, Vertico, Mct, Selectrum or
-     Icomplete).
+   • Your completion UI (Default completion, Vertico, Mct or Icomplete).
    • A stack trace in case the bug triggers an exception.
    • Your Emacs version, since bugs may be fixed or introduced in newer
      versions.
@@ -1252,7 +1243,7 @@ lexical binding
 Consult often relies on lambdas and lexical closures.
 
 
-File: consult.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
+File: docWqsD3N.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
 
 6 Contributions
 ***************
@@ -1260,7 +1251,7 @@ File: consult.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug rep
 Consult is a community effort, please participate in the discussions.
 Contributions are welcome, but you may want to discuss potential
 contributions first.  Since this package is part of GNU ELPA
-(http://elpa.gnu.org/packages/consult.html) contributions require a
+(https://elpa.gnu.org/packages/consult.html) contributions require a
 copyright assignment to the FSF.
 
    If you have a proposal, take a look at the Consult issue tracker
@@ -1272,22 +1263,21 @@ contribute to the Consult wiki (https://github.com/minad/consult/wiki),
 in case you want to share small configuration or command snippets.
 
 
-File: consult.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
+File: docWqsD3N.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
 
 7 Acknowledgments
 *****************
 
 This package took inspiration from Counsel
 (https://github.com/abo-abo/swiper#counsel) by Oleh Krehel.  Some of the
-Consult commands originated in the Counsel package or the Selectrum wiki
-(https://github.com/radian-software/selectrum/wiki/Useful-Commands).
-The commands have been rewritten and greatly enhanced in comparison to
-the original versions.
+Consult commands originated in the Counsel package or the wiki of the
+Selectrum package.  This package exists only thanks to the help of these
+great contributors and thanks to the feedback of many users.  Thank you!
 
    Code contributions:
    • Omar Antolín Camarena (https://github.com/oantolin/)
    • Sergey Kostyaev (https://github.com/s-kostyaev/)
-   • okamsn (https://github.com/okamsn/)
+   • Earl Hyatt (https://github.com/okamsn/)
    • Clemens Radermacher (https://github.com/clemera/)
    • Tom Fitzhenry (https://github.com/tomfitzhenry/)
    • jakanakaevangeli (https://github.com/jakanakaevangeli)
@@ -1301,6 +1291,10 @@ the original versions.
    • Sylvain Rousseau (https://github.com/thisirs)
    • J.D.  Smith (https://github.com/jdtsmith)
    • Mohsin Kaleem (https://github.com/mohkale)
+   • Jean-Philippe Bernardy (https://github.com/jyp)
+   • Aymeric Agon-Rambosson (https://github.com/aagon)
+   • Geoffrey Lessel (https://github.com/geolessel)
+   • Piotr Kwiecinski (https://github.com/piotrkwiecinski)
 
    Advice and useful discussions:
    • Clemens Radermacher (https://github.com/clemera/)
@@ -1317,6 +1311,7 @@ the original versions.
    • Bruce d’Arcus (https://github.com/bdarcus)
    • J.D.  Smith (https://github.com/jdtsmith)
    • Enrique Kessler Martínez (https://github.com/Qkessler)
+   • Radon Rosborough (https://github.com/raxod502)
 
    Authors of supplementary ‘consult-*’ packages:
 
@@ -1350,7 +1345,7 @@ the original versions.
      (https://github.com/mclear-tools/consult-notes))
 
 
-File: consult.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
+File: docWqsD3N.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 
 8 Indices
 *********
@@ -1361,7 +1356,7 @@ File: consult.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 * Concept index::                List of all Consult-specific concepts
 
 
-File: consult.info,  Node: Function index,  Next: Concept index,  Up: Indices
+File: docWqsD3N.info,  Node: Function index,  Next: Concept index,  Up: Indices
 
 8.1 Function index
 ==================
@@ -1419,7 +1414,7 @@ File: consult.info,  Node: Function index,  Next: Concept index,  Up: Indices
 * consult-yank-replace:                  Editing.               (line 6)
 
 
-File: consult.info,  Node: Concept index,  Prev: Function index,  Up: Indices
+File: docWqsD3N.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
 8.2 Concept index
 =================
@@ -1452,36 +1447,36 @@ File: consult.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
 
 Tag Table:
-Node: Top219
-Node: Available commands5203
-Node: Virtual Buffers6722
-Node: Editing8378
-Node: Register9232
-Node: Navigation10942
-Node: Search12023
-Node: Grep and Find13914
-Node: Compilation15910
-Node: Histories16584
-Node: Modes17802
-Node: Org Mode18280
-Node: Miscellaneous18795
-Node: Special features21586
-Node: Live previews22713
-Node: Narrowing and grouping26138
-Node: Asynchronous search28139
-Node: Multiple sources31219
-Node: Embark integration36929
-Node: Configuration39122
-Node: Use-package example40221
-Node: Custom variables47258
-Node: Fine-tuning50944
-Node: Recommended packages53985
-Node: Bug reports59992
-Node: Contributions62769
-Node: Acknowledgments63676
-Node: Indices67469
-Node: Function index67705
-Node: Concept index71351
+Node: Top221
+Node: Available commands4945
+Node: Virtual Buffers6466
+Node: Editing8124
+Node: Register8980
+Node: Navigation10692
+Node: Search11775
+Node: Grep and Find13668
+Node: Compilation15666
+Node: Histories16342
+Node: Modes17562
+Node: Org Mode18042
+Node: Miscellaneous18559
+Node: Special features21253
+Node: Live previews22382
+Node: Narrowing and grouping25809
+Node: Asynchronous search27812
+Node: Multiple sources30894
+Node: Embark integration36620
+Node: Configuration38815
+Node: Use-package example39917
+Node: Custom variables46956
+Node: Fine-tuning50641
+Node: Recommended packages53684
+Node: Bug reports59559
+Node: Contributions62300
+Node: Acknowledgments63210
+Node: Indices67270
+Node: Function index67508
+Node: Concept index71156
 
 End Tag Table
 

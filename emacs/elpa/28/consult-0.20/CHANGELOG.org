@@ -2,6 +2,24 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 0.20 (2022-10-16)
+
+- Bugfixes
+- Allow =consult-*-args= to be a string, or a list of strings or expressions.
+- Introduce face =consult-highlight-match= to highlight grep matches in the
+  completion buffer.
+- Highlight full matches in =consult-line=, =consult-outline=, =consult-*grep= and
+  =consult-flymake=.
+- Remove face =consult-preview-error=.
+- Deprecate =consult-line-point-placement= in favor of more general
+  =consult-point-placement=, which is also used by the =consult-*grep= commands.
+- =consult-imenu=: Support imenu-after-jump-hook and non-default
+  =imenu-default-goto-function=
+- =consult-history=: Add support for history index variables, which are updated
+  after selection.
+- Deprecate support for Selectrum in favor of Vertico. If you use Selectrum
+  consider switching to Vertico, Icomplete, Mct or default completion.
+
 * Version 0.19 (2022-09-09)
 
 - Bugfixes
