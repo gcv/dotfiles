@@ -48,6 +48,7 @@ parse_params() {
     link_fish=0
     link_git=0
     link_hammerspoon=0
+    link_helix=0
     link_misc=0
     link_notmuch=0
     link_nix=0
@@ -66,6 +67,7 @@ parse_params() {
             --fish) link_all=0; link_fish=1 ;;
             --git) link_all=0; link_git=1 ;;
             --hammerspoon) link_all=0; link_hammerspoon=1 ;;
+            --helix) link_all=0; link_helix=1 ;;
             --misc) link_all=0; link_misc=1 ;;
             --notmuch) link_all=0; link_notmuch=1 ;;
             --nix) link_all=0; link_nix=1 ;;
@@ -153,9 +155,6 @@ fi
 
 if [[ $link_all = "1" || $link_elvish = "1" ]]; then
     link "public/elvish" ".config/elvish"
-    if [[ -L "${basedir}/private" ]]; then
-        link "private/history-files/fish_$(hostname -s)_history" ".local/share/fish"
-    fi
 fi
 
 if [[ $link_all = "1" || $link_emacs = "1" ]]; then
@@ -178,6 +177,10 @@ if [[ $link_all = "1" || $link_hammerspoon = "1" ]]; then
     if [[ $(uname) = "Darwin" ]]; then
         link "public/hammerspoon" ".hammerspoon"
     fi
+fi
+
+if [[ $link_all = "1" || $link_helix = "1" ]]; then
+    link "public/helix" ".config/helix"
 fi
 
 if [[ $link_all = "1" || $link_misc = "1" ]]; then

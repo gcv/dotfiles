@@ -1,0 +1,8 @@
+theme = "night_owl"
+
+[editor]
+
+[editor.cursor-shape]
+insert = "block"
+normal = "bar"
+select = "underline"
