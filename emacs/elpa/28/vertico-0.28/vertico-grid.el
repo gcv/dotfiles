@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "0.27"))
+;; Package-Requires: ((emacs "27.1") (vertico "0.28"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -22,7 +22,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -105,7 +105,7 @@ When scrolling beyond this limit, candidates may be truncated."
                                 (lambda (x) (apply #'propertize " " (text-properties-at 0 x)))
                                 (vertico--format-candidate cand "" "" index start)))
                               width))
-                           (funcall vertico--highlight-function
+                           (funcall vertico--highlight
                                     (seq-subseq vertico--candidates start
                                                 (min (+ start count)
                                                      vertico--total)))))
@@ -161,7 +161,8 @@ When scrolling beyond this limit, candidates may be truncated."
   :global t :group 'vertico
   ;; Shrink current minibuffer window
   (when-let (win (active-minibuffer-window))
-    (window-resize win (- (window-pixel-height win)) nil nil 'pixelwise))
+    (unless (frame-root-window-p win)
+      (window-resize win (- (window-pixel-height win)) nil nil 'pixelwise)))
   (cond
    (vertico-grid-mode
     (add-to-list 'minor-mode-map-alist `(vertico--input . ,vertico-grid-map))

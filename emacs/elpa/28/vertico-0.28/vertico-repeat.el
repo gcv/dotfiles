@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "0.27"))
+;; Package-Requires: ((emacs "27.1") (vertico "0.28"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -22,7 +22,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -94,7 +94,7 @@
   (delete-minibuffer-contents)
   (insert (cadr session))
   (when (caddr session)
-    (vertico--exhibit)
+    (vertico--update)
     (when-let (idx (seq-position vertico--candidates (caddr session)))
       (setq vertico--index idx
             vertico--lock-candidate t)))

@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "0.27"))
+;; Package-Requires: ((emacs "27.1") (vertico "0.28"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -22,7 +22,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -98,7 +98,7 @@
     (while (and candidates (not (eq wrapped (car candidates)))
                 (> width 0) (> count 0))
       (let ((cand (car candidates)))
-        (setq cand (car (funcall vertico--highlight-function (list cand))))
+        (setq cand (car (funcall vertico--highlight (list cand))))
         (when (string-match-p "\n" cand)
           (setq cand (vertico--truncate-multiline cand width)))
         (setq cand (string-trim
@@ -127,7 +127,8 @@
   :global t :group 'vertico
   ;; Shrink current minibuffer window
   (when-let (win (active-minibuffer-window))
-    (window-resize win (- (window-pixel-height win)) nil nil 'pixelwise))
+    (unless (frame-root-window-p win)
+      (window-resize win (- (window-pixel-height win)) nil nil 'pixelwise)))
   (cond
    (vertico-flat-mode
     (add-to-list 'minor-mode-map-alist `(vertico--input . ,vertico-flat-map))

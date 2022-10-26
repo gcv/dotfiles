@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "0.27"))
+;; Package-Requires: ((emacs "27.1") (vertico "0.28"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -22,7 +22,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -40,17 +40,6 @@
 
 (require 'vertico)
 
-(defun vertico-directory--completing-file-p ()
-  "Return non-nil when completing file names."
-  (eq 'file
-      (completion-metadata-get
-       (completion-metadata
-        (buffer-substring (minibuffer-prompt-end)
-                          (max (minibuffer-prompt-end) (point)))
-        minibuffer-completion-table
-        minibuffer-completion-predicate)
-       'category)))
-
 ;;;###autoload
 (defun vertico-directory-enter ()
   "Enter directory or exit completion with current candidate."
@@ -62,7 +51,7 @@
                       (string-suffix-p ":" cand))))
            ;; Check vertico--base for stepwise file path completion
            (not (equal vertico--base ""))
-           (vertico-directory--completing-file-p))
+           (eq 'file (vertico--metadata-get 'category)))
       (vertico-insert)
     (vertico-exit)))
 
@@ -72,7 +61,7 @@
   (interactive "p")
   (when (and (> (point) (minibuffer-prompt-end))
              (eq (char-before) ?/)
-             (vertico-directory--completing-file-p))
+             (eq 'file (vertico--metadata-get 'category)))
     (let ((path (buffer-substring (minibuffer-prompt-end) (point))) found)
       (when (string-match-p "\\`~[^/]*/\\'" path)
         (delete-minibuffer-contents)

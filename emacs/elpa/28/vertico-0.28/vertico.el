@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.27
+;; Version: 0.28
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/vertico
 
@@ -22,7 +22,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -65,8 +65,7 @@ The value should lie between 0 and vertico-count/2."
   :type 'integer)
 
 (defcustom vertico-resize resize-mini-windows
-  "How to resize the Vertico minibuffer window.
-See `resize-mini-windows' for documentation."
+  "How to resize the Vertico minibuffer window, see `resize-mini-windows'."
   :type '(choice (const :tag "Fixed" nil)
                  (const :tag "Shrink and grow" t)
                  (const :tag "Grow-only" grow-only)))
@@ -131,7 +130,7 @@ See `resize-mini-windows' for documentation."
     map)
   "Vertico minibuffer keymap derived from `minibuffer-local-map'.")
 
-(defvar-local vertico--highlight-function #'identity
+(defvar-local vertico--highlight #'identity
   "Deferred candidate highlighting function.")
 
 (defvar-local vertico--history-hash nil
@@ -315,8 +314,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
                     "\\)\\'")))
     (or (seq-remove (lambda (x) (string-match-p re x)) files) files)))
 
-(defun vertico--recompute-candidates (pt content)
-  "Recompute candidates given PT and CONTENT."
+(defun vertico--recompute (pt content)
+  "Recompute state given PT and CONTENT."
   (pcase-let* ((before (substring content 0 pt))
                (after (substring content pt))
                ;; bug#47678: `completion-boundaries` fails for `partial-completion`
@@ -336,7 +335,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
                (base (or (when-let (z (last all)) (prog1 (cdr z) (setcdr z nil))) 0))
                (vertico--base (substring content 0 base))
                (def (or (car-safe minibuffer-default) minibuffer-default))
-               (groups))
+               (groups) (def-missing) (lock))
     ;; Filter the ignored file extensions. We cannot use modified predicate for this filtering,
     ;; since this breaks the special casing in the `completion-file-name-table' for `file-exists-p'
     ;; and `file-directory-p'.
@@ -351,15 +350,30 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
     (setq all (vertico--move-to-front field all))
     (when-let (group-fun (and all (vertico--metadata-get 'group-function)))
       (setq groups (vertico--group-by group-fun all) all (car groups)))
-    (list vertico--base (length all)
-          ;; Default value is missing from collection
-          (and def (equal content "") (not (member def all)))
-          ;; Find position of old candidate in the new list.
-          (when vertico--lock-candidate
-            (if (< vertico--index 0)
-                vertico--index
-              (seq-position all (nth vertico--index vertico--candidates))))
-          all (cadr groups) (or (caddr groups) vertico--all-groups) hl)))
+    (setq def-missing (and def (equal content "") (not (member def all)))
+          lock (and vertico--lock-candidate ;; Locked position of old candidate.
+                    (if (< vertico--index 0) -1
+                      (seq-position all (nth vertico--index vertico--candidates)))))
+    `((vertico--base . ,vertico--base)
+      (vertico--metadata . ,vertico--metadata)
+      (vertico--candidates . ,all)
+      (vertico--total . ,(length all))
+      (vertico--highlight . ,hl)
+      (vertico--default-missing . ,def-missing)
+      (vertico--lock-candidate . ,lock)
+      (vertico--groups . ,(cadr groups))
+      (vertico--all-groups . ,(or (caddr groups) vertico--all-groups))
+      ;; Compute new index. Select the prompt under these conditions:
+      ;; * If there are no candidates
+      ;; * If the default is missing from the candidate list.
+      ;; * For matching content, as long as the full content
+      ;;   after the boundary is empty, including content after point.
+      (vertico--index . ,(or lock
+                             (if (or def-missing (not all)
+                                     (and (= (length vertico--base) (length content))
+                                          (test-completion content minibuffer-completion-table
+                                                           minibuffer-completion-predicate)))
+                                 -1 0))))))
 
 (defun vertico--cycle (list n)
   "Rotate LIST to position N."
@@ -404,50 +418,36 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Return t if PATH is a remote path."
   (string-match-p "\\`/[^/|:]+:" (substitute-in-file-name path)))
 
-(defun vertico--update-candidates (pt content)
-  "Preprocess candidates given PT and CONTENT."
-  ;; Redisplay the minibuffer such that the input becomes immediately
-  ;; visible before the expensive candidate recomputation is performed (Issue #89).
-  ;; Do not redisplay during initialization, since this leads to flicker.
-  (when (consp vertico--input) (redisplay))
-  (let ((metadata (completion-metadata (substring content 0 pt)
-                                       minibuffer-completion-table
-                                       minibuffer-completion-predicate)))
-    (pcase
-        (let ((vertico--metadata metadata))
-          ;; If Tramp is used, do not compute the candidates in an interruptible fashion,
-          ;; since this will break the Tramp password and user name prompts (See #23).
-          (if (and (eq 'file (vertico--metadata-get 'category))
-                   (or (vertico--remote-p content) (vertico--remote-p default-directory)))
-              (vertico--recompute-candidates pt content)
-            (let ((non-essential t))
-              (while-no-input (vertico--recompute-candidates pt content)))))
-      ('nil (abort-recursive-edit))
-      (`(,base ,total ,def-missing ,index ,candidates ,groups ,all-groups ,hl)
-       (setq vertico--input (cons content pt)
-             vertico--index index
-             vertico--base base
-             vertico--total total
-             vertico--highlight-function hl
-             vertico--groups groups
-             vertico--all-groups all-groups
-             vertico--candidates candidates
-             vertico--default-missing def-missing
-             vertico--metadata metadata)
-       ;; If the current index is nil, compute new index. Select the prompt:
-       ;; * If there are no candidates
-       ;; * If the default is missing from the candidate list.
-       ;; * For matching content, as long as the full content after the boundary is empty,
-       ;;   including content after point.
-       (unless vertico--index
-         (setq vertico--lock-candidate nil
-               vertico--index
-               (if (or vertico--default-missing
-                       (= 0 vertico--total)
-                       (and (= (length base) (length content))
-                            (test-completion content minibuffer-completion-table
-                                             minibuffer-completion-predicate)))
-                   -1 0)))))))
+(defun vertico--prepare ()
+  "Ensure that the state is prepared before running the next command."
+  (when (and (symbolp this-command) (string-prefix-p "vertico-" (symbol-name this-command)))
+    (vertico--update)))
+
+(defun vertico--update (&optional interruptible)
+  "Update state, optionally INTERRUPTIBLE."
+  (let* ((pt (max 0 (- (point) (minibuffer-prompt-end))))
+         (content (minibuffer-contents-no-properties))
+         (input (cons content pt)))
+    (unless (or (and interruptible (input-pending-p)) (equal vertico--input input))
+      ;; Redisplay the minibuffer such that the input becomes immediately
+      ;; visible before the expensive candidate recomputation (Issue #89).
+      ;; Do not redisplay during initialization, since this leads to flicker.
+      (when (and interruptible (consp vertico--input)) (redisplay))
+      (pcase (let ((vertico--metadata (completion-metadata (substring content 0 pt)
+                                                           minibuffer-completion-table
+                                                           minibuffer-completion-predicate)))
+               ;; If Tramp is used, do not compute the candidates in an interruptible fashion,
+               ;; since this will break the Tramp password and user name prompts (See #23).
+               (if (or (not interruptible)
+                       (and (eq 'file (vertico--metadata-get 'category))
+                            (or (vertico--remote-p content) (vertico--remote-p default-directory))))
+                   (vertico--recompute pt content)
+                 (let ((non-essential t))
+                   (while-no-input (vertico--recompute pt content)))))
+        ('nil (abort-recursive-edit))
+        ((and state (pred consp))
+         (setq vertico--input input)
+         (dolist (s state) (set (car s) (cdr s))))))))
 
 (defun vertico--display-string (str)
   "Return display STR without display and invisible properties."
@@ -485,8 +485,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
     (add-face-text-property 0 (length cand) 'vertico-current 'append cand))
   cand)
 
-(defun vertico--update-scroll ()
-  "Update scroll position."
+(defun vertico--compute-scroll ()
+  "Compute new scroll position."
   (let ((off (max (min vertico-scroll-margin (/ vertico-count 2)) 0))
         (corr (if (= vertico-scroll-margin (/ vertico-count 2)) (1- (mod vertico-count 2)) 0)))
     (setq vertico--scroll (min (max 0 (- vertico--total vertico-count))
@@ -497,7 +497,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Format group TITLE given the current CAND."
   (when (string-prefix-p title cand)
     ;; Highlight title if title is a prefix of the candidate
-    (setq title (substring (car (funcall vertico--highlight-function
+    (setq title (substring (car (funcall vertico--highlight
                                          (list (propertize cand 'face 'vertico-group-title))))
                            0 (length title)))
     (vertico--remove-face 0 (length title) 'completions-first-difference title))
@@ -505,7 +505,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--arrange-candidates ()
   "Arrange candidates."
-  (vertico--update-scroll)
+  (vertico--compute-scroll)
   (let ((curr-line 0) lines)
     ;; Compute group titles
     (let* (title (index vertico--scroll)
@@ -513,7 +513,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
            (candidates
             (thread-last (seq-subseq vertico--candidates index
                                      (min (+ index vertico-count) vertico--total))
-              (funcall vertico--highlight-function)
+              (funcall vertico--highlight)
               (vertico--affixate))))
       (pcase-dolist ((and cand `(,str . ,_)) candidates)
         (when-let (new-title (and group-fun (funcall group-fun str nil)))
@@ -570,7 +570,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   (format (car vertico-count-format)
           (format (cdr vertico-count-format)
                   (cond ((>= vertico--index 0) (1+ vertico--index))
-                        ((vertico--allow-prompt-selection-p) "*")
+                        ((vertico--allow-prompt-p) "*")
                         (t "!"))
                   vertico--total)))
 
@@ -583,7 +583,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 (defun vertico--prompt-selection ()
   "Highlight the prompt if selected."
   (let ((inhibit-modification-hooks t))
-    (if (and (< vertico--index 0) (vertico--allow-prompt-selection-p))
+    (if (and (< vertico--index 0) (vertico--allow-prompt-p))
         (add-face-text-property (minibuffer-prompt-end) (point-max) 'vertico-current 'append)
       (vertico--remove-face (minibuffer-prompt-end) (point-max) 'vertico-current))))
 
@@ -597,23 +597,20 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--exhibit ()
   "Exhibit completion UI."
-  (let* ((buffer-undo-list t) ;; Overlays affect point position and undo list!
-         (pt (max 0 (- (point) (minibuffer-prompt-end))))
-         (content (minibuffer-contents-no-properties)))
-    (unless (or (input-pending-p) (equal vertico--input (cons content pt)))
-      (vertico--update-candidates pt content))
+  (let ((buffer-undo-list t)) ;; Overlays affect point position and undo list!
+    (vertico--update 'interruptible)
     (vertico--prompt-selection)
     (vertico--display-count)
     (vertico--display-candidates (vertico--arrange-candidates))))
 
-(defun vertico--allow-prompt-selection-p ()
+(defun vertico--allow-prompt-p ()
   "Return t if prompt can be selected."
   (or vertico--default-missing (memq minibuffer--require-match
                                      '(nil confirm confirm-after-completion))))
 
 (defun vertico--goto (index)
   "Go to candidate with INDEX."
-  (let ((prompt (vertico--allow-prompt-selection-p)))
+  (let ((prompt (vertico--allow-prompt-p)))
     (setq vertico--index
           (max (if (or prompt (= 0 vertico--total)) -1 0)
                (min index (1- vertico--total)))
@@ -647,7 +644,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
      (cond
       ((not vertico-cycle) index)
       ((= vertico--total 0) -1)
-      ((vertico--allow-prompt-selection-p) (1- (mod (1+ index) (1+ vertico--total))))
+      ((vertico--allow-prompt-p) (1- (mod (1+ index) (1+ vertico--total))))
       (t (mod index vertico--total))))))
 
 (defun vertico-previous (&optional n)
@@ -658,9 +655,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 (defun vertico--match-p (input)
   "Return t if INPUT is a valid match."
   (or (memq minibuffer--require-match '(nil confirm-after-completion))
-      (and (equal input "") (or (car-safe minibuffer-default) minibuffer-default))
-      (test-completion input minibuffer-completion-table
-                       minibuffer-completion-predicate)
+      (equal "" input) ;; Null completion, returns default value
+      (test-completion input minibuffer-completion-table minibuffer-completion-predicate)
       (if (eq minibuffer--require-match 'confirm)
           (eq (ignore-errors (read-char "Confirm")) 13)
         (and (minibuffer-message "Match required") nil))))
@@ -670,10 +666,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   (interactive "P")
   (when (and (not arg) (>= vertico--index 0))
     (vertico-insert))
-  (let ((input (minibuffer-contents-no-properties)))
-    ;; Allow null completion only if explicitly requested (M-RET)
-    (when (or (and arg (equal input "")) (vertico--match-p input))
-      (exit-minibuffer))))
+  (when (vertico--match-p (minibuffer-contents-no-properties))
+    (exit-minibuffer)))
 
 (defun vertico-next-group (&optional n)
   "Cycle N groups forward.
@@ -681,14 +675,12 @@ When the prefix argument is 0, the group order is reset."
   (interactive "p")
   (when (cdr vertico--groups)
     (if (setq vertico--lock-groups (not (eq n 0)))
-        (setq vertico--groups
-              (vertico--cycle vertico--groups
-                              (let ((len (length vertico--groups)))
-                                (- len (mod (- (or n 1)) len))))
-              vertico--all-groups
-              (vertico--cycle vertico--all-groups
-                              (seq-position vertico--all-groups
-                                            (car vertico--groups))))
+        (setq vertico--groups (vertico--cycle vertico--groups
+                                              (let ((len (length vertico--groups)))
+                                                (- len (mod (- (or n 1)) len))))
+              vertico--all-groups (vertico--cycle vertico--all-groups
+                                                  (seq-position vertico--all-groups
+                                                                (car vertico--groups))))
       (setq vertico--groups nil
             vertico--all-groups nil))
     (setq vertico--lock-candidate nil
@@ -720,7 +712,7 @@ When the prefix argument is 0, the group order is reset."
   ;; candidate only includes the prefix "~/emacs/master/lisp/", but not the
   ;; suffix "/calc". Default completion has the same problem when selecting in
   ;; the *Completions* buffer. See bug#48356.
-  (when (or (>= vertico--index 0) (= vertico--total 1))
+  (when (> vertico--total 0)
     (let ((vertico--index (max 0 vertico--index)))
       (insert (prog1 (vertico--candidate) (delete-minibuffer-contents))))))
 
@@ -735,7 +727,7 @@ When the prefix argument is 0, the group order is reset."
         ;; code is already marked with a FIXME. Should this be reported as a bug?
         (vertico--remove-face 0 (length cand) 'completions-common-part cand)
         (concat vertico--base
-                (if hl (car (funcall vertico--highlight-function (list cand))) cand))))
+                (if hl (car (funcall vertico--highlight (list cand))) cand))))
      ((and (equal content "") (or (car-safe minibuffer-default) minibuffer-default)))
      (t content))))
 
@@ -749,6 +741,7 @@ When the prefix argument is 0, the group order is reset."
   (setq-local completion-auto-help nil
               completion-show-inline-help nil)
   (use-local-map vertico-map)
+  (add-hook 'pre-command-hook #'vertico--prepare nil 'local)
   (add-hook 'post-command-hook #'vertico--exhibit nil 'local))
 
 (defun vertico--advice (&rest args)
