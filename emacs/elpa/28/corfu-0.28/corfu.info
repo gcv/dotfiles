@@ -1,4 +1,5 @@
-This is corfu.info, produced by makeinfo version 6.7 from corfu.texi.
+This is doccvu5Kb.info, produced by makeinfo version 6.7 from
+corfu.texi.
 
 INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
@@ -6,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: corfu.info,  Node: Top,  Next: Features,  Up: (dir)
+File: doccvu5Kb.info,  Node: Top,  Next: Features,  Up: (dir)
 
 corfu.el - Completion Overlay Region FUnction
 *********************************************
@@ -59,7 +60,7 @@ Installation and Configuration
 
 
 
-File: corfu.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
+File: doccvu5Kb.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
 
 1 Features
 **********
@@ -88,17 +89,17 @@ File: corfu.info,  Node: Features,  Next: Installation and Configuration,  Prev:
      documentation
 
 
-File: corfu.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
+File: doccvu5Kb.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
 
 2 Installation and Configuration
 ********************************
 
 Corfu is available from GNU ELPA
-(http://elpa.gnu.org/packages/corfu.html), such that it can be installed
-directly via ‘package-install’.  After installation, the global minor
-mode can be enabled with ‘M-x global-corfu-mode’.  In order to configure
-Corfu and other packages in your init.el, you may want to use
-‘use-package’.
+(https://elpa.gnu.org/packages/corfu.html), such that it can be
+installed directly via ‘package-install’.  After installation, the
+global minor mode can be enabled with ‘M-x global-corfu-mode’.  In order
+to configure Corfu and other packages in your init.el, you may want to
+use ‘use-package’.
 
    Corfu is highly flexible and customizable via ‘corfu-*’ customization
 variables, such that you can adapt it precisely to your requirements.
@@ -212,7 +213,7 @@ completion in the Elisp manual
 * Transfer completion to the minibuffer::
 
 
-File: corfu.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
+File: doccvu5Kb.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.1 Auto completion
 ===================
@@ -266,7 +267,7 @@ the Orderless documentation and source code for further details.
                  completion-styles '(orderless-fast))
 
 
-File: corfu.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
+File: doccvu5Kb.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
 
 2.2 Completing in the minibuffer
 ================================
@@ -301,7 +302,7 @@ the desired result.
      (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
-File: corfu.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
+File: doccvu5Kb.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.3 Completing in the Eshell or Shell
 =====================================
@@ -359,7 +360,7 @@ achieve a sane Eshell experience.*
      (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
 
 
-File: corfu.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
+File: doccvu5Kb.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
 
 2.4 Orderless completion
 ========================
@@ -425,7 +426,7 @@ components.
        (global-corfu-mode))
 
 
-File: corfu.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
+File: doccvu5Kb.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
 
 2.5 TAB-and-Go completion
 =========================
@@ -455,7 +456,7 @@ candidate explicitly with ‘RET’.
        (global-corfu-mode))
 
 
-File: corfu.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
+File: doccvu5Kb.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
 
 2.6 Transfer completion to the minibuffer
 =========================================
@@ -482,7 +483,7 @@ via ‘completing-read’.
      (define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
 
 
-File: corfu.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
+File: doccvu5Kb.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
 
 3 Key bindings
 **************
@@ -506,7 +507,7 @@ bindings:
    • ‘keyboard-escape-quit’ -> ‘corfu-reset’
 
 
-File: corfu.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
+File: doccvu5Kb.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
 
 4 Extensions
 ************
@@ -538,7 +539,7 @@ the following extensions come with the Corfu ELPA package:
    See the Commentary of those files for configuration details.
 
 
-File: corfu.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
+File: doccvu5Kb.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
 
 5 Complementary packages
 ************************
@@ -593,7 +594,7 @@ look into complementary packages to enhance your setup.
      Vertico is the minibuffer completion counterpart of Corfu.
 
 
-File: corfu.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
+File: doccvu5Kb.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
 
 6 Alternatives
 **************
@@ -640,32 +641,32 @@ File: corfu.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementar
      ‘consult-completion-in-region’ is your best option.
 
 
-File: corfu.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
+File: doccvu5Kb.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
 
 7 Contributions
 ***************
 
 Since this package is part of GNU ELPA
-(http://elpa.gnu.org/packages/corfu.html) contributions require a
+(https://elpa.gnu.org/packages/corfu.html) contributions require a
 copyright assignment to the FSF.
 
 
 
 Tag Table:
-Node: Top209
-Node: Features2205
-Node: Installation and Configuration3612
-Node: Auto completion9362
-Node: Completing in the minibuffer11726
-Node: Completing in the Eshell or Shell13539
-Node: Orderless completion16400
-Node: TAB-and-Go completion19497
-Node: Transfer completion to the minibuffer20612
-Node: Key bindings21951
-Node: Extensions22942
-Node: Complementary packages24325
-Node: Alternatives27023
-Node: Contributions29670
+Node: Top213
+Node: Features2213
+Node: Installation and Configuration3624
+Node: Auto completion9379
+Node: Completing in the minibuffer11747
+Node: Completing in the Eshell or Shell13564
+Node: Orderless completion16429
+Node: TAB-and-Go completion19530
+Node: Transfer completion to the minibuffer20649
+Node: Key bindings21992
+Node: Extensions22987
+Node: Complementary packages24374
+Node: Alternatives27076
+Node: Contributions29727
 
 End Tag Table
 
