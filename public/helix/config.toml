@@ -6,3 +6,9 @@ theme = "night_owl"
 insert = "block"
 normal = "bar"
 select = "underline"
+
+[editor.whitespace.render]
+space = "none"
+tab = "all"
+newline = "none"
+
