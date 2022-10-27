@@ -3,8 +3,8 @@ theme = "night_owl"
 [editor]
 
 [editor.cursor-shape]
-insert = "block"
-normal = "bar"
+insert = "bar"
+normal = "block"
 select = "underline"
 
 [editor.whitespace.render]

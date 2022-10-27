@@ -37,6 +37,11 @@ fn ls { |@a| e:ls --color --sort=version $@a }
 fn v { |@a| ls -lahF }
 fn rm { |@a| e:rm -i $@a }
 fn cp { |@a| e:cp -p $@a }
+fn ... { cd ../.. }
+fn .... { cd ../../.. }
+fn ..... { cd ../../../.. }
+fn ...... { cd ../../../../.. }
+fn ....... { cd ../../../../../.. }
 
 
 ### external tools
