@@ -185,6 +185,7 @@ fi
 
 if [[ $link_all = "1" || $link_misc = "1" ]]; then
     link "public/editrc" ".editrc"
+    link "public/inputrc" ".inputrc"
     link "public/hushlogin" ".hushlogin"
     link "public/terminfo" ".terminfo"
 fi

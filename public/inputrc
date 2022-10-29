@@ -1,0 +1,3 @@
+# highlight completions
+set colored-stats on
+set colored-completion-prefix on
