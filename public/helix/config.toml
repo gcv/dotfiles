@@ -1,6 +1,9 @@
 theme = "night_owl"
 
 [editor]
+auto-pairs = false
+#cursorline = true
+#scrolloff = 0
 
 [editor.cursor-shape]
 insert = "bar"
@@ -12,3 +15,8 @@ space = "none"
 tab = "all"
 newline = "none"
 
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "file-encoding"]
+#center = []
+right = ["diagnostics", "selections", "position", "position-percentage"]
+#separator = "│"
