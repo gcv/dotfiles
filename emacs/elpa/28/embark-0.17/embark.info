@@ -428,8 +428,8 @@ configuration:
      installations of) GNOME to input emojis, and Emacs doesn’t even get
      a chance to respond to the binding.  You can select a different key
      binding for ‘embark-act’ or use ‘ibus-setup’ to change the shortcut
-     for emoji insertion (Emacs 29 will likely use ‘C-x 8 e e’, in case
-     you want to set the same one system-wide).
+     for emoji insertion (Emacs uses ‘C-x 8 e e’, in case you want to
+     set the same one system-wide).
    • The suggested alternative of ‘M-.’ for ‘embark-dwim’ is bound by
      default to ‘xref-find-definitions’.  That is a very useful command
      but overwriting it with ‘embark-dwim’ is sensible since in Embark’s
@@ -947,8 +947,8 @@ in the list ‘embark-indicators’).
            (save-match-data
              (when (string-match "wikipedia:\\([[:alnum:]_]+\\)" str)
                `(url
-                 ,(format "https://en.wikipedia.org/wiki/%s"
-                          (match-string 1 str))
+                 (format "https://en.wikipedia.org/wiki/%s"
+                         (match-string 1 str))
                  ,beg . ,end))))))
 
      (add-to-list 'embark-target-finders 'my-short-wikipedia-link)
@@ -1311,26 +1311,26 @@ Node: Working with sets of possible targets10345
 Node: embark-live a live-updating variant of embark-collect14178
 Node: Switching to a different command without losing what you've typed15821
 Node: Quick start18395
-Node: Advanced configuration23001
-Node: Showing information about available targets and actions23528
-Node: Selecting commands via completions instead of key bindings26137
-Node: Quitting the minibuffer after an action27741
-Node: Running some setup after injecting the target30194
-Node: Running hooks before or after an action33800
-Node: Creating your own keymaps38294
-Node: Defining actions for new categories of targets39281
-Node: New minibuffer target example - tab-bar tabs40050
-Ref: Telling Embark about commands that prompt for tabs by name40953
-Ref: Defining and configuring a keymap for tab actions43816
-Node: New target example in regular buffers - short Wikipedia links45570
-Node: How does Embark call the actions?47604
-Node: Non-interactive functions as actions51940
-Node: Embark Marginalia and Consult53293
-Node: Marginalia54014
-Node: Consult55518
-Node: Resources59940
-Node: Contributions61084
-Node: Acknowledgments61794
+Node: Advanced configuration22987
+Node: Showing information about available targets and actions23514
+Node: Selecting commands via completions instead of key bindings26123
+Node: Quitting the minibuffer after an action27727
+Node: Running some setup after injecting the target30180
+Node: Running hooks before or after an action33786
+Node: Creating your own keymaps38280
+Node: Defining actions for new categories of targets39267
+Node: New minibuffer target example - tab-bar tabs40036
+Ref: Telling Embark about commands that prompt for tabs by name40939
+Ref: Defining and configuring a keymap for tab actions43802
+Node: New target example in regular buffers - short Wikipedia links45556
+Node: How does Embark call the actions?47588
+Node: Non-interactive functions as actions51924
+Node: Embark Marginalia and Consult53277
+Node: Marginalia53998
+Node: Consult55502
+Node: Resources59924
+Node: Contributions61068
+Node: Acknowledgments61778
 
 End Tag Table
 

@@ -148,7 +148,7 @@
     (heading embark-heading-map)
     (t embark-general-map))
   "Alist of action types and corresponding keymaps.
-The special key t is associated with the default keymap to use.
+The special key `t' is associated with the default keymap to use.
 Each value can be either a single symbol whose value is a keymap,
 or a list of such symbols."
   :type '(alist :key-type (symbol :tag "Target type")
@@ -308,7 +308,7 @@ In addition to target types, you can also use as keys in this alist,
 pairs of a target type and a command name. Such a pair indicates that
 the override only applies if the target was obtained from minibuffer
 completion from that command. For example adding an
-entry (cons (cons \\='file \\='delete-file) \\='find-file) to this alist would
+entry (cons (cons 'file 'delete-file) 'find-file) to this alist would
 indicate that for files at the prompt of the `delete-file' command,
 `find-file' should be used as the default action."
   :type '(alist :key-type (choice (symbol :tag "Type")
@@ -647,21 +647,13 @@ This function is meant to be added to `minibuffer-setup-hook'."
       `(region ,(buffer-substring start end) . (,start . ,end)))))
 
 (autoload 'dired-get-filename "dired")
-(declare-function image-dired-original-file-name "image-dired")
 
 (defun embark-target-file-at-point ()
   "Target file at point.
-This function mostly relies on `ffap-file-at-point', with the
-following exceptions:
-
-- In `dired-mode', it uses `dired-get-filename' instead.
-
-- In `imaged-dired-thumbnail-mode', it uses
-  `image-dired-original-file-name' instead."
-  (if-let (file (or (and (derived-mode-p 'dired-mode)
-                         (dired-get-filename t 'no-error-if-not-filep))
-                    (and (derived-mode-p 'image-dired-thumbnail-mode)
-                         (image-dired-original-file-name))))
+This function mostly relies on `ffap-file-at-point', with one exception:
+In `dired-mode', it uses `dired-get-filename' instead."
+  (if-let (file (and (derived-mode-p 'dired-mode)
+                     (dired-get-filename t 'no-error-if-not-filep)))
       (save-excursion
         (end-of-line)
         `(file ,(abbreviate-file-name (expand-file-name file))
@@ -850,7 +842,7 @@ completion UI highly compatible with it, like Icomplete.
 Many completion UIs can still work with Embark but will need
 their own target finder.  See for example
 `embark--vertico-selected' or `embark--selectrum-selected'."
-  (when (and (minibufferp) minibuffer-completion-table)
+  (when (minibufferp)
     (pcase-let* ((`(,category . ,candidates) (embark-minibuffer-candidates))
                  (contents (minibuffer-contents))
                  (top (if (test-completion contents
@@ -1079,8 +1071,7 @@ UPDATE is the indicator update function."
         update))
       ((or 'minibuffer-keyboard-quit 'abort-recursive-edit 'abort-minibuffers)
        nil)
-      ((guard (let ((def (lookup-key keymap keys))) ; if directly bound, then obey
-                (and def (not (numberp def))))) ; number means "invalid prefix"
+      ((guard (lookup-key keymap keys))  ; if directly bound, then obey
        cmd)
       ('self-insert-command
        (minibuffer-message "Not an action")
@@ -1105,7 +1096,7 @@ UPDATE is the indicator update function."
   "Return an appropriate name for CMD.
 If CMD is a symbol, use its symbol name; for lambdas, use the
 first line of the documentation string; otherwise use the word
-\"unnamed\"."
+'unnamed'."
   (concat ; fresh copy, so we can freely add text properties
    (cond
     ((stringp (car-safe cmd)) (car cmd))
@@ -1979,7 +1970,7 @@ plist concerns one target, and has keys `:type', `:target',
      'embark-target-finders
      (lambda (fun)
        (when-let (found (funcall fun))
-         (let* ((type (or (car found) 'general))
+         (let* ((type (car found))
                 (target+bounds (cdr found))
                 (target (if (consp target+bounds)
                             (car target+bounds)
@@ -2668,7 +2659,7 @@ This takes into account `embark-transformer-alist'."
   "Turn an ACTION into a command to perform the action.
 Returns the name of the command."
   (let ((name (intern (format "embark-action--%s"
-                              (embark--command-name action)))))
+                              (embark--command-name action))))) 
     (fset name (lambda (arg)
                  (interactive "P")
                  (when-let (target (embark-collect--target))
@@ -2799,8 +2790,7 @@ just restarts the completion session, that is, the command that
 opened the minibuffer is run again and the minibuffer contents
 restored.  You can then interact normally with the command,
 perhaps editing the minibuffer contents, and, if you wish, you
-can rerun `embark-collect' to get an updated buffer."
-    :interactive nil :abbrev-table nil :syntax-table nil)
+can rerun `embark-collect' to get an updated buffer.")
 
 (defun embark-collect--remove-zebra-stripes ()
   "Remove highlighting of alternate rows."
@@ -3259,11 +3249,6 @@ PRED is a predicate function used to filter the items."
 
 ;;; Integration with external completion UIs
 
-;; Ensure that the Marginalia cache is reset, such that
-;; `embark-toggle-variable-value' updates the display (See #540).
-(with-eval-after-load 'marginalia
-  (push 'marginalia--cache-reset (alist-get :always embark-post-action-hooks)))
-
 ;; vertico
 
 (declare-function vertico--candidate "ext:vertico")
@@ -3449,11 +3434,11 @@ its own."
                 (maybe-whitespace ()
                   (if multiline (maybe-newline) (maybe-space)))
                 (ins-string ()
-                  (let ((start (point)))
+                  (save-excursion
                     (insert (string-join strings separator))
-                    (save-excursion (goto-char start) (maybe-whitespace))
                     (when (looking-back "\n" 1) (delete-char -1))
-                    (save-excursion (maybe-whitespace)))))
+                    (maybe-whitespace))
+                  (maybe-whitespace)))
       (if buffer-read-only
           (with-selected-window (other-window-for-scrolling)
             (ins-string))
@@ -3489,10 +3474,8 @@ Sorting and history are disabled. PROMPT is the prompt message."
   "Remove FILE from the list of recent files."
   (interactive (list (embark--read-from-history
                       "Remove recent file: " recentf-list 'file)))
-  (embark-history-remove (expand-file-name file))
-  (embark-history-remove (abbreviate-file-name file))
-  (when (and (boundp 'recentf-list) (fboundp 'recentf-expand-file-name))
-    (setq recentf-list (delete (recentf-expand-file-name file) recentf-list))))
+  (embark-history-remove file)
+  (setq recentf-list (delete (expand-file-name file) recentf-list)))
 
 (defun embark-history-remove (str)
   "Remove STR from `minibuffer-history-variable'.
@@ -3569,17 +3552,6 @@ Returns the new name actually used."
   "Insert value of VAR."
   (interactive "SVariable: ")
   (insert (string-trim (pp-to-string (symbol-value var)))))
-
-(defun embark-toggle-variable (var &optional local)
-  "Toggle value of boolean variable VAR.
-If prefix LOCAL is non-nil make variable local."
-  (interactive "SVariable: \nP")
-  (let ((val (symbol-value var)))
-    (unless (memq val '(nil t))
-      (user-error "Not a boolean variable"))
-    (when local
-      (make-local-variable var))
-    (funcall (or (get var 'custom-set) 'set) var (not val))))
 
 (defun embark-insert-relative-path (file)
   "Insert relative path to FILE.
@@ -4172,8 +4144,7 @@ library, which have an obvious notion of associated directory."
   ("c" customize-set-variable)
   ("u" customize-variable)
   ("v" embark-save-variable-value)
-  ("<" embark-insert-variable-value)
-  ("t" embark-toggle-variable))
+  ("<" embark-insert-variable-value))
 
 (embark-define-keymap embark-function-map
   "Keymap for Embark function actions."
