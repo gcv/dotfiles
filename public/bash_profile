@@ -33,6 +33,11 @@ if [[ $(command -v fzf) && $(command -v fzf-history-all) ]]; then
     bind -x '"\er":fzf-history-all-widget'
 fi
 
+# direnv
+if [[ $(command -v direnv) ]]; then
+    eval "$(direnv hook bash)"
+fi
+
 # autojump
 if [[ -f /usr/share/autojump/autojump.sh ]]; then
     . /usr/share/autojump/autojump.bash

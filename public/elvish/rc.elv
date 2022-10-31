@@ -44,6 +44,33 @@ fn ...... { cd ../../../../.. }
 fn ....... { cd ../../../../../.. }
 
 
+### direnv
+
+if (has-external direnv) {
+  # This should just be:
+  # eval (direnv hook elvish)
+  # but does not work due to some outdated syntax.
+  set @edit:before-readline = $@edit:before-readline {
+    try {
+      var m = [(direnv export elvish | from-json)]
+      if (> (count $m) 0) {
+        set m = (all $m)
+        keys $m | each { |k|
+          if $m[$k] {
+            set-env $k $m[$k]
+          } else {
+            unset-env $k
+          }
+        }
+      }
+    } catch e {
+      echo $e
+    }
+  }
+}
+
+
+### TODO: deal with ssh-agent
 ### external tools
 
 if (has-external starship) {
