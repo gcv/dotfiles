@@ -5,8 +5,6 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: convenience
-;; Package-Version: 20220918.100
-;; Package-Commit: fc9f13863c168a2c25b22a10c8f6f8a87b662ea7
 ;; Version: 0.6
 ;; Homepage: https://github.com/oantolin/embark
 ;; Package-Requires: ((emacs "27.1") (embark "0.17") (consult "0.17"))
@@ -79,6 +77,16 @@
   (cadr (embark-target-collect-candidate)))
 
 (add-hook 'consult--completion-candidate-hook #'embark-consult--collect-candidate)
+
+(define-obsolete-function-alias
+  'embark-consult-preview-minor-mode
+  'consult-preview-at-point-mode
+  "0.11")
+
+(define-obsolete-function-alias
+  'embark-consult-preview-at-point
+  'consult-preview-at-point
+  "0.11")
 
 ;;; Support for consult-location
 
@@ -176,8 +184,6 @@ This function is meant to be added to `embark-collect-mode-hook'."
       (dolist (line lines) (insert line "\n"))
       (goto-char (point-min))
       (grep-mode)
-      ;; Make this buffer current for next/previous-error
-      (setq next-error-last-buffer buf)
       ;; Set up keymap before possible wgrep-setup, so that wgrep
       ;; restores our binding too when the user finishes editing.
       (use-local-map (make-composed-keymap
