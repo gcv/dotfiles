@@ -147,6 +147,7 @@ if [[ $link_all = "1" || $link_bin = "1" ]]; then
     link "public/bin/gpgd" ".local/bin/gpgd"
     link "public/bin/fzf-history-all" ".local/bin/fzf-history-all"
     link "public/bin/mosh-server" ".local/bin/mosh-server"
+    link "public/bin/sleeptil" ".local/bin/sleeptil"
 fi
 
 if [[ $link_all = "1" || $link_direnv = "1" ]]; then
