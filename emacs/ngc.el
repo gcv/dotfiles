@@ -182,7 +182,7 @@ targets."
 
 
 (use-package orderless
-  :pin melpa
+  :pin gnu
 
   :custom
   (completion-styles '(orderless basic))
