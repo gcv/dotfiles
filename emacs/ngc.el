@@ -92,7 +92,7 @@
 
 
 (use-package embark
-  :pin melpa
+  :pin gnu
 
   :bind
   (("C-," . embark-act)
@@ -152,7 +152,7 @@ targets."
 
 
 (use-package embark-consult
-  :pin melpa
+  :pin gnu
   :after (embark consult)
   :demand t                             ; required!
   :hook
