@@ -4,6 +4,7 @@ theme = "night_owl"
 auto-pairs = false
 #cursorline = true
 #scrolloff = 0
+true-color = true
 
 [editor.cursor-shape]
 insert = "bar"
