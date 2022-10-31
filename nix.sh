@@ -18,7 +18,6 @@ fi
 # - croc and magic-wormhole
 # - bat and cat
 # - exa and ls
-# - ranger and joshuto (file managers)
 packages=(
     aspell
     aspell-dict-en
@@ -51,7 +50,9 @@ packages=(
     gnutar
     helix              # modal text editor, alternative to (neo)vi(m)
     htop
-    #joshuto           # file manager
+    httpie             # HTTP client, alternative to curl
+    httrack            # web scraper, more stable than wget
+    hyperfine          # benchmarking tool
     jq
     lazydocker         # Docker UI
     lazygit            # Git UI
@@ -70,7 +71,6 @@ packages=(
     pass               # password manager
     pastel             # color utility
     pv                 # pipe viewer
-    #ranger            # file manager
     rclone
     restic             # backup utility
     ripgrep
@@ -87,7 +87,7 @@ packages=(
     unrar
     viddy             # watch replacement
     watch
-    wget
+    wget              # weak web scraper (no restart support)
     xcp               # cp replacement
     xz
     youtube-dl        # outdated?
