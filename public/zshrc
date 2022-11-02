@@ -1,26 +1,33 @@
 autoload -Uz compinit                                      # prepare completion
 autoload -Uz edit-command-line && zle -N edit-command-line # bound to M-e below
 autoload -Uz colors zsh/terminfo                           # symbolic colors
-autoload -Uz is-at-least                                   # zsh version checks
-autoload -Uz vcs_info                                      # VCS status
 autoload -Uz zmv                                           # file renamer
 bindkey -e                                                 # Emacs keybindings
 ulimit -c 0                                                # no core dumps
 ulimit -s unlimited                                        # no stack limits
 
 
+### command finding helper:
+command_exists () { command -v "$1" >/dev/null 2>&1; }
+
+
 ### environmental variables
-export EDITOR=vi
-export LESS="-M -R"
-export PAGER=less
-export LESSHISTFILE=/dev/null
 export CVS_RSH=ssh
+export DO_NOT_TRACK=1 # https://consoledonottrack.com
+export EDITOR=vi
+if command_exists bat; then
+    export PAGER=bat
+    export MANPAGER="bat -p"
+elif command_exists less; then
+    export PAGER=less
+fi
+export LESS="-M -R"
+export LESSHISTFILE=/dev/null
 export LC_CTYPE=en_US.UTF-8
 export LC_COLLATE=C
-export UNAME=`uname`
+export UNAME=$(uname)
 export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
 export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
-export DO_NOT_TRACK=1 # https://consoledonottrack.com
 
 
 ### Nix: turn it on.
@@ -71,34 +78,25 @@ path_prepend FPATH /opt/brew/share/zsh/site-functions
 typeset -U fpath                # dedup
 
 
-### Switch to a more recent zsh if found in path. Be sure not to
-### initialize completion system until after this happens.
-if [[ -x $(whence zsh) ]]; then
-    is-at-least $(zsh --version | awk '{print $2}') || exec zsh
-fi
-
-
 ### aliases
-alias rm='rm -i'
-alias cp='cp -p'
-alias dir='ls -aCF'
-alias v='ls -lahF'
-if [[ -x $(whence exa) ]]; then
-    alias e='exa -l'
-else
-    alias e=v
+if [[ $(ls --color 2>/dev/null) ]]; then
+    # GNU ls probably available
+    alias ls='ls --color --sort=version'
+elif command_exists gls && [[ $(gls --color 2>/dev/null) ]]; then
+    alias ls='gls --color --sort=version'
 fi
-alias d='dirs -v'
-alias pf='open -a "Path Finder.app"'
-function notify() { osascript -e "display notification \"$2\" with title \"$1\"" }
-function dtmux() { docker exec -ti $1 script -q -c "tmux attach || tmux new" /dev/null }
-function dlatex() { docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data "blang/latex:ubuntu" "$@" }
-# latexmk -cd -f -interaction=batchmode -pdf file.tex
-# latexmk -c or -C to clean up
-function doctave() { docker run --rm -it -v "$PWD":/source schickling/octave }
+alias v="ls -lahF"
+alias grep="grep --color"
+alias rm="rm -i"
+alias cp="cp -p"
+if command_exists exa; then
+    alias e="exa -l"
+fi
 
-alias ec='emacsclient -n'
-alias et='emacsclient -a "" -t'
+if command_exists emacsclient; then
+    alias ec="emacsclient -n"
+    alias et='emacsclient -a "" -t'
+fi
 #alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs -nw'
 #[[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
 #    alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n' || \
@@ -108,30 +106,13 @@ alias et='emacsclient -a "" -t'
 #    alias et='emacsclient -a "" -t'
 
 [[ ${UNAME} == "Darwin" && -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ]] && \
-    alias firewall='sudo /usr/libexec/ApplicationFirewall/socketfilterfw'
-
-if [[ $(ls --color 2>/dev/null) ]]; then
-    # GNU ls probably available
-    alias ls='ls --color --sort=version'
-elif [[ $(command -v gls) && $(gls --color 2>/dev/null) ]]; then
-    alias ls='gls --color --sort=version'
-fi
-
-[[ ${UNAME} == "Darwin" && $(command -v brew) ]] && function brewdeps() {
-        function brewdeps_check() {
-            echo -ne "\x1B[1;34m $1 \x1B[0m"; brew uses "$1" --installed | awk '{printf(" %s ", $0)}'; echo "";
-        }
-        if [[ -z "$1" ]]; then
-            brew list -1 | while read cask; do brewdeps_check $cask; done
-        else
-            brewdeps_check "$1"
-        fi
-    }
+    alias firewall="sudo /usr/libexec/ApplicationFirewall/socketfilterfw"
 
 alias -g ...='../..'
 alias -g ....='../../..'
 alias -g .....='../../../..'
 alias -g ......='../../../../..'
+alias -g .......='../../../../../..'
 
 
 ### ls color output
@@ -278,22 +259,25 @@ done
 COLOR_NONE="%{$terminfo[sgr0]%}"
 
 
-### vcs_info configuration
-zstyle ':vcs_info:*' formats " %s:${COLOR_GREEN}%b${COLOR_NONE}"
-zstyle ':vcs_info:*' actionformats " %s:${COLOR_GREEN}%b${COLOR_NONE} ${COLOR_RED}%a${COLOR_NONE}"
-zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat "${COLOR_GREEN}%b${COLOR_NONE}:%r"
-
-function precmd_vcs_info() {
-    vcs_info
-}
-
-is-at-least "4.3.7" && precmd_functions+=( precmd_vcs_info )
-
-
-### prompt (PROMPT is equivalent to PS1, RPROMPT to RPS1)
-# PROMPT='[%m:%4~] '
-PROMPT='%(!.${COLOR_RED}.${COLOR_NONE})[%m:$(shorten_path_disambiguate_keep_last)${vcs_info_msg_0_}${COLOR_MAGENTA}${VIRTUAL_ENV:+ }`basename ${VIRTUAL_ENV:-""}`${COLOR_NONE}]${COLOR_NONE} '
-RPROMPT='%(?..${COLOR_RED}[%?]${COLOR_NONE})'
+### prompt
+if command_exists starship; then
+    eval "$(starship init zsh)"
+else
+    # (PROMPT is equivalent to PS1, RPROMPT to RPS1)
+    # minimalist prompt:
+    #PROMPT='[%m:%4~] '
+    RPROMPT='%(?..${COLOR_RED}[%?]${COLOR_NONE})'
+    # fancier prompt:
+    # vcs_info configuration:
+    autoload -Uz vcs_info
+    zstyle ':vcs_info:*' formats " %s:${COLOR_GREEN}%b${COLOR_NONE}"
+    zstyle ':vcs_info:*' actionformats " %s:${COLOR_GREEN}%b${COLOR_NONE} ${COLOR_RED}%a${COLOR_NONE}"
+    zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat "${COLOR_GREEN}%b${COLOR_NONE}:%r"
+    function precmd_vcs_info() {
+        vcs_info
+    }
+    PROMPT='%(!.${COLOR_RED}.${COLOR_NONE})[%m:$(shorten_path_disambiguate_keep_last)${vcs_info_msg_0_}${COLOR_MAGENTA}${VIRTUAL_ENV:+ }`basename ${VIRTUAL_ENV:-""}`${COLOR_NONE}]${COLOR_NONE} '
+fi
 
 
 ### title bar or status bar
@@ -335,13 +319,13 @@ if [[ -f /usr/share/autojump/autojump.sh ]]; then
     . /usr/share/autojump/autojump.bash
 elif [[ -f "${HOME}/.nix-profile/share/autojump/autojump.zsh" ]]; then
     . "${HOME}/.nix-profile/share/autojump/autojump.zsh"
-elif [[ $(command -v brew) && -f `brew --prefix`/etc/autojump.sh ]]; then
-    . `brew --prefix`/etc/autojump.sh
+elif command_exists brew && [[ -f $(brew --prefix)/etc/autojump.sh ]]; then
+    . $(brew --prefix)/etc/autojump.sh
 fi
 
 
 ### Turn on fzf (fuzzy finder) integration with custom multi-shell history search:
-if [[ $(command -v fzf) && $(command -v fzf-history-all) ]]; then
+if command_exists -v fzf && command_exists -v fzf-history-all; then
     fzf-history-all-widget () {
         local selected=$(fzf-history-all zsh)
         zle reset-prompt
@@ -361,8 +345,8 @@ fi
 
 
 ### Turn on direnv integration if found.
-if [[ $(command -v direnv) ]]; then
-    eval "$($(readlink $(which direnv)) hook zsh)"
+if command_exists direnv; then
+    eval "$(direnv hook zsh)"
 fi
 
 
@@ -397,6 +381,15 @@ if [ -z "${SSH_AUTH_SOCK}" -o ! -e "${SSH_AUTH_SOCK}" ]; then
 fi
 
 
+### random functions
+function notify() { osascript -e "display notification \"$2\" with title \"$1\"" }
+function dtmux() { docker exec -ti $1 script -q -c "tmux attach || tmux new" /dev/null }
+function dlatex() { docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data "blang/latex:ubuntu" "$@" }
+# latexmk -cd -f -interaction=batchmode -pdf file.tex
+# latexmk -c or -C to clean up
+function doctave() { docker run --rm -it -v "$PWD":/source schickling/octave }
+
+
 ### pskill <process name>
 function pskill() {
    kill -9 $(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')
@@ -426,186 +419,16 @@ function readlinkf() {
 }
 
 
-### Set up the EC2 environment.
-function ec2setup() {
-    # variables
-    local ec2_home
-    local ec2_versions
-    local key
-
-    # autocompletion support
-    if [[ "$1" = "-c" || "$1" = "--complete" ]]; then
-        for key in ~/.ec2/pk-*.pem(N:t); do
-            echo ${key} | sed -e 's/pk-//' | sed -e 's/\.pem//'
-        done
-        return 0
-    fi
-
-    # sanity check
-    if [[ -z "$1" ]]; then
-        echo "key ID required; they're usually in ~/.ec2"
-        return 1
-    fi
-
-    # find EC2 installation
-    if [[ "${EC2_HOME}" = "" || -z "$(which ec2-describe-instances)" ]]; then
-        ec2_versions=( {~,~/.local,/opt}/ec2-api-tools*(/NOn) )
-        if [[ -z ${ec2_versions[@]} ]]; then
-            echo "EC2 tools not found anywhere"
-            return 1
-        else
-            ec2_home=${ec2_versions[1]}
-        fi
-        export EC2_HOME="${ec2_home}"
-        echo "export EC2_HOME=${EC2_HOME}"
-        export PATH="${EC2_HOME}/bin:${PATH}"
-    fi
-
-    # which keys?
-    local ec2_private_key=$(echo ~/.ec2/pk-$1.pem)
-    if [[ ! -f "${ec2_private_key}" ]]; then
-        echo "private key $1 not found"
-        return 1
-    fi
-    local ec2_cert=$(echo ~/.ec2/cert-$1.pem)
-    if [[ ! -f "${ec2_cert}" ]]; then
-        echo "cert $1 not found"
-        return 1
-    fi
-    export EC2_PRIVATE_KEY="${ec2_private_key}"
-    echo "export EC2_PRIVATE_KEY=${EC2_PRIVATE_KEY}"
-    export EC2_CERT="${ec2_cert}"
-    echo "export EC2_CERT=${EC2_CERT}"
-}
-
-function _ec2setup() {
-    compadd $(ec2setup --complete)
-}
-
-compdef _ec2setup ec2setup
-
-
-### Turn on RVM.
-function rvm-on() {
-    echo "rvm is deprecated" 1>&2
-    return 1
-    [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
-    # autocompletion
-    fpath=($fpath $HOME/.rvm/scripts/zsh/Completion)
-    compinit -i
-    function rvm_prompt_update() {
-        local rvm_prompt=$(~/.rvm/bin/rvm-prompt i v p g)
-        if [ -z $rvm_prompt ]; then
-            PROMPT="%(!.${COLOR_RED}.${COLOR_NONE})[%m:%4~"'${vcs_info_msg_0_}'"]${COLOR_NONE} "
-        else
-            rvm_info_msg=" rvm:${COLOR_CYAN}${rvm_prompt}${COLOR_NONE}"
-            PROMPT="┌ ${COLOR_MAGENTA}%8~${COLOR_NONE}"'${vcs_info_msg_0_}${rvm_info_msg}'"
-└ %(!.${COLOR_RED}.${COLOR_NONE})${COLOR_MAGENTA}%m${COLOR_NONE} ∴ ${COLOR_NONE}"
-        fi
+### Find Homebrew formula dependencies.
+function brewdeps() {
+    function brewdeps_check() {
+        echo -ne "\x1B[1;34m $1 \x1B[0m"; brew uses "$1" --installed | awk '{printf(" %s ", $0)}'; echo "";
     }
-    precmd_functions+=(rvm_prompt_update)
-}
-
-
-### Turn on rbenv.
-### Instructions:
-### - git clone git@github.com:rbenv/rbenv.git /opt/rbenv
-### - select a revision (tag) to use
-### - ln -s /opt/rbenv ~/.rbenv
-### - mkdir "$(rbenv root)"/plugins
-### - git clone git@github.com:rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
-### - select a revision (tag) of ruby-build to use
-### Direnv (.envrc) setup:
-### use rbenv
-function rbenv-on() {
-    eval "$(rbenv init -)"
-}
-
-
-### Turn on NVM.
-### Instructions:
-### - git clone git@github.com:nvm-sh/nvm.git /opt/nvm
-### - select a revision (tag) to use
-### - ln -s /opt/nvm ~/.nvm
-### Direnv (.envrc) setup:
-### NODE_VERSIONS=~/.nvm/versions/node
-### NODE_VERSION_PREFIX=v
-### use node 12
-### PATH_add ~/.yarn/bin
-function nvm-on() {
-    export NVM_DIR=$(readlinkf "$HOME/.nvm")
-    [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
-    path=($path ~/.yarn/bin)
-}
-
-
-### Turn on Python virtualenv.
-function pve() {
-    local pd=~/.python
-    local env_name=$1
-    if [[ -z ${env_name} ]]; then
-        if [[ -z ${VIRTUAL_ENV} ]]; then
-            echo "usage: pve{2,3} <envname>"
-            return 1
-        else
-            deactivate
-            return 0
-        fi
-    fi
-    if [[ ! -e ${pd} ]]; then
-        echo "${pd} not found"
-        return 1
-    fi
-    local system_python=$2
-    if [[ ! -f "${system_python}" ]]; then
-        echo "no system python found"
-        return 1
-    fi
-    pushd ${pd}
-    if [[ ! -f virtualenv.py ]]; then
-        curl -L -O 'https://raw.github.com/pypa/virtualenv/16.7.9/virtualenv.py'
-    fi
-    if [[ ! -d ${env_name} ]]; then
-        echo "installing virtualenv"
-        ${system_python} virtualenv.py ${env_name} --no-setuptools --no-pip --no-wheel
-        if [[ ! -f get-pip.py ]]; then
-            curl -L -O 'https://bootstrap.pypa.io/get-pip.py'
-        fi
-        ${env_name}/bin/python ./get-pip.py
-    fi
-    echo "switching to existing Python environment ${env_name}"
-    VIRTUAL_ENV_DISABLE_PROMPT=true
-    source "${env_name}/bin/activate"
-    popd
-    rehash
-}
-
-function pve2() {
-    local system_python
-    if [[ -f `which python2` ]]; then
-        system_python=`which python2`
-    elif [[ -f `which python2.7` ]]; then
-        system_python=`which python2.7`
-    elif [[ -f `which python2.6` ]]; then
-        system_python=`which python2.6`
+    if [[ -z "$1" ]]; then
+        brew list -1 | while read cask; do brewdeps_check $cask; done
     else
-        echo "no system python2 found"
-        return 1
+        brewdeps_check "$1"
     fi
-    pve "$1" "${system_python}"
-}
-
-function pve3() {
-    local system_python
-    if [[ -f `which python3` ]]; then
-        system_python=`which python3`
-    elif [[ -f `which python3.7` ]]; then
-        system_python=`which python3.7`
-    else
-        echo "no system python3 found"
-        return 1
-    fi
-    pve "$1" "${system_python}"
 }
 
 
