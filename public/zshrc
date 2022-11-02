@@ -224,7 +224,7 @@ bindkey 'f' forward-word # alt
 # cache: https://gist.github.com/ctechols/ca1035271ad134841284
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
     compinit -i
-    touch .zcompdump
+    touch ~/.zcompdump
 else
     compinit -C
 fi
