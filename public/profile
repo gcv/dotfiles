@@ -8,6 +8,11 @@
 # - use of local
 
 
+### command finding helper:
+
+command_exists () { command -v "$1" >/dev/null 2>&1; }
+
+
 ### enable Nix (must happen early for correct path setup)
 
 if [[ -z "${NIX_PATH}" ]]; then
@@ -26,9 +31,17 @@ fi
 ### environment variables
 
 export DO_NOT_TRACK=1 # https://consoledonottrack.com
+export EDITOR=vi
+export LESS="-M -R"
+export LESSHISTFILE=/dev/null
+if command_exists bat; then
+    export PAGER=bat
+    export MANPAGER="bat -p"
+elif command_exists less; then
+    export PAGER=less
+fi
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-export LESSHISTFILE=/dev/null
 
 
 ### path setup
@@ -71,7 +84,7 @@ if [ -z "${SSH_AUTH_SOCK}" -o ! -e "${SSH_AUTH_SOCK}" ]; then
             export SSH_AUTH_SOCK=$(lsof -p ${ssh_agent_pid} | grep com.apple.launchd | grep Listeners | awk '{print $8}' | head -1)
         fi
     else
-        if [[ $(command -v ssh-agent) ]]; then
+        if command_exists ssh-agent; then
             ssh_agent_sock_file="${HOME}/.ssh/ssh-agent-$(hostname -s)-$(id -un).sock"
             if [ ! -S "${ssh_agent_sock_file}" ]; then
                 ssh-agent -s -a "${ssh_agent_sock_file}" > /dev/null
@@ -91,7 +104,21 @@ alias .....="cd ../../../.."
 alias .....="cd ../../../../.."
 alias ......="cd ../../../../../.."
 
-alias ls="ls --color=auto --sort=version"
+if [[ $(ls --color 2>/dev/null) ]]; then
+    # GNU ls probably available
+    alias ls='ls --color --sort=version'
+elif command_exists gls && [[ $(gls --color 2>/dev/null) ]]; then
+    alias ls='gls --color --sort=version'
+fi
 alias v="ls -lahF"
+alias grep="grep --color"
 alias rm="rm -i"
 alias cp="cp -p"
+if command_exists exa; then
+    alias e="exa -l"
+fi
+
+if command_exists emacsclient; then
+    alias ec="emacsclient -n"
+    alias et='emacsclient -a "" -t'
+fi

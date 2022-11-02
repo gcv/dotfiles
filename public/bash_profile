@@ -23,8 +23,11 @@ HISTTIMEFORMAT="%F %T "
 #PROMPT_COMMAND="history -a; history -r; $PROMPT_COMMAND"
 #PROMPT_COMMAND="history -n; history -w; history -c; history -r; $PROMPT_COMMAND"
 
+# better globbing:
+shopt -s globstar
+
 # fzf with custom multi-shell history search:
-if [[ $(command -v fzf) && $(command -v fzf-history-all) ]]; then
+if command_exists fzf && command_exists fzf-history-all; then
     fzf-history-all-widget () {
         local selected=$(fzf-history-all bash)
         READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
@@ -34,24 +37,29 @@ if [[ $(command -v fzf) && $(command -v fzf-history-all) ]]; then
 fi
 
 # direnv
-if [[ $(command -v direnv) ]]; then
+if command_exists direnv; then
     eval "$(direnv hook bash)"
 fi
 
 # autojump
-if [[ -f /usr/share/autojump/autojump.sh ]]; then
+if [[ -f /usr/share/autojump/autojump.bash ]]; then
     . /usr/share/autojump/autojump.bash
 elif [[ -f "${HOME}/.nix-profile/share/autojump/autojump.bash" ]]; then
     . "${HOME}/.nix-profile/share/autojump/autojump.bash"
 fi
 
-# look for and maybe enable programmable completion features (Debian)
+# look for and maybe enable programmable completion features (Debian):
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
   elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
   fi
+fi
+
+# prompt
+if command_exists starship; then
+    eval "$(starship init bash)"
 fi
 
 # bash version >4 only:
