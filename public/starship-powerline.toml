@@ -10,6 +10,7 @@ add_newline = true
 [hostname]
 style = "bg:#1C4961 fg:white"
 format = "[ $hostname ]($style)"
+ssh_only = false
 
 [directory]
 style = "bg:#2F79A1 fg:white"
