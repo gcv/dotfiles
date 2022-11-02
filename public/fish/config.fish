@@ -30,6 +30,9 @@ fish_add_path --path --prepend ~/.local/sbin
 fish_add_path --path --prepend ~/.local/bin
 
 
+### TODO: deal with ssh-agent
+
+
 ### interactive mode only sessions:
 
 if status is-interactive
