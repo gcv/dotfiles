@@ -1,0 +1,7 @@
+format = """$directory$character"""
+right_format = """$all"""
+
+[directory]
+truncate_to_repo = true
+truncation_symbol = "…/"
+fish_style_pwd_dir_length = 2

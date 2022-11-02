@@ -1,0 +1,34 @@
+format = """\
+[\uE0B6](fg:#1C4961)\
+$hostname(bg:#1C4961)[\uE0B0](fg:#1C4961 bg:#2F79A1)\
+$directory[\uE0B0](fg:#2F79A1 bg:#3A95C7)\
+$git_branch[\uE0B0](#3A95C7 bg:#40A9E0)\
+$git_status[\uE0B0](#40A9E0 bg:none) """
+right_format = """$cmd_duration$status"""
+add_newline = true
+
+[hostname]
+style = "bg:#1C4961 fg:white"
+format = "[ $hostname ]($style)"
+
+[directory]
+style = "bg:#2F79A1 fg:white"
+format = "[ $path ]($style)"
+truncate_to_repo = true
+truncation_symbol = "…/"
+fish_style_pwd_dir_length = 2
+
+[git_branch]
+style = "bg:#3A95C7 fg:white"
+format = "[ $symbol$branch ]($style)"
+
+[git_status]
+style = "bg:#40A9E0 fg:white"
+format = "[ $all_status$ahead_behind ]($style)"
+
+[cmd_duration]
+format = " [$duration]($style) "
+#show_milliseconds = true
+
+[status]
+disabled = false
