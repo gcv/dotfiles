@@ -325,7 +325,7 @@ fi
 
 
 ### Turn on fzf (fuzzy finder) integration with custom multi-shell history search:
-if command_exists -v fzf && command_exists -v fzf-history-all; then
+if command_exists fzf && command_exists fzf-history-all; then
     fzf-history-all-widget () {
         local selected=$(fzf-history-all zsh)
         zle reset-prompt
