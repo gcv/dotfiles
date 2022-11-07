@@ -428,6 +428,19 @@
                           ))
 
 
+;;; terminal mode: clipboard integration
+(defun copy-last-yank-to-clipboard ()
+  "Use ANSI OSC 52 escape sequence to attempt clipboard copy"
+  ;; See https://sunaku.github.io/tmux-yank-osc52.html an explanation. If this
+  ;; does not work in some situations, try https://github.com/spudlyo/clipetty
+  ;; instead. It tries to detect the exact pseudo-tty to which to send the
+  ;; escape sequence.
+  ;; Not sure how this interacts with xclip.el.
+  (interactive)
+  (let ((txt (base64-encode-string (encode-coding-string (substring-no-properties (nth 0 kill-ring)) 'utf-8) t)))
+    (send-string-to-terminal (format "\033]52;c;%s\a" txt))))
+
+
 ;;; terminal mode: fix key bindings
 ;;; use ctrl-v in a terminal to capture the exact code to remap
 ;;; XXX: Do not use raw M-[ for any key binding! It can match the escape
