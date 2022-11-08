@@ -91,6 +91,24 @@ If file does not exist, invoke `denote' to create a file.
 
 \(fn TARGET)" t nil)
 
+(autoload 'denote-keywords-add "denote" "\
+Prompt for KEYWORDS to add to the current note's front matter.
+When called from Lisp, KEYWORDS is a list of strings.
+
+Rename the file without further prompt so that its name reflects
+the new front matter, per `denote-rename-file-using-front-matter'.
+
+\(fn KEYWORDS)" t nil)
+
+(autoload 'denote-keywords-remove "denote" "\
+Prompt for keywords in current note and remove them.
+Keywords are retrieved from the file's front matter.
+
+Rename the file without further prompt so that its name reflects
+the new front matter, per `denote-rename-file-using-front-matter'." t nil)
+
+(function-put 'denote-keywords-remove 'interactive-only 't)
+
 (autoload 'denote-rename-file "denote" "\
 Rename file and update existing front matter if appropriate.
 
@@ -99,9 +117,19 @@ with minibuffer completion for one.
 
 If FILE has a Denote-compliant identifier, retain it while
 updating the TITLE and KEYWORDS fields of the file name.  Else
-create an identifier based on the file's attribute of last
-modification time.  If such attribute cannot be found, the
-identifier falls back to the `current-time'.
+create an identifier based on the following conditions:
+
+- If FILE does not have an identifier and optional DATE is
+  non-nil (such as with a prefix argument), invoke the function
+  `denote-prompt-for-date-return-id'.  It prompts for a date and
+  uses it to derive the identifier.
+
+- If FILE does not have an identifier and optional DATE is
+  nil (this is the case without a prefix argument), use the file
+  attributes to determine the last modified date and format it as
+  an identifier.
+
+- As a fallback, derive an identifier from the current time.
 
 The default TITLE is retrieved from a line starting with a title
 field in the file's contents, depending on the given file
@@ -147,7 +175,7 @@ since we already have all the requisite mechanisms in
 place (though Denote does not---and will not---manage such
 files).
 
-\(fn FILE TITLE KEYWORDS)" t nil)
+\(fn FILE TITLE KEYWORDS &optional DATE)" t nil)
 
 (autoload 'denote-dired-rename-marked-files "denote" "\
 Rename marked files in Dired to Denote file name.
@@ -184,16 +212,21 @@ function `buffer-file-name' which is subsequently inspected for
 the requisite front matter.  It is thus implied that the FILE has
 a file type that is supported by Denote, per `denote-file-type'.
 
-Ask for confirmation, showing the difference between the old and
-the new file names.  Refrain from performing the operation if the
-buffer has unsaved changes.
+Unless AUTO-CONFIRM is non-nil (such as with a prefix argument),
+ask for confirmation, showing the difference between the old and
+the new file names.
 
 Never modify the identifier of the FILE, if any, even if it is
 edited in the front matter.  Denote considers the file name to be
 the source of truth in this case to avoid potential breakage with
 typos and the like.
 
-\(fn FILE)" t nil)
+Refrain from performing the operation if the buffer has unsaved
+changes.  Inform the user about the need to save their changes
+first.  If AUTO-CONFIRM is non-nil, then save the buffer and
+proceed with the renaming.
+
+\(fn FILE &optional AUTO-CONFIRM)" t nil)
 
 (autoload 'denote-dired-rename-marked-files-using-front-matter "denote" "\
 Rename marked files in Dired using their front matter as input.
@@ -288,10 +321,22 @@ argument (\\[universal-argument]), insert links with just the
 identifier and no further description.  In this case, the link
 format is always [[denote:IDENTIFIER]].
 
+Use TARGET's title for the link's description.  The title comes
+either from the front matter or the file name.
+
+If region is active, use its text as the link's description
+instead of TARGET's title.  If active region is empty (i.e
+whitespace-only), insert an ID-ONLY link.
+
 \(fn TARGET &optional ID-ONLY)" t nil)
 
 (autoload 'denote-link-find-file "denote" "\
 Use minibuffer completion to visit linked file." t nil)
+
+(autoload 'denote-link-find-backlink "denote" "\
+Use minibuffer completion to visit backlink to current file.
+
+Like `denote-link-find-file', but select backlink to follow." t nil)
 
 (autoload 'denote-link-after-creating "denote" "\
 Create new note in the background and link to it directly.
@@ -370,6 +415,16 @@ inserts links with just the identifier.
 
 \(fn REGEXP &optional ID-ONLY)" t nil)
 
+(autoload 'denote-link-add-missing-links "denote" "\
+Insert missing links to all notes matching REGEXP.
+Similar to `denote-link-add-links' but insert only links not yet
+present in the current buffer.
+
+Optional ID-ONLY has the same meaning as in `denote-link': it
+inserts links with just the identifier.
+
+\(fn REGEXP &optional ID-ONLY)" t nil)
+
 (autoload 'denote-link-dired-marked-notes "denote" "\
 Insert Dired marked FILES as links in BUFFER.
 
@@ -392,6 +447,32 @@ This command is meant to be used from a Dired buffer.
 
 \(fn FILES BUFFER &optional ID-ONLY)" '(dired-mode) nil)
 
+(autoload 'denote-link-ol-follow "denote" "\
+Find file of type `denote:' matching LINK.
+LINK is the identifier of the note, optionally followed by a
+search option akin to that of standard Org `file:' link types.
+Read Info node `(org) Search Options'.
+
+Uses the function `denote-directory' to establish the path to the
+file.
+
+\(fn LINK)" nil nil)
+
+(autoload 'denote-link-ol-complete "denote" "\
+Like `denote-link' but for Org integration.
+This lets the user complete a link through the `org-insert-link'
+interface by first selecting the `denote:' hyperlink type." nil nil)
+
+(autoload 'denote-link-ol-store "denote" "\
+Handler for `org-store-link' adding support for denote: links." nil nil)
+
+(autoload 'denote-link-ol-export "denote" "\
+Export a `denote:' link from Org files.
+The LINK, DESCRIPTION, and FORMAT are handled by the export
+backend.
+
+\(fn LINK DESCRIPTION FORMAT)" nil nil)
+
 (eval-after-load 'org `(funcall ',(lambda nil (with-no-warnings (org-link-set-parameters "denote" :follow #'denote-link-ol-follow :face 'denote-faces-link :complete #'denote-link-ol-complete :store #'denote-link-ol-store :export #'denote-link-ol-export)))))
 
 (autoload 'denote-org-capture "denote" "\
@@ -408,55 +489,6 @@ output of the `denote-org-capture-specifiers' (which can include
 arbitrary text).
 
 Consult the manual for template samples." nil nil)
-
-(autoload 'denote-migrate-old-org-filetags "denote" "\
-Rewrite Org filetags' value as colon-separated.
-
-Change the filetags from:
-
-    #+filetags:   one  two
-
-To the standard format of:
-
-    #+filetags:  :one:two:
-
-A single tags chnages from TAG to :TAG:.
-
-Denote used to format filetags with two spaces between them, but
-this is not fully supported by Org.  The colon-separated entries
-are the rule.
-
-The rewrite DOES NOT SAVE BUFFERS.  The user is expected to
-review the changes, such as by using `diff-buffer-with-file'.
-Multiple buffers can be saved with `save-some-buffers' (check its
-doc string).
-
-This command is provided for the convenience of the user.  It
-shall be deprecated and eventually removed from future versions
-of Denote.  Written on 2022-08-10 for version 0.5.0." t nil)
-
-(autoload 'denote-migrate-old-markdown-yaml-tags "denote" "\
-Rewrite Markdown YAML tags value as comma-separated strings.
-
-Change the tags from:
-
-    tags:   one  two
-
-To the standard format of:
-
-    tags:  [\"one\", \"two\"]
-
-Denote used to format filetags with two spaces between them, but
-this is not supported by YAML.
-
-The rewrite DOES NOT SAVE BUFFERS.  The user is expected to
-review the changes, such as by using `diff-buffer-with-file'.
-Multiple buffers can be saved with `save-some-buffers' (check its
-doc string).
-
-This command is provided for the convenience of the user.  It
-shall be deprecated and eventually removed from future versions
-of Denote.  Written on 2022-08-10 for version 0.5.0." t nil)
 
 (register-definition-prefixes "denote" '("denote-"))
 

@@ -6,7 +6,7 @@
 ;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
 ;; URL: https://git.sr.ht/~protesilaos/denote
 ;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
-;; Version: 1.0.0
+;; Version: 1.1.0
 ;; Package-Requires: ((emacs "27.2"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -516,8 +516,9 @@ and use one of the extensions implied by `denote-file-type'."
 
 (defun denote-file-has-identifier-p (file)
   "Return non-nil if FILE has a Denote identifier."
-  (let ((file-name (file-name-nondirectory file)))
-    (string-match-p (concat "\\`" denote-id-regexp) file-name)))
+  (when file
+    (string-match-p (concat "\\`" denote-id-regexp)
+                    (file-name-nondirectory file))))
 
 (define-obsolete-function-alias
   'denote--file-has-identifier-p
@@ -602,6 +603,11 @@ value, as explained in its doc string."
       (not (denote-file-has-identifier-p f)))
     (directory-files-recursively (denote-directory) directory-files-no-dot-files-regexp t))))
 
+(defun denote-directory-text-only-files ()
+  "Return list of text files in variable `denote-directory'.
+Filter `denote-directory-files' using `denote-file-is-note-p'."
+  (seq-filter #'denote-file-is-note-p (denote-directory-files)))
+
 (define-obsolete-function-alias
   'denote--directory-files
   'denote-directory-files
@@ -645,9 +651,10 @@ value, as explained in its doc string."
   'denote-directory-files-matching-regexp
   "1.0.0")
 
-(defun denote-file-prompt ()
-  "Prompt for file with identifier in variable `denote-directory'."
-  (read-file-name "Select note: " (denote-directory) nil nil nil
+(defun denote-file-prompt (&optional initial-text)
+  "Prompt for file with identifier in variable `denote-directory'.
+With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
+  (read-file-name "Select note: " (denote-directory) nil nil initial-text
                   (lambda (f)
                     (or (denote-file-has-identifier-p f)
                         (file-directory-p f)))))
@@ -696,11 +703,13 @@ existing notes and combine them into a list with
 (defvar denote--keyword-history nil
   "Minibuffer history of inputted keywords.")
 
-(defun denote--keywords-crm (keywords)
-  "Use `completing-read-multiple' for KEYWORDS."
+(defun denote--keywords-crm (keywords &optional prompt)
+  "Use `completing-read-multiple' for KEYWORDS.
+With optional PROMPT, use it instead of a generic text for file
+keywords."
   (delete-dups
    (completing-read-multiple
-    "File keyword: " keywords
+    (or prompt "File keyword: ") keywords
     nil nil nil 'denote--keyword-history)))
 
 (defun denote-keywords-prompt ()
@@ -784,8 +793,10 @@ This can be used in `denote-file-types' to format front mattter."
 (defun denote-trim-whitespace (s)
   "Trim whitespace around string S.
 This can be used in `denote-file-types' to format front mattter."
-  (let ((trims "[ \t\n\r]+"))
-    (string-trim s trims trims)))
+  (if (string-blank-p s)
+      ""
+    (let ((trims "[ \t\n\r]+"))
+      (string-trim s trims trims))))
 
 (defun denote--trim-quotes (s)
   "Trim quotes around string S."
@@ -795,7 +806,9 @@ This can be used in `denote-file-types' to format front mattter."
 (defun denote-trim-whitespace-then-quotes (s)
   "Trim whitespace then quotes around string S.
 This can be used in `denote-file-types' to format front mattter."
-  (denote--trim-quotes (denote-trim-whitespace s)))
+  (if (string-blank-p s)
+      ""
+    (denote--trim-quotes (denote-trim-whitespace s))))
 
 (defun denote-format-keywords-for-md-front-matter (keywords)
   "Format front matter KEYWORDS for markdown file type.
@@ -819,8 +832,13 @@ for how this is used."
 
 (defun denote-extract-keywords-from-front-matter (keywords-string)
   "Extract keywords list from front matter KEYWORDS-STRING.
+Split KEYWORDS-STRING into a list of strings.  If KEYWORDS-STRING
+satisfies `string-blank-p', return an empty string.
+
 Consult the `denote-file-types' for how this is used."
-  (split-string keywords-string "[:,\s]+" t "[][ \"']+"))
+  (if (string-blank-p keywords-string)
+      ""
+    (split-string keywords-string "[:,\s]+" t "[][ \"']+")))
 
 (defvar denote-file-types
   ;; If denote-file-type is nil, we use the first element
@@ -828,7 +846,7 @@ Consult the `denote-file-types' for how this is used."
   ;; to be org by default.
   `((org
      :extension ".org"
-     :front-matter ,denote-org-front-matter
+     :front-matter denote-org-front-matter
      :title-key-regexp "^#\\+title\\s-*:"
      :title-value-function identity
      :title-value-reverse-function denote-trim-whitespace
@@ -837,7 +855,7 @@ Consult the `denote-file-types' for how this is used."
      :keywords-value-reverse-function denote-extract-keywords-from-front-matter)
     (markdown-yaml
      :extension ".md"
-     :front-matter ,denote-yaml-front-matter
+     :front-matter denote-yaml-front-matter
      :title-key-regexp "^title\\s-*:"
      :title-value-function denote-surround-with-quotes
      :title-value-reverse-function denote-trim-whitespace-then-quotes
@@ -846,7 +864,7 @@ Consult the `denote-file-types' for how this is used."
      :keywords-value-reverse-function denote-extract-keywords-from-front-matter)
     (markdown-toml
      :extension ".md"
-     :front-matter ,denote-toml-front-matter
+     :front-matter denote-toml-front-matter
      :title-key-regexp "^title\\s-*="
      :title-value-function denote-surround-with-quotes
      :title-value-reverse-function denote-trim-whitespace-then-quotes
@@ -855,7 +873,7 @@ Consult the `denote-file-types' for how this is used."
      :keywords-value-reverse-function denote-extract-keywords-from-front-matter)
     (text
      :extension ".txt"
-     :front-matter ,denote-text-front-matter
+     :front-matter denote-text-front-matter
      :title-key-regexp "^title\\s-*:"
      :title-value-function identity
      :title-value-reverse-function denote-trim-whitespace
@@ -911,9 +929,12 @@ PROPERTY-LIST is a plist that consists of 8 elements:
 
 (defun denote--front-matter (file-type)
   "Return front matter based on FILE-TYPE."
-  (plist-get
-   (alist-get file-type denote-file-types)
-   :front-matter))
+  (let ((prop (plist-get
+               (alist-get file-type denote-file-types)
+               :front-matter)))
+    (if (symbolp prop)
+        (symbol-value prop)
+      prop)))
 
 (defun denote--title-key-regexp (file-type)
   "Return the title key regexp associated to FILE-TYPE."
@@ -990,8 +1011,8 @@ contain the newline."
 
 (defun denote-retrieve-filename-identifier (file)
   "Extract identifier from FILE name.
-To only return an existing identifier or create a new one, refer
-to the function `denote-retrieve-or-create-file-identifier'."
+To return an existing identifier or create a new one, refer to
+the function `denote-retrieve-or-create-file-identifier'."
   (if (denote-file-has-identifier-p file)
       (progn
         (string-match denote-id-regexp file)
@@ -1003,13 +1024,28 @@ to the function `denote-retrieve-or-create-file-identifier'."
   'denote-retrieve-filename-identifier
   "1.0.0")
 
-(defun denote-retrieve-or-create-file-identifier (file)
-  "Return FILE identifier, else generate one.
+(defun denote-retrieve-or-create-file-identifier (file &optional date)
+  "Return FILE identifier, generating one if appropriate.
+
+The conditions are as follows:
+
+- If FILE has an identifier, return it.
+
+- If FILE does not have an identifier and optional DATE is
+  non-nil, invoke `denote-prompt-for-date-return-id'.
+
+- If FILE does not have an identifier and DATE is nil, use the
+  file attributes to determine the last modified date and format
+  it as an identifier.
+
+- As a fallback, derive an identifier from the current time.
+
 To only return an existing identifier, refer to the function
 `denote-retrieve-filename-identifier'."
   (cond
    ((string-match denote-id-regexp file)
     (substring file (match-beginning 0) (match-end 0)))
+   (date (denote-prompt-for-date-return-id))
    ((denote--file-attributes-time file))
    (t (format-time-string denote-id-format))))
 
@@ -1090,7 +1126,8 @@ Run `denote-desluggify' on title if the extraction is sucessful."
 (defun denote--retrieve-title-or-filename (file type)
   "Return appropriate title for FILE given its TYPE."
   (if-let (((denote-file-is-note-p file))
-           (title (denote-retrieve-title-value file type)))
+           (title (denote-retrieve-title-value file type))
+           ((not (string-blank-p title))))
       title
     (denote-retrieve-filename-title file)))
 
@@ -1098,7 +1135,7 @@ Run `denote-desluggify' on title if the extraction is sucessful."
   "Return xrefs of IDENTIFIER in variable `denote-directory'.
 The xrefs are returned as an alist."
   (xref--alistify
-   (xref-matches-in-files identifier (denote-directory-files))
+   (xref-matches-in-files identifier (denote-directory-text-only-files))
    (lambda (x)
      (xref-location-group (xref-item-location x)))))
 
@@ -1111,10 +1148,9 @@ Parse `denote--retrieve-xrefs'."
 
 (defun denote--retrieve-process-grep (identifier)
   "Process lines matching IDENTIFIER and return list of files."
-  (seq-filter
-   #'denote-file-is-note-p
-   (delete (buffer-file-name) (denote--retrieve-files-in-xrefs
-                               (denote--retrieve-xrefs identifier)))))
+  (delete (buffer-file-name)
+          (denote--retrieve-files-in-xrefs
+           (denote--retrieve-xrefs identifier))))
 
 ;;;; New note
 
@@ -1129,7 +1165,7 @@ string.  EXTENSION is the file type extension, as a string."
         (file-name (concat path id)))
     (when (and title-slug (not (string-empty-p title-slug)))
       (setq file-name (concat file-name "--" title-slug)))
-    (when keywords
+    (when (and keywords (not (string-blank-p kws)))
       (setq file-name (concat file-name "__" kws)))
     (concat file-name extension)))
 
@@ -1156,9 +1192,10 @@ Apply `downcase' to KEYWORDS."
 TITLE, DATE, KEYWORDS, FILENAME, ID are all strings which are
 provided by `denote'.  FILETYPE is one of the values of
 `denote-file-type'."
-  (let ((title (denote--format-front-matter-title title filetype))
-        (kws (denote--format-front-matter-keywords keywords filetype)))
-    (format (denote--front-matter filetype) title date kws id)))
+  (let* ((fm (denote--front-matter filetype))
+         (title (denote--format-front-matter-title title filetype))
+         (kws (denote--format-front-matter-keywords keywords filetype)))
+    (if fm (format fm title date kws id) "")))
 
 (defun denote--path (title keywords dir id file-type)
   "Return path to new file with ID, TITLE, KEYWORDS and FILE-TYPE in DIR."
@@ -1406,6 +1443,12 @@ Use Org's more advanced date selection utility if the user option
   'denote-date-prompt
   "1.0.0")
 
+(defun denote-prompt-for-date-return-id ()
+  "Use `denote-date-prompt' and return it as `denote-id-format'."
+  (format-time-string
+   denote-id-format
+   (denote--valid-date (denote-date-prompt))))
+
 (defvar denote--subdir-history nil
   "Minibuffer history of `denote-subdirectory-prompt'.")
 
@@ -1531,6 +1574,60 @@ If file does not exist, invoke `denote' to create a file."
       (find-file target)
     (call-interactively #'denote)))
 
+;;;###autoload
+(defun denote-keywords-add (keywords)
+  "Prompt for KEYWORDS to add to the current note's front matter.
+When called from Lisp, KEYWORDS is a list of strings.
+
+Rename the file without further prompt so that its name reflects
+the new front matter, per `denote-rename-file-using-front-matter'."
+  (interactive (list (denote-keywords-prompt)))
+  ;; A combination of if-let and let, as we need to take into account
+  ;; the scenario in which there are no keywords yet.
+  (if-let* ((file (buffer-file-name))
+            ((denote-file-is-note-p file))
+            (file-type (denote-filetype-heuristics file)))
+      (let* ((cur-keywords (denote-retrieve-keywords-value file file-type))
+             (new-keywords (if (and (stringp cur-keywords)
+                                    (string-blank-p cur-keywords))
+                               keywords
+                             (seq-uniq (append keywords cur-keywords)))))
+        (denote--rewrite-keywords file new-keywords file-type)
+        (denote-rename-file-using-front-matter file t))
+    (user-error "Buffer not visiting a Denote file")))
+
+(defun denote--keywords-delete-prompt (keywords)
+  "Prompt for one or more KEYWORDS.
+In the case of multiple entries, those are separated by the
+`crm-sepator', which typically is a comma.  In such a case, the
+output is sorted with `string-lessp'."
+  (let ((choice (denote--keywords-crm keywords "Keyword to remove: ")))
+    (if denote-sort-keywords
+        (sort choice #'string-lessp)
+      choice)))
+
+;;;###autoload
+(defun denote-keywords-remove ()
+  "Prompt for keywords in current note and remove them.
+Keywords are retrieved from the file's front matter.
+
+Rename the file without further prompt so that its name reflects
+the new front matter, per `denote-rename-file-using-front-matter'."
+  (declare (interactive-only t))
+  (interactive)
+  (if-let* ((file (buffer-file-name))
+            ((denote-file-is-note-p file))
+            (file-type (denote-filetype-heuristics file)))
+      (when-let* ((cur-keywords (denote-retrieve-keywords-value file file-type))
+                  ((or (listp cur-keywords) (not (string-blank-p cur-keywords))))
+                  (del-keyword (denote--keywords-delete-prompt cur-keywords)))
+        (denote--rewrite-keywords
+         file
+         (seq-difference cur-keywords del-keyword)
+         file-type)
+        (denote-rename-file-using-front-matter file t))
+    (user-error "Buffer not visiting a Denote file")))
+
 ;;;; Note modification
 
 ;;;;; Common helpers for note modifications
@@ -1600,7 +1697,13 @@ the file type is assumed to be the first of `denote-file-types'."
 (defun denote-rename-file-and-buffer (old-name new-name)
   "Rename file named OLD-NAME to NEW-NAME, updating buffer name."
   (unless (string= (expand-file-name old-name) (expand-file-name new-name))
-    (rename-file old-name new-name nil)
+    (cond
+     ((derived-mode-p 'dired-mode)
+      (dired-rename-file old-name new-name nil))
+     ((vc-backend old-name)
+      (vc-rename-file old-name new-name))
+     (t
+      (rename-file old-name new-name nil)))
     (denote--rename-buffer old-name new-name)))
 
 (define-obsolete-function-alias
@@ -1716,7 +1819,7 @@ Throw error is FILE is not regular, else return FILE."
   "1.0.0")
 
 ;;;###autoload
-(defun denote-rename-file (file title keywords)
+(defun denote-rename-file (file title keywords &optional date)
   "Rename file and update existing front matter if appropriate.
 
 If in Dired, consider FILE to be the one at point, else prompt
@@ -1724,9 +1827,19 @@ with minibuffer completion for one.
 
 If FILE has a Denote-compliant identifier, retain it while
 updating the TITLE and KEYWORDS fields of the file name.  Else
-create an identifier based on the file's attribute of last
-modification time.  If such attribute cannot be found, the
-identifier falls back to the `current-time'.
+create an identifier based on the following conditions:
+
+- If FILE does not have an identifier and optional DATE is
+  non-nil (such as with a prefix argument), invoke the function
+  `denote-prompt-for-date-return-id'.  It prompts for a date and
+  uses it to derive the identifier.
+
+- If FILE does not have an identifier and optional DATE is
+  nil (this is the case without a prefix argument), use the file
+  attributes to determine the last modified date and format it as
+  an identifier.
+
+- As a fallback, derive an identifier from the current time.
 
 The default TITLE is retrieved from a line starting with a title
 field in the file's contents, depending on the given file
@@ -1778,9 +1891,10 @@ files)."
       file
       (denote-title-prompt
        (denote--retrieve-title-or-filename file file-type))
-      (denote-keywords-prompt))))
+      (denote-keywords-prompt)
+      current-prefix-arg)))
   (let* ((dir (file-name-directory file))
-         (id (denote-retrieve-or-create-file-identifier file))
+         (id (denote-retrieve-or-create-file-identifier file date))
          (extension (file-name-extension file t))
          (file-type (denote-filetype-heuristics file))
          (new-name (denote-format-file-name
@@ -1844,24 +1958,30 @@ The operation does the following:
     (user-error "No marked files; aborting")))
 
 ;;;###autoload
-(defun denote-rename-file-using-front-matter (file)
+(defun denote-rename-file-using-front-matter (file &optional auto-confirm)
   "Rename FILE using its front matter as input.
 When called interactively, FILE is the return value of the
 function `buffer-file-name' which is subsequently inspected for
 the requisite front matter.  It is thus implied that the FILE has
 a file type that is supported by Denote, per `denote-file-type'.
 
-Ask for confirmation, showing the difference between the old and
-the new file names.  Refrain from performing the operation if the
-buffer has unsaved changes.
+Unless AUTO-CONFIRM is non-nil (such as with a prefix argument),
+ask for confirmation, showing the difference between the old and
+the new file names.
 
 Never modify the identifier of the FILE, if any, even if it is
 edited in the front matter.  Denote considers the file name to be
 the source of truth in this case to avoid potential breakage with
-typos and the like."
-  (interactive (list (buffer-file-name)))
+typos and the like.
+
+Refrain from performing the operation if the buffer has unsaved
+changes.  Inform the user about the need to save their changes
+first.  If AUTO-CONFIRM is non-nil, then save the buffer and
+proceed with the renaming."
+  (interactive (list (buffer-file-name) current-prefix-arg))
   (when (buffer-modified-p)
-    (if (y-or-n-p "Would you like to save the buffer?")
+    (if (or auto-confirm
+            (y-or-n-p "Would you like to save the buffer?"))
         (save-buffer)
       (user-error "Save buffer before proceeding")))
   (unless (denote-file-is-writable-and-supported-p file)
@@ -1874,7 +1994,8 @@ typos and the like."
             (dir (file-name-directory file))
             (new-name (denote-format-file-name
                        dir id keywords (denote-sluggify title) extension)))
-      (when (denote-rename-file-prompt file new-name)
+      (when (or auto-confirm
+                (denote-rename-file-prompt file new-name))
         (denote-rename-file-and-buffer file new-name)
         (denote-update-dired-buffers))
     (user-error "No front matter for title and/or keywords")))
@@ -2198,12 +2319,14 @@ title."
     ("md" denote-link--regexp-markdown)
     (_ denote-link--regexp-org)))
 
-(defun denote-link--format-link (file pattern)
-  "Prepare link to FILE using PATTERN."
+(defun denote-link--format-link (file pattern &optional description)
+  "Prepare link to FILE using PATTERN.
+If DESCRIPTION is non-nil, use it as link description instead of
+FILE's title."
   (let* ((file-id (denote-retrieve-filename-identifier file))
          (file-type (denote-filetype-heuristics file))
          (file-title (unless (string= pattern denote-link--format-id-only)
-                       (denote--retrieve-title-or-filename file file-type))))
+                       (or description (denote--retrieve-title-or-filename file file-type)))))
     (format pattern file-id file-title)))
 
 ;;;###autoload
@@ -2212,13 +2335,30 @@ title."
 With optional ID-ONLY, such as a universal prefix
 argument (\\[universal-argument]), insert links with just the
 identifier and no further description.  In this case, the link
-format is always [[denote:IDENTIFIER]]."
+format is always [[denote:IDENTIFIER]].
+
+Use TARGET's title for the link's description.  The title comes
+either from the front matter or the file name.
+
+If region is active, use its text as the link's description
+instead of TARGET's title.  If active region is empty (i.e
+whitespace-only), insert an ID-ONLY link."
   (interactive (list (denote-file-prompt) current-prefix-arg))
-  (let ((beg (point)))
+  (let* ((beg (point))
+         (description (when-let* (((region-active-p))
+                                  (beg (region-beginning))
+                                  (end (region-end))
+                                  (selected-text
+                                   (string-trim
+                                    (buffer-substring-no-properties beg end))))
+                        (delete-region beg end)
+                        selected-text))
+         (id-only (or id-only (string-empty-p description))))
     (insert
      (denote-link--format-link
       target
-      (denote-link--file-type-format (buffer-file-name) id-only)))
+      (denote-link--file-type-format (buffer-file-name) id-only)
+      description))
     (unless (derived-mode-p 'org-mode)
       (make-button beg (point) 'type 'denote-link-button))))
 
@@ -2252,7 +2392,7 @@ format is always [[denote:IDENTIFIER]]."
   (let ((file-names (mapcar #'denote-get-file-name-relative-to-denote-directory
                             files)))
     (completing-read
-     "Find linked file "
+     "Find linked file: "
      (denote--completion-table 'file file-names)
      nil t nil 'denote-link--find-file-history)))
 
@@ -2267,6 +2407,20 @@ format is always [[denote:IDENTIFIER]]."
         (denote-extract-id-from-string
          (denote-link--find-file-prompt files))))
     (user-error "No links found in the current buffer")))
+
+;;;###autoload
+(defun denote-link-find-backlink ()
+  "Use minibuffer completion to visit backlink to current file.
+
+Like `denote-link-find-file', but select backlink to follow."
+  (interactive)
+  (when-let* ((file (buffer-file-name))
+              (id (denote-retrieve-filename-identifier file))
+              (files (denote--retrieve-process-grep id)))
+    (find-file
+     (denote-get-path-by-id
+      (denote-extract-id-from-string
+       (denote-link--find-file-prompt files))))))
 
 ;;;###autoload
 (defun denote-link-after-creating (&optional id-only)
@@ -2424,7 +2578,8 @@ Expand `denote-link-backlinks-display-buffer-action'."
   "Create backlinks' buffer for ID including FILES.
 Use optional TITLE for a prettier heading."
   (let ((inhibit-read-only t)
-        (buf (format "*denote-backlinks to %s*" id)))
+        (buf (format "*denote-backlinks to %s*" id))
+        (file (buffer-file-name)))
     (with-current-buffer (get-buffer-create buf)
       (setq-local default-directory (denote-directory))
       (erase-buffer)
@@ -2441,7 +2596,12 @@ Use optional TITLE for a prettier heading."
             files)
       (goto-char (point-min))
       (when denote-link-fontify-backlinks
-        (font-lock-add-keywords nil denote-faces-file-name-keywords-for-backlinks t)))
+        (font-lock-add-keywords nil denote-faces-file-name-keywords-for-backlinks t))
+      (setq-local revert-buffer-function
+                  (lambda (_ignore-auto _noconfirm)
+                    (when-let ((buffer-file-name file)
+                               (files (denote--retrieve-process-grep id)))
+                      (denote-link--prepare-backlinks id files title)))))
     (denote-link--display-buffer buf)))
 
 ;;;###autoload
@@ -2509,14 +2669,38 @@ inserts links with just the identifier."
     (read-regexp "Insert links matching REGEX: " nil 'denote-link--add-links-history)
     current-prefix-arg))
   (let ((current-file (buffer-file-name)))
-    (if-let ((files (delete current-file (denote-directory-files-matching-regexp regexp))))
-        (let ((beg (point)))
+    (if-let ((files (delete current-file (denote-directory-files-matching-regexp regexp)))
+             (beg (point)))
+        (progn
           (insert (denote-link--prepare-links files current-file id-only))
-          (unless (derived-mode-p 'org-mode)
-            (denote-link-buttonize-buffer beg (point))))
-      (user-error "No links matching `%s'" regexp))))
+          (denote-link-buttonize-buffer beg (point)))
+      (message "No links matching `%s'" regexp))))
 
 (defalias 'denote-link-insert-links-matching-regexp (symbol-function 'denote-link-add-links))
+
+;;;###autoload
+(defun denote-link-add-missing-links (regexp &optional id-only)
+  "Insert missing links to all notes matching REGEXP.
+Similar to `denote-link-add-links' but insert only links not yet
+present in the current buffer.
+
+Optional ID-ONLY has the same meaning as in `denote-link': it
+inserts links with just the identifier."
+  (interactive
+   (list
+    (read-regexp "Insert links matching REGEX: " nil 'denote-link--add-links-history)
+    current-prefix-arg))
+  (let* ((current-file (buffer-file-name))
+         (current-id (denote-link--file-type-regexp current-file))
+         (linked-files (denote-link--expand-identifiers current-id)))
+    (if-let* ((found-files (delete current-file
+                                   (denote-directory-files-matching-regexp regexp)))
+              (final-files (seq-difference found-files linked-files))
+              (beg (point)))
+        (progn
+          (insert (denote-link--prepare-links final-files current-file id-only))
+          (denote-link-buttonize-buffer beg (point)))
+      (message "No links matching `%s' that aren't yet present in the current buffer" regexp))))
 
 ;;;;; Links from Dired marks
 
@@ -2600,6 +2784,7 @@ and the identifier."
       (concat path "::" search))
      (path))))
 
+;;;###autoload
 (defun denote-link-ol-follow (link)
   "Find file of type `denote:' matching LINK.
 LINK is the identifier of the note, optionally followed by a
@@ -2612,6 +2797,7 @@ file."
    (denote-link--ol-resolve-link-to-target link)
    nil))
 
+;;;###autoload
 (defun denote-link-ol-complete ()
   "Like `denote-link' but for Org integration.
 This lets the user complete a link through the `org-insert-link'
@@ -2623,7 +2809,8 @@ interface by first selecting the `denote:' hyperlink type."
 (declare-function org-link-store-props "ol.el" (&rest plist))
 (defvar org-store-link-plist)
 
-(defun denote-link-ol-store()
+;;;###autoload
+(defun denote-link-ol-store ()
   "Handler for `org-store-link' adding support for denote: links."
   (when-let* ((file (buffer-file-name))
               ((denote-file-is-note-p file))
@@ -2634,8 +2821,9 @@ interface by first selecting the `denote:' hyperlink type."
      :type "denote"
      :description file-title
      :link (concat "denote:" file-id))
-  org-store-link-plist))
+    org-store-link-plist))
 
+;;;###autoload
 (defun denote-link-ol-export (link description format)
   "Export a `denote:' link from Org files.
 The LINK, DESCRIPTION, and FORMAT are handled by the export
@@ -2726,91 +2914,8 @@ Consult the manual for template samples."
 
 (add-hook 'org-capture-after-finalize-hook #'denote-org-capture-delete-empty-file)
 
-;;;; For the migration of old Org filetags/Markdown+YAML tags
-
-(defun denote--migrate-type-files (type file-type)
-  "Return list of TYPE files in variable `denote-directory'.
-TYPE is a string which matches the `file-name-extension'.
-FILE-TYPE is the symbol file-type."
-  (delq nil
-        (mapcar
-         (lambda (file)
-           (when-let* ((value (denote-retrieve-keywords-line
-                               file file-type))
-                       ((cond
-                         ((eq file-type 'markdown-yaml) (not (string-match-p "," value)))
-                         ((eq file-type 'org) (not (string-match-p " :" value)))
-                         (t nil))))
-             file))
-         (seq-remove
-          (lambda (file)
-            (not (string= (file-name-extension file) type)))
-          (denote-directory-files)))))
-
-;;;###autoload
-(defun denote-migrate-old-org-filetags ()
-  "Rewrite Org filetags' value as colon-separated.
-
-Change the filetags from:
-
-    #+filetags:   one  two
-
-To the standard format of:
-
-    #+filetags:  :one:two:
-
-A single tags chnages from TAG to :TAG:.
-
-Denote used to format filetags with two spaces between them, but
-this is not fully supported by Org.  The colon-separated entries
-are the rule.
-
-The rewrite DOES NOT SAVE BUFFERS.  The user is expected to
-review the changes, such as by using `diff-buffer-with-file'.
-Multiple buffers can be saved with `save-some-buffers' (check its
-doc string).
-
-This command is provided for the convenience of the user.  It
-shall be deprecated and eventually removed from future versions
-of Denote.  Written on 2022-08-10 for version 0.5.0."
-  (interactive)
-  (when-let (((yes-or-no-p "Rewrite filetags in Org files to use colons (buffers are NOT saved)?"))
-             (files (denote--migrate-type-files "org" 'org)))
-    (dolist (file files)
-      (when-let* ((kw (denote-retrieve-keywords-value file 'org))
-                  ((denote--edit-front-matter-p file 'org)))
-        (denote--rewrite-keywords file kw 'org)))))
-
-;;;###autoload
-(defun denote-migrate-old-markdown-yaml-tags ()
-  "Rewrite Markdown YAML tags value as comma-separated strings.
-
-Change the tags from:
-
-    tags:   one  two
-
-To the standard format of:
-
-    tags:  [\"one\", \"two\"]
-
-Denote used to format filetags with two spaces between them, but
-this is not supported by YAML.
-
-The rewrite DOES NOT SAVE BUFFERS.  The user is expected to
-review the changes, such as by using `diff-buffer-with-file'.
-Multiple buffers can be saved with `save-some-buffers' (check its
-doc string).
-
-This command is provided for the convenience of the user.  It
-shall be deprecated and eventually removed from future versions
-of Denote.  Written on 2022-08-10 for version 0.5.0."
-  (interactive)
-  (when-let (((yes-or-no-p "Rewrite tags in Markdown files with YAML header to use lists (buffers are NOT saved)?"))
-             (files (denote--migrate-type-files "md" 'markdown-yaml)))
-    (dolist (file files)
-      (when-let* ((kw (denote-retrieve-keywords-value file 'markdown-yaml))
-                  ((denote--edit-front-matter-p file 'markdown-yaml)))
-        (denote--rewrite-keywords file kw 'markdown-yaml)))))
+(make-obsolete 'denote-migrate-old-org-filetags nil "1.1.0")
+(make-obsolete 'denote-migrate-old-markdown-yaml-tags nil "1.1.0")
 
 (provide 'denote)
 ;;; denote.el ends here
