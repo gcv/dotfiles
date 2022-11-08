@@ -435,7 +435,9 @@
 
 (use-package expand-region
   :bind
-  (("C-S-SPC" . er/expand-region))
+  (("C-S-SPC" . er/expand-region)
+   ("C-c SPC" . er/expand-region)       ; terminal
+   )
   )
 
 

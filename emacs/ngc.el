@@ -96,9 +96,10 @@
 
   :bind
   (("C-," . embark-act)
-   ("C-c ," . embark-act)
+   ("C-c ," . embark-act)               ; terminal
    ("C-M-," . embark-dwim)
-   ("C-c M-," . embark-dwim))
+   ("C-c M-," . embark-dwim)            ; terminal
+   )
 
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
