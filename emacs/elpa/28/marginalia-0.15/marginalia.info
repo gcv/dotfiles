@@ -1,4 +1,4 @@
-This is marginalia.info, produced by makeinfo version 6.7 from
+This is docYD2eJk.info, produced by makeinfo version 6.7 from
 marginalia.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: marginalia.info,  Node: Top,  Next: Configuration,  Up: (dir)
+File: docYD2eJk.info,  Node: Top,  Next: Configuration,  Up: (dir)
 
 marginalia.el - Marginalia in the minibuffer
 ********************************************
@@ -37,7 +37,7 @@ annotators or even disable the annotator with command
 * Contributions::
 
 
-File: marginalia.info,  Node: Configuration,  Next: Information shown by the annotators,  Prev: Top,  Up: Top
+File: docYD2eJk.info,  Node: Configuration,  Next: Information shown by the annotators,  Prev: Top,  Up: Top
 
 1 Configuration
 ***************
@@ -46,10 +46,10 @@ It is recommended to use Marginalia together with either the Vertico
 (https://github.com/minad/vertico), Mct
 (https://github.com/protesilaos/mct), Icomplete
 (https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html)
-or the Selectrum (https://github.com/raxod502/selectrum) completion
-system.  Furthermore Marginalia can be combined with Embark
-(https://github.com/oantolin/embark) for action support and Consult
-(https://github.com/minad/consult), which provides many useful commands.
+or the default completion UI.  Furthermore Marginalia can be combined
+with Embark (https://github.com/oantolin/embark) for action support and
+Consult (https://github.com/minad/consult), which provides many useful
+commands.
 
      ;; Enable rich annotations using the Marginalia package
      (use-package marginalia
@@ -66,7 +66,7 @@ system.  Furthermore Marginalia can be combined with Embark
        (marginalia-mode))
 
 
-File: marginalia.info,  Node: Information shown by the annotators,  Next: Adding custom annotators or classifiers,  Prev: Configuration,  Up: Top
+File: docYD2eJk.info,  Node: Information shown by the annotators,  Next: Adding custom annotators or classifiers,  Prev: Configuration,  Up: Top
 
 2 Information shown by the annotators
 *************************************
@@ -81,7 +81,7 @@ more information on what the different classifications mean, see the
 docstring of ‘marginalia--symbol-class’.
 
 
-File: marginalia.info,  Node: Adding custom annotators or classifiers,  Next: Disabling annotators builtin or lightweight annotators,  Prev: Information shown by the annotators,  Up: Top
+File: docYD2eJk.info,  Node: Adding custom annotators or classifiers,  Next: Disabling annotators builtin or lightweight annotators,  Prev: Information shown by the annotators,  Up: Top
 
 3 Adding custom annotators or classifiers
 *****************************************
@@ -170,7 +170,7 @@ this setting, after invoking ‘M-x describe-face RET’ you can cycle
 between all of these annotators using ‘marginalia-cycle’.
 
 
-File: marginalia.info,  Node: Disabling annotators builtin or lightweight annotators,  Next: Contributions,  Prev: Adding custom annotators or classifiers,  Up: Top
+File: docYD2eJk.info,  Node: Disabling annotators builtin or lightweight annotators,  Next: Contributions,  Prev: Adding custom annotators or classifiers,  Up: Top
 
 4 Disabling annotators, builtin or lightweight annotators
 *********************************************************
@@ -222,24 +222,24 @@ from the registry.
            (assq-delete-all 'file marginalia-annotator-registry))
 
 
-File: marginalia.info,  Node: Contributions,  Prev: Disabling annotators builtin or lightweight annotators,  Up: Top
+File: docYD2eJk.info,  Node: Contributions,  Prev: Disabling annotators builtin or lightweight annotators,  Up: Top
 
 5 Contributions
 ***************
 
 Since this package is part of GNU ELPA
-(http://elpa.gnu.org/packages/marginalia.html) contributions require a
+(https://elpa.gnu.org/packages/marginalia.html) contributions require a
 copyright assignment to the FSF.
 
 
 
 Tag Table:
-Node: Top217
-Node: Configuration1452
-Node: Information shown by the annotators2647
-Node: Adding custom annotators or classifiers3360
-Node: Disabling annotators builtin or lightweight annotators8188
-Node: Contributions10230
+Node: Top216
+Node: Configuration1450
+Node: Information shown by the annotators2598
+Node: Adding custom annotators or classifiers3310
+Node: Disabling annotators builtin or lightweight annotators8137
+Node: Contributions10178
 
 End Tag Table
 
