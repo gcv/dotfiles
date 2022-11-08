@@ -6,8 +6,8 @@
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
 ;; URL: https://codeberg.org/ideasman42/emacs-undo-fu
-;; Package-Version: 20220731.2326
-;; Package-Commit: b0d6eba024ac87a0aaf7fa66ae76d76f6c764d46
+;; Package-Version: 20221015.433
+;; Package-Commit: 9a7a297e98114deed6c66f7569b7d0ee4aa2ee0a
 ;; Version: 0.5
 ;; Package-Requires: ((emacs "25.1"))
 
@@ -98,9 +98,11 @@ Instead, explicitly call `undo-fu-disable-checkpoint'."
           (new-pul (undo-fu--backport-undo--last-change-was-undo-p new-ul)))
         (message
           "Redo%s"
-          (if undo-in-region
-            " in region"
-            ""))
+          (cond
+            (undo-in-region
+              " in region")
+            (t
+              "")))
         (setq this-command 'undo)
         (setq pending-undo-list new-pul)
         (setq buffer-undo-list new-ul)))))
