@@ -140,6 +140,10 @@
       (modeline-warning "#7f1090")
       (modeline-info    "#0000af")
 
+      (underline-err     "#ef0f1f")
+      (underline-warning "#bf5f00")
+      (underline-info    "#02af52")
+
       ;; Mappings
       (err red)
       (warning yellow-cooler)
@@ -174,7 +178,7 @@
       (mail-0 blue)
       (mail-1 cyan-cooler)
       (mail-2 magenta)
-      (mail-3 cyan)
+      (mail-3 green)
       (mail-4 cyan-warmer)
       (mail-5 blue-cooler)
 

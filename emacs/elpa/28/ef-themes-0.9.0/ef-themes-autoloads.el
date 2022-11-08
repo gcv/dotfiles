@@ -11,11 +11,16 @@
 
 (autoload 'ef-themes-select "ef-themes" "\
 Load an Ef THEME using minibuffer completion.
-When called from Lisp, THEME is a symbol.
+
+With optional VARIANT as a prefix argument, prompt to limit the
+set of themes to either dark or light variants.
 
 Run `ef-themes-post-load-hook' after loading the theme.
 
-\(fn THEME)" t nil)
+When called from Lisp, THEME is the symbol of a theme.  VARIANT
+is ignored in this scenario.
+
+\(fn THEME &optional VARIANT)" t nil)
 
 (autoload 'ef-themes-toggle "ef-themes" "\
 Toggle between the two `ef-themes-to-toggle'.
@@ -28,13 +33,14 @@ Run `ef-themes-post-load-hook' after loading the theme." t nil)
 
 (autoload 'ef-themes-load-random "ef-themes" "\
 Load an Ef theme at random, excluding the current one.
-With optional VARIANT as either `light' or `dark', limit the set
-to the relevant themes.
 
-When called interactively, VARIANT is the prefix argument which
-prompts with completion for either `light' or `dark'.
+With optional VARIANT as a prefix argument, prompt to limit the
+set of themes to either dark or light variants.
 
 Run `ef-themes-post-load-hook' after loading the theme.
+
+When called from Lisp, VARIANT is either the `dark' or `light'
+symbol.
 
 \(fn &optional VARIANT)" t nil)
 
@@ -64,12 +70,13 @@ Those are stored in `ef-themes-faces' and
 ;;;***
 
 ;;;### (autoloads nil nil ("ef-autumn-theme.el" "ef-bio-theme.el"
-;;;;;;  "ef-dark-theme.el" "ef-day-theme.el" "ef-deuteranopia-dark-theme.el"
-;;;;;;  "ef-deuteranopia-light-theme.el" "ef-duo-dark-theme.el" "ef-duo-light-theme.el"
-;;;;;;  "ef-frost-theme.el" "ef-light-theme.el" "ef-night-theme.el"
-;;;;;;  "ef-spring-theme.el" "ef-summer-theme.el" "ef-themes-pkg.el"
-;;;;;;  "ef-trio-dark-theme.el" "ef-trio-light-theme.el" "ef-winter-theme.el")
-;;;;;;  (0 0 0 0))
+;;;;;;  "ef-cherie-theme.el" "ef-cyprus-theme.el" "ef-dark-theme.el"
+;;;;;;  "ef-day-theme.el" "ef-deuteranopia-dark-theme.el" "ef-deuteranopia-light-theme.el"
+;;;;;;  "ef-duo-dark-theme.el" "ef-duo-light-theme.el" "ef-frost-theme.el"
+;;;;;;  "ef-light-theme.el" "ef-night-theme.el" "ef-spring-theme.el"
+;;;;;;  "ef-summer-theme.el" "ef-themes-pkg.el" "ef-trio-dark-theme.el"
+;;;;;;  "ef-trio-light-theme.el" "ef-tritanopia-dark-theme.el" "ef-tritanopia-light-theme.el"
+;;;;;;  "ef-winter-theme.el") (0 0 0 0))
 
 ;;;***
 

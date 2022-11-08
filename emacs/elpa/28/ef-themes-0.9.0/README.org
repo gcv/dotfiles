@@ -4,9 +4,9 @@
 #+language:              en
 #+options:               ':t toc:nil author:t email:t num:t
 #+startup:               content
-#+macro:                 stable-version 0.7.0
-#+macro:                 release-date 2022-10-08
-#+macro:                 development-version 0.8.0-dev
+#+macro:                 stable-version 0.9.0
+#+macro:                 release-date 2022-10-28
+#+macro:                 development-version 0.10.0-dev
 #+export_file_name:      ef-themes.texi
 #+texinfo_filename:      ef-themes.info
 #+texinfo_dir_category:  Emacs misc features
@@ -173,17 +173,24 @@ Everything is in place to set up the package.
 ;; - `ef-themes-preview-colors-current'
 #+end_src
 
-* Themes for red-green color deficiency
+* Themes for red-green or blue-yellow color deficiency
 :PROPERTIES:
 :CUSTOM_ID: h:c8c3f312-692f-45d0-b490-78b501c99d41
 :END:
 
-Most items in the =ef-themes= collection are designed to use colors from
-many sides of the spectrum.  Those items generally are inappropriate for
-people with red-green color deficiency or deuteranopia.  We do,
-nonetheless, provide a light and a dark theme that are optimized for
-such users.  The named of the themes are: ~ef-deuteranopia-dark~ and
-~ef-deuteranopia-light~ ([[#h:75d74aea-d17f-497f-a3b8-f0bf4c372de0][Loading a theme]]).
+Most items in the =ef-themes= collection are designed to use colors
+from many parts of the spectrum.  Those items generally are
+inappropriate for users with red-green or blue-yellow color deficiency
+(deuteranopia and tritanopia, respectively).  We do, nonetheless,
+provide light and dark themes that are optimized for such cases.  The
+names of the themes are:
+
+- ~ef-deuteranopia-dark~ and ~ef-deuteranopia-light~ for red-green
+  color deficiency;
+- ~ef-tritanopia-dark~ and ~ef-tritanopia-light~ for blue-yellow color
+  deficiency;
+
+[[#h:75d74aea-d17f-497f-a3b8-f0bf4c372de0][Loading a theme]].
 
 * Customization options
 :PROPERTIES:
@@ -431,6 +438,10 @@ file to load the theme of their choice ([[#h:75d74aea-d17f-497f-a3b8-f0bf4c372de
 ;; like `load-theme' but also call `ef-themes-post-load-hook'
 (ef-themes-select 'ef-summer)
 #+end_src
+
+When ~ef-themes-select~ is called with a prefix argument (=C-u= by
+default), it first produces a minibuffer prompt to limit the choice to
+dark or light themes, and then shows only the relevant subset.
 
 #+findex: ef-themes-load-random
 The command ~ef-themes-load-random~ is for those who appreciate a bit of
@@ -713,7 +724,7 @@ The exact color values are taken from the active Ef theme."
 To find the names of the color variables, the user can rely on the
 commands for previewing the palette ([[#h:8dd67bf5-879e-46e5-b277-5bac141f53d1][Preview theme colors]]).
 
-** Make the modeline like the =modus-themes= default
+** Make the mode line like the =modus-themes= default
 :PROPERTIES:
 :CUSTOM_ID: h:69ea8788-33b9-42f9-a4f1-92ee22074d2b
 :END:
@@ -865,6 +876,40 @@ because it otherwise adds too much visual noise to the buffer (email
 addresses stand out more, due to the use of the uncommon =@= caharacter
 but also because they are often enclosed in angled brackets).
 
+* Faces defined by the Ef themes
+:PROPERTIES:
+:CUSTOM_ID: h:34afcc9a-a5f1-4023-b01a-abf5b8a6199d
+:END:
+
+The themes define some faces to make it possible to achieve
+consistency between various groups of faces.  For example, all "marks
+for selection" use the ~ef-themes-mark-select~ face.  If, say, the
+user wants to edit this face to include an underline, the change will
+apply to lots of packages, like Dired, Trashed, Ibuffer.
+
+[[#h:152326a3-9356-4158-8adb-83c42c2ef117][Do-It-Yourself customizations]].
+
+All the faces defined by the themes:
+
++ ~ef-themes-fixed-pitch~
++ ~ef-themes-heading-0~
++ ~ef-themes-heading-1~
++ ~ef-themes-heading-2~
++ ~ef-themes-heading-3~
++ ~ef-themes-heading-4~
++ ~ef-themes-heading-5~
++ ~ef-themes-heading-6~
++ ~ef-themes-heading-7~
++ ~ef-themes-heading-8~
++ ~ef-themes-key-binding~
++ ~ef-themes-mark-delete~
++ ~ef-themes-mark-other~
++ ~ef-themes-mark-select~
++ ~ef-themes-ui-variable-pitch~
++ ~ef-themes-underline-error~
++ ~ef-themes-underline-info~
++ ~ef-themes-underline-warning~
+
 * Supported packages or face groups
 :PROPERTIES:
 :CUSTOM_ID: h:c8d80daf-d039-40c4-bb74-e7814a9b4c79
@@ -886,6 +931,7 @@ everything most users need.
 - all-the-icons-ibuffer
 - ansi-color
 - auctex
+- auto-dim-other-buffers
 - bongo
 - bookmark
 - calendar and diary
@@ -895,7 +941,8 @@ everything most users need.
 - compilation
 - completions
 - consult
-- custom (M-x customize)
+- corfu
+- custom (=M-x customize=)
 - denote
 - dictionary
 - diff-hl
@@ -913,10 +960,15 @@ everything most users need.
 - epa
 - eshell
 - eww
+- flycheck
+- flymake
+- flyspell
 - font-lock
 - git-commit
 - git-rebase
 - gnus
+- hi-lock (=M-x highlight-regexp=)
+- ibuffer
 - image-dired
 - info
 - isearch, occur, query-replace
@@ -930,14 +982,16 @@ everything most users need.
 - messages
 - mode-line
 - mu4e
+- neotree
 - notmuch
+- olivetti
 - orderless
 - org
 - org-habit
 - org-modern
 - outline-mode
 - outline-minor-faces
-- package (M-x list-packages)
+- package (=M-x list-packages=)
 - pulsar
 - pulse
 - rainbow-delimiters
@@ -956,12 +1010,15 @@ everything most users need.
 - term
 - textsec
 - transient
+- trashed
+- tty-menu
 - vc (=vc-dir.el=, =vc-hooks.el=)
 - vertico
 - wgrep
 - which-function-mode
 - whitespace-mode
 - widget
+- writegood-mode
 - woman
 
 ** Implicitly supported packages or face groups
@@ -974,7 +1031,6 @@ are appropriate or because they inherit from basic faces which the
 themes already cover:
 
 - apropos
-- corfu
 - dim-autoload
 - flycheck
 - flymake
@@ -1229,8 +1285,9 @@ matters.
   Philip Kaludercic.
 
 + Ideas and/or user feedback :: Alan Schmitt, Anthony Chavez, Daniel
-  Mendler, Iris Garcia, Jean-Philippe Gagné Guay, Jonas Collberg,
-  Spike-Leung, Steve Molitor, Summer Emacs, Sven Seebeck, Zoltán Király.
+  Mendler, Federico Stilman, Iris Garcia, Jean-Philippe Gagné Guay,
+  Jonas Collberg, Spike-Leung, Steve Molitor, Summer Emacs, Sven
+  Seebeck, Zoltán Király.
 
 * GNU Free Documentation License
 :PROPERTIES:
