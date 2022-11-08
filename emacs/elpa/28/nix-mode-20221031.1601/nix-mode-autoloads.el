@@ -36,7 +36,7 @@ Pretty print Nix’s .drv files.
 
 \(fn)" t nil)
 
-(add-to-list 'auto-mode-alist '("\\`/nix/store/.+\\.drv\\'" . nix-drv-mode))
+(add-to-list 'auto-mode-alist '("^/nix/store/.+\\.drv\\'" . nix-drv-mode))
 
 (register-definition-prefixes "nix-drv-mode" '("nix-drv-mode-dejsonify-buffer"))
 
@@ -104,6 +104,8 @@ FILE nix file to parse.
 ATTR attribute to load the log of.
 
 \(fn FILE ATTR)" t nil)
+
+(register-definition-prefixes "nix-log" '("nix-log-path"))
 
 ;;;***
 
