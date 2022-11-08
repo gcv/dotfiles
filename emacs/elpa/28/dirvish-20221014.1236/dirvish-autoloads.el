@@ -270,6 +270,39 @@ it is disabled.
 ;;;### (autoloads nil "dirvish-side" "dirvish-side.el" (0 0 0 0))
 ;;; Generated autoloads from dirvish-side.el
 
+(defvar dirvish-side-follow-mode nil "\
+Non-nil if Dirvish-Side-Follow mode is enabled.
+See the `dirvish-side-follow-mode' command
+for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `dirvish-side-follow-mode'.")
+
+(custom-autoload 'dirvish-side-follow-mode "dirvish-side" nil)
+
+(autoload 'dirvish-side-follow-mode "dirvish-side" "\
+Toggle `dirvish-side-follow-mode'.
+When enabled the visible side session will select the current
+buffer's filename.  It will also visits the latest `project-root'
+after switching to a new project.
+
+This is a minor mode.  If called interactively, toggle the
+`Dirvish-Side-Follow mode' mode.  If the prefix argument is
+positive, enable the mode, and if it is zero or negative, disable
+the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `(default-value \\='dirvish-side-follow-mode)'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+\(fn &optional ARG)" t nil)
+
 (autoload 'dirvish-side "dirvish-side" "\
 Toggle a Dirvish session at the side window.
 
