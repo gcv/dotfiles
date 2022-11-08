@@ -4,8 +4,8 @@
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
-;; Package-Version: 20220925.2206
-;; Package-Commit: 3aa08da7a151f1928bf0e3d12fc2443b6485b6ef
+;; Package-Version: 20221024.134
+;; Package-Commit: 60c1cd49f72e930b8796e5644bd222e8fc466740
 ;; Keywords: help, lisp
 ;; Version: 0.20
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
@@ -799,6 +799,7 @@ bound) or else highlight."
        'callable-p nil))
      ((and (fboundp sym) (or
                           (s-starts-with-p " command" after-txt)
+                          (s-ends-with-p "command " before-txt)
                           (s-ends-with-p "function " before-txt)))
       (helpful--button
        sym-name
