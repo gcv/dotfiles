@@ -50,6 +50,7 @@ packages=(
     gnupg
     gnutar
     helix              # modal text editor, alternative to (neo)vi(m)
+    htmlq              # command line HTML parser and query tool (like jq)
     htop
     httpie             # HTTP client, alternative to curl
     httrack            # web scraper, more stable than wget
