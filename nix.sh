@@ -25,9 +25,11 @@ packages=(
     autojump
     automake
     awscli2
+    bandwhich          # network monitor
     bat                # cat replacement
     bashInteractive    # when needed
     bitwarden-cli      # password manager
+    bottom             # htop-like monitor
     cacert             # SSL certificates
     cmake
     coreutils
