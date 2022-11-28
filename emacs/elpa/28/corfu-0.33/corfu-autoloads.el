@@ -59,6 +59,42 @@ See `corfu-mode' for more information on Corfu mode.
 
 ;;;***
 
+;;;### (autoloads nil "corfu-echo" "corfu-echo.el" (0 0 0 0))
+;;; Generated autoloads from corfu-echo.el
+
+(defvar corfu-echo-mode nil "\
+Non-nil if Corfu-Echo mode is enabled.
+See the `corfu-echo-mode' command
+for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `corfu-echo-mode'.")
+
+(custom-autoload 'corfu-echo-mode "corfu-echo" nil)
+
+(autoload 'corfu-echo-mode "corfu-echo" "\
+Show candidate documentation in echo area.
+
+This is a minor mode.  If called interactively, toggle the
+`Corfu-Echo mode' mode.  If the prefix argument is positive,
+enable the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `(default-value \\='corfu-echo-mode)'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+\(fn &optional ARG)" t nil)
+
+(register-definition-prefixes "corfu-echo" '("corfu-echo-"))
+
+;;;***
+
 ;;;### (autoloads nil "corfu-history" "corfu-history.el" (0 0 0 0))
 ;;; Generated autoloads from corfu-history.el
 
@@ -141,6 +177,43 @@ Show documentation of current candidate." t nil)
 Show location of current candidate." t nil)
 
 (register-definition-prefixes "corfu-info" '("corfu-info--restore-on-next-command"))
+
+;;;***
+
+;;;### (autoloads nil "corfu-popupinfo" "corfu-popupinfo.el" (0 0
+;;;;;;  0 0))
+;;; Generated autoloads from corfu-popupinfo.el
+
+(defvar corfu-popupinfo-mode nil "\
+Non-nil if Corfu-Popupinfo mode is enabled.
+See the `corfu-popupinfo-mode' command
+for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `corfu-popupinfo-mode'.")
+
+(custom-autoload 'corfu-popupinfo-mode "corfu-popupinfo" nil)
+
+(autoload 'corfu-popupinfo-mode "corfu-popupinfo" "\
+Corfu info popup minor mode.
+
+This is a minor mode.  If called interactively, toggle the
+`Corfu-Popupinfo mode' mode.  If the prefix argument is positive,
+enable the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `(default-value \\='corfu-popupinfo-mode)'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+\(fn &optional ARG)" t nil)
+
+(register-definition-prefixes "corfu-popupinfo" '("corfu-popupinfo-"))
 
 ;;;***
 

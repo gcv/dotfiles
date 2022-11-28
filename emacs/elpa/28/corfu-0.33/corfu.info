@@ -1,4 +1,4 @@
-This is doccvu5Kb.info, produced by makeinfo version 6.7 from
+This is docIEiNaS.info, produced by makeinfo version 6.7 from
 corfu.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: doccvu5Kb.info,  Node: Top,  Next: Features,  Up: (dir)
+File: docIEiNaS.info,  Node: Top,  Next: Features,  Up: (dir)
 
 corfu.el - Completion Overlay Region FUnction
 *********************************************
@@ -60,7 +60,7 @@ Installation and Configuration
 
 
 
-File: doccvu5Kb.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
+File: docIEiNaS.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
 
 1 Features
 **********
@@ -80,16 +80,16 @@ File: doccvu5Kb.info,  Node: Features,  Next: Installation and Configuration,  P
      characters, after inserting a space via ‘M-SPC’ (configurable via
      ‘corfu-quit-at-boundary’ and ‘corfu-separator’).
    • Deferred completion style highlighting for performance.
-   • Support for candidate annotations and documentation in the echo
-     area.
+   • Support for candidate annotations (‘annotation-function’,
+     ‘affixation-function’).
    • Deprecated candidates are crossed out in the display.
    • Icons can be provided by an external package via margin formatter
      functions.
-   • Extensions: Quick keys, Index keys, Sorting by history, Candidate
-     documentation
+   • Rich set of extensions: Quick keys, Index keys, Sorting by history,
+     Candidate documentation in echo area, popup or separate buffer
 
 
-File: doccvu5Kb.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
+File: docIEiNaS.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
 
 2 Installation and Configuration
 ********************************
@@ -122,7 +122,6 @@ before turning on ‘global-corfu-mode’.
        ;; (corfu-preview-current nil)    ;; Disable current candidate preview
        ;; (corfu-preselect-first nil)    ;; Disable candidate preselection
        ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-       ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
        ;; (corfu-scroll-margin 5)        ;; Use scroll margin
 
        ;; Enable Corfu only for certain modes.
@@ -213,7 +212,7 @@ completion in the Elisp manual
 * Transfer completion to the minibuffer::
 
 
-File: doccvu5Kb.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
+File: docIEiNaS.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.1 Auto completion
 ===================
@@ -267,7 +266,7 @@ the Orderless documentation and source code for further details.
                  completion-styles '(orderless-fast))
 
 
-File: doccvu5Kb.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
+File: docIEiNaS.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
 
 2.2 Completing in the minibuffer
 ================================
@@ -284,7 +283,9 @@ bound in the minibuffer-local keymap to achieve this effect.
      (defun corfu-enable-in-minibuffer ()
        "Enable Corfu in the minibuffer if `completion-at-point' is bound."
        (when (where-is-internal #'completion-at-point (list (current-local-map)))
-         ;; (setq-local corfu-auto nil) Enable/disable auto completion
+         ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
+         (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+                     corfu-popupinfo-delay nil)
          (corfu-mode 1)))
      (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
 
@@ -297,12 +298,14 @@ the desired result.
        "Enable Corfu in the minibuffer if Vertico/Mct are not active."
        (unless (or (bound-and-true-p mct--active)
                    (bound-and-true-p vertico--input))
-         ;; (setq-local corfu-auto nil) Enable/disable auto completion
+         ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
+         (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+                     corfu-popupinfo-delay nil)
          (corfu-mode 1)))
      (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
-File: doccvu5Kb.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
+File: docIEiNaS.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.3 Completing in the Eshell or Shell
 =====================================
@@ -360,7 +363,7 @@ achieve a sane Eshell experience.*
      (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
 
 
-File: doccvu5Kb.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
+File: docIEiNaS.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
 
 2.4 Orderless completion
 ========================
@@ -426,7 +429,7 @@ components.
        (global-corfu-mode))
 
 
-File: doccvu5Kb.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
+File: docIEiNaS.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
 
 2.5 TAB-and-Go completion
 =========================
@@ -456,7 +459,7 @@ candidate explicitly with ‘RET’.
        (global-corfu-mode))
 
 
-File: doccvu5Kb.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
+File: docIEiNaS.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
 
 2.6 Transfer completion to the minibuffer
 =========================================
@@ -465,11 +468,11 @@ Sometimes it is useful to transfer the Corfu completion session to the
 minibuffer, since the minibuffer offers richer interaction features.  In
 particular, Embark (https://github.com/oantolin/embark) is available in
 the minibuffer, such that you can act on the candidates or
-export/collect the candidates to a separate buffer.  Hopefully we can
-also add Corfu-support to Embark in the future, such that at least
-export/collect is possible directly from Corfu.  But in my opinion
-having the ability to transfer the Corfu completion to the minibuffer is
-an even better feature, since further completion can be performed there.
+export/collect the candidates to a separate buffer.  We could add Corfu
+support to Embark in the future, such that export/collect is possible
+directly from Corfu.  But in my opinion having the ability to transfer
+the Corfu completion to the minibuffer is an even better feature, since
+further completion can be performed there.
 
    The command ‘corfu-move-to-minibuffer’ is defined here in terms of
 ‘consult-completion-in-region’, which uses the minibuffer completion UI
@@ -483,7 +486,7 @@ via ‘completing-read’.
      (define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
 
 
-File: doccvu5Kb.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
+File: docIEiNaS.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
 
 3 Key bindings
 **************
@@ -507,7 +510,7 @@ bindings:
    • ‘keyboard-escape-quit’ -> ‘corfu-reset’
 
 
-File: doccvu5Kb.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
+File: docIEiNaS.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
 
 4 Extensions
 ************
@@ -521,17 +524,25 @@ desired.  Furthermore it is possible to install all of the files
 separately, both ‘corfu.el’ and the ‘corfu-*.el’ extensions.  Currently
 the following extensions come with the Corfu ELPA package:
 
+   • corfu-echo
+     (https://github.com/minad/corfu/blob/main/extensions/corfu-echo.el):
+     ‘corfu-echo-mode’ displays a brief candidate documentation in the
+     echo area.
    • corfu-history
      (https://github.com/minad/corfu/blob/main/extensions/corfu-history.el):
-     ‘corfu-history-mode’ to remember selected candidates and to improve
-     sorting.
+     ‘corfu-history-mode’ remembers selected candidates and sorts the
+     candidates by their history position.
    • corfu-indexed
      (https://github.com/minad/corfu/blob/main/extensions/corfu-indexed.el):
-     ‘corfu-indexed-mode’ to select indexed candidates with prefix
-     arguments.
+     ‘corfu-indexed-mode’ allows you to select indexed candidates with
+     prefix arguments.
    • corfu-info
      (https://github.com/minad/corfu/blob/main/extensions/corfu-info.el):
      Actions to access the candidate location and documentation.
+   • corfu-popupinfo
+     (https://github.com/minad/corfu/blob/main/extensions/corfu-popupinfo.el):
+     Display candidate documentation or source in a popup next to the
+     candidate menu.
    • corfu-quick
      (https://github.com/minad/corfu/blob/main/extensions/corfu-quick.el):
      Commands to select using Avy-style quick keys.
@@ -539,7 +550,7 @@ the following extensions come with the Corfu ELPA package:
    See the Commentary of those files for configuration details.
 
 
-File: doccvu5Kb.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
+File: docIEiNaS.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
 
 5 Complementary packages
 ************************
@@ -552,10 +563,6 @@ look into complementary packages to enhance your setup.
    • corfu-terminal (https://codeberg.org/akib/emacs-corfu-terminal):
      The corfu-terminal package provides an overlay-based display for
      Corfu, such that you can use Corfu in terminal Emacs.
-
-   • corfu-doc (https://github.com/galeo/corfu-doc): The corfu-doc
-     package displays the candidate documentation in a popup next to the
-     Corfu popup, similar to ‘company-quickhelp’.
 
    • Orderless (https://github.com/oantolin/orderless): Corfu supports
      completion styles, including the advanced Orderless
@@ -594,7 +601,7 @@ look into complementary packages to enhance your setup.
      Vertico is the minibuffer completion counterpart of Corfu.
 
 
-File: doccvu5Kb.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
+File: docIEiNaS.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
 
 6 Alternatives
 **************
@@ -641,7 +648,7 @@ File: doccvu5Kb.info,  Node: Alternatives,  Next: Contributions,  Prev: Compleme
      ‘consult-completion-in-region’ is your best option.
 
 
-File: doccvu5Kb.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
+File: docIEiNaS.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
 
 7 Contributions
 ***************
@@ -655,18 +662,18 @@ copyright assignment to the FSF.
 Tag Table:
 Node: Top213
 Node: Features2213
-Node: Installation and Configuration3624
-Node: Auto completion9379
-Node: Completing in the minibuffer11747
-Node: Completing in the Eshell or Shell13564
-Node: Orderless completion16429
-Node: TAB-and-Go completion19530
-Node: Transfer completion to the minibuffer20649
-Node: Key bindings21992
-Node: Extensions22987
-Node: Complementary packages24374
-Node: Alternatives27076
-Node: Contributions29727
+Node: Installation and Configuration3695
+Node: Auto completion9367
+Node: Completing in the minibuffer11735
+Node: Completing in the Eshell or Shell13810
+Node: Orderless completion16675
+Node: TAB-and-Go completion19776
+Node: Transfer completion to the minibuffer20895
+Node: Key bindings22216
+Node: Extensions23211
+Node: Complementary packages25011
+Node: Alternatives27516
+Node: Contributions30167
 
 End Tag Table
 
