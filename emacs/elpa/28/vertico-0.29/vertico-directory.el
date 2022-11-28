@@ -1,4 +1,4 @@
-;;; vertico-directory.el --- Ido-like direction navigation for Vertico -*- lexical-binding: t -*-
+;;; vertico-directory.el --- Ido-like directory navigation for Vertico -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
 
@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "0.28"))
+;; Package-Requires: ((emacs "27.1") (vertico "0.29"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
