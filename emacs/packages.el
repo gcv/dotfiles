@@ -1029,6 +1029,15 @@
   )
 
 
+;;; paredit-like structural editing, generalized for modes with forward-sexp
+;;; https://github.com/AmaiKinono/puni
+(use-package puni
+  :pin melpa
+  :hook
+  ((sgml-mode nxml-mode tex-mode web-mode) . puni-mode)
+  )
+
+
 (use-package rainbow-mode
   :pin gnu
   :diminish ""
