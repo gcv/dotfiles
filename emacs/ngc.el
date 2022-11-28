@@ -62,7 +62,18 @@
   :init
   (global-corfu-mode 1)
   (setq tab-always-indent 'complete)
+
+  :config
+  ;;(corfu-indexed-mode 1)
   )
+
+
+;;(use-package corfu-terminal
+;;  :pin nongnu
+;;  :if (not window-system)
+;;  :init
+;;  (corfu-terminal-mode 1)
+;;  )
 
 
 (use-package cape
