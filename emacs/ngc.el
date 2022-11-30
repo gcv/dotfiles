@@ -64,16 +64,17 @@
   (setq tab-always-indent 'complete)
 
   :config
-  ;;(corfu-indexed-mode 1)
+  (corfu-indexed-mode 1)
+  (require 'corfu-popupinfo)
   )
 
 
-;;(use-package corfu-terminal
-;;  :pin nongnu
-;;  :if (not window-system)
-;;  :init
-;;  (corfu-terminal-mode 1)
-;;  )
+(use-package corfu-terminal
+ :pin nongnu
+ :if (not window-system)
+ :init
+ (corfu-terminal-mode 1)
+ )
 
 
 (use-package cape
