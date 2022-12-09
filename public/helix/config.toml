@@ -2,7 +2,10 @@ theme = "night_owl"
 
 [editor]
 auto-pairs = false
+#auto-save = true
+bufferline = "never"
 #cursorline = true
+line-number = "relative"
 #scrolloff = 0
 true-color = true
 
@@ -21,3 +24,7 @@ left = ["mode", "spinner", "file-name", "file-encoding"]
 #center = []
 right = ["diagnostics", "selections", "position", "position-percentage"]
 #separator = "│"
+
+[keys.insert]
+# jk exits insert mode instead of having to reach for Esc
+j = { k = "normal_mode" }
