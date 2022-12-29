@@ -29,7 +29,10 @@
 (declare-function helm-comp-read "helm-mode")
 (declare-function helm-browse-project "helm-files")
 (declare-function helm-ff-switch-to-shell "helm-files")
+(declare-function all-the-icons-icon-for-file "ext:all-the-icons.el")
+(declare-function all-the-icons-octicon "ext:all-the-icons.el")
 
+(defvar all-the-icons-mode-icon-alist)
 (defvar dired-buffers)
 (defvar org-directory)
 (defvar helm-ff-default-directory)
@@ -139,6 +142,10 @@ Default to `helm-fuzzy-sort-fn' you can use
 `helm-fuzzy-matching-sort-fn-preserve-ties-order' as alternative if
 you want to keep the recentest order when narrowing candidates."
   :type 'function)
+
+(defcustom helm-buffers-show-icons nil
+  "Prefix buffer names with an icon when non nil."
+  :type 'boolean)
 
 
 ;;; Faces
@@ -410,19 +417,29 @@ The list is reordered with `helm-buffer-list-reorder-fn'."
                                   proc details type)
   (append
    (list
-    (concat prefix
-            (let* ((buf-fname (buffer-file-name (get-buffer buf-name)))
-                   (ext (if buf-fname (helm-file-name-extension buf-fname) ""))
-                   (buf-name (propertize buf-name 'face face1
-                                         'help-echo help-echo
-                                         'type type)))
-              (when (condition-case _err
-                                (string-match (format "\\.\\(%s\\)" ext) buf-name)
-                              (invalid-regexp nil))
-                        (add-face-text-property
-                         (match-beginning 1) (match-end 1)
-                         'helm-ff-file-extension nil buf-name))
-              buf-name)))
+    (let* ((buf-fname (buffer-file-name (get-buffer buf-name)))
+           (ext (if buf-fname (helm-file-name-extension buf-fname) ""))
+           (bmode (with-current-buffer buf-name major-mode))
+           (icon (when helm-buffers-show-icons
+                   (helm-aif (assq bmode all-the-icons-mode-icon-alist)
+                       (apply (cadr it) (cddr it))
+                     (cond ((eq type 'dired)
+                            (all-the-icons-octicon "file-directory"))
+                           (buf-fname
+                            (all-the-icons-icon-for-file buf-fname))
+                           (t (all-the-icons-octicon "star" :v-adjust 0.0))))))
+           (buf-name (propertize buf-name 'face face1
+                                 'help-echo help-echo
+                                 'type type)))
+      (when (condition-case _err
+                (string-match (format "\\.\\(%s\\)" ext) buf-name)
+              (invalid-regexp nil))
+        (add-face-text-property
+         (match-beginning 1) (match-end 1)
+         'helm-ff-file-extension nil buf-name))
+      (if icon
+          (concat icon " " prefix buf-name)
+        (concat prefix buf-name))))
    (and details
         (list size mode
               (propertize
@@ -516,7 +533,10 @@ The list is reordered with `helm-buffer-list-reorder-fn'."
 Should be called after others transformers i.e. (boring
 buffers)."
   (cl-assert helm-fuzzy-matching-highlight-fn nil "Wrong type argument functionp: nil")
-  (cl-loop for i in buffers
+  (cl-loop with helm-buffers-show-icons = (and (featurep 'all-the-icons)
+                                               (default-toplevel-value
+                                                   'helm-buffers-show-icons))
+           for i in buffers
            for (name size mode meta) = (if helm-buffer-details-flag
                                            (helm-buffer--details i 'details)
                                          (helm-buffer--details i))
@@ -556,19 +576,22 @@ buffers)."
                            (get-buffer i)))))
 
 (defun helm-buffer--get-preselection (buffer)
-  (let ((bufname (buffer-name buffer)))
+  (let* ((bufname     (buffer-name buffer))
+         (dispbuf     (car (helm-buffer--details buffer)))
+         (len-dispbuf (string-width dispbuf))
+         (len-prefix  (- len-dispbuf (string-width bufname))))
     (when (and bufname
                (file-remote-p (with-current-buffer bufname
                                 default-directory)))
       (setq bufname (concat "@ " (helm-url-unhex-string bufname))))
-    (concat "^"
+    (concat "^[[:multibyte:] ]*"
             (if (and (null helm-buffer-details-flag)
                      (numberp helm-buffer-max-length)
-                     (> (string-width bufname)
-                        helm-buffer-max-length))
+                     (> len-dispbuf helm-buffer-max-length))
                 (regexp-quote
                  (helm-substring-by-width
-                  bufname helm-buffer-max-length
+                  bufname
+                  (- helm-buffer-max-length len-prefix)
                   helm-buffers-end-truncated-string))
               (concat (regexp-quote bufname)
                       (if helm-buffer-details-flag
@@ -606,23 +629,11 @@ buffers)."
            (type (or type
                      (get-text-property
                       0 'type (helm-get-selection nil 'withprop src)))))
-      (save-excursion
-        (goto-char (helm-get-previous-header-pos))
-        (helm-next-line)
-        (let* ((next-head (helm-get-next-header-pos))
-               (end       (and next-head
-                               (save-excursion
-                                 (goto-char next-head)
-                                 (forward-line -1)
-                                 (point))))
-               (maxpoint  (or end (point-max))))
-          (while (< (point) maxpoint)
-            (helm-mark-current-line)
-            (let ((cand (helm-get-selection nil 'withprop src)))
-              (when (and (not (helm-this-visible-mark))
-                         (eq (get-text-property 0 'type cand) type))
-                (helm-make-visible-mark)))
-            (forward-line 1) (end-of-line))))
+      (helm-map-candidates-in-source src
+        (lambda (_cand) (helm-make-visible-mark))
+        (lambda (cand)
+          (and (not (helm-this-visible-mark))
+               (eq (get-text-property 0 'type cand) type))))
       (helm-mark-current-line)
       (helm-display-mode-line src t)
       (when helm-marked-candidates

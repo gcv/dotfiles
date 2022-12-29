@@ -1434,7 +1434,7 @@ Keys description:
                            helm-ff-auto-update-flag))
              :mode-line mode-line
              :help-message 'helm-read-file-name-help-message
-             :nohighlight t
+             :nohighlight helm-ff-nohighlight-matches
              :candidate-number-limit 'helm-ff-candidate-number-limit
              :candidates
              (lambda ()
@@ -1460,6 +1460,7 @@ Keys description:
                                                          helm-ff-maybe-show-thumbnails
                                                          helm-ff-sort-candidates
                                                          ,(and helm-ff-icon-mode
+                                                               (featurep 'all-the-icons)
                                                                'helm-ff-icons-transformer)))
              :persistent-action-if persistent-action-if
              :persistent-help persistent-help
@@ -1979,7 +1980,7 @@ Can be used for `completion-in-region-function' by advicing it with an
                                                 (string= input ""))
                                       " "))
                  (file-comp-p (or (eq (completion-metadata-get metadata 'category) 'file)
-                                  (helm-mode--in-file-completion-p)
+                                  (helm-guess-filename-at-point)
                                   ;; Assume that when `afun' and `predicate' are null
                                   ;; we are in filename completion.
                                   (and (null afun) (null predicate))))
@@ -2163,10 +2164,6 @@ Be sure to know what you are doing when modifying this.")
            (funcall completion-list-insert-choice-function
                     beg end (mapconcat 'identity (append result '("")) sep))))
         (t nil)))
-
-(defun helm-mode--in-file-completion-p ()
-  (with-helm-current-buffer
-    (run-hook-with-args-until-success 'file-name-at-point-functions)))
 
 (defun helm-mode--disable-ido-maybe (&optional from-hook)
   (when (and (boundp 'ido-everywhere) ido-everywhere)

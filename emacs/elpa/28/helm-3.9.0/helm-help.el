@@ -822,6 +822,15 @@ When `dired-async-mode' is enabled, an additional action named \"Backup files\"
 will be available. (Such command is not natively available in Emacs).
 See [[Use the wildcard to select multiple files]] for details.
 
+*** Multiple copies of a file
+
+The command \\<helm-find-files-map>\\[helm-ff-run-mcp] allows
+copying a single file to multiple directories. To use it, mark
+the file you want to copy first and then mark the directories
+where you want to copy file.  For example if you run
+\\[helm-ff-run-mcp] on the marked candidates '(\"foo.txt\" \"bar/\" \"baz\"),
+\"foo.txt\" will be copied to directories \"bar/\" and \"baz/\".
+
 *** Use Rsync to copy files
 
 If Rsync is available, you can use it to copy/sync files or directories
@@ -1047,17 +1056,23 @@ When using two prefix args, files are opened in background without beeing displa
 
 *** Expand archives as directories in a avfs directory
 
-If you have mounted your filesystem with mountavfs,
+If you have mounted your filesystem with 'mountavfs' command,
 you can expand archives in the \"~/.avfs\" directory with \\<helm-map>\\[helm-execute-persistent-action].
+
+To umount Avfs, use ~fusermount -u ~/.avfs~
+
+NOTE: You need the package 'avfs', on debian like distros use ~apt-get install avfs~.
 
 *** Tramp archive support (emacs-27+ only)
 
-If your emacs have library tramp-archive.el, you can browse the
-content of archives with emacs and BTW helm-find-files. However this beeing
-experimental and not very fast, helm doesn't provide an automatic
-expansion and detection of archives, you will have to add the final /
-manually and may have to force update (\\<helm-map>\\[helm-refresh])
-or remove and add again the final / until tramp finish decompressing archive.
+As Tramp archive often crash Helm and Emacs, Helm does its best
+to disable it, however it is hard to do so as Tramp Archive is
+enabled inconditionally in Emacs.  Here I build my Emacs
+without-dbus to ensure Tramp archive wont kickin unexpectedly.
+
+If you want to browse archives please use [[Expand archives as
+directories in a avfs directory][Avfs]] which is much better and
+stable.
 
 *** Touch files
 
@@ -1070,6 +1085,18 @@ and killing it.
 To touch more than one new file, separate you filenames with a comma (\",\").
 If one wants to create (touch) a new file with comma inside the name use a prefix arg,
 this will prevent splitting the name and create multiple files.
+
+*** Change mode on files (chmod)
+
+When running `\\<helm-find-files-map>\\[helm-ff-run-chmod]' on
+marked files, you can enter the new mode in prompt but you can
+also use the first marked file as model to use it as default.
+For example you can mark a file with mode 777 and mark other
+files with mode 664, press 'RET' and answer 'y', all marked files
+will be changed to 777.
+
+NOTE: Another way to change modes on files in helm-find-files is
+running `\\<helm-find-files-map>\\[helm-ff-run-switch-to-shell]' and use 'chmod' directly.
 
 *** Delete files
 
@@ -1196,12 +1223,14 @@ If `all-the-icons' package is installed, turning on
 |\\[helm-ff-run-rename-file]|Rename Files (`\\[universal-argument]' to follow).
 |\\[helm-ff-run-query-replace-fnames-on-marked]|Query replace on marked files.
 |\\[helm-ff-run-copy-file]|Copy Files (`\\[universal-argument]' to follow).
+|\\[helm-ff-run-mcp]|Copy car of marked to remaining directories.
 |\\[helm-ff-run-rsync-file]|Rsync Files (`\\[universal-argument]' to edit command).
 |\\[helm-ff-run-byte-compile-file]|Byte Compile Files (`\\[universal-argument]' to load).
 |\\[helm-ff-run-load-file]|Load Files.
 |\\[helm-ff-run-symlink-file]|Symlink Files.
 |\\[helm-ff-run-hardlink-file]|Hardlink files.
 |\\[helm-ff-run-relsymlink-file]|Relative symlink Files.
+|\\[helm-ff-run-chmod]|Change mode on Files.
 |\\[helm-ff-run-delete-file]|Delete Files.
 |\\[helm-ff-run-touch-files]|Touch files.
 |\\[helm-ff-run-kill-buffer-persistent]|Kill buffer candidate without leaving Helm.
@@ -2088,6 +2117,51 @@ Multiple regexp matching is allowed, simply enter a space to separate the regexp
 Matching empty lines is supported with the regexp \"^$\", you then get the
 results displayed as the buffer-name and the line number only.  You can
 save and edit these results, i.e. add text to the empty line.
+
+**** Matching shorthands symbols in Elisp code
+
+Helm-occur have a basic support of [[info:elisp#Shorthands][read-symbol-shorthands]].
+You can enable this by customizing =helm-occur-match-shorthands=.
+
+The main usage is when you are in a given buffer with cursor on a
+symbol and you want to see where the definition is or where it is
+used in another buffer or other buffers.  Of course matching is
+working on both versions of the definition, the short one and the
+long one.  Here an example reusing the sample files used in the
+Manual:
+
+Here snu.el file with cursor on snu-lines definition:
+
+#+begin_src elisp
+     (defun snu-split (separator s &optional omit-nulls)
+       \"A match-data saving variation on `split-string'.\"
+       (save-match-data (split-string s separator omit-nulls)))
+
+     (defun snu-lines (s)
+       \"Split string S into a list of strings on newline characters.\"
+       (snu-split \"\\\\(\\r\\n\\\\|[\\n\\r]\\\\)\" s))
+
+     ;; Local Variables:
+     ;; read-symbol-shorthands: ((\"snu-\" . \"some-nice-string-utils-\"))
+     ;; End:
+#+end_src
+
+And here the my-tricks.el file reusing snu-lines but under another name:
+
+#+begin_src elisp
+     (defun t-reverse-lines (s)
+       (string-join (reverse (sns-lines s)) \"\\n\"))
+
+     ;; Local Variables:
+     ;; read-symbol-shorthands: ((\"t-\" . \"my-tricks-\")
+     ;;                          (\"sns-\" . \"some-nice-string-utils-\"))
+     ;; End:
+
+#+end_src
+
+You want to know where the definition currently at point ('snu-lines') is used in the my-tricks.el buffer.
+You launch for example helm-mini and start helm-occur on my-tricks.el, helm occur will match immediately
+'sns-lines'.
 
 *** Automatically match symbol at point
 

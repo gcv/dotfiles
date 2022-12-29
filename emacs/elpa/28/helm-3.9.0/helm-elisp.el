@@ -430,7 +430,7 @@ documentation when SYM name is the same for function and variable."
     (if (and doc (not (string= doc ""))
              ;; `documentation' return "\n\n(args...)"
              ;; for CL-style functions.
-             (not (string-match-p "^\n\n" doc)))
+             (not (string-match-p "\\`\n\n" doc)))
         ;; Some commands specify key bindings in their first line.
         (truncate-string-to-width
          (substitute-command-keys (car (split-string doc "\n")))
@@ -796,13 +796,16 @@ is only used to test DEFAULT."
       (helm-force-update (concat "^" (helm-stringify (helm-get-selection)))
                          (helm-get-current-source)))))
 
+(defun helm-apropos-get-default ()
+  (with-syntax-table emacs-lisp-mode-syntax-table
+    (symbol-name (intern-soft (thing-at-point 'symbol)))))
+
 ;;;###autoload
 (defun helm-apropos (default)
   "Preconfigured Helm to describe commands, functions, variables and faces.
 In non interactives calls DEFAULT argument should be provided as
 a string, i.e. the `symbol-name' of any existing symbol."
-  (interactive (list (with-syntax-table emacs-lisp-mode-syntax-table
-                       (thing-at-point 'symbol))))
+  (interactive (list (helm-apropos-get-default)))
   (let ((helm-M-x-show-short-doc
          (and helm-apropos-show-short-doc
               (null (memq 'helm-apropos helm-commands-using-frame)))))
