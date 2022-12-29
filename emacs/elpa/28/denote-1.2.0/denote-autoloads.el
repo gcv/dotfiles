@@ -89,6 +89,13 @@ set to \\='(template title keywords)." t nil)
 Visit TARGET file in variable `denote-directory'.
 If file does not exist, invoke `denote' to create a file.
 
+If TARGET file does not exist, add the user input that was used
+to search for it to the minibuffer history of the
+`denote-title-prompt'.  The user can then retrieve and possibly
+further edit their last input, using it as the newly created
+note's actual title.  At the `denote-title-prompt' type
+\\<minibuffer-local-map>\\[previous-history-element].
+
 \(fn TARGET)" t nil)
 
 (autoload 'denote-keywords-add "denote" "\
@@ -368,6 +375,13 @@ If TARGET file does not exist, call `denote-link-after-creating'
 which runs the `denote' command interactively to create the file.
 The established link will then be targeting that new file.
 
+If TARGET file does not exist, add the user input that was used
+to search for it to the minibuffer history of the
+`denote-title-prompt'.  The user can then retrieve and possibly
+further edit their last input, using it as the newly created
+note's actual title.  At the `denote-title-prompt' type
+\\<minibuffer-local-map>\\[previous-history-element].
+
 With optional ID-ONLY as a prefix argument create a link that
 consists of just the identifier.  Else try to also include the
 file's title.  This has the same meaning as in `denote-link'.
@@ -395,10 +409,14 @@ positions, limit the process to the region in-between.
 \(fn &optional BEG END)" t nil)
 
 (autoload 'denote-link-backlinks "denote" "\
-Produce a buffer with files linking to current note.
-Each file is a clickable/actionable button that visits the
-referenced entry.  Files are fontified if the user option
-`denote-link-fontify-backlinks' is non-nil.
+Produce a buffer with backlinks to the current note.
+
+The backlinks' buffer shows the file name of the note linking to
+the current note, as well as the context of each link.
+
+File names are fontified by Denote if the user option
+`denote-link-fontify-backlinks' is non-nil.  If this user option
+is nil, the buffer is fontified by Xref.
 
 The placement of the backlinks' buffer is controlled by the user
 option `denote-link-backlinks-display-buffer-action'.  By
@@ -490,7 +508,78 @@ arbitrary text).
 
 Consult the manual for template samples." nil nil)
 
+(autoload 'denote-modules-mode "denote" "\
+Enable Denote integration modules locally.
+Set modules to be enabled in `denote-modules' and activate the
+minor mode, either globally or locally.  The selected modules are
+enabled only when the minor mode is active.
+
+This is a minor mode.  If called interactively, toggle the
+`Denote-Modules mode' mode.  If the prefix argument is positive,
+enable the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `denote-modules-mode'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+\(fn &optional ARG)" t nil)
+
+(defvar denote-modules-global-mode nil "\
+Non-nil if Denote-Modules-Global mode is enabled.
+See the `denote-modules-global-mode' command
+for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `denote-modules-global-mode'.")
+
+(custom-autoload 'denote-modules-global-mode "denote" nil)
+
+(autoload 'denote-modules-global-mode "denote" "\
+Enable Denote integration modules globally.
+Set modules to be enabled in `denote-modules' and activate the
+minor mode, either globally or locally.  The selected modules are
+enabled only when the minor mode is active.
+
+This is a minor mode.  If called interactively, toggle the
+`Denote-Modules-Global mode' mode.  If the prefix argument is
+positive, enable the mode, and if it is zero or negative, disable
+the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `(default-value \\='denote-modules-global-mode)'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+\(fn &optional ARG)" t nil)
+
 (register-definition-prefixes "denote" '("denote-"))
+
+;;;***
+
+;;;### (autoloads nil "denote-org-dblock" "denote-org-dblock.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from denote-org-dblock.el
+
+(autoload 'denote-org-dblock-insert-links "denote-org-dblock" "\
+Create Org dynamic block to insert Denote links matching REGEXP.
+
+\(fn REGEXP)" t nil)
+
+(autoload 'denote-org-dblock-insert-backlinks "denote-org-dblock" "\
+Insert new Org dynamic block to include backlinks." t nil)
+
+(register-definition-prefixes "denote-org-dblock" '("org-dblock-write:denote-"))
 
 ;;;***
 
