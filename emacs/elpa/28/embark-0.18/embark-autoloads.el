@@ -179,6 +179,13 @@ the minibuffer contents, and, if you wish, you can rerun
 
 ;;;***
 
+;;;### (autoloads nil "embark-org" "embark-org.el" (0 0 0 0))
+;;; Generated autoloads from embark-org.el
+
+(register-definition-prefixes "embark-org" '("embark-org-"))
+
+;;;***
+
 ;;;### (autoloads nil nil ("embark-pkg.el") (0 0 0 0))
 
 ;;;***
