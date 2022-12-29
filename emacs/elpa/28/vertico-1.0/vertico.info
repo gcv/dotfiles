@@ -1,4 +1,4 @@
-This is docV7NQwr.info, produced by makeinfo version 6.7 from
+This is doc61Uu4r.info, produced by makeinfo version 6.7 from
 vertico.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docV7NQwr.info,  Node: Top,  Next: Features,  Up: (dir)
+File: doc61Uu4r.info,  Node: Top,  Next: Features,  Up: (dir)
 
 vertico.el - VERTical Interactive COmpletion
 ********************************************
@@ -61,7 +61,7 @@ Problematic completion commands
 
 
 
-File: docV7NQwr.info,  Node: Features,  Next: Key bindings,  Prev: Top,  Up: Top
+File: doc61Uu4r.info,  Node: Features,  Next: Key bindings,  Prev: Top,  Up: Top
 
 1 Features
 **********
@@ -86,7 +86,7 @@ File: docV7NQwr.info,  Node: Features,  Next: Key bindings,  Prev: Top,  Up: Top
    <https://github.com/minad/vertico/blob/screenshots/vertico-mx.png?raw=true>
 
 
-File: docV7NQwr.info,  Node: Key bindings,  Next: Configuration,  Prev: Features,  Up: Top
+File: doc61Uu4r.info,  Node: Key bindings,  Next: Configuration,  Prev: Features,  Up: Top
 
 2 Key bindings
 **************
@@ -113,7 +113,7 @@ handful of commands.  Note in particular the binding of ‘TAB’ to
    • ‘TAB’ -> ‘vertico-insert’
 
 
-File: docV7NQwr.info,  Node: Configuration,  Next: Extensions,  Prev: Key bindings,  Up: Top
+File: doc61Uu4r.info,  Node: Configuration,  Next: Extensions,  Prev: Key bindings,  Up: Top
 
 3 Configuration
 ***************
@@ -214,7 +214,7 @@ documentation about completion in the Elisp manual
 * Completion-at-point and completion-in-region::
 
 
-File: docV7NQwr.info,  Node: Completion styles and TAB completion,  Next: Completion-at-point and completion-in-region,  Up: Configuration
+File: doc61Uu4r.info,  Node: Completion styles and TAB completion,  Next: Completion-at-point and completion-in-region,  Up: Configuration
 
 3.1 Completion styles and TAB completion
 ========================================
@@ -261,7 +261,7 @@ completion styles are used instead of ‘orderless’:
            completion-ignore-case t)
 
 
-File: docV7NQwr.info,  Node: Completion-at-point and completion-in-region,  Prev: Completion styles and TAB completion,  Up: Configuration
+File: doc61Uu4r.info,  Node: Completion-at-point and completion-in-region,  Prev: Completion styles and TAB completion,  Up: Configuration
 
 3.2 Completion-at-point and completion-in-region
 ================================================
@@ -290,7 +290,7 @@ Corfu is also a narrowly focused package and developed in the same
 spirit as Vertico.
 
 
-File: docV7NQwr.info,  Node: Extensions,  Next: Complementary packages,  Prev: Configuration,  Up: Top
+File: doc61Uu4r.info,  Node: Extensions,  Next: Complementary packages,  Prev: Configuration,  Up: Top
 
 4 Extensions
 ************
@@ -369,7 +369,7 @@ according to the buffer height.
 * Configure Vertico per command or completion category::
 
 
-File: docV7NQwr.info,  Node: Configure Vertico per command or completion category,  Up: Extensions
+File: doc61Uu4r.info,  Node: Configure Vertico per command or completion category,  Up: Extensions
 
 4.1 Configure Vertico per command or completion category
 ========================================================
@@ -468,7 +468,7 @@ when they scroll off-screen to the left.
            '((buffer flat (vertico-cycle . t))))
 
 
-File: docV7NQwr.info,  Node: Complementary packages,  Next: Child frames and Popups,  Prev: Extensions,  Up: Top
+File: doc61Uu4r.info,  Node: Complementary packages,  Next: Child frames and Popups,  Prev: Extensions,  Up: Top
 
 5 Complementary packages
 ************************
@@ -515,7 +515,7 @@ functionality not present in Emacs already (e.g., ‘consult-line’) and
 some are substitutes (e.g., ‘consult-buffer’ for ‘switch-to-buffer’).
 
 
-File: docV7NQwr.info,  Node: Child frames and Popups,  Next: Alternatives,  Prev: Complementary packages,  Up: Top
+File: doc61Uu4r.info,  Node: Child frames and Popups,  Next: Alternatives,  Prev: Complementary packages,  Up: Top
 
 6 Child frames and Popups
 *************************
@@ -542,7 +542,7 @@ a try and judge for yourself.
      posframe library.
 
 
-File: docV7NQwr.info,  Node: Alternatives,  Next: Resources,  Prev: Child frames and Popups,  Up: Top
+File: doc61Uu4r.info,  Node: Alternatives,  Next: Resources,  Prev: Child frames and Popups,  Up: Top
 
 7 Alternatives
 **************
@@ -588,27 +588,21 @@ philosophy:
      due to recent changes of the default completion UI on the Emacs
      master branch.
    • Selectrum (https://github.com/radian-software/selectrum): Selectrum
-     is the predecessor of Vertico, since it directly inspired Vertico.
-     Vertico was designed specifically to address the technical
-     shortcomings of Selectrum.  Selectrum is not fully compatible with
-     every Emacs completion command and dynamic completion tables
-     (selectrum#481
-     (https://github.com/radian-software/selectrum/issues/481)), since
-     it uses its own filtering infrastructure, which deviates from the
-     standard Emacs completion facilities.  Therefore Selectrum is
-     getting deprecated in favor of Vertico (vertico#237
-     (https://github.com/minad/vertico/issues/237), selectrum#598)
-     (https://github.com/radian-software/selectrum/issues/598).
-     Furthermore, Vertico was designed with flexibility in mind via its
-     *note extensions: Extensions.  See the migration guide
+     is the predecessor of Vertico has been deprecated in favor of
+     Vertico.  See the migration guide
      (https://github.com/minad/vertico/wiki/Migrating-from-Selectrum-to-Vertico)
-     if you plan to migrate from Selectrum to Vertico.
+     if you want to migrate from Selectrum to Vertico.  Vertico was
+     designed specifically to address the technical shortcomings of
+     Selectrum.  Selectrum is not fully compatible with every Emacs
+     completion command and dynamic completion tables, since it uses its
+     own filtering infrastructure, which deviates from the standard
+     Emacs completion facilities.
    • Icomplete: Emacs 28 comes with a builtin ‘icomplete-vertical-mode’,
      which is a more bare-bone than Vertico.  Vertico offers more
      flexibility thanks to its *note extensions: Extensions.
 
 
-File: docV7NQwr.info,  Node: Resources,  Next: Contributions,  Prev: Alternatives,  Up: Top
+File: doc61Uu4r.info,  Node: Resources,  Next: Contributions,  Prev: Alternatives,  Up: Top
 
 8 Resources
 ***********
@@ -643,7 +637,7 @@ out the following resources:
      Wilson.
 
 
-File: docV7NQwr.info,  Node: Contributions,  Next: Debugging Vertico,  Prev: Resources,  Up: Top
+File: doc61Uu4r.info,  Node: Contributions,  Next: Debugging Vertico,  Prev: Resources,  Up: Top
 
 9 Contributions
 ***************
@@ -653,7 +647,7 @@ Since this package is part of GNU ELPA
 copyright assignment to the FSF.
 
 
-File: docV7NQwr.info,  Node: Debugging Vertico,  Next: Problematic completion commands,  Prev: Contributions,  Up: Top
+File: doc61Uu4r.info,  Node: Debugging Vertico,  Next: Problematic completion commands,  Prev: Contributions,  Up: Top
 
 10 Debugging Vertico
 ********************
@@ -675,7 +669,7 @@ that the hooks are executed after every command.
      (advice-add #'vertico--exhibit :around #'force-debug)
 
 
-File: docV7NQwr.info,  Node: Problematic completion commands,  Prev: Debugging Vertico,  Up: Top
+File: doc61Uu4r.info,  Node: Problematic completion commands,  Prev: Debugging Vertico,  Up: Top
 
 11 Problematic completion commands
 **********************************
@@ -696,7 +690,7 @@ require minor workarounds.
 * Tramp hostname completion::
 
 
-File: docV7NQwr.info,  Node: org-refile,  Next: org-agenda-filter,  Up: Problematic completion commands
+File: doc61Uu4r.info,  Node: org-refile,  Next: org-agenda-filter,  Up: Problematic completion commands
 
 11.1 ‘org-refile’
 =================
@@ -732,7 +726,7 @@ much more cluttered.
            org-outline-path-complete-in-steps nil)
 
 
-File: docV7NQwr.info,  Node: org-agenda-filter,  Next: tmm-menubar,  Prev: org-refile,  Up: Problematic completion commands
+File: doc61Uu4r.info,  Node: org-agenda-filter,  Next: tmm-menubar,  Prev: org-refile,  Up: Problematic completion commands
 
 11.2 ‘org-agenda-filter’
 ========================
@@ -747,7 +741,7 @@ correct.  With preserved completion boundaries, the expected result
 would be ‘+tag<0:10’.
 
 
-File: docV7NQwr.info,  Node: tmm-menubar,  Next: ffap-menu,  Prev: org-agenda-filter,  Up: Problematic completion commands
+File: doc61Uu4r.info,  Node: tmm-menubar,  Next: ffap-menu,  Prev: org-agenda-filter,  Up: Problematic completion commands
 
 11.3 ‘tmm-menubar’
 ==================
@@ -762,7 +756,7 @@ overwrite the default F10 keybinding.
      (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
 
 
-File: docV7NQwr.info,  Node: ffap-menu,  Next: completion-table-dynamic,  Prev: tmm-menubar,  Up: Problematic completion commands
+File: doc61Uu4r.info,  Node: ffap-menu,  Next: completion-table-dynamic,  Prev: tmm-menubar,  Up: Problematic completion commands
 
 11.4 ‘ffap-menu’
 ================
@@ -777,7 +771,7 @@ buffer can be disabled as follows.
                                         (apply args))))
 
 
-File: docV7NQwr.info,  Node: completion-table-dynamic,  Next: Submitting the empty string,  Prev: ffap-menu,  Up: Problematic completion commands
+File: doc61Uu4r.info,  Node: completion-table-dynamic,  Next: Submitting the empty string,  Prev: ffap-menu,  Up: Problematic completion commands
 
 11.5 ‘completion-table-dynamic’
 ===============================
@@ -801,7 +795,7 @@ priority, it can also come after other completion styles like
                                (concat str "3")))))
 
 
-File: docV7NQwr.info,  Node: Submitting the empty string,  Next: Tramp hostname completion,  Prev: completion-table-dynamic,  Up: Problematic completion commands
+File: doc61Uu4r.info,  Node: Submitting the empty string,  Next: Tramp hostname completion,  Prev: completion-table-dynamic,  Up: Problematic completion commands
 
 11.6 Submitting the empty string
 ================================
@@ -828,7 +822,7 @@ and Vertico preselects the prompt, such that exiting with the empty
 string is possible by pressing ‘RET’ only.
 
 
-File: docV7NQwr.info,  Node: Tramp hostname completion,  Prev: Submitting the empty string,  Up: Problematic completion commands
+File: doc61Uu4r.info,  Node: Tramp hostname completion,  Prev: Submitting the empty string,  Up: Problematic completion commands
 
 11.7 Tramp hostname completion
 ==============================
@@ -871,17 +865,17 @@ Node: Configure Vertico per command or completion category15455
 Node: Complementary packages19935
 Node: Child frames and Popups22192
 Node: Alternatives23569
-Node: Resources27141
-Node: Contributions28632
-Node: Debugging Vertico28907
-Node: Problematic completion commands29719
-Node: org-refile30301
-Node: org-agenda-filter31898
-Node: tmm-menubar32599
-Node: ffap-menu33200
-Node: completion-table-dynamic33835
-Node: Submitting the empty string34948
-Node: Tramp hostname completion36392
+Node: Resources26748
+Node: Contributions28239
+Node: Debugging Vertico28514
+Node: Problematic completion commands29326
+Node: org-refile29908
+Node: org-agenda-filter31505
+Node: tmm-menubar32206
+Node: ffap-menu32807
+Node: completion-table-dynamic33442
+Node: Submitting the empty string34555
+Node: Tramp hostname completion35999
 
 End Tag Table
 

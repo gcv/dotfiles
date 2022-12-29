@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.29
+;; Version: 1.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/vertico
 
@@ -75,7 +75,7 @@ The value should lie between 0 and vertico-count/2."
   :type 'boolean)
 
 (defcustom vertico-multiline
-  (cons #("⤶" 0 1 (face vertico-multiline)) #("…" 0 1 (face vertico-multiline)))
+  (cons #("↲" 0 1 (face vertico-multiline)) #("…" 0 1 (face vertico-multiline)))
   "Replacements for multiline strings."
   :type '(cons (string :tag "Newline") (string :tag "Truncation")))
 
@@ -307,31 +307,22 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
       (vertico--metadata-get 'display-sort-function)
       vertico-sort-function))
 
-(defun vertico--filter-files (files)
-  "Filter FILES by `completion-ignored-extensions'."
-  (let ((re (concat "\\(?:\\(?:\\`\\|/\\)\\.\\.?/\\|"
-                    (regexp-opt completion-ignored-extensions)
-                    "\\)\\'")))
-    (or (seq-remove (lambda (x) (string-match-p re x)) files) files)))
-
 (defun vertico--recompute (pt content)
   "Recompute state given PT and CONTENT."
-  (pcase-let* ((before (substring content 0 pt))
+  (pcase-let* ((table minibuffer-completion-table)
+               (pred minibuffer-completion-predicate)
+               (before (substring content 0 pt))
                (after (substring content pt))
                ;; bug#47678: `completion-boundaries` fails for `partial-completion`
                ;; if the cursor is moved between the slashes of "~//".
                ;; See also marginalia.el which has the same issue.
                (bounds (or (condition-case nil
-                               (completion-boundaries
-                                before minibuffer-completion-table
-                                minibuffer-completion-predicate after)
+                               (completion-boundaries before table pred after)
                              (t (cons 0 (length after))))))
                (field (substring content (car bounds) (+ pt (cdr bounds))))
                ;; `minibuffer-completing-file-name' has been obsoleted by the completion category
                (completing-file (eq 'file (vertico--metadata-get 'category)))
-               (`(,all . ,hl) (vertico--all-completions
-                               content minibuffer-completion-table
-                               minibuffer-completion-predicate pt vertico--metadata))
+               (`(,all . ,hl) (vertico--all-completions content table pred pt vertico--metadata))
                (base (or (when-let (z (last all)) (prog1 (cdr z) (setcdr z nil))) 0))
                (vertico--base (substring content 0 base))
                (def (or (car-safe minibuffer-default) minibuffer-default))
@@ -339,7 +330,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
     ;; Filter the ignored file extensions. We cannot use modified predicate for this filtering,
     ;; since this breaks the special casing in the `completion-file-name-table' for `file-exists-p'
     ;; and `file-directory-p'.
-    (when completing-file (setq all (vertico--filter-files all)))
+    (when completing-file (setq all (completion-pcm--filename-try-filter all)))
     ;; Sort using the `display-sort-function' or the Vertico sort functions
     (setq all (delete-consecutive-dups (funcall (or (vertico--sort-function) #'identity) all)))
     ;; Move special candidates: "field" appears at the top, before "field/", before default value
@@ -365,16 +356,14 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
       (vertico--lock-candidate . ,lock)
       (vertico--groups . ,(cadr groups))
       (vertico--all-groups . ,(or (caddr groups) vertico--all-groups))
-      ;; Compute new index. Select the prompt under these conditions:
-      ;; * If there are no candidates
-      ;; * If the default is missing from the candidate list.
-      ;; * For matching content, as long as the full content
-      ;;   after the boundary is empty, including content after point.
+      ;; Index computation: The prompt is selected if there are no candidates,
+      ;; if the default is missing from the candidate list and for matching
+      ;; input at the field end. The latter is important for directory selection
+      ;; when renaming files.
       (vertico--index . ,(or lock
                              (if (or def-missing (not all)
                                      (and (= (length vertico--base) (length content))
-                                          (test-completion content minibuffer-completion-table
-                                                           minibuffer-completion-predicate)))
+                                          (test-completion content table pred)))
                                  -1 0))))))
 
 (defun vertico--cycle (list n)
@@ -652,6 +641,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Return t if INPUT is a valid match."
   (or (memq minibuffer--require-match '(nil confirm-after-completion))
       (equal "" input) ;; Null completion, returns default value
+      (and (functionp minibuffer--require-match) ;; Emacs 29 require-match function
+           (funcall minibuffer--require-match input))
       (test-completion input minibuffer-completion-table minibuffer-completion-predicate)
       (if (eq minibuffer--require-match 'confirm)
           (eq (ignore-errors (read-char "Confirm")) 13)
