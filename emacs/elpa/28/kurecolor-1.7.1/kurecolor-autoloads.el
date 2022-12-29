@@ -6,13 +6,6 @@
                          (or (file-name-directory #$) (car load-path))))
 
 
-;;;### (autoloads nil "etd" "etd.el" (0 0 0 0))
-;;; Generated autoloads from etd.el
-
-(register-definition-prefixes "etd" '("create-docs-file" "def" "docs--" "etd-testing" "example" "first-three" "function" "github-id" "goto-and-remove" "quote-" "simplify-quotes"))
-
-;;;***
-
 ;;;### (autoloads nil "kurecolor" "kurecolor.el" (0 0 0 0))
 ;;; Generated autoloads from kurecolor.el
 
@@ -138,11 +131,6 @@ Hex `rgb' to XCode `colorLiteral'." t nil)
 Hex `rgba' to XCode `colorLiteral'." t nil)
 
 (register-definition-prefixes "kurecolor" '("kurecolor-"))
-
-;;;***
-
-;;;### (autoloads nil nil ("kurecolor-examples.el" "kurecolor-pkg.el")
-;;;;;;  (0 0 0 0))
 
 ;;;***
 
