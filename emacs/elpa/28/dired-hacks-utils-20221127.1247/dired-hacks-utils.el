@@ -5,11 +5,11 @@
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Keywords: files
-;; Package-Version: 20201005.2318
-;; Package-Commit: 7c0ef09d57a80068a11edc74c3568e5ead5cc15a
+;; Package-Version: 20221127.1247
+;; Package-Commit: 41d3eb42195d9f0894c20d18cc8e722b099aa1c1
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.5.0"))
+;; Package-Requires: ((dash "2.5.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
