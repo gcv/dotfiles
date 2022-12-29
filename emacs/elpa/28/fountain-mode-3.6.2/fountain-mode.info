@@ -1,7 +1,7 @@
 This is fountain-mode.info, produced by makeinfo version 6.7 from
 fountain-mode.texi.
 
-Copyright (C) 2021 Paul W. Rankin
+Copyright (C) 2022 Paul W. Rankin
 
    The following people contributed to this documentation:
 Paul W. Rankin, Kohl Sudduth
@@ -771,7 +771,7 @@ Contact
 
 If you run into any trouble using Fountain Mode, or you have a feature
 request, you can email the maintainer Paul W. Rankin directly at
-<pwr@bydasein.com>.
+<hello@paulwrankin.com>.
 
    For bugs, please ensure you can reproduce with:
 
@@ -908,10 +908,10 @@ Node: Pagination22524
 Node: Exporting22863
 Ref: Exporting-Footnote-124362
 Node: Contact24433
-Node: Indexes25329
-Node: Key Index25488
-Node: Index of Commands27358
-Node: Index of User Options28628
+Node: Indexes25334
+Node: Key Index25493
+Node: Index of Commands27363
+Node: Index of User Options28633
 
 End Tag Table
 
