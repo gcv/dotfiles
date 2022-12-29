@@ -4,7 +4,7 @@
 ;; Homepage: https://github.com/NixOS/nix-mode
 ;; Keywords: nix
 ;; Package-Requires: ((emacs "25.1") (magit-section "3.3.0"))
-;; Version: 1.4.0
+;; Version: 1.5.0
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -193,7 +193,7 @@ implement your own ones) you can customize the variable
     (magit-insert-section (store-path)
       (magit-insert-headers 'nix-store-path-headers-hook)
       (magit-run-section-hook 'nix-store-path-sections-hook))
-    (setf (point) (point-min))))
+    (goto-char (point-min))))
 
 (defun nix-store-path-at-point ()
   "Return the nix-store path at point."
