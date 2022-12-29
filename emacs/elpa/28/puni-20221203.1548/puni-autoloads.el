@@ -25,6 +25,10 @@ Delete char backward while keeping expressions balanced.
 With prefix argument N, kill that many chars.  Negative argument
 means kill chars forward.
 
+Pressing \\[universal-argument] one or more times without
+entering a number would force this command to delete 1 char
+backward, even if this breaks the balance.
+
 This respects the variable `delete-active-region'.
 
 \(fn &optional N)" t nil)
@@ -33,6 +37,10 @@ This respects the variable `delete-active-region'.
 Delete char forward while keeping expressions balanced.
 With prefix argument N, kill that many chars.  Negative argument
 means kill chars backward.
+
+Pressing \\[universal-argument] one or more times without
+entering a number would force this command to delete 1 char
+forward, even if this breaks the balance.
 
 This respects the variable `delete-active-region'.
 
@@ -91,6 +99,20 @@ This is the same as `puni-strict-backward-sexp', except that it
 jumps backward consecutive single-line comments.
 
 With prefix argument N, go backward that many sexps.  Negative
+argument means go forward.
+
+\(fn &optional N)" t nil)
+
+(autoload 'puni-forward-sexp-or-up-list "puni" "\
+Go forward a sexp, or an ending delimiter if there's no sexp forward.
+With prefix argument N, do this that many times.  Negative
+argument means go backward.
+
+\(fn &optional N)" t nil)
+
+(autoload 'puni-backward-sexp-or-up-list "puni" "\
+Go backward a sexp, or a starting delimiter if there's no sexp backward.
+With prefix argument N, do this that many times.  Negative
 argument means go forward.
 
 \(fn &optional N)" t nil)
@@ -204,6 +226,14 @@ With positive prefix argument N, barf that many sexps.
 (autoload 'puni-splice "puni" "\
 Remove the delimiters of sexp around point." t nil)
 
+(autoload 'puni-splice-killing-backward "puni" "\
+Kill all sexps before point in the current list, then splice it.
+Splicing is done by removing the delimiters of the list." t nil)
+
+(autoload 'puni-splice-killing-forward "puni" "\
+Kill all sexps after point in the current list, then splice it.
+Splicing is done by removing the delimiters of the list." t nil)
+
 (autoload 'puni-split "puni" "\
 Split the list around point into two sexps." t nil)
 
@@ -217,6 +247,59 @@ Swap the sexp before and after point." t nil)
 
 (autoload 'puni-convolute "puni" "\
 Exchange the order of application of two closest outer forms." t nil)
+
+(autoload 'puni-wrap-next-sexps "puni" "\
+Wrap next N S-expressions with BEG-DELIM and END-DELIM.
+- If N is a positive integer, wrap N sexps after the point.
+- If N is `to-end', wrap sexps from the point to the end of
+  current list.
+- If N is a negative integer, wrap N sexps before the point.
+- If N is `to-beg', wrap sexps from the point to the beginning of
+  current list.
+- If N is `region', and there's an active region, wrap the region
+  instead, otherwise throw an error.
+
+\(fn N BEG-DELIM END-DELIM)" nil nil)
+
+(autoload 'puni-wrap-round "puni" "\
+Wrap the following S-expression with parentheses.
+If a ‘C-u’ prefix argument is given, wrap all S-expressions
+following the point until the end of the buffer or of the
+enclosing list.  If a numeric prefix argument N is given, wrap N
+S-expressions.  Automatically indent the newly wrapped
+S-expression.
+
+\(fn &optional N)" t nil)
+
+(autoload 'puni-wrap-square "puni" "\
+Wrap the following S-expression with square brackets.
+If a ‘C-u’ prefix argument is given, wrap all S-expressions
+following the point until the end of the buffer or of the
+enclosing list.  If a numeric prefix argument N is given, wrap N
+S-expressions.  Automatically indent the newly wrapped
+S-expression.
+
+\(fn &optional N)" t nil)
+
+(autoload 'puni-wrap-curly "puni" "\
+Wrap the following S-expression with curly brackets.
+If a ‘C-u’ prefix argument is given, wrap all S-expressions
+following the point until the end of the buffer or of the
+enclosing list.  If a numeric prefix argument N is given, wrap N
+S-expressions.  Automatically indent the newly wrapped
+S-expression.
+
+\(fn &optional N)" t nil)
+
+(autoload 'puni-wrap-angle "puni" "\
+Wrap the following S-expression with angle brackets.
+If a ‘C-u’ prefix argument is given, wrap all S-expressions
+following the point until the end of the buffer or of the
+enclosing list.  If a numeric prefix argument N is given, wrap N
+S-expressions.  Automatically indent the newly wrapped
+S-expression.
+
+\(fn &optional N)" t nil)
 
 (defvar puni-mode-map (let ((map (make-sparse-keymap))) (define-key map (kbd "DEL") 'puni-backward-delete-char) (define-key map (kbd "C-d") 'puni-forward-delete-char) (define-key map (kbd "M-d") 'puni-forward-kill-word) (define-key map (kbd "M-DEL") 'puni-backward-kill-word) (define-key map (kbd "C-k") 'puni-kill-line) (define-key map (kbd "C-S-k") 'puni-backward-kill-line) (define-key map (kbd "C-c DEL") 'puni-force-delete) (define-key map (kbd "C-w") 'puni-kill-active-region) (define-key map (kbd "C-M-f") 'puni-forward-sexp) (define-key map (kbd "C-M-b") 'puni-backward-sexp) (define-key map (kbd "C-M-a") 'puni-beginning-of-sexp) (define-key map (kbd "C-M-e") 'puni-end-of-sexp) (define-key map (kbd "M-(") 'puni-syntactic-backward-punct) (define-key map (kbd "M-)") 'puni-syntactic-forward-punct) map) "\
 Keymap used for `puni-structural-editing-mode'.")
