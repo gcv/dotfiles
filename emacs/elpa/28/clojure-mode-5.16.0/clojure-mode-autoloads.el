@@ -125,6 +125,8 @@ Major mode for editing ClojureC code.
 
 (add-to-list 'interpreter-mode-alist '("bb" . clojure-mode))
 
+(add-to-list 'interpreter-mode-alist '("nbb" . clojurescript-mode))
+
 (register-definition-prefixes "clojure-mode" '("add-custom-clojure-indents" "clojure" "define-clojure-indent" "put-clojure-indent"))
 
 ;;;***
