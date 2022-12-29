@@ -25,7 +25,7 @@
 
 (require 'consult)
 
-(defcustom consult-register-prefix #("@" 0 1 (face consult-key))
+(defcustom consult-register-prefix #("#" 0 1 (face consult-key))
   "Prepend prefix in front of register keys during completion."
   :type '(choice (const nil) string)
   :group 'consult)
@@ -38,6 +38,7 @@
     (?t . "Frameset")
     (?k . "Kmacro")
     (?f . "File")
+    (?b . "Buffer")
     (?w . "Window"))
   "Register type names.
 Each element of the list must have the form \\='(char . name).")
@@ -83,6 +84,11 @@ Each element of the list must have the form \\='(char . name).")
   "Describe file register VAL."
   (list (propertize (abbreviate-file-name (cdr val)) 'face 'consult-file)
         'consult--type ?f 'multi-category `(file . ,(cdr val))))
+
+(cl-defmethod consult-register--describe ((val (head buffer)))
+  "Describe buffer register VAL."
+  (list (propertize (cdr val) 'face 'consult-buffer)
+        'consult--type ?f 'multi-category `(buffer . ,(cdr val))))
 
 (cl-defmethod consult-register--describe ((val (head file-query)))
   "Describe file-query register VAL."
@@ -160,13 +166,21 @@ If COMPLETION is non-nil format the register for completion."
        str))
     str))
 
-(defun consult-register--alist (&optional noerror)
-  "Return sorted register list.
+(defun consult-register--alist (&optional noerror filter)
+  "Return register list, sorted and filtered with FILTER.
 Raise an error if the list is empty and NOERROR is nil."
-  ;; Sometimes, registers are made without a `cdr'.
-  ;; Such registers don't do anything, and can be ignored.
-  (or (sort (seq-filter #'cdr register-alist) #'car-less-than-car)
+  (or (sort (seq-filter
+             ;; Sometimes, registers are made without a `cdr'.
+             ;; Such registers don't do anything, and can be ignored.
+             (lambda (x) (and (cdr x) (or (not filter) (funcall filter x))))
+             register-alist)
+            #'car-less-than-car)
       (and (not noerror) (user-error "All registers are empty"))))
+
+(defun consult-register--candidates (&optional filter)
+  "Return formatted completion candidates, filtered with FILTER."
+  (mapcar (lambda (reg) (consult-register-format reg 'completion))
+          (consult-register--alist nil filter)))
 
 ;;;###autoload
 (defun consult-register (&optional arg)
@@ -181,9 +195,7 @@ built-in register access functions. The command supports narrowing, see
   (interactive "P")
   (consult-register-load
    (consult--read
-    (mapcar (lambda (reg)
-              (consult-register-format reg 'completion))
-            (consult-register--alist))
+    (consult-register--candidates)
     :prompt "Register: "
     :category 'multi-category
     :state

@@ -75,10 +75,12 @@ changed if the START prefix argument is set. The symbol at point and the last
 (autoload 'consult-line-multi "consult" "\
 Search for a matching line in multiple buffers.
 
-By default search across all project buffers. If the prefix argument QUERY is
-non-nil, all buffers are searched. Optional INITIAL input can be provided. See
-`consult-line' for more information. In order to search a subset of buffers,
-QUERY can be set to a plist according to `consult--buffer-query'.
+By default search across all project buffers. If the prefix
+argument QUERY is non-nil, all buffers are searched. Optional
+INITIAL input can be provided. The symbol at point and the last
+`isearch-string' is added to the future history.In order to
+search a subset of buffers, QUERY can be set to a plist according
+to `consult--buffer-query'.
 
 \(fn QUERY &optional INITIAL)" t nil)
 
