@@ -900,6 +900,7 @@
   :diminish " π"
 
   :config
+  (define-key paredit-mode-map (kbd "<RET>") nil) ; paredit-RET broke eval-expression and ielm in paredit-26
   (define-key paredit-mode-map (kbd "C-<left>") 'backward-word)
   (define-key paredit-mode-map (kbd "C-<right>") 'forward-word)
   (define-key paredit-mode-map (kbd "M-<up>") 'scroll-up-line)
