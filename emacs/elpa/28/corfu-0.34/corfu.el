@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.33
+;; Version: 0.34
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/corfu
 
@@ -104,6 +104,8 @@ separator: Quit at boundary if no `corfu-separator' has been inserted."
 
 (defcustom corfu-quit-no-match 'separator
   "Automatically quit if no matching candidate is found.
+When staying alive even if there is no match a warning message is
+shown in the popup.
 nil: Stay alive even if there is no match.
 t: Quit if there is no match.
 separator: Only stay alive if there is no match and
@@ -342,8 +344,8 @@ The completion backend can override this with
     map)
   "Ignore all mouse clicks.")
 
-(defun corfu--make-buffer (name content)
-  "Create buffer with NAME and CONTENT."
+(defun corfu--make-buffer (name)
+  "Create buffer with NAME."
   (let ((fr face-remapping-alist)
         (ls line-spacing)
         (buffer (get-buffer-create name)))
@@ -355,12 +357,7 @@ The completion backend can override this with
       (setq-local face-remapping-alist (copy-tree fr)
                   line-spacing ls)
       (cl-pushnew 'corfu-default (alist-get 'default face-remapping-alist))
-      (let ((inhibit-modification-hooks t)
-            (inhibit-read-only t))
-        (erase-buffer)
-        (insert content)
-        (goto-char (point-min))))
-    buffer))
+      buffer)))
 
 ;; Function adapted from posframe.el by tumashu
 (defvar x-gtk-resize-child-frames) ;; Not present on non-gtk builds
@@ -373,6 +370,7 @@ FRAME is the existing frame."
     (set-frame-parameter frame 'corfu--hide-timer nil))
   (let* ((window-min-height 1)
          (window-min-width 1)
+         (inhibit-redisplay t)
          (x-gtk-resize-child-frames
           (let ((case-fold-search t))
             (and
@@ -415,19 +413,28 @@ FRAME is the existing frame."
       (set-window-parameter win 'no-other-window t)
       ;; Mark window as dedicated to prevent frame reuse (#60)
       (set-window-dedicated-p win t))
-    (set-frame-size frame width height t)
-    (if (frame-visible-p frame)
-        ;; XXX HACK Avoid flicker when frame is already visible.
-        ;; Redisplay, wait for resize and then move the frame.
-        (unless (equal (frame-position frame) (cons x y))
-          (redisplay 'force)
-          (sleep-for 0.01)
-          (set-frame-position frame x y))
-      ;; XXX HACK: Force redisplay, otherwise the popup sometimes does not
-      ;; display content.
-      (set-frame-position frame x y)
-      (redisplay 'force)
-      (make-frame-visible frame))
+    ;; XXX HACK: Child frame popup behavior improved on Emacs 29.
+    ;; It seems we may not need the Emacs 27/28 hacks anymore.
+    (if (eval-when-compile (< emacs-major-version 29))
+        (let (inhibit-redisplay)
+          (set-frame-size frame width height t)
+          (if (frame-visible-p frame)
+              ;; XXX HACK Avoid flicker when frame is already visible.
+              ;; Redisplay, wait for resize and then move the frame.
+              (unless (equal (frame-position frame) (cons x y))
+                (redisplay 'force)
+                (sleep-for 0.01)
+                (set-frame-position frame x y))
+            ;; XXX HACK: Force redisplay, otherwise the popup sometimes does not
+            ;; display content.
+            (set-frame-position frame x y)
+            (redisplay 'force)
+            (make-frame-visible frame)))
+      (set-frame-size frame width height t)
+      (unless (equal (frame-position frame) (cons x y))
+        (set-frame-position frame x y))
+      (unless (frame-visible-p frame)
+        (make-frame-visible frame)))
     (redirect-frame-focus frame parent)
     frame))
 
@@ -436,45 +443,49 @@ FRAME is the existing frame."
 WIDTH is the width of the popup.
 The current candidate CURR is highlighted.
 A scroll bar is displayed from LO to LO+BAR."
-  (let* ((ch (default-line-height))
-         (cw (default-font-width))
-         (ml (ceiling (* cw corfu-left-margin-width)))
-         (mr (ceiling (* cw corfu-right-margin-width)))
-         (bw (ceiling (min mr (* cw corfu-bar-width))))
-         (marginl (and (> ml 0) (propertize " " 'display `(space :width (,ml)))))
-         (marginr (and (> mr 0) (propertize " " 'display `(space :align-to right))))
-         (sbar (when (> bw 0)
-                 (concat (propertize " " 'display `(space :align-to (- right (,mr))))
-                         (propertize " " 'display `(space :width (,(- mr bw))))
-                         (propertize " " 'face 'corfu-bar 'display `(space :width (,bw))))))
-         (pos (posn-x-y (posn-at-point pos)))
-         (width (+ (* width cw) ml mr))
-         (height (* (length lines) ch))
-         (edge (window-inside-pixel-edges))
-         (border (alist-get 'child-frame-border-width corfu--frame-parameters))
-         (x (max border (min (+ (car edge) (- (or (car pos) 0) ml (* cw off) border))
-                             (- (frame-pixel-width) width))))
-         (yb (+ (cadr edge) (window-tab-line-height) (or (cdr pos) 0) ch))
-         (y (if (> (+ yb (* corfu-count ch) ch ch) (frame-pixel-height))
-                (- yb height ch 1)
-              yb))
-         (row 0))
-    (setq corfu--frame
-          (corfu--make-frame
-           corfu--frame x y width height
-           (corfu--make-buffer
-            " *corfu*"
-            (mapconcat (lambda (line)
-                         (let ((str (concat marginl line
-                                            (if (and lo (<= lo row (+ lo bar)))
-                                                sbar
-                                              marginr))))
-                           (when (eq row curr)
-                             (add-face-text-property
-                              0 (length str) 'corfu-current 'append str))
-                           (cl-incf row)
-                           str))
-                       lines "\n"))))))
+  (let ((lh (default-line-height)))
+    (with-current-buffer (corfu--make-buffer " *corfu*")
+      (let* ((ch (default-line-height))
+             (cw (default-font-width))
+             (ml (ceiling (* cw corfu-left-margin-width)))
+             (mr (ceiling (* cw corfu-right-margin-width)))
+             (bw (ceiling (min mr (* cw corfu-bar-width))))
+             (marginl (and (> ml 0) (propertize " " 'display `(space :width (,ml)))))
+             (marginr (and (> mr 0) (propertize " " 'display `(space :align-to right))))
+             (sbar (when (> bw 0)
+                     (concat (propertize " " 'display `(space :align-to (- right (,mr))))
+                             (propertize " " 'display `(space :width (,(- mr bw))))
+                             (propertize " " 'face 'corfu-bar 'display `(space :width (,bw))))))
+             (pos (posn-x-y (posn-at-point pos)))
+             (width (+ (* width cw) ml mr))
+             ;; XXX HACK: Minimum popup height must be at least 1 line of the
+             ;; parent frame (#261).
+             (height (max lh (* (length lines) ch)))
+             (edge (window-inside-pixel-edges))
+             (border (alist-get 'child-frame-border-width corfu--frame-parameters))
+             (x (max 0 (min (+ (car edge) (- (or (car pos) 0) ml (* cw off) border))
+                            (- (frame-pixel-width) width))))
+             (yb (+ (cadr edge) (window-tab-line-height) (or (cdr pos) 0) lh))
+             (y (if (> (+ yb (* corfu-count ch) lh lh) (frame-pixel-height))
+                    (- yb height lh border border)
+                  yb))
+             (row 0))
+        (with-silent-modifications
+          (erase-buffer)
+          (insert (mapconcat (lambda (line)
+                               (let ((str (concat marginl line
+                                                  (if (and lo (<= lo row (+ lo bar)))
+                                                      sbar
+                                                    marginr))))
+                                 (when (eq row curr)
+                                   (add-face-text-property
+                                    0 (length str) 'corfu-current 'append str))
+                                 (cl-incf row)
+                                 str))
+                             lines "\n"))
+          (goto-char (point-min)))
+        (setq corfu--frame (corfu--make-frame corfu--frame x y
+                                              width height (current-buffer)))))))
 
 (defun corfu--hide-frame-deferred (frame)
   "Deferred hiding of child FRAME."
@@ -482,8 +493,7 @@ A scroll bar is displayed from LO to LO+BAR."
     (set-frame-parameter frame 'corfu--hide-timer nil)
     (make-frame-invisible frame)
     (with-current-buffer (window-buffer (frame-root-window frame))
-      (let ((inhibit-modification-hooks t)
-            (inhibit-read-only t))
+      (with-silent-modifications
         (erase-buffer)))))
 
 (defun corfu--hide-frame (frame)
@@ -590,13 +600,6 @@ A scroll bar is displayed from LO to LO+BAR."
           (eq t (compare-strings word 0 len it 0 len
                                  completion-ignore-case))))))
 
-(defun corfu--filter-files (files)
-  "Filter FILES by `completion-ignored-extensions'."
-  (let ((re (concat "\\(?:\\(?:\\`\\|/\\)\\.\\.?/\\|"
-                    (regexp-opt completion-ignored-extensions)
-                    "\\)\\'")))
-    (or (seq-remove (lambda (x) (string-match-p re x)) files) files)))
-
 (defun corfu--sort-function ()
   "Return the sorting function."
   (or corfu-sort-override-function
@@ -622,7 +625,7 @@ A scroll bar is displayed from LO to LO+BAR."
     ;; Filter the ignored file extensions. We cannot use modified predicate for
     ;; this filtering, since this breaks the special casing in the
     ;; `completion-file-name-table' for `file-exists-p' and `file-directory-p'.
-    (when completing-file (setq all (corfu--filter-files all)))
+    (when completing-file (setq all (completion-pcm--filename-try-filter all)))
     (setq all (delete-consecutive-dups (funcall (or (corfu--sort-function) #'identity) all)))
     (setq all (corfu--move-prefix-candidates-to-front field all))
     (when (and completing-file (not (string-suffix-p "/" field)))

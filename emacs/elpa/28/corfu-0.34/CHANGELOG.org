@@ -2,6 +2,13 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 0.34 (2022-12-03)
+
+- Bugfixes
+- Popup frame code updated for Emacs 29. Please report any issues.
+- =corfu-popupinfo-direction=: Variable must be a list of directions.
+- Support height adjustments of =corfu-default= face
+
 * Version 0.33 (2022-11-21)
 
 - =corfu-popupinfo=: Bugfixes

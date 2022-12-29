@@ -1,4 +1,4 @@
-This is docIEiNaS.info, produced by makeinfo version 6.7 from
+This is docYXxwrO.info, produced by makeinfo version 6.7 from
 corfu.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docIEiNaS.info,  Node: Top,  Next: Features,  Up: (dir)
+File: docYXxwrO.info,  Node: Top,  Next: Features,  Up: (dir)
 
 corfu.el - Completion Overlay Region FUnction
 *********************************************
@@ -22,13 +22,12 @@ facilities and concentrates on providing a polished completion UI.
 Completions are either provided by commands like ‘dabbrev-completion’ or
 by pluggable backends (‘completion-at-point-functions’, Capfs).  Most
 programming language major modes implement a Capf.  Furthermore the
-language server packages, Eglot (https://github.com/joaotavora/eglot)
-and Lsp-mode (https://github.com/emacs-lsp/lsp-mode), use Capfs which
-talk to the LSP server to retrieve the completions.  Corfu does not
-include its own completion backends.  The Emacs built-in Capfs and the
-Capfs provided by other programming language packages are usually
-sufficient.  A few additional Capfs and completion utilities are
-provided by the Cape (https://github.com/minad/cape) package.
+language server packages, Eglot and Lsp-mode, use Capfs which talk to
+the LSP server to retrieve the completions.  Corfu does not include its
+own completion backends.  The Emacs built-in Capfs and the Capfs
+provided by other programming language packages are usually sufficient.
+A few additional Capfs and completion utilities are provided by the Cape
+(https://github.com/minad/cape) package.
 
    *NOTE*: Corfu uses child frames to show the popup and falls back to
 the default setting of the ‘completion-in-region-function’ on
@@ -60,7 +59,7 @@ Installation and Configuration
 
 
 
-File: docIEiNaS.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
+File: docYXxwrO.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
 
 1 Features
 **********
@@ -89,7 +88,7 @@ File: docIEiNaS.info,  Node: Features,  Next: Installation and Configuration,  P
      Candidate documentation in echo area, popup or separate buffer
 
 
-File: docIEiNaS.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
+File: docYXxwrO.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
 
 2 Installation and Configuration
 ********************************
@@ -194,9 +193,9 @@ once with ‘find-file’ if you enter a wildcard.  You may also give the
 
    See also the Corfu Wiki (https://github.com/minad/corfu/wiki) and the
 Cape manual (https://github.com/minad/cape) for additional Capf
-configuration tips.  The Lsp-mode configuration is documented in the
-wiki.  For more general documentation read the chapter about completion
-in the Emacs manual
+configuration tips.  The Eglot and Lsp-mode configurations are
+documented in the wiki.  For more general documentation read the chapter
+about completion in the Emacs manual
 (https://www.gnu.org/software/emacs/manual/html_node/emacs/Completion.html).
 If you want to create your own Capfs, you can find documentation about
 completion in the Elisp manual
@@ -212,7 +211,7 @@ completion in the Elisp manual
 * Transfer completion to the minibuffer::
 
 
-File: docIEiNaS.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
+File: docYXxwrO.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.1 Auto completion
 ===================
@@ -266,7 +265,7 @@ the Orderless documentation and source code for further details.
                  completion-styles '(orderless-fast))
 
 
-File: docIEiNaS.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
+File: docYXxwrO.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
 
 2.2 Completing in the minibuffer
 ================================
@@ -305,7 +304,7 @@ the desired result.
      (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
-File: docIEiNaS.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
+File: docYXxwrO.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.3 Completing in the Eshell or Shell
 =====================================
@@ -363,7 +362,7 @@ achieve a sane Eshell experience.*
      (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
 
 
-File: docIEiNaS.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
+File: docYXxwrO.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
 
 2.4 Orderless completion
 ========================
@@ -429,7 +428,7 @@ components.
        (global-corfu-mode))
 
 
-File: docIEiNaS.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
+File: docYXxwrO.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
 
 2.5 TAB-and-Go completion
 =========================
@@ -459,7 +458,7 @@ candidate explicitly with ‘RET’.
        (global-corfu-mode))
 
 
-File: docIEiNaS.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
+File: docYXxwrO.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
 
 2.6 Transfer completion to the minibuffer
 =========================================
@@ -486,7 +485,7 @@ via ‘completing-read’.
      (define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
 
 
-File: docIEiNaS.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
+File: docYXxwrO.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
 
 3 Key bindings
 **************
@@ -510,7 +509,7 @@ bindings:
    • ‘keyboard-escape-quit’ -> ‘corfu-reset’
 
 
-File: docIEiNaS.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
+File: docYXxwrO.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
 
 4 Extensions
 ************
@@ -550,7 +549,7 @@ the following extensions come with the Corfu ELPA package:
    See the Commentary of those files for configuration details.
 
 
-File: docIEiNaS.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
+File: docYXxwrO.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
 
 5 Complementary packages
 ************************
@@ -601,7 +600,7 @@ look into complementary packages to enhance your setup.
      Vertico is the minibuffer completion counterpart of Corfu.
 
 
-File: docIEiNaS.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
+File: docYXxwrO.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
 
 6 Alternatives
 **************
@@ -648,7 +647,7 @@ File: docIEiNaS.info,  Node: Alternatives,  Next: Contributions,  Prev: Compleme
      ‘consult-completion-in-region’ is your best option.
 
 
-File: docIEiNaS.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
+File: docYXxwrO.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
 
 7 Contributions
 ***************
@@ -661,19 +660,19 @@ copyright assignment to the FSF.
 
 Tag Table:
 Node: Top213
-Node: Features2213
-Node: Installation and Configuration3695
-Node: Auto completion9367
-Node: Completing in the minibuffer11735
-Node: Completing in the Eshell or Shell13810
-Node: Orderless completion16675
-Node: TAB-and-Go completion19776
-Node: Transfer completion to the minibuffer20895
-Node: Key bindings22216
-Node: Extensions23211
-Node: Complementary packages25011
-Node: Alternatives27516
-Node: Contributions30167
+Node: Features2134
+Node: Installation and Configuration3616
+Node: Auto completion9300
+Node: Completing in the minibuffer11668
+Node: Completing in the Eshell or Shell13743
+Node: Orderless completion16608
+Node: TAB-and-Go completion19709
+Node: Transfer completion to the minibuffer20828
+Node: Key bindings22149
+Node: Extensions23144
+Node: Complementary packages24944
+Node: Alternatives27449
+Node: Contributions30100
 
 End Tag Table
 
