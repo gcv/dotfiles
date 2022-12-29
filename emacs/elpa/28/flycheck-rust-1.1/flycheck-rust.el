@@ -5,7 +5,7 @@
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://github.com/flycheck/flycheck-rust
-;; Package-Version: 20190319.1546
+;; Package-Version: 1.1
 ;; Package-Commit: a139cd53c5062697e9ed94ad80b803c37d999600
 ;; Keywords: tools, convenience
 ;; Version: 1.1

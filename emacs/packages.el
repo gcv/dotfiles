@@ -445,12 +445,10 @@
   :pin melpa)
 
 
-(use-package flycheck
-  :pin melpa)
+(use-package flycheck)
 
 
-(use-package flycheck-rust
-  :pin melpa)
+(use-package flycheck-rust)
 
 
 (use-package fountain-mode              ; screenwriting
@@ -1071,8 +1069,6 @@
 
 
 (use-package rust-mode
-  :pin melpa
-
   :mode "\\.rs\\'"
 
   :hook
