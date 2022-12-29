@@ -5,7 +5,7 @@
 ;; Author: Feng Shu <tumashu@163.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/vertico-posframe
-;; Version: 0.5.4
+;; Version: 0.6.0
 ;; Keywords: abbrev, convenience, matching, vertico
 ;; Package-Requires: ((emacs "26.0") (posframe "1.1.4") (vertico "0.13.0"))
 
@@ -36,6 +36,22 @@
 ;; NOTE: vertico-posframe requires Emacs 26 and do not support mouse
 ;; click.
 
+;; ** How to let vertico-posframe work well with vertico-multiform.
+;; #+BEGIN_EXAMPLE
+;; (setq vertico-multiform-commands
+;;       '((consult-line
+;;          posframe
+;;          (vertico-posframe-poshandler . posframe-poshandler-frame-top-center)
+;;          (vertico-posframe-border-width . 10)
+;;          ;; NOTE: This is useful when emacs is used in both in X and
+;;          ;; terminal, for posframe do not work well in terminal, so
+;;          ;; vertico-buffer-mode will be used as fallback at the
+;;          ;; moment.
+;;          (vertico-posframe-fallback-mode . vertico-buffer-mode))
+;;         (t posframe)))
+;; (vertico-multiform-mode 1)
+;; #+END_EXAMPLE
+
 ;; ** How to enable vertico-posframe
 ;; #+BEGIN_EXAMPLE
 ;; (require 'vertico-posframe)
@@ -61,7 +77,11 @@
 
 (defgroup vertico-posframe nil
   "Using posframe to show vertico."
-  :group 'vertico-posframe)
+  :group 'vertico)
+
+(defcustom vertico-posframe-fallback-mode #'ignore
+  "When posframe is not workable, this mode will be used as fallback."
+  :type 'function)
 
 (defcustom vertico-posframe-font nil
   "The font used by vertico-posframe.
@@ -184,17 +204,17 @@ Optional argument FRAME ."
   "Hidehandler used by vertico-posframe."
   (not (minibufferp)))
 
-(defun vertico-posframe-get-size ()
+(defun vertico-posframe-get-size (buffer)
   "The default functon used by `vertico-posframe-size-function'."
   (list
-   :height vertico-posframe-height
-   :width vertico-posframe-width
-   :min-height (or vertico-posframe-min-height
+   :height (buffer-local-value 'vertico-posframe-height buffer)
+   :width (buffer-local-value 'vertico-posframe-width buffer)
+   :min-height (or (buffer-local-value 'vertico-posframe-min-height buffer)
                    (let ((height (+ vertico-count 1)))
-                     (min height (or vertico-posframe-height height))))
-   :min-width (or vertico-posframe-min-width
+                     (min height (or (buffer-local-value 'vertico-posframe-height buffer) height))))
+   :min-width (or (buffer-local-value 'vertico-posframe-min-width buffer)
                   (let ((width (round (* (frame-width) 0.62))))
-                    (min width (or vertico-posframe-width width))))))
+                    (min width (or (buffer-local-value 'vertico-posframe-width buffer) width))))))
 
 (defun vertico-posframe--display (_lines)
   "Display _LINES in posframe."
@@ -214,17 +234,27 @@ is called, window-point will be set to WINDOW-POINT."
          (with-selected-window (vertico-posframe-last-window)
            (apply #'posframe-show
                   buffer
-                  :font vertico-posframe-font
-                  :poshandler vertico-posframe-poshandler
+                  :font (buffer-local-value 'vertico-posframe-font buffer)
+                  ;; Variable settings in `vertico-multiform-commands' will
+                  ;; save to BUFFER as buffer-local variables, so we need to
+                  ;; get buffer local value from BUFFER, for example:
+                  ;;
+                  ;; (setq vertico-multiform-commands
+                  ;;       '((consult-line
+                  ;;          posframe
+                  ;;          (vertico-posframe-poshandler . posframe-poshandler-frame-top-center))
+                  ;;         (t buffer)))
+                  ;;
+                  :poshandler (buffer-local-value 'vertico-posframe-poshandler buffer)
                   :background-color (face-attribute 'vertico-posframe :background nil t)
                   :foreground-color (face-attribute 'vertico-posframe :foreground nil t)
-                  :border-width vertico-posframe-border-width
+                  :border-width (buffer-local-value 'vertico-posframe-border-width buffer)
                   :border-color (vertico-posframe--get-border-color)
-                  :override-parameters vertico-posframe-parameters
-                  :refposhandler vertico-posframe-refposhandler
+                  :override-parameters (buffer-local-value 'vertico-posframe-parameters buffer)
+                  :refposhandler (buffer-local-value 'vertico-posframe-refposhandler buffer)
                   :hidehandler #'vertico-posframe-hidehandler
-                  :lines-truncate vertico-posframe-truncate-lines
-                  (funcall vertico-posframe-size-function)))))
+                  :lines-truncate (buffer-local-value 'vertico-posframe-truncate-lines buffer)
+                  (funcall (buffer-local-value 'vertico-posframe-size-function buffer) buffer)))))
     ;; NOTE: `posframe-show' will force set window-point to 0, so we
     ;; need reset it again after `posframe-show'.
     (when (numberp window-point)
@@ -289,8 +319,7 @@ is called, window-point will be set to WINDOW-POINT."
   ;; `vertico--resize-window' have set `max-mini-window-height' to
   ;; 1.0, so I think setting it to 1.0 here is safe :-).
   (setq-local max-mini-window-height 1.0)
-  (when (posframe-workable-p)
-    (posframe-hide vertico-posframe--buffer)))
+  (posframe-hide vertico-posframe--buffer))
 
 (defun vertico-posframe--setup ()
   "Setup minibuffer overlay, which pushes the minibuffer content down."
@@ -310,13 +339,17 @@ is called, window-point will be set to WINDOW-POINT."
   :global t
   (cond
    (vertico-posframe-mode
-    (advice-add #'vertico--display-candidates :after #'vertico-posframe--display)
-    (advice-add #'vertico--setup :after #'vertico-posframe--setup)
-    (advice-add #'vertico--resize-window :override #'ignore))
+    (if (not (posframe-workable-p))
+        (funcall (buffer-local-value 'vertico-posframe-fallback-mode (current-buffer)) 1)
+      (advice-add #'vertico--display-candidates :after #'vertico-posframe--display)
+      (advice-add #'vertico--setup :after #'vertico-posframe--setup)
+      (advice-add #'vertico--resize-window :override #'ignore)))
    (t
-    (advice-remove #'vertico--display-candidates #'vertico-posframe--display)
-    (advice-remove #'vertico--setup #'vertico-posframe--setup)
-    (advice-remove #'vertico--resize-window #'ignore))))
+    (if (not (posframe-workable-p))
+        (funcall (buffer-local-value 'vertico-posframe-fallback-mode (current-buffer)) -1)
+      (advice-remove #'vertico--display-candidates #'vertico-posframe--display)
+      (advice-remove #'vertico--setup #'vertico-posframe--setup)
+      (advice-remove #'vertico--resize-window #'ignore)))))
 
 (provide 'vertico-posframe)
 ;;; vertico-posframe.el ends here
