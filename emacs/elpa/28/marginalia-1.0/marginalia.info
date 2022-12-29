@@ -1,4 +1,4 @@
-This is docYD2eJk.info, produced by makeinfo version 6.7 from
+This is doc7iS3dD.info, produced by makeinfo version 6.7 from
 marginalia.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docYD2eJk.info,  Node: Top,  Next: Configuration,  Up: (dir)
+File: doc7iS3dD.info,  Node: Top,  Next: Configuration,  Up: (dir)
 
 marginalia.el - Marginalia in the minibuffer
 ********************************************
@@ -37,7 +37,7 @@ annotators or even disable the annotator with command
 * Contributions::
 
 
-File: docYD2eJk.info,  Node: Configuration,  Next: Information shown by the annotators,  Prev: Top,  Up: Top
+File: doc7iS3dD.info,  Node: Configuration,  Next: Information shown by the annotators,  Prev: Top,  Up: Top
 
 1 Configuration
 ***************
@@ -66,7 +66,7 @@ commands.
        (marginalia-mode))
 
 
-File: docYD2eJk.info,  Node: Information shown by the annotators,  Next: Adding custom annotators or classifiers,  Prev: Configuration,  Up: Top
+File: doc7iS3dD.info,  Node: Information shown by the annotators,  Next: Adding custom annotators or classifiers,  Prev: Configuration,  Up: Top
 
 2 Information shown by the annotators
 *************************************
@@ -81,7 +81,7 @@ more information on what the different classifications mean, see the
 docstring of ‘marginalia--symbol-class’.
 
 
-File: docYD2eJk.info,  Node: Adding custom annotators or classifiers,  Next: Disabling annotators builtin or lightweight annotators,  Prev: Information shown by the annotators,  Up: Top
+File: doc7iS3dD.info,  Node: Adding custom annotators or classifiers,  Next: Disabling annotators builtin or lightweight annotators,  Prev: Information shown by the annotators,  Up: Top
 
 3 Adding custom annotators or classifiers
 *****************************************
@@ -89,20 +89,22 @@ File: docYD2eJk.info,  Node: Adding custom annotators or classifiers,  Next: Dis
 *IMPORTANT NOTICE FOR PACKAGE AUTHORS*: The intention of the Marginalia
 package is to give the user means to overwrite completion categories and
 to add custom annotators for existing commands in their user
-configuration.  Marginalia is a user facing package and is not intended
-to be used as a library.  Therefore Marginalia does not expose library
+configuration.  *Marginalia is a user facing package and is not intended
+to be used as a library*.  Therefore Marginalia does not expose library
 functions as part of its public API.  If you add your own completion
 commands to your package we recommend to specify an
 ‘annotation-function’ or an ‘affixation-function’, avoiding the
 Marginalia dependency this way.  The ‘annotation-function’ and
 ‘affixation-function’ are documented in the Elisp manual
 (https://www.gnu.org/software/emacs/manual/html_node/elisp/Completion.html).
-There is an exception to our recommendation: If you want to implement
-annotations for an existing package ‘hypothetic.el’, which does not have
-annotations and where annotations cannot be added, then the creation of
-a ‘marginalia-hypothetic.el’ package is a good idea, since Marginalia
-provides the facilities to enhance existing commands from the outside.
-If you have questions feel free to ask on the Marginalia issue tracker!
+If you use ‘consult--read’, you can specify an ‘:annotate’ keyword
+argument.  There is an exception to our recommendation: If you want to
+implement annotations for an existing package ‘hypothetic.el’, which
+does not have annotations and where annotations cannot be added, then
+the creation of a ‘marginalia-hypothetic.el’ package is a good idea,
+since Marginalia provides the facilities to enhance existing commands
+from the outside.  If you have questions feel free to ask on the
+Marginalia issue tracker.
 
    Commands that support minibuffer completion use a completion table of
 all the available candidates.  Candidates are associated with a
@@ -170,7 +172,7 @@ this setting, after invoking ‘M-x describe-face RET’ you can cycle
 between all of these annotators using ‘marginalia-cycle’.
 
 
-File: docYD2eJk.info,  Node: Disabling annotators builtin or lightweight annotators,  Next: Contributions,  Prev: Adding custom annotators or classifiers,  Up: Top
+File: doc7iS3dD.info,  Node: Disabling annotators builtin or lightweight annotators,  Next: Contributions,  Prev: Adding custom annotators or classifiers,  Up: Top
 
 4 Disabling annotators, builtin or lightweight annotators
 *********************************************************
@@ -222,7 +224,7 @@ from the registry.
            (assq-delete-all 'file marginalia-annotator-registry))
 
 
-File: docYD2eJk.info,  Node: Contributions,  Prev: Disabling annotators builtin or lightweight annotators,  Up: Top
+File: doc7iS3dD.info,  Node: Contributions,  Prev: Disabling annotators builtin or lightweight annotators,  Up: Top
 
 5 Contributions
 ***************
@@ -238,8 +240,8 @@ Node: Top216
 Node: Configuration1450
 Node: Information shown by the annotators2598
 Node: Adding custom annotators or classifiers3310
-Node: Disabling annotators builtin or lightweight annotators8137
-Node: Contributions10178
+Node: Disabling annotators builtin or lightweight annotators8226
+Node: Contributions10267
 
 End Tag Table
 
