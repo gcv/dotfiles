@@ -4,10 +4,10 @@
 
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;; Keywords: processes, tools
-;; Package-Commit: d55ee22573c83ccbb55b8df6360ef3c62d1ce244
+;; Package-Commit: 417285c4e259abab8ae43e2d72b0e1110563efbc
 ;; Homepage: https://github.com/purcell/envrc
 ;; Package-Requires: ((seq "2") (emacs "25.1") (inheritenv "0.1"))
-;; Package-Version: 20221106.1133
+;; Package-Version: 20221208.932
 ;; Package-X-Original-Version: 0
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -145,7 +145,8 @@ e.g. (define-key envrc-mode-map (kbd \"C-c e\") 'envrc-command-map)"
 ;;; Global state
 
 (defvar envrc--cache (make-hash-table :test 'equal :size 10)
-  "Known envrc directories and their direnv results, as produced by `envrc--export'.")
+  "Known envrc directorie and their direnv results.
+The values are as produced by `envrc--export'.")
 
 ;;; Local state
 
@@ -289,7 +290,7 @@ also appear in PAIRS."
     (kill-local-variable 'process-environment)
     (when (derived-mode-p 'eshell-mode)
       (if (fboundp 'eshell-set-path)
-          (eshell-set-path (butlast (exec-path)))
+          (eshell-set-path (butlast exec-path))
         (kill-local-variable 'eshell-path-env)))))
 
 
@@ -400,6 +401,7 @@ in a temp buffer.  ARGS is as for ORIG."
     (apply orig args)))
 
 (advice-add 'shell-command-to-string :around #'envrc-propagate-environment)
+(advice-add 'async-shell-command :around #'envrc-propagate-environment)
 (advice-add 'org-babel-eval :around #'envrc-propagate-environment)
 
 
