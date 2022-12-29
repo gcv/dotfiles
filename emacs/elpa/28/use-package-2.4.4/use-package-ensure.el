@@ -1,6 +1,6 @@
 ;;; use-package-ensure.el --- Support for the :ensure and :pin keywords  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2012-2017 John Wiegley
+;; Copyright (C) 2012-2022 Free Software Foundation, Inc.
 
 ;; Author: John Wiegley <johnw@newartisans.com>
 ;; Maintainer: John Wiegley <johnw@newartisans.com>
@@ -93,7 +93,7 @@ The default value uses package.el to install the package."
 (defun use-package-archive-exists-p (archive)
   "Check if a given ARCHIVE is enabled.
 
-ARCHIVE can be a string or a symbol or 'manual to indicate a
+ARCHIVE can be a string or a symbol or `manual' to indicate a
 manually updated package."
   (if (member archive '(manual "manual"))
       't

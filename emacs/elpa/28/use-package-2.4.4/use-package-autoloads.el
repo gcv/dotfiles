@@ -90,6 +90,7 @@ this file.  Usage:
                  package.  This is useful if the package is being lazily
                  loaded, and you wish to conditionally call functions in your
                  `:init' block that are defined in the package.
+:autoload        Similar to :commands, but it for no-interactive one.
 :hook            Specify hook(s) to attach this package to.
 
 :bind            Bind keys, and define autoloads for the bound commands.
@@ -117,16 +118,16 @@ this file.  Usage:
 :load-path       Add to the `load-path' before attempting to load the package.
 :diminish        Support for diminish.el (if installed).
 :delight         Support for delight.el (if installed).
-:custom          Call `custom-set' or `set-default' with each variable
+:custom          Call `Custom-set' or `set-default' with each variable
                  definition without modifying the Emacs `custom-file'.
                  (compare with `custom-set-variables').
-:custom-face     Call `customize-set-faces' with each face definition.
+:custom-face     Call `custom-set-faces' with each face definition.
 :ensure          Loads the package using package.el if necessary.
 :pin             Pin the package to an archive.
 
 \(fn NAME &rest ARGS)" nil t)
 
-(function-put 'use-package 'lisp-indent-function '1)
+(function-put 'use-package 'lisp-indent-function 'defun)
 
 (register-definition-prefixes "use-package-core" '("use-package-"))
 
@@ -186,6 +187,24 @@ Normalize arguments to delight.
 
 ;;;***
 
+;;;### (autoloads nil "use-package-ensure-system-package" "use-package-ensure-system-package.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from use-package-ensure-system-package.el
+
+(autoload 'use-package-normalize/:ensure-system-package "use-package-ensure-system-package" "\
+Turn `arg' into a list of cons-es of (`package-name' . `install-command').
+
+\(fn NAME-SYMBOL KEYWORD ARGS)" nil nil)
+
+(autoload 'use-package-handler/:ensure-system-package "use-package-ensure-system-package" "\
+Execute the handler for `:ensure-system-package' keyword in `use-package'.
+
+\(fn NAME KEYWORD ARG REST STATE)" nil nil)
+
+(register-definition-prefixes "use-package-ensure-system-package" '("use-package-ensure-system-package-"))
+
+;;;***
+
 ;;;### (autoloads nil "use-package-jump" "use-package-jump.el" (0
 ;;;;;;  0 0 0))
 ;;; Generated autoloads from use-package-jump.el
@@ -216,8 +235,8 @@ with the specified `:load-path' the module cannot be found." t nil)
 
 ;;;***
 
-;;;### (autoloads nil nil ("use-package-pkg.el" "use-package.el")
-;;;;;;  (0 0 0 0))
+;;;### (autoloads nil nil ("use-package-chords-tests.el" "use-package-pkg.el"
+;;;;;;  "use-package-tests.el" "use-package.el") (0 0 0 0))
 
 ;;;***
 
