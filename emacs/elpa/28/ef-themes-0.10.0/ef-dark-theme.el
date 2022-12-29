@@ -37,7 +37,8 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-dark "Legible dark theme with blue, magenta, cyan, purple colors.")
+  (deftheme ef-dark
+    "Legible dark theme with blue, magenta, cyan, purple colors.")
 
   (defconst ef-dark-palette
     '(;; Basic tones
@@ -48,8 +49,8 @@
       (bg-alt      "#2b2b2b")
       (fg-alt      "#89afef")
 
-      (bg-active   "#3b3b3b")
-      (bg-inactive "#0c0c0c")
+      (bg-active   "#4b4b4b")
+      (bg-inactive "#121212")
 
       ;; Basic hues for foreground values
       (red             "#ef6560")
@@ -71,7 +72,7 @@
       (magenta         "#d369af")
       (magenta-warmer  "#e580ea")
       (magenta-cooler  "#af85ff")
-      (magenta-faint   "#c57faf")
+      (magenta-faint   "#c58faf")
       (cyan            "#4fbaef")
       (cyan-warmer     "#6fafff")
       (cyan-cooler     "#1dbfcf")
@@ -93,17 +94,17 @@
       (bg-cyan-subtle     "#004065")
 
       ;; Diffs
-      (bg-added          "#00331f")
-      (bg-added-faint    "#002410")
-      (bg-added-refine   "#03492f")
+      (bg-added          "#00381f")
+      (bg-added-faint    "#002910")
+      (bg-added-refine   "#034f2f")
 
-      (bg-changed        "#323200")
-      (bg-changed-faint  "#281a00")
-      (bg-changed-refine "#484800")
+      (bg-changed        "#363300")
+      (bg-changed-faint  "#2a1f00")
+      (bg-changed-refine "#4a4a00")
 
-      (bg-removed        "#4a1119")
-      (bg-removed-faint  "#320a0f")
-      (bg-removed-refine "#751a1f")
+      (bg-removed        "#4f1119")
+      (bg-removed-faint  "#380a0f")
+      (bg-removed-refine "#781a1f")
 
       ;; Graphs
       (red-graph-0-bg     "#b52c2c")
@@ -128,9 +129,9 @@
       (bg-hl-line    "#002435")
       (bg-region     "#2a234a")
       (bg-paren      "#20577a")
-      (bg-err        "#330d09") ; check with err
+      (bg-err        "#360d09") ; check with err
       (bg-warning    "#332600") ; check with warning
-      (bg-info       "#002212") ; check with info
+      (bg-info       "#002c12") ; check with info
 
       (border        "#4f4f5f")
       (cursor        "#ff76ff")
@@ -144,6 +145,9 @@
       (underline-warning "#c0b000")
       (underline-info    "#22b022")
 
+      ;; Conditional hues
+      (bg-region-intense "#3a3465")
+
       ;; Mappings
       (err red-warmer)
       (warning yellow)
@@ -154,6 +158,7 @@
       (date green-cooler)
       (name blue-warmer)
       (keybind blue-cooler)
+      (identifier magenta-faint)
       (prompt green-cooler)
 
       (builtin magenta)
@@ -196,5 +201,8 @@
   (ef-themes-theme ef-dark ef-dark-palette)
 
   (provide-theme 'ef-dark))
+
+;;;###theme-autoload
+(put 'ef-dark 'theme-properties '(:background-mode dark :kind color-scheme :family ef))
 
 ;;; ef-dark-theme.el ends here

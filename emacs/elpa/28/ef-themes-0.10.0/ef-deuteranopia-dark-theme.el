@@ -40,19 +40,20 @@
   ;; Most of the colors here, like the red and green hues, are defined
   ;; simply to preserve compatibility with the rest of the project.  We
   ;; don't actually rely on them for anything critical.
-  (deftheme ef-deuteranopia-dark "Legible dark theme, optimized for red-green color deficiency.")
+  (deftheme ef-deuteranopia-dark
+    "Legible dark theme, optimized for red-green color deficiency.")
 
   (defconst ef-deuteranopia-dark-palette
     '(;; Basic tones
       (bg-main     "#000a1f")
       (fg-main     "#ddddee")
-      (bg-dim      "#0f1c2d")
+      (bg-dim      "#121f34")
       (fg-dim      "#7f8797")
-      (bg-alt      "#19263a")
+      (bg-alt      "#243145")
       (fg-alt      "#90afef")
 
-      (bg-active   "#30354f")
-      (bg-inactive "#071225")
+      (bg-active   "#445165")
+      (bg-inactive "#0d1429")
 
       ;; Basic hues for foreground values
       (red             "#cf8560")
@@ -129,11 +130,11 @@
       (bg-hover      "#4f4f00")
       (bg-hover-alt  "#00405f")
       (bg-hl-line    "#2e2e1b")
-      (bg-region     "#202d3f")
+      (bg-region     "#223848")
       (bg-paren      "#0f4f9a")
       (bg-err        "#342d09") ; check with err
       (bg-warning    "#292900") ; check with warning
-      (bg-info       "#00204f") ; check with info
+      (bg-info       "#002252") ; check with info
 
       (border        "#555a64")
       (cursor        "#ffff00")
@@ -147,6 +148,9 @@
       (underline-warning "#bfaf50")
       (underline-info    "#22cff2")
 
+      ;; Conditional hues
+      (bg-region-intense "#1f2f70")
+
       ;; Mappings
       (err yellow-warmer)
       (warning yellow)
@@ -157,6 +161,7 @@
       (date yellow-cooler)
       (name blue-warmer)
       (keybind yellow-warmer)
+      (identifier cyan-faint)
       (prompt yellow)
 
       (builtin blue-warmer)
@@ -199,5 +204,8 @@
   (ef-themes-theme ef-deuteranopia-dark ef-deuteranopia-dark-palette)
 
   (provide-theme 'ef-deuteranopia-dark))
+
+;;;###theme-autoload
+(put 'ef-deuteranopia-dark 'theme-properties '(:background-mode dark :kind color-scheme :family ef))
 
 ;;; ef-deuteranopia-dark-theme.el ends here

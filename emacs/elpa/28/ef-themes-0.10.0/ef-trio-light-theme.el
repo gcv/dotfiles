@@ -37,29 +37,30 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-trio-light "Legible light theme with magenta, blue, and teal colors.")
+  (deftheme ef-trio-light
+    "Legible light theme with magenta, blue, and teal colors.")
 
   (defconst ef-trio-light-palette
     '(;; Basic tones
       (bg-main     "#f8f5ff")
       (fg-main     "#4f3363")
-      (bg-dim      "#f0ecf4")
+      (bg-dim      "#ebe7f1")
       (fg-dim      "#786e74")
       (bg-alt      "#e3e0e9")
       (fg-alt      "#3f7668")
 
-      (bg-active   "#d3d0d9")
-      (bg-inactive "#f3f1fa")
+      (bg-active   "#c3c0c9")
+      (bg-inactive "#efeef7")
 
       ;; Basic hues for foreground values
       (red             "#c3303a")
       (red-warmer      "#d03033")
       (red-cooler      "#c01f5f")
-      (red-faint       "#c24552")
+      (red-faint       "#a24568")
       (green           "#057800")
       (green-warmer    "#4f7d0f")
       (green-cooler    "#007f6f")
-      (green-faint     "#61756c")
+      (green-faint     "#41754c")
       (yellow          "#a45f22")
       (yellow-warmer   "#b8532f")
       (yellow-cooler   "#b65050")
@@ -144,6 +145,9 @@
       (underline-warning "#bf5f00")
       (underline-info    "#02af52")
 
+      ;; Conditional hues
+      (bg-region-intense "#aacacf")
+
       ;; Mappings
       (err red-warmer)
       (warning yellow-warmer)
@@ -154,6 +158,7 @@
       (date cyan-cooler)
       (name blue)
       (keybind magenta-warmer)
+      (identifier red-faint)
       (prompt blue-cooler)
 
       (builtin magenta-cooler)
@@ -165,7 +170,7 @@
       (docstring magenta-faint)
       (string green-cooler)
       (type cyan-cooler)
-      (variable blue)
+      (variable cyan-warmer)
 
       (rx-escape blue-warmer) ; compare with `string'
       (rx-construct red)
@@ -196,5 +201,8 @@
   (ef-themes-theme ef-trio-light ef-trio-light-palette)
 
   (provide-theme 'ef-trio-light))
+
+;;;###theme-autoload
+(put 'ef-trio-light 'theme-properties '(:background-mode light :kind color-scheme :family ef))
 
 ;;; ef-trio-light-theme.el ends here

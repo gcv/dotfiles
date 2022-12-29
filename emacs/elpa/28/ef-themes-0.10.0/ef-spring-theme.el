@@ -37,7 +37,8 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-spring "Legible light theme with cool, varied colors (green, cyan, red).")
+  (deftheme ef-spring
+    "Legible light theme with cool, varied colors (green, cyan, red).")
 
   (defconst ef-spring-palette
     '(;; Basic tones
@@ -48,7 +49,7 @@
       (bg-alt      "#e0e6e3")
       (fg-alt      "#9d5e7a")
 
-      (bg-active   "#d0d6d3")
+      (bg-active   "#c0c6c3")
       (bg-inactive "#f0f8f4")
 
       ;; Basic hues for foreground values
@@ -144,6 +145,9 @@
       (underline-warning "#bf5f00")
       (underline-info    "#02af52")
 
+      ;; Conditional hues
+      (bg-region-intense "#cfb5f0")
+
       ;; Mappings
       (err red-warmer)
       (warning yellow)
@@ -154,6 +158,7 @@
       (date cyan)
       (name green-cooler)
       (keybind magenta-warmer)
+      (identifier magenta-faint)
       (prompt green)
 
       (builtin green)
@@ -188,7 +193,7 @@
       (rainbow-3 blue-warmer)
       (rainbow-4 yellow-warmer)
       (rainbow-5 cyan)
-      (rainbow-6 red-warmer)
+      (rainbow-6 magenta)
       (rainbow-7 magenta-cooler)
       (rainbow-8 yellow-cooler))
     "The `ef-spring' palette.")
@@ -196,5 +201,8 @@
   (ef-themes-theme ef-spring ef-spring-palette)
 
   (provide-theme 'ef-spring))
+
+;;;###theme-autoload
+(put 'ef-spring 'theme-properties '(:background-mode light :kind color-scheme :family ef))
 
 ;;; ef-spring-theme.el ends here

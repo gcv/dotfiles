@@ -37,7 +37,8 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-frost "Legible light theme with blue, cyan, teal, purple colors.")
+  (deftheme ef-frost
+    "Legible light theme with blue, cyan, teal, purple colors.")
 
   (defconst ef-frost-palette
     '(;; Basic tones
@@ -48,7 +49,7 @@
       (bg-alt      "#d7dbdb")
       (fg-alt      "#204f9a")
 
-      (bg-active   "#c7cbcb")
+      (bg-active   "#b5b8b8")
       (bg-inactive "#f7f9f9")
 
       ;; Basic hues for foreground values
@@ -144,6 +145,9 @@
       (underline-warning "#bf5f00")
       (underline-info    "#02af52")
 
+      ;; Conditional hues
+      (bg-region-intense "#aadfcc")
+
       ;; Mappings
       (err red)
       (warning yellow-cooler)
@@ -154,6 +158,7 @@
       (date cyan-cooler)
       (name cyan-warmer)
       (keybind blue-cooler)
+      (identifier magenta-faint)
       (prompt blue)
 
       (builtin cyan)
@@ -196,5 +201,8 @@
   (ef-themes-theme ef-frost ef-frost-palette)
 
   (provide-theme 'ef-frost))
+
+;;;###theme-autoload
+(put 'ef-frost 'theme-properties '(:background-mode light :kind color-scheme :family ef))
 
 ;;; ef-frost-theme.el ends here

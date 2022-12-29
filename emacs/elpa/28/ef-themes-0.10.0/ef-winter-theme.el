@@ -37,19 +37,20 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-winter "Legible dark theme with magenta, purple, fawn, teal colors.")
+  (deftheme ef-winter
+    "Legible dark theme with magenta, purple, fawn, teal colors.")
 
   (defconst ef-winter-palette
     '(;; Basic tones
       (bg-main      "#0f0b15")
       (fg-main      "#b8c6d5")
-      (bg-dim       "#161926")
+      (bg-dim       "#1d202f")
       (fg-dim       "#807c9f")
-      (bg-alt       "#202234")
+      (bg-alt       "#2a2f42")
       (fg-alt       "#bf8f8f")
 
-      (bg-active    "#353554")
-      (bg-inactive  "#14121a")
+      (bg-active    "#4a4f62")
+      (bg-inactive  "#19181f")
 
       ;; Basic hues for foreground values
       (red             "#f47359")
@@ -93,17 +94,17 @@
       (bg-cyan-subtle     "#004065")
 
       ;; Diffs
-      (bg-added          "#002d1f")
-      (bg-added-faint    "#001f18")
-      (bg-added-refine   "#003b2f")
+      (bg-added          "#00371f")
+      (bg-added-faint    "#002918")
+      (bg-added-refine   "#004c2f")
 
-      (bg-changed        "#323200")
-      (bg-changed-faint  "#2a2000")
-      (bg-changed-refine "#444000")
+      (bg-changed        "#363300")
+      (bg-changed-faint  "#2a1f00")
+      (bg-changed-refine "#4a4a00")
 
-      (bg-removed        "#3d091f")
-      (bg-removed-faint  "#27040f")
-      (bg-removed-refine "#5b0f26")
+      (bg-removed        "#450f1f")
+      (bg-removed-faint  "#2f060f")
+      (bg-removed-refine "#641426")
 
       ;; Graphs
       (red-graph-0-bg     "#b52c2c")
@@ -130,7 +131,7 @@
       (bg-paren      "#2f608e")
       (bg-err        "#330d06") ; check with err
       (bg-warning    "#332610") ; check with warning
-      (bg-info       "#0f2a10") ; check with info
+      (bg-info       "#0f2e10") ; check with info
 
       (border        "#4a4955")
       (cursor        "#ff6ff0")
@@ -144,6 +145,9 @@
       (underline-warning "#c0b000")
       (underline-info    "#22b022")
 
+      ;; Conditional hues
+      (bg-region-intense "#4f2f5d")
+
       ;; Mappings
       (err red-warmer)
       (warning yellow)
@@ -154,6 +158,7 @@
       (date cyan-cooler)
       (name magenta)
       (keybind cyan-cooler)
+      (identifier magenta-faint)
       (prompt magenta-warmer)
 
       (builtin magenta-warmer)
@@ -196,5 +201,8 @@
   (ef-themes-theme ef-winter ef-winter-palette)
 
   (provide-theme 'ef-winter))
+
+;;;###theme-autoload
+(put 'ef-winter 'theme-properties '(:background-mode dark :kind color-scheme :family ef))
 
 ;;; ef-winter-theme.el ends here

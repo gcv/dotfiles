@@ -37,19 +37,20 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-summer "Legible light theme with magenta, purple, gold, cyan colors.")
+  (deftheme ef-summer
+    "Legible light theme with magenta, purple, gold, cyan colors.")
 
   (defconst ef-summer-palette
     '(;; Basic tones
       (bg-main     "#fff2f3")
       (fg-main     "#4f4073")
-      (bg-dim      "#f3e7eb")
+      (bg-dim      "#f2e4ea")
       (fg-dim      "#786e74")
       (bg-alt      "#efd3e4")
       (fg-alt      "#af4988")
 
-      (bg-active   "#dfc3d4")
-      (bg-inactive "#f9eff0")
+      (bg-active   "#cfb3c4")
+      (bg-inactive "#f7ebee")
 
       ;; Basic hues for foreground values
       (red             "#d3303a")
@@ -71,7 +72,7 @@
       (magenta         "#ba35af")
       (magenta-warmer  "#cb1aaa")
       (magenta-cooler  "#8e44f3")
-      (magenta-faint   "#bf3580")
+      (magenta-faint   "#a45392")
       (cyan            "#1f6fbf")
       (cyan-warmer     "#3f6faf")
       (cyan-cooler     "#0f7b8f")
@@ -144,6 +145,9 @@
       (underline-warning "#bf5f00")
       (underline-info    "#02af52")
 
+      ;; Conditional hues
+      (bg-region-intense "#caaadf")
+
       ;; Mappings
       (err red-warmer)
       (warning yellow)
@@ -154,6 +158,7 @@
       (date cyan-cooler)
       (name magenta-warmer)
       (keybind red-cooler)
+      (identifier magenta-faint)
       (prompt magenta-warmer)
 
       (builtin magenta)
@@ -188,7 +193,7 @@
       (rainbow-3 cyan)
       (rainbow-4 magenta)
       (rainbow-5 blue-warmer)
-      (rainbow-6 red-warmer)
+      (rainbow-6 red-cooler)
       (rainbow-7 cyan-cooler)
       (rainbow-8 yellow-cooler))
     "The `ef-summer' palette.")
@@ -196,5 +201,8 @@
   (ef-themes-theme ef-summer ef-summer-palette)
 
   (provide-theme 'ef-summer))
+
+;;;###theme-autoload
+(put 'ef-summer 'theme-properties '(:background-mode light :kind color-scheme :family ef))
 
 ;;; ef-summer-theme.el ends here

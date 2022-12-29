@@ -40,7 +40,8 @@
   ;; Most of the colors here, like the blue and green hues, are defined
   ;; simply to preserve compatibility with the rest of the project.  We
   ;; don't actually rely on them for anything critical.
-  (deftheme ef-tritanopia-light "Legible light theme, optimized for blue-yellow color deficiency.")
+  (deftheme ef-tritanopia-light
+    "Legible light theme, optimized for blue-yellow color deficiency.")
 
   (defconst ef-tritanopia-light-palette
     '(;; Basic tones
@@ -51,7 +52,7 @@
       (bg-alt      "#ddd9d9")
       (fg-alt      "#194f90")
 
-      (bg-active   "#cdc9c9")
+      (bg-active   "#bdb9b9")
       (bg-inactive "#f7f2f2")
 
       ;; Basic hues for foreground values
@@ -147,6 +148,9 @@
       (underline-warning "#af7f90")
       (underline-info    "#22afc2")
 
+      ;; Conditional hues
+      (bg-region-intense "#dfa5a5")
+
       ;; Mappings
       (err red-warmer)
       (warning magenta)
@@ -157,6 +161,7 @@
       (date cyan-cooler)
       (name magenta)
       (keybind red-cooler)
+      (identifier magenta-faint)
       (prompt cyan)
 
       (builtin magenta)
@@ -199,5 +204,8 @@
   (ef-themes-theme ef-tritanopia-light ef-tritanopia-light-palette)
 
   (provide-theme 'ef-tritanopia-light))
+
+;;;###theme-autoload
+(put 'ef-tritanopia-light 'theme-properties '(:background-mode light :kind color-scheme :family ef))
 
 ;;; ef-tritanopia-light-theme.el ends here

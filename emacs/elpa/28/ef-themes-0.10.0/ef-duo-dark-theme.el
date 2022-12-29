@@ -40,19 +40,20 @@
   ;; Most of the colors here are defined simply to preserve
   ;; compatibility with the rest of the project.  We don't actually rely
   ;; on them for anything critical.
-  (deftheme ef-duo-dark "Legible dark theme with mostly blue and orange colors.")
+  (deftheme ef-duo-dark
+    "Legible dark theme with mostly blue and orange colors.")
 
   (defconst ef-duo-dark-palette
     '(;; Basic tones
       (bg-main     "#070019")
       (fg-main     "#d0d0d0")
-      (bg-dim      "#1c1926")
+      (bg-dim      "#1d1a26")
       (fg-dim      "#857f8f")
-      (bg-alt      "#262230")
+      (bg-alt      "#2a2739")
       (fg-alt      "#89afef")
 
-      (bg-active   "#363240")
-      (bg-inactive "#140e1c")
+      (bg-active   "#4a4759")
+      (bg-inactive "#13101f")
 
       ;; Basic hues for foreground values
       (red             "#ef656a")
@@ -131,9 +132,9 @@
       (bg-hl-line    "#301a4f")
       (bg-region     "#042a50")
       (bg-paren      "#2f608e")
-      (bg-err        "#330d09") ; check with err
+      (bg-err        "#360d09") ; check with err
       (bg-warning    "#332600") ; check with warning
-      (bg-info       "#002212") ; check with info
+      (bg-info       "#002d12") ; check with info
 
       (border        "#545f6f")
       (cursor        "#ef6f11")
@@ -147,6 +148,9 @@
       (underline-warning "#c0b000")
       (underline-info    "#22b022")
 
+      ;; Conditional hues
+      (bg-region-intense "#1f2f70")
+
       ;; Mappings
       (err red)
       (warning yellow)
@@ -157,6 +161,7 @@
       (date cyan-cooler)
       (name blue)
       (keybind blue-cooler)
+      (identifier red-faint)
       (prompt yellow)
 
       (builtin cyan)
@@ -199,5 +204,8 @@
   (ef-themes-theme ef-duo-dark ef-duo-dark-palette)
 
   (provide-theme 'ef-duo-dark))
+
+;;;###theme-autoload
+(put 'ef-duo-dark 'theme-properties '(:background-mode dark :kind color-scheme :family ef))
 
 ;;; ef-duo-dark-theme.el ends here

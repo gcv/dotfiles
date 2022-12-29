@@ -37,7 +37,8 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-cyprus "Legible light theme with green, yellow, teal, red colors.")
+  (deftheme ef-cyprus
+    "Legible light theme with green, yellow, teal, red colors.")
 
   (defconst ef-cyprus-palette
     '(;; Basic tones
@@ -48,7 +49,7 @@
       (bg-alt      "#e5e3d8")
       (fg-alt      "#7f475a")
 
-      (bg-active   "#d5d3c8")
+      (bg-active   "#c5c3b8")
       (bg-inactive "#f8f3ea")
 
       ;; Basic hues for foreground values
@@ -59,7 +60,7 @@
       (green           "#006f00")
       (green-warmer    "#557400")
       (green-cooler    "#00824f")
-      (green-faint     "#4f654c")
+      (green-faint     "#3a6f48")
       (yellow          "#a7601f")
       (yellow-warmer   "#bf4400")
       (yellow-cooler   "#a2604f")
@@ -144,6 +145,9 @@
       (underline-warning "#bf5f00")
       (underline-info    "#02af5f")
 
+      ;; Conditional hues
+      (bg-region-intense "#dcd09f")
+
       ;; Mappings
       (err red-warmer)
       (warning yellow)
@@ -154,6 +158,7 @@
       (date yellow-cooler)
       (name green-warmer)
       (keybind red)
+      (identifier green-faint)
       (prompt green)
 
       (builtin green-warmer)
@@ -196,5 +201,8 @@
   (ef-themes-theme ef-cyprus ef-cyprus-palette)
 
   (provide-theme 'ef-cyprus))
+
+;;;###theme-autoload
+(put 'ef-cyprus 'theme-properties '(:background-mode light :kind color-scheme :family ef))
 
 ;;; ef-cyprus-theme.el ends here

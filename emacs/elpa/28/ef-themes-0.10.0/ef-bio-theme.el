@@ -37,7 +37,8 @@
 (eval-and-compile
   (require 'ef-themes)
 
-  (deftheme ef-bio "Legible dark theme with green, teal, blue, purple colors.")
+  (deftheme ef-bio
+    "Legible dark theme with green, teal, blue, purple colors.")
 
   (defconst ef-bio-palette
     '(;; Basic tones
@@ -48,7 +49,7 @@
       (bg-alt       "#303230")
       (fg-alt       "#8fcfaf")
 
-      (bg-active    "#404240")
+      (bg-active    "#505250")
       (bg-inactive  "#161916")
 
       ;; Basic hues for foreground values
@@ -93,16 +94,16 @@
       (bg-cyan-subtle     "#004065")
 
       ;; Diffs
-      (bg-added          "#00301f")
-      (bg-added-faint    "#002110")
-      (bg-added-refine   "#03462f")
+      (bg-added          "#003b1f")
+      (bg-added-faint    "#002a10")
+      (bg-added-refine   "#03512f")
 
-      (bg-changed        "#323200")
-      (bg-changed-faint  "#281a00")
-      (bg-changed-refine "#484800")
+      (bg-changed        "#363300")
+      (bg-changed-faint  "#2a1f00")
+      (bg-changed-refine "#4a4a00")
 
-      (bg-removed        "#4a1119")
-      (bg-removed-faint  "#320a0f")
+      (bg-removed        "#4e1119")
+      (bg-removed-faint  "#380a0f")
       (bg-removed-refine "#751a1f")
 
       ;; Graphs
@@ -128,9 +129,9 @@
       (bg-hl-line    "#00331f")
       (bg-region     "#3a3027")
       (bg-paren      "#664950")
-      (bg-err        "#361400") ; check with err
+      (bg-err        "#381400") ; check with err
       (bg-warning    "#332800") ; check with warning
-      (bg-info       "#132b00") ; check with info
+      (bg-info       "#132f00") ; check with info
 
       (border        "#525959")
       (cursor        "#35f038")
@@ -144,6 +145,9 @@
       (underline-warning "#c0b000")
       (underline-info    "#22b022")
 
+      ;; Conditional hues
+      (bg-region-intense "#0f5450")
+
       ;; Mappings
       (err red)
       (warning yellow-cooler)
@@ -154,6 +158,7 @@
       (date cyan-cooler)
       (name green)
       (keybind green)
+      (identifier magenta-faint)
       (prompt green-warmer)
 
       (builtin green)
@@ -196,5 +201,8 @@
   (ef-themes-theme ef-bio ef-bio-palette)
 
   (provide-theme 'ef-bio))
+
+;;;###theme-autoload
+(put 'ef-bio 'theme-properties '(:background-mode dark :kind color-scheme :family ef))
 
 ;;; ef-bio-theme.el ends here

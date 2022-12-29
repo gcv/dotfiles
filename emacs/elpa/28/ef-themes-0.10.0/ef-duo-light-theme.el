@@ -40,7 +40,8 @@
   ;; Most of the colors here are defined simply to preserve
   ;; compatibility with the rest of the project.  We don't actually rely
   ;; on them for anything critical.
-  (deftheme ef-duo-light "Legible light theme with mostly blue and yellow colors.")
+  (deftheme ef-duo-light
+    "Legible light theme with mostly blue and yellow colors.")
 
   (defconst ef-duo-light-palette
     '(;; Basic tones
@@ -51,7 +52,7 @@
       (bg-alt      "#e7e0da")
       (fg-alt      "#856f4a")
 
-      (bg-active   "#d7d0ca")
+      (bg-active   "#c7c0ba")
       (bg-inactive "#f9f2ef")
 
       ;; Basic hues for foreground values
@@ -74,7 +75,7 @@
       (magenta         "#ba35af")
       (magenta-warmer  "#cf25aa")
       (magenta-cooler  "#6052cf")
-      (magenta-faint   "#bf3580")
+      (magenta-faint   "#af569f")
       (cyan            "#1f6fbf")
       (cyan-warmer     "#3f6faf")
       (cyan-cooler     "#1f77bb")
@@ -148,6 +149,9 @@
       (underline-warning "#bf5f00")
       (underline-info    "#02af52")
 
+      ;; Conditional hues
+      (bg-region-intense "#dfc2b0")
+
       ;; Mappings
       (err red)
       (warning yellow)
@@ -158,6 +162,7 @@
       (date cyan-cooler)
       (name blue)
       (keybind blue-cooler)
+      (identifier red-faint)
       (prompt blue)
 
       (builtin cyan-cooler)
@@ -200,5 +205,8 @@
   (ef-themes-theme ef-duo-light ef-duo-light-palette)
 
   (provide-theme 'ef-duo-light))
+
+;;;###theme-autoload
+(put 'ef-duo-light 'theme-properties '(:background-mode light :kind color-scheme :family ef))
 
 ;;; ef-duo-light-theme.el ends here
