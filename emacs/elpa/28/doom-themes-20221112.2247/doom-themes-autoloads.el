@@ -126,6 +126,22 @@
 
 ;;;***
 
+;;;### (autoloads nil "doom-feather-dark-theme" "doom-feather-dark-theme.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from doom-feather-dark-theme.el
+
+(register-definition-prefixes "doom-feather-dark-theme" '("doom-feather-"))
+
+;;;***
+
+;;;### (autoloads nil "doom-feather-light-theme" "doom-feather-light-theme.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from doom-feather-light-theme.el
+
+(register-definition-prefixes "doom-feather-light-theme" '("doom-feather-light"))
+
+;;;***
+
 ;;;### (autoloads nil "doom-flatwhite-theme" "doom-flatwhite-theme.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from doom-flatwhite-theme.el
@@ -411,6 +427,14 @@
 ;;; Generated autoloads from doom-peacock-theme.el
 
 (register-definition-prefixes "doom-peacock-theme" '("doom-peacock"))
+
+;;;***
+
+;;;### (autoloads nil "doom-pine-theme" "doom-pine-theme.el" (0 0
+;;;;;;  0 0))
+;;; Generated autoloads from doom-pine-theme.el
+
+(register-definition-prefixes "doom-pine-theme" '("doom-pine"))
 
 ;;;***
 
