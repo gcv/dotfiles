@@ -399,6 +399,14 @@ available APPEND is ignored."
 (defun helm-subr-native-elisp-p (object)
   (when (fboundp 'subr-native-elisp-p)
       (subr-native-elisp-p object)))
+
+;; Available only in emacs-27+
+(unless (fboundp 'proper-list-p) 
+  (defun proper-list-p (seq)
+    "Return OBJECT's length if it is a proper list, nil otherwise."
+    (unless (or (null (consp seq))
+                (cdr (last seq)))
+      (length seq))))
 
 ;;; Macros helper.
 ;;
@@ -663,7 +671,7 @@ INSERT-CONTENT-FN is the function that inserts text to be
 displayed in BUFNAME."
   (let ((winconf (current-frame-configuration))
         (hframe (selected-frame)))
-    (helm-log-run-hook 'helm-help-mode-before-hook)
+    (helm-log-run-hook "helm-help-internal" 'helm-help-mode-before-hook)
     (with-selected-frame helm-initial-frame
       (select-frame-set-input-focus helm-initial-frame)
       (unwind-protect
@@ -685,7 +693,7 @@ displayed in BUFNAME."
              (buffer-disable-undo)
              (helm-help-event-loop))
         (raise-frame hframe)
-        (helm-log-run-hook 'helm-help-mode-after-hook)
+        (helm-log-run-hook "helm-help-internal" 'helm-help-mode-after-hook)
         (setq helm-suspend-update-flag nil)
         (set-frame-configuration winconf)))))
 
@@ -737,7 +745,9 @@ displayed in BUFNAME."
 
 (defun helm-help-quit ()
   "Quit `helm-help'."
-  (throw 'helm-help-quit nil))
+  (if (get-buffer-window helm-help-buffer-name 'visible)
+      (throw 'helm-help-quit nil)
+    (quit-window)))
 
 (defun helm-help-org-open-at-point ()
   "Calls `org-open-at-point' ignoring errors."
@@ -841,9 +851,10 @@ See `helm-help-hkmap' for supported keys and functions."
     (nreverse result)))
 
 (defun helm-mklist (obj)
-  "If OBJ is a list (but not lambda), return itself.
-Otherwise make a list with one element."
-  (if (and (listp obj) (not (functionp obj)))
+  "Return OBJ as a list.
+If OBJ is a proper list (but not lambda), return itself.
+Otherwise make a list with one element OBJ."
+  (if (and (listp obj) (proper-list-p obj) (not (functionp obj)))
       obj
     (list obj)))
 
@@ -964,7 +975,10 @@ Examples:
     =>(a b z c d)
     (helm-append-at-nth \\='(a b c d) \\='((x . 1) (y . 2)) 2)
     =>(a b (x . 1) (y . 2) c d)
-"
+
+NOTE: This function uses `append' internally, so ELM is expected to be a list to
+be appended to SEQ, however for convenience ELM can be an atom or a cons cell,
+it will be wrapped inside a list automatically."
   (setq index (min (max index 0) (length seq))
         elm   (helm-mklist elm))
   (if (zerop index)
@@ -1248,6 +1262,12 @@ differently depending of answer:
                      (funcall action elm)
                    (setq dont-ask t)))
             ("q" (throw 'break nil))))))))
+
+(defsubst helm-string-numberp (str)
+  "Return non nil if string STR represent a number."
+  (cl-assert (stringp str) t)
+  (or (cl-loop for c across str always (char-equal c ?0))
+      (not (zerop (string-to-number str)))))
 
 ;;; Symbols routines
 ;;
@@ -1447,6 +1467,30 @@ Argument ALIST is an alist of associated major modes."
             (eq (car (rassq cdr-o-assoc-mode alist))
                 cur-maj-mode)))))
 
+;;; Source processing
+;;
+(defun helm-map-candidates-in-source (src fn pred)
+  "Map over all candidates in SRC and execute FN if PRED returns non nil.
+Arg FN and PRED are functions called with current display part of
+candidate as arg."
+  (declare (indent 1))
+  (save-excursion
+    (goto-char (helm-get-previous-header-pos))
+    (helm-next-line)
+    (let* ((next-head (helm-get-next-header-pos))
+           (end       (and next-head
+                           (save-excursion
+                             (goto-char next-head)
+                             (forward-line -1)
+                             (point))))
+           (maxpoint  (or end (point-max))))
+      (while (< (point) maxpoint)
+        (helm-mark-current-line)
+        (let ((cand (helm-get-selection nil 'withprop src)))
+          (when (funcall pred cand)
+            (funcall fn cand)))
+        (forward-line 1) (end-of-line)))))
+
 ;;; Files routines
 ;;
 (defun helm-file-name-sans-extension (filename)
@@ -1461,9 +1505,7 @@ Argument ALIST is an alist of associated major modes."
 (defsubst helm-file-name-extension (file)
   "Returns FILE extension if it is not a number."
   (helm-aif (file-name-extension file)
-      (and (not (string-match "\\`0+\\'" it))
-           (zerop (string-to-number it))
-           it)))
+      (and (not (helm-string-numberp it)) it)))
 
 (defun helm-basename (fname &optional ext)
   "Print FNAME with any leading directory components removed.
@@ -1830,6 +1872,10 @@ Also `helm-completion-style' settings have no effect here,
                           all)))))
       ;; Ensure circular objects are removed.
       (complete-with-action t compsfn helm-pattern predicate))))
+
+(defun helm-guess-filename-at-point ()
+  (with-helm-current-buffer
+    (run-hook-with-args-until-success 'file-name-at-point-functions)))
 
 ;; Yank text at point.
 ;;
