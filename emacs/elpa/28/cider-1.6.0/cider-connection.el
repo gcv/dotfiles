@@ -180,6 +180,8 @@ buffer."
                      ;; Sync request will hang if the server is dead.
                      (process-live-p (get-buffer-process nrepl-server-buffer))))
         (nrepl-sync-request:close repl)
+        ;; give a chance to the REPL to respond to the closing of the connection
+        (sleep-for 0.5)
         (delete-process proc)))
     (when-let* ((messages-buffer (and nrepl-log-messages
                                       (nrepl-messages-buffer repl))))
@@ -301,6 +303,26 @@ See command `cider-mode'."
   (unless (cider-sessions)
     (cider-disable-on-existing-clojure-buffers)))
 
+(defun cider--set-connection-capabilities (&optional conn-buffer)
+  "Set `cider-connection-capabilities' for CONN-BUFFER during repl init.
+See `cider-connection-capabilities'."
+  (with-current-buffer (or conn-buffer (current-buffer))
+    (setf cider-connection-capabilities
+          (append
+           (pcase (cider-runtime)
+             ('clojure '(clojure jvm-compilation-errors))
+             ('babashka '(babashka jvm-compilation-errors))
+             (_ '()))
+           (when
+               (or
+                (eq cider-repl-type 'cljs)
+                ;; This check is currently basically for nbb.
+                ;; See `cider-sync-tooling-eval', but it is defined on a higher layer
+                (nrepl-dict-get
+                 (nrepl-sync-request:eval "cljs.core/demunge" (current-buffer) nil 'tooling)
+                 "value"))
+             '(cljs))))))
+
 (declare-function cider--debug-init-connection "cider-debug")
 (declare-function cider-repl-init "cider-repl")
 (declare-function cider-nrepl-op-supported-p "cider-client")
@@ -336,6 +358,8 @@ buffer."
          ;; the end, allowing for the faster "server-out" middleware to load
          ;; first.
          (cider--debug-init-connection))
+
+       (cider--set-connection-capabilities)
 
        (when cider-repl-init-function
          (funcall cider-repl-init-function))
@@ -436,6 +460,19 @@ about this buffer (like variable `cider-repl-type')."
               (or (cider--project-name nrepl-project-dir) "<no project>")
               (plist-get nrepl-endpoint :host)
               (plist-get nrepl-endpoint :port))))))
+
+(defvar-local cider-connection-capabilities '()
+  "A list of some of the capabilities of this connection buffer.
+In other words - what assumptions we make about the runtime.
+This is more general than
+`cider-nrepl-op-supported-p' and `cider-library-present-p'.
+But does not need to replace them.")
+
+(defun cider-connection-has-capability-p (capability &optional conn-buf)
+  "Return non nil when the cider connection has CAPABILITY for CONN-BUF.
+By default it assumes the connection buffer is current."
+  (with-current-buffer (or conn-buf (current-buffer))
+    (member capability cider-connection-capabilities)))
 
 
 ;;; Connection Management Commands
@@ -725,9 +762,16 @@ Session name can be customized with `cider-session-name-template'."
 (defvar-local cider-repl-type nil
   "The type of this REPL buffer, usually either clj or cljs.")
 
+(defvar-local cider-repl-cljs-upgrade-pending nil
+  "Is the cljs repl currently pending?")
+
 (defun cider-repl-type (repl-buffer)
   "Get REPL-BUFFER's type."
   (buffer-local-value 'cider-repl-type repl-buffer))
+
+(defun cider-cljs-pending-p (repl-buffer)
+  "Returns non nil when REPL-BUFFER is currently a pending cljs repl."
+  (buffer-local-value 'cider-repl-cljs-upgrade-pending repl-buffer))
 
 (defun cider-repl-type-for-buffer (&optional buffer)
   "Return the matching connection type (clj or cljs) for BUFFER.
@@ -775,13 +819,14 @@ PARAMS is a plist as received by `cider-repl-create'."
     (let* ((proj-dir (plist-get params :project-dir))
            (host (plist-get params :host))
            (port (plist-get params :port))
-           (cljsp (member (plist-get params :repl-type) '(cljs pending-cljs)))
+           (cljsp (eq (plist-get params :repl-type) 'cljs))
            (scored-repls
             (delq nil
                   (mapcar (lambda (b)
                             (let ((bparams (cider--gather-connect-params nil b)))
-                              (when (eq cljsp (member (plist-get bparams :repl-type)
-                                                      '(cljs pending-cljs)))
+                              (when (and cljsp
+                                         (eq (plist-get bparams :repl-type)
+                                             'cljs))
                                 (cons (buffer-name b)
                                       (+
                                        (if (equal proj-dir (plist-get bparams :project-dir)) 8 0)
@@ -829,8 +874,9 @@ function with the repl buffer set as current."
             mode-name nil
             cider-session-name ses-name
             nrepl-project-dir (plist-get params :project-dir)
-            ;; REPLs start with clj and then "upgrade" to a different type
+            ;; Cljs repls are pending until they are upgraded. See cider-repl--state-handler
             cider-repl-type (plist-get params :repl-type)
+            cider-repl-cljs-upgrade-pending (plist-get params :cider-repl-cljs-upgrade-pending)
             ;; ran at the end of cider--connected-handler
             cider-repl-init-function (plist-get params :repl-init-function)
             cider-launch-params params)
@@ -885,7 +931,13 @@ no linked session or there is no REPL of TYPE within the current session."
     (cond ((null buffer-repl-type) nil)
           ((or (null type) (eq type 'multi) (eq type 'any)) t)
           ((listp type) (member buffer-repl-type type))
-          (t (string= type buffer-repl-type)))))
+          (t
+           (or (string= type buffer-repl-type)
+               (let ((capabilities
+                      (buffer-local-value 'cider-connection-capabilities buffer)))
+                 (cond ((listp type)
+                        (cl-some (lambda (it) (member it capabilities)) type))
+                       (t (member type capabilities)))))))))
 
 (defun cider--get-host-from-session (session)
   "Returns the host associated with SESSION."
@@ -942,7 +994,9 @@ throw an error if no linked session exists."
                              (sesman-ensure-session 'CIDER)
                            (sesman-current-session 'CIDER)))))))
     (or (seq-filter (lambda (b)
-                      (cider--match-repl-type type b))
+                      (unless
+                          (cider-cljs-pending-p b)
+                        (cider--match-repl-type type b)))
                     repls)
         (when ensure
           (cider--no-repls-user-error type)))))

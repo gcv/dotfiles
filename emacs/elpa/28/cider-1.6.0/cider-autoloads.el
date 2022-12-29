@@ -769,7 +769,7 @@ Displays the function dependencies for  NS and SYMBOL using completing read.
 ;;;### (autoloads nil "nrepl-client" "nrepl-client.el" (0 0 0 0))
 ;;; Generated autoloads from nrepl-client.el
 
-(register-definition-prefixes "nrepl-client" '("cider-enlighten-mode" "emacs-bug-46284/when-27.1-windows-nt" "nrepl-"))
+(register-definition-prefixes "nrepl-client" '("cider-" "emacs-bug-46284/when-27.1-windows-nt" "nrepl-"))
 
 ;;;***
 
