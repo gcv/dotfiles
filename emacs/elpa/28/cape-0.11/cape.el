@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.9
+;; Version: 0.11
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/minad/cape
 
@@ -22,7 +22,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -93,6 +93,13 @@ The buffers are scanned for completion candidates by `cape-line'."
                  (const :tag "All buffers" buffer-list)
                  (const :tag "Buffers with same major mode" cape--buffers-major-mode)
                  (function :tag "Custom function")))
+
+(defcustom cape-symbol-wrapper
+  '((org-mode . ?=)
+    (markdown-mode . ?`)
+    (rst-mode . "``"))
+  "Wrapper characters for symbols."
+  :type '(alist :key-type symbol :value-type (choice character string)))
 
 ;;;; Helpers
 
@@ -201,6 +208,10 @@ VALID is the input comparator, see `cape--input-valid-p'."
 ;;;;; cape-history
 
 (declare-function ring-elements "ring")
+(declare-function eshell-bol "eshell")
+(declare-function comint-bol "comint")
+(defvar eshell-history-ring)
+(defvar comint-input-ring)
 
 (defvar cape--history-properties
   (list :company-kind (lambda (_) 'text)
@@ -215,18 +226,21 @@ See also `consult-history' for a more flexible variant based on
   (interactive (list t))
   (if interactive
       (cape--interactive #'cape-history)
-    (let ((history
-           (cond
-            ((derived-mode-p 'eshell-mode)
-             (bound-and-true-p eshell-history-ring))
-            ((derived-mode-p 'comint-mode)
-             (bound-and-true-p comint-history-ring))
-            ((and (minibufferp) (not (eq minibuffer-history-variable t)))
-             (symbol-value minibuffer-history-variable)))))
+    (let (history bol)
+      (cond
+       ((derived-mode-p 'eshell-mode)
+        (setq history eshell-history-ring
+              bol (save-excursion (eshell-bol) (point))))
+       ((derived-mode-p 'comint-mode)
+        (setq history comint-input-ring
+              bol (save-excursion (comint-bol) (point))))
+       ((and (minibufferp) (not (eq minibuffer-history-variable t)))
+        (setq history (symbol-value minibuffer-history-variable)
+              bol (line-beginning-position))))
       (when (ring-p history)
         (setq history (ring-elements history)))
       (when history
-        `(,(line-beginning-position) ,(point)
+        `(,bol ,(point)
           ,(cape--table-with-properties history :sort nil)
           ,@cape--history-properties)))))
 
@@ -270,28 +284,41 @@ If INTERACTIVE is nil the function acts like a Capf."
 ;;;;; cape-symbol
 
 (defvar cape--symbol-properties
-  (list :annotation-function #'cape--symbol-annotation
-        :company-kind #'cape--symbol-kind
-        :exclusive 'no)
+  (append
+   (list :annotation-function #'cape--symbol-annotation
+         :exit-function #'cape--symbol-exit
+         :exclusive 'no)
+   (when (>= emacs-major-version 28)
+     (autoload 'elisp--company-kind "elisp-mode")
+     (autoload 'elisp--company-doc-buffer "elisp-mode")
+     (autoload 'elisp--company-doc-string "elisp-mode")
+     (autoload 'elisp--company-location "elisp-mode")
+     (list :company-kind 'elisp--company-kind
+           :company-doc-buffer 'elisp--company-doc-buffer
+           :company-docsig 'elisp--company-doc-string
+           :company-location 'elisp--company-location)))
   "Completion extra properties for `cape-symbol'.")
 
-(defun cape--symbol-kind (sym)
-  "Return kind of SYM."
-  (setq sym (intern-soft sym))
-  (cond
-   ((or (macrop sym) (special-form-p sym)) 'keyword)
-   ((fboundp sym) 'function)
-   ((boundp sym) 'variable)
-   ((featurep sym) 'module)
-   ((facep sym) 'color)
-   (t 'text)))
+(defun cape--symbol-exit (name status)
+  "Wrap symbol NAME with `cape-symbol-wrapper' buffers.
+STATUS is the exit status."
+  (when-let (((not (eq status 'exact)))
+             (c (cl-loop for (m . c) in cape-symbol-wrapper
+                         if (derived-mode-p m) return c)))
+    (save-excursion
+      (backward-char (length name))
+      (insert c))
+    (insert c)))
 
 (defun cape--symbol-annotation (sym)
   "Return kind of SYM."
   (setq sym (intern-soft sym))
   (cond
-   ((or (macrop sym) (special-form-p sym)) " Macro")
+   ((special-form-p sym) " Special")
+   ((macrop sym) " Macro")
+   ((commandp sym) " Command")
    ((fboundp sym) " Function")
+   ((custom-variable-p sym) " Custom")
    ((boundp sym) " Variable")
    ((featurep sym) " Feature")
    ((facep sym) " Face")

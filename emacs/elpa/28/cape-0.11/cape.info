@@ -1,4 +1,4 @@
-This is cape.info, produced by makeinfo version 6.7 from cape.texi.
+This is docKin1q3.info, produced by makeinfo version 6.7 from cape.texi.
 
 INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: cape.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
+File: docKin1q3.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
 
 cape.el - Let your completions fly!
 ***********************************
@@ -52,7 +52,7 @@ Experimental features
 
 
 
-File: cape.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
+File: docKin1q3.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
 
 1 Available Capfs
 *****************
@@ -73,7 +73,7 @@ File: cape.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: 
    • ‘cape-rfc1345’: Complete unicode char using RFC 1345 mnemonics.
 
 
-File: cape.info,  Node: Configuration,  Next: Experimental features,  Prev: Available Capfs,  Up: Top
+File: docKin1q3.info,  Node: Configuration,  Next: Experimental features,  Prev: Available Capfs,  Up: Top
 
 2 Configuration
 ***************
@@ -125,7 +125,7 @@ this package could be upstreamed into Emacs itself.
      )
 
 
-File: cape.info,  Node: Experimental features,  Next: Contributions,  Prev: Configuration,  Up: Top
+File: docKin1q3.info,  Node: Experimental features,  Next: Contributions,  Prev: Configuration,  Up: Top
 
 3 Experimental features
 ***********************
@@ -138,7 +138,7 @@ File: cape.info,  Node: Experimental features,  Next: Contributions,  Prev: Conf
 * Other Capf transformers::
 
 
-File: cape.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: Experimental features
+File: docKin1q3.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: Experimental features
 
 3.1 Company adapter
 ===================
@@ -203,7 +203,7 @@ single Company backend, which can then be used as a Capf via
                               '(company-dabbrev company-elisp)))))
 
 
-File: cape.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: Experimental features
+File: docKin1q3.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: Experimental features
 
 3.2 Super-Capf - Merging multiple Capfs
 =======================================
@@ -245,7 +245,7 @@ multi-step completions like ‘cape-file’.
 Company, which allows you to merge multiple Company backends.
 
 
-File: cape.info,  Node: Capf-Buster - Cache busting,  Next: Other Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: Experimental features
+File: docKin1q3.info,  Node: Capf-Buster - Cache busting,  Next: Other Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: Experimental features
 
 3.3 Capf-Buster - Cache busting
 ===============================
@@ -265,7 +265,7 @@ similarly refreshing strategy.
                  (list (cape-capf-buster #'some-caching-capf)))
 
 
-File: cape.info,  Node: Other Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: Experimental features
+File: docKin1q3.info,  Node: Other Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: Experimental features
 
 3.4 Other Capf transformers
 ===========================
@@ -337,27 +337,27 @@ personal configuration.
                                             #'ignore-elisp-keywords)))
 
 
-File: cape.info,  Node: Contributions,  Prev: Experimental features,  Up: Top
+File: docKin1q3.info,  Node: Contributions,  Prev: Experimental features,  Up: Top
 
 4 Contributions
 ***************
 
 Since this package is part of GNU ELPA
-(http://elpa.gnu.org/packages/cape.html) contributions require a
+(https://elpa.gnu.org/packages/cape.html) contributions require a
 copyright assignment to the FSF.
 
 
 
 Tag Table:
-Node: Top203
-Node: Available Capfs1924
-Node: Configuration2880
-Node: Experimental features5121
-Node: Company adapter5403
-Node: Super-Capf - Merging multiple Capfs8019
-Node: Capf-Buster - Cache busting10220
-Node: Other Capf transformers11151
-Node: Contributions14739
+Node: Top208
+Node: Available Capfs1934
+Node: Configuration2895
+Node: Experimental features5141
+Node: Company adapter5428
+Node: Super-Capf - Merging multiple Capfs8049
+Node: Capf-Buster - Cache busting10255
+Node: Other Capf transformers11191
+Node: Contributions14784
 
 End Tag Table
 
