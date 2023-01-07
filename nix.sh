@@ -64,7 +64,7 @@ packages=(
     libvterm-neovim
     magic-wormhole     # peer-to-peer file transfer
     mediainfo
-    #mosh              # may need to be built from mosh-git.nix derivation
+    mosh               # since 1.4.0, should not need to be built from mosh-git.nix derivation
     miniserve          # HTTP server
     ngrok              # expose local service over a secure tunnel
     nix-direnv
@@ -99,7 +99,7 @@ packages=(
     zsh
 )
 
-NIXPKGS_ALLOW_UNFREE=1
+export NIXPKGS_ALLOW_UNFREE=1
 for pkg in "${packages[@]}"; do
     nix profile --verbose install --impure "nixpkgs#${pkg}"
 done
