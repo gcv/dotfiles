@@ -398,6 +398,11 @@
   )
 
 
+;;; eat: Emulate A Terminal - vterm alternative
+(use-package eat
+  :pin nongnu)
+
+
 ;;; obsolete: set-fontset-font invocations with appropriate fonts should work
 ;; (use-package emojify
 ;;   :pin melpa
