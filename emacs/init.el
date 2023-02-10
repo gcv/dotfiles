@@ -848,8 +848,8 @@ See `eshell-prompt-regexp'."
 
 
 ;;; ediff
-(setq ediff-window-setup-function 'ediff-setup-windows-plain)
-(setq ediff-split-window-function 'split-window-horizontally)
+(customize-set-variable 'ediff-window-setup-function 'ediff-setup-windows-plain)
+(customize-set-variable 'ediff-split-window-function 'split-window-horizontally)
 
 
 ;;; outline
