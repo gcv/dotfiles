@@ -5,8 +5,8 @@
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Keywords: files
-;; Package-Version: 20221127.1247
-;; Package-Commit: 41d3eb42195d9f0894c20d18cc8e722b099aa1c1
+;; Package-Version: 20230118.1953
+;; Package-Commit: 1382acb219c5e3b179662bcacd9c57463802718a
 ;; Version: 0.0.1
 ;; Created: 25th February 2014
 ;; Package-Requires: ((dash "2.5.0") (dired-hacks-utils "0.0.1"))
@@ -542,6 +542,7 @@ Return a string suitable for insertion in `dired' buffer."
       (goto-char beg)
       (dired-move-to-filename)
       (read-only-mode 1)
+      (when (bound-and-true-p dired-filter-mode) (dired-filter-mode 1))
       (run-hooks 'dired-subtree-after-insert-hook))))
 
 ;;;###autoload
