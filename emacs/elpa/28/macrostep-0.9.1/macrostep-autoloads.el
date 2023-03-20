@@ -36,10 +36,10 @@ quit and return to normal editing.
 \(fn &optional ARG)" t nil)
 
 (autoload 'macrostep-expand "macrostep" "\
-Expand the Elisp macro form following point by one step.
+Expand the macro form following point by one step.
 
 Enters `macrostep-mode' if it is not already active, making the
-buffer temporarily read-only. If macrostep-mode is active and the
+buffer temporarily read-only.  If `macrostep-mode' is active and the
 form following point is not a macro form, search forward in the
 buffer and expand the next macro form found, if any.
 
@@ -50,13 +50,18 @@ behaviors.
 
 \(fn &optional TOGGLE-SEPARATE-BUFFER)" t nil)
 
-(autoload 'macrostep-slime-mode-hook "macrostep" nil nil nil)
-
-(add-hook 'slime-mode-hook #'macrostep-slime-mode-hook)
-
-(add-hook 'slime-repl-mode-hook #'macrostep-slime-mode-hook)
-
 (register-definition-prefixes "macrostep" '("macrostep-"))
+
+;;;***
+
+;;;### (autoloads nil "macrostep-c" "macrostep-c.el" (0 0 0 0))
+;;; Generated autoloads from macrostep-c.el
+
+(autoload 'macrostep-c-mode-hook "macrostep-c" nil nil nil)
+
+(add-hook 'c-mode-hook #'macrostep-c-mode-hook)
+
+(register-definition-prefixes "macrostep-c" '("macrostep-c-"))
 
 ;;;***
 
