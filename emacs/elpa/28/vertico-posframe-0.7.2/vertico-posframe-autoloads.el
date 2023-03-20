@@ -10,9 +10,6 @@
 ;;;;;;  0 0 0))
 ;;; Generated autoloads from vertico-posframe.el
 
-(autoload 'vertico-posframe-cleanup "vertico-posframe" "\
-Remove frames and buffers used for vertico-posframe." t nil)
-
 (defvar vertico-posframe-mode nil "\
 Non-nil if Vertico-Posframe mode is enabled.
 See the `vertico-posframe-mode' command
@@ -42,6 +39,9 @@ The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
 \(fn &optional ARG)" t nil)
+
+(autoload 'vertico-posframe-cleanup "vertico-posframe" "\
+Remove frames and buffers used for vertico-posframe." t nil)
 
 (register-definition-prefixes "vertico-posframe" '("vertico-posframe-"))
 
