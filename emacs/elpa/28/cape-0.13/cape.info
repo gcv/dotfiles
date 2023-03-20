@@ -1,4 +1,4 @@
-This is docKin1q3.info, produced by makeinfo version 6.7 from cape.texi.
+This is doc6ETFYy.info, produced by makeinfo version 6.7 from cape.texi.
 
 INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docKin1q3.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
+File: doc6ETFYy.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
 
 cape.el - Let your completions fly!
 ***********************************
@@ -38,26 +38,27 @@ Company as frontend.
 
 * Available Capfs::
 * Configuration::
-* Experimental features::
+* CAPF adapters and transformers::
 * Contributions::
 
 — The Detailed Node Listing —
 
-Experimental features
+CAPF adapters and transformers
 
 * Company adapter::
 * Super-Capf - Merging multiple Capfs::
 * Capf-Buster - Cache busting::
-* Other Capf transformers::
+* Capf transformers::
 
 
 
-File: docKin1q3.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
+File: doc6ETFYy.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
 
 1 Available Capfs
 *****************
 
-   • ‘cape-dabbrev’: Complete word from current buffers
+   • ‘cape-dabbrev’: Complete word from current buffers (see also
+     ‘dabbrev-capf’ on Emacs 29)
    • ‘cape-file’: Complete file name
    • ‘cape-history’: Complete from Eshell, Comint or minibuffer history
    • ‘cape-keyword’: Complete programming language keyword
@@ -73,7 +74,7 @@ File: docKin1q3.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top, 
    • ‘cape-rfc1345’: Complete unicode char using RFC 1345 mnemonics.
 
 
-File: docKin1q3.info,  Node: Configuration,  Next: Experimental features,  Prev: Available Capfs,  Up: Top
+File: doc6ETFYy.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
 
 2 Configuration
 ***************
@@ -125,20 +126,20 @@ this package could be upstreamed into Emacs itself.
      )
 
 
-File: docKin1q3.info,  Node: Experimental features,  Next: Contributions,  Prev: Configuration,  Up: Top
+File: doc6ETFYy.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
 
-3 Experimental features
-***********************
+3 CAPF adapters and transformers
+********************************
 
 * Menu:
 
 * Company adapter::
 * Super-Capf - Merging multiple Capfs::
 * Capf-Buster - Cache busting::
-* Other Capf transformers::
+* Capf transformers::
 
 
-File: docKin1q3.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: Experimental features
+File: doc6ETFYy.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.1 Company adapter
 ===================
@@ -203,7 +204,7 @@ single Company backend, which can then be used as a Capf via
                               '(company-dabbrev company-elisp)))))
 
 
-File: docKin1q3.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: Experimental features
+File: doc6ETFYy.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
 
 3.2 Super-Capf - Merging multiple Capfs
 =======================================
@@ -211,9 +212,10 @@ File: docKin1q3.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Bu
 _Throw multiple Capfs under the Cape and get a Super-Capf!_
 
    Cape supports merging multiple Capfs using the function
-‘cape-super-capf’.  This feature is experimental and should only be used
-in special scenarios.  *Don’t use cape-super-capf if you are not 100%
-sure that you need it!*
+‘cape-super-capf’.  *This feature is EXPERIMENTAL and should only be
+used in special scenarios.  Don’t use cape-super-capf if you are not
+100% sure that you need it!  If you decide to use the function, you are
+on UNSUPPORTED TERRITORY.*
 
    Note that ‘cape-super-capf’ is not needed if you want to use multiple
 Capfs which are tried one by one, e.g., it is perfectly possible to use
@@ -245,7 +247,7 @@ multi-step completions like ‘cape-file’.
 Company, which allows you to merge multiple Company backends.
 
 
-File: docKin1q3.info,  Node: Capf-Buster - Cache busting,  Next: Other Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: Experimental features
+File: doc6ETFYy.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.3 Capf-Buster - Cache busting
 ===============================
@@ -265,10 +267,10 @@ similarly refreshing strategy.
                  (list (cape-capf-buster #'some-caching-capf)))
 
 
-File: docKin1q3.info,  Node: Other Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: Experimental features
+File: doc6ETFYy.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
 
-3.4 Other Capf transformers
-===========================
+3.4 Capf transformers
+=====================
 
 Cape provides a set of additional Capf transformation functions, which
 are mostly meant to used by experts to fine tune the Capf behavior and
@@ -277,14 +279,16 @@ or to create a new Capf from an existing Capf (‘cape-capf-*’).  You can
 bind the Capfs created by the Capf transformers with ‘defalias’ to a
 function symbol.
 
-   • ‘cape-interactive-capf’: Create a Capf which can be called
-     interactively.
+   • ‘cape-interactive-capf’, ‘cape-interactive’: Create a Capf which
+     can be called interactively.
    • ‘cape-wrap-accept-all’, ‘cape-capf-accept-all’: Create a Capf which
      accepts every input as valid.
    • ‘cape-wrap-silent’, ‘cape-capf-silent’: Wrap a chatty Capf and
      silence it.
    • ‘cape-wrap-purify’, ‘cape-capf-purify’: Purify a broken Capf and
      ensure that it does not modify the buffer.
+   • ‘cape-wrap-nonexclusive’, ‘cape-capf-nonexclusive:’ Mark Capf as
+     non-exclusive.
    • ‘cape-wrap-noninterruptible’, ‘cape-capf-noninterruptible:’ Protect
      a Capf which does not like to be interrupted.
    • ‘cape-wrap-case-fold’, ‘cape-capf-case-fold’: Create a Capf which
@@ -295,6 +299,10 @@ function symbol.
      predicate to a Capf.
    • ‘cape-wrap-prefix-length’, ‘cape-capf-prefix-length’: Enforce a
      minimal prefix length.
+   • ‘cape-wrap-inside-comment’, ‘cape-capf-inside-comment’: Ensure that
+     Capf triggers only inside comment.
+   • ‘cape-wrap-inside-string’, ‘cape-capf-inside-string’: Ensure that
+     Capf triggers only inside a string literal.
 
    In the following we show a few example configurations, which have
 come up on the Cape (https://github.com/minad/cape/issues) or Corfu
@@ -302,10 +310,12 @@ issue tracker (https://github.com/minad/corfu/issues) or the Corfu wiki.
 (https://github.com/minad/corfu/wiki) I use some of these tweaks in my
 personal configuration.
 
-     ;; Example 1: Sanitize the `pcomplete-completions-at-point' Capf.
-     ;; The Capf has undesired side effects on Emacs 28 and earlier.
-     (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
-     (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
+     ;; Example 1: Sanitize the `pcomplete-completions-at-point' Capf.  The Capf has
+     ;; undesired side effects on Emacs 28 and earlier.  These advices are not needed
+     ;; on Emacs 29 and newer.
+     (when (< emacs-major-version 29)
+       (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
+       (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
 
      ;; Example 2: Configure a Capf with a specific auto completion prefix length
      (setq-local completion-at-point-functions
@@ -315,19 +325,17 @@ personal configuration.
      (defalias 'cape-dabbrev-min-2 (cape-capf-prefix-length #'cape-dabbrev 2))
      (setq-local completion-at-point-functions (list #'cape-dabbrev-min-2))
 
-     ;; Example 4: Define a defensive Dabbrev Capf, which accepts all inputs.
-     ;; If you use Corfu and `corfu-auto=t', the first candidate won't be auto
-     ;; selected even if `corfu-preselect-first=t'! You can use this instead of
-     ;; `cape-dabbrev'.
+     ;; Example 4: Define a defensive Dabbrev Capf, which accepts all inputs.  If you
+     ;; use Corfu and `corfu-auto=t', the first candidate won't be auto selected even
+     ;; if `corfu-preselect=first'. You can use this instead of `cape-dabbrev'.
      (defun my-cape-dabbrev-accept-all ()
        (cape-wrap-accept-all #'cape-dabbrev))
      (add-to-list 'completion-at-point-functions #'my-cape-dabbrev-accept-all)
 
-     ;; Example 5: Define interactive Capf which can be bound to a key.
-     ;; Here we wrap the `elisp-completion-at-point' such that we can
-     ;; complete Elisp code explicitly in arbitrary buffers.
-     (global-set-key (kbd "C-c p e")
-                     (cape-interactive-capf #'elisp-completion-at-point))
+     ;; Example 5: Define interactive Capf which can be bound to a key.  Here we wrap
+     ;; the `elisp-completion-at-point' such that we can complete Elisp code
+     ;; explicitly in arbitrary buffers.
+     (keymap-global-set "C-c p e" (cape-interactive-capf #'elisp-completion-at-point))
 
      ;; Example 6: Ignore :keywords in Elisp completion.
      (defun ignore-elisp-keywords (sym)
@@ -337,7 +345,7 @@ personal configuration.
                                             #'ignore-elisp-keywords)))
 
 
-File: docKin1q3.info,  Node: Contributions,  Prev: Experimental features,  Up: Top
+File: doc6ETFYy.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
 
 4 Contributions
 ***************
@@ -350,14 +358,14 @@ copyright assignment to the FSF.
 
 Tag Table:
 Node: Top208
-Node: Available Capfs1934
-Node: Configuration2895
-Node: Experimental features5141
-Node: Company adapter5428
-Node: Super-Capf - Merging multiple Capfs8049
-Node: Capf-Buster - Cache busting10255
-Node: Other Capf transformers11191
-Node: Contributions14784
+Node: Available Capfs1946
+Node: Configuration2954
+Node: CAPF adapters and transformers5209
+Node: Company adapter5517
+Node: Super-Capf - Merging multiple Capfs8147
+Node: Capf-Buster - Cache busting10432
+Node: Capf transformers11371
+Node: Contributions15405
 
 End Tag Table
 

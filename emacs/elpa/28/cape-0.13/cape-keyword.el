@@ -1,6 +1,6 @@
 ;;; cape-keyword.el --- Keyword completion function -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 ;; This file is part of GNU Emacs.
 
@@ -85,6 +85,23 @@
      "super" "switch" "synchronized" "template" "this" "throw" "true" "try"
      "typedef" "typeid" "typeof" "ubyte" "ucent" "uint" "ulong" "union"
      "unittest" "ushort" "version" "void" "volatile" "wchar" "while" "with")
+    (elixir-mode ;; https://hexdocs.pm/elixir/Kernel.html
+     "__CALLER__" "__DIR__" "__ENV__" "__MODULE__" "__STACKTRACE__"
+     "__aliases__" "__block__" "abs" "alias" "alias!" "and" "apply"
+     "binary_part" "binary_slice" "binding" "bit_size" "byte_size" "case" "ceil"
+     "cond" "dbg" "def" "defdelegate" "defexception" "defguard" "defguardp"
+     "defimpl" "defmacro" "defmacrop" "defmodule" "defoverridable" "defp"
+     "defprotocol" "defstruct" "destructure" "div" "elem" "exit" "floor" "fn"
+     "for" "function_exported?" "get_and_update_in" "get_in" "hd" "if" "import"
+     "in" "inspect" "is_atom" "is_binary" "is_bitstring" "is_boolean"
+     "is_exception" "is_float" "is_function" "is_integer" "is_list" "is_map"
+     "is_map_key" "is_nil" "is_number" "is_pid" "is_port" "is_reference"
+     "is_struct" "is_tuple" "length" "macro_exported?" "make_ref" "map_size"
+     "match?" "max" "min" "node" "not" "or" "pop_in" "put_elem" "put_in" "quote"
+     "raise" "receive" "rem" "require" "reraise" "round" "self" "send" "spawn"
+     "spawn_link" "spawn_monitor" "struct" "struct!" "super" "tap" "then"
+     "throw" "tl" "to_charlist" "to_string" "trunc" "try" "tuple_size" "unless"
+     "unquote" "unquote_splicing" "update_in" "use" "var!" "with")
     (erlang-mode ;; https://www.erlang.org/docs/20/reference_manual/introduction.html
      "after" "and" "andalso" "band" "begin" "bnot" "bor" "bsl" "bsr" "bxor"
      "case" "catch" "cond" "div" "end" "fun" "if" "let" "not" "of" "or" "orelse"
@@ -237,6 +254,10 @@
      "print" "private" "protected" "public" "readonly" "require" "require_once"
      "return" "self" "static" "string" "switch" "this" "throw" "trait" "true"
      "try" "unset" "use" "var" "void" "while" "xor" "yield" "yield from")
+    (purescript-mode ;; purescript-font-lock.el
+     "ado" "case" "class" "data" "default" "deriving" "do" "else" "if" "import"
+     "in" "infix" "infixl" "infixr" "instance" "let" "module" "newtype" "of"
+     "then" "type" "where")
     (python-mode ;; https://docs.python.org/3/reference/lexical_analysis.html#keywords
      "False" "None" "True" "and" "as" "assert" "break" "class" "continue" "def"
      "del" "elif" "else" "except" "exec" "finally" "for" "from" "global" "if"
@@ -337,17 +358,28 @@
      "i32" "i64" "include" "list" "map" "oneway" "optional" "required" "service"
      "set" "string" "struct" "throws" "typedef" "void")
     ;; Aliases
-    (js2-mode javascript-mode)
-    (js2-jsx-mode javascript-mode)
-    (espresso-mode javascript-mode)
-    (js-mode javascript-mode)
-    (js-jsx-mode javascript-mode)
-    (rjsx-mode javascript-mode)
     (cperl-mode perl-mode)
-    (jde-mode java-mode)
+    (enh-ruby-mode ruby-mode)
+    (espresso-mode javascript-mode)
     (ess-julia-mode julia-mode)
+    (jde-mode java-mode)
+    (js-jsx-mode javascript-mode)
+    (js-mode javascript-mode)
+    (js2-jsx-mode javascript-mode)
+    (js2-mode javascript-mode)
     (phps-mode php-mode)
-    (enh-ruby-mode ruby-mode))
+    (rjsx-mode javascript-mode)
+    ;; Emacs 29 treesitter modes
+    (c++-ts-mode c++-mode)
+    (c-ts-mode c-mode)
+    (csharp-ts-mode csharp-mode)
+    (css-ts-mode css-mode)
+    (go-ts-mode go-mode)
+    (java-ts-mode java-mode)
+    (js-ts-mode javascript-mode)
+    (python-ts-mode python-mode)
+    (ruby-ts-mode ruby-mode)
+    (rust-ts-mode rust-mode))
   "Alist of major modes and keywords."
   :type 'alist
   :group 'cape)
@@ -370,7 +402,7 @@ See the variable `cape-keyword-list'.
 If INTERACTIVE is nil the function acts like a capf."
   (interactive (list t))
   (if interactive
-      (cape--interactive #'cape-keyword)
+      (cape-interactive #'cape-keyword)
     (when-let (keywords (cape--keyword-list))
       (let ((bounds (cape--bounds 'symbol)))
         `(,(car bounds) ,(cdr bounds)

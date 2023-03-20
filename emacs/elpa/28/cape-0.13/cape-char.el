@@ -1,6 +1,6 @@
 ;;; cape-char.el --- Character completion functions -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 ;; This file is part of GNU Emacs.
 
@@ -56,7 +56,7 @@ REGEXP is the regular expression matching the names."
                   (when (and (get-text-property beg 'face line) (< ename len) (<= echar len))
                     (let ((name (string-trim (substring-no-properties line beg ename)))
                           (char (string-trim (substring-no-properties line ename echar))))
-                      (when (and (string-match-p regexp name) (= (length char) 1))
+                      (when (and (string-match-p regexp name) (length= char 1))
                         (puthash name (aref char 0) hash))))
                   (setq beg echar)))))
           (kill-buffer)
@@ -73,7 +73,8 @@ PREFIX are the prefix characters."
         (ann (intern (format "cape--%s-annotation" name)))
         (docsig (intern (format "cape--%s-docsig" name)))
         (exit (intern (format "cape--%s-exit" name)))
-        (properties (intern (format "cape--%s-properties" name))))
+        (properties (intern (format "cape--%s-properties" name)))
+        (thing-re (concat (regexp-opt (mapcar #'char-to-string prefix)) "[^ \n\t]*" )))
     `(progn
        (defvar ,hash (cape-char--translation
                       ,method
@@ -113,13 +114,13 @@ is nil the function acts like a capf." method method)
          (if interactive
              ;; NOTE: Disable cycling since replacement breaks it.
              (let (completion-cycle-threshold ,prefix-required)
-               (when (memq last-input-event ',prefix)
+               (when (and (memq last-input-event ',prefix)
+                          (not (thing-at-point-looking-at ,thing-re)))
                  (self-insert-command 1 last-input-event))
-               (cape--interactive #',capf))
+               (cape-interactive #',capf))
            (when-let (bounds
                       (cond
-                       ((thing-at-point-looking-at
-                         ,(concat (regexp-opt (mapcar #'char-to-string prefix)) "[^ \n\t]*" ))
+                       ((thing-at-point-looking-at ,thing-re)
                         (cons (match-beginning 0) (match-end 0)))
                        ((not ,prefix-required) (cons (point) (point)))))
              (append

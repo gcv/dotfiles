@@ -12,7 +12,7 @@
 (autoload 'cape-history "cape" "\
 Complete from Eshell, Comint or minibuffer history.
 See also `consult-history' for a more flexible variant based on
-`completing-read'. If INTERACTIVE is nil the function acts like a Capf.
+`completing-read'.  If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
@@ -31,9 +31,12 @@ If INTERACTIVE is nil the function acts like a Capf.
 
 (autoload 'cape-dabbrev "cape" "\
 Complete with Dabbrev at point.
+
+If INTERACTIVE is nil the function acts like a Capf.  In case you
+observe a performance issue with autocompletion and `cape-dabbrev'
+it is strongly recommended to disable scanning in other buffers.
 See the user options `cape-dabbrev-min-length' and
 `cape-dabbrev-check-other-buffers'.
-If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
@@ -65,6 +68,7 @@ If INTERACTIVE is nil the function acts like a Capf.
 
 (autoload 'cape-super-capf "cape" "\
 Merge CAPFS and return new Capf which includes all candidates.
+This feature is experimental.
 
 \(fn &rest CAPFS)" nil nil)
 
@@ -74,6 +78,11 @@ VALID is the input comparator, see `cape--input-valid-p'.
 This feature is experimental.
 
 \(fn BACKEND &optional VALID)" nil nil)
+
+(autoload 'cape-interactive "cape" "\
+Complete interactively with the given CAPFS.
+
+\(fn &rest CAPFS)" nil nil)
 
 (autoload 'cape-interactive-capf "cape" "\
 Create interactive completion function from CAPF.
@@ -90,10 +99,15 @@ comparator, see `cape--input-valid-p'.
 (autoload 'cape-wrap-properties "cape" "\
 Call CAPF and add additional completion PROPERTIES.
 Completion properties include for example :exclusive, :annotation-function and
-the various :company-* extensions. Furthermore a boolean :sort flag and a
+the various :company-* extensions.  Furthermore a boolean :sort flag and a
 completion :category symbol can be specified.
 
 \(fn CAPF &rest PROPERTIES)" nil nil)
+
+(autoload 'cape-wrap-nonexclusive "cape" "\
+Call CAPF and ensure that it is marked as non-exclusive.
+
+\(fn CAPF)" nil nil)
 
 (autoload 'cape-wrap-predicate "cape" "\
 Call CAPF and add an additional candidate PREDICATE.
@@ -123,6 +137,16 @@ If the prefix is long enough, enforce auto completion.
 
 \(fn CAPF LENGTH)" nil nil)
 
+(autoload 'cape-wrap-inside-comment "cape" "\
+Call CAPF only if inside comment.
+
+\(fn CAPF)" nil nil)
+
+(autoload 'cape-wrap-inside-string "cape" "\
+Call CAPF only if inside string.
+
+\(fn CAPF)" nil nil)
+
 (autoload 'cape-wrap-purify "cape" "\
 Call CAPF and ensure that it does not modify the buffer.
 
@@ -135,7 +159,10 @@ Call CAPF and return a completion table which accepts every input.
  (autoload 'cape-capf-accept-all "cape")
  (autoload 'cape-capf-buster "cape")
  (autoload 'cape-capf-case-fold "cape")
+ (autoload 'cape-capf-inside-comment "cape")
+ (autoload 'cape-capf-inside-string "cape")
  (autoload 'cape-capf-noninterruptible "cape")
+ (autoload 'cape-capf-nonexclusive "cape")
  (autoload 'cape-capf-predicate "cape")
  (autoload 'cape-capf-prefix-length "cape")
  (autoload 'cape-capf-properties "cape")
