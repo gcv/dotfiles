@@ -49,10 +49,7 @@ it is disabled.
 (defvar vertico-buffer-mode nil "\
 Non-nil if Vertico-Buffer mode is enabled.
 See the `vertico-buffer-mode' command
-for a description of this minor mode.
-Setting this variable directly does not take effect;
-either customize it (see the info node `Easy Customization')
-or call the function `vertico-buffer-mode'.")
+for a description of this minor mode.")
 
 (custom-autoload 'vertico-buffer-mode "vertico-buffer" nil)
 
@@ -87,7 +84,7 @@ it is disabled.
 Enter directory or exit completion with current candidate." t nil)
 
 (autoload 'vertico-directory-up "vertico-directory" "\
-Delete N directories before point.
+Delete N names before point.
 
 \(fn &optional N)" t nil)
 
@@ -185,10 +182,7 @@ it is disabled.
 (defvar vertico-indexed-mode nil "\
 Non-nil if Vertico-Indexed mode is enabled.
 See the `vertico-indexed-mode' command
-for a description of this minor mode.
-Setting this variable directly does not take effect;
-either customize it (see the info node `Easy Customization')
-or call the function `vertico-indexed-mode'.")
+for a description of this minor mode.")
 
 (custom-autoload 'vertico-indexed-mode "vertico-indexed" nil)
 
@@ -221,10 +215,7 @@ it is disabled.
 (defvar vertico-mouse-mode nil "\
 Non-nil if Vertico-Mouse mode is enabled.
 See the `vertico-mouse-mode' command
-for a description of this minor mode.
-Setting this variable directly does not take effect;
-either customize it (see the info node `Easy Customization')
-or call the function `vertico-mouse-mode'.")
+for a description of this minor mode.")
 
 (custom-autoload 'vertico-mouse-mode "vertico-mouse" nil)
 
@@ -369,7 +360,7 @@ it is disabled.
 
 \(fn &optional ARG)" t nil)
 
-(register-definition-prefixes "vertico-reverse" '("vertico-reverse-"))
+(register-definition-prefixes "vertico-reverse" '("vertico-reverse-map"))
 
 ;;;***
 

@@ -125,7 +125,7 @@ prefix TAB completion used by the basic default completion system or in shells.
     (use-package orderless
       :init
       ;; Configure a custom style dispatcher (see the Consult wiki)
-      ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
+      ;; (setq orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch)
       ;;       orderless-component-separator #'orderless-escapable-split-on-space)
       (setq completion-styles '(orderless basic)
             completion-category-defaults nil
@@ -135,8 +135,8 @@ prefix TAB completion used by the basic default completion system or in shells.
 The =basic= completion style is specified as fallback in addition to =orderless= in
 order to ensure that completion commands which rely on dynamic completion
 tables, e.g., ~completion-table-dynamic~ or ~completion-table-in-turn~, work
-correctly. See =+orderless-dispatch= in the [[https://github.com/minad/consult/wiki][Consult wiki]] for an advanced Orderless
-style dispatcher. Additionally enable =partial-completion= for file path
+correctly. See the [[https://github.com/minad/consult/wiki#minads-orderless-configuration][Consult wiki]] for my advanced Orderless configuration with
+style dispatchers. Additionally enable =partial-completion= for file path
 expansion. =partial-completion= is important for file wildcard support. Multiple
 files can be opened at once with =find-file= if you enter a wildcard. You may also
 give the =initials= completion style a try.
@@ -158,9 +158,9 @@ completion commands behave as usual. For example you can use =M-TAB= to cycle
 between candidates if you have set ~completion-cycle-threshold~.
 
 #+begin_src emacs-lisp
-  (define-key vertico-map "?" #'minibuffer-completion-help)
-  (define-key vertico-map (kbd "M-RET") #'minibuffer-force-complete-and-exit)
-  (define-key vertico-map (kbd "M-TAB") #'minibuffer-complete)
+  (keymap-set vertico-map "?" #'minibuffer-completion-help)
+  (keymap-set vertico-map "M-RET" #'minibuffer-force-complete-and-exit)
+  (keymap-set vertico-map "M-TAB" #'minibuffer-complete)
 #+end_src
 
 The ~orderless~ completion style does not support completion of a common prefix
@@ -300,21 +300,20 @@ problem.
           (consult-grep buffer)))
 #+end_src
 
-Temporary toggling between the different display modes is possible. Bind the
-following commands:
+Temporary toggling between the different display modes is possible. The
+following commands are bound by default in the =vertico-multiform-map=. You can of
+course change these bindings if you like.
 
-#+begin_src emacs-lisp
-  (define-key vertico-map "\M-V" #'vertico-multiform-vertical)
-  (define-key vertico-map "\M-G" #'vertico-multiform-grid)
-  (define-key vertico-map "\M-F" #'vertico-multiform-flat)
-  (define-key vertico-map "\M-R" #'vertico-multiform-reverse)
-  (define-key vertico-map "\M-U" #'vertico-multiform-unobtrusive)
-#+end_src
+- =M-V= -> ~vertico-multiform-vertical~
+- =M-G= -> ~vertico-multiform-grid~
+- =M-F= -> ~vertico-multiform-flat~
+- =M-R= -> ~vertico-multiform-reverse~
+- =M-U= -> ~vertico-multiform-unobtrusive~
 
-You can use your own functions or even lambdas to configure the completion
-behavior per command or per completion category. The function must have the
-calling convention of a mode, i.e., it takes a single argument, which is either
-1 to turn on the mode and -1 to turn off the mode.
+For special configuration you can use your own functions or even lambdas to
+configure the completion behavior per command or per completion category.
+Functions must have the calling convention of a mode, i.e., take a single
+argument, which is either 1 to turn on the mode and -1 to turn off the mode.
 
 #+begin_src emacs-lisp
   ;; Configure `consult-outline' as a scaled down TOC in a separate buffer
@@ -458,18 +457,17 @@ There are other interactive completion UIs, which follow a similar philosophy:
   has the advantage that you can interact freely with the candidates and jump
   around with Isearch or Avy. On the other hand it necessarily causes a
   slowdown. Mct supports completion in region via its ~mct-region-mode~. Note that
-  Mct development is currently [[https://protesilaos.com/codelog/2022-04-14-emacs-discontinue-mct/][discontinued]] due to recent changes of the default
-  completion UI on the Emacs master branch.
+  Mct development has been [[https://protesilaos.com/codelog/2022-04-14-emacs-discontinue-mct/][discontinued]] due to recent developments of the
+  default completion UI in Emacs 29.
 - [[https://github.com/radian-software/selectrum][Selectrum]]: Selectrum is the predecessor of Vertico has been deprecated in
-  favor of Vertico. See the [[https://github.com/minad/vertico/wiki/Migrating-from-Selectrum-to-Vertico][migration guide]] if you want to migrate from
-  Selectrum to Vertico. Vertico was designed specifically to address the
-  technical shortcomings of Selectrum. Selectrum is not fully compatible with
-  every Emacs completion command and dynamic completion tables, since it uses
-  its own filtering infrastructure, which deviates from the standard Emacs
-  completion facilities.
+  favor of Vertico. Read the [[https://github.com/minad/vertico/wiki/Migrating-from-Selectrum-to-Vertico][migration guide]] when migrating from Selectrum.
+  Vertico was designed specifically to address the technical shortcomings of
+  Selectrum. Selectrum is not fully compatible with every Emacs completion
+  command and dynamic completion tables, since it uses its own filtering
+  infrastructure, which deviates from the standard Emacs completion facilities.
 - Icomplete: Emacs 28 comes with a builtin =icomplete-vertical-mode=, which is a
-  more bare-bone than Vertico. Vertico offers more flexibility thanks to its
-  [[#extensions][extensions]].
+  more bare-bone than Vertico. Vertico offers additional flexibility thanks to
+  its [[#extensions][extensions]].
 
 * Resources
 
@@ -497,7 +495,7 @@ When you observe an error in the =vertico--exhibit= post command hook, you shoul
 install an advice to enforce debugging. This allows you to obtain a stack trace
 in order to narrow down the location of the error. The reason is that post
 command hooks are automatically disabled (and not debugged) by Emacs. Otherwise
-Emacs could become unusable, given that the hooks are executed after every
+Emacs would become unusable, given that the hooks are executed after every
 command.
 
 #+begin_src emacs-lisp
@@ -570,7 +568,7 @@ be disabled with an advice. If you disabled the standard GUI menu bar and prefer
 the Vertico interface you may also overwrite the default F10 keybinding.
 
 #+begin_src emacs-lisp
-  (global-set-key [f10] #'tmm-menubar)
+  (keymap-global-set "<f10>" #'tmm-menubar)
   (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
 #+end_src
 
@@ -581,21 +579,23 @@ The command ~ffap-menu~ shows the =*Completions*= buffer by default like
 disabled as follows.
 
 #+begin_src emacs-lisp
-  (advice-add #'ffap-menu-ask :around (lambda (&rest args)
-                                   (cl-letf (((symbol-function #'minibuffer-completion-help)
-                                              #'ignore))
-                                     (apply args))))
+  (advice-add #'ffap-menu-ask :around
+              (lambda (&rest args)
+                (cl-letf (((symbol-function #'minibuffer-completion-help)
+                           #'ignore))
+                  (apply args))))
 #+end_src
 
 ** ~completion-table-dynamic~
 
 Dynamic completion tables (~completion-table-dynamic~, ~completion-table-in-turn~,
-etc.) should work well with Vertico. However the requirement is that the =basic=
+...) should work well with Vertico. The only requirement is that the =basic=
 completion style is enabled. The =basic= style performs prefix filtering by
 passing the input to the completion table (or the dynamic completion table
 function). The =basic= completion style must not necessarily be configured with
 highest priority, it can also come after other completion styles like =orderless=,
-=substring= or =flex=.
+=substring= or =flex=, as is also recommended by the Orderless documentation because
+of ~completion-table-dynamic~.
 
 #+begin_src emacs-lisp
   (setq completion-styles '(basic))
@@ -631,20 +631,29 @@ to exit with the empty string, press =M-RET=. In the second case the explicit
 default value "" is specified and Vertico preselects the prompt, such that
 exiting with the empty string is possible by pressing =RET= only.
 
-** Tramp hostname completion
+** Tramp hostname and username completion
 
-In combination with Orderless, hostnames are not made available for completion
-after entering =/ssh:=. In order to avoid this problem, the =basic= completion style
-should be specified for the file completion category, such that =basic= is tried
-before =orderless=.
+*NOTE:* On upcoming Emacs 30 and the upcoming Tramp 2.6.0.2 the workarounds
+described in this section will likely become unnecessary, since the Tramp
+maintainer improved the relevant completion tables. Confirmation would be
+welcome if you already use a very recent build of Emacs master.
+
+In combination with Orderless or other non-prefix completion styles like
+=substring= or =flex=, host names and user names are not made available for
+completion after entering =/ssh:=. In order to avoid this problem, the =basic=
+completion style should be specified for the file completion category, such that
+=basic= is tried before =orderless=. This can be achieved by putting =basic= first in
+the completion style overrides for the file completion category.
 
 #+begin_src emacs-lisp
   (setq completion-styles '(orderless basic)
         completion-category-overrides '((file (styles basic partial-completion))))
 #+end_src
 
-For users who are familiar with the =completion-style= machinery: You may also
-define a custom completion style which sets in only for remote files!
+For users who are familiar with the =completion-style= machinery and who want to
+dig a bit deeper. You may also define a custom completion style which sets in
+only for remote files. This way =orderless= will stay the preferred style in most
+cases.
 
 #+begin_src emacs-lisp
   (defun basic-remote-try-completion (string table pred point)

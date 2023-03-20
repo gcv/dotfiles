@@ -1,12 +1,12 @@
 ;;; vertico-grid.el --- Grid display for Vertico -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.0"))
+;; Package-Requires: ((emacs "27.1") (vertico "1.2"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -28,11 +28,10 @@
 
 ;; This package is a Vertico extension providing a grid display.
 ;;
-;; The mode can be enabled globally or via `vertico-multiform-mode' per
-;; command or completion category. Alternatively the grid display can be
-;; toggled temporarily if `vertico-multiform-mode' is enabled:
-;;
-;; (define-key vertico-map "\M-G" #'vertico-multiform-grid)
+;; The mode can be enabled globally or via `vertico-multiform-mode'
+;; per command or completion category.  Alternatively the grid display
+;; can be toggled temporarily with M-G if `vertico-multiform-mode' is
+;; enabled.
 
 ;;; Code:
 
@@ -41,12 +40,12 @@
 
 (defcustom vertico-grid-min-columns 2
   "Minimal number of grid columns."
-  :type 'integer
+  :type 'natnum
   :group 'vertico)
 
 (defcustom vertico-grid-max-columns 8
   "Maximal number of grid columns."
-  :type 'integer
+  :type 'natnum
   :group 'vertico)
 
 (defcustom vertico-grid-separator
@@ -57,76 +56,24 @@
 
 (defcustom vertico-grid-rows 6
   "Number of grid rows."
-  :type 'integer
+  :type 'natnum
   :group 'vertico)
 
 (defcustom vertico-grid-lookahead 100
   "Number of candidates to lookahead for column number computation.
 When scrolling beyond this limit, candidates may be truncated."
-  :type 'integer
+  :type 'natnum
   :group 'vertico)
 
-(defvar vertico-grid-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [remap left-char] #'vertico-grid-left)
-    (define-key map [remap right-char] #'vertico-grid-right)
-    (define-key map [remap scroll-down-command] #'vertico-grid-scroll-down)
-    (define-key map [remap scroll-up-command] #'vertico-grid-scroll-up)
-    map)
-  "Additional keymap activated in grid mode.")
+(defvar-keymap vertico-grid-map
+  :doc "Additional keymap activated in grid mode."
+  "<remap> <left-char>" #'vertico-grid-left
+  "<remap> <right-char>" #'vertico-grid-right
+  "<remap> <scroll-down-command>" #'vertico-grid-scroll-down
+  "<remap> <scroll-up-command>" #'vertico-grid-scroll-up)
 
 (defvar-local vertico-grid--columns vertico-grid-min-columns
   "Current number of grid columns.")
-
-(defun vertico-grid--arrange-candidates ()
-  "Arrange candidates."
-  (when (<= vertico--index 0)
-    (let ((cand vertico--candidates) (w 1) (n 0))
-      (while (and cand (< n vertico-grid-lookahead))
-        (setq w (max w (length (car cand))) n (1+ n))
-        (pop cand))
-      (setq vertico-grid--columns
-            (max vertico-grid-min-columns
-                 (min vertico-grid-max-columns
-                      (floor (vertico--window-width) (+ w (length vertico-grid-separator))))))))
-  (let* ((sep (length vertico-grid-separator))
-         (count (* vertico-count vertico-grid--columns))
-         (start (* count (floor (max 0 vertico--index) count)))
-         (width (- (/ (vertico--window-width) vertico-grid--columns) sep))
-         (cands
-          (seq-map-indexed (lambda (cand index)
-                             (cl-incf index start)
-                             (when (string-match-p "\n" cand)
-                               (setq cand (vertico--truncate-multiline cand width)))
-                             (truncate-string-to-width
-                              (string-trim
-                               (replace-regexp-in-string
-                                "[ \t]+"
-                                (lambda (x) (apply #'propertize " " (text-properties-at 0 x)))
-                                (vertico--format-candidate cand "" "" index start)))
-                              width))
-                           (funcall vertico--highlight
-                                    (seq-subseq vertico--candidates start
-                                                (min (+ start count)
-                                                     vertico--total)))))
-         (width (make-vector vertico-grid--columns 0)))
-    (dotimes (col vertico-grid--columns)
-      (dotimes (row vertico-count)
-        (aset width col (max
-                         (aref width col)
-                         (string-width (or (nth (+ row (* col vertico-count)) cands) ""))))))
-    (dotimes (col (1- vertico-grid--columns))
-      (cl-incf (aref width (1+ col)) (+ (aref width col) sep)))
-    (cl-loop for row from 0 to (1- (min vertico-count vertico--total)) collect
-             (let ((line (list "\n")))
-               (cl-loop for col from (1- vertico-grid--columns) downto 0 do
-                        (when-let (cand (nth (+ row (* col vertico-count)) cands))
-                          (push cand line)
-                          (when (> col 0)
-                            (push vertico-grid-separator line)
-                            (push (propertize " " 'display
-                                              `(space :align-to (+ left ,(aref width (1- col))))) line))))
-             (string-join line)))))
 
 (defun vertico-grid-left (&optional n)
   "Move N columns to the left in the grid."
@@ -163,13 +110,58 @@ When scrolling beyond this limit, candidates may be truncated."
   (when-let (win (active-minibuffer-window))
     (unless (frame-root-window-p win)
       (window-resize win (- (window-pixel-height win)) nil nil 'pixelwise)))
-  (cond
-   (vertico-grid-mode
-    (add-to-list 'minor-mode-map-alist `(vertico--input . ,vertico-grid-map))
-    (advice-add #'vertico--arrange-candidates :override #'vertico-grid--arrange-candidates))
-   (t
-    (setq minor-mode-map-alist (delete `(vertico--input . ,vertico-grid-map) minor-mode-map-alist))
-    (advice-remove #'vertico--arrange-candidates #'vertico-grid--arrange-candidates))))
+  (if vertico-grid-mode
+      (add-to-list 'minor-mode-map-alist `(vertico--input . ,vertico-grid-map))
+    (setq minor-mode-map-alist (delete `(vertico--input . ,vertico-grid-map) minor-mode-map-alist))))
+
+(cl-defmethod vertico--arrange-candidates (&context (vertico-grid-mode (eql t)))
+  (when (<= vertico--index 0)
+    (let ((cand vertico--candidates) (w 1) (n 0))
+      (while (and cand (< n vertico-grid-lookahead))
+        (setq w (max w (length (car cand))) n (1+ n))
+        (pop cand))
+      (setq vertico-grid--columns
+            (max vertico-grid-min-columns
+                 (min vertico-grid-max-columns
+                      (floor (vertico--window-width) (+ w (length vertico-grid-separator))))))))
+  (let* ((sep (length vertico-grid-separator))
+         (count (* vertico-count vertico-grid--columns))
+         (start (* count (floor (max 0 vertico--index) count)))
+         (width (- (/ (vertico--window-width) vertico-grid--columns) sep))
+         (cands
+          (seq-map-indexed (lambda (cand index)
+                             (cl-incf index start)
+                             (when (string-search "\n" cand)
+                               (setq cand (vertico--truncate-multiline cand width)))
+                             (truncate-string-to-width
+                              (string-trim
+                               (replace-regexp-in-string
+                                "[ \t]+"
+                                (lambda (x) (apply #'propertize " " (text-properties-at 0 x)))
+                                (vertico--format-candidate cand "" "" index start)))
+                              width))
+                           (funcall vertico--highlight
+                                    (seq-subseq vertico--candidates start
+                                                (min (+ start count)
+                                                     vertico--total)))))
+         (width (make-vector vertico-grid--columns 0)))
+    (dotimes (col vertico-grid--columns)
+      (dotimes (row vertico-count)
+        (aset width col (max
+                         (aref width col)
+                         (string-width (or (nth (+ row (* col vertico-count)) cands) ""))))))
+    (dotimes (col (1- vertico-grid--columns))
+      (cl-incf (aref width (1+ col)) (+ (aref width col) sep)))
+    (cl-loop for row from 0 to (1- (min vertico-count vertico--total)) collect
+             (let ((line (list "\n")))
+               (cl-loop for col from (1- vertico-grid--columns) downto 0 do
+                        (when-let (cand (nth (+ row (* col vertico-count)) cands))
+                          (push cand line)
+                          (when (> col 0)
+                            (push vertico-grid-separator line)
+                            (push (propertize " " 'display
+                                              `(space :align-to (+ left ,(aref width (1- col))))) line))))
+             (string-join line)))))
 
 ;; Emacs 28: Do not show Vertico commands in M-X
 (dolist (sym '(vertico-grid-left vertico-grid-right

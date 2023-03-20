@@ -1,12 +1,12 @@
 ;;; vertico-buffer.el --- Display Vertico in a buffer instead of the minibuffer -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.0"))
+;; Package-Requires: ((emacs "27.1") (vertico "1.2"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -27,7 +27,7 @@
 ;;; Commentary:
 
 ;; This package is a Vertico extension, which displays Vertico in a
-;; buffer instead of the minibuffer. The buffer display can be enabled
+;; buffer instead of the minibuffer.  The buffer display can be enabled
 ;; by the `vertico-buffer-mode'.
 
 ;;; Code:
@@ -74,21 +74,29 @@
   "Redisplay window WIN."
   (when-let (mbwin (active-minibuffer-window))
     (when (eq (window-buffer mbwin) (current-buffer))
-      (let ((old cursor-in-non-selected-windows)
-            (new (and (eq (selected-window) mbwin) 'box)))
-        (unless (eq new old)
-          (setq-local cursor-in-non-selected-windows new)
-          (force-mode-line-update t)))
       (unless (eq win mbwin)
         (setq-local truncate-lines (< (window-point win)
                                       (* 0.8 (window-width win))))
-        (set-window-point win (point)))
+        (set-window-point win (point))
+        (set-window-hscroll win 0))
       (when vertico-buffer-hide-prompt
         (window-resize mbwin (- (window-pixel-height mbwin)) nil nil 'pixelwise)
-        (set-window-vscroll mbwin 100)))))
+        (set-window-vscroll mbwin 100))
+      (let ((old cursor-in-non-selected-windows)
+            (new (and (eq (selected-window) mbwin)
+                      (if (memq cursor-type '(nil t)) 'box cursor-type))))
+        (unless (eq new old)
+          (setq-local cursor-in-non-selected-windows new)
+          (force-mode-line-update t))))))
 
-(defun vertico-buffer--setup ()
-  "Setup buffer display."
+;;;###autoload
+(define-minor-mode vertico-buffer-mode
+  "Display Vertico in a buffer instead of the minibuffer."
+  :global t :group 'vertico)
+
+(cl-defmethod vertico--resize-window (_height &context (vertico-buffer-mode (eql t))))
+
+(cl-defmethod vertico--setup :after (&context (vertico-buffer-mode (eql t)))
   (add-hook 'pre-redisplay-functions 'vertico-buffer--redisplay nil 'local)
   (let* ((action vertico-buffer-display-action) tmp win old-buf
          (_ (unwind-protect
@@ -115,6 +123,7 @@
                         (delete-window win)
                       (set-window-parameter win 'no-other-window now)
                       (set-window-parameter win 'no-delete-other-windows ndow)
+                      (set-window-dedicated-p win nil)
                       (set-window-buffer win old-buf))
                     (when vertico-buffer-hide-prompt
                       (set-window-vscroll nil 0))
@@ -125,6 +134,7 @@
     (add-hook 'minibuffer-exit-hook sym)
     (set-window-parameter win 'no-other-window t)
     (set-window-parameter win 'no-delete-other-windows t)
+    (set-window-dedicated-p win t)
     (overlay-put vertico--candidates-ov 'window win)
     (when (and vertico-buffer-hide-prompt vertico--count-ov)
       (overlay-put vertico--count-ov 'window win))
@@ -142,21 +152,8 @@
                                         (minibuffer-prompt))
                                        depth)
                                'face 'mode-line-buffer-id)))
-                cursor-in-non-selected-windows 'box
                 vertico-count (- (/ (window-pixel-height win)
                                     (default-line-height)) 2))))
-
-;;;###autoload
-(define-minor-mode vertico-buffer-mode
-  "Display Vertico in a buffer instead of the minibuffer."
-  :global t :group 'vertico
-  (cond
-   (vertico-buffer-mode
-    (advice-add #'vertico--setup :after #'vertico-buffer--setup)
-    (advice-add #'vertico--resize-window :override #'ignore))
-   (t
-    (advice-remove #'vertico--setup #'vertico-buffer--setup)
-    (advice-remove #'vertico--resize-window #'ignore))))
 
 (provide 'vertico-buffer)
 ;;; vertico-buffer.el ends here

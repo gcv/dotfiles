@@ -1,12 +1,12 @@
 ;;; vertico-repeat.el --- Repeat Vertico sessions -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.0"))
+;; Package-Requires: ((emacs "27.1") (vertico "1.2"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -28,15 +28,15 @@
 
 ;; This package is a Vertico extension, which enables repetition of
 ;; Vertico sessions via the `vertico-repeat', `vertico-repeat-last' and
-;; `vertico-repeat-select' commands. If the repeat commands are called
+;; `vertico-repeat-select' commands.  If the repeat commands are called
 ;; from an existing Vertico minibuffer session, only sessions
 ;; corresponding to the current minibuffer command are offered via
-;; completion. It is necessary to register a minibuffer setup hook,
-;; which saves the Vertico state for repetition. In order to save the
+;; completion.  It is necessary to register a minibuffer setup hook,
+;; which saves the Vertico state for repetition.  In order to save the
 ;; history across Emacs sessions, enable `savehist-mode' and add
 ;; `vertico-repeat-history' to `savehist-additional-variables'.
 ;;
-;; (global-set-key "\M-R" #'vertico-repeat)
+;; (keymap-global-set "M-R" #'vertico-repeat)
 ;; (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
 ;;; Code:
