@@ -25,6 +25,7 @@ packages=(
     autojump
     automake
     awscli2
+    #babashka
     bandwhich          # network monitor
     bat                # cat replacement
     bashInteractive    # when needed
@@ -33,7 +34,7 @@ packages=(
     cacert             # SSL certificates
     cmake
     coreutils
-    croc               # peer-to-peer file transfer, directory capable
+    croc               # peer-to-peer file transfer, directory capable (cf magic-wormhole)
     ctags
     direnv
     du-dust            # du replacement
@@ -58,11 +59,12 @@ packages=(
     httrack            # web scraper, more stable than wget
     hyperfine          # benchmarking tool
     jq
+    #julia
     lazydocker         # Docker UI
     lazygit            # Git UI
     ledger
     libvterm-neovim
-    magic-wormhole     # peer-to-peer file transfer
+    magic-wormhole     # peer-to-peer file transfer (cf croc)
     mediainfo
     mosh               # since 1.4.0, should not need to be built from mosh-git.nix derivation
     miniserve          # HTTP server
@@ -94,7 +96,7 @@ packages=(
     wget              # weak web scraper (no restart support)
     xcp               # cp replacement
     xz
-    youtube-dl        # outdated?
+    #youtube-dl        # outdated?
     yt-dlp            # new youtube-dl
     zsh
 )
