@@ -6,20 +6,105 @@
                          (or (file-name-directory #$) (car load-path))))
 
 
+;;;### (autoloads nil "bind-key" "bind-key.el" (0 0 0 0))
+;;; Generated autoloads from bind-key.el
+
+(autoload 'bind-key "bind-key" "\
+Bind KEY-NAME to COMMAND in KEYMAP (`global-map' if not passed).
+
+KEY-NAME may be a vector, in which case it is passed straight to
+`define-key'.  Or it may be a string to be interpreted as
+spelled-out keystrokes, e.g., \"C-c C-z\".  See the documentation
+of `edmacro-mode' for details.
+
+COMMAND must be an interactive function or lambda form.
+
+KEYMAP, if present, should be a keymap variable or symbol.
+For example:
+
+  (bind-key \"M-h\" #\\='some-interactive-function my-mode-map)
+
+  (bind-key \"M-h\" #\\='some-interactive-function \\='my-mode-map)
+
+If PREDICATE is non-nil, it is a form evaluated to determine when
+a key should be bound. It must return non-nil in such cases.
+Emacs can evaluate this form at any time that it does redisplay
+or operates on menu data structures, so you should write it so it
+can safely be called at any time.
+
+\(fn KEY-NAME COMMAND &optional KEYMAP PREDICATE)" nil t)
+
+(autoload 'unbind-key "bind-key" "\
+Unbind the given KEY-NAME, within the KEYMAP (if specified).
+See `bind-key' for more details.
+
+\(fn KEY-NAME &optional KEYMAP)" nil t)
+
+(autoload 'bind-key* "bind-key" "\
+Similar to `bind-key', but overrides any mode-specific bindings.
+
+\(fn KEY-NAME COMMAND &optional PREDICATE)" nil t)
+
+(autoload 'bind-keys "bind-key" "\
+Bind multiple keys at once.
+
+Accepts keyword arguments:
+:map MAP               - a keymap into which the keybindings should be
+                         added
+:prefix KEY            - prefix key for these bindings
+:prefix-map MAP        - name of the prefix map that should be created
+                         for these bindings
+:prefix-docstring STR  - docstring for the prefix-map variable
+:menu-name NAME        - optional menu string for prefix map
+:repeat-docstring STR  - docstring for the repeat-map variable
+:repeat-map MAP        - name of the repeat map that should be created
+                         for these bindings. If specified, the
+                         `repeat-map' property of each command bound
+                         (within the scope of the `:repeat-map' keyword)
+                         is set to this map.
+:exit BINDINGS         - Within the scope of `:repeat-map' will bind the
+                         key in the repeat map, but will not set the
+                         `repeat-map' property of the bound command.
+:continue BINDINGS     - Within the scope of `:repeat-map' forces the
+                         same behavior as if no special keyword had
+                         been used (that is, the command is bound, and
+                         it's `repeat-map' property set)
+:filter FORM           - optional form to determine when bindings apply
+
+The rest of the arguments are conses of keybinding string and a
+function symbol (unquoted).
+
+\(fn &rest ARGS)" nil t)
+
+(autoload 'bind-keys* "bind-key" "\
+Bind multiple keys at once, in `override-global-map'.
+Accepts the same keyword arguments as `bind-keys' (which see).
+
+This binds keys in such a way that bindings are not overridden by
+other modes.  See `override-global-mode'.
+
+\(fn &rest ARGS)" nil t)
+
+(autoload 'describe-personal-keybindings "bind-key" "\
+Display all the personal keybindings defined by `bind-key'." t nil)
+
+(register-definition-prefixes "bind-key" '("bind-key" "compare-keybindings" "get-binding-description" "override-global-m" "personal-keybindings"))
+
+;;;***
+
 ;;;### (autoloads nil "use-package-bind-key" "use-package-bind-key.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from use-package-bind-key.el
 
 (autoload 'use-package-autoload-keymap "use-package-bind-key" "\
-Loads PACKAGE and then binds the key sequence used to invoke
-this function to KEYMAP-SYMBOL. It then simulates pressing the
-same key sequence a again, so that the next key pressed is routed
-to the newly loaded keymap.
+Load PACKAGE and bind key sequence invoking this function to KEYMAP-SYMBOL.
+Then simulate pressing the same key sequence a again, so that the
+next key pressed is routed to the newly loaded keymap.
 
-This function supports use-package's :bind-keymap keyword. It
+This function supports use-package's :bind-keymap keyword.  It
 works by binding the given key sequence to an invocation of this
-function for a particular keymap. The keymap is expected to be
-defined by the package. In this way, loading the package is
+function for a particular keymap.  The keymap is expected to be
+defined by the package.  In this way, loading the package is
 deferred until the prefix key sequence is pressed.
 
 \(fn KEYMAP-SYMBOL PACKAGE OVERRIDE)" nil nil)
@@ -67,8 +152,8 @@ deferred until the prefix key sequence is pressed.
 (autoload 'use-package "use-package-core" "\
 Declare an Emacs package by specifying a group of configuration options.
 
-For full documentation, please see the README file that came with
-this file.  Usage:
+For the full documentation, see Info node `(use-package) top'.
+Usage:
 
   (use-package package-name
      [:keyword [option]]...)
@@ -105,11 +190,14 @@ this file.  Usage:
                  `:magic-fallback', or `:interpreter'.  This can be an integer,
                  to force loading after N seconds of idle time, if the package
                  has not already been loaded.
-:after           Delay the use-package declaration until after the named modules
-                 have loaded. Once load, it will be as though the use-package
-                 declaration (without `:after') had been seen at that moment.
 :demand          Prevent the automatic deferred loading introduced by constructs
                  such as `:bind' (see `:defer' for the complete list).
+
+:after           Delay the effect of the use-package declaration
+                 until after the named libraries have loaded.
+                 Before they have been loaded, no other keyword
+                 has any effect at all, and once they have been
+                 loaded it is as if `:after' was not specified.
 
 :if EXPR         Initialize and load only if EXPR evaluates to a non-nil value.
 :disabled        The package is ignored completely if this keyword is present.
@@ -192,7 +280,7 @@ Normalize arguments to delight.
 ;;; Generated autoloads from use-package-ensure-system-package.el
 
 (autoload 'use-package-normalize/:ensure-system-package "use-package-ensure-system-package" "\
-Turn `arg' into a list of cons-es of (`package-name' . `install-command').
+Turn ARGS into a list of conses of the form (PACKAGE-NAME . INSTALL-COMMAND).
 
 \(fn NAME-SYMBOL KEYWORD ARGS)" nil nil)
 
@@ -210,11 +298,10 @@ Execute the handler for `:ensure-system-package' keyword in `use-package'.
 ;;; Generated autoloads from use-package-jump.el
 
 (autoload 'use-package-jump-to-package-form "use-package-jump" "\
-Attempt to find and jump to the `use-package' form that loaded
-PACKAGE. This will only find the form if that form actually
-required PACKAGE. If PACKAGE was previously required then this
-function will jump to the file that originally required PACKAGE
-instead.
+Attempt to find and jump to the `use-package' form that loaded PACKAGE.
+This will only find the form if that form actually required
+PACKAGE.  If PACKAGE was previously required then this function
+will jump to the file that originally required PACKAGE instead.
 
 \(fn PACKAGE)" t nil)
 
@@ -227,7 +314,7 @@ instead.
 ;;; Generated autoloads from use-package-lint.el
 
 (autoload 'use-package-lint "use-package-lint" "\
-Check for errors in use-package declarations.
+Check for errors in `use-package' declarations.
 For example, if the module's `:if' condition is met, but even
 with the specified `:load-path' the module cannot be found." t nil)
 
@@ -235,8 +322,8 @@ with the specified `:load-path' the module cannot be found." t nil)
 
 ;;;***
 
-;;;### (autoloads nil nil ("use-package-chords-tests.el" "use-package-pkg.el"
-;;;;;;  "use-package-tests.el" "use-package.el") (0 0 0 0))
+;;;### (autoloads nil nil ("use-package-pkg.el" "use-package.el")
+;;;;;;  (0 0 0 0))
 
 ;;;***
 
