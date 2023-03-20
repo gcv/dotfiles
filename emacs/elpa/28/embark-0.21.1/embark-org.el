@@ -2,13 +2,6 @@
 
 ;; Copyright (C) 2022  Free Software Foundation, Inc.
 
-;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
-;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
-;; Keywords: convenience
-;; Version: 0.1
-;; Homepage: https://github.com/oantolin/embark
-;; Package-Requires: ((emacs "27.1"))
-
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -93,7 +86,7 @@
     ;; strike-through
     ;; subscript
     ;; superscript
-    ;; table ; supported via a specific target finder
+    table ; supported via a specific target finder
     table-cell
     ;; table-row ; we'll put row & column actions in the cell map
     ;; target ; I think there are no useful actions for radio targets
@@ -105,22 +98,24 @@
   "Supported Org object and element types.")
 
 (defun embark-org-target-element-context ()
-  "Target the smallest Org element or object around point."
-  (when-let (((derived-mode-p 'org-mode 'org-agenda-mode))
-             (element (org-element-context))
-             ((memq (car element) embark-org--types))
-             (begin (org-element-property :begin element))
-             (end (org-element-property :end element))
-             (target (buffer-substring begin end)))
-    ;; Adjust table-cell to exclude final |. (Why is that there?)
-    ;; Note: We are not doing this is an embark transformer because we
-    ;; want to adjust the bounds too.
-    ;; TODO? If more adjustments like this become necessary, add a
-    ;; nice mechanism for doing them.
-    (when (and (eq (car element) 'table-cell) (string-suffix-p "|" target))
-      (setq target (string-trim (string-remove-suffix "|" target))
-            end (1- end)))
-    `(,(intern (format "org-%s" (car element))) ,target ,begin . ,end)))
+  "Target all Org elements or objects around point."
+  (when (derived-mode-p 'org-mode 'org-agenda-mode)
+    (cl-loop
+     for elt = (org-element-lineage (org-element-context) embark-org--types t)
+     then (org-element-lineage elt embark-org--types)
+     while elt
+     for begin = (org-element-property :begin elt)
+     for end = (org-element-property :end elt)
+     for target = (buffer-substring begin end)
+      ;; Adjust table-cell to exclude final |. (Why is that there?)
+      ;; Note: We are not doing this is an embark transformer because we
+      ;; want to adjust the bounds too.
+      ;; TODO? If more adjustments like this become necessary, add a
+      ;; nice mechanism for doing them.
+      when (and (eq (car elt) 'table-cell) (string-suffix-p "|" target))
+      do (setq target (string-trim (string-remove-suffix "|" target))
+               end (1- end))
+      collect `(,(intern (format "org-%s" (car elt))) ,target ,begin . ,end))))
 
 (add-to-list 'embark-target-finders 'embark-org-target-element-context)
 
@@ -141,16 +136,9 @@
 (add-to-list 'embark-pre-action-hooks
              '(embark-org-copy-as-markdown embark--mark-target))
 
-(define-key embark-region-map "M" #'embark-org-copy-as-markdown) ; good idea?
+(keymap-set embark-region-map "M" #'embark-org-copy-as-markdown) ; good idea?
 
 ;;; Tables
-
-(defun embark-org-target-table ()
-  "Target entire Org table at point."
-  (when (and (derived-mode-p 'org-mode) (org-at-table-p))
-    `(org-table
-      ,(buffer-substring (org-table-begin) (org-table-end))
-      . (,(org-table-begin) . ,(org-table-end)))))
 
 (dolist (motion '(org-table-move-cell-up org-table-move-cell-down
                   org-table-move-cell-left org-table-move-cell-right))
@@ -159,35 +147,34 @@
 (push 'embark--ignore-target
       (alist-get 'org-table-edit-field embark-target-injection-hooks))
 
-(embark-define-keymap embark-org-table-cell-map
-  "Keymap for actions the current cells, column or row of an Org table."
+(defvar-keymap embark-org-table-cell-map
+  :doc "Keymap for actions the current cells, column or row of an Org table."
+  :parent embark-general-map
   ;; TODO: default action?
-  ("<up>"    org-table-move-cell-up)
-  ("<down>"  org-table-move-cell-down)
-  ("<left>"  org-table-move-cell-left)
-  ("<right>" org-table-move-cell-right)
-  ("=" org-table-eval-formula)
-  ("e" org-table-edit-field)
-  ("g" org-table-recalculate))
+  "<up>"    #'org-table-move-cell-up
+  "<down>"  #'org-table-move-cell-down
+  "<left>"  #'org-table-move-cell-left
+  "<right>" #'org-table-move-cell-right
+  "=" #'org-table-eval-formula
+  "e" #'org-table-edit-field
+  "g" #'org-table-recalculate)
 
-(embark-define-keymap embark-org-table-map
-  "Keymap for actions on entire Org table."
+(defvar-keymap embark-org-table-map
+  :doc "Keymap for actions on entire Org table."
+  :parent embark-general-map
   ;; TODO: default action?
-  ("=" org-table-edit-formulas)
-  ("s" org-table-sort-lines)
-  ("t" org-table-transpose-table-at-point)
-  ("c" org-table-convert)
-  ("f" org-table-follow-field-mode)
-  ("y" org-table-paste-rectangle)
-  ("d" org-table-toggle-formula-debugger)
-  ("i" org-table-iterate)
-  ("e" org-table-export))
+  "=" #'org-table-edit-formulas
+  "s" #'org-table-sort-lines
+  "t" #'org-table-transpose-table-at-point
+  "c" #'org-table-convert
+  "f" #'org-table-follow-field-mode
+  "y" #'org-table-paste-rectangle
+  "d" #'org-table-toggle-formula-debugger
+  "i" #'org-table-iterate
+  "e" #'org-table-export)
 
 (push 'embark--ignore-target            ; prompts for file name
       (alist-get 'org-table-export embark-target-injection-hooks))
-
-(push 'embark-org-target-table
-      (cdr (memq 'embark-org-target-element-context embark-target-finders)))
 
 (add-to-list 'embark-keymap-alist '(org-table . embark-org-table-map))
 
@@ -293,40 +280,41 @@ what part or in what format the link is copied."
 (embark-org-define-link-copier target target "'s target")
 
 (defalias 'embark-org-copy-link-inner-target #'kill-new
-  "Copy 'inner part' of the Org link at point's target.
+  "Copy inner part of the Org link at point's target.
 For mailto and elisp links, the inner part is the portion of the
-target after 'mailto:' or 'elisp:'.
+target after `mailto:' or `elisp:'.
 
 For file links the inner part is the file name, without the
-'file:' prefix and without '::' suffix (used for line numbers,
+`file:' prefix and without `::' suffix (used for line numbers,
 IDs or search terms).
 
-For URLs the inner part is the whole target including the 'http:'
-or 'https:' prefix.  For any other type of link the inner part is
+For URLs the inner part is the whole target including the `http:'
+or `https:' prefix.  For any other type of link the inner part is
 also the whole target.")
 
-(embark-define-keymap embark-org-link-copy-map
-  "Keymap for different ways to copy Org links to the kill-ring.
+(defvar-keymap embark-org-link-copy-map
+  :doc "Keymap for different ways to copy Org links to the kill-ring.
 
 You should bind w in this map to your most frequently used link
 copying function.  The default is for w to copy the \"inner
 target\" (see `embark-org-copy-link-inner-target'); which is also
 bound to i."
   :parent nil
-  ("w" embark-org-copy-link-inner-target)
-  ("f" embark-org-copy-link-in-full)
-  ("d" embark-org-copy-link-description)
-  ("t" embark-org-copy-link-target)
-  ("i" embark-org-copy-link-inner-target)
-  ("m" embark-org-copy-as-markdown))
+  "w" #'embark-org-copy-link-inner-target
+  "f" #'embark-org-copy-link-in-full
+  "d" #'embark-org-copy-link-description
+  "t" #'embark-org-copy-link-target
+  "i" #'embark-org-copy-link-inner-target
+  "m" #'embark-org-copy-as-markdown)
 
 (fset 'embark-org-link-copy-map embark-org-link-copy-map)
 
-(embark-define-keymap embark-org-link-map
-  "Keymap for actions on Org links"
-  ("RET" org-open-at-point)
-  ("'" org-insert-link)
-  ("w" 'embark-org-link-copy-map))
+(defvar-keymap embark-org-link-map
+  :doc "Keymap for actions on Org links."
+  :parent embark-general-map
+  "RET" #'org-open-at-point
+  "'" #'org-insert-link
+  "w" #'embark-org-link-copy-map)
 
 ;; The reason for this is left as an exercise to the reader.
 ;; Solution: Na ryvfc gnetrg znl cebzcg gur hfre sbe fbzrguvat!
@@ -349,35 +337,96 @@ bound to i."
 
 ;;; Source blocks and babel calls
 
-(embark-define-keymap embark-org-src-block-map
-  "Keymap for actions on Org source blocks"
-  ("RET" org-babel-execute-src-block)
-  ("c" org-babel-check-src-block)
-  ("k" org-babel-remove-result-one-or-many)
-  ("p" org-babel-previous-src-block)
-  ("n" org-babel-next-src-block)
-  ("t" org-babel-tangle)
-  ("s" org-babel-switch-to-session)
-  ("l" org-babel-load-in-session)
-  ("'" org-edit-special))
+(defvar-keymap embark-org-src-block-map
+  :doc "Keymap for actions on Org source blocks."
+  :parent embark-general-map
+  "RET" #'org-babel-execute-src-block
+  "c" #'org-babel-check-src-block
+  "k" #'org-babel-remove-result-one-or-many
+  "p" #'org-babel-previous-src-block
+  "n" #'org-babel-next-src-block
+  "t" #'org-babel-tangle
+  "s" #'org-babel-switch-to-session
+  "l" #'org-babel-load-in-session
+  "'" #'org-edit-special)
 
 (dolist (motion '(org-babel-next-src-blockorg-babel-previous-src-block))
   (add-to-list 'embark-repeat-actions motion))
 
 (add-to-list 'embark-keymap-alist '(org-src-block . embark-org-src-block-map))
 
+;;; List items
+
+(defvar-keymap embark-org-item-map
+  :doc "Keymap for actions on Org list items."
+  :parent embark-general-map
+  "RET" #'org-toggle-checkbox
+  "c" #'org-toggle-checkbox
+  "t" #'org-toggle-item
+  "n" #'org-next-item
+  "p" #'org-previous-item
+  "<left>" #'org-outdent-item
+  "<right>" #'org-indent-item
+  "<up>" #'org-move-item-up
+  "<down>" #'org-move-item-down
+  ">" #'org-indent-item-tree
+  "<" #'org-outdent-item-tree)
+
+(dolist (cmd '(org-toggle-checkbox
+               org-toggle-item
+               org-next-item
+               org-previous-item
+               org-outdent-item
+               org-indent-item
+               org-move-item-up
+               org-move-item-down
+               org-indent-item-tree
+               org-outdent-item-tree))
+  (add-to-list 'embark-repeat-actions cmd))
+
+(add-to-list 'embark-keymap-alist '(org-item . embark-org-item-map))
+
+;;; Org plain lists
+
+(defvar-keymap embark-org-plain-list-map
+  :doc "Keymap for actions on plain Org lists."
+  :parent embark-general-map
+  "RET" #'org-list-repair
+  "r" #'org-list-repair
+  "s" #'org-sort-list
+  "b" #'org-cycle-list-bullet
+  "t" #'org-list-make-subtree
+  "c" #'org-toggle-checkbox)
+
+(add-to-list 'embark-repeat-actions 'org-cycle-list-bullet)
+
+(add-to-list 'embark-keymap-alist '(org-plain-list . embark-org-plain-list-map))
+
+(cl-defun embark-org--toggle-checkboxes
+    (&rest rest &key run type &allow-other-keys)
+  "Around action hook for `org-toggle-checkbox'.
+See `embark-around-action-hooks' for the keyword arguments RUN and TYPE.
+REST are the remaining arguments."
+  (apply (if (eq type 'org-plain-list) #'embark--mark-target run)
+         :type type
+         rest))
+
+(cl-pushnew #'embark-org--toggle-checkboxes
+            (alist-get 'org-toggle-checkbox embark-around-action-hooks))
+
 ;;; "Encode" region using Org export in place
 
-(embark-define-keymap embark-org-export-in-place-map
-  "Keymap for actions which replace the region by an exported version."
-  ("m" org-md-convert-region-to-md)
-  ("h" org-html-convert-region-to-html)
-  ("a" org-ascii-convert-region-to-ascii)
-  ("l" org-latex-convert-region-to-latex))
+(defvar-keymap embark-org-export-in-place-map
+  :doc "Keymap for actions which replace the region by an exported version."
+  :parent embark-general-map
+  "m" #'org-md-convert-region-to-md
+  "h" #'org-html-convert-region-to-html
+  "a" #'org-ascii-convert-region-to-ascii
+  "l" #'org-latex-convert-region-to-latex)
 
 (fset 'embark-org-export-in-place-map embark-org-export-in-place-map)
 
-(define-key embark-encode-map "o" 'embark-org-export-in-place-map)
+(keymap-set embark-encode-map "o" 'embark-org-export-in-place-map)
 
 (provide 'embark-org)
 ;;; embark-org.el ends here

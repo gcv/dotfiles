@@ -146,14 +146,15 @@ Create an Embark Collect buffer.
 To control the display, add an entry to `display-buffer-alist'
 with key \"Embark Collect\".
 
-Reverting an Embark Collect buffer has slightly unusual behavior
-if the buffer was obtained by running `embark-collect' from
-within a minibuffer completion session.  In that case reverting
-just restarts the completion session, that is, the command that
-opened the minibuffer is run again and the minibuffer contents
-restored.  You can then interact normally with the command,
-perhaps editing the minibuffer contents, and, if you wish, you
-can rerun `embark-collect' to get an updated buffer." t nil)
+In Embark Collect buffers `revert-buffer' is remapped to
+`embark-rerun-collect-or-export', which has slightly unusual
+behavior if the buffer was obtained by running `embark-collect'
+from within a minibuffer completion session.  In that case
+rerunning just restarts the completion session, that is, the
+command that opened the minibuffer is run again and the
+minibuffer contents restored.  You can then interact normally with
+the command, perhaps editing the minibuffer contents, and, if you
+wish, you can rerun `embark-collect' to get an updated buffer." t nil)
 
 (autoload 'embark-live "embark" "\
 Create a live-updating Embark Collect buffer.
@@ -166,14 +167,16 @@ Create a type-specific buffer to manage current candidates.
 The variable `embark-exporters-alist' controls how to make the
 buffer for each type of completion.
 
-Reverting an Embark Export buffer has slightly unusual behavior if
-the buffer was obtained by running `embark-export' from within a
-minibuffer completion session.  In that case reverting just
-restarts the completion session, that is, the command that opened
-the minibuffer is run again and the minibuffer contents restored.
-You can then interact normally with the command, perhaps editing
-the minibuffer contents, and, if you wish, you can rerun
-`embark-export' to get an updated buffer." t nil)
+In Embark Export buffers `revert-buffer' is remapped to
+`embark-rerun-collect-or-export', which has slightly unusual
+behavior if the buffer was obtained by running `embark-export'
+from within a minibuffer completion session.  In that case
+reverting just restarts the completion session, that is, the
+command that opened the minibuffer is run again and the
+minibuffer contents restored.  You can then interact normally
+with the command, perhaps editing the minibuffer contents, and,
+if you wish, you can rerun `embark-export' to get an updated
+buffer." t nil)
 
 (register-definition-prefixes "embark" '("embark-"))
 
