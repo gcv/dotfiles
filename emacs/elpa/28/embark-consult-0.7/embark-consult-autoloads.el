@@ -14,6 +14,13 @@
 
 ;;;***
 
+;;;### (autoloads nil "embark-org" "embark-org.el" (0 0 0 0))
+;;; Generated autoloads from embark-org.el
+
+(register-definition-prefixes "embark-org" '("embark-org-"))
+
+;;;***
+
 ;;;### (autoloads nil nil ("embark-consult-pkg.el") (0 0 0 0))
 
 ;;;***
