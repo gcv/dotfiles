@@ -6,8 +6,8 @@
 ;; Maintainer: Hao Wang <amaikinono@gmail.com>
 ;; Created: 08 Aug 2021
 ;; Keywords: convenience, lisp, tools
-;; Package-Version: 20221203.1548
-;; Package-Commit: 370c456859ca808dd1333caadc88343b8800865f
+;; Package-Version: 20230214.1156
+;; Package-Commit: a39a4ecac7279bed1a150a895bbc80baa7272888
 ;; Homepage: https://github.com/AmaiKinono/puni
 ;; Version: 0
 ;; Package-Requires: ((emacs "26.1"))
@@ -1474,31 +1474,52 @@ When this will cause unbalanced state, ask the user to confirm,
 unless `puni-confirm-when-delete-unbalanced-active-region' is
 nil."
   (interactive)
-  (if (use-region-p)
-      (let ((beg (region-beginning))
-            (end (region-end)))
-        (when (or (not puni-confirm-when-delete-unbalanced-active-region)
-                  (puni-region-balance-p beg end)
-                  (y-or-n-p "Delete the region will cause unbalanced state.  \
+  (unless (use-region-p) (user-error "No active region"))
+  (if (bound-and-true-p rectangle-mark-mode)
+      (funcall region-extract-function 'delete-only)
+    (let ((beg (region-beginning))
+          (end (region-end)))
+      (when (or (not puni-confirm-when-delete-unbalanced-active-region)
+                (puni-region-balance-p beg end)
+                (y-or-n-p "Delete the region will cause unbalanced state.  \
 Continue? "))
-          (puni-delete-region beg end)))
-    (user-error "No active region")))
+        (puni-delete-region beg end)))))
+
+;;;###autoload
+(defun puni-kill-region ()
+  "Kill text between point and mark.
+When this will cause unbalanced state, ask the user to confirm,
+unless `puni-confirm-when-delete-unbalanced-active-region'.
+
+When `rectangle-mark-mode' is enabled, kill the marked
+rectangular region instead."
+  (interactive)
+  (if (bound-and-true-p rectangle-mark-mode)
+      ;; There is a rectangular region active.  The user probably
+      ;; knows what they are doing, defer to the stock `kill-region'
+      ;; function for it to handle the rectangular region.
+      (kill-region nil nil 'region)
+    (let ((beg (region-beginning))
+          (end (region-end)))
+      (when (or (not puni-confirm-when-delete-unbalanced-active-region)
+                (puni-region-balance-p beg end)
+                (y-or-n-p "Delete the region will cause unbalanced state.  \
+  Continue? "))
+        (setq this-command 'kill-region)
+        (puni-delete-region beg end 'kill)))))
 
 ;;;###autoload
 (defun puni-kill-active-region ()
   "Kill active region.
 When this will cause unbalanced state, ask the user to confirm,
-unless `puni-confirm-when-delete-unbalanced-active-region'."
+unless `puni-confirm-when-delete-unbalanced-active-region' is
+nil.
+
+When `rectangle-mark-mode' is enabled, kill the marked
+rectangular region instead."
   (interactive)
   (if (use-region-p)
-      (let ((beg (region-beginning))
-            (end (region-end)))
-        (when (or (not puni-confirm-when-delete-unbalanced-active-region)
-                  (puni-region-balance-p beg end)
-                  (y-or-n-p "Delete the region will cause unbalanced state.  \
-Continue? "))
-          (setq this-command 'kill-region)
-          (puni-delete-region beg end 'kill)))
+      (puni-kill-region)
     (user-error "No active region")))
 
 ;;;;; Char
@@ -2471,29 +2492,30 @@ like before wrapping.  BEG and END are integers, not markers."
   (puni--set-undo-position)
   (if (eq n 'region)
       (puni--wrap-region (point) (mark) beg-delim end-delim)
-    (let* ((n (cond ((eq n 'to-end) most-positive-fixnum)
-                    ((eq n 'to-beg) most-negative-fixnum)
-                    ((numberp n) n)
-                    (t (user-error
-                        "Expected 'to-end, 'to-beg, 'region, or integer as N, \
+    (let* ((end (pcase n
+                  ('to-end (puni-end-pos-of-list-around-point))
+                  ('to-beg (puni-beginning-pos-of-list-around-point))
+                  ((pred numberp)
+                   (save-excursion
+                     (catch 'end-of-list
+                       (dotimes (_ (abs n))
+                         (or (if (>= n 0)
+                                 (puni-strict-forward-sexp)
+                               (puni-strict-backward-sexp))
+                             (throw 'end-of-list nil))))
+                     (point)))
+                  (_ (user-error
+                      "Expected 'to-end, 'to-beg, 'region, or integer as N, \
 got: %S"
-                        n))))
+                      n))))
            (beg (save-excursion
-                  (if (>= n 0)
+                  (if (>= end (point))
                       (puni--forward-blanks)
                     (puni--backward-blanks))
-                  (point)))
-           (end (save-excursion
-                  (catch 'end-of-list
-                    (dotimes (_ (abs n))
-                      (or (if (>= n 0)
-                              (puni-strict-forward-sexp)
-                            (puni-strict-backward-sexp))
-                          (throw 'end-of-list nil))))
                   (point))))
       (puni--wrap-region beg end beg-delim end-delim))))
 
-(defun puni--parse-interactive-argument (n)
+(defun puni--parse-interactive-argument-for-wrap (n)
   "Convert N to a value understood by `puni-wrap-next-sexps'."
   (cond ((use-region-p) 'region)
         ((integerp n) n)
@@ -2510,7 +2532,7 @@ S-expressions.  Automatically indent the newly wrapped
 S-expression."
   (interactive "P")
   (puni-wrap-next-sexps
-   (puni--parse-interactive-argument n)
+   (puni--parse-interactive-argument-for-wrap n)
    "(" ")"))
 
 ;;;###autoload
@@ -2523,7 +2545,7 @@ S-expressions.  Automatically indent the newly wrapped
 S-expression."
   (interactive "P")
   (puni-wrap-next-sexps
-   (puni--parse-interactive-argument n)
+   (puni--parse-interactive-argument-for-wrap n)
    "[" "]"))
 
 ;;;###autoload
@@ -2536,7 +2558,7 @@ S-expressions.  Automatically indent the newly wrapped
 S-expression."
   (interactive "P")
   (puni-wrap-next-sexps
-   (puni--parse-interactive-argument n)
+   (puni--parse-interactive-argument-for-wrap n)
    "{" "}"))
 
 ;;;###autoload
@@ -2549,7 +2571,7 @@ S-expressions.  Automatically indent the newly wrapped
 S-expression."
   (interactive "P")
   (puni-wrap-next-sexps
-   (puni--parse-interactive-argument n)
+   (puni--parse-interactive-argument-for-wrap n)
    "<" ">"))
 
 ;;;; Puni mode
@@ -2564,7 +2586,7 @@ S-expression."
     (define-key map (kbd "C-k") 'puni-kill-line)
     (define-key map (kbd "C-S-k") 'puni-backward-kill-line)
     (define-key map (kbd "C-c DEL") 'puni-force-delete)
-    (define-key map (kbd "C-w") 'puni-kill-active-region)
+    (define-key map (kbd "C-w") 'puni-kill-region)
     (define-key map (kbd "C-M-f") 'puni-forward-sexp)
     (define-key map (kbd "C-M-b") 'puni-backward-sexp)
     (define-key map (kbd "C-M-a") 'puni-beginning-of-sexp)
@@ -2572,7 +2594,7 @@ S-expression."
     (define-key map (kbd "M-(") 'puni-syntactic-backward-punct)
     (define-key map (kbd "M-)") 'puni-syntactic-forward-punct)
     map)
-  "Keymap used for `puni-structural-editing-mode'.")
+  "Keymap used for `puni-mode'.")
 
 ;;;###autoload
 (progn
