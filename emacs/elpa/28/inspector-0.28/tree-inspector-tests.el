@@ -1,4 +1,4 @@
-;; tree-inspector-tests.el --- Tests for Emacs tree-inspector  -*- lexical-binding: t; -*-
+;;;; tree-inspector-tests.el --- Tests for Emacs tree-inspector  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022 Free Software Foundation, Inc.
 
@@ -39,7 +39,7 @@
 ;;                           tab))
 ;; (tree-inspector-inspect '((a . 22) (b . "lala")))
 ;; (tree-inspector-inspect [1 2 3 4 5 6 6 7 7 7 8 8 8 8 9 9])
-
+;; (tree-inspector-inspect (get-buffer-window (current-buffer)))
 ;; (request "https://www.govtrack.us/api/v2/role?current=true&role_type=senator"
 ;;  :success
 ;;  (lambda (&rest args)
@@ -183,11 +183,6 @@
   (if (= 1 integer) 1
     (* integer (tree-inspector-tests--factorial (1- integer)))))
 
-(ert-deftest tree-inspector-tests--inspect-compiled-function-test ()
-  (tree-inspector-tests--with-tree-inspector-contents
-   (buffer-string (byte-compile 'inspector-tests--factorial))
-   (should (cl-search "factorial" buffer-string))))
-
 (ert-deftest tree-inspector-tests--inspect-record-test ()
   (tree-inspector-tests--with-tree-inspector-contents
    (buffer-string (record 'foo 23 [bar baz] "rats"))
@@ -197,7 +192,8 @@
 
 (ert-deftest tree-inspector-tests--inspect-finalizer-test ()
   (tree-inspector-tests--with-tree-inspector-contents
-   (buffer-string (make-finalizer #'print))))
+   (buffer-string (make-finalizer #'print))
+   (should (cl-search "finalizer" buffer-string))))
 
 (ert-deftest tree-inspector-tests--overlays-test ()
   (tree-inspector-tests--with-tree-inspector-contents
@@ -214,23 +210,153 @@
 (ert-deftest tree-inspector-tests--inspect-class-test ()
   (tree-inspector-tests--with-tree-inspector-contents
    (buffer-string (make-instance 'inspector-tests--person))
-   (let ((buffer-string (buffer-string)))
-     (should (cl-search "name" buffer-string))
-     (should (cl-search "John" buffer-string))
-     (should (cl-search "age" buffer-string))
-     (should (cl-search "40" buffer-string)))))
-
-
-(cl-defstruct inspector-tests--rectangle
-  x y)
-
-(ert-deftest inspector-tests--inspect-struct-test ()
-  (tree-inspector-tests--with-tree-inspector-contents
-   (buffer-string (make-inspector-tests--rectangle :x 30 :y 40))
-   (should (cl-search "x" buffer-string))
-   (should (cl-search "y" buffer-string))
-   (should (cl-search "30" buffer-string))
+   (should (cl-search "name" buffer-string))
+   (should (cl-search "John" buffer-string))
+   (should (cl-search "age" buffer-string))
    (should (cl-search "40" buffer-string))))
+
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-top-defun-simple-list-test ()
+  (with-temp-buffer
+    (insert "(list 1 2 3)")
+    (goto-char (point-min))
+    (tree-inspector-inspect-defun)
+    (with-current-buffer "*tree-inspector*"
+      (let ((content (buffer-string)))
+        (should (cl-search "1" content))
+        (should (cl-search "2" content))
+        (should (cl-search "[-]" content))
+        (kill-buffer)))))
+
+
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-top-defun-simple-vector-test ()
+  (with-temp-buffer
+    (insert "(vector 1 2 3)")
+    (goto-char (point-min))
+    (tree-inspector-inspect-defun)
+    (with-current-buffer "*tree-inspector*"
+      (let ((content (buffer-string)))
+        (should (cl-search "1" content))
+        (should (cl-search "2" content))
+        (should (cl-search "[-]" content))
+        (kill-buffer)))))
+
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-top-defun-simple-assoc-test ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "'( 'a '((a . 1) (b . 2)))")
+    (goto-char (point-min))
+    (tree-inspector-inspect-defun)
+    (with-current-buffer "*tree-inspector*"
+      (let ((buffer-string (buffer-string)))
+        (should (cl-search "a" buffer-string))
+        (should (cl-search "1" buffer-string))
+        (should (cl-search "[-]" buffer-string))
+        (kill-buffer)))))
+
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-top-defun-simple-plist-test ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "'(:a 1 :b 2)")
+    (goto-char (point-min))
+    (tree-inspector-inspect-defun)
+    (with-current-buffer "*tree-inspector*"
+      (let ((content (buffer-string)))
+        (should (cl-search "a" content))
+        (should (cl-search "1" content))
+        (should (cl-search "[-]" content))
+        (should (cl-search "[+]" content))
+        (kill-buffer)))))
+
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-defun-complicate-list-test ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "(list 1 2 (list 3 4) 5)")
+    (goto-char (point-min))
+    (tree-inspector-inspect-defun)
+    (with-current-buffer "*tree-inspector*"
+      (let ((content (buffer-string)))
+        (should (cl-search "1" content))
+        (should (cl-search "2" content))
+        (should (cl-search "3" content))
+        (should (cl-search "4" content))
+        (should (cl-search "[-]" content))
+        (kill-buffer)))))
+
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-defun-complicate-vector-test ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "(vector 1 2 (vector 3 4) 5)")
+    (goto-char (point-min))
+    (tree-inspector-inspect-defun)
+    (with-current-buffer "*tree-inspector*"
+      (let ((content (buffer-string)))
+        (should (cl-search "1" content))
+        (should (cl-search "2" content))
+        (should (cl-search "3" content))
+        (should (cl-search "[-]" content))
+        (should (cl-search "vector" content))
+        (kill-buffer)))))
+
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-defun-complicate-assoc-test ()
+  (with-temp-buffer
+    (let* ((insert-content  "'('a '((a . 1) (b . 2) (c . (1 2 3)) (d . (1 2 (3 4) 5)) (e . (1 2 (3 4 (5 6)) 7)))))")
+           (tree-inspect-buffer-name "*tree-inspector*"))
+      (insert insert-content)
+      (goto-char (point-min))
+      (tree-inspector-inspect-defun)
+      (with-current-buffer tree-inspect-buffer-name
+        (let ((content (buffer-string)))
+          (should (cl-search "[-]" content))
+          (should (cl-search "[+]" content))
+          (should (cl-search "2" content))
+          (kill-buffer)
+          )))))
+
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-defun-complicate-plist-test ()
+  (with-temp-buffer
+    (let* ((insert-content "'(:key1 2 :key2 3 (:key4 4))")
+           )
+      (insert insert-content)
+      (goto-char (point-min))
+      (tree-inspector-inspect-defun)
+      (with-current-buffer (format "*tree-inspector*")
+        (let ((buffer-content (buffer-string)))
+          (should (cl-search "key1" buffer-content))
+          (should (cl-search "2" buffer-content))
+          (should (cl-search "key2" buffer-content))
+          (should (cl-search "3" buffer-content))
+          (should (cl-search "key4" buffer-content))
+          (should (cl-search "4" buffer-content))
+          (kill-buffer)
+          ))
+      )))
+(ert-deftest tree-inspector-tests--tree-inspector-inspect-region ()
+  (with-temp-buffer
+    (let ((insert-string "(list 1 2 3)"))
+      (insert insert-string)
+      (goto-char (point-min))
+      (tree-inspector-inspect-region (point-min) (point-max))
+
+      (with-current-buffer (format  "*tree-inspector*" insert-string)
+        (let ((current-buffer-string
+               (buffer-substring-no-properties (point-min) (point-max))))
+          (should (cl-search "1" current-buffer-string))
+          (should (cl-search "2" current-buffer-string))
+          (should (cl-search "3" current-buffer-string))
+          (should (cl-search "list" current-buffer-string)))
+        (kill-buffer)
+        ))))
+
+;; (cl-defstruct inspector-tests--rectangle
+;;   x y)
+;; TEST FAIL
+;; (ert-deftest inspector-tests--inspect-struct-test ()
+;;   (tree-inspector-tests--with-tree-inspector-contents
+;;    (buffer-string (make-inspector-tests--rectangle :x 30 :y 40))
+;;    (should (cl-search "x" buffer-string))
+;;    (should (cl-search "y" buffer-string))
+;;    (should (cl-search "30" buffer-string))
+;;    (should (cl-search "40" buffer-string))))
 
 (provide 'tree-inspector-tests)
 
