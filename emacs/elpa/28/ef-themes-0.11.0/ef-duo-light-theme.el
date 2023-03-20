@@ -1,6 +1,6 @@
 ;;; ef-duo-light-theme.el --- Legible light theme with mostly blue and yellow colors -*- lexical-binding:t -*-
 
-;; Copyright (C) 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2022-2023  Free Software Foundation, Inc.
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
 ;; Maintainer: Ef-Themes Development <~protesilaos/ef-themes@lists.sr.ht>
@@ -44,7 +44,9 @@
     "Legible light theme with mostly blue and yellow colors.")
 
   (defconst ef-duo-light-palette
-    '(;; Basic tones
+    '(
+;;; Basic values
+
       (bg-main     "#fff8f0")
       (fg-main     "#222222")
       (bg-dim      "#f6ece8")
@@ -55,7 +57,8 @@
       (bg-active   "#c7c0ba")
       (bg-inactive "#f9f2ef")
 
-      ;; Basic hues for foreground values
+;;; Basic hues for foreground values
+
       (red             "#cc3333")
       (red-warmer      "#dd1100")
       (red-cooler      "#c04440")
@@ -81,7 +84,8 @@
       (cyan-cooler     "#1f77bb")
       (cyan-faint      "#406f90")
 
-      ;; Basic hues for background values
+;;; Basic hues for background values
+
       (bg-red      "#ff8f88")
       (bg-green    "#8adf80")
       (bg-yellow   "#fac200")
@@ -96,20 +100,25 @@
       (bg-magenta-subtle  "#ffddff")
       (bg-cyan-subtle     "#bfefff")
 
-      ;; Diffs
+;;; Diffs
+
       (bg-added          "#ccefcf")
       (bg-added-faint    "#e0f3e0")
       (bg-added-refine   "#bae0c0")
+      (fg-added          "#005000")
 
       (bg-changed        "#ffe5b9")
       (bg-changed-faint  "#ffefc5")
       (bg-changed-refine "#ffd09f")
+      (fg-changed        "#553d00")
 
       (bg-removed        "#ffd4d8")
       (bg-removed-faint  "#ffe3e3")
       (bg-removed-refine "#ffc0ca")
+      (fg-removed        "#8f1313")
 
-      ;; Graphs
+;;; Graphs
+
       (red-graph-0-bg     "#ef7969")
       (red-graph-1-bg     "#ffaab4")
       (green-graph-0-bg   "#4faa09")
@@ -123,19 +132,20 @@
       (cyan-graph-0-bg    "#70d3f0")
       (cyan-graph-1-bg    "#afefff")
 
-      ;; Special hues
-      (bg-mode-line  "#f8cf8f") (fg-mode-line  "#111133")
-      (bg-accent     "#0044aa")
-      (fg-accent     "#ffffff")
-      (bg-completion "#fadacf")
-      (bg-hover      "#b4cfff")
-      (bg-hover-alt  "#aaeccf")
-      (bg-hl-line    "#f9e8c0")
-      (bg-region     "#caeafa")
-      (bg-paren      "#afbfef")
-      (bg-err        "#ffdfe6") ; check with err
-      (bg-warning    "#ffe5ba") ; check with warning
-      (bg-info       "#cff5d0") ; check with info
+;;; Special hues
+
+      (bg-mode-line       "#f8cf8f")
+      (fg-mode-line       "#111133")
+      (bg-accent          "#0044aa")
+      (bg-completion      "#fadacf")
+      (bg-hover           "#b4cfff")
+      (bg-hover-secondary "#aaeccf")
+      (bg-hl-line         "#f9e8c0")
+      (bg-region          "#caeafa")
+      (bg-paren           "#afbfef")
+      (bg-err             "#ffdfe6") ; check with err
+      (bg-warning         "#ffe5ba") ; check with warning
+      (bg-info            "#cff5d0") ; check with info
 
       (border        "#baafba")
       (cursor        "#1144ff")
@@ -149,21 +159,26 @@
       (underline-warning "#bf5f00")
       (underline-info    "#02af52")
 
-      ;; Conditional hues
+;;; Conditional hues
+
       (bg-region-intense "#dfc2b0")
 
-      ;; Mappings
+;;; Mappings
+
+;;;; General mappings
+
       (err red)
       (warning yellow)
       (info green)
 
       (link cyan)
       (link-alt green-cooler)
-      (date cyan-cooler)
       (name blue)
       (keybind blue-cooler)
       (identifier red-faint)
       (prompt blue)
+
+;;;; Code mappings
 
       (builtin cyan-cooler)
       (comment yellow-faint)
@@ -175,21 +190,51 @@
       (string yellow-warmer)
       (type blue-cooler)
       (variable magenta-cooler)
-
       (rx-escape cyan) ; compare with `string'
       (rx-construct red-warmer)
+
+;;;; Accent mappings
 
       (accent-0 blue-warmer)
       (accent-1 yellow-warmer)
       (accent-2 green-cooler)
       (accent-3 red)
 
-      (mail-0 blue)
-      (mail-1 yellow-cooler)
-      (mail-2 cyan-cooler)
-      (mail-3 red-cooler)
-      (mail-4 blue-warmer)
-      (mail-5 green-warmer)
+;;;; Date mappings
+
+      (date-common cyan-cooler)
+      (date-deadline red)
+      (date-event fg-alt)
+      (date-holiday green-cooler)
+      (date-now fg-main)
+      (date-scheduled yellow)
+      (date-weekday cyan)
+      (date-weekend red-faint)
+
+;;;; Prose mappings
+
+      (prose-code yellow-warmer)
+      (prose-done green)
+      (prose-macro green-cooler)
+      (prose-metadata fg-dim)
+      (prose-metadata-value fg-alt)
+      (prose-table fg-alt)
+      (prose-tag yellow-faint)
+      (prose-todo red)
+      (prose-verbatim blue-warmer)
+
+;;;; Mail mappings
+
+      (mail-cite-0 blue)
+      (mail-cite-1 yellow-cooler)
+      (mail-cite-2 cyan-cooler)
+      (mail-cite-3 red-cooler)
+      (mail-part blue-faint)
+      (mail-recipient blue)
+      (mail-subject yellow-warmer)
+      (mail-other cyan)
+
+;;;; Rainbow mappings
 
       (rainbow-0 blue)
       (rainbow-1 yellow-warmer)
@@ -200,9 +245,24 @@
       (rainbow-6 cyan-warmer)
       (rainbow-7 yellow)
       (rainbow-8 green-cooler))
-    "The `ef-duo-light' palette.")
+    "The `ef-duo-light' palette.
+Color values have the form (COLOR-NAME HEX-VALUE) with the former
+as a symbol and the latter as a string.
 
-  (ef-themes-theme ef-duo-light ef-duo-light-palette)
+Semantic color mappings have the form (MAPPING-NAME COLOR-NAME)
+with both as symbols.  The latter is a color that already exists
+in the palette and is associated with a HEX-VALUE.")
+
+  (defvar ef-duo-light-palette-overrides nil
+    "Overrides for `ef-duo-light-palette'.
+
+Mirror the elements of the aforementioned palette, overriding
+their value.
+
+For overrides that are shared across all of the Ef themes,
+refer to `ef-themes-common-palette-overrides'.")
+
+  (ef-themes-theme ef-duo-light ef-duo-light-palette ef-duo-light-palette-overrides)
 
   (provide-theme 'ef-duo-light))
 

@@ -44,14 +44,6 @@ symbol.
 
 \(fn &optional VARIANT)" t nil)
 
-(autoload 'ef-themes-preview-colors "ef-themes" "\
-Preview palette of the Ef THEME of choice.
-
-\(fn THEME)" t nil)
-
-(autoload 'ef-themes-preview-colors-current "ef-themes" "\
-Call `ef-themes-preview-colors' for the current Ef theme." t nil)
-
 (autoload 'ef-themes-theme "ef-themes" "\
 Bind NAME's color PALETTE around face specs and variables.
 Face specifications are passed to `custom-theme-set-faces'.
@@ -59,7 +51,10 @@ While variables are handled by `custom-theme-set-variables'.
 Those are stored in `ef-themes-faces' and
 `ef-themes-custom-variables' respectively.
 
-\(fn NAME PALETTE)" nil t)
+Optional OVERRIDES are appended to PALETTE, overriding
+corresponding entries.
+
+\(fn NAME PALETTE &optional OVERRIDES)" nil t)
 
 (function-put 'ef-themes-theme 'lisp-indent-function '0)
 

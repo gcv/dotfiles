@@ -1,7 +1,7 @@
-This is docoZpgUM.info, produced by makeinfo version 6.7 from
+This is doccHEA4h.info, produced by makeinfo version 6.7 from
 ef-themes.texi.
 
-Copyright (C) 2022 Free Software Foundation, Inc.
+Copyright (C) 2022-2023 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -20,12 +20,12 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docoZpgUM.info,  Node: Top,  Next: Installation,  Up: (dir)
+File: doccHEA4h.info,  Node: Top,  Next: Installation,  Up: (dir)
 
 ef-themes: colorful and legible themes
 **************************************
 
-Copyright (C) 2022 Free Software Foundation, Inc.
+Copyright (C) 2022-2023 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -43,11 +43,11 @@ package called ‘ef-themes’, and provides every other piece of
 information pertinent to it.
 
    The documentation furnished herein corresponds to stable version
-0.10.0, released on 2022-12-02.  Any reference to a newer feature which
+0.11.0, released on 2023-03-13.  Any reference to a newer feature which
 does not yet form part of the latest tagged commit, is explicitly marked
 as such.
 
-   Current development target is 0.11.0-dev.
+   Current development target is 1.0.0-dev.
 
    • Package name (GNU ELPA): ‘ef-themes’
    • Official manual: <https://protesilaos.com/emacs/ef-themes>
@@ -93,14 +93,17 @@ Installation
 
 Customization options
 
+* Disable other themes::
 * Toggle between two Ef themes::
 * Enable mixed fonts::
 * UI typeface::
 * Option for headings::
 * Style of region highlight::
+* Palette overrides::
 
 Do-It-Yourself customizations
 
+* Get a single color from the palette::
 * The general approach to advanced DIY changes::
 * A theme-agnostic hook for theme loading::
 * Add support for hl-todo::
@@ -137,7 +140,7 @@ Indices
 
 
 
-File: docoZpgUM.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
+File: doccHEA4h.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
 
 1 Installation
 **************
@@ -148,7 +151,7 @@ File: docoZpgUM.info,  Node: Installation,  Next: Sample configuration,  Prev: T
 * Manual installation::
 
 
-File: docoZpgUM.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
+File: doccHEA4h.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
 
 1.1 GNU ELPA package
 ====================
@@ -167,7 +170,7 @@ archive.  Read:
 <https://protesilaos.com/codelog/2022-05-13-emacs-elpa-devel/>.
 
 
-File: docoZpgUM.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
+File: doccHEA4h.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
 
 1.2 Manual installation
 =======================
@@ -194,7 +197,7 @@ following commands in a shell prompt:
    Everything is in place to set up the package.
 
 
-File: docoZpgUM.info,  Node: Sample configuration,  Next: Themes for red-green or blue-yellow color deficiency,  Prev: Installation,  Up: Top
+File: doccHEA4h.info,  Node: Sample configuration,  Next: Themes for red-green or blue-yellow color deficiency,  Prev: Installation,  Up: Top
 
 2 Sample configuration
 **********************
@@ -249,7 +252,7 @@ File: docoZpgUM.info,  Node: Sample configuration,  Next: Themes for red-green o
      ;; - `ef-themes-preview-colors-current'
 
 
-File: docoZpgUM.info,  Node: Themes for red-green or blue-yellow color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
+File: doccHEA4h.info,  Node: Themes for red-green or blue-yellow color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
 
 3 Themes for red-green or blue-yellow color deficiency
 ******************************************************
@@ -268,7 +271,7 @@ themes that are optimized for such cases.  The names of the themes are:
    *note Loading a theme::.
 
 
-File: docoZpgUM.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green or blue-yellow color deficiency,  Up: Top
+File: doccHEA4h.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green or blue-yellow color deficiency,  Up: Top
 
 4 Customization options
 ***********************
@@ -283,16 +286,41 @@ Principles.).
 
 * Menu:
 
+* Disable other themes::
 * Toggle between two Ef themes::
 * Enable mixed fonts::
 * UI typeface::
 * Option for headings::
 * Style of region highlight::
+* Palette overrides::
 
 
-File: docoZpgUM.info,  Node: Toggle between two Ef themes,  Next: Enable mixed fonts,  Up: Customization options
+File: doccHEA4h.info,  Node: Disable other themes,  Next: Toggle between two Ef themes,  Up: Customization options
 
-4.1 Toggle between two Ef themes
+4.1 Disable other themes
+========================
+
+The user option ‘ef-themes-disable-other-themes’ controls which themes
+to disable when loading an Ef theme.
+
+   When the value is non-nil, the commands ‘ef-themes-toggle’ and
+‘ef-themes-select’ will disable all other themes while loading the
+specified Ef theme.  This is done to ensure that Emacs does not blend
+two or more themes: such blends lead to awkward results that undermine
+the work of the designer.
+
+   When the value is nil, the aforementioned commands will only disable
+other themes within the Ef collection.
+
+   This option is provided because Emacs themes are not necessarily
+limited to colors/faces: they can consist of an arbitrary set of
+customizations.  Users who use such customization bundles must set this
+variable to a nil value.
+
+
+File: doccHEA4h.info,  Node: Toggle between two Ef themes,  Next: Enable mixed fonts,  Prev: Disable other themes,  Up: Customization options
+
+4.2 Toggle between two Ef themes
 ================================
 
 The user option ‘ef-themes-to-toggle’ expects two symbols that name
@@ -311,9 +339,9 @@ either with minibuffer completion or at random (*note Commands to load
 an Ef theme::).
 
 
-File: docoZpgUM.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Toggle between two Ef themes,  Up: Customization options
+File: doccHEA4h.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Toggle between two Ef themes,  Up: Customization options
 
-4.2 Enable mixed fonts
+4.3 Enable mixed fonts
 ======================
 
 The user option ‘ef-themes-mixed-fonts’ controls whether strictly
@@ -340,9 +368,9 @@ family of the ‘fixed-pitch’ and ‘variable-pitch’ faces.  The ‘fontaine
 package on GNU ELPA (by Protesilaos) can be helpful in this regard.
 
 
-File: docoZpgUM.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
+File: doccHEA4h.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
 
-4.3 UI typeface
+4.4 UI typeface
 ===============
 
 The user option ‘ef-themes-variable-pitch-ui’ controls whether the
@@ -364,9 +392,9 @@ family of the ‘fixed-pitch’ and ‘variable-pitch’ faces.  The ‘fontaine
 package on GNU ELPA (by Protesilaos) can be helpful in this regard.
 
 
-File: docoZpgUM.info,  Node: Option for headings,  Next: Style of region highlight,  Prev: UI typeface,  Up: Customization options
+File: doccHEA4h.info,  Node: Option for headings,  Next: Style of region highlight,  Prev: UI typeface,  Up: Customization options
 
-4.4 Option for headings
+4.5 Option for headings
 =======================
 
 The user option ‘ef-themes-headings’ provides support for individual
@@ -451,9 +479,9 @@ the original aesthetic for that level.  For example:
              (t . t))) ; default style for all unspecified levels
 
 
-File: docoZpgUM.info,  Node: Style of region highlight,  Prev: Option for headings,  Up: Customization options
+File: doccHEA4h.info,  Node: Style of region highlight,  Next: Palette overrides,  Prev: Option for headings,  Up: Customization options
 
-4.5 Style of region highlight
+4.6 Style of region highlight
 =============================
 
 The user option ‘ef-themes-region’ controls the appearance of the
@@ -486,7 +514,73 @@ legible.
      (setq ef-themes-region '(intense no-extend neutral))
 
 
-File: docoZpgUM.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
+File: doccHEA4h.info,  Node: Palette overrides,  Prev: Style of region highlight,  Up: Customization options
+
+4.7 Palette overrides
+=====================
+
+Each theme defines its own color palette as well as semantic color
+mappings.  The former is the set of color values such as what shade of
+blue to use.  The latter refers to associations between a color value
+and a syntactic construct, such as a ‘variable’ for variables in
+programming modes or ‘heading-1’ for level 1 headings in Org and others.
+
+   The definition is stored in the variable ‘ef-NAME-palette’, where
+‘NAME’ is the specifier of the theme, such as ‘summer’ for the
+‘ef-summer’ theme.  Overrides for those associations are specified in
+the variable ‘ef-NAME-palette-overrides’.
+
+   The variable ‘ef-themes-common-palette-overrides’ is available for
+shared values.  It is advised to only use this for mappings that do not
+specify a color value directly.  This way, the text remains legible by
+getting the theme-specific color value it needs.
+
+   All associations take the form of ‘(KEY VALUE)’ pairs.  For example,
+the ‘ef-summer-palette’ contains ‘(blue-warmer "#5250ef")’.  Semantic
+color mappings are the same, though the ‘VALUE’ is one of the named
+colors of the theme.  For instance, ‘ef-summer-palette’ maps the
+aforementioned ‘blue-warmer’ to ‘variable’ thus ‘(variable
+blue-warmer)’.
+
+   The easiest way to learn about a theme’s definition is to use the
+command ‘describe-variable’ (bound to ‘C-h v’ by default) and then
+search for the ‘ef-NAME-palette’.  The resulting Help buffer will look
+like this:
+
+     ef-summer-palette is a variable defined in ‘ef-summer-theme.el’.
+
+     Its value is shown below.
+
+     The ‘ef-summer’ palette.
+
+       This variable may be risky if used as a file-local variable.
+
+     Value:
+     ((bg-main "#fff2f3")
+      (fg-main "#4f4073")
+
+     [... Shortened for the purposes of this manual.]
+
+   The user can study this information to identify the overrides they
+wish to make.  Then they can specify them and re-load the theme for
+changes to take effect.  Sample of how to override a color value and a
+semantic mapping:
+
+     (setq ef-summer-palette-overrides
+           '((blue-warmer "#5230ff") ; original value is #5250ef
+             (variable cyan))) ; original value is blue-warmer
+
+   The overrides can contain as many associations as the user needs.
+
+   Changes to color values are reflected in the preview of the theme’s
+palette (*note Preview theme colors::).  They are shown at the top of
+the buffer.  In the above example, the first instance of ‘blue-warmer’
+is the override and the second is the original one.
+
+   Contact me if you need further help with this.
+
+
+File: doccHEA4h.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
 
 5 Loading a theme
 *****************
@@ -494,7 +588,8 @@ File: docoZpgUM.info,  Node: Loading a theme,  Next: Commands to load an Ef them
 Emacs can load and maintain enabled multiple themes at once.  This
 typically leads to awkward styling and weird combinations.  The theme
 looks broken and the designer’s intent is misunderstood.  Before loading
-one of the ‘ef-themes’, the user is encouraged to disable all others:
+one of the ‘ef-themes’, the user is encouraged to disable all others
+(*note Disable other themes::):
 
      (mapc #'disable-theme custom-enabled-themes)
 
@@ -517,7 +612,7 @@ theme::).  For example:
      (ef-themes-select 'ef-summer)
 
 
-File: docoZpgUM.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
+File: doccHEA4h.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
 
 6 Commands to load an Ef theme
 ******************************
@@ -587,7 +682,7 @@ a light/dark theme and then loads an appropriate Ef theme at random:
        (ef-themes-load-random 'light))
 
 
-File: docoZpgUM.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
+File: doccHEA4h.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
 
 7 Preview theme colors
 **********************
@@ -601,8 +696,27 @@ which reflects the given choice, like ‘ef-summer-preview-colors’ for the
    The command ‘ef-themes-preview-colors-current’ skips the minibuffer
 selection process and just produces a preview for the current Ef theme.
 
+   When called with a prefix argument (‘C-u’ with the default key
+bindings), these commands will show a preview of the palette’s semantic
+color mappings instead of the named colors.
+
+   Aliases for those commands are ‘ef-themes-list-colors’ and
+‘ef-themes-list-colors-current’.
+
+   Overrides to color values are reflected in the buffers produced by
+the aforementioned commands (*note Palette overrides::).
+
+   Each row shows a foreground and background coloration using the
+underlying value it references.  For example a line with ‘#d3303a’ (a
+shade of red) will show red text followed by a stripe with that same
+color as a backdrop.
+
+   The name of the buffer describes the given Ef theme and what the
+contents are, such as ‘*ef-summer-list-colors*’ for named colors and
+‘=*ef-summer-list-mappings*’ for the semantic color mappings.
+
 
-File: docoZpgUM.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
+File: doccHEA4h.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
 
 8 Use colors from the active Ef theme
 *************************************
@@ -631,7 +745,7 @@ color mapping are still possible.  At any rate, we will not outright
 break any code that uses ‘ef-themes-with-colors’.
 
 
-File: docoZpgUM.info,  Node: Do-It-Yourself customizations,  Next: Faces defined by the Ef themes,  Prev: Use colors from the active Ef theme,  Up: Top
+File: doccHEA4h.info,  Node: Do-It-Yourself customizations,  Next: Faces defined by the Ef themes,  Prev: Use colors from the active Ef theme,  Up: Top
 
 9 Do-It-Yourself customizations
 *******************************
@@ -641,6 +755,7 @@ their liking.
 
 * Menu:
 
+* Get a single color from the palette::
 * The general approach to advanced DIY changes::
 * A theme-agnostic hook for theme loading::
 * Add support for hl-todo::
@@ -650,9 +765,63 @@ their liking.
 * Tweak goto-address-mode faces::
 
 
-File: docoZpgUM.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
+File: doccHEA4h.info,  Node: Get a single color from the palette,  Next: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
-9.1 The general approach to advanced DIY changes
+9.1 Get a single color from the palette
+=======================================
+
+*note The general approach to advanced DIY changes::.
+
+   The fuction ‘ef-themes-get-color-value’ can be called from Lisp to
+return the value of a color from the active Ef theme palette.  It takea
+a ‘COLOR’ argument and an optional ‘OVERRIDES’.
+
+   ‘COLOR’ is a symbol that represents a named color entry in the
+palette.
+
+   *note Preview theme colors::.
+
+   If the value is the name of another color entry in the palette (so a
+mapping), this function recurs until it finds the underlying color
+value.
+
+   With an optional ‘OVERRIDES’ argument as a non-nil value, it accounts
+for palette overrides.  Else it reads only the default palette.
+
+   *note Palette overrides::.
+
+   With optional ‘THEME’ as a symbol among ‘ef-themes-collection’, use
+the palette of that item.  Else use the current Ef theme.
+
+   If ‘COLOR’ is not present in the palette, this function returns the
+‘unspecified’ symbol, which is safe when used as a face attribute’s
+value.
+
+   An example with ‘ef-summer’ to show how this function behaves
+with/without overrides and when recursive mappings are introduced.
+
+     ;; Here we show the recursion of palette mappings.  In general, it is
+     ;; better for the user to specify named colors to avoid possible
+     ;; confusion with their configuration, though those still work as
+     ;; expected.
+     (setq ef-themes-common-palette-overrides
+           '((cursor red)
+             (prompt cursor)
+             (variable prompt)))
+
+     ;; Ignore the overrides and get the original value.
+     (ef-themes-get-color-value 'variable)
+     ;; => "#5250ef"
+
+     ;; Read from the overrides and deal with any recursion to find the
+     ;; underlying value.
+     (ef-themes-get-color-value 'variable :overrides)
+     ;; => "#d3303a"
+
+
+File: doccHEA4h.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Prev: Get a single color from the palette,  Up: Do-It-Yourself customizations
+
+9.2 The general approach to advanced DIY changes
 ================================================
 
 When the user wants to customize Emacs faces there are two
@@ -737,9 +906,9 @@ mechanism.  We are willing to help and shall provide comprehensive
 documentation where necessary.
 
 
-File: docoZpgUM.info,  Node: A theme-agnostic hook for theme loading,  Next: Add support for hl-todo,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
+File: doccHEA4h.info,  Node: A theme-agnostic hook for theme loading,  Next: Add support for hl-todo,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
-9.2 A theme-agnostic hook for theme loading
+9.3 A theme-agnostic hook for theme loading
 ===========================================
 
 The themes are designed with the intent to be useful to Emacs users of
@@ -788,9 +957,9 @@ the user can replace it with ‘after-enable-theme-hook’ should they need
 to (provided they understand the implications).
 
 
-File: docoZpgUM.info,  Node: Add support for hl-todo,  Next: Make the mode line like the modus-themes default,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
+File: doccHEA4h.info,  Node: Add support for hl-todo,  Next: Make the mode line like the modus-themes default,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
 
-9.3 Add support for hl-todo
+9.4 Add support for hl-todo
 ===========================
 
 The ‘hl-todo’ package provides the user option ‘hl-todo-keyword-faces’:
@@ -832,9 +1001,9 @@ method.
 commands for previewing the palette (*note Preview theme colors::).
 
 
-File: docoZpgUM.info,  Node: Make the mode line like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
+File: doccHEA4h.info,  Node: Make the mode line like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
 
-9.4 Make the mode line like the ‘modus-themes’ default
+9.5 Make the mode line like the ‘modus-themes’ default
 ======================================================
 
 The Ef themes do not use a ‘:box’ attribute for their mode lines, while
@@ -866,9 +1035,9 @@ snippet:
      `(mode-line ((,c :background ,bg-mode-line :foreground ,fg-mode-line :box (:line-width 1 :color ,fg-dim))))
 
 
-File: docoZpgUM.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the mode line like the modus-themes default,  Up: Do-It-Yourself customizations
+File: doccHEA4h.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the mode line like the modus-themes default,  Up: Do-It-Yourself customizations
 
-9.5 Configure bold and italic faces
+9.6 Configure bold and italic faces
 ===================================
 
 The Ef themes do not hardcode a ‘:weight’ or ‘:slant’ attribute in the
@@ -918,9 +1087,9 @@ pick fonts that work in tandem):
 provides the means to configure font families via faces.
 
 
-File: docoZpgUM.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
+File: doccHEA4h.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
 
-9.6 Tweak ‘org-modern’ timestamps
+9.7 Tweak ‘org-modern’ timestamps
 =================================
 
 The ‘org-modern’ package uses faces and text properties to make Org
@@ -948,9 +1117,9 @@ further trouble (*note Enable mixed fonts::).
    For any further issues, you are welcome to ask for help.
 
 
-File: docoZpgUM.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
+File: doccHEA4h.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
 
-9.7 Tweak goto-address-mode faces
+9.8 Tweak goto-address-mode faces
 =================================
 
 The built-in ‘goto-address-mode’ uses heuristics to identify URLs and
@@ -973,7 +1142,7 @@ addresses stand out more, due to the use of the uncommon ‘@’ caharacter
 but also because they are often enclosed in angled brackets).
 
 
-File: docoZpgUM.info,  Node: Faces defined by the Ef themes,  Next: Supported packages or face groups,  Prev: Do-It-Yourself customizations,  Up: Top
+File: doccHEA4h.info,  Node: Faces defined by the Ef themes,  Next: Supported packages or face groups,  Prev: Do-It-Yourself customizations,  Up: Top
 
 10 Faces defined by the Ef themes
 *********************************
@@ -1008,7 +1177,7 @@ packages, like Dired, Trashed, Ibuffer.
    • ‘ef-themes-underline-warning’
 
 
-File: docoZpgUM.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Faces defined by the Ef themes,  Up: Top
+File: doccHEA4h.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Faces defined by the Ef themes,  Up: Top
 
 11 Supported packages or face groups
 ************************************
@@ -1025,7 +1194,7 @@ already covers everything most users need.
 * Packages that are hard to support::
 
 
-File: docoZpgUM.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: doccHEA4h.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.1 Explicitly supported packages or face groups
 =================================================
@@ -1050,6 +1219,7 @@ File: docoZpgUM.info,  Node: Explicitly supported packages or face groups,  Next
    • consult
    • corfu
    • custom (‘M-x customize’)
+   • dashboard
    • denote
    • dictionary
    • diff-hl
@@ -1080,6 +1250,7 @@ File: docoZpgUM.info,  Node: Explicitly supported packages or face groups,  Next
    • image-dired
    • info
    • isearch, occur, query-replace
+   • jit-spell
    • keycast
    • lin
    • line numbers (‘display-line-numbers-mode’ and global variant)
@@ -1101,6 +1272,7 @@ File: docoZpgUM.info,  Node: Explicitly supported packages or face groups,  Next
    • outline-minor-faces
    • package (‘M-x list-packages’)
    • perspective
+   • powerline
    • pulsar
    • pulse
    • rainbow-delimiters
@@ -1131,7 +1303,7 @@ File: docoZpgUM.info,  Node: Explicitly supported packages or face groups,  Next
    • woman
 
 
-File: docoZpgUM.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
+File: doccHEA4h.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.2 Implicitly supported packages or face groups
 =================================================
@@ -1142,6 +1314,7 @@ themes already cover:
 
    • apropos
    • dim-autoload
+   • forge
    • hl-todo
    • icomplete
    • ido
@@ -1155,7 +1328,7 @@ in perfectly.  If there are refinements we need to made, then we need to
 intervene (*note Explicitly supported packages or face groups::).
 
 
-File: docoZpgUM.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: doccHEA4h.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.3 Packages that are hard to support
 ======================================
@@ -1182,9 +1355,6 @@ dired+
 ein (Emacs IPython Notebook)
      external dependency that I don’t use.
 
-elfeed-goodies
-     depends on ‘powerline’...
-
 ement.el
      has an external dependency that I don’t use.
 
@@ -1203,18 +1373,10 @@ ivy/counsel/swiper
 lsp-mode
      has external dependencies that I don’t use.
 
-powerline
-     requires too many shades of background and generally violates our
-     expectation of how the mode-line is supposed to look by placing the
-     designated default background in unexpected places.
-
 solaire
      in principle, it is incompatible with practically every theme that
      is not designed around it.  Emacs does not distinguish between “UI”
      and “syntax” buffers.
-
-spaceline
-     same as ‘powerline’.
 
 sx
      has an external dependency that I don’t use.
@@ -1222,9 +1384,6 @@ sx
 telega
      has an external dependency that I don’t use (I don’t even have a
      smartphone).
-
-telephone-line
-     same as ‘powerline’.
 
 treemacs
      it has too many dependencies and does too many things.
@@ -1237,7 +1396,7 @@ web-mode
    The above list is non-exhaustive though you get the idea.
 
 
-File: docoZpgUM.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
+File: doccHEA4h.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
 
 12 Principles
 *************
@@ -1281,7 +1440,7 @@ File: docoZpgUM.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages o
 * Minimal VS maximal scope::
 
 
-File: docoZpgUM.info,  Node: Minimal VS maximal scope,  Up: Principles
+File: doccHEA4h.info,  Node: Minimal VS maximal scope,  Up: Principles
 
 12.1 Minimal VS maximal scope
 =============================
@@ -1300,7 +1459,7 @@ necessity.  The ‘modus-themes’ are such because:
 have such a lofty accessibility target.
 
 
-File: docoZpgUM.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
+File: doccHEA4h.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
 
 13 FAQ
 ******
@@ -1316,7 +1475,7 @@ File: docoZpgUM.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  U
 * Add something like Nord or Zenburn?::
 
 
-File: docoZpgUM.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
+File: doccHEA4h.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
 
 13.1 What does Ef mean?
 =======================
@@ -1326,7 +1485,7 @@ good, nice, and/or easy.  For example, eftopia (ευτοπία) is the opposite
 of dystopia (δυστοπία): a good place as opposed to a bad place.
 
 
-File: docoZpgUM.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
+File: doccHEA4h.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
 
 13.2 Will you stop using the modus-themes?
 ==========================================
@@ -1335,7 +1494,7 @@ No.  For my workflow, accessibility is the most important quality.  The
 ‘modus-themes’ will remain my default choice.
 
 
-File: docoZpgUM.info,  Node: Then why develop the ef-themes?,  Next: Difference between ef-themes and modus-themes?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
+File: doccHEA4h.info,  Node: Then why develop the ef-themes?,  Next: Difference between ef-themes and modus-themes?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
 
 13.3 Then why develop the ef-themes?
 ====================================
@@ -1348,7 +1507,7 @@ considerations for legibility, and (ii) are not designed on a whimsy.
 fine with a bit more relaxed accessibility target.
 
 
-File: docoZpgUM.info,  Node: Difference between ef-themes and modus-themes?,  Next: Too many options what should I do?,  Prev: Then why develop the ef-themes?,  Up: FAQ
+File: doccHEA4h.info,  Node: Difference between ef-themes and modus-themes?,  Next: Too many options what should I do?,  Prev: Then why develop the ef-themes?,  Up: FAQ
 
 13.4 Difference between ef-themes and modus-themes?
 ===================================================
@@ -1412,7 +1571,7 @@ pay attention.  In short: I am not picking random colours and
 implementing them on a whimsy.  Theme development is not easy.
 
 
-File: docoZpgUM.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Difference between ef-themes and modus-themes?,  Up: FAQ
+File: doccHEA4h.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Difference between ef-themes and modus-themes?,  Up: FAQ
 
 13.5 Too many options, what should I do?
 ========================================
@@ -1425,7 +1584,7 @@ tweaks to toggle between those two and don’t worry anymore about the
 abundance of choice (*note Toggle between two Ef themes::).  Good luck!
 
 
-File: docoZpgUM.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
+File: doccHEA4h.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
 
 13.6 Let Org tags inherit the heading color?
 ============================================
@@ -1458,7 +1617,7 @@ Realigning tags by inserting spaces also creates noise in
 version-controlled files, which is undesirable.
 
 
-File: docoZpgUM.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
+File: doccHEA4h.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
 
 13.7 Add something like Nord or Zenburn?
 ========================================
@@ -1487,7 +1646,7 @@ compromises and sub-optimal choices, which make no sense for a project
 with opinionanted design principles.
 
 
-File: docoZpgUM.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
+File: doccHEA4h.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
 
 14 Acknowledgements
 *******************
@@ -1505,10 +1664,10 @@ Ideas and/or user feedback
      Alan Schmitt, Anthony Chavez, Benjamin (zealotrush), Daniel
      Mendler, Federico Stilman, Iris Garcia, Jean-Philippe Gagné Guay,
      Jonas Collberg, Saša Janiška, Spike-Leung, Steve Molitor, Summer
-     Emacs, Sven Seebeck, Zoltán Király.
+     Emacs, Sven Seebeck, Thanos Apollo, Zoltán Király.
 
 
-File: docoZpgUM.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
+File: doccHEA4h.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
 
 15 GNU Free Documentation License
 *********************************
@@ -1990,7 +2149,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docoZpgUM.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
+File: doccHEA4h.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
 
 16 Indices
 **********
@@ -2002,7 +2161,7 @@ File: docoZpgUM.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up
 * Concept index::
 
 
-File: docoZpgUM.info,  Node: Function index,  Next: Variable index,  Up: Indices
+File: doccHEA4h.info,  Node: Function index,  Next: Variable index,  Up: Indices
 
 16.1 Function index
 ===================
@@ -2010,6 +2169,10 @@ File: docoZpgUM.info,  Node: Function index,  Next: Variable index,  Up: Indices
  [index ]
 * Menu:
 
+* ef-themes-get-color-value:             Get a single color from the palette.
+                                                               (line  8)
+* ef-themes-list-colors:                 Preview theme colors. (line 19)
+* ef-themes-list-colors-current:         Preview theme colors. (line 19)
 * ef-themes-load-random:                 Commands to load an Ef theme.
                                                                (line 35)
 * ef-themes-preview-colors:              Preview theme colors. (line  6)
@@ -2022,7 +2185,7 @@ File: docoZpgUM.info,  Node: Function index,  Next: Variable index,  Up: Indices
                                                                (line  6)
 
 
-File: docoZpgUM.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
+File: doccHEA4h.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
 
 16.2 Variable index
 ===================
@@ -2030,18 +2193,20 @@ File: docoZpgUM.info,  Node: Variable index,  Next: Concept index,  Prev: Functi
  [index ]
 * Menu:
 
-* ef-themes-headings:                    Option for headings.   (line 6)
-* ef-themes-mixed-fonts:                 Enable mixed fonts.    (line 6)
+* ef-themes-common-palette-overrides:    Palette overrides.    (line 17)
+* ef-themes-disable-other-themes:        Disable other themes. (line  6)
+* ef-themes-headings:                    Option for headings.  (line  6)
+* ef-themes-mixed-fonts:                 Enable mixed fonts.   (line  6)
 * ef-themes-post-load-hook:              Commands to load an Ef theme.
-                                                                (line 6)
+                                                               (line  6)
 * ef-themes-region:                      Style of region highlight.
-                                                                (line 6)
+                                                               (line  6)
 * ef-themes-to-toggle:                   Toggle between two Ef themes.
-                                                                (line 6)
-* ef-themes-variable-pitch-ui:           UI typeface.           (line 6)
+                                                               (line  6)
+* ef-themes-variable-pitch-ui:           UI typeface.          (line  6)
 
 
-File: docoZpgUM.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
+File: doccHEA4h.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 16.3 Concept index
 ==================
@@ -2053,55 +2218,60 @@ File: docoZpgUM.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
                                                                 (line 6)
 * Contributors:                          Acknowledgements.      (line 6)
 * Installation instructions:             Installation.          (line 6)
+* Override color values and semantic color mappings: Palette overrides.
+                                                                (line 6)
 
 
 
 Tag Table:
-Node: Top835
-Node: Installation4459
-Node: GNU ELPA package4641
-Node: Manual installation5205
-Node: Sample configuration5986
-Node: Themes for red-green or blue-yellow color deficiency8110
-Node: Customization options8974
-Node: Toggle between two Ef themes9650
-Node: Enable mixed fonts10514
-Node: UI typeface11890
-Node: Option for headings12826
-Node: Style of region highlight16546
-Node: Loading a theme17721
-Node: Commands to load an Ef theme18886
-Node: Preview theme colors21983
-Node: Use colors from the active Ef theme22633
-Node: Do-It-Yourself customizations23844
-Node: The general approach to advanced DIY changes24436
-Node: A theme-agnostic hook for theme loading28461
-Node: Add support for hl-todo30995
-Node: Make the mode line like the modus-themes default32912
-Node: Configure bold and italic faces34482
-Node: Tweak org-modern timestamps36909
-Node: Tweak goto-address-mode faces38296
-Node: Faces defined by the Ef themes39397
-Node: Supported packages or face groups40667
-Node: Explicitly supported packages or face groups41273
-Node: Implicitly supported packages or face groups43477
-Node: Packages that are hard to support44316
-Node: Principles46803
-Node: Minimal VS maximal scope48813
-Node: FAQ49572
-Node: What does Ef mean?49998
-Node: Will you stop using the modus-themes?50386
-Node: Then why develop the ef-themes?50743
-Node: Difference between ef-themes and modus-themes?51332
-Node: Too many options what should I do?54855
-Node: Let Org tags inherit the heading color?55555
-Node: Add something like Nord or Zenburn?57378
-Node: Acknowledgements58672
-Node: GNU Free Documentation License59327
-Node: Indices84672
-Node: Function index84850
-Node: Variable index85726
-Node: Concept index86543
+Node: Top840
+Node: Installation4555
+Node: GNU ELPA package4737
+Node: Manual installation5301
+Node: Sample configuration6082
+Node: Themes for red-green or blue-yellow color deficiency8206
+Node: Customization options9070
+Node: Disable other themes9793
+Node: Toggle between two Ef themes10727
+Node: Enable mixed fonts11620
+Node: UI typeface12996
+Node: Option for headings13932
+Node: Style of region highlight17652
+Node: Palette overrides18853
+Node: Loading a theme21631
+Node: Commands to load an Ef theme22827
+Node: Preview theme colors25924
+Node: Use colors from the active Ef theme27435
+Node: Do-It-Yourself customizations28646
+Node: Get a single color from the palette29278
+Node: The general approach to advanced DIY changes31305
+Node: A theme-agnostic hook for theme loading35374
+Node: Add support for hl-todo37908
+Node: Make the mode line like the modus-themes default39825
+Node: Configure bold and italic faces41395
+Node: Tweak org-modern timestamps43822
+Node: Tweak goto-address-mode faces45209
+Node: Faces defined by the Ef themes46310
+Node: Supported packages or face groups47580
+Node: Explicitly supported packages or face groups48186
+Node: Implicitly supported packages or face groups50441
+Node: Packages that are hard to support51293
+Node: Principles53430
+Node: Minimal VS maximal scope55440
+Node: FAQ56199
+Node: What does Ef mean?56625
+Node: Will you stop using the modus-themes?57013
+Node: Then why develop the ef-themes?57370
+Node: Difference between ef-themes and modus-themes?57959
+Node: Too many options what should I do?61482
+Node: Let Org tags inherit the heading color?62182
+Node: Add something like Nord or Zenburn?64005
+Node: Acknowledgements65299
+Node: GNU Free Documentation License65969
+Node: Indices91314
+Node: Function index91492
+Node: Variable index92665
+Node: Concept index93628
 
 End Tag Table
 
