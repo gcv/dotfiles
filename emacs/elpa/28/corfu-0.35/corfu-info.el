@@ -1,12 +1,12 @@
 ;;; corfu-info.el --- Show candidate information in separate buffer -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2022-2023 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.34"))
+;; Package-Requires: ((emacs "27.1") (corfu "0.35"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -27,7 +27,7 @@
 ;;; Commentary:
 
 ;; This Corfu extension provides commands to show additional information to the
-;; candidates in a separate buffer. The commands `corfu-info-location' and
+;; candidates in a separate buffer.  The commands `corfu-info-location' and
 ;; `corfu-info-documentation' are bound by default in the `corfu-map' to M-g and
 ;; M-h respectively.
 
@@ -60,8 +60,8 @@
   (when (< corfu--index 0)
     (user-error "No candidate selected"))
   (let ((cand (nth corfu--index corfu--candidates)))
-    (if-let* ((fun (plist-get corfu--extra :company-doc-buffer))
-              (res (funcall fun cand)))
+    (if-let ((fun (plist-get corfu--extra :company-doc-buffer))
+             (res (funcall fun cand)))
         (let ((buf (or (car-safe res) res)))
           (corfu-info--restore-on-next-command)
           (setq other-window-scroll-buffer (get-buffer buf))
@@ -77,8 +77,8 @@
     (user-error "No candidate selected"))
   (let ((cand (nth corfu--index corfu--candidates)))
     ;; BUG: company-location may throw errors if location is not found
-    (if-let* ((fun (ignore-errors (plist-get corfu--extra :company-location)))
-              (loc (funcall fun cand)))
+    (if-let ((fun (ignore-errors (plist-get corfu--extra :company-location)))
+             (loc (funcall fun cand)))
         (let ((buf (or (and (bufferp (car loc)) (car loc))
                        (find-file-noselect (car loc) t))))
           (corfu-info--restore-on-next-command)

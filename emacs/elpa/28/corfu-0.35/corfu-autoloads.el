@@ -65,10 +65,7 @@ See `corfu-mode' for more information on Corfu mode.
 (defvar corfu-echo-mode nil "\
 Non-nil if Corfu-Echo mode is enabled.
 See the `corfu-echo-mode' command
-for a description of this minor mode.
-Setting this variable directly does not take effect;
-either customize it (see the info node `Easy Customization')
-or call the function `corfu-echo-mode'.")
+for a description of this minor mode.")
 
 (custom-autoload 'corfu-echo-mode "corfu-echo" nil)
 
@@ -137,10 +134,7 @@ it is disabled.
 (defvar corfu-indexed-mode nil "\
 Non-nil if Corfu-Indexed mode is enabled.
 See the `corfu-indexed-mode' command
-for a description of this minor mode.
-Setting this variable directly does not take effect;
-either customize it (see the info node `Easy Customization')
-or call the function `corfu-indexed-mode'.")
+for a description of this minor mode.")
 
 (custom-autoload 'corfu-indexed-mode "corfu-indexed" nil)
 
@@ -187,10 +181,7 @@ Show location of current candidate." t nil)
 (defvar corfu-popupinfo-mode nil "\
 Non-nil if Corfu-Popupinfo mode is enabled.
 See the `corfu-popupinfo-mode' command
-for a description of this minor mode.
-Setting this variable directly does not take effect;
-either customize it (see the info node `Easy Customization')
-or call the function `corfu-popupinfo-mode'.")
+for a description of this minor mode.")
 
 (custom-autoload 'corfu-popupinfo-mode "corfu-popupinfo" nil)
 

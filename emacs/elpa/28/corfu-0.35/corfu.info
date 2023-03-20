@@ -1,4 +1,4 @@
-This is docYXxwrO.info, produced by makeinfo version 6.7 from
+This is docNN5dzZ.info, produced by makeinfo version 6.7 from
 corfu.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docYXxwrO.info,  Node: Top,  Next: Features,  Up: (dir)
+File: docNN5dzZ.info,  Node: Top,  Next: Features,  Up: (dir)
 
 corfu.el - Completion Overlay Region FUnction
 *********************************************
@@ -59,7 +59,7 @@ Installation and Configuration
 
 
 
-File: docYXxwrO.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
+File: docNN5dzZ.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
 
 1 Features
 **********
@@ -88,7 +88,7 @@ File: docYXxwrO.info,  Node: Features,  Next: Installation and Configuration,  P
      Candidate documentation in echo area, popup or separate buffer
 
 
-File: docYXxwrO.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
+File: docNN5dzZ.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
 
 2 Installation and Configuration
 ********************************
@@ -119,7 +119,7 @@ before turning on ‘global-corfu-mode’.
        ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
        ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
        ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-       ;; (corfu-preselect-first nil)    ;; Disable candidate preselection
+       ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
        ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
        ;; (corfu-scroll-margin 5)        ;; Use scroll margin
 
@@ -211,7 +211,7 @@ completion in the Elisp manual
 * Transfer completion to the minibuffer::
 
 
-File: docYXxwrO.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
+File: docNN5dzZ.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.1 Auto completion
 ===================
@@ -265,7 +265,7 @@ the Orderless documentation and source code for further details.
                  completion-styles '(orderless-fast))
 
 
-File: docYXxwrO.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
+File: docNN5dzZ.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
 
 2.2 Completing in the minibuffer
 ================================
@@ -289,14 +289,15 @@ bound in the minibuffer-local keymap to achieve this effect.
      (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
 
    You can also enable Corfu more generally for every minibuffer, as
-long as no other completion UI is active.  If you use Mct or Vertico as
-your main minibuffer completion UI, the following snippet should yield
-the desired result.
+long as no completion UI is active.  In the following example we check
+for Mct and Vertico.  Furthermore we ensure that Corfu is not enabled if
+a password is read from the minibuffer.
 
      (defun corfu-enable-always-in-minibuffer ()
        "Enable Corfu in the minibuffer if Vertico/Mct are not active."
        (unless (or (bound-and-true-p mct--active)
-                   (bound-and-true-p vertico--input))
+                   (bound-and-true-p vertico--input)
+                   (eq (current-local-map) read-passwd-map))
          ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
          (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
                      corfu-popupinfo-delay nil)
@@ -304,7 +305,7 @@ the desired result.
      (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
-File: docYXxwrO.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
+File: docNN5dzZ.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.3 Completing in the Eshell or Shell
 =====================================
@@ -336,33 +337,38 @@ it is easy to improve this!  In my configuration I define the advice
 
      (advice-add #'corfu-insert :after #'corfu-send-shell)
 
-   Shell completion uses the flexible ‘Pcomplete’ mechanism internally,
+   Shell completion uses the flexible Pcomplete mechanism internally,
 which allows you to program the completions per shell command.  If you
-want to know more, look into this blog post
+want to know more, look into the blog post
 (https://www.masteringemacs.org/article/pcomplete-context-sensitive-completion-emacs),
-which shows how to configure Pcomplete for git commands.  I recommend
-the pcmpl-args (https://github.com/JonWaltman/pcmpl-args.el) package
-which extends Pcomplete with completion support and helpful annotation
-support for more commands.  Similar to the Fish shell, pcmpl-args uses
-man page parsing and –help output parsing to dynamically generate
-completions.  This package brings Eshell completion to another level!
+which shows how to configure Pcomplete for git commands.  Since Emacs
+29, Pcomplete offers the ‘pcomplete-from-help’ function which parses the
+‘--help’ output of a command and produces completions.  This
+functionality is similar to the Fish shell, which also takes advantage
+of ‘--help’ to dynamically generate completions.
 
-   Unfortunately Pcomplete has a few technical issues, which we can work
-around with the Cape (https://github.com/minad/cape) library (Completion
-at point extensions).  Cape provides wrappers, which sanitize the
-Pcomplete function.  Ideally the bugs in Pcomplete should be fixed
-upstream.  *For now these two advices are strongly recommended to
-achieve a sane Eshell experience.*
+   Unfortunately Pcomplete had a few technical issues on Emacs 28 and
+older.  We can work around the issues with the Cape
+(https://github.com/minad/cape) library (Completion at point
+extensions).  Cape provides wrappers which sanitize the Pcomplete
+function.  If you use Emacs 28 or older installing these advices is
+strongly recommend such that Pcomplete works properly.  On Emacs 29 the
+advices are not necessary anymore, since almost all of the related bugs
+have been fixed.  I therefore recommend to remove the advices on Emacs
+29 and eventually report any remaining Pcomplete issues upstream, such
+that they can be fixed at the root.
 
-     ;; Silence the pcomplete capf, no errors or messages!
-     (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
+     ;; The advices are only needed on Emacs 28 and older.
+     (when (< emacs-major-version 29)
+       ;; Silence the pcomplete capf, no errors or messages!
+       (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
 
-     ;; Ensure that pcomplete does not write to the buffer
-     ;; and behaves as a pure `completion-at-point-function'.
-     (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify)
+       ;; Ensure that pcomplete does not write to the buffer
+       ;; and behaves as a pure `completion-at-point-function'.
+       (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
 
 
-File: docYXxwrO.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
+File: docNN5dzZ.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
 
 2.4 Orderless completion
 ========================
@@ -428,7 +434,7 @@ components.
        (global-corfu-mode))
 
 
-File: docYXxwrO.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
+File: docNN5dzZ.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
 
 2.5 TAB-and-Go completion
 =========================
@@ -443,8 +449,8 @@ candidate explicitly with ‘RET’.
      (use-package corfu
        ;; TAB-and-Go customizations
        :custom
-       (corfu-cycle t)             ;; Enable cycling for `corfu-next/previous'
-       (corfu-preselect-first nil) ;; Disable candidate preselection
+       (corfu-cycle t)           ;; Enable cycling for `corfu-next/previous'
+       (corfu-preselect 'prompt) ;; Always preselect the prompt
 
        ;; Use TAB for cycling, default is `corfu-complete'.
        :bind
@@ -458,7 +464,7 @@ candidate explicitly with ‘RET’.
        (global-corfu-mode))
 
 
-File: docYXxwrO.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
+File: docNN5dzZ.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
 
 2.6 Transfer completion to the minibuffer
 =========================================
@@ -482,10 +488,10 @@ via ‘completing-read’.
        (let ((completion-extra-properties corfu--extra)
              completion-cycle-threshold completion-cycling)
          (apply #'consult-completion-in-region completion-in-region--data)))
-     (define-key corfu-map "\M-m" #'corfu-move-to-minibuffer)
+     (keymap-set corfu-map "M-m" #'corfu-move-to-minibuffer)
 
 
-File: docYXxwrO.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
+File: docNN5dzZ.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
 
 3 Key bindings
 **************
@@ -494,6 +500,8 @@ Corfu uses a transient keymap ‘corfu-map’ which is active while the
 popup is shown.  The keymap defines the following remappings and
 bindings:
 
+   • ‘move-beginning-of-line’ -> ‘corfu-prompt-beginning’
+   • ‘move-end-of-line’ -> ‘corfu-prompt-end’
    • ‘beginning-of-buffer’ -> ‘corfu-first’
    • ‘end-of-buffer’ -> ‘corfu-last’
    • ‘scroll-down-command’ -> ‘corfu-scroll-down’
@@ -509,7 +517,7 @@ bindings:
    • ‘keyboard-escape-quit’ -> ‘corfu-reset’
 
 
-File: docYXxwrO.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
+File: docNN5dzZ.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
 
 4 Extensions
 ************
@@ -549,7 +557,7 @@ the following extensions come with the Corfu ELPA package:
    See the Commentary of those files for configuration details.
 
 
-File: docYXxwrO.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
+File: docNN5dzZ.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
 
 5 Complementary packages
 ************************
@@ -584,13 +592,6 @@ look into complementary packages to enhance your setup.
      beautifully styled SVG icons based on monochromatic icon sets like
      material design.
 
-   • pcmpl-args (https://github.com/JonWaltman/pcmpl-args.el): Extend
-     the Eshell/Shell Pcomplete mechanism with support for many more
-     commands.  Similar to the Fish shell, Pcomplete uses man page
-     parsing to dynamically retrieve the completions and helpful
-     annotations.  This package brings Eshell completions to another
-     level!
-
    • Tempel (https://github.com/minad/tempel): Tiny template/snippet
      package with templates in Lisp syntax, which can be used in
      conjunction with Corfu.
@@ -600,7 +601,7 @@ look into complementary packages to enhance your setup.
      Vertico is the minibuffer completion counterpart of Corfu.
 
 
-File: docYXxwrO.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
+File: docNN5dzZ.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
 
 6 Alternatives
 **************
@@ -647,7 +648,7 @@ File: docYXxwrO.info,  Node: Alternatives,  Next: Contributions,  Prev: Compleme
      ‘consult-completion-in-region’ is your best option.
 
 
-File: docYXxwrO.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
+File: docNN5dzZ.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
 
 7 Contributions
 ***************
@@ -662,17 +663,17 @@ Tag Table:
 Node: Top213
 Node: Features2134
 Node: Installation and Configuration3616
-Node: Auto completion9300
-Node: Completing in the minibuffer11668
-Node: Completing in the Eshell or Shell13743
-Node: Orderless completion16608
-Node: TAB-and-Go completion19709
-Node: Transfer completion to the minibuffer20828
-Node: Key bindings22149
-Node: Extensions23144
-Node: Complementary packages24944
-Node: Alternatives27449
-Node: Contributions30100
+Node: Auto completion9290
+Node: Completing in the minibuffer11658
+Node: Completing in the Eshell or Shell13814
+Node: Orderless completion16956
+Node: TAB-and-Go completion20057
+Node: Transfer completion to the minibuffer21169
+Node: Key bindings22489
+Node: Extensions23608
+Node: Complementary packages25408
+Node: Alternatives27558
+Node: Contributions30209
 
 End Tag Table
 

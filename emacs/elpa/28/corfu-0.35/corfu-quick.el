@@ -1,12 +1,12 @@
 ;;; corfu-quick.el --- Quick keys for Corfu -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2022-2023 Free Software Foundation, Inc.
 
 ;; Author: Luis Henriquez-Perez <luis@luishp.xyz>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.34"))
+;; Package-Requires: ((emacs "27.1") (corfu "0.35"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -27,12 +27,12 @@
 ;;; Commentary:
 
 ;; This package is a Corfu extension, which prefixes candidates with
-;; quick keys. Typing these quick keys allows you to select the
-;; candidate in front of them. This is designed to be a faster
+;; quick keys.  Typing these quick keys allows you to select the
+;; candidate in front of them.  This is designed to be a faster
 ;; alternative to selecting a candidate with `corfu-next' and
 ;; `corfu-previous'.
-;; (define-key corfu-map "\M-q" #'corfu-quick-complete)
-;; (define-key corfu-map "\C-q" #'corfu-quick-insert)
+;; (keymap-set corfu-map "M-q" #'corfu-quick-complete)
+;; (keymap-set corfu-map "C-q" #'corfu-quick-insert)
 
 ;;; Code:
 

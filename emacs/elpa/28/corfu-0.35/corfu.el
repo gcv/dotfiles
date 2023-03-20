@@ -1,12 +1,12 @@
 ;;; corfu.el --- Completion Overlay Region FUnction -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021, 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.34
-;; Package-Requires: ((emacs "27.1"))
+;; Version: 0.35
+;; Package-Requires: ((emacs "27.1") (compat "29.1.3.4"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -27,20 +27,25 @@
 ;;; Commentary:
 
 ;; Corfu enhances the default completion in region function with a
-;; completion overlay. The current candidates are shown in a popup
-;; below or above the point. Corfu can be considered the minimalistic
+;; completion overlay.  The current candidates are shown in a popup
+;; below or above the point.  Corfu can be considered the minimalistic
 ;; completion-in-region counterpart of Vertico.
 
 ;;; Code:
 
-(require 'seq)
+(require 'compat)
 (eval-when-compile
   (require 'cl-lib)
   (require 'subr-x))
 
 (defgroup corfu nil
   "Completion Overlay Region FUnction."
+  :link '(info-link :tag "Info Manual" "(corfu)")
+  :link '(url-link :tag "Homepage" "https://github.com/minad/corfu")
+  :link '(emacs-library-link :tag "Library Source" "corfu.el")
   :group 'convenience
+  :group 'tools
+  :group 'matching
   :prefix "corfu-")
 
 (defcustom corfu-count 10
@@ -81,17 +86,24 @@ If the variable has the value `insert', the candidate is automatically
 inserted on further input."
   :type '(choice boolean (const insert)))
 
-(defcustom corfu-preselect-first t
-  "Preselect first candidate."
-  :type 'boolean)
+(defcustom corfu-preselect 'valid
+  "Configure if the prompt or first candidate is preselected.
+- prompt: Always select the prompt.
+- first: Always select the first candidate.
+- valid: Only select the prompt if valid and not equal to the first candidate.
+- directory: Like first, but select the prompt if it is a directory."
+  :type '(choice (const prompt) (const valid) (const first) (const directory)))
+
+(defvar corfu-preselect-first t)
+(make-obsolete-variable 'corfu-preselect-first "Use `corfu-preselect' instead." "0.34")
 
 (defcustom corfu-separator ?\s
   "Component separator character.
-The character used for separating components in the input. The presence
+The character used for separating components in the input.  The presence
 of this separator character will inhibit quitting at completion
-boundaries, so that any further characters can be entered. To enter the
+boundaries, so that any further characters can be entered.  To enter the
 first separator character, call `corfu-insert-separator' (bound to M-SPC
-by default). Useful for multi-component completion styles such as
+by default).  Useful for multi-component completion styles such as
 Orderless."
   :type 'character)
 
@@ -131,7 +143,7 @@ separator: Only stay alive if there is no match and
 (defcustom corfu-margin-formatters nil
   "Registry for margin formatter functions.
 Each function of the list is called with the completion metadata as
-argument until an appropriate formatter is found. The function should
+argument until an appropriate formatter is found.  The function should
 return a formatter function, which takes the candidate string and must
 return a string, possibly an icon."
   :type 'hook)
@@ -206,31 +218,34 @@ The completion backend can override this with
   '((t :inherit shadow :strike-through t))
   "Face used for deprecated candidates.")
 
-(defvar corfu-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [remap beginning-of-buffer] #'corfu-first)
-    (define-key map [remap end-of-buffer] #'corfu-last)
-    (define-key map [remap scroll-down-command] #'corfu-scroll-down)
-    (define-key map [remap scroll-up-command] #'corfu-scroll-up)
-    (define-key map [remap next-line] #'corfu-next)
-    (define-key map [remap previous-line] #'corfu-previous)
-    (define-key map [remap completion-at-point] #'corfu-complete)
-    (define-key map [down] #'corfu-next)
-    (define-key map [up] #'corfu-previous)
-    (define-key map [remap keyboard-escape-quit] #'corfu-reset)
-    ;; XXX [tab] is bound because of org-mode
-    ;; The binding should be removed from org-mode-map.
-    (define-key map [tab] #'corfu-complete)
-    (define-key map "\M-n" #'corfu-next)
-    (define-key map "\M-p" #'corfu-previous)
-    (define-key map "\C-g" #'corfu-quit)
-    (define-key map "\r" #'corfu-insert)
-    (define-key map "\t" #'corfu-complete)
-    (define-key map "\M-g" 'corfu-info-location)
-    (define-key map "\M-h" 'corfu-info-documentation)
-    (define-key map "\M- " #'corfu-insert-separator)
-    map)
-  "Corfu keymap used when popup is shown.")
+(defvar-keymap corfu-map
+  :doc "Corfu keymap used when popup is shown."
+  "<remap> <move-beginning-of-line>" #'corfu-prompt-beginning
+  "<remap> <move-end-of-line>" #'corfu-prompt-end
+  "<remap> <beginning-of-buffer>" #'corfu-first
+  "<remap> <end-of-buffer>" #'corfu-last
+  "<remap> <scroll-down-command>" #'corfu-scroll-down
+  "<remap> <scroll-up-command>" #'corfu-scroll-up
+  "<remap> <next-line>" #'corfu-next
+  "<remap> <previous-line>" #'corfu-previous
+  "<remap> <completion-at-point>" #'corfu-complete
+  "<remap> <keyboard-escape-quit>" #'corfu-reset
+  "<down>" #'corfu-next
+  "<up>" #'corfu-previous
+  ;; XXX C-a is bound because of eshell.
+  ;; Ideally eshell would remap move-beginning-of-line.
+  "C-a" #'corfu-prompt-beginning
+  ;; XXX [tab] is bound because of org-mode
+  ;; The binding should be removed from org-mode-map.
+  "<tab>" #'corfu-complete
+  "M-n" #'corfu-next
+  "M-p" #'corfu-previous
+  "C-g" #'corfu-quit
+  "RET" #'corfu-insert
+  "TAB" #'corfu-complete
+  "M-g" 'corfu-info-location
+  "M-h" 'corfu-info-documentation
+  "M-SPC" #'corfu-insert-separator)
 
 (defvar corfu--auto-timer nil
   "Auto completion timer.")
@@ -294,8 +309,6 @@ The completion backend can override this with
     (no-focus-on-map . t)
     (min-width . t)
     (min-height . t)
-    (width . 0)
-    (height . 0)
     (border-width . 0)
     (child-frame-border-width . 1)
     (left-fringe . 0)
@@ -309,7 +322,6 @@ The completion backend can override this with
     (unsplittable . t)
     (undecorated . t)
     (cursor-type . nil)
-    (visibility . nil)
     (no-special-glyphs . t)
     (desktop-dont-save . t))
   "Default child frame parameters.")
@@ -340,7 +352,7 @@ The completion backend can override this with
   (let ((map (make-sparse-keymap)))
     (dotimes (i 7)
       (dolist (k '(mouse down-mouse drag-mouse double-mouse triple-mouse))
-        (define-key map (vector (intern (format "%s-%s" k (1+ i)))) #'ignore)))
+        (keymap-set map (format "<%s-%s>" k (1+ i)) #'ignore)))
     map)
   "Ignore all mouse clicks.")
 
@@ -359,8 +371,22 @@ The completion backend can override this with
       (cl-pushnew 'corfu-default (alist-get 'default face-remapping-alist))
       buffer)))
 
-;; Function adapted from posframe.el by tumashu
 (defvar x-gtk-resize-child-frames) ;; Not present on non-gtk builds
+(defvar corfu--gtk-resize-child-frames
+  (let ((case-fold-search t))
+    (and
+     ;; XXX HACK to fix resizing on gtk3/gnome taken from posframe.el
+     ;; More information:
+     ;; * https://github.com/minad/corfu/issues/17
+     ;; * https://gitlab.gnome.org/GNOME/mutter/-/issues/840
+     ;; * https://lists.gnu.org/archive/html/emacs-devel/2020-02/msg00001.html
+     (string-match-p "gtk3" system-configuration-features)
+     (string-match-p "gnome\\|cinnamon"
+                     (or (getenv "XDG_CURRENT_DESKTOP")
+                         (getenv "DESKTOP_SESSION") ""))
+     'resize-mode)))
+
+;; Function adapted from posframe.el by tumashu
 (defun corfu--make-frame (frame x y width height buffer)
   "Show BUFFER in child frame at X/Y with WIDTH/HEIGHT.
 FRAME is the existing frame."
@@ -371,30 +397,32 @@ FRAME is the existing frame."
   (let* ((window-min-height 1)
          (window-min-width 1)
          (inhibit-redisplay t)
-         (x-gtk-resize-child-frames
-          (let ((case-fold-search t))
-            (and
-             ;; XXX HACK to fix resizing on gtk3/gnome taken from posframe.el
-             ;; More information:
-             ;; * https://github.com/minad/corfu/issues/17
-             ;; * https://gitlab.gnome.org/GNOME/mutter/-/issues/840
-             ;; * https://lists.gnu.org/archive/html/emacs-devel/2020-02/msg00001.html
-             (string-match-p "gtk3" system-configuration-features)
-             (string-match-p "gnome\\|cinnamon"
-                             (or (getenv "XDG_CURRENT_DESKTOP")
-                                 (getenv "DESKTOP_SESSION") ""))
-             'resize-mode)))
+         (x-gtk-resize-child-frames corfu--gtk-resize-child-frames)
          (after-make-frame-functions)
          (parent (window-frame)))
-    (unless (and (frame-live-p frame) (eq (frame-parent frame) parent))
+    (unless (and (frame-live-p frame)
+                 (eq (frame-parent frame) parent)
+                 ;; XXX HACK: It seems the frame can be alive but have a dead window?
+                 ;; Is this a Emacs 29 regression?
+                 (window-live-p (frame-root-window frame)))
       (when frame (delete-frame frame))
       (setq frame (make-frame
                    `((parent-frame . ,parent)
                      (minibuffer . ,(minibuffer-window parent))
+                     (width . 0) (height . 0) (visibility . nil)
                      ;; Set `internal-border-width' for Emacs 27
                      (internal-border-width
                       . ,(alist-get 'child-frame-border-width corfu--frame-parameters))
                      ,@corfu--frame-parameters))))
+    ;; Reset frame parameters if they changed.  For example `tool-bar-mode'
+    ;; overrides the parameter `tool-bar-lines' for every frame, including child
+    ;; frames.  The child frame API is a pleasure to work with.  It is full of
+    ;; lovely suprises.
+    (when-let ((params (frame-parameters frame))
+               (reset (seq-remove
+                       (lambda (p) (equal (alist-get (car p) params) (cdr p)))
+                       corfu--frame-parameters)))
+      (modify-frame-parameters frame reset))
     ;; XXX HACK Setting the same frame-parameter/face-background is not a nop.
     ;; Check before applying the setting. Without the check, the frame flickers
     ;; on Mac. We have to apply the face background before adjusting the frame
@@ -438,55 +466,6 @@ FRAME is the existing frame."
     (redirect-frame-focus frame parent)
     frame))
 
-(defun corfu--popup-show (pos off width lines &optional curr lo bar)
-  "Show LINES as popup at POS - OFF.
-WIDTH is the width of the popup.
-The current candidate CURR is highlighted.
-A scroll bar is displayed from LO to LO+BAR."
-  (let ((lh (default-line-height)))
-    (with-current-buffer (corfu--make-buffer " *corfu*")
-      (let* ((ch (default-line-height))
-             (cw (default-font-width))
-             (ml (ceiling (* cw corfu-left-margin-width)))
-             (mr (ceiling (* cw corfu-right-margin-width)))
-             (bw (ceiling (min mr (* cw corfu-bar-width))))
-             (marginl (and (> ml 0) (propertize " " 'display `(space :width (,ml)))))
-             (marginr (and (> mr 0) (propertize " " 'display `(space :align-to right))))
-             (sbar (when (> bw 0)
-                     (concat (propertize " " 'display `(space :align-to (- right (,mr))))
-                             (propertize " " 'display `(space :width (,(- mr bw))))
-                             (propertize " " 'face 'corfu-bar 'display `(space :width (,bw))))))
-             (pos (posn-x-y (posn-at-point pos)))
-             (width (+ (* width cw) ml mr))
-             ;; XXX HACK: Minimum popup height must be at least 1 line of the
-             ;; parent frame (#261).
-             (height (max lh (* (length lines) ch)))
-             (edge (window-inside-pixel-edges))
-             (border (alist-get 'child-frame-border-width corfu--frame-parameters))
-             (x (max 0 (min (+ (car edge) (- (or (car pos) 0) ml (* cw off) border))
-                            (- (frame-pixel-width) width))))
-             (yb (+ (cadr edge) (window-tab-line-height) (or (cdr pos) 0) lh))
-             (y (if (> (+ yb (* corfu-count ch) lh lh) (frame-pixel-height))
-                    (- yb height lh border border)
-                  yb))
-             (row 0))
-        (with-silent-modifications
-          (erase-buffer)
-          (insert (mapconcat (lambda (line)
-                               (let ((str (concat marginl line
-                                                  (if (and lo (<= lo row (+ lo bar)))
-                                                      sbar
-                                                    marginr))))
-                                 (when (eq row curr)
-                                   (add-face-text-property
-                                    0 (length str) 'corfu-current 'append str))
-                                 (cl-incf row)
-                                 str))
-                             lines "\n"))
-          (goto-char (point-min)))
-        (setq corfu--frame (corfu--make-frame corfu--frame x y
-                                              width height (current-buffer)))))))
-
 (defun corfu--hide-frame-deferred (frame)
   "Deferred hiding of child FRAME."
   (when (and (frame-live-p frame) (frame-visible-p frame))
@@ -503,19 +482,10 @@ A scroll bar is displayed from LO to LO+BAR."
     (set-frame-parameter frame 'corfu--hide-timer
                          (run-at-time 0 nil #'corfu--hide-frame-deferred frame))))
 
-(defun corfu--popup-hide ()
-  "Hide Corfu popup."
-  (corfu--hide-frame corfu--frame))
-
-(defun corfu--popup-support-p ()
-  "Return non-nil if child frames are supported."
-  (display-graphic-p))
-
 (defun corfu--move-to-front (elem list)
   "Move ELEM to front of LIST."
   (if-let (found (member elem list))
-      (let ((head (list (car found))))
-        (nconc head (delq (setcar found nil) list)))
+      (nconc (list (car found)) (delq (setcar found nil) list))
     list))
 
 ;; bug#47711: Deferred highlighting for `completion-all-completions'
@@ -563,16 +533,9 @@ A scroll bar is displayed from LO to LO+BAR."
   "Sorting predicate which compares X and Y first by length then by `string<'."
   (or (< (length x) (length y)) (and (= (length x) (length y)) (string< x y))))
 
-(defun corfu-sort-length-alpha (list)
-  "Sort LIST by length and alphabetically."
-  (sort list #'corfu--length-string<))
-
 (defmacro corfu--partition! (list form)
   "Evaluate FORM for every element and partition LIST."
-  (let ((head1 (make-symbol "head1"))
-        (head2 (make-symbol "head2"))
-        (tail1 (make-symbol "tail1"))
-        (tail2 (make-symbol "tail2")))
+  (cl-with-gensyms (head1 head2 tail1 tail2)
     `(let* ((,head1 (cons nil nil))
             (,head2 (cons nil nil))
             (,tail1 ,head1)
@@ -636,10 +599,12 @@ A scroll bar is displayed from LO to LO+BAR."
       (corfu--candidates . ,all)
       (corfu--total . ,(length all))
       (corfu--highlight . ,hl)
-      ;; Select the prompt when the input is a valid completion
-      ;; and if it is not equal to the first candidate.
-      (corfu--preselect . ,(if (or (not corfu-preselect-first) (not all)
-                                   (and (not (equal field (car all)))
+      (corfu--preselect . ,(if (or (eq corfu-preselect 'prompt) (not all)
+                                   (and completing-file (eq corfu-preselect 'directory)
+                                        (= (length corfu--base) (length str))
+                                        (test-completion str table pred))
+                                   (and (eq corfu-preselect 'valid)
+                                        (not (equal field (car all)))
                                         (not (and completing-file (equal (concat field "/") (car all))))
                                         (test-completion str table pred)))
                                -1 0)))))
@@ -659,8 +624,7 @@ A scroll bar is displayed from LO to LO+BAR."
       ;; without the user explicitly requesting it via M-TAB.
       (pcase (let ((non-essential t))
                ;; XXX Guard against errors during candidate generation.
-               ;; For example dabbrev throws error "No dynamic expansion ... found".
-               ;; TODO Report this as a bug? Are completion tables supposed to throw errors?
+               ;; bug#61274: `dabbrev-capf' signals errors.
                (condition-case err
                    (if interruptible
                        (while-no-input (corfu--recompute str pt table pred))
@@ -682,55 +646,6 @@ A scroll bar is displayed from LO to LO+BAR."
                 thereis (if (symbolp x)
                             (eq sym x)
                           (string-match-p x (symbol-name sym))))))
-
-(defun corfu-quit ()
-  "Quit Corfu completion."
-  (interactive)
-  (completion-in-region-mode -1))
-
-(defun corfu-reset ()
-  "Reset Corfu completion.
-This command can be executed multiple times by hammering the ESC key. If a
-candidate is selected, unselect the candidate. Otherwise reset the input. If
-there hasn't been any input, then quit."
-  (interactive)
-  (if (/= corfu--index corfu--preselect)
-      (progn
-        (corfu--goto -1)
-        (setq this-command #'corfu-first))
-    ;; Cancel all changes and start new change group.
-    (cancel-change-group corfu--change-group)
-    (activate-change-group (setq corfu--change-group (prepare-change-group)))
-    (when (eq last-command #'corfu-reset) (corfu-quit))))
-
-(defun corfu--affixate (cands)
-  "Annotate CANDS with annotation function."
-  (setq cands
-        (if-let (aff (or (corfu--metadata-get 'affixation-function)
-                         (plist-get corfu--extra :affixation-function)))
-            (funcall aff cands)
-          (if-let (ann (or (corfu--metadata-get 'annotation-function)
-                           (plist-get corfu--extra :annotation-function)))
-              (cl-loop for cand in cands collect
-                       (let ((suffix (or (funcall ann cand) "")))
-                         ;; The default completion UI adds the
-                         ;; `completions-annotations' face if no other faces are
-                         ;; present. We use a custom `corfu-annotations' face to
-                         ;; allow further styling which fits better for popups.
-                         (unless (text-property-not-all 0 (length suffix) 'face nil suffix)
-                           (setq suffix (propertize suffix 'face 'corfu-annotations)))
-                         (list cand "" suffix)))
-            (cl-loop for cand in cands collect (list cand "" "")))))
-  (let* ((dep (plist-get corfu--extra :company-deprecated))
-         (completion-extra-properties corfu--extra)
-         (mf (run-hook-with-args-until-success 'corfu-margin-formatters corfu--metadata)))
-    (cl-loop for x in cands for (c . _) = x do
-             (when mf
-               (setf (cadr x) (funcall mf c)))
-             (when (and dep (funcall dep c))
-               (setcar x (setq c (substring c)))
-               (add-face-text-property 0 (length c) 'corfu-deprecated 'append c)))
-    (cons mf cands)))
 
 (defun corfu--metadata-get (prop)
   "Return PROP from completion metadata."
@@ -809,69 +724,19 @@ there hasn't been any input, then quit."
     (overlay-put corfu--preview-ov 'window (selected-window))
     (overlay-put corfu--preview-ov (if (= beg end) 'after-string 'display) cand)))
 
-(defun corfu--exhibit (&optional auto)
-  "Exhibit Corfu UI.
-AUTO is non-nil when initializing auto completion."
-  (pcase-let ((`(,beg ,end ,table ,pred) completion-in-region--data)
-              (`(,str . ,pt) (corfu--update 'interruptible)))
-    (cond
-     ;; 1) Single exactly matching candidate and no further completion is possible.
-     ((and (not (equal str ""))
-           (equal (car corfu--candidates) str) (not (cdr corfu--candidates))
-           (not (consp (completion-try-completion str table pred pt corfu--metadata)))
-           (or auto corfu-on-exact-match))
-      ;; Quit directly when initializing auto completion.
-      (if (or auto (eq corfu-on-exact-match 'quit))
-          (corfu-quit)
-        (corfu--done str 'finished)))
-     ;; 2) There exist candidates => Show candidates popup.
-     (corfu--candidates
-      (corfu--candidates-popup beg)
-      (corfu--preview-current beg end)
-      (redisplay 'force)) ;; XXX HACK Ensure that popup is redisplayed
-     ;; 3) No candidates & corfu-quit-no-match & initialized => Confirmation popup.
-     ((pcase-exhaustive corfu-quit-no-match
-        ('t nil)
-        ('nil corfu--input)
-        ('separator (seq-contains-p (car corfu--input) corfu-separator)))
-      (corfu--popup-show beg 0 8 '(#("No match" 0 8 (face italic))))
-      (redisplay 'force)) ;; XXX HACK Ensure that popup is redisplayed
-     ;; 4) No candidates & auto completing or initialized => Quit.
-     ((or auto corfu--input) (corfu-quit)))))
-
-(defun corfu--pre-command ()
-  "Insert selected candidate unless command is marked to continue completion."
-  (when corfu--preview-ov
-    (delete-overlay corfu--preview-ov)
-    (setq corfu--preview-ov nil))
-  ;; Ensure that state is initialized before next Corfu command
-  (when (and (symbolp this-command) (string-prefix-p "corfu-" (symbol-name this-command)))
-    (corfu--update))
-  (when (and (eq corfu-preview-current 'insert)
-             (/= corfu--index corfu--preselect)
-             ;; See the comment about `overriding-local-map' in `corfu--post-command'.
-             (not (or overriding-terminal-local-map
-                      (corfu--match-symbol-p corfu-continue-commands this-command))))
-    (corfu--insert 'exact)))
-
-(defun corfu-insert-separator ()
-  "Insert a separator character, inhibiting quit on completion boundary.
-See `corfu-separator' for more details."
-  (interactive)
-  (insert corfu-separator))
-
 (defun corfu--continue-p ()
   "Continue completion?"
   (pcase-let ((pt (point))
+              (buf (current-buffer))
               (`(,beg ,end . ,_) completion-in-region--data))
     (and beg end
-         (eq (marker-buffer beg) (current-buffer))
+         (eq buf (marker-buffer beg))
+         (eq buf (window-buffer))
          ;; Check ranges
          (<= beg pt end)
          (save-excursion
            (goto-char beg)
-           (let ((inhibit-field-text-motion t))
-             (<= (line-beginning-position) pt (line-end-position))))
+           (<= (pos-bol) pt (pos-eol)))
          (or
           ;; We keep Corfu alive if a `overriding-terminal-local-map' is
           ;; installed, e.g., the `universal-argument-map'. It would be good to
@@ -901,102 +766,6 @@ See `corfu-separator' for more details."
   "Go to candidate with INDEX."
   (setq corfu--index (max corfu--preselect (min index (1- corfu--total)))))
 
-(defun corfu-next (&optional n)
-  "Go forward N candidates."
-  (interactive "p")
-  (let ((index (+ corfu--index (or n 1))))
-    (corfu--goto
-     (cond
-      ((not corfu-cycle) index)
-      ((= corfu--total 0) -1)
-      ((< corfu--preselect 0) (1- (mod (1+ index) (1+ corfu--total))))
-      (t (mod index corfu--total))))))
-
-(defun corfu-previous (&optional n)
-  "Go backward N candidates."
-  (interactive "p")
-  (corfu-next (- (or n 1))))
-
-(defun corfu-scroll-down (&optional n)
-  "Go back by N pages."
-  (interactive "p")
-  (corfu--goto (max 0 (- corfu--index (* (or n 1) corfu-count)))))
-
-(defun corfu-scroll-up (&optional n)
-  "Go forward by N pages."
-  (interactive "p")
-  (corfu-scroll-down (- (or n 1))))
-
-(defun corfu-first ()
-  "Go to first candidate, or to the prompt when the first candidate is selected."
-  (interactive)
-  (corfu--goto (if (> corfu--index 0) 0 -1)))
-
-(defun corfu-last ()
-  "Go to last candidate."
-  (interactive)
-  (corfu--goto (1- corfu--total)))
-
-(defun corfu-complete ()
-  "Try to complete current input.
-If a candidate is selected, insert it."
-  (interactive)
-  (pcase-let ((`(,beg ,end ,table ,pred) completion-in-region--data))
-    (if (>= corfu--index 0)
-        ;; Continue completion with selected candidate
-        (progn
-          (corfu--insert nil)
-          ;; Exit with status 'finished if input is a valid match and no further
-          ;; completion is possible. Furthermore treat the completion as
-          ;; finished if we are at the end of a boundary, even if other longer
-          ;; candidates would still match, since the user invoked `corfu-complete'
-          ;; with an explicitly selected candidate!
-          (let ((newstr (buffer-substring-no-properties beg end)))
-            (when (and (test-completion newstr table pred)
-                       (or
-                        (not (consp (completion-try-completion
-                                     newstr table pred (length newstr)
-                                     (completion-metadata newstr table pred))))
-                        (equal (completion-boundaries newstr table pred "") '(0 . 0))))
-              (corfu--done newstr 'finished))))
-      ;; Try to complete the current input string
-      (let* ((pt (max 0 (- (point) beg)))
-             (str (buffer-substring-no-properties beg end))
-             (metadata (completion-metadata (substring str 0 pt) table pred)))
-        (pcase (completion-try-completion str table pred pt metadata)
-          ('t
-           (goto-char end)
-           (corfu--done str 'finished))
-          (`(,newstr . ,newpt)
-           (unless (equal str newstr)
-             ;; bug#55205: completion--replace removes properties!
-             (completion--replace beg end (concat newstr)))
-           (goto-char (+ beg newpt))
-           ;; Exit with status 'finished if input is a valid match
-           ;; and no further completion is possible.
-           (when (and (test-completion newstr table pred)
-                      (not (consp (completion-try-completion
-                                   newstr table pred newpt
-                                   (completion-metadata (substring newstr 0 newpt) table pred)))))
-             (corfu--done newstr 'finished))))))))
-
-(defun corfu--insert (status)
-  "Insert current candidate, exit with STATUS if non-nil."
-  (pcase-let* ((`(,beg ,end . ,_) completion-in-region--data)
-               (str (buffer-substring-no-properties beg end)))
-    ;; XXX There is a small bug here, depending on interpretation.
-    ;; When completing "~/emacs/master/li|/calc" where "|" is the
-    ;; cursor, then the candidate only includes the prefix
-    ;; "~/emacs/master/lisp/", but not the suffix "/calc". Default
-    ;; completion has the same problem when selecting in the
-    ;; *Completions* buffer. See bug#48356.
-    (setq str (concat corfu--base (substring-no-properties
-                                   (nth corfu--index corfu--candidates))))
-    ;; bug#55205: completion--replace removes properties!
-    (completion--replace beg end (concat str))
-    (corfu--goto -1) ;; Reset selection, but continue completion.
-    (when status (corfu--done str status)))) ;; Exit with status
-
 (defun corfu--done (str status)
   "Call the `:exit-function' with STR and STATUS and exit completion."
   (let ((exit (plist-get corfu--extra :exit-function)))
@@ -1006,14 +775,6 @@ If a candidate is selected, insert it."
     (corfu-quit)
     (when exit (funcall exit str status))))
 
-(defun corfu-insert ()
-  "Insert current candidate.
-Quit if no candidate is selected."
-  (interactive)
-  (if (>= corfu--index 0)
-      (corfu--insert 'finished)
-    (corfu-quit)))
-
 (defun corfu--setup ()
   "Setup Corfu completion state."
   (setq corfu--extra completion-extra-properties)
@@ -1021,7 +782,7 @@ Quit if no candidate is selected."
   (undo-boundary) ;; Necessary to support `corfu-reset'
   (activate-change-group (setq corfu--change-group (prepare-change-group)))
   (setcdr (assq #'completion-in-region-mode minor-mode-overriding-map-alist) corfu-map)
-  (add-hook 'pre-command-hook #'corfu--pre-command nil 'local)
+  (add-hook 'pre-command-hook #'corfu--prepare nil 'local)
   (add-hook 'post-command-hook #'corfu--post-command)
   ;; Disable default post-command handling, since we have our own
   ;; checks in `corfu--post-command'.
@@ -1035,15 +796,6 @@ Quit if no candidate is selected."
                   (with-current-buffer (if (buffer-live-p buf) buf (current-buffer))
                     (corfu--teardown)))))
     (add-hook 'completion-in-region-mode-hook sym)))
-
-(defun corfu--teardown ()
-  "Teardown Corfu."
-  (corfu--popup-hide)
-  (remove-hook 'pre-command-hook #'corfu--pre-command 'local)
-  (remove-hook 'post-command-hook #'corfu--post-command)
-  (when corfu--preview-ov (delete-overlay corfu--preview-ov))
-  (accept-change-group corfu--change-group)
-  (mapc #'kill-local-variable corfu--state-vars))
 
 (defun corfu--in-region (&rest args)
   "Corfu completion in region function called with ARGS."
@@ -1065,7 +817,7 @@ Quit if no candidate is selected."
          (exit (plist-get completion-extra-properties :exit-function))
          (threshold (completion--cycle-threshold metadata))
          (completion-in-region-mode-predicate
-          (or completion-in-region-mode-predicate (lambda () t))))
+          (or completion-in-region-mode-predicate #'always)))
     (pcase (completion-try-completion str table pred pt metadata)
       ('nil (corfu--message "No match") nil)
       ('t (goto-char end)
@@ -1134,7 +886,9 @@ See `completion-in-region' for the arguments BEG, END, TABLE, PRED."
              (run-hook-wrapped 'completion-at-point-functions #'corfu--capf-wrapper))
       (`(,fun ,beg ,end ,table . ,plist)
        (let ((completion-in-region-mode-predicate
-              (lambda () (eq beg (car-safe (funcall fun)))))
+              (lambda ()
+                (when-let (newbeg (car-safe (funcall fun)))
+                  (= newbeg beg))))
              (completion-extra-properties plist))
          (setq completion-in-region--data
                (list (if (markerp beg) beg (copy-marker beg))
@@ -1165,7 +919,308 @@ See `completion-in-region' for the arguments BEG, END, TABLE, PRED."
 (defun corfu--auto-tick ()
   "Return the current tick/status of the buffer.
 Auto completion is only performed if the tick did not change."
-  (list (current-buffer) (buffer-chars-modified-tick) (point)))
+  (list (selected-window) (current-buffer) (buffer-chars-modified-tick) (point)))
+
+(cl-defgeneric corfu--popup-show (pos off width lines &optional curr lo bar)
+  "Show LINES as popup at POS - OFF.
+WIDTH is the width of the popup.
+The current candidate CURR is highlighted.
+A scroll bar is displayed from LO to LO+BAR."
+  (let ((lh (default-line-height)))
+    (with-current-buffer (corfu--make-buffer " *corfu*")
+      (let* ((ch (default-line-height))
+             (cw (default-font-width))
+             (ml (ceiling (* cw corfu-left-margin-width)))
+             (mr (ceiling (* cw corfu-right-margin-width)))
+             (bw (ceiling (min mr (* cw corfu-bar-width))))
+             (marginl (and (> ml 0) (propertize " " 'display `(space :width (,ml)))))
+             (marginr (and (> mr 0) (propertize " " 'display `(space :align-to right))))
+             (sbar (when (> bw 0)
+                     (concat (propertize " " 'display `(space :align-to (- right (,mr))))
+                             (propertize " " 'display `(space :width (,(- mr bw))))
+                             (propertize " " 'face 'corfu-bar 'display `(space :width (,bw))))))
+             (pos (posn-x-y (posn-at-point pos)))
+             (width (+ (* width cw) ml mr))
+             ;; XXX HACK: Minimum popup height must be at least 1 line of the
+             ;; parent frame (#261).
+             (height (max lh (* (length lines) ch)))
+             (edge (window-inside-pixel-edges))
+             (border (alist-get 'child-frame-border-width corfu--frame-parameters))
+             (x (max 0 (min (+ (car edge) (- (or (car pos) 0) ml (* cw off) border))
+                            (- (frame-pixel-width) width))))
+             (yb (+ (cadr edge) (window-tab-line-height) (or (cdr pos) 0) lh))
+             (y (if (> (+ yb (* corfu-count ch) lh lh) (frame-pixel-height))
+                    (- yb height lh border border)
+                  yb))
+             (row 0))
+        (with-silent-modifications
+          (erase-buffer)
+          (insert (mapconcat (lambda (line)
+                               (let ((str (concat marginl line
+                                                  (if (and lo (<= lo row (+ lo bar)))
+                                                      sbar
+                                                    marginr))))
+                                 (when (eq row curr)
+                                   (add-face-text-property
+                                    0 (length str) 'corfu-current 'append str))
+                                 (cl-incf row)
+                                 str))
+                             lines "\n"))
+          (goto-char (point-min)))
+        (setq corfu--frame (corfu--make-frame corfu--frame x y
+                                              width height (current-buffer)))))))
+
+(cl-defgeneric corfu--popup-hide ()
+  "Hide Corfu popup."
+  (corfu--hide-frame corfu--frame))
+
+(cl-defgeneric corfu--popup-support-p ()
+  "Return non-nil if child frames are supported."
+  (display-graphic-p))
+
+(cl-defgeneric corfu--insert (status)
+  "Insert current candidate, exit with STATUS if non-nil."
+  (pcase-let* ((`(,beg ,end . ,_) completion-in-region--data)
+               (str (buffer-substring-no-properties beg end)))
+    ;; XXX There is a small bug here, depending on interpretation.
+    ;; When completing "~/emacs/master/li|/calc" where "|" is the
+    ;; cursor, then the candidate only includes the prefix
+    ;; "~/emacs/master/lisp/", but not the suffix "/calc". Default
+    ;; completion has the same problem when selecting in the
+    ;; *Completions* buffer. See bug#48356.
+    (setq str (concat corfu--base (substring-no-properties
+                                   (nth corfu--index corfu--candidates))))
+    ;; bug#55205: completion--replace removes properties!
+    (completion--replace beg end (concat str))
+    (corfu--goto -1) ;; Reset selection, but continue completion.
+    (when status (corfu--done str status)))) ;; Exit with status
+
+(cl-defgeneric corfu--affixate (cands)
+  "Annotate CANDS with annotation function."
+  (setq cands
+        (if-let (aff (or (corfu--metadata-get 'affixation-function)
+                         (plist-get corfu--extra :affixation-function)))
+            (funcall aff cands)
+          (if-let (ann (or (corfu--metadata-get 'annotation-function)
+                           (plist-get corfu--extra :annotation-function)))
+              (cl-loop for cand in cands collect
+                       (let ((suffix (or (funcall ann cand) "")))
+                         ;; The default completion UI adds the
+                         ;; `completions-annotations' face if no other faces are
+                         ;; present. We use a custom `corfu-annotations' face to
+                         ;; allow further styling which fits better for popups.
+                         (unless (text-property-not-all 0 (length suffix) 'face nil suffix)
+                           (setq suffix (propertize suffix 'face 'corfu-annotations)))
+                         (list cand "" suffix)))
+            (cl-loop for cand in cands collect (list cand "" "")))))
+  (let* ((dep (plist-get corfu--extra :company-deprecated))
+         (completion-extra-properties corfu--extra)
+         (mf (run-hook-with-args-until-success 'corfu-margin-formatters corfu--metadata)))
+    (cl-loop for x in cands for (c . _) = x do
+             (when mf
+               (setf (cadr x) (funcall mf c)))
+             (when (and dep (funcall dep c))
+               (setcar x (setq c (substring c)))
+               (add-face-text-property 0 (length c) 'corfu-deprecated 'append c)))
+    (cons mf cands)))
+
+(cl-defgeneric corfu--prepare ()
+  "Insert selected candidate unless command is marked to continue completion."
+  (when corfu--preview-ov
+    (delete-overlay corfu--preview-ov)
+    (setq corfu--preview-ov nil))
+  ;; Ensure that state is initialized before next Corfu command
+  (when (and (symbolp this-command) (string-prefix-p "corfu-" (symbol-name this-command)))
+    (corfu--update))
+  (when (and (eq corfu-preview-current 'insert)
+             (/= corfu--index corfu--preselect)
+             ;; See the comment about `overriding-local-map' in `corfu--post-command'.
+             (not (or overriding-terminal-local-map
+                      (corfu--match-symbol-p corfu-continue-commands this-command))))
+    (corfu--insert 'exact)))
+
+(cl-defgeneric corfu--exhibit (&optional auto)
+  "Exhibit Corfu UI.
+AUTO is non-nil when initializing auto completion."
+  (pcase-let ((`(,beg ,end ,table ,pred) completion-in-region--data)
+              (`(,str . ,pt) (corfu--update 'interruptible)))
+    (cond
+     ;; 1) Single exactly matching candidate and no further completion is possible.
+     ((and (not (equal str ""))
+           (equal (car corfu--candidates) str) (not (cdr corfu--candidates))
+           (not (consp (completion-try-completion str table pred pt corfu--metadata)))
+           (or auto corfu-on-exact-match))
+      ;; Quit directly when initializing auto completion.
+      (if (or auto (eq corfu-on-exact-match 'quit))
+          (corfu-quit)
+        (corfu--done str 'finished)))
+     ;; 2) There exist candidates => Show candidates popup.
+     (corfu--candidates
+      (corfu--candidates-popup beg)
+      (corfu--preview-current beg end)
+      (redisplay 'force)) ;; XXX HACK Ensure that popup is redisplayed
+     ;; 3) No candidates & corfu-quit-no-match & initialized => Confirmation popup.
+     ((pcase-exhaustive corfu-quit-no-match
+        ('t nil)
+        ('nil corfu--input)
+        ('separator (seq-contains-p (car corfu--input) corfu-separator)))
+      (corfu--popup-show beg 0 8 '(#("No match" 0 8 (face italic))))
+      (redisplay 'force)) ;; XXX HACK Ensure that popup is redisplayed
+     ;; 4) No candidates & auto completing or initialized => Quit.
+     ((or auto corfu--input) (corfu-quit)))))
+
+(cl-defgeneric corfu--teardown ()
+  "Teardown Corfu."
+  (corfu--popup-hide)
+  (remove-hook 'pre-command-hook #'corfu--prepare 'local)
+  (remove-hook 'post-command-hook #'corfu--post-command)
+  (when corfu--preview-ov (delete-overlay corfu--preview-ov))
+  (accept-change-group corfu--change-group)
+  (mapc #'kill-local-variable corfu--state-vars))
+
+(defun corfu-sort-length-alpha (list)
+  "Sort LIST by length and alphabetically."
+  (sort list #'corfu--length-string<))
+
+(defun corfu-quit ()
+  "Quit Corfu completion."
+  (interactive)
+  (completion-in-region-mode -1))
+
+(defun corfu-reset ()
+  "Reset Corfu completion.
+This command can be executed multiple times by hammering the ESC key.  If a
+candidate is selected, unselect the candidate.  Otherwise reset the input.  If
+there hasn't been any input, then quit."
+  (interactive)
+  (if (/= corfu--index corfu--preselect)
+      (progn
+        (corfu--goto -1)
+        (setq this-command #'corfu-first))
+    ;; Cancel all changes and start new change group.
+    (cancel-change-group corfu--change-group)
+    (activate-change-group (setq corfu--change-group (prepare-change-group)))
+    (when (eq last-command #'corfu-reset) (corfu-quit))))
+
+(defun corfu-insert-separator ()
+  "Insert a separator character, inhibiting quit on completion boundary.
+See `corfu-separator' for more details."
+  (interactive)
+  (insert corfu-separator))
+
+(defun corfu-next (&optional n)
+  "Go forward N candidates."
+  (interactive "p")
+  (let ((index (+ corfu--index (or n 1))))
+    (corfu--goto
+     (cond
+      ((not corfu-cycle) index)
+      ((= corfu--total 0) -1)
+      ((< corfu--preselect 0) (1- (mod (1+ index) (1+ corfu--total))))
+      (t (mod index corfu--total))))))
+
+(defun corfu-previous (&optional n)
+  "Go backward N candidates."
+  (interactive "p")
+  (corfu-next (- (or n 1))))
+
+(defun corfu-scroll-down (&optional n)
+  "Go back by N pages."
+  (interactive "p")
+  (corfu--goto (max 0 (- corfu--index (* (or n 1) corfu-count)))))
+
+(defun corfu-scroll-up (&optional n)
+  "Go forward by N pages."
+  (interactive "p")
+  (corfu-scroll-down (- (or n 1))))
+
+(defun corfu-first ()
+  "Go to first candidate.
+If the first candidate is already selected, go to the prompt."
+  (interactive)
+  (corfu--goto (if (> corfu--index 0) 0 -1)))
+
+(defun corfu-last ()
+  "Go to last candidate."
+  (interactive)
+  (corfu--goto (1- corfu--total)))
+
+(defun corfu-prompt-beginning (arg)
+  "Move to beginning of the prompt line.
+If the point is already the beginning of the prompt move to the
+beginning of the line.  If ARG is not 1 or nil, move backward ARG - 1
+lines first."
+  (interactive "^p")
+  (let ((beg (car completion-in-region--data)))
+    (if (or (not (eq arg 1))
+            (and (= corfu--preselect corfu--index) (= (point) beg)))
+        (move-beginning-of-line arg)
+      (corfu--goto -1)
+      (goto-char beg))))
+
+(defun corfu-prompt-end (arg)
+  "Move to end of the prompt line.
+If the point is already the end of the prompt move to the end of
+the line.  If ARG is not 1 or nil, move forward ARG - 1 lines
+first."
+  (interactive "^p")
+  (let ((end (cadr completion-in-region--data)))
+    (if (or (not (eq arg 1))
+            (and (= corfu--preselect corfu--index) (= (point) end)))
+        (move-end-of-line arg)
+      (corfu--goto -1)
+      (goto-char end))))
+
+(defun corfu-complete ()
+  "Try to complete current input.
+If a candidate is selected, insert it."
+  (interactive)
+  (pcase-let ((`(,beg ,end ,table ,pred) completion-in-region--data))
+    (if (>= corfu--index 0)
+        ;; Continue completion with selected candidate
+        (progn
+          (corfu--insert nil)
+          ;; Exit with status 'finished if input is a valid match and no further
+          ;; completion is possible. Furthermore treat the completion as
+          ;; finished if we are at the end of a boundary, even if other longer
+          ;; candidates would still match, since the user invoked `corfu-complete'
+          ;; with an explicitly selected candidate!
+          (let ((newstr (buffer-substring-no-properties beg end)))
+            (when (and (test-completion newstr table pred)
+                       (or
+                        (not (consp (completion-try-completion
+                                     newstr table pred (length newstr)
+                                     (completion-metadata newstr table pred))))
+                        (equal (completion-boundaries newstr table pred "") '(0 . 0))))
+              (corfu--done newstr 'finished))))
+      ;; Try to complete the current input string
+      (let* ((pt (max 0 (- (point) beg)))
+             (str (buffer-substring-no-properties beg end))
+             (metadata (completion-metadata (substring str 0 pt) table pred)))
+        (pcase (completion-try-completion str table pred pt metadata)
+          ('t
+           (goto-char end)
+           (corfu--done str 'finished))
+          (`(,newstr . ,newpt)
+           (unless (equal str newstr)
+             ;; bug#55205: completion--replace removes properties!
+             (completion--replace beg end (concat newstr)))
+           (goto-char (+ beg newpt))
+           ;; Exit with status 'finished if input is a valid match
+           ;; and no further completion is possible.
+           (when (and (test-completion newstr table pred)
+                      (not (consp (completion-try-completion
+                                   newstr table pred newpt
+                                   (completion-metadata (substring newstr 0 newpt) table pred)))))
+             (corfu--done newstr 'finished))))))))
+
+(defun corfu-insert ()
+  "Insert current candidate.
+Quit if no candidate is selected."
+  (interactive)
+  (if (>= corfu--index 0)
+      (corfu--insert 'finished)
+    (corfu-quit)))
 
 ;;;###autoload
 (define-minor-mode corfu-mode
@@ -1179,7 +1234,7 @@ Auto completion is only performed if the tick did not change."
     ;; issue has been mentioned. We never uninstall this advice since the
     ;; advice is active *globally*.
     (advice-add #'completion--capf-wrapper :around #'corfu--capf-wrapper-advice)
-    (advice-add #'eldoc-display-message-no-interference-p :before-while #'corfu--allow-eldoc)
+    (advice-add #'eldoc-display-message-no-interference-p :before-while #'corfu--eldoc-advice)
     (and corfu-auto (add-hook 'post-command-hook #'corfu--auto-post-command nil 'local))
     (setq-local completion-in-region-function #'corfu--in-region))
    (t
@@ -1189,7 +1244,7 @@ Auto completion is only performed if the tick did not change."
 (defun corfu--capf-wrapper (fun &optional prefix)
   "Wrapper for `completion-at-point' FUN.
 The wrapper determines if the capf is applicable at the current position
-and performs sanity checking on the returned result. PREFIX is a prefix
+and performs sanity checking on the returned result.  PREFIX is a prefix
 length override, set to t for manual completion."
   (pcase (funcall fun)
     ((and res `(,beg ,end ,table . ,plist))
@@ -1228,7 +1283,7 @@ The ORIG function takes the FUN and WHICH arguments."
               (memq major-mode corfu-excluded-modes))
     (corfu-mode 1)))
 
-(defun corfu--allow-eldoc ()
+(defun corfu--eldoc-advice ()
   "Return non-nil if Corfu is currently not active."
   (not (and corfu-mode completion-in-region-mode)))
 
