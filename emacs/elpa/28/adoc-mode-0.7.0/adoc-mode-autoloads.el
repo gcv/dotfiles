@@ -15,6 +15,8 @@ Turning on Adoc mode runs the normal hook `adoc-mode-hook'.
 
 \(fn)" t nil)
 
+(add-to-list 'auto-mode-alist '("\\.a\\(?:scii\\)?doc\\'" . adoc-mode))
+
 (register-definition-prefixes "adoc-mode" '("adoc-"))
 
 ;;;***
