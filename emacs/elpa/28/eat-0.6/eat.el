@@ -1,10 +1,10 @@
 ;;; eat.el --- Emulate A Terminal, in a region, in a buffer and in Eshell -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2022 Akib Azmain Turja.
+;; Copyright (C) 2022, 2023 Akib Azmain Turja.
 
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-08-15
-;; Version: 0.4
+;; Version: 0.6
 ;; Package-Requires: ((emacs "28.1"))
 ;; Keywords: terminals processes
 ;; Homepage: https://codeberg.org/akib/emacs-eat
@@ -83,6 +83,12 @@
 (require 'shell)
 (require 'url)
 
+;; Needed by `eat-reload'.
+(defvar eat--being-loaded nil
+  "Non-nil means Eat is being loaded.")
+
+(setq eat--being-loaded t)
+
 
 ;;;; User Options.
 
@@ -140,6 +146,17 @@ This is left disabled for security reasons."
   :group 'eat-ui
   :group 'eat-eshell)
 
+(defcustom eat-query-before-killing-running-terminal 'auto
+  "Whether to query before killing running terminal.
+
+If the value is t, always query.  If the value is nil, never query.
+If the value is `auto', query if a shell command is running (shell
+integration needs to be enabled to use this properly)."
+  :type '(choice (const :tag "Yes" t)
+                 (const :tag "No" nil)
+                 (const :tag "If a shell command is running" auto))
+  :group 'eat-ui)
+
 (defcustom eat-eshell-fallback-if-stty-not-available 'ask
   "What to do if `stty' is unavailable.
 
@@ -155,6 +172,98 @@ FUNCTION      Call FUNCTION with the command and arguments (using
                 `apply') and fallback to plain Eshell if it returns
                 nil."
   :type 'boolean
+  :group 'eat-eshell)
+
+(defcustom eat-semi-char-non-bound-keys
+  '([?\C-x] [?\C-\\] [?\C-q] [?\C-g] [?\C-h] [?\e ?\C-c] [?\C-u]
+    [?\e ?x] [?\e ?:] [?\e ?!] [?\e ?&]
+    [C-insert] [M-insert] [S-insert] [C-M-insert]
+    [C-S-insert] [M-S-insert] [C-M-S-insert]
+    [C-delete] [M-delete] [S-delete] [C-M-delete]
+    [C-S-delete] [M-S-delete] [C-M-S-delete]
+    [C-deletechar] [M-deletechar]
+    [S-deletechar] [C-M-deletechar] [C-S-deletechar]
+    [M-S-deletechar] [C-M-S-deletechar]
+    [C-up] [C-down] [C-right] [C-left]
+    [M-up] [M-down] [M-right] [M-left]
+    [S-up] [S-down] [S-right] [S-left]
+    [C-M-up] [C-M-down] [C-M-right] [C-M-left]
+    [C-S-up] [C-S-down] [C-S-right] [C-S-left]
+    [M-S-up] [M-S-down] [M-S-right] [M-S-left]
+    [C-M-S-up] [C-M-S-down] [C-M-S-right] [C-M-S-left]
+    [C-home] [M-home] [S-home] [C-M-home] [C-S-home]
+    [M-S-home] [C-M-S-home]
+    [C-end] [M-end] [S-end] [C-M-end] [C-S-end]
+    [M-S-end] [C-M-S-end]
+    [C-prior] [M-prior] [S-prior] [C-M-prior]
+    [C-S-prior] [M-S-prior] [C-M-S-prior]
+    [C-next] [M-next] [S-next] [C-M-next] [C-S-next]
+    [M-S-next] [C-M-S-next])
+  "List of keys not bound in Eat \"semi-char\" mode.
+
+Keys appearing in this list are not bound to send the key to terminal.
+Eat might still bound them to do something else (for example, changing
+keybinding mode).
+
+Each element is a vector of form [KEY] or [?\\e KEY], meaning KEY or
+M-KEY shouldn't be bound.  KEY shouldn't contain meta (Alt) modifier.
+
+When changing this from Lisp, make sure to call
+`eat-update-semi-char-mode-map' to update the keymap and reload Eat to
+make the changes effective."
+  :type '(repeat sexp)
+  :set (lambda (sym val)
+         (set-default-toplevel-value sym val)
+         (when (and (not eat--being-loaded)
+                    (boundp 'eat-semi-char-mode-map))
+           (eat-update-semi-char-mode-map)
+           (eat-reload)))
+  :group 'eat-ui)
+
+(defcustom eat-eshell-semi-char-non-bound-keys
+  '([?\C-\\] [?\C-x] [?\C-g] [?\C-h] [?\e ?\C-c] [?\C-u] [?\C-q]
+    [?\e ?x] [?\e ?:] [?\e ?!] [?\e ?&]
+    [C-insert] [M-insert] [S-insert] [C-M-insert]
+    [C-S-insert] [M-S-insert] [C-M-S-insert]
+    [C-delete] [M-delete] [S-delete] [C-M-delete]
+    [C-S-delete] [M-S-delete] [C-M-S-delete]
+    [C-deletechar] [M-deletechar]
+    [S-deletechar] [C-M-deletechar] [C-S-deletechar]
+    [M-S-deletechar] [C-M-S-deletechar]
+    [C-up] [C-down] [C-right] [C-left]
+    [M-up] [M-down] [M-right] [M-left]
+    [S-up] [S-down] [S-right] [S-left]
+    [C-M-up] [C-M-down] [C-M-right] [C-M-left]
+    [C-S-up] [C-S-down] [C-S-right] [C-S-left]
+    [M-S-up] [M-S-down] [M-S-right] [M-S-left]
+    [C-M-S-up] [C-M-S-down] [C-M-S-right] [C-M-S-left]
+    [C-home] [M-home] [S-home] [C-M-home] [C-S-home]
+    [M-S-home] [C-M-S-home]
+    [C-end] [M-end] [S-end] [C-M-end] [C-S-end]
+    [M-S-end] [C-M-S-end]
+    [C-prior] [M-prior] [S-prior] [C-M-prior]
+    [C-S-prior] [M-S-prior] [C-M-S-prior]
+    [C-next] [M-next] [S-next] [C-M-next] [C-S-next]
+    [M-S-next] [C-M-S-next])
+  "List of keys not bound in Eat-Eshell \"semi-char\" mode.
+
+Keys appearing in this list are not bound to send the key to terminal.
+Eat might still bound them to do something else (for example, changing
+keybinding mode).
+
+Each element is a vector of form [KEY] or [?\\e KEY], meaning KEY or
+M-KEY shouldn't be bound.  KEY shouldn't contain meta (Alt) modifier.
+
+When changing this from Lisp, make sure to call
+`eat-eshell-update-semi-char-mode-map' to update the keymap and reload
+Eat to make the changes effective."
+  :type '(repeat sexp)
+  :set (lambda (sym val)
+         (set-default-toplevel-value sym val)
+         (when (and (not eat--being-loaded)
+                    (boundp 'eat-eshell-semi-char-mode-map))
+           (eat-eshell-update-semi-char-mode-map)
+           (eat-reload)))
   :group 'eat-eshell)
 
 (defcustom eat-enable-directory-tracking t
@@ -346,6 +455,9 @@ This value is used by terminal programs to identify the terminal."
 ;; Upgrading Eat causes `eat-term-terminfo-directory' and
 ;; `eat-term-shell-integration-directory' to be outdated, so update it
 ;; if not modified by user (or something else).
+(defvar eat--load-file-path nil
+  "Path to currently loaded Eat.")
+
 (defvar eat--install-path nil
   "Path to directory where Eat is installed.")
 
@@ -355,9 +467,10 @@ This value is used by terminal programs to identify the terminal."
 (defvar eat--shell-integration-path nil
   "Path to directory where shell integration scripts are installed.")
 
+(setq eat--load-file-path (or load-file-name buffer-file-name))
+
 (setq eat--install-path
-      (copy-sequence (file-name-directory
-                      (or load-file-name buffer-file-name))))
+      (copy-sequence (file-name-directory eat--load-file-path)))
 
 (defvar eat-term-terminfo-directory)
 (defvar eat-term-shell-integration-directory)
@@ -4466,7 +4579,11 @@ If HOST isn't the host Emacs is running on, don't do anything."
 
 (defun eat--pre-prompt (_)
   "Save the beginning position of shell prompt."
-  (setq eat--shell-prompt-begin (point-marker)))
+  (setq eat--shell-prompt-begin (point-marker))
+  ;; FIXME: It's a crime to touch processes in this section.
+  (when (eq eat-query-before-killing-running-terminal 'auto)
+    (when (bound-and-true-p eat--process)
+      (set-process-query-on-exit-flag eat--process nil))))
 
 (defun eat--post-prompt (_)
   "Put a mark in the marginal area on current line."
@@ -4568,6 +4685,10 @@ BUFFER is the terminal buffer."
 
 (defun eat--pre-cmd (_)
   "Update shell prompt mark to indicate command is running."
+  ;; FIXME: It's a crime to touch processes in this section.
+  (when (eq eat-query-before-killing-running-terminal 'auto)
+    (when (bound-and-true-p eat--process)
+      (set-process-query-on-exit-flag eat--process t)))
   (when (and eat-enable-shell-prompt-annotation
              eat--shell-prompt-mark)
     (setf (cadr eat--shell-prompt-mark)
@@ -4793,6 +4914,20 @@ STRING and ARG are passed to `yank-pop', which see."
          (yank-from-kill-ring string arg)
          (buffer-string))))))
 
+(defun eat-xterm-paste (event)
+  "Handle paste operation EVENT from XTerm."
+  (interactive "e")
+  (unless (eq (car-safe event) 'xterm-paste)
+    (error "`eat-xterm-paste' must be bind to `xterm-paste' event"))
+  (let ((pasted-text (nth 1 event)))
+    (if (bound-and-true-p xterm-store-paste-on-kill-ring)
+        ;; Put the text onto the kill ring and then insert it into the
+        ;; buffer.
+        (let ((interprogram-paste-function (lambda () pasted-text)))
+          (eat-yank))
+      ;; Insert the text without putting it onto the kill ring.
+      (eat-send-string-as-yank eat--terminal pasted-text))))
+
 ;; When changing these keymaps, be sure to update the manual, README
 ;; and commentary.
 (defvar eat-mode-map
@@ -4802,31 +4937,39 @@ STRING and ARG are passed to `yank-pop', which see."
     (define-key map [?\C-c ?\C-k] #'eat-kill-process)
     (define-key map [?\C-c ?\C-p] #'eat-previous-shell-prompt)
     (define-key map [?\C-c ?\C-n] #'eat-next-shell-prompt)
+    (define-key map [xterm-paste] #'ignore)
     map)
   "Keymap for Eat mode.")
 
-(defvar eat-semi-char-mode-map
+(defun eat--prepare-semi-char-mode-map ()
+  "Prepare `eat-semi-char-mode-map'."
   (let ((map (eat-term-make-keymap
-              #'eat-self-input
-              '(:ascii :arrow :navigation)
-              '( [?\C-\\] [?\C-q] [?\C-c] [?\C-x] [?\C-g] [?\C-h]
-                 [?\e ?\C-c] [?\C-u] [?\C-q] [?\e ?x] [?\e ?:]
-                 [?\e ?!] [?\e ?&] [?\C-y] [?\e ?y]))))
+              #'eat-self-input '(:ascii :arrow :navigation)
+              `([?\C-c] [?\C-q] [?\C-y] [?\e ?y]
+                ,@eat-semi-char-non-bound-keys))))
     (define-key map [?\C-q] #'eat-quoted-input)
     (define-key map [?\C-y] #'eat-yank)
     (define-key map [?\M-y] #'eat-yank-from-kill-ring)
     (define-key map [?\C-c ?\C-c] #'eat-self-input)
     (define-key map [?\C-c ?\C-e] #'eat-emacs-mode)
     (define-key map [remap insert-char] #'eat-input-char)
-    map)
+    (define-key map [xterm-paste] #'eat-xterm-paste)
+    map))
+
+(defvar eat-semi-char-mode-map (ignore-errors
+                                 (eat--prepare-semi-char-mode-map))
   "Keymap for Eat semi-char mode.")
+
+(defun eat-update-semi-char-mode-map ()
+  "Update \"semi-char\" keybinding mode's keymap."
+  (setq eat-semi-char-mode-map (eat--prepare-semi-char-mode-map)))
 
 (defvar eat-char-mode-map
   (let ((map (eat-term-make-keymap
-              #'eat-self-input
-              '(:ascii :arrow :navigation :function)
+              #'eat-self-input '(:ascii :arrow :navigation :function)
               '([?\e ?\C-m]))))
     (define-key map [?\C-\M-m] #'eat-semi-char-mode)
+    (define-key map [xterm-paste] #'eat-xterm-paste)
     map)
   "Keymap for Eat char mode.")
 
@@ -5345,6 +5488,8 @@ same Eat buffer.  The hook `eat-exec-hook' is run after each exec."
                :file-handler t)))
         (process-put process 'adjust-window-size-function
                      #'eat--adjust-process-window-size)
+        (set-process-query-on-exit-flag
+         process eat-query-before-killing-running-terminal)
         ;; Jump to the end, and set the process mark.
         (goto-char (point-max))
         (set-marker (process-mark process) (point))
@@ -5440,30 +5585,40 @@ PROGRAM can be a shell command."
     (define-key map [remap eshell-toggle-direct-send] ; C-c M-d
                 #'eat-eshell-char-mode)
     (define-key map [remap undo] #'undefined) ; Disable `undo'.
+    (define-key map [xterm-paste] #'ignore)
     map)
   "Keymap for Eat Eshell \"emacs\" mode.")
 
-(defvar eat-eshell-semi-char-mode-map
+(defun eat--eshell-prepare-semi-char-mode-map ()
+  "Prepare `eat-eshell-semi-char-mode-map'."
   (let ((map (eat-term-make-keymap
-              #'eat-self-input
-              '(:ascii :arrow :navigation)
-              '( [?\C-\\] [?\C-q] [?\C-c] [?\C-x] [?\C-g] [?\C-h]
-                 [?\e ?\C-c] [?\C-u] [?\C-q] [?\e ?x] [?\e ?:]
-                 [?\e ?!] [?\e ?&] [?\C-y] [?\e ?y]))))
+              #'eat-self-input '(:ascii :arrow :navigation)
+              `([?\C-c] [?\C-q] [?\C-y] [?\e ?y]
+                ,@eat-eshell-semi-char-non-bound-keys))))
     (define-key map [?\C-q] #'eat-quoted-input)
     (define-key map [?\C-y] #'eat-yank)
     (define-key map [?\M-y] #'eat-yank-from-kill-ring)
     (define-key map [?\C-c ?\C-e] #'eat-eshell-emacs-mode)
     (define-key map [remap insert-char] #'eat-input-char)
-    map)
+    (define-key map [xterm-paste] #'eat-xterm-paste)
+    map))
+
+(defvar eat-eshell-semi-char-mode-map
+  (ignore-errors
+    (eat--eshell-prepare-semi-char-mode-map))
   "Keymap for Eat Eshell semi-char mode.")
+
+(defun eat-eshell-update-semi-char-mode-map ()
+  "Update \"semi-char\" keybinding mode's keymap in Eshell."
+  (setq eat-eshell-semi-char-mode-map
+        (eat--eshell-prepare-semi-char-mode-map)))
 
 (defvar eat-eshell-char-mode-map
   (let ((map (eat-term-make-keymap
-              #'eat-self-input
-              '(:ascii :arrow :navigation :function)
+              #'eat-self-input '(:ascii :arrow :navigation :function)
               '([?\e ?\C-m]))))
     (define-key map [?\C-\M-m] #'eat-eshell-semi-char-mode)
+    (define-key map [xterm-paste] #'eat-xterm-paste)
     map)
   "Keymap for Eat Eshell char mode.")
 
@@ -6442,6 +6597,18 @@ N defaults to 1.  Interactively, N is the prefix argument."
      "/" (:eval (number-to-string eat--trace-replay-frame-count))
      "]"))
   (add-hook 'kill-buffer-hook #'eat-trace--cleanup nil t))
+
+
+;;;; Footer.
+
+(defun eat-reload ()
+  "Reload Eat."
+  (interactive)
+  (unless eat--being-loaded
+    ;; Remove .elc suffix to load native compiled version if possible.
+    (load (string-remove-suffix ".elc" eat--load-file-path))))
+
+(setq eat--being-loaded nil)
 
 (provide 'eat)
 ;;; eat.el ends here

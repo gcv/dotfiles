@@ -1,3 +1,73 @@
+2023-02-08  Akib Azmain Turja  <akib@disroot.org>
+
+	* eat.texi (Querying Before Kill): New chapter
+
+2023-02-07  Akib Azmain Turja  <akib@disroot.org>
+
+	Query when killing buffer when command is running
+
+	* eat.el (eat-query-before-killing-running-terminal): New user
+	option.
+	* eat.el (eat--pre-prompt): Unset process query on exit flag if
+	eat-query-before-killing-running-terminal is 'auto'.
+	* eat.el (eat--pre-cmd): Set process query on exit flag if
+	eat-query-before-killing-running-terminal is 'auto'.
+
+2023-01-22  Akib Azmain Turja  <akib@disroot.org>
+
+	Add many more semi-char mode exceptions
+
+	* eat.el (eat-semi-char-non-bound-keys)
+	(eat-eshell-semi-char-non-bound-keys): Add 81 more keys.
+
+2023-01-19  Akib Azmain Turja  <akib@disroot.org>
+
+	Auto reload Eat when "semi-char" map is customized
+
+	* eat.el (eat--load-file-path, eat--being-loaded): New
+	variable.
+	* eat.el (eat-semi-char-non-bound-keys)
+	(eat-eshell-semi-char-non-bound-keys): Reload Eat when
+	customized.  Document what to do if changed from Lisp.
+	* eat.el (eat-update-semi-char-mode-map)
+	(eat-eshell-update-semi-char-mode-map): New function.
+	* eat.el (eat-reload): New command.
+	* eat.texi (Semi-char Mode): Document what to do if the lists
+	of not bound keys are changed from Lisp.
+
+2023-01-18  Akib Azmain Turja  <akib@disroot.org>
+
+	Document some new user options
+
+	* eat.texi (Semi-char Mode): Document
+	'eat-semi-char-non-bound-keys' and
+	'eat-eshell-semi-char-non-bound-keys'.
+	* eat.texi (Input Invisible): New section.
+
+2023-01-16  Akib Azmain Turja  <akib@disroot.org>
+
+	Allow modifying semi-char key exceptions
+
+	* eat.el (eat-semi-char-non-bound-keys)
+	(eat-eshell-semi-char-non-bound-keys): New user option.
+	* eat.el (eat--prepare-semi-char-mode-map)
+	(eat--eshell-prepare-semi-char-mode-map): New function.
+	* eat.el (eat-semi-char-mode-map): Use
+	'eat--prepare-semi-char-mode-map' to make the keymap.
+	* eat.el (eat-eshell-semi-char-mode-map): Use
+	'eat--eshell-prepare-semi-char-mode-map' to make the keymap.
+
+2023-01-15  Akib Azmain Turja  <akib@disroot.org>
+
+	Allow pasting from parent XTerm to Eat terminal
+
+	* eat.el (eat-xterm-paste): New command.
+	* eat.el (eat-mode-map, eat-eshell-emacs-mode-map): Bind
+	<xterm-paste> to 'ignore'.
+	* eat.el (eat-semi-char-mode-map, eat-char-mode-map)
+	(eat-eshell-semi-char-mode-map, eat-eshell-char-mode-map): Bind
+	<xterm-paste> to 'eat-xterm-paste'.
+
 2022-12-28  Akib Azmain Turja  <akib@disroot.org>
 
 	Don't error while handling the sequence '\e[>c'
@@ -930,7 +1000,7 @@
 ;; coding: utf-8
 ;; End:
 
-  Copyright (C) 2022 Akib Azmain Turja.
+  Copyright (C) 2022-2023 Akib Azmain Turja.
 
   This file is not part of GNU Emacs.
 

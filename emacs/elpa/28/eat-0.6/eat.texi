@@ -2,9 +2,9 @@
 
 @comment %**start of header
 @setfilename eat.info
-@set UPDATED 10 December 2022
-@set EDITION 0.4
-@set VERSION 0.4
+@set UPDATED 08 February 2023
+@set EDITION 0.6
+@set VERSION 0.6
 @documentencoding UTF-8
 @codequotebacktick on
 @codequoteundirected on
@@ -18,7 +18,7 @@
 This manual is for Eat (version @value{VERSION}, @value{UPDATED}), a
 terminal emulator for Emacs.
 
-Copyright @copyright{}  2022  Akib Azmain Turja.
+Copyright @copyright{}  2022, 2023  Akib Azmain Turja.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -66,6 +66,7 @@ Basic Operations
 
 Advanced Customizations
 * Shell Integration::   Getting the most from Eat and your shell.
+* Querying Before Kill::  Confirming before you kill your terminal.
 * Display::             The region where everything is shown.
 * Scrollback::          Region for things that went out of display.
 * Cursor Types::        Cursor can displayed in many forms.
@@ -100,7 +101,7 @@ emulators.  But it has some key features that make Eat distinct from
 other terminal emulators.
 
 Firstly, it's in Emacs, which means you don't need to leave the
-comfort of Emacs to use Emacs.
+comfort of Emacs to use terminal.
 
 Secondly, it's easy and convenient to use.  It is tries to stay out of
 your way, allowing you to maximize your productivity.
@@ -268,6 +269,41 @@ Emacs built-in terminal emulator, you can still input any character.
 In ``semi-char mode'', @kbd{C-c C-c} sends a @kbd{C-c}, just for
 convenience, and @kbd{C-c C-k} kills the terminal program.
 
+@cindex customizing semi-char mode
+@cindex customizing semi-char mode keys
+@cindex customizing semi-char mode keybindings
+@cindex mode, semi-char, customizing
+@cindex keybindings, semi-char mode, customizing
+@cindex keybinding mode, semi-char, customizing
+@cindex input mode, semi-char, customizing
+@cindex mode, semi-char, adding exceptions
+@cindex keybindings, semi-char mode, adding exceptions
+@cindex keybinding mode, semi-char, adding exceptions
+@cindex input mode, semi-char, adding exceptions
+@cindex mode, semi-char, exception, add
+@cindex keybindings, semi-char mode, exception, add
+@cindex keybinding mode, semi-char, exception, add
+@cindex input mode, semi-char, exception, add
+@vindex eat-semi-char-non-bound-keys
+@vindex eat-eshell-semi-char-non-bound-keys
+You can customize the exceptions by customizing the user option
+@code{eat-semi-char-non-bound-keys}, and
+@code{eat-eshell-semi-char-non-bound-keys} for Eshell integration.
+Both user options contain a list of keys of form @code{[@var{key}]},
+where @var{key} is a key not to bind.  @var{key} mustn't contain meta
+modifier.  To not bind a key with meta modifier, use a vector of form
+@code{[?\e @var{key}]}, where @var{key} is the key without meta
+modifier.
+
+@findex eat-update-semi-char-mode-map
+@findex eat-eshell-update-semi-char-mode-map
+@findex eat-reload
+If you set the user options manually (for example, with @code{setq}),
+you must call @code{eat-update-semi-char-mode-map} or
+@code{eat-eshell-update-semi-char-mode-map} respectively, and finally
+reload Eat (you can do this with the command @command{eat-reload}).
+Or alternatively you can set the user options before Eat is loaded.
+
 @anchor{Char Mode}
 @cindex char mode
 @cindex mode, char
@@ -430,6 +466,32 @@ the user option
 face @code{eat-shell-prompt-annotation-failure} control the indicator
 used to indicate the command has exited unsuccessfully with non-zero
 exit status.
+
+@node Querying Before Kill
+@cindex querying before kill
+@cindex querying before kill terminal
+@cindex confirm before kill
+@cindex confirm before kill terminal
+@cindex terminal, kill, query
+@cindex terminal, kill, confirm
+@chapter Querying Before Kill
+
+When a terminal is killed, the terminal process is also killed.  Since
+the process can do some important things, Eat asks for confirmation
+before killing a terminal with running process by default.  Eat
+provides the user option
+@code{eat-query-before-killing-running-terminal} to control this.
+
+@vindex eat-query-before-killing-running-terminal
+@defopt eat-query-before-killing-running-terminal
+When set to @code{nil}, Eat would never ask.  When set to @code{t},
+Eat would always ask for confirmation.  When set to @code{auto}, Eat
+would ask only if a shell command is running inside the shell running
+in the terminal.  This is effective only after shell integration is
+enabled in the shell (@pxref{Shell Integration}) (i.e. after the shell
+integration code is executed on shell); before that it is essentially
+same as @code{t}, and Eat will always query.
+@end defopt
 
 @node Display
 @cindex display
@@ -862,6 +924,7 @@ Eat does something unexpected, such as hangs, garbled text, etc.
 @menu
 * Not Recognized::      The program can't recognize Eat.
 * Garbled Text::        When you get garbage on your terminal.
+* Input Invisible::     The input is not shown.
 * Not Responding::      What to do if Eat is unresponsive.
 * Signaled an Error::   The worst and the most unlikely bug.
 * Bugs in Manual::      What if there are problems in this manual?
@@ -903,7 +966,7 @@ If the text on the terminal looks wrong, first check out the value of
 send invalid escape sequences.
 
 First, @pxref{Not Recognized}; the problem is most likely because the
-problem doesn't recognize Eat, and it stays silent instead of
+program doesn't recognize Eat, and it stays silent instead of
 reporting that.
 
 If the problem isn't resolved after following the instructions in the
@@ -916,6 +979,26 @@ feature request.
 
 The other potential reason is that Eat is not working.  This is
 definitely a bug, so please report it.
+
+@node Input Invisible
+@cindex input invisible
+@cindex input, invisible
+@cindex invisible input
+@cindex invisible, input
+@section Input Invisible
+
+This can happen if the @samp{stty} program is unavailable on the
+system.  Eat uses @samp{stty} to set various terminal settings
+including input echoing.  Please install the @samp{stty} program to
+fix the problem.
+
+@vindex eat-eshell-fallback-if-stty-not-available
+If you are using Eat from Eshell (@pxref{Eshell Terminal}), you might
+want to set @code{eat-eshell-fallback-if-stty-not-available} to handle
+such cases.  The user option can be set to three possible value,
+@code{t} to automatically fallback to bare Eshell when @samp{stty} is
+not available, @code{nil} to do nothing, and @samp{ask} to ask
+interactively.
 
 @node Not Responding
 @cindex not responding, eat
