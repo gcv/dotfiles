@@ -1,4 +1,4 @@
-This is docblvCO5.info, produced by makeinfo version 6.7 from
+This is doc3KIqKn.info, produced by makeinfo version 6.7 from
 consult.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,25 +7,25 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docblvCO5.info,  Node: Top,  Next: Available commands,  Up: (dir)
+File: doc3KIqKn.info,  Node: Top,  Next: Available commands,  Up: (dir)
 
 consult.el - Consulting completing-read
 ***************************************
 
-Consult provides practical commands based on the Emacs completion
-function completing-read
+Consult provides search and navigation commands based on the Emacs
+completion function completing-read
 (https://www.gnu.org/software/emacs/manual/html_node/elisp/Minibuffer-Completion.html).
 Completion allows you to quickly select an item from a list of
-candidates.  Consult offers in particular an advanced buffer switching
-command ‘consult-buffer’ to switch between buffers and recently opened
-files.  Furthermore Consult provides multiple search commands, an
-asynchronous ‘consult-grep’ and ‘consult-ripgrep’, and the line-based
-search command ‘consult-line’.  Some of the Consult commands are
-enhanced versions of built-in Emacs commands.  For example the command
-‘consult-imenu’ presents a flat list of the Imenu with *note live
-preview: Live previews, *note grouping and narrowing: Narrowing and
-grouping.  Please take a look at the *note full list of commands:
-Available commands.
+candidates.  Consult offers asynchronous and interactive ‘consult-grep’
+and ‘consult-ripgrep’ commands, and the line-based search command
+‘consult-line’.  Furthermore Consult provides an advanced buffer
+switching command ‘consult-buffer’ to switch between buffers, recently
+opened files, bookmarks and buffer-like candidates from other sources.
+Some of the Consult commands are enhanced versions of built-in Emacs
+commands.  For example the command ‘consult-imenu’ presents a flat list
+of the Imenu with *note live preview: Live previews, *note grouping and
+narrowing: Narrowing and grouping.  Please take a look at the *note full
+list of commands: Available commands.
 
    Consult is fully compatible with completion systems centered around
 the standard Emacs ‘completing-read’ API, notably the default completion
@@ -59,6 +59,7 @@ work together.
 * Special features::             Enhancements over built-in ‘completing-read’
 * Configuration::                Example configuration and customization variables
 * Recommended packages::         Related packages recommended for installation
+* Auxiliary packages::           Integrations with the wider ecosystem
 * Bug reports::                  How to create reproducible bug reports
 * Contributions::                Feature requests and pull requests
 * Acknowledgments::              Contributors and Sources of Inspiration
@@ -78,6 +79,7 @@ Available commands
 * Histories::                    Navigating histories
 * Modes::                        Toggling minor modes and executing commands
 * Org Mode::                     Org-specific commands
+* Help::                         Searching through help
 * Miscellaneous::                Various other useful commands
 
 Special features
@@ -101,7 +103,7 @@ Indices
 
 
 
-File: docblvCO5.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
+File: doc3KIqKn.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
 
 1 Available commands
 ********************
@@ -130,10 +132,11 @@ their descriptions.
 * Histories::                    Navigating histories
 * Modes::                        Toggling minor modes and executing commands
 * Org Mode::                     Org-specific commands
+* Help::                         Searching through help
 * Miscellaneous::                Various other useful commands
 
 
-File: docblvCO5.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
+File: doc3KIqKn.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
 
 1.1 Virtual Buffers
 ===================
@@ -168,7 +171,7 @@ File: docblvCO5.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available com
      ‘recentf-mode’ enables tracking of recent files.
 
 
-File: docblvCO5.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
+File: doc3KIqKn.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
 
 1.2 Editing
 ===========
@@ -186,7 +189,7 @@ File: docblvCO5.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  
    • ‘consult-kmacro’: Select macro from the macro ring and execute it.
 
 
-File: docblvCO5.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
+File: doc3KIqKn.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
 
 1.3 Register
 ============
@@ -217,7 +220,7 @@ File: docblvCO5.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: A
         • ‘C-u 100 M-' x’: Store number in register ‘x’.
 
 
-File: docblvCO5.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
+File: doc3KIqKn.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
 
 1.4 Navigation
 ==============
@@ -238,7 +241,7 @@ File: docblvCO5.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Av
      imenu-anywhere (https://github.com/vspinu/imenu-anywhere).
 
 
-File: docblvCO5.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
+File: doc3KIqKn.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
 
 1.5 Search
 ==========
@@ -254,8 +257,6 @@ File: docblvCO5.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  U
      argument search across all buffers.  The candidates are computed on
      demand based on the input.  The command behaves like
      ‘consult-grep’, but operates on buffers instead of files.
-   • ‘consult-multi-occur’: Replacement for ‘multi-occur’ which uses
-     ‘completing-read-multiple’.
    • ‘consult-keep-lines’: Replacement for ‘keep/flush-lines’ which uses
      the current completion style for filtering the buffer.  The
      function updates the buffer while typing.  In particular
@@ -273,7 +274,7 @@ File: docblvCO5.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  U
      region restricts the filtering.
 
 
-File: docblvCO5.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
+File: doc3KIqKn.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
 
 1.6 Grep and Find
 =================
@@ -298,16 +299,17 @@ File: docblvCO5.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  
      returns non-nil, ‘consult-grep’ searches the current project
      directory.  Otherwise the ‘default-directory’ is searched.  If
      ‘consult-grep’ is invoked with prefix argument ‘C-u M-s g’, you can
-     specify the directory manually.
+     specify one or more comma-separated files and directories manually.
    • ‘consult-find’, ‘consult-locate’: Find file by matching the path
      against a regexp.  Like for ‘consult-grep’, either the project root
      or the current directory is the root directory for the search.  The
      input string is treated similarly to ‘consult-grep’, where the
      first part is passed to find, and the second part is used for Emacs
-     filtering.
+     filtering.  Prefix arguments to ‘consult-find’ work just like those
+     for the consult grep commands.
 
 
-File: docblvCO5.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
+File: doc3KIqKn.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
 
 1.7 Compilation
 ===============
@@ -322,7 +324,7 @@ File: docblvCO5.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find
      ‘xref-show-xrefs-function’ and ‘xref-show-definitions-function’.
 
 
-File: docblvCO5.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
+File: doc3KIqKn.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
 
 1.8 Histories
 =============
@@ -345,7 +347,7 @@ File: docblvCO5.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: A
      ‘isearch-edit-string’.
 
 
-File: docblvCO5.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
+File: doc3KIqKn.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
 
 1.9 Modes
 =========
@@ -358,7 +360,7 @@ File: docblvCO5.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Avai
      local-minor/global-minor/major mode via the keys ‘l/g/m’.
 
 
-File: docblvCO5.info,  Node: Org Mode,  Next: Miscellaneous,  Prev: Modes,  Up: Available commands
+File: doc3KIqKn.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available commands
 
 1.10 Org Mode
 =============
@@ -371,16 +373,41 @@ File: docblvCO5.info,  Node: Org Mode,  Next: Miscellaneous,  Prev: Modes,  Up: 
      live preview and recursive editing.
 
 
-File: docblvCO5.info,  Node: Miscellaneous,  Prev: Org Mode,  Up: Available commands
+File: doc3KIqKn.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: Available commands
 
-1.11 Miscellaneous
-==================
+1.11 Help
+=========
 
    • ‘consult-man’: Find Unix man page, via Unix ‘apropos’ or ‘man -k’.
      ‘consult-man’ opens the selected man page using the Emacs ‘man’
      command.
-   • ‘consult-file-externally’: Select a file and open it externally,
-     e.g. using ‘xdg-open’ on Linux.
+   • ‘consult-info’: Full text search through info pages.  If the
+     command is invoked from within an ‘*info*’ buffer, it will search
+     through the current manual.  You may want to create your own
+     commands which search through a predefined set of info pages, for
+     example:
+     (defun consult-info-emacs ()
+       "Search through Emacs info pages."
+       (interactive)
+       (consult-info "emacs" "efaq" "elisp" "cl" "compat"))
+
+     (defun consult-info-org ()
+       "Search through the Org info page."
+       (interactive)
+       (consult-info "org"))
+
+     (defun consult-info-completion ()
+       "Search through completion info pages."
+       (interactive)
+       (consult-info "vertico" "consult" "marginalia" "orderless" "embark"
+                     "corfu" "cape" "tempel"))
+
+
+File: doc3KIqKn.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
+
+1.12 Miscellaneous
+==================
+
    • ‘consult-theme’: Select a theme and disable all currently enabled
      themes.  Supports live preview of the theme while scrolling through
      the candidates.
@@ -417,7 +444,7 @@ File: docblvCO5.info,  Node: Miscellaneous,  Prev: Org Mode,  Up: Available comm
      the original buffer.
 
 
-File: docblvCO5.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
+File: doc3KIqKn.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
 
 2 Special features
 ******************
@@ -441,7 +468,7 @@ advanced features.
 * Embark integration::           Actions, Grep/Occur-buffer export
 
 
-File: docblvCO5.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
+File: doc3KIqKn.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
 
 2.1 Live previews
 =================
@@ -463,8 +490,8 @@ with its own ‘:preview-key’.  The following settings are possible:
 
    • Automatic and immediate ‘'any’
    • Automatic and delayed ‘(list :debounce 0.5 'any)’
-   • Manual and immediate ‘(kbd "M-.")’
-   • Manual and delayed ‘(list :debounce 0.5 (kbd "M-."))’
+   • Manual and immediate ‘"M-."’
+   • Manual and delayed ‘(list :debounce 0.5 "M-.")’
    • Disabled ‘nil’
 
    A safe recommendation is to leave automatic immediate previews
@@ -483,7 +510,7 @@ be considered.
       consult--source-recent-file consult--source-project-recent-file
       ;; my/command-wrapping-consult    ;; disable auto previews inside my command
       :preview-key '(:debounce 0.4 any) ;; Option 1: Delay preview
-      ;; :preview-key (kbd "M-."))      ;; Option 2: Manual preview
+      ;; :preview-key "M-.")            ;; Option 2: Manual preview
 
    In this case one may wonder what the difference is between using an
 Embark action on the current candidate in comparison to a manually
@@ -502,12 +529,12 @@ slow.  The delay results in a smoother UI experience.
      ;; Preview immediately on M-., on up/down after 0.5s, on any other key after 1s
      (consult-customize consult-theme
                         :preview-key
-                        (list (kbd "M-.")
-                              :debounce 0.5 (kbd "<up>") (kbd "<down>")
-                              :debounce 1 'any))
+                        '("M-."
+                          :debounce 0.5 "<up>" "<down>"
+                          :debounce 1 any))
 
 
-File: docblvCO5.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
+File: doc3KIqKn.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
 
 2.2 Narrowing and grouping
 ==========================
@@ -542,7 +569,7 @@ keys are automatically shown in the which-key window after pressing the
 ‘consult-narrow-key’.
 
 
-File: docblvCO5.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
+File: doc3KIqKn.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
 
 2.3 Asynchronous search
 =======================
@@ -608,7 +635,7 @@ status:
      provided.
 
 
-File: docblvCO5.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
+File: doc3KIqKn.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
 
 2.4 Multiple sources
 ====================
@@ -674,7 +701,7 @@ However it is possible to configure a manual preview as follows.
      (consult-customize
       consult--source-bookmark consult--source-file-register
       consult--source-recent-file consult--source-project-recent-file
-      :preview-key (kbd "M-."))
+      :preview-key "M-.")
 
    Sources can be added directly to the ‘consult-buffer-source’ list for
 convenience.  For example views/perspectives can be added to the list of
@@ -737,7 +764,7 @@ used to create new multi-source commands, but is part of the internal
 API as of now, since some details may still change.
 
 
-File: docblvCO5.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
+File: doc3KIqKn.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
 
 2.5 Embark integration
 ======================
@@ -781,7 +808,7 @@ package is installed.  These three workflows are symmetric.
      ‘wdired-change-to-wdired-mode’ for editing.
 
 
-File: docblvCO5.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
+File: doc3KIqKn.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
 
 3 Configuration
 ***************
@@ -808,7 +835,7 @@ For this reason many Consult-related snippets require lexical binding.
 * Fine-tuning::                  Fine-grained configuration for special requirements
 
 
-File: docblvCO5.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
+File: doc3KIqKn.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
 
 3.1 Use-package example
 =======================
@@ -830,9 +857,12 @@ additional configuration examples.
      (use-package consult
        ;; Replace bindings. Lazily loaded due by `use-package'.
        :bind (;; C-c bindings (mode-specific-map)
+              ("C-c M-x" . consult-mode-command)
               ("C-c h" . consult-history)
-              ("C-c m" . consult-mode-command)
               ("C-c k" . consult-kmacro)
+              ("C-c m" . consult-man)
+              ("C-c i" . consult-info)
+              ([remap Info-search] . consult-info)
               ;; C-x bindings (ctl-x-map)
               ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
               ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
@@ -864,7 +894,6 @@ additional configuration examples.
               ("M-s r" . consult-ripgrep)
               ("M-s l" . consult-line)
               ("M-s L" . consult-line-multi)
-              ("M-s m" . consult-multi-occur)
               ("M-s k" . consult-keep-lines)
               ("M-s u" . consult-focus-lines)
               ;; Isearch integration
@@ -907,8 +936,8 @@ additional configuration examples.
        ;; Optionally configure preview. The default value
        ;; is 'any, such that any key triggers the preview.
        ;; (setq consult-preview-key 'any)
-       ;; (setq consult-preview-key (kbd "M-."))
-       ;; (setq consult-preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
+       ;; (setq consult-preview-key "M-.")
+       ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
        ;; For some commands and buffer sources it is useful to configure the
        ;; :preview-key on a per-command basis using the `consult-customize' macro.
        (consult-customize
@@ -917,12 +946,12 @@ additional configuration examples.
         consult-bookmark consult-recent-file consult-xref
         consult--source-bookmark consult--source-file-register
         consult--source-recent-file consult--source-project-recent-file
-        ;; :preview-key (kbd "M-.")
+        ;; :preview-key "M-."
         :preview-key '(:debounce 0.4 any))
 
        ;; Optionally configure the narrowing key.
        ;; Both < and C-+ work reasonably well.
-       (setq consult-narrow-key "<") ;; (kbd "C-+")
+       (setq consult-narrow-key "<") ;; "C-+"
 
        ;; Optionally make narrowing help available in the minibuffer.
        ;; You may want to use `embark-prefix-help-command' or which-key instead.
@@ -930,20 +959,21 @@ additional configuration examples.
 
        ;; By default `consult-project-function' uses `project-root' from project.el.
        ;; Optionally configure a different project root function.
-       ;; There are multiple reasonable alternatives to chose from.
        ;;;; 1. project.el (the default)
        ;; (setq consult-project-function #'consult--default-project--function)
-       ;;;; 2. projectile.el (projectile-project-root)
+       ;;;; 2. vc.el (vc-root-dir)
+       ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+       ;;;; 3. locate-dominating-file
+       ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+       ;;;; 4. projectile.el (projectile-project-root)
        ;; (autoload 'projectile-project-root "projectile")
        ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
-       ;;;; 3. vc.el (vc-root-dir)
-       ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-       ;;;; 4. locate-dominating-file
-       ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+       ;;;; 5. No project support
+       ;; (setq consult-project-function nil)
      )
 
 
-File: docblvCO5.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
+File: doc3KIqKn.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
 
 3.2 Custom variables
 ====================
@@ -998,7 +1028,7 @@ consult-widen-key                  Widening key during completion
 consult-yank-rotate                Rotate kill ring
 
 
-File: docblvCO5.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
+File: doc3KIqKn.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
 
 3.3 Fine-tuning of individual commands
 ======================================
@@ -1034,13 +1064,13 @@ future versions of the package.
       ;; Disable preview for `consult-theme' completely.
       consult-theme :preview-key nil
       ;; Set preview for `consult-buffer' to key `M-.'
-      consult-buffer :preview-key (kbd "M-.")
+      consult-buffer :preview-key "M-."
       ;; For `consult-line' change the prompt and specify multiple preview
       ;; keybindings. Note that you should bind <S-up> and <S-down> in the
       ;; `minibuffer-local-completion-map' or `vertico-map' to the commands which
       ;; select the previous or next candidate.
       consult-line :prompt "Search: "
-      :preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
+      :preview-key '("S-<down>" "S-<up>"))
 
    The configuration values are evaluated at runtime, just before the
 completion session is started.  Therefore you can use for example
@@ -1069,7 +1099,7 @@ by the following techniques:
   5. Write or propose a patch.
 
 
-File: docblvCO5.info,  Node: Recommended packages,  Next: Bug reports,  Prev: Configuration,  Up: Top
+File: doc3KIqKn.info,  Node: Recommended packages,  Next: Auxiliary packages,  Prev: Configuration,  Up: Top
 
 4 Recommended packages
 **********************
@@ -1098,9 +1128,24 @@ model fits best for you.
      completion UI (development currently discontinued
      (https://protesilaos.com/codelog/2022-04-14-emacs-discontinue-mct/)).
 
-   You can integrate Consult with special programs or with other
-packages in the wider Emacs ecosystem.  You may want to install some of
-theses packages depending on your preferences and requirements.
+   Note that all packages are independent and can be exchanged with
+alternative components, since there exist no hard dependencies.
+Furthermore it is possible to get started with only default completion
+and Consult and add more components later to the mix.  For example you
+can omit Marginalia if you don’t need annotations.  I highly recommend
+the Embark package, but in order to familiarize yourself with the other
+components, you can first start without it - or you could use with
+Embark right away and add the other components later on.
+
+
+File: doc3KIqKn.info,  Node: Auxiliary packages,  Next: Bug reports,  Prev: Recommended packages,  Up: Top
+
+5 Auxiliary packages
+********************
+
+You can integrate Consult with special programs or with other packages
+in the wider Emacs ecosystem.  You may want to install some of theses
+packages depending on your preferences and requirements.
 
    • consult-ag (https://github.com/yadex205/consult-ag): Support for
      the Silver Searcher (https://github.com/ggreer/the_silver_searcher)
@@ -1108,6 +1153,9 @@ theses packages depending on your preferences and requirements.
    • consult-company (https://github.com/mohkale/consult-company):
      Completion at point using the Company
      (https://github.com/company-mode/company-mode) backends.
+   • consult-codesearch
+     (https://github.com/youngker/consult-codesearch.el): Integration
+     with Code Search (https://github.com/google/codesearch).
    • consult-dir (https://github.com/karthink/consult-dir): Directory
      jumper using Consult multi sources.
    • consult-dash (https://codeberg.org/ravi/consult-dash): Consult
@@ -1178,35 +1226,31 @@ follow a similar spirit or offer functionality based on
      (https://github.com/iyefrat/all-the-icons-completion): Icons for
      the completion UI.
 
-   Note that all packages are independent and can be exchanged with
-alternative components, since there exist no hard dependencies.
-Furthermore it is possible to get started with only default completion
-and Consult and add more components later to the mix.  For example you
-can omit Marginalia if you don’t need annotations.  I highly recommend
-the Embark package, but in order to familiarize yourself with the other
-components, you can first start without it - or you could use with
-Embark right away and add the other components later on.
-
 
-File: docblvCO5.info,  Node: Bug reports,  Next: Contributions,  Prev: Recommended packages,  Up: Top
+File: doc3KIqKn.info,  Node: Bug reports,  Next: Contributions,  Prev: Auxiliary packages,  Up: Top
 
-5 Bug reports
+6 Bug reports
 *************
 
 If you find a bug or suspect that there is a problem with Consult,
 please carry out the following steps:
 
-  1. *Update all the relevant packages to the newest version*.  This
-     includes Consult, Vertico or other completion UIs, Marginalia,
-     Embark and Orderless.
-  2. Either use the default completion UI or ensure that exactly one of
+  1. *Search through the issue tracker* if your issue has been reported
+     before (and has been resolved eventually) in the meantime.
+  2. *Remove all packages involved in the suspected bug from your
+     installation.*
+  3. *Reinstall the newest version of all relevant packages*.  Updating
+     alone is not sufficient, since package.el is known to cause
+     miscompilation.  The list of packages includes Consult, Compat,
+     Vertico or other completion UIs, Marginalia, Embark and Orderless.
+  4. Either use the default completion UI or ensure that exactly one of
      ‘vertico-mode’, ‘mct-mode’, or ‘icomplete-mode’ is enabled.  The
-     unsupported modes ‘ivy-mode’, ‘helm-mode’ and ‘ido-ubiquitous-mode’
-     must be disabled.
-  3. Ensure that the ‘completion-styles’ variable is properly
+     unsupported modes ‘selectrum-mode’, ‘ivy-mode’, ‘helm-mode’,
+     ‘ido-mode’ and ‘ido-ubiquitous-mode’ must be disabled.
+  5. Ensure that the ‘completion-styles’ variable is properly
      configured.  Try to set ‘completion-styles’ to a list including
      ‘substring’ or ‘orderless’.
-  4. Try to reproduce the issue by starting a bare bone Emacs instance
+  6. Try to reproduce the issue by starting a bare bone Emacs instance
      with ‘emacs -Q’ on the command line.  Execute the following minimal
      code snippets in the scratch buffer.  This way we can exclude side
      effects due to configuration settings.  If other packages are
@@ -1250,9 +1294,9 @@ lexical binding
 Consult often relies on lambdas and lexical closures.
 
 
-File: docblvCO5.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
+File: doc3KIqKn.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
 
-6 Contributions
+7 Contributions
 ***************
 
 Consult is a community effort, please participate in the discussions.
@@ -1270,9 +1314,9 @@ contribute to the Consult wiki (https://github.com/minad/consult/wiki),
 in case you want to share small configuration or command snippets.
 
 
-File: docblvCO5.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
+File: doc3KIqKn.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
 
-7 Acknowledgments
+8 Acknowledgments
 *****************
 
 This package took inspiration from Counsel
@@ -1302,6 +1346,7 @@ great contributors and thanks to the feedback of many users.  Thank you!
    • Aymeric Agon-Rambosson (https://github.com/aagon)
    • Geoffrey Lessel (https://github.com/geolessel)
    • Piotr Kwiecinski (https://github.com/piotrkwiecinski)
+   • Robert Weiner (https://github.com/rswgnu)
 
    Advice and useful discussions:
    • Clemens Radermacher (https://github.com/clemera/)
@@ -1355,11 +1400,13 @@ great contributors and thanks to the feedback of many users.  Thank you!
      (https://github.com/Nyoho/consult-hatena-bookmark))
    • ghosty141 (https://github.com/ghosty141) (consult-git-log-grep
      (https://github.com/ghosty141/consult-git-log-grep))
+   • YoungJoo Lee (https://github.com/youngker) (consult-codesearch
+     (https://github.com/youngker/consult-codesearch.el))
 
 
-File: docblvCO5.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
+File: doc3KIqKn.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 
-8 Indices
+9 Indices
 *********
 
 * Menu:
@@ -1368,9 +1415,9 @@ File: docblvCO5.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 * Concept index::                List of all Consult-specific concepts
 
 
-File: docblvCO5.info,  Node: Function index,  Next: Concept index,  Up: Indices
+File: doc3KIqKn.info,  Node: Function index,  Next: Concept index,  Up: Indices
 
-8.1 Function index
+9.1 Function index
 ==================
 
  [index ]
@@ -1383,7 +1430,6 @@ File: docblvCO5.info,  Node: Function index,  Next: Concept index,  Up: Indices
 * consult-compile-error:                 Compilation.           (line 6)
 * consult-completion-in-region:          Miscellaneous.         (line 6)
 * consult-complex-command:               Histories.             (line 6)
-* consult-file-externally:               Miscellaneous.         (line 6)
 * consult-find:                          Grep and Find.         (line 6)
 * consult-flymake:                       Compilation.           (line 6)
 * consult-focus-lines:                   Search.                (line 6)
@@ -1394,17 +1440,17 @@ File: docblvCO5.info,  Node: Function index,  Next: Concept index,  Up: Indices
 * consult-history:                       Histories.             (line 6)
 * consult-imenu:                         Navigation.            (line 6)
 * consult-imenu-multi:                   Navigation.            (line 6)
+* consult-info:                          Help.                  (line 6)
 * consult-isearch-history:               Histories.             (line 6)
 * consult-keep-lines:                    Search.                (line 6)
 * consult-kmacro:                        Editing.               (line 6)
 * consult-line:                          Search.                (line 6)
 * consult-line-multi:                    Search.                (line 6)
 * consult-locate:                        Grep and Find.         (line 6)
-* consult-man:                           Miscellaneous.         (line 6)
+* consult-man:                           Help.                  (line 6)
 * consult-mark:                          Navigation.            (line 6)
 * consult-minor-mode-menu:               Modes.                 (line 6)
 * consult-mode-command:                  Modes.                 (line 6)
-* consult-multi-occur:                   Search.                (line 6)
 * consult-org-agenda:                    Org Mode.              (line 6)
 * consult-org-heading:                   Org Mode.              (line 6)
 * consult-outline:                       Navigation.            (line 6)
@@ -1425,9 +1471,9 @@ File: docblvCO5.info,  Node: Function index,  Next: Concept index,  Up: Indices
 * consult-yank-replace:                  Editing.               (line 6)
 
 
-File: docblvCO5.info,  Node: Concept index,  Prev: Function index,  Up: Indices
+File: doc3KIqKn.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
-8.2 Concept index
+9.2 Concept index
 =================
 
  [index ]
@@ -1459,35 +1505,37 @@ File: docblvCO5.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
 Tag Table:
 Node: Top221
-Node: Available commands4945
-Node: Virtual Buffers6466
-Node: Editing8153
-Node: Register9009
-Node: Navigation10721
-Node: Search11804
-Node: Grep and Find13831
-Node: Compilation15829
-Node: Histories16505
-Node: Modes17725
-Node: Org Mode18205
-Node: Miscellaneous18722
-Node: Special features21216
-Node: Live previews22345
-Node: Narrowing and grouping25793
-Node: Asynchronous search27796
-Node: Multiple sources30878
-Node: Embark integration36640
-Node: Configuration38835
-Node: Use-package example39937
-Node: Custom variables46962
-Node: Fine-tuning50699
-Node: Recommended packages53742
-Node: Bug reports59855
-Node: Contributions62596
-Node: Acknowledgments63506
-Node: Indices67832
-Node: Function index68070
-Node: Concept index71645
+Node: Available commands5119
+Node: Virtual Buffers6696
+Node: Editing8383
+Node: Register9239
+Node: Navigation10951
+Node: Search12034
+Node: Grep and Find13945
+Node: Compilation16076
+Node: Histories16752
+Node: Modes17972
+Node: Org Mode18452
+Node: Help18960
+Node: Miscellaneous20071
+Node: Special features22266
+Node: Live previews23395
+Node: Narrowing and grouping26800
+Node: Asynchronous search28803
+Node: Multiple sources31885
+Node: Embark integration37641
+Node: Configuration39836
+Node: Use-package example40938
+Node: Custom variables48025
+Node: Fine-tuning51762
+Node: Recommended packages54783
+Node: Auxiliary packages56618
+Node: Bug reports61211
+Node: Contributions64324
+Node: Acknowledgments65234
+Node: Indices69737
+Node: Function index69975
+Node: Concept index73477
 
 End Tag Table
 

@@ -2,6 +2,65 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 0.33 (2023-03-11)
+
+- BREAKING: The key convention has been updated. The old key convention is not
+  supported anymore. Keys must now be strings valid according to =key-valid-p=.
+  This changes affects the keys =consult-narrow-key=, =consult-widen-key=,
+  =consult-preview-key= and the =:preview-key= of sources and passed as keyword
+  argument to =consult--read=. See the example configurations in the manual.
+- BREAKING: Remove the "." argument from  =consult-grep-args= and
+  =consult-ripgrep-args=, since directories or files to search are appended by the
+  command line builder. Take this change into account, when you use a customized
+  version of those variables.
+- =consult-grep=: Add support for grep and find over multiple files or directory.
+  If the prefix argument DIR is a single C-u, prompt for comma separated
+  directories or files to search recursively via =completing-read-multiple=.
+- =consult-buffer= and =consult-isearch-history=: Align annotations dynamically
+  depending on candidate width, instead of computing the alignment beforehand.
+- Add the full path as =help-echo= property to abbreviated directory paths and
+  project names. Enable =tooltip-mode= and hover with the mouse over the
+  abbreviated directory path to see the full path.
+- =consult-grep/find/etc=: Print first line of stderr output if command failed.
+
+* Version 0.32 (2023-02-06)
+
+- Bugfixes
+- Deprecate the old key convention. Keys must now be strings valid according to
+  =key-valid-p=. This changes affects the keys =consult-narrow-key=,
+  =consult-widen-key=, =consult-preview-key= and the =:preview-key= of sources and
+  passed as keyword argument to =consult--read=. See the example configurations in
+  the manual.
+- Add =consult-info= command (#634, #727).
+- =consult-buffer=: Always select the first candidate when narrowing (#714).
+- =consult-locate-args=: Remove =--existing=, which is not supported by =plocate= on
+  Debian stable.
+- =consult-ripgrep-args=: Add =--search-zip= option to automatically search through
+  compressed files. This will allow you to search Elisp files bundled with your
+  Emacs installation. Move to an Elisp library via =find-library=, then invoke
+  =consult-ripgrep=.
+- Drop obsolete =consult-apropos=. Alternatives: =describe-symbol= in combination
+  with =embark-export=. See also =consult-info= and =consult-ripgrep= to search
+  through info manuals and Elisp source code.
+- Drop obsolete =consult-multi-occur=. Alternative: Built-in =multi-occur=,
+  =multi-occur-in-matching-buffers= or =consult-line-multi=.
+- Drop obsolete =consult-file-externally=. The command has been moved to Embark
+  under the name =embark-open-externally=.
+
+* Version 0.31 (2023-01-06)
+
+- Version bump to update the Compat package dependency (29.1.0.1)
+
+* Version 0.30 (2023-01-02)
+
+- Bugfixes
+- Drop Selectrum support
+- Deprecate =consult-file-externally= in favor of =embark-open-externally=
+- Deprecate =consult-multi-occur=. The =multi-occur= command should be improved
+  upstream to take advantage of =completing-read-multiple=. Consult provides the
+  command =consult-line-multi= as an alternative.
+- =consult-history=: Use input as initial completion input
+
 * Version 0.29 (2022-12-03)
 
 - Bugfixes
