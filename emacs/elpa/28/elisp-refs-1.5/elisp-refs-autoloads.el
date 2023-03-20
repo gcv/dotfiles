@@ -55,7 +55,7 @@ search.
 
 \(fn SYMBOL &optional PATH-PREFIX)" t nil)
 
-(register-definition-prefixes "elisp-refs" '("elisp-refs-"))
+(register-definition-prefixes "elisp-refs" '("elisp-"))
 
 ;;;***
 
