@@ -19,6 +19,7 @@ fi
 # - bat and cat
 # - exa and ls
 packages=(
+    #ansible
     aspell
     aspell-dict-en
     autoconf
@@ -48,6 +49,7 @@ packages=(
     findutils
     fish
     fzf
+    getopt             # enhanced option parser for shell scripts
     git
     git-lfs
     gnupg
