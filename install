@@ -140,6 +140,11 @@ if [[ ! -d "${HOME}/.local/bin" ]]; then
     mkdir -p "${HOME}/.local/bin"
 fi
 
+# make sure ~/.local/share exists
+if [[ ! -d "${HOME}/.local/share" ]]; then
+    mkdir -p "${HOME}/.local/share"
+fi
+
 
 ### links
 
@@ -212,7 +217,7 @@ if [[ $link_all = "1" || $link_sqlite = "1" ]]; then
 fi
 
 if [[ $link_all = "1" || $link_starship = "1" ]]; then
-    link "public/starship.toml" ".config"
+    link "public/starship.toml" ".config/starship.toml"
 fi
 
 if [[ $link_all = "1" || $link_tmux = "1" ]]; then

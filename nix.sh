@@ -4,8 +4,8 @@
 NIX_HOME=/nix
 
 if [[ ! -d "${NIX_HOME}" ]]; then
-    sudo mkdir -m 0755 "${NIX_HOME}" && chown `whoami` "${NIX_HOME}"
-    sh <(curl https://nixos.org/nix/install) --no-daemon
+    sudo mkdir -m 0755 "${NIX_HOME}" && sudo chown `whoami` "${NIX_HOME}"
+    sh <(curl -L https://nixos.org/nix/install) --no-daemon
 fi
 
 
