@@ -1159,23 +1159,23 @@
 
 
 ;;; TypeScript IDE
-(use-package tide
-  :diminish " Tide"
-  :commands (tide-mode)
-
-  :config
-  (setq tide-tsserver-start-method 'manual)
-)
+;; (use-package tide
+;;   :diminish " Tide"
+;;   :commands (tide-mode)
+;;
+;;   :config
+;;   (setq tide-tsserver-start-method 'manual)
+;; )
 
 
 ;;; Installed purely because it's a tide dependency. web-mode provides superior
 ;;; TS indentation.
-(use-package typescript-mode
-  :diminish " TS"
-
-  :config
-  (setq auto-mode-alist (delete '("\\.ts$" . typescript-mode) auto-mode-alist))
-  )
+;; (use-package typescript-mode
+;;   :diminish " TS"
+;;
+;;   :config
+;;   (setq auto-mode-alist (delete '("\\.ts$" . typescript-mode) auto-mode-alist))
+;;   )
 
 
 ;;; TODO: Review when Emacs 28 comes out. Maybe just add C-z as a binding for
@@ -1273,11 +1273,11 @@
     (require 'flycheck)
     ;; (require 'flycheck)
     (subword-mode 1)
-    (when (-contains? '("ts" "tsx") (file-name-extension buffer-file-name))
-      (tide-setup)
-      (unless (-contains? (flycheck-checker-get 'typescript-tide 'modes) 'web-mode)
-        (flycheck-add-mode 'typescript-tide 'web-mode))
-      (flycheck-mode))
+    ;; (when (-contains? '("ts" "tsx") (file-name-extension buffer-file-name))
+    ;;   (tide-setup)
+    ;;   (unless (-contains? (flycheck-checker-get 'typescript-tide 'modes) 'web-mode)
+    ;;     (flycheck-add-mode 'typescript-tide 'web-mode))
+    ;;   (flycheck-mode))
     (local-set-key (kbd "C-m") 'newline-and-indent))
 
   (add-hook 'web-mode-hook #'/web-mode-hook)
