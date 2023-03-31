@@ -1126,43 +1126,6 @@
 (use-package terraform-mode)
 
 
-;; (use-package treemacs
-;;   :config
-;;   (setq treemacs-persist-file (expand-file-name "treemacs/treemacs-persist" user-emacs-directory))
-;;   (setq treemacs-no-png-images t)
-;;
-;;   (defun /treemacs-mode-hook ()
-;;     ;; (define-key treemacs-mode-map (kbd "M-x")
-;;     ;;   (lambda ()
-;;     ;;     (interactive)
-;;     ;;     (let ((ivy-posframe-display-functions-alist '((counsel-M-x . ivy-posframe-display-at-frame-center))))
-;;     ;;       (counsel-M-x))))
-;;     (define-key treemacs-mode-map (kbd "<S-return>") #'treemacs-visit-node-ace))
-;;
-;;   (add-hook 'treemacs-mode-hook #'/treemacs-mode-hook)
-;;   )
-
-
-;;; TypeScript IDE
-;; (use-package tide
-;;   :diminish " Tide"
-;;   :commands (tide-mode)
-;;
-;;   :config
-;;   (setq tide-tsserver-start-method 'manual)
-;; )
-
-
-;;; Installed purely because it's a tide dependency. web-mode provides superior
-;;; TS indentation.
-;; (use-package typescript-mode
-;;   :diminish " TS"
-;;
-;;   :config
-;;   (setq auto-mode-alist (delete '("\\.ts$" . typescript-mode) auto-mode-alist))
-;;   )
-
-
 ;;; TODO: Review when Emacs 28 comes out. Maybe just add C-z as a binding for
 ;;; undo-only and C-S-z for undo-redo.
 (use-package undo-fu
