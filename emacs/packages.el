@@ -1047,11 +1047,6 @@
   )
 
 
-(use-package rust-mode
-  :mode "\\.rs\\'"
-)
-
-
 ;;; An alternative to .dir-locals.el for configuring projects.
 ;; (use-package sidecar-locals
 ;;   :pin melpa
