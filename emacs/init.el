@@ -731,6 +731,14 @@ See `eshell-prompt-regexp'."
 (add-hook 'abbrev-mode-hook #'/abbrev-mode-hook)
 
 
+;;; eldoc
+(use-feature eldoc
+  :custom
+  ;;(eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit)
+  (eldoc-echo-area-prefer-doc-buffer t)
+  )
+
+
 ;;; EasyPG (epg)
 (setq epg-pinentry-mode 'loopback)
 
