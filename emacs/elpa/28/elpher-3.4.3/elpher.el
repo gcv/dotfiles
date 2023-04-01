@@ -1,11 +1,11 @@
 ;;; elpher.el --- A friendly gopher and gemini client  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2019-2022 Tim Vaughan <plugd@thelambdalab.xyz>
+;; Copyright (C) 2019-2023 Tim Vaughan <plugd@thelambdalab.xyz>
 ;; Copyright (C) 2020-2022 Elpher contributors (See info manual for full list)
 
 ;; Author: Tim Vaughan <plugd@thelambdalab.xyz>
 ;; Created: 11 April 2019
-;; Version: 3.4.2
+;; Version: 3.4.3
 ;; Keywords: comm gopher
 ;; Homepage: https://thelambdalab.xyz/elpher
 ;; Package-Requires: ((emacs "27.1"))
@@ -66,11 +66,12 @@
 (require 'gnutls)
 (require 'socks)
 (require 'bookmark)
+(require 'rx)
 
 ;;; Global constants
 ;;
 
-(defconst elpher-version "3.4.2"
+(defconst elpher-version "3.4.3"
   "Current version of elpher.")
 
 (defconst elpher-margin-width 6
@@ -447,17 +448,21 @@ For gopher addresses this is a combination of the selector type and selector."
 
 (defun elpher-address-host (address)
   "Retrieve host from ADDRESS object."
-  (let ((host-pre (url-host address)))
+  (pcase (url-host address)
     ;; The following strips out square brackets which sometimes enclose IPv6
     ;; addresses.  Doing this here rather than at the parsing stage may seem
     ;; weird, but this lets us way we avoid having to muck with both URL parsing
     ;; and reconstruction.  It's also more efficient, as this method is not
     ;; called during page rendering.
-    (if (and (> (length host-pre) 2)
-             (eq (elt host-pre 0) ?\[)
-             (eq (elt host-pre (- (length host-pre) 1)) ?\]))
-        (substring host-pre 1 (- (length host-pre) 1))
-      host-pre)))
+    ((rx (: "[" (let ipv6 (* (not "]"))) "]"))
+     ipv6)
+    ;; The following is a work-around for a parsing bug that causes
+    ;; URLs with empty (but not absent, see RFC 1738) usernames to have
+    ;; @ prepended to the hostname.
+    ((rx (: "@" (let rest (+ anything))))
+     rest)
+    (addr
+     addr)))
 
 (defun elpher-address-user (address)
   "Retrieve user from ADDRESS object."
@@ -566,7 +571,7 @@ This variable is used by `elpher-show-visited-pages'.")
 (defun elpher-visit-page (page &optional renderer no-history)
   "Visit PAGE using its own renderer or RENDERER, if non-nil.
 Additionally, push PAGE onto the history stack and the list of
-previously-visited pages,unless NO-HISTORY is non-nil."
+previously-visited pages, unless NO-HISTORY is non-nil."
   (elpher-save-pos)
   (elpher-process-cleanup)
   (unless no-history
@@ -865,7 +870,8 @@ the host operating system and the local network capabilities.)"
                                                                  nil force-ipv4))
                                       (t
                                        (elpher-network-error address "Connection time-out."))))))
-               (proc (if socks (socks-open-network-stream "elpher-process" nil host service)
+               (proc (if socks
+                         (socks-open-network-stream "elpher-process" nil host service)
                        (make-network-process :name "elpher-process"
                                              :host host
                                              :family (and (or force-ipv4
@@ -879,6 +885,7 @@ the host operating system and the local network capabilities.)"
                                                   (cons 'gnutls-x509pki
                                                         (apply #'gnutls-boot-parameters
                                                                gnutls-params)))))))
+          (process-put proc 'elpher-buffer (current-buffer))
           (setq elpher-network-timer timer)
           (set-process-coding-system proc 'binary 'binary)
           (set-process-query-on-exit-flag proc nil)
@@ -922,17 +929,19 @@ the host operating system and the local network capabilities.)"
                                                                   response-processor
                                                                   use-tls t))
                                        (response-string-parts
-                                        (elpher-with-clean-buffer
-                                         (insert "Data received.  Rendering..."))
-                                        (funcall response-processor
-                                                 (apply #'concat (reverse response-string-parts)))
-                                        (elpher-restore-pos))
+                                        (with-current-buffer (process-get proc 'elpher-buffer)
+                                          (elpher-with-clean-buffer
+                                           (insert "Data received.  Rendering..."))
+                                          (funcall response-processor
+                                                   (apply #'concat (reverse response-string-parts)))
+                                          (elpher-restore-pos)))
                                        (t
                                         (error "No response from server")))
                                     (error
                                      (elpher-network-error address the-error)))))
           (when socks
-            (if use-tls (apply #'gnutls-negotiate :process proc gnutls-params))
+            (if use-tls
+                (apply #'gnutls-negotiate :process proc gnutls-params))
             (funcall (process-sentinel proc) proc "open\n")))
       (error
        (elpher-process-cleanup)
@@ -1343,14 +1352,17 @@ that the response was malformed."
          (elpher-with-clean-buffer
           (insert "Gemini server is requesting input."))
          (let* ((query-string
-                 (if (eq (elt response-code 1) ?1)
-                     (read-passwd (concat response-meta ": "))
-                   (read-string (concat response-meta ": "))))
+                 (with-local-quit
+                   (if (eq (elt response-code 1) ?1)
+                       (read-passwd (concat response-meta ": "))
+                     (read-string (concat response-meta ": ")))))
                 (query-address (seq-copy (elpher-page-address elpher-current-page)))
                 (old-fname (url-filename query-address)))
-           (setf (url-filename query-address)
-                 (concat old-fname "?" (url-build-query-string `((,query-string)))))
-           (elpher-get-gemini-response query-address renderer)))
+           (if (not query-string)
+               (elpher-visit-previous-page)
+             (setf (url-filename query-address)
+                   (concat old-fname "?" (url-build-query-string `((,query-string)))))
+             (elpher-get-gemini-response query-address renderer))))
         (?2 ; Normal response
          (funcall renderer response-body response-meta))
         (?3 ; Redirect
@@ -1683,7 +1695,7 @@ can be used to toggle the display of the preformatted text."
      (setq-local fill-column (min (window-width) elpher-gemini-max-fill-width))
      (dolist (line (split-string data "\n"))
        (pcase line
-         ((rx (: "```" (opt (let alt-text (+ any)))))
+         ((rx (: string-start "```" (opt (let alt-text (+ any)))))
           (setq preformatted
                 (if preformatted
                     nil
@@ -1796,10 +1808,10 @@ Assumes UTF-8 encoding for all text files."
          (filename (elpher-address-filename address)))
     (unless (file-exists-p filename)
       (elpher-visit-previous-page)
-        (error "File not found"))
+      (error "File not found"))
     (unless (file-readable-p filename)
       (elpher-visit-previous-page)
-        (error "Could not read from file"))
+      (error "Could not read from file"))
     (let ((body (with-temp-buffer
        (let ((coding-system-for-read 'binary)
              (coding-system-for-write 'binary))
@@ -2258,7 +2270,8 @@ supports the old protocol elpher, where the link is self-contained."
   "Go to a particular gopher site HOST-OR-URL.
 When run interactively HOST-OR-URL is read from the minibuffer."
   (interactive (list
-                (read-string (format "Visit URL (default scheme %s): " (elpher-get-default-url-scheme)))))
+                (read-string (format "Visit URL (default scheme %s): "
+                                     (elpher-get-default-url-scheme)))))
   (let ((trimmed-host-or-url (string-trim host-or-url)))
     (unless (string-empty-p trimmed-host-or-url)
       (let ((page (elpher-page-from-url trimmed-host-or-url
@@ -2275,10 +2288,14 @@ Unlike `elpher-go', the reader is initialized with the URL of the
 current page."
   (interactive)
   (let* ((address (elpher-page-address elpher-current-page))
-         (url (read-string (format "Visit URL (default scheme %s): " (elpher-get-default-url-scheme))
+         (url (read-string (format "Visit URL (default scheme %s): "
+                                   (elpher-get-default-url-scheme))
                            (elpher-address-to-url address))))
-    (unless (string-empty-p (string-trim url))
-      (elpher-visit-page (elpher-page-from-url url)))))
+    (let ((trimmed-url (string-trim url)))
+      (unless (string-empty-p trimmed-url)
+        (elpher-with-clean-buffer
+         (elpher-visit-page
+          (elpher-page-from-url trimmed-url (elpher-get-default-url-scheme))))))))
 
 (defun elpher-redraw ()
   "Redraw current page."
@@ -2341,9 +2358,7 @@ current page."
   (if (elpher-address-about-p (elpher-page-address elpher-current-page))
       (error "Cannot download %s"
              (elpher-page-display-string elpher-current-page))
-    (elpher-visit-page (elpher-make-page
-                        (elpher-page-display-string elpher-current-page)
-                        (elpher-page-address elpher-current-page))
+    (elpher-visit-page elpher-current-page
                        #'elpher-render-download
                        t)))
 
