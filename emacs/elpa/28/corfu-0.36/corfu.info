@@ -1,4 +1,4 @@
-This is docNN5dzZ.info, produced by makeinfo version 6.7 from
+This is doc9wGpM9.info, produced by makeinfo version 6.7 from
 corfu.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docNN5dzZ.info,  Node: Top,  Next: Features,  Up: (dir)
+File: doc9wGpM9.info,  Node: Top,  Next: Features,  Up: (dir)
 
 corfu.el - Completion Overlay Region FUnction
 *********************************************
@@ -59,7 +59,7 @@ Installation and Configuration
 
 
 
-File: docNN5dzZ.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
+File: doc9wGpM9.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
 
 1 Features
 **********
@@ -88,7 +88,7 @@ File: docNN5dzZ.info,  Node: Features,  Next: Installation and Configuration,  P
      Candidate documentation in echo area, popup or separate buffer
 
 
-File: docNN5dzZ.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
+File: doc9wGpM9.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
 
 2 Installation and Configuration
 ********************************
@@ -130,7 +130,7 @@ before turning on ‘global-corfu-mode’.
 
        ;; Recommended: Enable Corfu globally.
        ;; This is recommended since Dabbrev can be used globally (M-/).
-       ;; See also `corfu-excluded-modes'.
+       ;; See also `corfu-exclude-modes'.
        :init
        (global-corfu-mode))
 
@@ -211,7 +211,7 @@ completion in the Elisp manual
 * Transfer completion to the minibuffer::
 
 
-File: docNN5dzZ.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
+File: doc9wGpM9.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.1 Auto completion
 ===================
@@ -265,7 +265,7 @@ the Orderless documentation and source code for further details.
                  completion-styles '(orderless-fast))
 
 
-File: docNN5dzZ.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
+File: doc9wGpM9.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
 
 2.2 Completing in the minibuffer
 ================================
@@ -305,7 +305,7 @@ a password is read from the minibuffer.
      (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
-File: docNN5dzZ.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
+File: doc9wGpM9.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.3 Completing in the Eshell or Shell
 =====================================
@@ -368,7 +368,7 @@ that they can be fixed at the root.
        (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
 
 
-File: docNN5dzZ.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
+File: doc9wGpM9.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
 
 2.4 Orderless completion
 ========================
@@ -434,7 +434,7 @@ components.
        (global-corfu-mode))
 
 
-File: docNN5dzZ.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
+File: doc9wGpM9.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
 
 2.5 TAB-and-Go completion
 =========================
@@ -464,7 +464,7 @@ candidate explicitly with ‘RET’.
        (global-corfu-mode))
 
 
-File: docNN5dzZ.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
+File: doc9wGpM9.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
 
 2.6 Transfer completion to the minibuffer
 =========================================
@@ -491,7 +491,7 @@ via ‘completing-read’.
      (keymap-set corfu-map "M-m" #'corfu-move-to-minibuffer)
 
 
-File: docNN5dzZ.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
+File: doc9wGpM9.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
 
 3 Key bindings
 **************
@@ -517,7 +517,7 @@ bindings:
    • ‘keyboard-escape-quit’ -> ‘corfu-reset’
 
 
-File: docNN5dzZ.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
+File: doc9wGpM9.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
 
 4 Extensions
 ************
@@ -557,7 +557,7 @@ the following extensions come with the Corfu ELPA package:
    See the Commentary of those files for configuration details.
 
 
-File: docNN5dzZ.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
+File: doc9wGpM9.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
 
 5 Complementary packages
 ************************
@@ -601,7 +601,7 @@ look into complementary packages to enhance your setup.
      Vertico is the minibuffer completion counterpart of Corfu.
 
 
-File: docNN5dzZ.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
+File: doc9wGpM9.info,  Node: Alternatives,  Next: Contributions,  Prev: Complementary packages,  Up: Top
 
 6 Alternatives
 **************
@@ -620,22 +620,6 @@ File: docNN5dzZ.info,  Node: Alternatives,  Next: Contributions,  Prev: Compleme
      limited and the ‘completion-at-point’ command and the
      ‘completion-in-region’ function do not invoke Company.
 
-   • Mct (https://git.sr.ht/~protesilaos/mct): Protesilaos’ Minibuffer
-     Confines Transcended package supports both minibuffer completion
-     and completion in region.  It reuses the default completion UI for
-     this purpose and installs a timer which live updates the completion
-     buffer.  The main advantage of Mct is that you work with a regular
-     Emacs buffer instead of with a popup.  You can take advantage of
-     the usual Emacs commands to navigate in the completions buffer.  On
-     top, Mct enhances the movement such that you can quickly switch
-     between the completions buffer and the minibuffer or the region
-     which is being completed.  Mct does not support timer-based auto
-     completion, but the integration into Emacs is naturally tight.
-     Note that Mct development is currently discontinued
-     (https://protesilaos.com/codelog/2022-04-14-emacs-discontinue-mct/)
-     due to recent changes of the default completion UI on the Emacs
-     master branch.
-
    • consult-completion-in-region (https://github.com/minad/consult):
      The Consult package provides the function
      ‘consult-completion-in-region’ which can be set as
@@ -648,7 +632,7 @@ File: docNN5dzZ.info,  Node: Alternatives,  Next: Contributions,  Prev: Compleme
      ‘consult-completion-in-region’ is your best option.
 
 
-File: docNN5dzZ.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
+File: doc9wGpM9.info,  Node: Contributions,  Prev: Alternatives,  Up: Top
 
 7 Contributions
 ***************
@@ -663,17 +647,17 @@ Tag Table:
 Node: Top213
 Node: Features2134
 Node: Installation and Configuration3616
-Node: Auto completion9290
-Node: Completing in the minibuffer11658
-Node: Completing in the Eshell or Shell13814
-Node: Orderless completion16956
-Node: TAB-and-Go completion20057
-Node: Transfer completion to the minibuffer21169
-Node: Key bindings22489
-Node: Extensions23608
-Node: Complementary packages25408
-Node: Alternatives27558
-Node: Contributions30209
+Node: Auto completion9289
+Node: Completing in the minibuffer11657
+Node: Completing in the Eshell or Shell13813
+Node: Orderless completion16955
+Node: TAB-and-Go completion20056
+Node: Transfer completion to the minibuffer21168
+Node: Key bindings22488
+Node: Extensions23607
+Node: Complementary packages25407
+Node: Alternatives27557
+Node: Contributions29207
 
 End Tag Table
 

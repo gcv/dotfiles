@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.35"))
+;; Package-Requires: ((emacs "27.1") (corfu "0.36"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -50,7 +50,7 @@
 (defcustom corfu-indexed-start 0
   "Start of the indexing."
   :group 'corfu
-  :type 'integer)
+  :type 'natnum)
 
 (defvar corfu-indexed--commands
   '(corfu-insert corfu-complete)

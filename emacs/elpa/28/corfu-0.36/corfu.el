@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.35
-;; Package-Requires: ((emacs "27.1") (compat "29.1.3.4"))
+;; Version: 0.36
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -50,20 +50,20 @@
 
 (defcustom corfu-count 10
   "Maximal number of candidates to show."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom corfu-scroll-margin 2
   "Number of lines at the top and bottom when scrolling.
 The value should lie between 0 and corfu-count/2."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom corfu-min-width 15
   "Popup minimum width in characters."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom corfu-max-width 100
   "Popup maximum width in characters."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom corfu-cycle nil
   "Enable cycling for `corfu-next' and `corfu-previous'."
@@ -94,9 +94,6 @@ inserted on further input."
 - directory: Like first, but select the prompt if it is a directory."
   :type '(choice (const prompt) (const valid) (const first) (const directory)))
 
-(defvar corfu-preselect-first t)
-(make-obsolete-variable 'corfu-preselect-first "Use `corfu-preselect' instead." "0.34")
-
 (defcustom corfu-separator ?\s
   "Component separator character.
 The character used for separating components in the input.  The presence
@@ -124,9 +121,10 @@ separator: Only stay alive if there is no match and
 `corfu-separator' has been inserted."
   :type '(choice boolean (const separator)))
 
-(defcustom corfu-excluded-modes nil
+(defcustom corfu-exclude-modes nil
   "List of modes excluded by `global-corfu-mode'."
   :type '(repeat symbol))
+(define-obsolete-function-alias 'corfu-excluded-modes 'corfu-exclude-modes "0.35")
 
 (defcustom corfu-left-margin-width 0.5
   "Width of the left margin in units of the character width."
@@ -162,11 +160,16 @@ return a string, possibly an icon."
 (defcustom corfu-auto-prefix 3
   "Minimum length of prefix for auto completion.
 The completion backend can override this with
-:company-prefix-length."
-  :type 'integer)
+:company-prefix-length.  It is *not recommended* to use a small
+prefix length (below 2), since this will create high load for
+Emacs.  See also `corfu-auto-delay'."
+  :type 'natnum)
 
 (defcustom corfu-auto-delay 0.2
-  "Delay for auto completion."
+  "Delay for auto completion.
+It is *not recommended* to use a very small delay or even 0,
+since this will create high load for Emacs in particular if the
+completion backend in use is expensive."
   :type 'float)
 
 (defcustom corfu-auto-commands
@@ -779,7 +782,6 @@ FRAME is the existing frame."
   "Setup Corfu completion state."
   (setq corfu--extra completion-extra-properties)
   (completion-in-region-mode 1)
-  (undo-boundary) ;; Necessary to support `corfu-reset'
   (activate-change-group (setq corfu--change-group (prepare-change-group)))
   (setcdr (assq #'completion-in-region-mode minor-mode-overriding-map-alist) corfu-map)
   (add-hook 'pre-command-hook #'corfu--prepare nil 'local)
@@ -1279,8 +1281,9 @@ The ORIG function takes the FUN and WHICH arguments."
 (defun corfu--on ()
   "Turn `corfu-mode' on."
   (unless (or noninteractive
+              buffer-read-only
               (eq (aref (buffer-name) 0) ?\s)
-              (memq major-mode corfu-excluded-modes))
+              (memq major-mode corfu-exclude-modes))
     (corfu-mode 1)))
 
 (defun corfu--eldoc-advice ()
