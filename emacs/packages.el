@@ -381,9 +381,7 @@
   :pin nongnu)
 
 
-;;; eglot: LSP mode.
-;;; TODO: Review when Emacs 29 comes out.
-;;; Remove dependencies: external-completion, jsonrpc, xref
+;;; eglot: LSP support mode. For Emacs <29, only version 1.9 or earlier work.
 (use-package eglot)
 
 
@@ -1052,7 +1050,11 @@
   )
 
 
-(use-package rustic)
+(use-package rustic
+
+  :custom
+  (rustic-lsp-client 'eglot)
+  )
 
 
 ;;; An alternative to .dir-locals.el for configuring projects.
