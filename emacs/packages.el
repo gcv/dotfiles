@@ -381,6 +381,12 @@
   :pin nongnu)
 
 
+;;; eglot: LSP mode.
+;;; TODO: Review when Emacs 29 comes out.
+;;; Remove dependencies: external-completion, jsonrpc, xref
+(use-package eglot)
+
+
 ;;; obsolete: set-fontset-font invocations with appropriate fonts should work
 ;; (use-package emojify
 ;;   :pin melpa
@@ -1044,6 +1050,9 @@
   (setq reverse-im-input-methods '("russian-computer"))
   ;;(reverse-im-mode 1)
   )
+
+
+(use-package rustic)
 
 
 ;;; An alternative to .dir-locals.el for configuring projects.
