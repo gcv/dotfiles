@@ -734,7 +734,8 @@ See `eshell-prompt-regexp'."
 ;;; eldoc
 (use-feature eldoc
   :custom
-  ;;(eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit)
+  ;;(eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit) ; default
+  (eldoc-echo-area-use-multiline-p nil)
   (eldoc-echo-area-prefer-doc-buffer t)
   )
 
