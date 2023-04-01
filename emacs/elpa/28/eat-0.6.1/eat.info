@@ -1,6 +1,6 @@
-This is doc42m57g.info, produced by makeinfo version 6.7 from eat.texi.
+This is docrZkPhl.info, produced by makeinfo version 6.7 from eat.texi.
 
-This manual is for Eat (version 0.6, 08 February 2023), a terminal
+This manual is for Eat (version 0.6.1, 28 March 2023), a terminal
 emulator for Emacs.
 
    Copyright © 2022, 2023 Akib Azmain Turja.
@@ -17,12 +17,12 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: doc42m57g.info,  Node: Top,  Next: Intro,  Up: (dir)
+File: docrZkPhl.info,  Node: Top,  Next: Intro,  Up: (dir)
 
 Eat Manual
 **********
 
-This manual is for Eat (version 0.6, 08 February 2023), a terminal
+This manual is for Eat (version 0.6.1, 28 March 2023), a terminal
 emulator for Emacs.
 
    Copyright © 2022, 2023 Akib Azmain Turja.
@@ -72,7 +72,7 @@ Appendices
 * Index::               A list of various things.
 
 
-File: doc42m57g.info,  Node: Intro,  Next: Hello Terminal,  Prev: Top,  Up: Top
+File: docrZkPhl.info,  Node: Intro,  Next: Hello Terminal,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -94,7 +94,7 @@ both graphical display and text display, while still allowing you to run
 full screen programs like Emacs within the terminal.
 
 
-File: doc42m57g.info,  Node: Hello Terminal,  Next: Project-local Terminal,  Prev: Intro,  Up: Top
+File: docrZkPhl.info,  Node: Hello Terminal,  Next: Project-local Terminal,  Prev: Intro,  Up: Top
 
 2 Hello Terminal
 ****************
@@ -118,7 +118,7 @@ it’ll switch to a terminal in ‘*eat*<N>’, ‘*eat*<42>’ for example, and
 it’ll create a new terminal if that doesn’t exist.
 
 
-File: doc42m57g.info,  Node: Project-local Terminal,  Next: Eshell Terminal,  Prev: Hello Terminal,  Up: Top
+File: docrZkPhl.info,  Node: Project-local Terminal,  Next: Eshell Terminal,  Prev: Hello Terminal,  Up: Top
 
 3 Project-local Terminal
 ************************
@@ -130,7 +130,7 @@ or switches to a already existing project terminal.  It too accepts
 prefix argument, just like the ordinary ‘eat’ command.
 
 
-File: doc42m57g.info,  Node: Eshell Terminal,  Next: Keyboard,  Prev: Project-local Terminal,  Up: Top
+File: docrZkPhl.info,  Node: Eshell Terminal,  Next: Keyboard,  Prev: Project-local Terminal,  Up: Top
 
 4 Eshell Terminal Emulation
 ***************************
@@ -158,7 +158,7 @@ nil, since they’ll work in Eshell when ‘eat-eshell-mode’ is enabled.
 the global minor mode ‘eat-eshell-visual-command-mode’.
 
 
-File: doc42m57g.info,  Node: Keyboard,  Next: Mouse,  Prev: Eshell Terminal,  Up: Top
+File: docrZkPhl.info,  Node: Keyboard,  Next: Mouse,  Prev: Eshell Terminal,  Up: Top
 
 5 Keyboard
 **********
@@ -181,7 +181,7 @@ example, to input ‘M-:’, use the key sequence ‘C-q M-:’.
 Char Mode::.
 
 
-File: doc42m57g.info,  Node: Mouse,  Next: Input Modes,  Prev: Keyboard,  Up: Top
+File: docrZkPhl.info,  Node: Mouse,  Next: Input Modes,  Prev: Keyboard,  Up: Top
 
 6 Mouse
 *******
@@ -194,7 +194,7 @@ supports it.
    *Note Mouse Tracking:: to configure mouse tracking.
 
 
-File: doc42m57g.info,  Node: Input Modes,  Next: Shell Integration,  Prev: Mouse,  Up: Top
+File: docrZkPhl.info,  Node: Input Modes,  Next: Shell Integration,  Prev: Mouse,  Up: Top
 
 7 Input Modes
 *************
@@ -282,7 +282,7 @@ and to “char mode” with ‘C-c M-d’.  In Eshell, the command
 usually bound to ‘C-c M-d’.
 
 
-File: doc42m57g.info,  Node: Shell Integration,  Next: Querying Before Kill,  Prev: Input Modes,  Up: Top
+File: docrZkPhl.info,  Node: Shell Integration,  Next: Querying Before Kill,  Prev: Input Modes,  Up: Top
 
 8 Shell Integration
 *******************
@@ -347,7 +347,7 @@ indicate the command has exited unsuccessfully with non-zero exit
 status.
 
 
-File: doc42m57g.info,  Node: Querying Before Kill,  Next: Display,  Prev: Shell Integration,  Up: Top
+File: docrZkPhl.info,  Node: Querying Before Kill,  Next: Display,  Prev: Shell Integration,  Up: Top
 
 9 Querying Before Kill
 **********************
@@ -368,7 +368,7 @@ this.
      essentially same as ‘t’, and Eat will always query.
 
 
-File: doc42m57g.info,  Node: Display,  Next: Scrollback,  Prev: Querying Before Kill,  Up: Top
+File: docrZkPhl.info,  Node: Display,  Next: Scrollback,  Prev: Querying Before Kill,  Up: Top
 
 10 Display
 **********
@@ -384,7 +384,7 @@ display size is controlled by the Emacs user option
 Buffers:: for the possible values of the user option.
 
 
-File: doc42m57g.info,  Node: Scrollback,  Next: Cursor Types,  Prev: Display,  Up: Top
+File: docrZkPhl.info,  Node: Scrollback,  Next: Cursor Types,  Prev: Display,  Up: Top
 
 11 Scrollback
 *************
@@ -407,7 +407,7 @@ much memory.  You can change the limit, or remove it altogether.
      scrollback region is unlimited.
 
 
-File: doc42m57g.info,  Node: Cursor Types,  Next: Mouse Tracking,  Prev: Scrollback,  Up: Top
+File: docrZkPhl.info,  Node: Cursor Types,  Next: Mouse Tracking,  Prev: Scrollback,  Up: Top
 
 12 Cursor Types
 ***************
@@ -446,7 +446,7 @@ as CURSOR-ON.  The blinking cursor switches between CURSOR-ON and
 CURSOR-OFF cursor shape.
 
 
-File: doc42m57g.info,  Node: Mouse Tracking,  Next: Clipboard,  Prev: Cursor Types,  Up: Top
+File: docrZkPhl.info,  Node: Mouse Tracking,  Next: Clipboard,  Prev: Cursor Types,  Up: Top
 
 13 Mouse Tracking
 *****************
@@ -461,7 +461,7 @@ mouse at all.  So mouse tracking can be toggled.
      tracking.  This is enabled by default.
 
 
-File: doc42m57g.info,  Node: Clipboard,  Next: Colors,  Prev: Mouse Tracking,  Up: Top
+File: docrZkPhl.info,  Node: Clipboard,  Next: Colors,  Prev: Mouse Tracking,  Up: Top
 
 14 Clipboard
 ************
@@ -492,7 +492,7 @@ the following user option to configure this:
      disabled by default for security reasons.
 
 
-File: doc42m57g.info,  Node: Colors,  Next: Fonts,  Prev: Clipboard,  Up: Top
+File: docrZkPhl.info,  Node: Colors,  Next: Fonts,  Prev: Clipboard,  Up: Top
 
 15 Colors
 *********
@@ -547,7 +547,7 @@ following user option:
      for the behavior described above.
 
 
-File: doc42m57g.info,  Node: Fonts,  Next: Blinking Text,  Prev: Colors,  Up: Top
+File: docrZkPhl.info,  Node: Fonts,  Next: Blinking Text,  Prev: Colors,  Up: Top
 
 16 Fonts
 ********
@@ -576,7 +576,7 @@ number between 0 and 9 (inclusive).  For example, the font 6 is can be
 changed by customizing ‘eat-term-font-6’.  Font 0 is the default font.
 
 
-File: doc42m57g.info,  Node: Blinking Text,  Next: Performance Tuning,  Prev: Fonts,  Up: Top
+File: docrZkPhl.info,  Node: Blinking Text,  Next: Performance Tuning,  Prev: Fonts,  Up: Top
 
 17 Blinking Text
 ****************
@@ -621,7 +621,7 @@ the rate of blinking:
      second.
 
 
-File: doc42m57g.info,  Node: Performance Tuning,  Next: Common Problems,  Prev: Blinking Text,  Up: Top
+File: docrZkPhl.info,  Node: Performance Tuning,  Next: Common Problems,  Prev: Blinking Text,  Up: Top
 
 18 Performance Tuning
 *********************
@@ -713,7 +713,7 @@ enough.  So Eat defers the correction.
 values, but they may change anytime.
 
 
-File: doc42m57g.info,  Node: Common Problems,  Next: Reporting Bugs,  Prev: Performance Tuning,  Up: Top
+File: docrZkPhl.info,  Node: Common Problems,  Next: Reporting Bugs,  Prev: Performance Tuning,  Up: Top
 
 19 Common Problems
 ******************
@@ -731,7 +731,7 @@ Eat does something unexpected, such as hangs, garbled text, etc.
 * Bugs in Manual::      What if there are problems in this manual?
 
 
-File: doc42m57g.info,  Node: Not Recognized,  Next: Garbled Text,  Up: Common Problems
+File: docrZkPhl.info,  Node: Not Recognized,  Next: Garbled Text,  Up: Common Problems
 
 19.1 Terminal Not Recognized
 ============================
@@ -754,7 +754,7 @@ Terminfo database, the program should now recognize Eat.  If they don’t
 match, then your shell is probably responsible for the problem.
 
 
-File: doc42m57g.info,  Node: Garbled Text,  Next: Input Invisible,  Prev: Not Recognized,  Up: Common Problems
+File: docrZkPhl.info,  Node: Garbled Text,  Next: Input Invisible,  Prev: Not Recognized,  Up: Common Problems
 
 19.2 Garbled Text on Terminal
 =============================
@@ -778,7 +778,7 @@ Bugs:: for instructions on sending bug reports or feature request.
 definitely a bug, so please report it.
 
 
-File: doc42m57g.info,  Node: Input Invisible,  Next: Not Responding,  Prev: Garbled Text,  Up: Common Problems
+File: docrZkPhl.info,  Node: Input Invisible,  Next: Not Responding,  Prev: Garbled Text,  Up: Common Problems
 
 19.3 Input Invisible
 ====================
@@ -794,7 +794,7 @@ automatically fallback to bare Eshell when ‘stty’ is not available,
 ‘nil’ to do nothing, and ‘ask’ to ask interactively.
 
 
-File: doc42m57g.info,  Node: Not Responding,  Next: Signaled an Error,  Prev: Input Invisible,  Up: Common Problems
+File: docrZkPhl.info,  Node: Not Responding,  Next: Signaled an Error,  Prev: Input Invisible,  Up: Common Problems
 
 19.4 Emacs or Eat Not Responding
 ================================
@@ -810,7 +810,7 @@ those programs in faster terminals like bare Eshell (i.e.  without
 Eat-Eshell), Comint, or external terminal emulators.
 
 
-File: doc42m57g.info,  Node: Signaled an Error,  Next: Bugs in Manual,  Prev: Not Responding,  Up: Common Problems
+File: docrZkPhl.info,  Node: Signaled an Error,  Next: Bugs in Manual,  Prev: Not Responding,  Up: Common Problems
 
 19.5 Eat Signaled an Error
 ==========================
@@ -830,7 +830,7 @@ work with.  However, it mayn’t work if you’re really unlucky, in that
 case deleting the terminal and starting a new one is your only option.
 
 
-File: doc42m57g.info,  Node: Bugs in Manual,  Prev: Signaled an Error,  Up: Common Problems
+File: docrZkPhl.info,  Node: Bugs in Manual,  Prev: Signaled an Error,  Up: Common Problems
 
 19.6 Bugs in Manual
 ===================
@@ -857,7 +857,7 @@ them must be wrong, and that’s a bug.
 instruction on how to report it.
 
 
-File: doc42m57g.info,  Node: Reporting Bugs,  Next: Tracing the Terminal,  Prev: Common Problems,  Up: Top
+File: docrZkPhl.info,  Node: Reporting Bugs,  Next: Tracing the Terminal,  Prev: Common Problems,  Up: Top
 
 20 Reporting Bugs
 *****************
@@ -919,7 +919,7 @@ anything that reproduces the bug will suffice.  (Of course, if you like
 doing experiments, the smaller the example, the better.)
 
 
-File: doc42m57g.info,  Node: Tracing the Terminal,  Next: GNU General Public License,  Prev: Reporting Bugs,  Up: Top
+File: docrZkPhl.info,  Node: Tracing the Terminal,  Next: GNU General Public License,  Prev: Reporting Bugs,  Up: Top
 
 21 Tracing the Terminal
 ***********************
@@ -952,7 +952,7 @@ ordinary users, it’s documented here only to help you debug Eat.  You
 mustn’t rely on the behavior of this functionality to do anything else.
 
 
-File: doc42m57g.info,  Node: GNU General Public License,  Next: GNU Free Documentation License,  Prev: Tracing the Terminal,  Up: Top
+File: docrZkPhl.info,  Node: GNU General Public License,  Next: GNU Free Documentation License,  Prev: Tracing the Terminal,  Up: Top
 
 Appendix A GNU General Public License
 *************************************
@@ -1668,7 +1668,7 @@ GNU Lesser General Public License instead of this License.  But first,
 please read <https://www.gnu.org/licenses/why-not-lgpl.html>.
 
 
-File: doc42m57g.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: GNU General Public License,  Up: Top
+File: docrZkPhl.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: GNU General Public License,  Up: Top
 
 Appendix B GNU Free Documentation License
 *****************************************
@@ -2150,7 +2150,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: doc42m57g.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: docrZkPhl.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
 
 Appendix C Index
 ****************
@@ -2421,40 +2421,40 @@ Appendix C Index
 
 
 Tag Table:
-Node: Top719
-Node: Intro2928
-Node: Hello Terminal3774
-Node: Project-local Terminal4891
-Node: Eshell Terminal5399
-Node: Keyboard6594
-Node: Mouse7592
-Node: Input Modes7976
-Ref: Semi-char Mode8678
-Ref: Char Mode10302
-Ref: Emacs Mode11148
-Node: Shell Integration11824
-Node: Querying Before Kill14995
-Node: Display15994
-Node: Scrollback16620
-Node: Cursor Types17559
-Node: Mouse Tracking19403
-Node: Clipboard19952
-Node: Colors21297
-Node: Fonts24025
-Node: Blinking Text25193
-Node: Performance Tuning27205
-Node: Common Problems31822
-Node: Not Recognized32472
-Node: Garbled Text33578
-Node: Input Invisible34618
-Node: Not Responding35338
-Node: Signaled an Error36069
-Node: Bugs in Manual37083
-Node: Reporting Bugs37908
-Node: Tracing the Terminal40625
-Node: GNU General Public License42107
-Node: GNU Free Documentation License79926
-Node: Index105295
+Node: Top718
+Node: Intro2926
+Node: Hello Terminal3772
+Node: Project-local Terminal4889
+Node: Eshell Terminal5397
+Node: Keyboard6592
+Node: Mouse7590
+Node: Input Modes7974
+Ref: Semi-char Mode8676
+Ref: Char Mode10300
+Ref: Emacs Mode11146
+Node: Shell Integration11822
+Node: Querying Before Kill14993
+Node: Display15992
+Node: Scrollback16618
+Node: Cursor Types17557
+Node: Mouse Tracking19401
+Node: Clipboard19950
+Node: Colors21295
+Node: Fonts24023
+Node: Blinking Text25191
+Node: Performance Tuning27203
+Node: Common Problems31820
+Node: Not Recognized32470
+Node: Garbled Text33576
+Node: Input Invisible34616
+Node: Not Responding35336
+Node: Signaled an Error36067
+Node: Bugs in Manual37081
+Node: Reporting Bugs37906
+Node: Tracing the Terminal40623
+Node: GNU General Public License42105
+Node: GNU Free Documentation License79924
+Node: Index105293
 
 End Tag Table
 

@@ -4,7 +4,7 @@
 
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-08-15
-;; Version: 0.6
+;; Version: 0.6.1
 ;; Package-Requires: ((emacs "28.1"))
 ;; Keywords: terminals processes
 ;; Homepage: https://codeberg.org/akib/emacs-eat
@@ -388,7 +388,7 @@ When the cursor is off, CURSOR-OFF is used as `cursor-type'.  This
 should be nil when cursor is not blinking."
   :type eat--cursor-type-value-type
   :group 'eat-ui
-  :group 'eat-ehell)
+  :group 'eat-eshell)
 
 (defcustom eat-invisible-cursor-type '(nil nil nil)
   "Invisible cursor to use in Eat buffer.
@@ -401,7 +401,7 @@ When the cursor is off, CURSOR-OFF is used as `cursor-type'.  This
 should be nil when cursor is not blinking."
   :type eat--cursor-type-value-type
   :group 'eat-ui
-  :group 'eat-ehell)
+  :group 'eat-eshell)
 
 (defcustom eat-very-visible-cursor-type
   `(,(default-value 'cursor-type) 2 hollow)
@@ -412,7 +412,7 @@ When the cursor is invisible, the car of the value is used as
 blinking frequency of cursor."
   :type eat--cursor-type-value-type
   :group 'eat-ui
-  :group 'eat-ehell)
+  :group 'eat-eshell)
 
 (defcustom eat-minimum-latency 0.008
   "Minimum display latency in seconds.
@@ -423,7 +423,7 @@ cause the terminal to feel less responsive.  Try to increase this
 value if the terminal flickers."
   :type 'number
   :group 'eat-ui
-  :group 'eat-ehell)
+  :group 'eat-eshell)
 
 (defcustom eat-maximum-latency 0.033
   "Minimum display latency in seconds.
@@ -434,7 +434,7 @@ terminal flickers.  Try to lower the value if the terminal feels less
 responsive."
   :type 'number
   :group 'eat-ui
-  :group 'eat-ehell)
+  :group 'eat-eshell)
 
 (defcustom eat-term-name #'eat-term-get-suitable-term-name
   "Value for the `TERM' environment variable.
@@ -976,7 +976,7 @@ Nil when not in alternative display mode.")
   (mouse-encoding nil :documentation "Current mouse event encoding.")
   (focus-event-mode nil :documentation "Whether to send focus event.")
   (cut-buffers
-   (1value (make-vector 10 nil))
+   (1value (make-vector 8 nil))
    :documentation "Cut buffers.")
   ;; NOTE: Change the default value of parameters when changing this.
   (bold-face 'eat-term-bold :documentation "Face for bold text.")
@@ -2604,8 +2604,8 @@ output."
   "Set and send current selection.
 
 TARGETS is a string containing zero or more characters from the set
-`c', `p', `q', `s', `0', `1', `2', `3', `4', `5', `6', `7', `8', `9'.
-DATA is the selection data encoded in base64."
+`c', `p', `q', `s', `0', `1', `2', `3', `4', `5', `6', and `7'.  DATA
+is the selection data encoded in base64."
   (when (string-empty-p targets)
     (setq targets "s0"))
   (if (string= data "?")
@@ -2614,8 +2614,16 @@ DATA is the selection data encoded in base64."
       (funcall
        (eat--t-term-input-fn eat--t-term) eat--t-term
        (let ((str nil)
-             (source nil)
              (n 0))
+         ;; Remove invalid and duplicate targets from TARGETS before
+         ;; processing it and sending it back.
+         (setq targets
+               (apply #'string
+                      (cl-delete-duplicates
+                       (cl-delete-if-not
+                        (lambda (c) (or (<= ?0 c ?7)
+                                        (memq c '(?c ?p ?q ?s))))
+                        (string-to-list targets)))))
          (while (and (not str) (< n (length targets)))
            (setq
             str
@@ -2640,22 +2648,17 @@ DATA is the selection data encoded in base64."
                 eat--t-term :select t))
               ;; 0 to 9 targets are handled by us, and always work.
               ((and (pred (<= ?0))
-                    (pred (>= ?9))
+                    (pred (>= ?7))
                     i)
                (aref (eat--t-term-cut-buffers eat--t-term)
                      (- i ?0)))))
-           ;; If we got a string to send, record the source to inform
-           ;; the client.
-           (when str
-             (setq source (string (aref targets n))))
            (cl-incf n))
-         ;; No string to send, so send an empty string and an empty
-         ;; target string meaning that we don't have any answer.
-         (unless str
-           (setq str "")
-           (setq source ""))
-         (format "\e]52;%s;%s\e\\" source
-                 (base64-encode-string str))))
+         ;; No string to send, so send an empty string.
+         (unless str (setq str ""))
+         (format "\e]52;%s;%s\e\\" targets
+                 (base64-encode-string (encode-coding-string
+                                        str locale-coding-system)
+                                       'no-line-break))))
     ;; The client is requesting to set clipboard content, let's try to
     ;; fulfill the request.
     (let ((str (ignore-errors
@@ -2677,9 +2680,9 @@ DATA is the selection data encoded in base64."
           (?s
            (funcall (eat--t-term-manipulate-selection-fn eat--t-term)
                     eat--t-term :select str))
-          ;; 0 to 9 targets are handled by us, and always work.
+          ;; 0 to 7 targets are handled by us, and always work.
           ((and (pred (<= ?0))
-                (pred (>= ?9))
+                (pred (>= ?7))
                 i)
            (aset (eat--t-term-cut-buffers eat--t-term) (- i ?0)
                  str)))))))
@@ -3206,8 +3209,7 @@ DATA is the selection data encoded in base64."
                       ;; OSC 5 2 ; <t> ; <s> ST.
                       ((rx string-start "52;"
                            (let targets
-                             (zero-or-more (any ?c ?p ?q ?s
-                                                (?0 . ?9))))
+                             (zero-or-more (not ?\;)))
                            ?\; (let data (zero-or-more anything))
                            string-end)
                        (eat--t-manipulate-selection
@@ -3578,7 +3580,7 @@ should not change point and buffer restriction.
 
 To set it, use (`setf' (`eat-term-ring-bell-function' TERMINAL)
 FUNCTION), where FUNCTION is the function to ring the bell."
-  (eat--t-term-manipulate-selection-fn terminal))
+  (eat--t-term-bell-fn terminal))
 
 (gv-define-setter eat-term-ring-bell-function (function terminal)
   `(setf (eat--t-term-bell-fn ,terminal) ,function))
@@ -4560,6 +4562,9 @@ selection, or nil if none."
        (when eat-enable-yank-to-terminal
          (ignore-error error
            (current-kill 0 'do-not-move))))
+      ('nil
+       (when eat-enable-kill-from-terminal
+         (kill-new "")))
       ((and (pred stringp) str)
        (when eat-enable-kill-from-terminal
          (kill-new str))))))
@@ -4582,8 +4587,8 @@ If HOST isn't the host Emacs is running on, don't do anything."
   (setq eat--shell-prompt-begin (point-marker))
   ;; FIXME: It's a crime to touch processes in this section.
   (when (eq eat-query-before-killing-running-terminal 'auto)
-    (when (bound-and-true-p eat--process)
-      (set-process-query-on-exit-flag eat--process nil))))
+    (set-process-query-on-exit-flag
+     (eat-term-parameter eat--terminal 'eat--process) nil)))
 
 (defun eat--post-prompt (_)
   "Put a mark in the marginal area on current line."
@@ -4687,8 +4692,8 @@ BUFFER is the terminal buffer."
   "Update shell prompt mark to indicate command is running."
   ;; FIXME: It's a crime to touch processes in this section.
   (when (eq eat-query-before-killing-running-terminal 'auto)
-    (when (bound-and-true-p eat--process)
-      (set-process-query-on-exit-flag eat--process t)))
+    (set-process-query-on-exit-flag
+     (eat-term-parameter eat--terminal 'eat--process) t))
   (when (and eat-enable-shell-prompt-annotation
              eat--shell-prompt-mark)
     (setf (cadr eat--shell-prompt-mark)
@@ -5152,7 +5157,6 @@ END if it's safe to do so."
           cursor-type
           track-mouse
           eat--terminal
-          eat--process
           eat--synchronize-scroll-function
           eat--mouse-grabbing-type
           eat--shell-command-status
@@ -5173,7 +5177,7 @@ END if it's safe to do so."
   (setq mode-line-process
         '(""
           (:eval
-           (when eat--process
+           (when eat--terminal
              (cond
               (eat--semi-char-mode
                '("["
@@ -5257,9 +5261,6 @@ mouse-3: Switch to char mode"
 
 ;;;;; Process Handling.
 
-(defvar eat--process nil
-  "The running process.")
-
 (defvar eat--pending-output-chunks nil
   "The list of pending output chunks.
 
@@ -5277,8 +5278,9 @@ The output chunks are pushed, so last output appears first.")
 (defun eat-kill-process ()
   "Kill Eat process in current buffer."
   (interactive)
-  (when eat--process
-    (kill-process eat--process)))
+  (when-let* ((eat--terminal)
+              (proc (eat-term-parameter eat--terminal 'eat--process)))
+    (delete-process proc)))
 
 (defun eat--send-string (process string)
   "Send to PROCESS the contents of STRING as input.
@@ -5299,8 +5301,9 @@ OS's."
 
 (defun eat--send-input (_ input)
   "Send INPUT to subprocess."
-  (when eat--process
-    (eat--send-string eat--process input)))
+  (when-let* ((eat--terminal)
+              (proc (eat-term-parameter eat--terminal 'eat--process)))
+    (eat--send-string proc input)))
 
 (defun eat--process-output-queue (buffer)
   "Process the output queue on BUFFER."
@@ -5385,7 +5388,6 @@ to it."
                   (setq eat--shell-prompt-mark nil)
                   (setq eat--shell-prompt-mark-overlays nil))
                 (eat-emacs-mode)
-                (setq eat--process nil)
                 (delete-process process)
                 (eat-term-delete eat--terminal)
                 (setq eat--terminal nil)
@@ -5424,9 +5426,11 @@ mode.  You can use this to cheaply run a series of processes in the
 same Eat buffer.  The hook `eat-exec-hook' is run after each exec."
   (with-current-buffer buffer
     (let ((inhibit-read-only t))
-      (when eat--process
+      (when-let*
+          ((eat--terminal)
+           (proc (eat-term-parameter eat--terminal 'eat--process)))
         (let ((eat-kill-buffer-on-exit nil))
-          (delete-process eat--process)))
+          (delete-process proc)))
       ;; Ensure final newline.
       (goto-char (point-max))
       (unless (or (= (point-min) (point-max))
@@ -5493,14 +5497,19 @@ same Eat buffer.  The hook `eat-exec-hook' is run after each exec."
         ;; Jump to the end, and set the process mark.
         (goto-char (point-max))
         (set-marker (process-mark process) (point))
-        (setq eat--process process)
+        (setf (eat-term-parameter eat--terminal 'eat--process)
+              process)
+        (setf (eat-term-parameter eat--terminal 'eat--input-process)
+              process)
+        (setf (eat-term-parameter eat--terminal 'eat--output-process)
+              process)
         ;; Feed it the startfile.
         (when startfile
-          ;;This is guaranteed to wait long enough
-          ;;but has bad results if the shell does not prompt at all
-          ;;         (while (= size (buffer-size))
-          ;;           (sleep-for 1))
-          ;;I hope 1 second is enough!
+          ;; This is guaranteed to wait long enough
+          ;; but has bad results if the shell does not prompt at all
+          ;;          (while (= size (buffer-size))
+          ;;            (sleep-for 1))
+          ;; I hope 1 second is enough!
           (sleep-for 1)
           (goto-char (point-max))
           (insert-file-contents startfile)
@@ -5567,7 +5576,8 @@ PROGRAM can be a shell command."
       (unless (eq major-mode #'eat-mode)
         (eat-mode))
       (pop-to-buffer-same-window buffer)
-      (unless eat--process
+      (unless (and eat--terminal
+                   (eat-term-parameter eat--terminal 'eat--process))
         (eat-exec buffer (buffer-name) "/usr/bin/env" nil
                   (list "sh" "-c" program)))
       buffer)))
@@ -5697,6 +5707,8 @@ PROGRAM can be a shell command."
 
 (defvar eshell-last-output-start) ; In `esh-mode'.
 (defvar eshell-last-output-end) ; In `esh-mode'.
+(declare-function eshell-head-process "esh-cmd" ())
+(declare-function eshell-resume-eval "esh-cmd" ())
 
 (defun eat--eshell-term-name (&rest _)
   "Return the value of `TERM' environment variable for Eshell."
@@ -5717,12 +5729,13 @@ PROGRAM can be a shell command."
     (let ((end (eat-term-end eat--terminal)))
       (set-marker eshell-last-output-start end)
       (set-marker eshell-last-output-end end)
-      (set-marker (process-mark eat--process) end))))
+      (set-marker (process-mark (eat-term-parameter
+                                 eat--terminal 'eat--output-process))
+                  end))))
 
 (defun eat--eshell-setup-proc-and-term (proc)
   "Setup process PROC and a new terminal for it."
-  (unless (or eat--terminal eat--process)
-    (setq eat--process proc)
+  (unless eat--terminal
     (process-put proc 'adjust-window-size-function
                  #'eat--adjust-process-window-size)
     (setq eat--terminal (eat-term-make (current-buffer)
@@ -5738,6 +5751,12 @@ PROGRAM can be a shell command."
     (setf (eat-term-ring-bell-function eat--terminal) #'eat--bell)
     (setf (eat-term-set-cwd-function eat--terminal) #'eat--set-cwd)
     (setf (eat-term-set-cmd-function eat--terminal) #'eat--set-cmd)
+    (setf (eat-term-parameter eat--terminal 'eat--process) proc)
+    (unless (>= emacs-major-version 29)
+      (setf (eat-term-parameter eat--terminal 'eat--input-process)
+            proc))
+    (setf (eat-term-parameter eat--terminal 'eat--output-process)
+          proc)
     (when-let* ((window (get-buffer-window nil t)))
       (with-selected-window window
         (eat-term-resize eat--terminal (window-max-chars-per-line)
@@ -5762,9 +5781,10 @@ PROGRAM can be a shell command."
       (set-marker eshell-last-output-end (point))
       (eat--cursor-blink-mode -1)
       (eat--grab-mouse nil nil)
+      (set-process-filter (eat-term-parameter
+                           eat--terminal 'eat--output-process)
+                          #'eshell-output-filter)
       (eat-term-delete eat--terminal)
-      (set-process-filter eat--process #'eshell-output-filter)
-      (setq eat--process nil)
       (setq eat--terminal nil)
       (kill-local-variable 'eshell-output-filter-functions)
       (eat--eshell-semi-char-mode -1)
@@ -5903,6 +5923,12 @@ sane 2>%s ; if [ $1 = .. ]; then shift; fi; exec \"$@\""
               (funcall fn command args))))
         (remove-hook 'eshell-exec-hook hook)))))
 
+(defun eat--eshell-set-input-process ()
+  "Set the process that gets user input."
+  (when eat--terminal
+    (setf (eat-term-parameter eat--terminal 'eat--input-process)
+          (eshell-head-process))))
+
 
 ;;;;; Minor Modes.
 
@@ -5946,7 +5972,6 @@ symbol `buffer', in which case the point of current buffer is set."
                   track-mouse
                   filter-buffer-substring-function
                   eat--terminal
-                  eat--process
                   eat--synchronize-scroll-function
                   eat--mouse-grabbing-type
                   eat--pending-output-chunks
@@ -6031,7 +6056,7 @@ symbol `buffer', in which case the point of current buffer is set."
                           (down-mouse-1 . eat-eshell-semi-char-mode)
                           (down-mouse-3 . eat-eshell-char-mode)))))
                     "]")))))))
-  :group 'eat-ehell
+  :group 'eat-eshell
   (cond
    (eat-eshell-mode
     (let ((buffers nil))
@@ -6064,7 +6089,10 @@ symbol `buffer', in which case the point of current buffer is set."
              eat-term-shell-integration-directory t)
             ,@eshell-variable-aliases-list))
     (advice-add #'eshell-gather-process-output :around
-                #'eat--eshell-adjust-make-process-args))
+                #'eat--eshell-adjust-make-process-args)
+    (when (>= emacs-major-version 29)
+      (advice-add #'eshell-resume-eval :after
+                  #'eat--eshell-set-input-process)))
    (t
     (let ((buffers nil))
       (setq eat-eshell-mode t)
@@ -6095,7 +6123,10 @@ symbol `buffer', in which case the point of current buffer is set."
                        ("INSIDE_EMACS" eat-term-inside-emacs t))))
            eshell-variable-aliases-list))
     (advice-remove #'eshell-gather-process-output
-                   #'eat--eshell-adjust-make-process-args))))
+                   #'eat--eshell-adjust-make-process-args)
+    (when (>= emacs-major-version 29)
+      (advice-remove #'eshell-resume-eval
+                     #'eat--eshell-set-input-process)))))
 
 
 ;;;; Eshell Visual Command Handling.
@@ -6363,7 +6394,9 @@ see."
           (let ((time (current-time)))
             (prog1
                 (funcall eat--eshell-setup-proc-and-term proc)
-              (when (eq eat--process proc)
+              (when (eq (eat-term-parameter
+                         eat--terminal 'eat--output-process)
+                        proc)
                 (let ((buf (generate-new-buffer
                             (format "*eat-trace %s*: %s"
                                     (buffer-name)

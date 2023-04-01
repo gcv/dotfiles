@@ -1,3 +1,49 @@
+2023-03-28  Akib Azmain Turja  <akib@disroot.org>
+
+	Fix bugs in selection data manipulation code
+
+	* eat.el (eat--t-term): Put a vector of length 8 (instead of
+	10) in 'cut-buffers' slot.
+	* eat.el (eat--t-manipulate-selection): Don't process the
+	targets '8' and '9', since they are not in the protocol.
+	Return correct list of queried targets to the client.  Make
+	sure base64 encoded data doesn't contain line breaks.
+	* eat.el (eat--t-handle-output): Tolerate invalid targets in
+	OSC 52 (manipulate selection data).
+	* eat.el (eat--manipulate-kill-ring): Handle 'nil' correctly.
+
+2023-03-21  Akib Azmain Turja  <akib@disroot.org>
+
+	Fix incompatiblity with Eshell on Emacs 28
+
+	* eat.el (eat--eshell-setup-proc-and-term): Set
+	'eat--input-process' terminal parameter on Emacs 28.
+	* eat.el (eat-eshell-mode): Don't add advice
+	'eat--eshell-set-input-process' on Emacs 28.
+
+2023-03-20  Akib Azmain Turja  <akib@disroot.org>
+
+	Send input to correct process in Eshell pipeline
+
+	* eat.el (eat--process): Remove.
+	* eat.el (eat-mode): Don't make 'eat--process' buffer-local.
+	Use 'eat--terminal' to determine whether terminal is live.
+	* eat.el (eat--eshell-set-input-process): New function.
+	* eat.el (eat--eshell-local-mode): Don't make 'eat--process'
+	buffer-local.  Add 'eat--eshell-set-input-process' as a advice
+	after 'eshell-resume-eval'.
+	* eat.el (eat-exec): Use the terminal parameters
+	'eat--process', 'eat--input-process' and 'eat--output-process'
+	instead of the buffer-local variable 'eat--process' store the
+	process object.
+	* eat.el (eat--sentinel): Don't set 'eat--process' to nil.
+	* eat.el (eat--eshell-setup-proc-and-term): Set the terminal
+	parameters instead of buffer-local 'eat--process'.
+	* eat.el (eat--pre-prompt, eat--pre-cmd, eat-kill-process, eat)
+	(eat--send-input, eat--trace-eshell-adjust-make-process-args)
+	(eat--eshell-cleanup, eat--eshell-output-filter): Get the
+	process from terminal parameter.
+
 2023-02-08  Akib Azmain Turja  <akib@disroot.org>
 
 	* eat.texi (Querying Before Kill): New chapter
