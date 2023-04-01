@@ -1051,6 +1051,9 @@
 
 
 (use-package rustic
+  ;; stable version 3.4 does not use inheritenv correctly
+  :pin melpa
+  :after (inheritenv)
 
   :custom
   (rustic-lsp-client 'eglot)

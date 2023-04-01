@@ -239,11 +239,12 @@ When calling this function from `rustic-popup-mode', always use the value of
 \(fn &optional ARG)" t nil)
 
 (autoload 'rustic-cargo-comint-run-rerun "rustic-comint" "\
-Run 'cargo run' with `rustic-run-comint-arguments'." t nil)
+Run `cargo run' with `rustic-run-comint-arguments'." t nil)
 
 (autoload 'rustic-cargo-plain-run "rustic-comint" "\
-Run 'cargo run' for the current project.
-If running with prefix command `C-u', read whole command from minibuffer.
+Run `cargo run' for the current project.
+Read the full command from the minibuffer when ARG is non-nil or
+when called with a prefix command \\[universal-argument].
 
 \(fn &optional ARG)" t nil)
 
@@ -382,25 +383,25 @@ visiting a project." t nil)
 ;;; Generated autoloads from rustic-lsp.el
 
 (autoload 'rustic-analyzer-macro-expand "rustic-lsp" "\
-Default method for displaying macro expansion results.
+Default method for displaying macro expansion RESULT .
 
-\(fn RESULT)" t nil)
+\(fn RESULT)" nil nil)
 
 (register-definition-prefixes "rustic-lsp" '("rustic-"))
 
 ;;;***
 
-;;;### (autoloads nil "rustic-playpen" "rustic-playpen.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from rustic-playpen.el
+;;;### (autoloads nil "rustic-playground" "rustic-playground.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from rustic-playground.el
 
-(autoload 'rustic-playpen "rustic-playpen" "\
+(autoload 'rustic-playground "rustic-playground" "\
 Create a shareable URL for the contents of the current region,
-src-block or buffer on the Rust playpen.
+src-block or buffer on the Rust playground.
 
 \(fn BEGIN END)" t nil)
 
-(register-definition-prefixes "rustic-playpen" '("rustic-"))
+(register-definition-prefixes "rustic-playground" '("rustic-"))
 
 ;;;***
 
