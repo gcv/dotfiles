@@ -4,8 +4,8 @@
 
 ;; Author: Tony Wang <wwwjfy@gmail.com>
 ;; Keywords: Fish, shell
-;; Package-Version: 20220505.1111
-;; Package-Commit: d04478c0aba018cb789d77d591bfe315cb25132a
+;; Package-Version: 20230326.1604
+;; Package-Commit: 6869efbc05cdb628209338bf57fe52742e53d956
 ;; Package-Requires: ((emacs "24"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -508,7 +508,7 @@ POSITIVE-RE and NEGATIVE-RE are regular expressions."
   (catch :indent
     (cl-labels ((back-to-non-continued
                  () (cl-loop do (forward-line -1)
-                             while (line-continued-p)))
+                             while (and (not (bobp)) (line-continued-p))))
                 (line-continued-p
                  () (save-excursion
                       (forward-line -1)
