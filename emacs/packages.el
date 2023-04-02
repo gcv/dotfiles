@@ -587,6 +587,16 @@
 (use-package hydra)
 
 
+;;; ChatGPT integration package
+(use-package chat
+  :quelpa (chat :fetcher github :repo "iwahbe/chat.el")
+
+  :custom
+  (chat-user-prompt "\n> ")
+  (chat-bot-prompt "\n∵ ")
+  )
+
+
 (use-package iedit
   :init
   (setq iedit-toggle-key-default nil)
