@@ -592,6 +592,7 @@
   :quelpa (chat :fetcher github :repo "iwahbe/chat.el")
 
   :custom
+  (chat-max-tokens 2000)
   (chat-user-prompt "\n> ")
   (chat-bot-prompt "\n∵ ")
   )
