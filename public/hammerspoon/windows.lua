@@ -69,6 +69,24 @@ hs.hotkey.bind(
    end
 )
 
+
+--- Ctrl-Alt-Cmd-Shift-z: Zoom to the other screen's max size
+hs.hotkey.bind(
+   {"ctrl", "alt", "cmd", "shift"}, "z",
+   function()
+      local win = hs.window.focusedWindow()
+      local f = win:frame()
+      local currentScreen = win:screen()
+      local nextScreen = currentScreen:next()
+      local screen = nextScreen
+      local max = screen:frame()
+      f.w = max.w
+      f.h = max.h
+      win:setFrame(f)
+   end
+)
+
+
 --- Ctrl-Alt-Cmd-Shift-<up>: Take up the upper left quarter of the screen
 hs.hotkey.bind(
    {"ctrl", "alt", "cmd", "shift"}, "up",
