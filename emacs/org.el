@@ -62,6 +62,8 @@
   (setq org-catch-invisible-edits 'show-and-error)
   (setq org-list-demote-modify-bullet '(("-" . "+") ("+" . "*") ("*" . "-")))
 
+  (setq org-export-with-smart-quotes t)
+
   (setq org-src-fontify-natively t)
   (setq org-src-window-setup 'current-window)
   (setq org-src-preserve-indentation t)
