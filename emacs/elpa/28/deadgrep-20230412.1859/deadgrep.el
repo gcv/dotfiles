@@ -4,8 +4,8 @@
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/deadgrep
-;; Package-Version: 20230310.1634
-;; Package-Commit: aed448bf4c8bdf94564b775aac2429be6ed028b9
+;; Package-Version: 20230412.1859
+;; Package-Commit: f65a20d5c3d42aa649314f13976bc18020a9fc2a
 ;; Keywords: tools
 ;; Version: 0.13
 ;; Package-Requires: ((emacs "25.1") (dash "2.12.0") (s "1.11.0") (spinner "1.7.3"))
@@ -988,10 +988,8 @@ Returns a list ordered by the most recently accessed."
     ;; Keybinding chosen to match `kill-compilation'.
     (define-key map (kbd "C-c C-k") #'deadgrep-kill-process)
 
-    (define-key map (kbd "n") #'deadgrep-forward)
-    (define-key map (kbd "p") #'deadgrep-backward)
-    (define-key map (kbd "N") #'deadgrep-forward-match)
-    (define-key map (kbd "P") #'deadgrep-backward-match)
+    (define-key map (kbd "n") #'deadgrep-forward-match)
+    (define-key map (kbd "p") #'deadgrep-backward-match)
     (define-key map (kbd "M-n") #'deadgrep-forward-filename)
     (define-key map (kbd "M-p") #'deadgrep-backward-filename)
 
