@@ -1,2 +1,0 @@
-;; Generated package description from eat.el  -*- no-byte-compile: t -*-
-(define-package "eat" "0.6.1" "Emulate A Terminal, in a region, in a buffer and in Eshell" '((emacs "28.1")) :commit "5a2123910ae882e28f4951a288fac073e21e1601" :authors '(("Akib Azmain Turja" . "akib@disroot.org")) :maintainer '("Akib Azmain Turja" . "akib@disroot.org") :keywords '("terminals" "processes") :url "https://codeberg.org/akib/emacs-eat")

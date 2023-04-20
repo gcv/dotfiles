@@ -43,8 +43,8 @@ __eat_preexec () {
          "$(printf "%s" "$__eat_current_command" | base64)"
   # Send pre-exec sequence.
   printf '\e]51;e;G\e\\'
-  # Update title to including the command running.
-  # "${PWD/$HOME/'~'}" converts "/home/akib/org/" to "~/org/".
+  # Update title to include the command running.
+  # "${PWD/$HOME/'~'}" converts "/home/akib/foo/" to "~/foo/".
   # The next one is substituted with '$', or '#' if we're "root".
   printf '\e]2;%s@%s:%s%s %s\e\\' "$USER" "$HOSTNAME" \
          "${PWD/$HOME/'~'}" \
@@ -105,10 +105,15 @@ __eat_enable_integration ()
 }
 
 # Enable.
-test -z "$__eat_integration_enabled" && \
-  test "${TERM:0:4}" = "eat-" && \
+if test -z "$__eat_integration_enabled" && \
+    test "${TERM:0:4}" = "eat-"
+then
   __eat_enable_integration
+else
+  true
+fi
 
 # Local Variables:
 # mode: sh
+# sh-shell: bash
 # End:

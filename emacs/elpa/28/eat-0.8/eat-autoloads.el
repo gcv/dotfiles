@@ -22,9 +22,12 @@ Return the buffer selected (or created).
 
 With a non-numeric prefix ARG, create a new session.
 
-With a numeric prefix ARG (like \\[universal-argument] 42 \\[eshell]),
+With a numeric prefix ARG (like \\[universal-argument] 42 \\[eat]),
 switch to the session with that number, or create it if it doesn't
 already exist.
+
+With double prefix argument ARG, ask for the program to run and run it
+in a newly created session.
 
 PROGRAM can be a shell command.
 
@@ -94,9 +97,9 @@ Return the buffer selected (or created).
 
 With a non-numeric prefix ARG, create a new session.
 
-With a numeric prefix ARG (like \\[universal-argument] 42 \\[eshell]),
-switch to the session with that number, or create it if it doesn't
-already exist.
+With a numeric prefix ARG (like
+\\[universal-argument] 42 \\[eat-project]), switch to the session with
+that number, or create it if it doesn't already exist.
 
 \(fn &optional ARG)" t nil)
 

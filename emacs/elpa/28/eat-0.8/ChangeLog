@@ -1,3 +1,181 @@
+2023-04-09  Akib Azmain Turja  <akib@disroot.org>
+
+	Pass process to eat-exec-hook and eat-exit-hook
+
+	* eat.el (eat-exec-hook, eat-exit-hook): Update docstring.
+	* eat.el (eat--sentinel): Pass process to 'eat-exit-hook'.
+	Delete process after running 'eat-exit-hook'.
+	* eat.el (eat--kill-buffer): New helper function.
+	* eat.el (eat-exec): Pass process to 'eat-exec-hook'.  Add or
+	remove 'eat--kill-process' from 'eat-exit-hook' instead of
+	'kill-buffer'.
+
+2023-04-09  Akib Azmain Turja  <akib@disroot.org>
+
+	New command 'eat-narrow-to-shell-prompt'
+
+	* eat.el (eat--post-prompt): Put the 'eat--shell-prompt-begin'
+	text property at the beginning of shell prompt.
+	* eat.el (eat--correct-shell-prompt-mark-overlays): Don't try
+	to go outside accessible portion of buffer when the buffer is
+	narrowed.
+	* eat.el (eat-narrow-to-shell-prompt): New command.
+	* eat.el (eat-mode-map): Bind key sequence 'C-x n d' to
+	'eat-narrow-to-shell-prompt'.
+	* eat.el (eat--filter-buffer-substring): Remove all text
+	properties added on UI side before passing buffer substring to
+	'eat-term-filter-string'.
+	* eat.texi (Shell Integration): Document
+	'eat-narrow-to-shell-prompt'.
+
+2023-04-07  Akib Azmain Turja  <akib@disroot.org>
+
+	Run hooks on terminal update and process exit
+
+	* eat.el (eat-exit-hook, eat-update-hook, eat-eshell-exit-hook)
+	(eat-eshell-update-hook): New user option.
+	* eat.el (eat-reset, eat--process-output-queue): Run
+	'eat-update-hook'.
+	* eat.el (eat--sentinel): Don't test 'eat-kill-buffer-on-exit',
+	run 'eat-exit-hook'.
+	* eat.el (eat--adjust-process-window-size): Run
+	'eat-update-hook' when the major mode is 'eat-mode'.  Run
+	'eat-eshell-update-hook' in 'eshell-mode' buffers.
+	* eat.el (eat-exec): Don't let-bind 'eat-kill-buffer-on-exit'
+	while killing old process, remove 'kill-buffer' from hook
+	'eat-exit-hook' instead.  When 'eat-kill-buffer-on-exit' is
+	non-nil, add 'kill-buffer' to 'eat-exit-hook' with priority 90.
+	Run 'eat-exec-hook' outside any let-block.
+	* eat.el (eat--eshell-output-filter): Run
+	'eat-eshell-update-hook'.
+	* eat.el (eat--eshell-cleanup): Run 'eat-eshell-exit-hook'.
+
+2023-04-05  Akib Azmain Turja  <akib@disroot.org>
+
+	Fix resizing when alternative display is enabled
+
+	* eat.el (eat--t-term): Fix error while resizing when
+	alternative display is enabled.
+
+2023-04-02  Akib Azmain Turja  <akib@disroot.org>
+
+	Force directionality of paragraphs in Eat buffer
+
+	* eat.el (eat-mode): Set 'bidi-paragraph-direction' to
+	'left-to-right'.
+
+2023-04-02  Akib Azmain Turja  <akib@disroot.org>
+
+	Inform about unlisted semi-char mode exceptions
+
+	* eat.texi (Input Modes): Inform about unlisted semi-char mode
+	exceptions.
+	* README.org: Inform about unlisted semi-char mode exceptions.
+	Add Zsh integration instructions.
+
+2023-03-31  Akib Azmain Turja  <akib@disroot.org>
+
+	Support DECSCUSR control function
+
+	* eat.el (eat-very-visible-vertical-bar-cursor-type)
+	(eat-vertical-bar-cursor-type, eat-horizontal-bar-cursor-type)
+	(eat-very-visible-horizontal-bar-cursor-type): New user
+	options.
+	* eat.el (eat--t-term): New slot 'cur-visible-p'.  Remove slot
+	'cur-blinking-p'.  Change the default value of 'cur-state' to
+	':block'.
+	* eat.el (eat--t-reset): Don't reset slot 'cur-blinking-p'.
+	Reset slot 'cur-visible-p'.  Reset 'cur-state' to ':block'.
+	Reset cursor state to ':block'.
+	* eat.el (eat--t-set-cursor-state): Set slot 'cur-visible-p' to
+	the current visibility of cursor.  Set slot 'cur-state' to the
+	shape of cursor, regardless of visibility.
+	* eat.el (eat--t-default-cursor): Rename to
+	'eat--t-show-cursor'.  Don't change any cursor state except
+	visibility.
+	* eat.el (eat--t-invisible-cursor): Rename to
+	'eat--t-hide-cursor'.  Don't change any cursor state except
+	visibility.
+	* eat.el (eat--t-set-cursor-style): New function.
+	* eat.el (eat--t-blinking-cursor, eat--t-non-blinking-cursor):
+	Update to handle new cursor shapes properly.
+	* eat.el (eat--t-set-modes): Call 'eat--t-show-cursor' instead
+	of 'eat--t-default-cursor'.
+	* eat.el (eat--t-reset-modes): Call 'eat--t-hide-cursor'
+	instead of 'eat--t-invisible-cursor'.
+	* eat.el (eat--t-handle-output): Handle DECSCUSR control
+	function.
+	* eat.el (eat-term-cursor-type): Return ':invisible' if cursor
+	is invisible, otherwise the value of slot 'cur-state'.  Update
+	the list of possible cursor states in the docstring.
+	* eat.el (eat-term-set-cursor-function): Update the list of
+	possible cursor states and fallback cursor state in the
+	docstring.
+	* eat.el (eat--cursor-blink-mode): Add
+	'eat--cursor-blink-stop-timers' to 'kill-buffer-hook'.
+	* eat.el (eat--set-cursor): Support new cursor states.  Update
+	the list of possible cursor states in the docstring.
+	* eat.texi (Cursor Types): Document new user options
+	'eat-vertical-bar-cursor-type',
+	'eat-very-visible-vertical-bar-cursor-type',
+	'eat-horizontal-bar-cursor-type' and
+	'eat-very-visible-horizontal-bar-cursor-type'.
+
+2023-03-31  Akib Azmain Turja  <akib@disroot.org>
+
+	Capture keys 'M-backspace' and 'C-M-backspace'
+
+	* eat.el (eat-term-input-event): Support 'M-backspace' and
+	'C-M-backspace'.
+	* eat.el (eat-term-make-keymap): Bind 'M-backspace' and
+	'C-M-backspace'.
+
+2023-03-31  Akib Azmain Turja  <akib@disroot.org>
+
+	Suggest to invoke 'eat-compile-terminfo' in manual
+
+	* eat.texi (Not Recognized, Garbled Text): Suggest to do
+	'M-x eat-compile-terminfo' when the Terminfo databases aren't
+	working properly.
+
+2023-03-31  Akib Azmain Turja  <akib@disroot.org>
+
+	Fix directory tracking in Zsh
+
+	* integration/zsh (__eat_precmd): Use '$HOST' instead of
+	'$HOSTNAME'.
+
+2023-03-31  Akib Azmain Turja  <akib@disroot.org>
+
+	Implement Zsh integration
+
+	* integration/zsh: New file.
+	* eat.texi (Shell Integration): Add instructions for Zsh.
+	* integration/bash: Always return zero on succuss.
+
+2023-03-30  Akib Azmain Turja  <akib@disroot.org>
+
+	Add new command 'eat-compile-terminfo'
+
+	* eat.el (eat-compile-terminfo): New command.
+	* eat.texi (Hello Terminal): Refer to 'Common Problems'.
+	* eat.texi (Common Problems): Add instructions to compile
+	Terminfo databases with 'eat-compile-terminfo'.
+
+2023-03-29  Akib Azmain Turja  <akib@disroot.org>
+
+	Update manual to correctly describe command 'eat'
+
+	* eat.texi (Hello Terminal): Update to match with the current
+	behavior of command 'eat'.
+
+2023-03-29  Akib Azmain Turja  <akib@disroot.org>
+
+	Don't prompt for program in M-x eat by default
+
+	* eat.el (eat): Prompt for program to run only if double prefix
+	argument is given, otherwise use the default one.
+
 2023-03-28  Akib Azmain Turja  <akib@disroot.org>
 
 	Fix bugs in selection data manipulation code

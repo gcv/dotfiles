@@ -4,7 +4,7 @@
 
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-08-15
-;; Version: 0.6.1
+;; Version: 0.8
 ;; Package-Requires: ((emacs "28.1"))
 ;; Keywords: terminals processes
 ;; Homepage: https://codeberg.org/akib/emacs-eat
@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; Eat's name self-explainary, it stands for "Emulate A Terminal".
+;; Eat's name self-explanatory, it stands for "Emulate A Terminal".
 ;; Eat is a terminal emulator.  It can run most (if not all)
 ;; full-screen terminal programs, including Emacs.
 
@@ -51,7 +51,9 @@
 
 ;;   * "semi-char" mode: Most keys are bound to send the key to the
 ;;     terminal, except the following keys: `C-\', `C-c', `C-x',
-;;     `C-g', `C-h', `C-M-c', `C-u', `M-x', `M-:', `M-!', `M-&'.  The
+;;     `C-g', `C-h', `C-M-c', `C-u', `M-x', `M-:', `M-!', `M-&' and
+;;     some other keys (see the user option
+;;     `eat-semi-char-non-bound-keys' for the complete list).  The
 ;;     following special keybinding are available:
 
 ;;       * `C-q': Send next key to the terminal.
@@ -345,12 +347,38 @@ prompt annotation."
   :group 'eat-ui)
 
 (defcustom eat-exec-hook nil
-  "Hook run after `eat' executes a commamnd."
+  "Hook run after `eat' executes a commamnd.
+
+The hook is run with the process run in the terminal as the only
+argument."
+  :type 'hook
+  :group 'eat-ui)
+
+(defcustom eat-update-hook nil
+  "Hook run after the terminal in a Eat buffer is updated."
+  :type 'hook
+  :group 'eat-ui)
+
+(defcustom eat-exit-hook nil
+  "Hook run after the command executed by `eat' exits.
+
+The hook is run with the process that just exited as the only
+argument."
   :type 'hook
   :group 'eat-ui)
 
 (defcustom eat-eshell-exec-hook nil
-  "Hook run after `eat' executes a commamnd."
+  "Hook run after a terminal is created in Eshell."
+  :type 'hook
+  :group 'eat-eshell)
+
+(defcustom eat-eshell-update-hook nil
+  "Hook run after the terminal in a Eshell buffer is updated."
+  :type 'hook
+  :group 'eat-eshell)
+
+(defcustom eat-eshell-exit-hook nil
+  "Hook run after the terminal in Eshell is deleted."
   :type 'hook
   :group 'eat-eshell)
 
@@ -376,9 +404,8 @@ prompt annotation."
       ,cur-type))
   "Custom type specification for Eat's cursor type variables.")
 
-(defcustom eat-default-cursor-type
-  `(,(default-value 'cursor-type) nil nil)
-  "Cursor to use in Eat buffer.
+(defcustom eat-invisible-cursor-type '(nil nil nil)
+  "Type of cursor to use as invisible cursor in Eat buffer.
 
 The value is a list of form (CURSOR-ON BLINKING-FREQUENCY CURSOR-OFF).
 
@@ -390,8 +417,9 @@ should be nil when cursor is not blinking."
   :group 'eat-ui
   :group 'eat-eshell)
 
-(defcustom eat-invisible-cursor-type '(nil nil nil)
-  "Invisible cursor to use in Eat buffer.
+(defcustom eat-default-cursor-type
+  `(,(default-value 'cursor-type) nil nil)
+  "Cursor to use in Eat buffer.
 
 The value is a list of form (CURSOR-ON BLINKING-FREQUENCY CURSOR-OFF).
 
@@ -407,9 +435,64 @@ should be nil when cursor is not blinking."
   `(,(default-value 'cursor-type) 2 hollow)
   "Very visible cursor to use in Eat buffer.
 
-When the cursor is invisible, the car of the value is used as
-`cursor-type', which see.  The cdr of the value, when non-nil, is the
-blinking frequency of cursor."
+The value is a list of form (CURSOR-ON BLINKING-FREQUENCY CURSOR-OFF).
+
+When the cursor is on, CURSOR-ON is used as `cursor-type', which see.
+BLINKING-FREQUENCY is the blinking frequency of cursor's blinking.
+When the cursor is off, CURSOR-OFF is used as `cursor-type'.  This
+should be nil when cursor is not blinking."
+  :type eat--cursor-type-value-type
+  :group 'eat-ui
+  :group 'eat-eshell)
+
+(defcustom eat-vertical-bar-cursor-type '(bar nil nil)
+  "Vertical bar cursor to use in Eat buffer.
+
+The value is a list of form (CURSOR-ON BLINKING-FREQUENCY CURSOR-OFF).
+
+When the cursor is on, CURSOR-ON is used as `cursor-type', which see.
+BLINKING-FREQUENCY is the blinking frequency of cursor's blinking.
+When the cursor is off, CURSOR-OFF is used as `cursor-type'.  This
+should be nil when cursor is not blinking."
+  :type eat--cursor-type-value-type
+  :group 'eat-ui
+  :group 'eat-eshell)
+
+(defcustom eat-very-visible-vertical-bar-cursor-type '(bar 2 nil)
+  "Very visible vertical bar cursor to use in Eat buffer.
+
+The value is a list of form (CURSOR-ON BLINKING-FREQUENCY CURSOR-OFF).
+
+When the cursor is on, CURSOR-ON is used as `cursor-type', which see.
+BLINKING-FREQUENCY is the blinking frequency of cursor's blinking.
+When the cursor is off, CURSOR-OFF is used as `cursor-type'.  This
+should be nil when cursor is not blinking."
+  :type eat--cursor-type-value-type
+  :group 'eat-ui
+  :group 'eat-eshell)
+
+(defcustom eat-horizontal-bar-cursor-type '(hbar nil nil)
+  "Horizontal bar cursor to use in Eat buffer.
+
+The value is a list of form (CURSOR-ON BLINKING-FREQUENCY CURSOR-OFF).
+
+When the cursor is on, CURSOR-ON is used as `cursor-type', which see.
+BLINKING-FREQUENCY is the blinking frequency of cursor's blinking.
+When the cursor is off, CURSOR-OFF is used as `cursor-type'.  This
+should be nil when cursor is not blinking."
+  :type eat--cursor-type-value-type
+  :group 'eat-ui
+  :group 'eat-eshell)
+
+(defcustom eat-very-visible-horizontal-bar-cursor-type '(hbar 2 nil)
+  "Very visible horizontal bar cursor to use in Eat buffer.
+
+The value is a list of form (CURSOR-ON BLINKING-FREQUENCY CURSOR-OFF).
+
+When the cursor is on, CURSOR-ON is used as `cursor-type', which see.
+BLINKING-FREQUENCY is the blinking frequency of cursor's blinking.
+When the cursor is off, CURSOR-OFF is used as `cursor-type'.  This
+should be nil when cursor is not blinking."
   :type eat--cursor-type-value-type
   :group 'eat-ui
   :group 'eat-eshell)
@@ -964,8 +1047,8 @@ Nil when not in alternative display mode.")
                       (g2 . us-ascii)
                       (g3 . us-ascii))))
    :documentation "Current character set.")
-  (cur-state :default :documentation "Current state of cursor.")
-  (cur-blinking-p nil :documentation "Is the cursor blinking?")
+  (cur-state :block :documentation "Current state of cursor.")
+  (cur-visible-p t :documentation "Is the cursor visible?")
   (saved-face
    (1value (eat--t-make-face))
    :documentation "Saved SGR attributes.")
@@ -1047,8 +1130,8 @@ Don't `set' it, bind it to a value with `let'.")
                (g3 . dec-line-drawing)))
     (setf (eat--t-term-saved-face eat--t-term) (eat--t-make-face))
     (setf (eat--t-term-bracketed-yank eat--t-term) nil)
-    (setf (eat--t-term-cur-state eat--t-term) :default)
-    (setf (eat--t-term-cur-blinking-p eat--t-term) nil)
+    (setf (eat--t-term-cur-state eat--t-term) :block)
+    (setf (eat--t-term-cur-visible-p eat--t-term) t)
     (setf (eat--t-term-title eat--t-term) "")
     (setf (eat--t-term-keypad-mode eat--t-term) nil)
     (setf (eat--t-term-mouse-mode eat--t-term) nil)
@@ -1062,7 +1145,7 @@ Don't `set' it, bind it to a value with `let'.")
              eat--t-term nil)
     (funcall (eat--t-term-set-title-fn eat--t-term) eat--t-term "")
     (funcall (eat--t-term-set-cursor-fn eat--t-term) eat--t-term
-             :default)))
+             :block)))
 
 (defun eat--t-cur-right (&optional n)
   "Move cursor N columns right.
@@ -1893,36 +1976,64 @@ to (1, 1).  When N is 3, also erase the scrollback."
 (defun eat--t-set-cursor-state (state)
   "Set cursor state to STATE.
 
-STATE one of the `:default', `:invisible', `:very-visible'."
-  (unless (eq (eat--t-term-cur-state eat--t-term) state)
-    ;; Update state.
-    (setf (eat--t-term-cur-state eat--t-term) state)
-    ;; Inform the UI.
-    (funcall (eat--t-term-set-cursor-fn eat--t-term) eat--t-term
-             state)))
+STATE one of the `:invisible', `:block', `:blinking-block',
+`:underline', `:blinking-underline', `:bar', `:blinking-bar'."
+  (if (eq state :invisible)
+      (when (eat--t-term-cur-visible-p eat--t-term)
+        (setf (eat--t-term-cur-visible-p eat--t-term) nil)
+        (funcall (eat--t-term-set-cursor-fn eat--t-term) eat--t-term
+                 :invisible))
+    (unless (and (eat--t-term-cur-visible-p eat--t-term)
+                 (eq (eat--t-term-cur-state eat--t-term) state))
+      ;; Update state.
+      (setf (eat--t-term-cur-state eat--t-term) state)
+      (setf (eat--t-term-cur-visible-p eat--t-term) t)
+      ;; Inform the UI.
+      (funcall (eat--t-term-set-cursor-fn eat--t-term) eat--t-term
+               state))))
 
-(defun eat--t-default-cursor ()
-  "Set the cursor to its default state."
-  (eat--t-set-cursor-state
-   (if (eat--t-term-cur-blinking-p eat--t-term)
-       :very-visible
-     :default)))
+(defun eat--t-set-cursor-style (style)
+  "Set cursor state as described by STYLE."
+  (when (<= 0 style 6)
+    (let ((state (aref [ :blinking-block :blinking-block :block
+                         :blinking-underline :underline
+                         :blinking-bar :bar]
+                       style)))
+      (if (eat--t-term-cur-visible-p eat--t-term)
+          (eat--t-set-cursor-state state)
+        (setf (eat--t-term-cur-state eat--t-term) state)))))
 
-(defun eat--t-invisible-cursor ()
+(defun eat--t-show-cursor ()
+  "Make the cursor visible."
+  (when (not (eat--t-term-cur-visible-p eat--t-term))
+    (eat--t-set-cursor-state (eat--t-term-cur-state eat--t-term))))
+
+(defun eat--t-hide-cursor ()
   "Make the cursor invisible."
-  (eat--t-set-cursor-state :invisible))
+  (when (eat--t-term-cur-visible-p eat--t-term)
+    (eat--t-set-cursor-state :invisible)))
 
 (defun eat--t-blinking-cursor ()
   "Make the cursor blink."
-  (setf (eat--t-term-cur-blinking-p eat--t-term) t)
-  (when (eq (eat--t-term-cur-state eat--t-term) :default)
-    (eat--t-set-cursor-state :very-visible)))
+  (let ((state (pcase (eat--t-term-cur-state eat--t-term)
+                 (:block :blinking-block)
+                 (:underline :blinking-underline)
+                 (:bar :blinking-bar)
+                 (state state))))
+    (if (eat--t-term-cur-visible-p eat--t-term)
+        (eat--t-set-cursor-state state)
+      (setf (eat--t-term-cur-state eat--t-term) state))))
 
 (defun eat--t-non-blinking-cursor ()
   "Make the cursor not blink."
-  (setf (eat--t-term-cur-blinking-p eat--t-term) nil)
-  (when (eq (eat--t-term-cur-state eat--t-term) :very-visible)
-    (eat--t-set-cursor-state :default)))
+  (let ((state (pcase (eat--t-term-cur-state eat--t-term)
+                 (:blinking-block :block)
+                 (:blinking-underline :underline)
+                 (:blinking-bar :bar)
+                 (state state))))
+    (if (eat--t-term-cur-visible-p eat--t-term)
+        (eat--t-set-cursor-state state)
+      (setf (eat--t-term-cur-state eat--t-term) state))))
 
 (defun eat--t-enable-bracketed-yank ()
   "Enable bracketed yank mode."
@@ -2741,7 +2852,7 @@ is the selection data encoded in base64."
          ('(12)
           (eat--t-blinking-cursor))
          ('(25)
-          (eat--t-default-cursor))
+          (eat--t-show-cursor))
          ('(1000)
           (eat--t-enable-normal-mouse))
          ('(1002)
@@ -2778,7 +2889,7 @@ is the selection data encoded in base64."
          ('(12)
           (eat--t-non-blinking-cursor))
          ('(25)
-          (eat--t-invisible-cursor))
+          (eat--t-hide-cursor))
          (`(,(or 9 1000 1002 1003))
           (eat--t-disable-mouse))
          ('(1004)
@@ -3103,6 +3214,9 @@ is the selection data encoded in base64."
                  ;; CSI 6 n.
                  ('((?n) nil ((6)))
                   (eat--t-device-status-report))
+                 ;; CSI <n> SP q.
+                 (`((?q ?\ ) nil ((,n)))
+                  (eat--t-set-cursor-style n))
                  ;; CSI <n> ; <n> r.
                  (`((?r) nil ,(and (pred listp) params))
                   (eat--t-change-scroll-region (caadr params)
@@ -3281,16 +3395,19 @@ is the selection data encoded in base64."
                     (< height old-height))
             ;; Go to the beginning of display.
             (goto-char (eat--t-disp-begin disp))
-            (dotimes (l height)
-              (eat--t-col-motion width)
-              (delete-region (point) (car (eat--t-eol)))
-              (if (< (1+ l) height)
-                  (forward-char)
-                (delete-region (point) (point-max))
-                (let ((y (eat--t-cur-y cursor))
-                      (x (eat--t-cur-x cursor)))
-                  (eat--t-goto 1 1)
-                  (eat--t-goto y x)))))
+            (let ((l 0))
+              (while (and (< l height) (not (eobp)))
+                (eat--t-col-motion width)
+                (delete-region (point) (car (eat--t-eol)))
+                (unless (eobp)
+                  (if (< (1+ l) height)
+                      (forward-char)
+                    (delete-region (point) (point-max))
+                    (let ((y (eat--t-cur-y cursor))
+                          (x (eat--t-cur-x cursor)))
+                      (eat--t-goto 1 1)
+                      (eat--t-goto y x))))
+                (cl-incf l))))
         ;; REVIEW: This works, but it is very simple.  Most
         ;; terminals have more sophisticated mechanisms to do this.
         ;; It would be nice thing have them here.
@@ -3479,10 +3596,16 @@ where FUNCTION is the input function."
 
 The return value can be one of the following:
 
-  `:default'            Default cursor.
   `:invisible'          Invisible cursor.
-  `:very-visible'       Very visible cursor."
-  (eat--t-term-cur-state terminal))
+  `:block'              Block (filled box) cursor (default).
+  `:blinking-block'     Blinking block cursor.
+  `:bar'                Vertical bar cursor.
+  `:blinking-bar'       Blinking vertical bar cursor.
+  `:underline'          Horizontal bar cursor.
+  `:blinking-underline' Blinking horizontal bar cursor."
+  (if (eat--t-term-cur-visible-p terminal)
+      (eat--t-term-cur-state terminal)
+    :invisible))
 
 (defun eat-term-set-cursor-function (terminal)
   "Return the function used to set the cursor of TERMINAL.
@@ -3491,14 +3614,17 @@ The function is called with two arguments, TERMINAL and a symbol STATE
 describing the new state of cursor.  The function should not change
 point and buffer restriction.  STATE can be one of the following:
 
-  `:default'            Default cursor.
   `:invisible'          Invisible cursor.
-  `:very-visible'       Very visible cursor.  Can also be implemented
-                        as blinking cursor.
+  `:block'              Block (filled box) cursor (default).
+  `:blinking-block'     Blinking block cursor.
+  `:bar'                Vertical bar cursor.
+  `:blinking-bar'       Blinking vertical bar cursor.
+  `:underline'          Horizontal bar cursor.
+  `:blinking-underline' Blinking horizontal bar cursor.
 
 More possible values might be added in future.  So in case the
 function doesn't know about a particular cursor state, it should reset
-the cursor to the default like the `:default' state.
+the cursor to the default like the `:block' state.
 
 To set it, use (`setf' (`eat-term-set-cursor-function' TERMINAL)
 FUNCTION), where FUNCTION is the function to set cursor."
@@ -3908,6 +4034,10 @@ client process may get confused."
            (send "\C-?"))
           ('C-backspace
            (send "\C-h"))
+          ('M-backspace
+           (send "\e\C-?"))
+          ('C-M-backspace
+           (send "\e\C-h"))
           ;; Function keys.
           ((and (pred symbolp)
                 fn-key
@@ -4193,6 +4323,7 @@ EXCEPTIONS is a list of key sequences to not bind.  Don't use
         ;; Bind `backspace', `delete', `deletechar', and all modified
         ;; variants.
         (dolist (key '( backspace C-backspace
+                        M-backspace C-M-backspace
                         insert C-insert M-insert S-insert C-M-insert
                         C-S-insert M-S-insert C-M-S-insert
                         delete C-delete M-delete S-delete C-M-delete
@@ -4490,6 +4621,8 @@ return \"eat-color\", otherwise return \"eat-mono\"."
                 t)
       (add-hook 'post-command-hook #'eat--cursor-blink-start-timers
                 nil t)
+      (add-hook 'kill-buffer-hook #'eat--cursor-blink-stop-timers nil
+                t)
       (when (current-idle-time)
         (eat--cursor-blink-start-timers)))
      (t
@@ -4497,6 +4630,8 @@ return \"eat-color\", otherwise return \"eat-mono\"."
       (remove-hook 'pre-command-hook #'eat--cursor-blink-stop-timers
                    t)
       (remove-hook 'post-command-hook #'eat--cursor-blink-start-timers
+                   t)
+      (remove-hook 'kill-buffer-hook #'eat--cursor-blink-stop-timers
                    t)
       (mapc #'kill-local-variable locals)))))
 
@@ -4527,25 +4662,37 @@ return \"eat-color\", otherwise return \"eat-mono\"."
   (when eat--terminal
     (let ((inhibit-read-only t))
       (eat-term-reset eat--terminal)
-      (eat-term-redisplay eat--terminal))))
+      (eat-term-redisplay eat--terminal))
+    (run-hooks 'eat-update-hook)))
 
 (defun eat--set-cursor (_ state)
   "Set cursor type according to STATE.
 
 STATE can be one of the following:
 
-`:default'            Default cursor.
-`:invisible'          Invisible cursor.
-`:very-visible'       Very visible cursor.  Can also be implemented as
-                      blinking cursor.
-Any other value     Default cursor."
-  (setq-local eat--cursor-blink-type
-              (pcase state
-                (:invisible eat-invisible-cursor-type)
-                (:very-visible eat-very-visible-cursor-type)
-                (_ eat-default-cursor-type))) ; `:default'
+  `:invisible'          Invisible cursor.
+  `:block'              Block (filled box) cursor (default).
+  `:blinking-block'     Blinking block cursor.
+  `:bar'                Vertical bar cursor.
+  `:blinking-bar'       Blinking vertical bar cursor.
+  `:underline'          Horizontal bar cursor.
+  `:blinking-underline' Blinking horizontal bar cursor.
+  Any other value         Block cursor."
+  (setq-local
+   eat--cursor-blink-type
+   (pcase state
+     (:invisible eat-invisible-cursor-type)
+     (:block eat-default-cursor-type)
+     (:blinking-block eat-very-visible-cursor-type)
+     (:bar eat-vertical-bar-cursor-type)
+     (:blinking-bar eat-very-visible-vertical-bar-cursor-type)
+     (:underline eat-horizontal-bar-cursor-type)
+     (:blinking-underline eat-very-visible-horizontal-bar-cursor-type)
+     (_ eat-default-cursor-type)))
   (setq-local cursor-type (car eat--cursor-blink-type))
-  (eat--cursor-blink-mode (if (cadr eat--cursor-blink-type) +1 -1)))
+  (when (xor (cadr eat--cursor-blink-type) eat--cursor-blink-mode)
+    (eat--cursor-blink-mode
+     (if (cadr eat--cursor-blink-type) +1 -1))))
 
 (defun eat--manipulate-kill-ring (_ selection data)
   "Manipulate `kill-ring'.
@@ -4628,7 +4775,11 @@ If HOST isn't the host Emacs is running on, don't do anything."
             (push ov eat--shell-prompt-mark-overlays))))))
   (when eat--shell-prompt-begin
     (when (< eat--shell-prompt-begin (point))
-      ;; Put a text property to allow previous or next prompts.
+      ;; Put a text property for `eat-narrow-to-shell-prompt'.
+      (put-text-property eat--shell-prompt-begin
+                         (1+ eat--shell-prompt-begin)
+                         'eat--shell-prompt-begin t)
+      ;; Put a text property to allow shell prompt navigation.
       (put-text-property (1- (point)) (point)
                          'eat--shell-prompt-end t)))
   (setq eat--shell-prompt-begin nil))
@@ -4644,23 +4795,27 @@ BUFFER is the terminal buffer."
       (while-no-input
         ;; Delete all outdated overlays.
         (dolist (ov eat--shell-prompt-mark-overlays)
-          (unless (eq (overlay-get ov 'eat--shell-prompt-mark-id)
-                      (get-text-property (overlay-start ov)
-                                         'eat--shell-prompt-mark-id))
+          (unless (and (<= (point-min) (overlay-start ov)
+                           (1- (point-max)))
+                       (eq (overlay-get ov 'eat--shell-prompt-mark-id)
+                           (get-text-property
+                            (overlay-start ov)
+                            'eat--shell-prompt-mark-id)))
             (delete-overlay ov)
             (setq eat--shell-prompt-mark-overlays
                   (delq ov eat--shell-prompt-mark-overlays))))
         (save-excursion
           ;; Recreate overlays if needed.
-          (goto-char (eat-term-beginning eat--terminal))
-          (while (< (point) (eat-term-end eat--terminal))
+          (goto-char (max (eat-term-beginning eat--terminal)
+                          (point-min)))
+          (while (< (point) (min (eat-term-end eat--terminal)
+                                 (point-max)))
             (when (get-text-property
                    (point) 'eat--shell-prompt-mark-id)
               (let ((ov (get-text-property
                          (point) 'eat--shell-prompt-mark-overlay)))
-                (unless
-                    (and ov
-                         (overlay-buffer ov)
+                (unless (and
+                         ov (overlay-buffer ov)
                          (eq (overlay-get
                               ov 'eat--shell-prompt-mark-id)
                              (get-text-property
@@ -4680,8 +4835,10 @@ BUFFER is the terminal buffer."
                   (push ov eat--shell-prompt-mark-overlays))))
             (goto-char (or (next-single-property-change
                             (point) 'eat--shell-prompt-mark-id nil
-                            (eat-term-end eat--terminal))
-                           (eat-term-end eat--terminal)))))))))
+                            (min (eat-term-end eat--terminal)
+                                 (point-max)))
+                           (min (eat-term-end eat--terminal)
+                                (point-max))))))))))
 
 (defun eat--set-cmd (_ cmd)
   "Add CMD to `shell-command-history'."
@@ -4740,6 +4897,31 @@ prompt."
                        (point-max))))
       (unless next
         (user-error "No next prompt")))))
+
+(defun eat-narrow-to-shell-prompt ()
+  "Narrow buffer to the shell prompt and following output at point."
+  (interactive)
+  (widen)
+  (narrow-to-region
+   (save-excursion
+     (while (not (or (bobp) (get-text-property
+                             (point) 'eat--shell-prompt-begin)))
+       (goto-char (or (previous-single-property-change
+                       (point) 'eat--shell-prompt-begin)
+                      (point-min))))
+     (point))
+   (save-excursion
+     (when (and (not (eobp))
+                (get-text-property (point) 'eat--shell-prompt-begin))
+       (goto-char (or (next-single-property-change
+                       (point) 'eat--shell-prompt-begin)
+                      (point-max))))
+     (while (not (or (eobp) (get-text-property
+                             (point) 'eat--shell-prompt-begin)))
+       (goto-char (or (next-single-property-change
+                       (point) 'eat--shell-prompt-begin)
+                      (point-max))))
+     (point))))
 
 
 ;;;;; Input.
@@ -4942,6 +5124,7 @@ STRING and ARG are passed to `yank-pop', which see."
     (define-key map [?\C-c ?\C-k] #'eat-kill-process)
     (define-key map [?\C-c ?\C-p] #'eat-previous-shell-prompt)
     (define-key map [?\C-c ?\C-n] #'eat-next-shell-prompt)
+    (define-key map [?\C-x ?n ?d] #'eat-narrow-to-shell-prompt)
     (define-key map [xterm-paste] #'ignore)
     map)
   "Keymap for Eat mode.")
@@ -5134,7 +5317,16 @@ symbol `buffer', in which case the point of current buffer is set."
 
 When DELETE is given and non-nil, delete the text between BEGIN and
 END if it's safe to do so."
-  (let ((str (eat-term-filter-string (buffer-substring begin end))))
+  (let ((str (buffer-substring begin end)))
+    (remove-text-properties
+     0 (length str)
+     '( eat--before-string nil
+        eat--shell-prompt-mark-id nil
+        eat--shell-prompt-mark-overlay nil
+        eat--shell-prompt-begin nil
+        eat--shell-prompt-end nil)
+     str)
+    (setq str (eat-term-filter-string str))
     (when (and delete
                (or (not eat--terminal)
                    (and (<= (eat-term-end eat--terminal) begin)
@@ -5173,6 +5365,7 @@ END if it's safe to do so."
   (setq eat--synchronize-scroll-function #'eat--synchronize-scroll)
   (setq filter-buffer-substring-function
         #'eat--filter-buffer-substring)
+  (setq bidi-paragraph-direction 'left-to-right)
   (setq eat--mouse-grabbing-type nil)
   (setq mode-line-process
         '(""
@@ -5335,7 +5528,8 @@ OS's."
                eat-shell-prompt-annotation-correction-delay
                nil #'eat--correct-shell-prompt-mark-overlays
                buffer))
-        (funcall eat--synchronize-scroll-function sync-windows)))))
+        (funcall eat--synchronize-scroll-function sync-windows))
+      (run-hooks 'eat-update-hook))))
 
 (defun eat--filter (process output)
   "Handle OUTPUT from PROCESS."
@@ -5368,35 +5562,34 @@ to it."
   (let ((buffer (process-buffer process)))
     (when (memq (process-status process) '(signal exit))
       (if (buffer-live-p buffer)
-          (if eat-kill-buffer-on-exit
-              (kill-buffer buffer)
-            (with-current-buffer buffer
-              (let ((inhibit-read-only t))
-                (when eat--process-output-queue-timer
-                  (cancel-timer eat--process-output-queue-timer)
-                  (setq eat--process-output-queue-timer nil))
-                (eat--process-output-queue buffer)
-                (when eat--shell-prompt-annotation-correction-timer
-                  (cancel-timer
-                   eat--shell-prompt-annotation-correction-timer)
-                  (setq eat--shell-prompt-annotation-correction-timer
-                        nil))
-                (when eat-enable-shell-prompt-annotation
-                  (eat--correct-shell-prompt-mark-overlays buffer)
-                  (setq eat--shell-command-status 0)
-                  (setq eat--shell-prompt-begin nil)
-                  (setq eat--shell-prompt-mark nil)
-                  (setq eat--shell-prompt-mark-overlays nil))
-                (eat-emacs-mode)
-                (delete-process process)
-                (eat-term-delete eat--terminal)
-                (setq eat--terminal nil)
-                (eat--set-cursor nil :default)
-                (eat--grab-mouse nil nil)
-                (goto-char (point-max))
-                (insert "\nProcess " (process-name process) " "
-                        message)
-                (setq buffer-read-only nil))))
+          (with-current-buffer buffer
+            (let ((inhibit-read-only t))
+              (when eat--process-output-queue-timer
+                (cancel-timer eat--process-output-queue-timer)
+                (setq eat--process-output-queue-timer nil))
+              (eat--process-output-queue buffer)
+              (when eat--shell-prompt-annotation-correction-timer
+                (cancel-timer
+                 eat--shell-prompt-annotation-correction-timer)
+                (setq eat--shell-prompt-annotation-correction-timer
+                      nil))
+              (when eat-enable-shell-prompt-annotation
+                (eat--correct-shell-prompt-mark-overlays buffer)
+                (setq eat--shell-command-status 0)
+                (setq eat--shell-prompt-begin nil)
+                (setq eat--shell-prompt-mark nil)
+                (setq eat--shell-prompt-mark-overlays nil))
+              (eat-emacs-mode)
+              (eat-term-delete eat--terminal)
+              (setq eat--terminal nil)
+              (eat--set-cursor nil :default)
+              (eat--grab-mouse nil nil)
+              (goto-char (point-max))
+              (insert "\nProcess " (process-name process) " "
+                      message)
+              (setq buffer-read-only nil))
+            (run-hook-with-args 'eat-exit-hook process)
+            (delete-process process))
         (set-process-buffer process nil)))))
 
 (defun eat--adjust-process-window-size (process windows)
@@ -5413,8 +5606,17 @@ of window displaying PROCESS's buffer."
             (sync-windows (eat--synchronize-scroll-windows)))
         (eat-term-resize eat--terminal width height)
         (eat-term-redisplay eat--terminal)
-        (funcall eat--synchronize-scroll-function sync-windows)))
+        (funcall eat--synchronize-scroll-function sync-windows))
+      (pcase major-mode
+        ('eat-mode
+         (run-hooks 'eat-update-hook))
+        ('eshell-mode
+         (run-hooks 'eat-eshell-update-hook))))
     size))
+
+(defun eat--kill-buffer (_process)
+  "Kill current buffer."
+  (kill-buffer (current-buffer)))
 
 ;; Adapted from Term.
 (defun eat-exec (buffer name command startfile switches)
@@ -5426,11 +5628,11 @@ mode.  You can use this to cheaply run a series of processes in the
 same Eat buffer.  The hook `eat-exec-hook' is run after each exec."
   (with-current-buffer buffer
     (let ((inhibit-read-only t))
-      (when-let*
-          ((eat--terminal)
-           (proc (eat-term-parameter eat--terminal 'eat--process)))
-        (let ((eat-kill-buffer-on-exit nil))
-          (delete-process proc)))
+      (when-let* ((eat--terminal)
+                  (proc (eat-term-parameter
+                         eat--terminal 'eat--process)))
+        (remove-hook 'eat-exit-hook #'eat--kill-buffer t)
+        (delete-process proc))
       ;; Ensure final newline.
       (goto-char (point-max))
       (unless (or (= (point-min) (point-max))
@@ -5503,6 +5705,8 @@ same Eat buffer.  The hook `eat-exec-hook' is run after each exec."
               process)
         (setf (eat-term-parameter eat--terminal 'eat--output-process)
               process)
+        (when eat-kill-buffer-on-exit
+          (add-hook 'eat-exit-hook #'eat--kill-buffer 90 t))
         ;; Feed it the startfile.
         (when startfile
           ;; This is guaranteed to wait long enough
@@ -5515,9 +5719,10 @@ same Eat buffer.  The hook `eat-exec-hook' is run after each exec."
           (insert-file-contents startfile)
           (process-send-string
            process (delete-and-extract-region (point) (point-max)))))
-      (eat-term-redisplay eat--terminal)
-      (run-hooks 'eat-exec-hook)
-      buffer)))
+      (eat-term-redisplay eat--terminal))
+    (run-hook-with-args 'eat-exec-hook (eat-term-parameter
+                                        eat--terminal 'eat--process))
+    buffer))
 
 
 ;;;;; Entry Points.
@@ -5551,16 +5756,21 @@ Return the buffer selected (or created).
 
 With a non-numeric prefix ARG, create a new session.
 
-With a numeric prefix ARG (like \\[universal-argument] 42 \\[eshell]),
+With a numeric prefix ARG (like \\[universal-argument] 42 \\[eat]),
 switch to the session with that number, or create it if it doesn't
 already exist.
 
+With double prefix argument ARG, ask for the program to run and run it
+in a newly created session.
+
 PROGRAM can be a shell command."
-  (interactive (list (read-shell-command "Run program: "
-                                         (or explicit-shell-file-name
-                                             (getenv "ESHELL")
-                                             shell-file-name))
-                     current-prefix-arg))
+  (interactive
+   (list (when (equal current-prefix-arg '(16))
+           (read-shell-command "Run program: "
+                               (or explicit-shell-file-name
+                                   (getenv "ESHELL")
+                                   shell-file-name)))
+         current-prefix-arg))
   (let ((program (or program (or explicit-shell-file-name
                                  (getenv "ESHELL")
                                  shell-file-name)))
@@ -5731,7 +5941,8 @@ PROGRAM can be a shell command."
       (set-marker eshell-last-output-end end)
       (set-marker (process-mark (eat-term-parameter
                                  eat--terminal 'eat--output-process))
-                  end))))
+                  end)))
+  (run-hooks 'eat-eshell-update-hook))
 
 (defun eat--eshell-setup-proc-and-term (proc)
   "Setup process PROC and a new terminal for it."
@@ -5790,7 +6001,8 @@ PROGRAM can be a shell command."
       (eat--eshell-semi-char-mode -1)
       (eat--eshell-char-mode -1)
       (eat--eshell-process-running-mode -1)
-      (setq buffer-read-only nil))))
+      (setq buffer-read-only nil))
+    (run-hooks 'eat-eshell-exit-hook)))
 
 (declare-function eshell-output-filter "esh-mode" (process string))
 
@@ -5946,9 +6158,8 @@ symbol `buffer', in which case the point of current buffer is set."
                eat--eshell-char-mode)
            (eat-term-display-beginning eat--terminal)
          (save-restriction
-           (narrow-to-region
-            (eat-term-beginning eat--terminal)
-            (eat-term-end eat--terminal))
+           (narrow-to-region (eat-term-beginning eat--terminal)
+                             (eat-term-end eat--terminal))
            (let ((start-line (- (floor (window-screen-lines))
                                 (line-number-at-pos (point-max)))))
              (goto-char (point-min))
@@ -6218,9 +6429,9 @@ Return the buffer selected (or created).
 
 With a non-numeric prefix ARG, create a new session.
 
-With a numeric prefix ARG (like \\[universal-argument] 42 \\[eshell]),
-switch to the session with that number, or create it if it doesn't
-already exist."
+With a numeric prefix ARG (like
+\\[universal-argument] 42 \\[eat-project]), switch to the session with
+that number, or create it if it doesn't already exist."
   (interactive "P")
   (require 'project)
   (let* ((default-directory (project-root (project-current t)))
@@ -6630,6 +6841,40 @@ N defaults to 1.  Interactively, N is the prefix argument."
      "/" (:eval (number-to-string eat--trace-replay-frame-count))
      "]"))
   (add-hook 'kill-buffer-hook #'eat-trace--cleanup nil t))
+
+
+;;;; Miscellaneous.
+
+(defun eat-compile-terminfo ()
+  "Compile terminfo databases of Eat."
+  (interactive)
+  ;; Check for required files and programs.
+  (let ((source-path (expand-file-name "eat.ti" eat--install-path))
+        (tic-path (executable-find "tic")))
+    (unless (file-exists-p source-path)
+      (error "Eat not installed properly: %s"
+             "Terminfo source file not found"))
+    (unless tic-path
+      (error "Terminfo compiler `tic' not found"))
+    (message "Compiling terminfo databases...")
+    ;; Compile.
+    (let* ((command (format "env TERMINFO=\"%s\" %s -x %s"
+                            eat-term-terminfo-directory tic-path
+                            source-path))
+           (status
+            (with-temp-buffer
+              (make-directory eat-term-terminfo-directory 'parents)
+              (let ((proc (start-process-shell-command
+                           "eat-terminfo-compile"
+                           (current-buffer) command)))
+                (while (process-live-p proc)
+                  (sleep-for 0.02))
+                (process-exit-status proc)))))
+      (if (= status 0)
+          (message "Compiling terminfo databases...done")
+        (message "Compiling terminfo databases...error")
+        (error "Command `%s' exited with non-zero exit code %i"
+               command status)))))
 
 
 ;;;; Footer.

@@ -2,8 +2,8 @@
 
 @comment %**start of header
 @setfilename eat.info
-@set UPDATED 28 March 2023
-@set VERSION 0.6.1
+@set UPDATED 13 April 2023
+@set VERSION 0.8
 @documentencoding UTF-8
 @codequotebacktick on
 @codequoteundirected on
@@ -116,23 +116,26 @@ to run full screen programs like Emacs within the terminal.
 @chapter Hello Terminal
 
 @findex eat
-The terminal can be started with @kbd{M-x eat}.  It would prompt you
-for the program to run in the terminal, with a reasonable default
-value already filled in.  You can specify a program path, or a shell
-command.  After you hit @kbd{@key{RET}}, you will see a terminal, and
-the program you chose will be run within the terminal in the current
-directory.  You can interact with it.  If you started a shell, you
-should get a shell prompt and you should be able to write commands and
+The terminal can be started with @kbd{M-x eat}.  It'll create a
+terminal and run the default shell
+(@pxref{Interactive Shell,,, emacs, GNU Emacs Manual}) in it.  You
+should get a shell prompt and be able to write shell commands and
 execute them.  Full screen programs like @samp{htop}, @samp{lynx} and
-Emacs will work inside it, just like other any other terminal.
+Emacs will work inside it, just like any other terminal.  (If the
+terminal doesn't work as expected, @pxref{Common Problems}.)
 
 If an Eat terminal already exists, @kbd{M-x eat} will switch to it.
 To create a new terminal, call it with a prefix argument like this,
 @kbd{C-u M-x eat}.
 
-If you give it a numeric argument N, for example @kbd{C-u 42 M-x eat},
-it'll switch to a terminal in @file{*eat*<N>}, @file{*eat*<42>} for
-example, and it'll create a new terminal if that doesn't exist.
+If you give it a numeric prefix argument N, for example
+@kbd{C-u 42 M-x eat}, it'll switch to a terminal in the buffer
+@file{*eat*<N>}, @file{*eat*<42>} for example, or it'll create a new
+terminal if that buffer doesn't exist.
+
+If you give it double prefix argument, for example
+@kbd{C-u C-u M-x eat}, you'll be prompted for the program or shell
+command to run, and it'll be run in a newly created terminal.
 
 @node Project-local Terminal
 @cindex project-local terminal
@@ -249,7 +252,8 @@ applications.
 ``Semi-char mode'' is the default input mode of Eat.  This works for
 most inputs.  It forwards all keys, except @kbd{C-\}, @kbd{C-c},
 @kbd{C-x}, @kbd{C-g}, @kbd{C-h}, @kbd{C-M-c}, @kbd{C-u}, @kbd{M-x},
-@kbd{C-q}, @kbd{M-:}, @kbd{M-!} and @kbd{M-&}, Emacs handle them.
+@kbd{C-q}, @kbd{M-:}, @kbd{M-!}, @kbd{M-&} and some other keys, Emacs
+handles them.
 
 @cindex inputting exceptional characters
 @kindex C-q @r{(``semi-char mode'')}
@@ -292,7 +296,8 @@ Both user options contain a list of keys of form @code{[@var{key}]},
 where @var{key} is a key not to bind.  @var{key} mustn't contain meta
 modifier.  To not bind a key with meta modifier, use a vector of form
 @code{[?\e @var{key}]}, where @var{key} is the key without meta
-modifier.
+modifier.  These user options contain all the ``semi-char'' mode
+exceptions listed above, plus some more exceptions.
 
 @findex eat-update-semi-char-mode-map
 @findex eat-eshell-update-semi-char-mode-map
@@ -371,13 +376,20 @@ Eat.  When shell integration is enabled and the script is loaded in
 your shell, it'll take care of everything and provide many useful
 features.
 
-Currently only GNU Bash is supported.
+Currently only GNU Bash and Zsh are supported.
 
 If you use GNU Bash, put the following in your @samp{.bashrc} file:
 
 @example
 [ -n "$EAT_SHELL_INTEGRATION_DIR" ] && \
   source "$EAT_SHELL_INTEGRATION_DIR/bash"
+@end example
+
+If you use Zsh, put the following in your @samp{.zshrc} file:
+
+@example
+[ -n "$EAT_SHELL_INTEGRATION_DIR" ] && \
+  source "$EAT_SHELL_INTEGRATION_DIR/zsh"
 @end example
 
 @cindex directory tracking
@@ -413,6 +425,17 @@ You can navigate shell prompts in ``emacs'' and ``semi-char'' mode.
 the previous shell prompt.  @kbd{C-c C-n}, bound to
 @command{eat-next-shell-prompt}, is the opposite, it goes to the next
 shell prompt.  This doesn't work in Eshell.
+
+@cindex narrow to shell prompt
+@cindex narrow to prompt
+@cindex narrow, shell prompt
+@cindex narrow, prompt
+@kindex C-x n d @r{(``emacs mode'')}
+@kindex C-x n d @r{(``semi-char mode'')}
+@findex eat-narrow-to-shell-prompt
+You can narrow (@pxref{Narrowing,,, emacs, GNU Emacs Manual}) down Eat
+buffer to a shell prompt and its output (if any) using the key
+sequence @kbd{C-x n d}, bound to @command{eat-narrow-to-shell-prompt}.
 
 @cindex shell prompt annotation
 @cindex annotation, shell prompt
@@ -552,23 +575,45 @@ types of cursor.  Each of the user options share the same format.
 
 @vindex eat-default-cursor-type
 @defopt eat-default-cursor-type
-This control the cursor shape of ``visible'' cursor type.
+This controls the cursor shape of the ``visible'' cursor type.
 @end defopt
 
 @vindex eat-invisible-cursor-type
 @defopt eat-invisible-cursor-type
-This control the cursor shape of ``invisible'' cursor type.
+This controls the cursor shape of the ``invisible'' cursor type.
 @end defopt
 
 @vindex eat-very-visible-cursor-type
 @defopt eat-very-visible-cursor-type
-This control the cursor shape of ``very visible'' cursor type.  This
-cursor blinks, switching between the default cursor shape and a hollow
-box.
+This controls the cursor shape of the ``very visible'' cursor type.
+This cursor blinks, switching between the default cursor shape and a
+hollow box.
 @end defopt
 
-The value type of these user options is a list.  The list is of form
-(@var{cursor-on} @var{blinking-frequency} @var{cursor-off}).
+@vindex eat-vertical-bar-cursor-type
+@defopt eat-vertical-bar-cursor-type
+This controls the cursor shape of the ``vertical bar'' cursor type.
+@end defopt
+
+@vindex eat-very-visible-vertical-bar-cursor-type
+@defopt eat-very-visible-vertical-bar-cursor-type
+This controls the cursor shape of the ``very visible vertical bar''
+cursor type.  This cursor blinks.
+@end defopt
+
+@vindex eat-horizontal-bar-cursor-type
+@defopt eat-horizontal-bar-cursor-type
+This controls the cursor shape of the ``horizontal bar'' cursor type.
+@end defopt
+
+@vindex eat-very-visible-horizontal-bar-cursor-type
+@defopt eat-very-visible-horizontal-bar-cursor-type
+This controls the cursor shape of the ``very visible horizontal bar''
+cursor type.  This cursor blinks.
+@end defopt
+
+The value type of all these user options is a list.  The list is of
+form (@var{cursor-on} @var{blinking-frequency} @var{cursor-off}).
 @var{blinking-frequency} is the frequency of blinking of cursor.  It
 is a number, controlling how many times the cursor will blink a
 second.  This can also be @code{nil}, this will disable cursor
@@ -895,7 +940,8 @@ Due to some limitations, shell prompt annotations
 (@pxref{Shell Integration}) can get messed up sometimes.  Eat
 automatically corrects them after each terminal redisplay.  However,
 this can have some performance impact when the terminal scrollback and
-display is large enough.  So Eat defers the correction.
+display is large enough (unless the buffer is narrowed).  So Eat
+defers the correction.
 
 @vindex eat-shell-prompt-annotation-delay
 @defopt eat-shell-prompt-annotation-delay
@@ -908,7 +954,7 @@ instantly, but this may cause the terminal to slow down in some cases.
 @end defopt
 
 The user options described in this chapter have reasonable default
-values, but they may change anytime.
+values, but the default values may change anytime.
 
 @part Part IV:@* Recovering from Problems
 
@@ -937,22 +983,39 @@ Eat does something unexpected, such as hangs, garbled text, etc.
 @section Terminal Not Recognized
 
 If your program says that it can't recognize the terminal, probably
-the @env{TERM} environment has a wrong value.
+the @env{TERM} environment variable has a wrong value.
 
+@vindex eat-term-name
 Check the value of @env{TERM}, if it's not set to something like
 @samp{eat-...}, check the user option @code{eat-term-name}.  If that's
 correct that your shell might be changing the @env{TERM} environment
 variable.  If @code{eat-term-name} isn't correct, customize to a
 suitable value and try again, your problem should be fixed.
 
+@vindex eat-term-terminfo-directory
 If @env{TERM} has the correct value, then probably the Terminfo
-entries of Eat are missing.  This can happen if you manually install
-Eat.  Check that whether the values of the environment value
-@env{TERM} and the user option @code{eat-term-terminfo-directory}
-match.  If they match, customize @code{eat-term-terminfo-directory} to
-the directory that contains the Terminfo database, the program should
-now recognize Eat.  If they don't match, then your shell is probably
-responsible for the problem.
+databases of Eat are missing.  This can happen if you have installed
+Eat without using the package from NonGNU ELPA
+(@pxref{Packages,,, emacs, GNU Emacs Manual}).  Check that whether
+the values of the environment variable @env{TERMINFO} and the user
+option @code{eat-term-terminfo-directory} match.  If they match,
+customize @code{eat-term-terminfo-directory} to the directory
+containing the Terminfo databases, the program should now recognize
+Eat.  If they don't match, then your shell is probably responsible for
+the problem.
+
+@findex eat-compile-terminfo
+If the program is not recognizing the terminal even when
+the correct directory is set as @code{eat-term-terminfo-directory},
+probably the precompiled Terminfo databases aren't working properly on
+your system.  You can invoke the command
+@command{eat-compile-terminfo} to recompile it for your system.
+
+If you can't find the directory containing Terminfo databases, you can
+compile it yourself.  First, set @code{eat-term-terminfo-directory} to
+the directory where to put the Terminfo databases.  Then invoke the
+command @command{eat-compile-terminfo} to compile the Terminfo
+databases.
 
 @node Garbled Text
 @cindex garbled text
@@ -969,12 +1032,16 @@ program doesn't recognize Eat, and it stays silent instead of
 reporting that.
 
 If the problem isn't resolved after following the instructions in the
-previous section, may be your program is blindly assuming that the
-terminal is XTerm-compatible.  If so, what you are seeing is the
-current state of ``XTerm-compliance''.  Though it's not really a bug,
-we definite want to know what's problem so that we can fix it.
-@xref{Reporting Bugs} for instructions on sending bug reports or
-feature request.
+previous section, probably the precompiled Terminfo databases aren't
+working properly on your system.  Running the command
+@command{eat-compile-terminfo} will recompile it for your system.
+
+If the problem still persists, may be your program is blindly assuming
+that the terminal is XTerm-compatible.  If so, what you are seeing is
+the current state of ``XTerm-compliance''.  Though it's not really a
+bug, we really want to know what's problem so that we can fix it and
+improve XTerm-compliance.  @xref{Reporting Bugs} for instructions on
+sending bug reports or feature request.
 
 The other potential reason is that Eat is not working.  This is
 definitely a bug, so please report it.
