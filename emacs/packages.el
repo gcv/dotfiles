@@ -598,6 +598,13 @@
   )
 
 
+;;; ChatGPT integration package
+(use-package shell-maker                ; must be installed first or chatgpt-shell does not load
+  :quelpa (shell-maker :fetcher github :repo "xenodium/chatgpt-shell"))
+(use-package chatgpt-shell
+  :quelpa (chatgpt-shell :fetcher github :repo "xenodium/chatgpt-shell"))
+
+
 (use-package iedit
   :init
   (setq iedit-toggle-key-default nil)
