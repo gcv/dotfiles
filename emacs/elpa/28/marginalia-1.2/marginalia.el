@@ -5,9 +5,10 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 1.1
-;; Package-Requires: ((emacs "27.1") (compat "29.1.3.4"))
+;; Version: 1.2
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
 ;; Homepage: https://github.com/minad/marginalia
+;; Keywords: docs, help, matching, completion
 
 ;; This file is part of GNU Emacs.
 
@@ -51,7 +52,7 @@
   "Maximum truncation width of annotation fields.
 
 This value is adjusted depending on the `window-width'."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom marginalia-separator "  "
   "Annotation field separator."
@@ -65,14 +66,14 @@ This value is adjusted depending on the `window-width'."
 
 (defcustom marginalia-align-offset 0
   "Additional offset added to the alignment."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
   "Maximum relative age in seconds displayed by the file annotator.
 
 Set to `most-positive-fixnum' to always use a relative age, or 0 to never show
 a relative age."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom marginalia-annotator-registry
   (mapcar
@@ -138,7 +139,7 @@ determine it."
   :type '(alist :key-type regexp :value-type symbol))
 
 (defcustom marginalia-censor-variables
-  '("pass\\|auth-source-netrc-cache\\|auth-source-.*-nonce")
+  '("pass\\|auth-source-netrc-cache\\|auth-source-.*-nonce\\|api-?key")
   "The value of variables matching any of these regular expressions is not shown.
 This configuration variable is useful to hide variables which may
 hold sensitive data, e.g., passwords."
@@ -146,8 +147,10 @@ hold sensitive data, e.g., passwords."
 
 (defcustom marginalia-command-categories
   '((imenu . imenu)
-    (recentf-open . file))
-  "Associate commands with a completion category."
+    (recentf-open . file)
+    (where-is . command))
+  "Associate commands with a completion category.
+The value of `this-command' is used as key for the lookup."
   :type '(alist :key-type symbol :value-type symbol))
 
 (defgroup marginalia-faces nil
@@ -450,7 +453,7 @@ FACE is the name of the face, with which the field should be propertized."
   "Return symbol class characters for symbol S.
 
 This function is an extension of `help--symbol-class'.  It returns
-more fine-grained and more detailled symbol information.
+more fine-grained and more detailed symbol information.
 
 Function:
 f function
@@ -1112,7 +1115,10 @@ These annotations are skipped for remote paths."
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
   (and marginalia--command
-       (alist-get marginalia--command marginalia-command-categories)))
+       (or (alist-get marginalia--command marginalia-command-categories)
+           ;; The command can be an alias, e.g., `recentf' -> `recentf-open'.
+           (when-let ((chain (function-alias-p marginalia--command)))
+             (alist-get (car (last chain)) marginalia-command-categories)))))
 
 (defun marginalia-classify-original-category ()
   "Return original category reported by completion metadata."
