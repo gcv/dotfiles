@@ -29,6 +29,13 @@ If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
+(autoload 'cape-elisp-block "cape" "\
+Complete Elisp in Org or Markdown code block.
+This Capf is particularly useful for literate Emacs configurations.
+If INTERACTIVE is nil the function acts like a Capf.
+
+\(fn &optional INTERACTIVE)" t nil)
+
 (autoload 'cape-dabbrev "cape" "\
 Complete with Dabbrev at point.
 
@@ -37,12 +44,6 @@ observe a performance issue with autocompletion and `cape-dabbrev'
 it is strongly recommended to disable scanning in other buffers.
 See the user options `cape-dabbrev-min-length' and
 `cape-dabbrev-check-other-buffers'.
-
-\(fn &optional INTERACTIVE)" t nil)
-
-(autoload 'cape-ispell "cape" "\
-Complete word at point with Ispell.
-If INTERACTIVE is nil the function acts like a Capf.
 
 \(fn &optional INTERACTIVE)" t nil)
 
@@ -68,14 +69,17 @@ If INTERACTIVE is nil the function acts like a Capf.
 
 (autoload 'cape-super-capf "cape" "\
 Merge CAPFS and return new Capf which includes all candidates.
-This feature is experimental.
+The function `cape-super-capf' is experimental.
 
 \(fn &rest CAPFS)" nil nil)
 
 (autoload 'cape-company-to-capf "cape" "\
 Convert Company BACKEND function to Capf.
-VALID is the input comparator, see `cape--input-valid-p'.
-This feature is experimental.
+VALID is a function taking the old and new input string.  It
+should return nil if the cached candidates became invalid.  The
+default value for VALID is `string-prefix-p' such that the
+candidates are only fetched again if the input prefix
+changed.  The function `cape-company-to-capf' is experimental.
 
 \(fn BACKEND &optional VALID)" nil nil)
 
@@ -91,8 +95,12 @@ Create interactive completion function from CAPF.
 
 (autoload 'cape-wrap-buster "cape" "\
 Call CAPF and return a completion table with cache busting.
-The cache is busted when the input changes, where VALID is the input
-comparator, see `cape--input-valid-p'.
+This function can be used as an advice around an existing Capf.
+The cache is busted when the input changes.  The argument VALID
+can be a function taking the old and new input string.  It should
+return nil if the new input requires that the completion table is
+refreshed.  The default value for VALID is `equal', such that the
+completion table is refreshed on every input change.
 
 \(fn CAPF &optional VALID)" nil nil)
 
@@ -106,6 +114,7 @@ completion :category symbol can be specified.
 
 (autoload 'cape-wrap-nonexclusive "cape" "\
 Call CAPF and ensure that it is marked as non-exclusive.
+This function can be used as an advice around an existing Capf.
 
 \(fn CAPF)" nil nil)
 
@@ -117,17 +126,20 @@ The PREDICATE is passed the candidate symbol or string.
 
 (autoload 'cape-wrap-silent "cape" "\
 Call CAPF and silence it (no messages, no errors).
+This function can be used as an advice around an existing Capf.
 
 \(fn CAPF)" nil nil)
 
 (autoload 'cape-wrap-case-fold "cape" "\
-Call CAPF and return a case insenstive completion table.
+Call CAPF and return a case-insensitive completion table.
 If DONT-FOLD is non-nil return a case sensitive table instead.
+This function can be used as an advice around an existing Capf.
 
 \(fn CAPF &optional DONT-FOLD)" nil nil)
 
 (autoload 'cape-wrap-noninterruptible "cape" "\
 Call CAPF and return a non-interruptible completion table.
+This function can be used as an advice around an existing Capf.
 
 \(fn CAPF)" nil nil)
 
@@ -139,21 +151,27 @@ If the prefix is long enough, enforce auto completion.
 
 (autoload 'cape-wrap-inside-comment "cape" "\
 Call CAPF only if inside comment.
+This function can be used as an advice around an existing Capf.
 
 \(fn CAPF)" nil nil)
 
 (autoload 'cape-wrap-inside-string "cape" "\
 Call CAPF only if inside string.
+This function can be used as an advice around an existing Capf.
 
 \(fn CAPF)" nil nil)
 
 (autoload 'cape-wrap-purify "cape" "\
-Call CAPF and ensure that it does not modify the buffer.
+Call CAPF and ensure that it does not illegally modify the buffer.
+This function can be used as an advice around an existing
+Capf.  It has been introduced mainly to fix the broken
+`pcomplete-completions-at-point' function in Emacs versions < 29.
 
 \(fn CAPF)" nil nil)
 
 (autoload 'cape-wrap-accept-all "cape" "\
 Call CAPF and return a completion table which accepts every input.
+This function can be used as an advice around an existing Capf.
 
 \(fn CAPF)" nil nil)
  (autoload 'cape-capf-accept-all "cape")

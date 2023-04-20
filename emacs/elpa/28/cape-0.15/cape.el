@@ -5,9 +5,10 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.13
-;; Package-Requires: ((emacs "27.1") (compat "29.1.3.4"))
+;; Version: 0.15
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
 ;; Homepage: https://github.com/minad/cape
+;; Keywords: abbrev, convenience, matching, completion, wp
 
 ;; This file is part of GNU Emacs.
 
@@ -29,18 +30,18 @@
 ;; Let your completions fly! This package provides additional completion
 ;; backends in the form of Capfs (completion-at-point-functions).
 ;;
-;; cape-dabbrev: Complete word from current buffers
-;; cape-file: Complete file name
-;; cape-history: Complete from Eshell, Comint or minibuffer history
-;; cape-keyword: Complete programming language keyword
-;; cape-symbol: Complete Elisp symbol
-;; cape-abbrev: Complete abbreviation (add-global-abbrev, add-mode-abbrev)
-;; cape-ispell: Complete word from Ispell dictionary
-;; cape-dict: Complete word from dictionary file
-;; cape-line: Complete entire line from file
-;; cape-tex: Complete unicode char from TeX command, e.g. \hbar.
-;; cape-sgml: Complete unicode char from Sgml entity, e.g., &alpha.
-;; cape-rfc1345: Complete unicode char using RFC 1345 mnemonics.
+;; `cape-dabbrev': Complete word from current buffers
+;; `cape-elisp-block': Complete Elisp in Org or Markdown code block.
+;; `cape-file': Complete file name
+;; `cape-history': Complete from Eshell, Comint or minibuffer history
+;; `cape-keyword': Complete programming language keyword
+;; `cape-symbol': Complete Elisp symbol
+;; `cape-abbrev': Complete abbreviation (add-global-abbrev, add-mode-abbrev)
+;; `cape-dict': Complete word from dictionary file
+;; `cape-line': Complete entire line from file
+;; `cape-tex': Complete Unicode char from TeX command, e.g. \hbar.
+;; `cape-sgml': Complete Unicode char from SGML entity, e.g., &alpha.
+;; `cape-rfc1345': Complete Unicode char using RFC 1345 mnemonics.
 
 ;;; Code:
 
@@ -64,15 +65,39 @@
   :prefix "cape-")
 
 (defcustom cape-dict-file "/usr/share/dict/words"
-  "Dictionary word list file."
-  :type 'string)
+  "Path to dictionary word list file.
+This variable can also be a list of paths or
+a function returning a single or more paths."
+  :type '(choice string (repeat string) function))
+
+(defcustom cape-dict-grep t
+  "Use grep to search through the dictionary specified by `cape-dict-file'.
+If this variable is non-nil, the dictionary will be searched with
+grep in a separate process.  Otherwise the whole dictionary will
+be loaded into Emacs.  Depending on the size of your dictionary
+one or the other approach is preferable."
+  :type 'boolean)
+
+(defcustom cape-dict-case-replace 'case-replace
+  "Preserve case of input.
+See `dabbrev-case-replace' for details."
+  :type '(choice (const :tag "off" nil)
+                 (const :tag "use `case-replace'" case-replace)
+                 (other :tag "on" t)))
+
+(defcustom cape-dict-case-fold 'case-fold-search
+  "Case fold search during search.
+See `dabbrev-case-fold-search' for details."
+  :type '(choice (const :tag "off" nil)
+                 (const :tag "use `case-fold-search'" case-fold-search)
+                 (other :tag "on" t)))
 
 (defcustom cape-dabbrev-min-length 4
   "Minimum length of dabbrev expansions.
 This setting ensures that words which are too short
 are not offered as completion candidates, such that
 auto completion does not pop up too aggressively."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom cape-dabbrev-check-other-buffers t
   "Buffers to check for dabbrev.
@@ -112,6 +137,31 @@ The buffers are scanned for completion candidates by `cape-line'."
                                                    (choice character string))))
 
 ;;;; Helpers
+
+(defun cape--case-fold-p (fold)
+  "Return non-nil if case folding is enabled for FOLD."
+  (if (eq fold 'case-fold-search) case-fold-search fold))
+
+(defun cape--case-replace-list (flag input strs)
+  "Replace case of STRS depending on INPUT and FLAG."
+  (if (and (if (eq flag 'case-replace) case-replace flag)
+           (string-match-p "\\`[[:upper:]]" input))
+      (mapcar (apply-partially #'cape--case-replace flag input) strs)
+    strs))
+
+(defun cape--case-replace (flag input str)
+  "Replace case of STR depending on INPUT and FLAG."
+  (or (and (if (eq flag 'case-replace) case-replace flag)
+           (string-prefix-p input str t)
+           (string-match-p "\\`[[:upper:]]" input)
+           (save-match-data
+             ;; Ensure that single character uppercase input does not lead to an
+             ;; all uppercase result.
+             (when (and (= (length input) 1) (> (length str) 1))
+               (setq input (concat input (substring str 1 2))))
+             (and (string-match input input)
+                  (replace-match str nil nil input))))
+      str))
 
 (defmacro cape--silent (&rest body)
   "Silence BODY."
@@ -174,27 +224,12 @@ SORT should be nil to disable sorting."
             metadata
           (complete-with-action action table str pred))))))
 
-(defun cape--input-valid-p (old-input new-input cmp)
-  "Return non-nil if the NEW-INPUT is valid in comparison to OLD-INPUT.
-The CMP argument determines how the new input is compared to the old input.
-- never: Never treat the input as valid.
-- prefix/nil: The old input is a prefix of the new input.
-- equal: The old input is equal to the new input.
-- substring: The old input is a substring of the new input."
-  ;; Treat input as not changed if it contains space to allow
-  ;; Orderless completion style filtering.
-  (or (string-match-p "\\s-" new-input)
-      (pcase-exhaustive cmp
-        ('never nil)
-        ((or 'prefix 'nil) (string-prefix-p old-input new-input))
-        ('equal (equal old-input new-input))
-        ('substring (string-search old-input new-input)))))
-
 (defun cape--cached-table (beg end fun valid)
   "Create caching completion table.
-BEG and END are the input bounds.
-FUN is the function which computes the candidates.
-VALID is the input comparator, see `cape--input-valid-p'."
+BEG and END are the input bounds.  FUN is the function which
+computes the candidates.  VALID is a function taking the old and
+new input string.  It should return nil if the cached candidates
+became invalid."
   (let ((input 'init)
         (beg (copy-marker beg))
         (end (copy-marker end t))
@@ -202,18 +237,18 @@ VALID is the input comparator, see `cape--input-valid-p'."
     (lambda (str pred action)
       ;; Bail out early for `metadata' and `boundaries'. This is a pointless
       ;; move because of caching, but we do it anyway in the hope that the
-      ;; resulting profiler output looks less confusing, since the weight of the
-      ;; expensive FUN computation is moved to the `all-completions' action.
-      ;; Computing `all-completions' must surely be most expensive, so nobody
-      ;; will suspect a thing.
+      ;; profiler report looks less confusing, since the weight of the expensive
+      ;; FUN computation is moved to the `all-completions' action.  Computing
+      ;; `all-completions' must surely be most expensive, so nobody will suspect
+      ;; a thing.
       (unless (or (eq action 'metadata) (eq (car-safe action) 'boundaries))
         (let ((new-input (buffer-substring-no-properties beg end)))
           (when (or (eq input 'init)
-                    (not (cape--input-valid-p input new-input valid)))
-            ;; We have to make sure that the completion table is interruptible.
-            ;; An interruption should not happen between the setqs.
-            (setq table (funcall fun new-input)
-                  input new-input)))
+                    (not (or (string-match-p "\\s-" new-input) ;; Support Orderless
+                             (funcall valid input new-input))))
+            (let ((new-table (funcall fun new-input))
+                  (throw-on-input nil)) ;; No interrupt during state update
+              (setq table new-table input new-input))))
         (complete-with-action action table str pred)))))
 
 ;;;; Capfs
@@ -274,21 +309,21 @@ If INTERACTIVE is nil the function acts like a Capf."
   (if interactive
       (let (cape-file-directory-must-exist)
         (cape-interactive #'cape-file))
-    (let* ((default-directory (pcase cape-file-directory
-                                ('nil default-directory)
-                                ((pred stringp) cape-file-directory)
-                                (_ (funcall cape-file-directory))))
-           (bounds (cape--bounds 'filename))
-           (non-essential t)
-           (file (buffer-substring (car bounds) (cdr bounds)))
-           ;; Support org links globally, see `org-open-at-point-global'.
-           (org (string-prefix-p "file:" file)))
-      (when org (setcar bounds (+ 5 (car bounds))))
+    (pcase-let* ((default-directory (pcase cape-file-directory
+                                      ('nil default-directory)
+                                      ((pred stringp) cape-file-directory)
+                                      (_ (funcall cape-file-directory))))
+                 (`(,beg . ,end) (cape--bounds 'filename))
+                 (non-essential t)
+                 (file (buffer-substring-no-properties beg end))
+                 ;; Support org links globally, see `org-open-at-point-global'.
+                 (org (string-prefix-p "file:" file)))
+      (when org (setq beg (+ 5 beg)))
       (when (or org
                 (not cape-file-directory-must-exist)
                 (and (string-search "/" file)
                      (file-exists-p (file-name-directory file))))
-        `(,(car bounds) ,(cdr bounds)
+        `(,beg ,end
           ,(cape--nonessential-table #'read-file-name-internal)
           ,@(when (or org (string-match-p "./" file))
               '(:company-prefix-length t))
@@ -356,6 +391,32 @@ If INTERACTIVE is nil the function acts like a Capf."
         ,(cape--table-with-properties obarray :category 'symbol)
         ,@cape--symbol-properties))))
 
+;;;;; cape-elisp-block
+
+(declare-function org-element-context "org-element")
+(declare-function markdown-code-block-lang "ext:markdown-mode")
+
+;;;###autoload
+(defun cape-elisp-block (&optional interactive)
+  "Complete Elisp in Org or Markdown code block.
+This Capf is particularly useful for literate Emacs configurations.
+If INTERACTIVE is nil the function acts like a Capf."
+  (interactive (list t))
+  (if interactive
+      (cape-interactive #'cape-elisp-block)
+    (when-let ((face (get-text-property (point) 'face))
+               (lang (or (and (if (listp face)
+                                  (memq 'org-block face)
+                                (eq 'org-block face))
+                              (plist-get (cadr (org-element-context)) :language))
+                         (and (if (listp face)
+                                  (memq 'markdown-code-face face)
+                                (eq 'markdown-code-face face))
+                              (save-excursion
+                                (markdown-code-block-lang)))))
+               ((member lang '("elisp" "emacs-lisp"))))
+      (elisp-completion-at-point))))
+
 ;;;;; cape-dabbrev
 
 (defvar cape--dabbrev-properties
@@ -366,9 +427,22 @@ If INTERACTIVE is nil the function acts like a Capf."
 
 (defvar dabbrev-check-all-buffers)
 (defvar dabbrev-check-other-buffers)
-(declare-function dabbrev--ignore-case-p "dabbrev")
+(defvar dabbrev-case-replace)
+(defvar dabbrev-case-fold-search)
 (declare-function dabbrev--find-all-expansions "dabbrev")
 (declare-function dabbrev--reset-global-variables "dabbrev")
+
+(defun cape--dabbrev-list (input)
+  "Find all dabbrev expansions for INPUT."
+  (cape--silent
+    (let ((dabbrev-check-other-buffers (not (null cape-dabbrev-check-other-buffers)))
+          (dabbrev-check-all-buffers (eq cape-dabbrev-check-other-buffers t)))
+      (dabbrev--reset-global-variables))
+    (cl-loop with min-len = (+ cape-dabbrev-min-length (length input))
+             with ic = (cape--case-fold-p dabbrev-case-fold-search)
+             for w in (dabbrev--find-all-expansions input ic)
+             if (>= (length w) min-len) collect
+             (cape--case-replace (and ic dabbrev-case-replace) input w))))
 
 ;;;###autoload
 (defun cape-dabbrev (&optional interactive)
@@ -384,53 +458,16 @@ See the user options `cape-dabbrev-min-length' and
       (let ((cape-dabbrev-min-length 0))
         (cape-interactive #'cape-dabbrev))
     (when (thing-at-point-looking-at "\\(?:\\sw\\|\\s_\\)+")
+      (require 'dabbrev)
       (let ((beg (match-beginning 0))
             (end (match-end 0)))
         `(,beg ,end
           ,(cape--table-with-properties
-            (cape--cached-table beg end #'cape--dabbrev-list 'prefix)
+            (completion-table-case-fold
+             (cape--cached-table beg end #'cape--dabbrev-list #'string-prefix-p)
+             (not (cape--case-fold-p dabbrev-case-fold-search)))
             :category 'cape-dabbrev)
           ,@cape--dabbrev-properties)))))
-
-(defun cape--dabbrev-list (word)
-  "Find all dabbrev expansions for WORD."
-  (require 'dabbrev)
-  (cape--silent
-    (let ((dabbrev-check-other-buffers (not (null cape-dabbrev-check-other-buffers)))
-          (dabbrev-check-all-buffers (eq cape-dabbrev-check-other-buffers t)))
-      (dabbrev--reset-global-variables))
-    (cl-loop with min-len = (+ cape-dabbrev-min-length (length word))
-             for w in (dabbrev--find-all-expansions word (dabbrev--ignore-case-p word))
-             if (>= (length w) min-len) collect w)))
-
-;;;;; cape-ispell
-
-(defvar cape--ispell-properties
-  (list :annotation-function (lambda (_) " Ispell")
-        :company-kind (lambda (_) 'text)
-        :exclusive 'no)
-  "Completion extra properties for `cape-ispell'.")
-
-(declare-function ispell-lookup-words "ispell")
-(defun cape--ispell-words (str)
-  "Return all words from Ispell matching STR."
-  (with-demoted-errors "Ispell Error: %S"
-    (require 'ispell)
-    (cape--silent (ispell-lookup-words (format "*%s*" str)))))
-
-;;;###autoload
-(defun cape-ispell (&optional interactive)
-  "Complete word at point with Ispell.
-If INTERACTIVE is nil the function acts like a Capf."
-  (interactive (list t))
-  (if interactive
-      (cape-interactive #'cape-ispell)
-    (let ((bounds (cape--bounds 'word)))
-      `(,(car bounds) ,(cdr bounds)
-        ,(cape--table-with-properties
-          (cape--cached-table (car bounds) (cdr bounds) #'cape--ispell-words 'substring)
-          :category 'cape-ispell)
-        ,@cape--ispell-properties))))
 
 ;;;;; cape-dict
 
@@ -440,15 +477,34 @@ If INTERACTIVE is nil the function acts like a Capf."
         :exclusive 'no)
   "Completion extra properties for `cape-dict'.")
 
-(defvar cape--dict-words nil)
-(defun cape--dict-words ()
-  "Dictionary words."
-  (or cape--dict-words
-      (setq cape--dict-words
-            (split-string (with-temp-buffer
-                            (insert-file-contents cape-dict-file)
-                            (buffer-string))
-                          "\n" 'omit-nulls))))
+(defun cape--dict-file ()
+  "Return list of dictionary files."
+  (ensure-list
+   (if (functionp cape-dict-file)
+       (funcall cape-dict-file)
+     cape-dict-file)))
+
+(defvar cape--dict-all-words nil)
+(defun cape--dict-list (input)
+  "Return all words from `cape-dict-file' matching INPUT."
+  (unless (equal input "")
+    (cape--case-replace-list
+     cape-dict-case-replace input
+     (if cape-dict-grep
+         (apply #'process-lines-ignore-status
+                "grep"
+                (concat "-Fh" (and (cape--case-fold-p cape-dict-case-fold) "i"))
+                input (cape--dict-file))
+       (unless cape--dict-all-words
+         (setq cape--dict-all-words
+               (split-string (with-temp-buffer
+                               (mapc #'insert-file-contents
+                                     (cape--dict-file))
+                               (buffer-string))
+                             "\n" 'omit-nulls)))
+       (let ((completion-ignore-case t)
+             (completion-regexp-list (list (regexp-quote input))))
+         (all-completions "" cape--dict-all-words))))))
 
 ;;;###autoload
 (defun cape-dict (&optional interactive)
@@ -458,10 +514,16 @@ If INTERACTIVE is nil the function acts like a Capf."
   (interactive (list t))
   (if interactive
       (cape-interactive #'cape-dict)
-    (let ((bounds (cape--bounds 'word)))
-      `(,(car bounds) ,(cdr bounds)
-        ,(cape--table-with-properties (cape--dict-words) :category 'cape-dict)
+    (pcase-let ((`(,beg . ,end) (cape--bounds 'word)))
+      `(,beg ,end
+        ,(cape--table-with-properties
+          (completion-table-case-fold
+           (cape--cached-table beg end #'cape--dict-list #'string-search)
+           (not (cape--case-fold-p cape-dict-case-fold)))
+          :category 'cape-dict)
         ,@cape--dict-properties))))
+
+(define-obsolete-function-alias 'cape-ispell 'cape-dict "0.13")
 
 ;;;;; cape-abbrev
 
@@ -567,16 +629,11 @@ If INTERACTIVE is nil the function acts like a Capf."
 ;;;###autoload
 (defun cape-super-capf (&rest capfs)
   "Merge CAPFS and return new Capf which includes all candidates.
-This feature is experimental."
+The function `cape-super-capf' is experimental."
   (lambda ()
     (when-let (results (delq nil (mapcar #'funcall capfs)))
       (pcase-let* ((`((,beg ,end . ,_)) results)
                    (cand-ht (make-hash-table :test #'equal))
-                   (extra-fun
-                    (lambda (prop)
-                      (lambda (cand &rest args)
-                        (when-let (fun (plist-get (gethash cand cand-ht) prop))
-                          (apply fun cand args)))))
                    (tables nil)
                    (prefix-len nil))
         (cl-loop for (beg2 end2 . rest) in results do
@@ -591,55 +648,56 @@ This feature is experimental."
                       ((and (integerp prefix-len) (integerp plen))
                        (setq prefix-len (max prefix-len plen)))))))
         (setq tables (nreverse tables))
-        (list beg end
-              (lambda (str pred action)
-                (pcase action
-                  (`(boundaries . ,_) nil)
-                  ('metadata
-                   '(metadata (category . cape-super)
-                              (display-sort-function . identity)
-                              (cycle-sort-function . identity)))
-                  ('t
-                   (let ((ht (make-hash-table :test #'equal))
-                         (candidates nil))
-                     (cl-loop for (table . plist) in tables do
-                              (let* ((pr (if-let (pr (plist-get plist :predicate))
-                                             (if pred
-                                                 (lambda (x) (and (funcall pr x) (funcall pred x)))
-                                               pr)
-                                           pred))
-                                     (md (completion-metadata "" table pr))
-                                     (sort (or (completion-metadata-get md 'display-sort-function)
-                                               #'identity))
-                                     (cands (funcall sort (all-completions str table pr))))
-                                (cl-loop for cell on cands
-                                         for cand = (car cell) do
-                                         (if (eq (gethash cand ht t) t)
-                                             (puthash cand plist ht)
-                                           (setcar cell nil)))
-                                (setq candidates (nconc candidates cands))))
-                     (setq cand-ht ht)
-                     (delq nil candidates)))
-                  (_
-                   (completion--some
-                    (pcase-lambda (`(,table . ,plist))
-                      (complete-with-action
-                       action table str
-                       (if-let (pr (plist-get plist :predicate))
-                           (if pred
-                               (lambda (x) (and (funcall pr x) (funcall pred x)))
-                             pr)
-                         pred)))
-                    tables))))
-              :exclusive 'no
-              :company-prefix-length prefix-len
-              :company-doc-buffer (funcall extra-fun :company-doc-buffer)
-              :company-location (funcall extra-fun :company-location)
-              :company-docsig (funcall extra-fun :company-docsig)
-              :company-deprecated (funcall extra-fun :company-deprecated)
-              :company-kind (funcall extra-fun :company-kind)
-              :annotation-function (funcall extra-fun :annotation-function)
-              :exit-function (funcall extra-fun :exit-function))))))
+        `(,beg ,end
+          ,(lambda (str pred action)
+             (pcase action
+               (`(boundaries . ,_) nil)
+               ('metadata
+                '(metadata (category . cape-super)
+                           (display-sort-function . identity)
+                           (cycle-sort-function . identity)))
+               ('t ;; all-completions
+                (let ((ht (make-hash-table :test #'equal))
+                      (candidates nil))
+                  (cl-loop for (table . plist) in tables do
+                           (let* ((pr (if-let (pr (plist-get plist :predicate))
+                                          (if pred
+                                              (lambda (x) (and (funcall pr x) (funcall pred x)))
+                                            pr)
+                                        pred))
+                                  (md (completion-metadata "" table pr))
+                                  (sort (or (completion-metadata-get md 'display-sort-function)
+                                            #'identity))
+                                  (cands (funcall sort (all-completions str table pr))))
+                             (cl-loop for cell on cands
+                                      for cand = (car cell) do
+                                      (if (eq (gethash cand ht t) t)
+                                          (puthash cand plist ht)
+                                        (setcar cell nil)))
+                             (setq candidates (nconc candidates cands))))
+                  (setq cand-ht ht)
+                  (delq nil candidates)))
+               (_ ;; try-completion and test-completion
+                (completion--some
+                 (pcase-lambda (`(,table . ,plist))
+                   (complete-with-action
+                    action table str
+                    (if-let (pr (plist-get plist :predicate))
+                        (if pred
+                            (lambda (x) (and (funcall pr x) (funcall pred x)))
+                          pr)
+                      pred)))
+                 tables))))
+          :exclusive no
+          :company-prefix-length ,prefix-len
+          ,@(mapcan
+             (lambda (prop)
+               (list prop (lambda (cand &rest args)
+                            (when-let (fun (plist-get (gethash cand cand-ht) prop))
+                              (apply fun cand args)))))
+             '(:company-docsig :company-location :company-kind
+               :company-doc-buffer :company-deprecated
+               :annotation-function :exit-function)))))))
 
 (defun cape--company-call (&rest app)
   "Apply APP and handle future return values."
@@ -683,8 +741,11 @@ This feature is experimental."
 ;;;###autoload
 (defun cape-company-to-capf (backend &optional valid)
   "Convert Company BACKEND function to Capf.
-VALID is the input comparator, see `cape--input-valid-p'.
-This feature is experimental."
+VALID is a function taking the old and new input string.  It
+should return nil if the cached candidates became invalid.  The
+default value for VALID is `string-prefix-p' such that the
+candidates are only fetched again if the input prefix
+changed.  The function `cape-company-to-capf' is experimental."
   (lambda ()
     (when (and (symbolp backend) (not (fboundp backend)))
       (ignore-errors (require backend nil t)))
@@ -710,7 +771,7 @@ This feature is experimental."
                    (when dups (setq candidates (delete-dups candidates)))
                    candidates)
                  (if (cape--company-call backend 'no-cache initial-input)
-                     'never valid))
+                     #'equal (or valid #'string-prefix-p)))
                 :category backend
                 :sort (not (cape--company-call backend 'sorted))))
               :exclusive 'no
@@ -752,24 +813,32 @@ This feature is experimental."
 ;;;###autoload
 (defun cape-wrap-buster (capf &optional valid)
   "Call CAPF and return a completion table with cache busting.
-The cache is busted when the input changes, where VALID is the input
-comparator, see `cape--input-valid-p'."
-    (pcase (funcall capf)
-      (`(,beg ,end ,table . ,plist)
-       `(,beg ,end
-              ,(let* ((beg (copy-marker beg))
-                      (end (copy-marker end t))
-                      (input (buffer-substring-no-properties beg end)))
-                 (lambda (str pred action)
-                   (let ((new-input (buffer-substring-no-properties beg end)))
-                     (unless (cape--input-valid-p input new-input valid)
-                       (pcase (funcall capf)
-                         (`(,_beg ,_end ,new-table . ,_plist)
-                          ;; NOTE: We have to make sure that the completion table is interruptible.
-                          ;; An interruption should not happen between the setqs.
-                          (setq table new-table input new-input)))))
-                   (complete-with-action action table str pred)))
-              ,@plist))))
+This function can be used as an advice around an existing Capf.
+The cache is busted when the input changes.  The argument VALID
+can be a function taking the old and new input string.  It should
+return nil if the new input requires that the completion table is
+refreshed.  The default value for VALID is `equal', such that the
+completion table is refreshed on every input change."
+  (setq valid (or valid #'equal))
+  (pcase (funcall capf)
+    (`(,beg ,end ,table . ,plist)
+     (setq plist `(:cape--buster t . ,plist))
+     `(,beg ,end
+       ,(let* ((beg (copy-marker beg))
+               (end (copy-marker end t))
+               (input (buffer-substring-no-properties beg end)))
+          (lambda (str pred action)
+            (let ((new-input (buffer-substring-no-properties beg end)))
+              (unless (or (string-match-p "\\s-" new-input) ;; Support Orderless
+                          (funcall valid input new-input))
+                (pcase (funcall capf)
+                  (`(,_beg ,_end ,new-table . ,new-plist)
+                   (let (throw-on-input) ;; No interrupt during state update
+                     (setf table new-table
+                           input new-input
+                           (cddr plist) new-plist))))))
+            (complete-with-action action table str pred)))
+       ,@plist))))
 
 ;;;###autoload
 (defun cape-wrap-properties (capf &rest properties)
@@ -785,7 +854,8 @@ completion :category symbol can be specified."
 
 ;;;###autoload
 (defun cape-wrap-nonexclusive (capf)
-  "Call CAPF and ensure that it is marked as non-exclusive."
+  "Call CAPF and ensure that it is marked as non-exclusive.
+This function can be used as an advice around an existing Capf."
   (cape-wrap-properties capf :exclusive 'no))
 
 ;;;###autoload
@@ -812,22 +882,25 @@ The PREDICATE is passed the candidate symbol or string."
 
 ;;;###autoload
 (defun cape-wrap-silent (capf)
-  "Call CAPF and silence it (no messages, no errors)."
+  "Call CAPF and silence it (no messages, no errors).
+This function can be used as an advice around an existing Capf."
   (pcase (cape--silent (funcall capf))
     (`(,beg ,end ,table . ,plist)
      `(,beg ,end ,(cape--silent-table table) ,@plist))))
 
 ;;;###autoload
 (defun cape-wrap-case-fold (capf &optional dont-fold)
-  "Call CAPF and return a case insenstive completion table.
-If DONT-FOLD is non-nil return a case sensitive table instead."
+  "Call CAPF and return a case-insensitive completion table.
+If DONT-FOLD is non-nil return a case sensitive table instead.
+This function can be used as an advice around an existing Capf."
   (pcase (funcall capf)
     (`(,beg ,end ,table . ,plist)
      `(,beg ,end ,(completion-table-case-fold table dont-fold) ,@plist))))
 
 ;;;###autoload
 (defun cape-wrap-noninterruptible (capf)
-  "Call CAPF and return a non-interruptible completion table."
+  "Call CAPF and return a non-interruptible completion table.
+This function can be used as an advice around an existing Capf."
   (pcase (let (throw-on-input) (funcall capf))
     (`(,beg ,end ,table . ,plist)
      `(,beg ,end ,(cape--noninterruptible-table table) ,@plist))))
@@ -845,21 +918,27 @@ If the prefix is long enough, enforce auto completion."
 
 ;;;###autoload
 (defun cape-wrap-inside-comment (capf)
-  "Call CAPF only if inside comment."
+  "Call CAPF only if inside comment.
+This function can be used as an advice around an existing Capf."
   (and (nth 4 (syntax-ppss)) (funcall capf)))
 
 ;;;###autoload
 (defun cape-wrap-inside-string (capf)
-  "Call CAPF only if inside string."
+  "Call CAPF only if inside string.
+This function can be used as an advice around an existing Capf."
   (and (nth 3 (syntax-ppss)) (funcall capf)))
 
 ;;;###autoload
 (defun cape-wrap-purify (capf)
-  "Call CAPF and ensure that it does not modify the buffer."
-  ;; bug#50470: Fix Capfs which illegally modify the buffer or which
-  ;; illegally call `completion-in-region'. The workaround here has been
-  ;; proposed @jakanakaevangeli in bug#50470 and is used in
-  ;; @jakanakaevangeli's capf-autosuggest package.
+  "Call CAPF and ensure that it does not illegally modify the buffer.
+This function can be used as an advice around an existing
+Capf.  It has been introduced mainly to fix the broken
+`pcomplete-completions-at-point' function in Emacs versions < 29."
+  ;; bug#50470: Fix Capfs which illegally modify the buffer or which illegally
+  ;; call `completion-in-region'.  The workaround here was proposed by
+  ;; @jakanakaevangeli and is used in his capf-autosuggest package.  In Emacs 29
+  ;; the purity bug of Pcomplete has been fixed, such that make
+  ;; `cape-wrap-purify' is not necessary anymore.
   (catch 'cape--illegal-completion-in-region
     (condition-case nil
         (let ((buffer-read-only t)
@@ -873,13 +952,14 @@ If the prefix is long enough, enforce auto completion."
 
 ;;;###autoload
 (defun cape-wrap-accept-all (capf)
-  "Call CAPF and return a completion table which accepts every input."
+  "Call CAPF and return a completion table which accepts every input.
+This function can be used as an advice around an existing Capf."
   (pcase (funcall capf)
     (`(,beg ,end ,table . ,plist)
      `(,beg ,end ,(cape--accept-all-table table) . ,plist))))
 
 (defmacro cape--capf-wrapper (wrapper)
-  "Create a capf transformer for WRAPPER."
+  "Create a capf transformer from WRAPPER."
   `(defun ,(intern (format "cape-capf-%s" wrapper)) (&rest args)
      (lambda () (apply #',(intern (format "cape-wrap-%s" wrapper)) args))))
 
