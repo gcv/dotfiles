@@ -1071,10 +1071,14 @@
 (use-package rustic
   ;; stable version 3.4 does not use inheritenv correctly
   :pin melpa
-  :after (inheritenv)
 
   :custom
   (rustic-lsp-client 'eglot)
+
+  :init
+  ;; not sure why envrc/inheritenv is not automatically loaded with rustic, but
+  ;; this manual load is necessary:
+  (require 'inheritenv)
   )
 
 
