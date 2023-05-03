@@ -4,7 +4,9 @@
 
 ;; Author: Alvaro Ramirez https://xenodium.com
 ;; URL: https://github.com/xenodium/chatgpt-shell
-;; Version: 0.17.1
+;; Package-Version: 20230430.1957
+;; Package-Commit: 9d88c4c4cc81df7060ca746dfe97a999ba27cf2f
+;; Version: 0.18.1
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This package is free software; you can redistribute it and/or modify
@@ -24,6 +26,9 @@
 
 ;; This is a comint-based generic package used for building concrete
 ;; shells.
+;;
+;; Much inspiration comes from IELM
+;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Lisp-Interaction.html
 
 ;;; Code:
 
@@ -40,12 +45,12 @@
   (declare-function json-pretty-print "ext:json" (begin end &optional minimize)))
 
 (defcustom shell-maker-display-function #'pop-to-buffer-same-window
-  "Function to display new shell.  Can be set to `display-buffer' or similar."
+  "Function to display the shell.  Set to `display-buffer' or custom function."
   :type 'function
   :group 'shell-maker)
 
 (defcustom shell-maker-read-string-function (lambda (prompt history)
-                                           (read-string prompt nil history))
+                                              (read-string prompt nil history))
   "Function to read strings from user.
 
 To use `completing-read', it can be done with something like:
@@ -61,6 +66,11 @@ To use `completing-read', it can be done with something like:
 
 Enable it for troubleshooting issues."
   :type 'boolean
+  :group 'shell-maker)
+
+(defcustom shell-maker-history-path user-emacs-directory
+  "Root path to the location for storing history files."
+  :type 'directory
   :group 'shell-maker)
 
 (defvar shell-maker--input nil)
@@ -95,11 +105,11 @@ Enable it for troubleshooting issues."
 
 (defvar shell-maker-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
-    (define-key map "\C-m" 'shell-maker-return)
-    (define-key map "\C-c\C-c" 'shell-maker-interrupt)
-    (define-key map "\C-x\C-s" 'shell-maker-save-session-transcript)
-    (define-key map "\C-\M-h" 'shell-maker-mark-output)
-    (define-key map "\M-r" 'shell-maker-search-history)
+    (define-key map [remap comint-send-input] 'shell-maker-return)
+    (define-key map [remap comint-interrupt-subjob] 'shell-maker-interrupt)
+    (define-key map (kbd "C-x C-s") 'shell-maker-save-session-transcript)
+    (define-key map (kbd "C-M-h") 'shell-maker-mark-output)
+    (define-key map [remap comint-history-isearch-backward-regexp] 'shell-maker-search-history)
     map)
   "Keymap for `shell-maker' shells.")
 
@@ -181,7 +191,7 @@ Uses the interface provided by `comint-mode'"
   "Write REPLY to prompt.  Set FAILED to record failure."
   (let ((inhibit-read-only t))
     (goto-char (point-max))
-    (shell-maker--output-filter (shell-maker--process)
+    (comint-output-filter (shell-maker--process)
                           (concat reply
                                   (if failed
                                       (propertize "<shell-maker-failed-command>"
@@ -202,12 +212,12 @@ Uses the interface provided by `comint-mode'"
   (unless (eq major-mode 'shell-maker-mode)
     (user-error "Not in a shell"))
   (let ((candidate (completing-read
-               "History: "
-               (delete-dups
-                (seq-filter
-                 (lambda (item)
-                   (not (string-empty-p item)))
-                 (ring-elements comint-input-ring))) nil t)))
+                    "History: "
+                    (delete-dups
+                     (seq-filter
+                      (lambda (item)
+                        (not (string-empty-p item)))
+                      (ring-elements comint-input-ring))) nil t)))
     (delete-region (comint-line-beginning-position) (point-max))
     (insert candidate)))
 
@@ -216,8 +226,8 @@ Uses the interface provided by `comint-mode'"
   (let ((proc (get-buffer-process (current-buffer))))
     (save-excursion
       (let* ((pmark (progn (goto-char (process-mark proc))
-			   (forward-line 0)
-			   (point-marker)))
+                           (forward-line 0)
+                           (point-marker)))
              (output (buffer-substring comint-last-input-end pmark))
              (items (split-string output "<shell-maker-end-of-prompt>")))
         (if (> (length items) 1)
@@ -251,7 +261,7 @@ Uses the interface provided by `comint-mode'"
         (prompt-pos (save-excursion
                       (goto-char (process-mark
                                   (get-buffer-process (current-buffer))))
-		      (point))))
+                      (point))))
     (when (>= (point) prompt-pos)
       (goto-char prompt-pos)
       (forward-line 0))
@@ -318,7 +328,7 @@ Otherwise mark current output at location."
         (prompt-pos (save-excursion
                       (goto-char (process-mark
                                   (get-buffer-process (current-buffer))))
-		      (point))))
+                      (point))))
     (when (>= (point) prompt-pos)
       (goto-char prompt-pos)
       (forward-line -1)
@@ -359,14 +369,14 @@ Otherwise mark current output at location."
       (max
        (save-excursion
          (call-interactively #'comint-previous-prompt)
-         (re-search-backward comint-prompt-regexp)
+         (re-search-backward comint-prompt-regexp nil t)
          (point))
        (save-excursion
-         (re-search-backward comint-prompt-regexp)
+         (re-search-backward comint-prompt-regexp nil t)
          (point))
        (save-excursion
          (call-interactively #'comint-next-prompt)
-         (re-search-backward comint-prompt-regexp)
+         (re-search-backward comint-prompt-regexp nil t)
          (if (<= (point) old-point)
              (point)
            (point-min)))))))
@@ -405,22 +415,35 @@ Otherwise save current output at location."
     (comint-send-input)
     (goto-char (point-max))
     (shell-maker--output-filter (shell-maker--process)
-                          (concat (propertize "<shell-maker-failed-command>"
-                                              'invisible (not shell-maker--show-invisible-markers))
-                                  "\n"
-                                  shell-maker--prompt-internal))
+                                (concat (propertize "<shell-maker-failed-command>"
+                                                    'invisible (not shell-maker--show-invisible-markers))
+                                        "\n"
+                                        shell-maker--prompt-internal))
     (when (process-live-p shell-maker--request-process)
       (kill-process shell-maker--request-process))
     (when shell-maker--busy
       (message "interrupted!"))
     (setq shell-maker--busy nil)))
 
-(defun shell-maker--eval-input (input-string)
-  "Evaluate the Lisp expression INPUT-STRING, and pretty-print the result."
+(defun shell-maker--eval-input (input-string &optional on-output no-announcement)
+  "Evaluate the Lisp expression INPUT-STRING, and pretty-print the result.
+
+Use ON-OUTPUT function to handle outcome.
+
+For example:
+
+\(lambda (command output error finished)
+   (message \"Command: %s\" command)
+   (message \"Output: %s\" output)
+   (message \"Has error: %s\" output)
+   (message \"Is finished: %s\" finished))
+
+NO-ANNOUNCEMENT skips announcing response when in background."
   (let ((buffer (shell-maker-buffer shell-maker-config))
         (prefix-newline "")
         (suffix-newline "\n\n")
-        (response-count 0))
+        (response-count 0)
+        (errored))
     (unless shell-maker--busy
       (setq shell-maker--busy t)
       (cond
@@ -443,14 +466,14 @@ Otherwise save current output at location."
         (setq shell-maker--busy nil))
        ((string-empty-p (string-trim input-string))
         (shell-maker--output-filter (shell-maker--process)
-                                 (concat "\n" shell-maker--prompt-internal))
+                                    (concat "\n" shell-maker--prompt-internal))
         (setq shell-maker--busy nil))
        (t
         ;; For viewing prompt delimiter (used to handle multiline prompts).
         ;; (shell-maker--output-filter (shell-maker--process) "<shell-maker-end-of-prompt>")
         (shell-maker--output-filter (shell-maker--process)
-                                 (propertize "<shell-maker-end-of-prompt>"
-                                             'invisible (not shell-maker--show-invisible-markers)))
+                                    (propertize "<shell-maker-end-of-prompt>"
+                                                'invisible (not shell-maker--show-invisible-markers)))
         (funcall (shell-maker-config-execute-command shell-maker-config)
                  input-string
                  (shell-maker--extract-history
@@ -466,28 +489,50 @@ Otherwise save current output at location."
                        (if partial
                            (progn
                              (shell-maker--write-partial-reply (concat prefix-newline response))
-                             (setq shell-maker--busy partial))
+                             (setq shell-maker--busy partial)
+                             (when on-output
+                               (funcall on-output
+                                        input-string response nil partial)))
                          (shell-maker--write-reply (concat prefix-newline response suffix-newline))
-                         (shell-maker--announce-response buffer)
+                         (unless no-announcement
+                           (shell-maker--announce-response buffer))
                          (setq shell-maker--busy nil)
                          (shell-maker--write-input-ring-history)
                          (when (shell-maker-config-on-command-finished shell-maker-config)
                            ;; FIXME use (concat prefix-newline response suffix-newline) if not streaming.
+                           (when on-output
+                             (funcall on-output
+                                      input-string response nil t))
                            (funcall (shell-maker-config-on-command-finished shell-maker-config)
                                     input-string
                                     (shell-maker-last-output))))
                      (shell-maker--write-reply "Error: that's all is known" t) ;; comeback
                      (setq shell-maker--busy nil)
-                     (shell-maker--announce-response buffer)))
+                     (unless no-announcement
+                       (shell-maker--announce-response buffer))
+                     (when on-output
+                       (funcall on-output
+                                input-string (shell-maker-last-output) t t))))
                  (lambda (error)
-                   (shell-maker--write-reply (concat (string-trim error) suffix-newline) t)
+                   (unless errored
+                     (shell-maker--write-reply (concat (string-trim error) suffix-newline) t)
+                     (setq errored t))
                    (setq shell-maker--busy nil)
-                   (shell-maker--announce-response buffer))))))))
+                   (unless no-announcement
+                     (shell-maker--announce-response buffer))
+                   (when on-output
+                     (funcall on-output
+                              input-string error t t)))))))))
 
 (defun shell-maker--announce-response (buffer)
   "Announce response if BUFFER is not active."
   (unless (eq buffer (window-buffer (selected-window)))
     (message "%s responded" (buffer-name buffer))))
+
+(defun shell-maker--curl-exit-status-from-error-string (string)
+  "Extract exit status from curl error STRING."
+  (when (string-match (rx "curl: (" (group (one-or-more digit)) ")") string)
+    (string-to-number (match-string 1 string))))
 
 (defun shell-maker-async-shell-command (command streaming response-extractor callback error-callback)
   "Run shell COMMAND asynchronously.
@@ -529,7 +574,13 @@ response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
                            (funcall callback (funcall response-extractor obj) t)))
                        (car preparsed))
                (with-current-buffer buffer
-                 (funcall callback (cdr preparsed) t)))
+                 (let ((curl-exit-code (shell-maker--curl-exit-status-from-error-string (cdr preparsed))))
+                   (cond ((eq 0 curl-exit-code)
+                          (funcall callback (cdr preparsed) t))
+                         ((numberp curl-exit-code)
+                          (funcall error-callback (string-trim (cdr preparsed))))
+                         (t
+                          (funcall callback (cdr preparsed) t))))))
              (setq remaining-text (cdr preparsed))))))
       (set-process-sentinel
        request-process
@@ -598,11 +649,23 @@ response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
 Used by `shell-maker--send-input's call."
   (setq shell-maker--input input))
 
-(defun shell-maker--send-input ()
-  "Send text after the prompt."
+(defun shell-maker--send-input (&optional on-output no-announcement)
+  "Send text after the prompt.
+
+Use ON-OUTPUT function to handle outcome.
+
+For example:
+
+\(lambda (command output error finished)
+   (message \"Command: %s\" command)
+   (message \"Output: %s\" output)
+   (message \"Has error: %s\" output)
+   (message \"Is finished: %s\" finished))
+
+NO-ANNOUNCEMENT skips announcing response when in background."
   (let (shell-maker--input)
     (comint-send-input)
-    (shell-maker--eval-input shell-maker--input)))
+    (shell-maker--eval-input shell-maker--input on-output no-announcement)))
 
 (defun shell-maker--get-old-input nil
   "Return the previous input surrounding point."
@@ -748,48 +811,48 @@ Uses PROCESS and STRING same as `comint-output-filter'."
   (when-let ((oprocbuf (process-buffer process)))
     (with-current-buffer oprocbuf
       (let ((inhibit-read-only t))
-	(save-restriction
-	  (widen)
-	  (goto-char (process-mark process))
-	  (set-marker comint-last-output-start (point))
-	  (insert string)
-	  (set-marker (process-mark process) (point))
-	  (goto-char (process-mark process))
-	  (unless comint-use-prompt-regexp
+        (save-restriction
+          (widen)
+          (goto-char (process-mark process))
+          (set-marker comint-last-output-start (point))
+          (insert string)
+          (set-marker (process-mark process) (point))
+          (goto-char (process-mark process))
+          (unless comint-use-prompt-regexp
             (with-silent-modifications
               (add-text-properties comint-last-output-start (point)
                                    `(rear-nonsticky
-	        		     ,shell-maker--prompt-rear-nonsticky
-	        		     front-sticky
-	        		     (field inhibit-line-move-field-capture)
-	        		     field output
-	        		     inhibit-line-move-field-capture t))))
-	  (when-let* ((prompt-start (save-excursion (forward-line 0) (point)))
-		      (inhibit-read-only t)
+                                     ,shell-maker--prompt-rear-nonsticky
+                                     front-sticky
+                                     (field inhibit-line-move-field-capture)
+                                     field output
+                                     inhibit-line-move-field-capture t))))
+          (when-let* ((prompt-start (save-excursion (forward-line 0) (point)))
+                      (inhibit-read-only t)
                       (prompt (string-match
                                comint-prompt-regexp
                                (buffer-substring prompt-start (point)))))
-	    (with-silent-modifications
-	      (or (= (point-min) prompt-start)
-		  (get-text-property (1- prompt-start) 'read-only)
-		  (put-text-property (1- prompt-start)
-				     prompt-start 'read-only 'fence))
-	      (add-text-properties prompt-start (point)
-				   '(read-only t front-sticky (read-only))))
-	    (when comint-last-prompt
-	      (font-lock--remove-face-from-text-property
-	       (car comint-last-prompt)
-	       (cdr comint-last-prompt)
-	       'font-lock-face
-	       'comint-highlight-prompt))
-	    (setq comint-last-prompt
-		  (cons (copy-marker prompt-start) (point-marker)))
+            (with-silent-modifications
+              (or (= (point-min) prompt-start)
+                  (get-text-property (1- prompt-start) 'read-only)
+                  (put-text-property (1- prompt-start)
+                                     prompt-start 'read-only 'fence))
+              (add-text-properties prompt-start (point)
+                                   '(read-only t front-sticky (read-only))))
+            (when comint-last-prompt
+              (font-lock--remove-face-from-text-property
+               (car comint-last-prompt)
+               (cdr comint-last-prompt)
+               'font-lock-face
+               'comint-highlight-prompt))
+            (setq comint-last-prompt
+                  (cons (copy-marker prompt-start) (point-marker)))
             (font-lock-append-text-property prompt-start (point)
-	        			    'font-lock-face
-	        			    'comint-highlight-prompt)
-	    (add-text-properties prompt-start (point)
-	                         `(rear-nonsticky
-	                           ,shell-maker--prompt-rear-nonsticky))))))))
+                                            'font-lock-face
+                                            'comint-highlight-prompt)
+            (add-text-properties prompt-start (point)
+                                 `(rear-nonsticky
+                                   ,shell-maker--prompt-rear-nonsticky))))))))
 
 (defun shell-maker-buffer (config)
   "Get buffer from CONFIG."
@@ -810,7 +873,7 @@ Uses PROCESS and STRING same as `comint-output-filter'."
   (expand-file-name (concat
                      (file-name-as-directory
                       (downcase (shell-maker-config-name config)))
-                     "history")  user-emacs-directory))
+                     "history") shell-maker-history-path))
 
 (defun shell-maker-prompt (config)
   "Get prompt name from CONFIG."
