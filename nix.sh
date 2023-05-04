@@ -61,6 +61,7 @@ packages=(
     httpie             # HTTP client, alternative to curl
     httrack            # web scraper, more stable than wget
     hyperfine          # benchmarking tool
+    joshuto            # file manager
     jq
     #julia
     lazydocker         # Docker UI
