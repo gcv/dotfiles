@@ -55,6 +55,17 @@
 			<key>Text</key>
 			<string></string>
 		</dict>
+		<key>0x60-0x100000-0x32</key>
+		<dict>
+			<key>Action</key>
+			<integer>22</integer>
+			<key>Label</key>
+			<string></string>
+			<key>Text</key>
+			<string></string>
+			<key>Version</key>
+			<integer>1</integer>
+		</dict>
 		<key>0x60-0x180000-0x32</key>
 		<dict>
 			<key>Action</key>
