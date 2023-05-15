@@ -8,7 +8,7 @@
 
 @copying
 @quotation
-Copyright (C) 2015-2022 Jonas Bernoulli <jonas@@bernoul.li>
+Copyright (C) 2015-2023 Jonas Bernoulli <jonas@@bernoul.li>
 
 You can redistribute this document and/or modify it under the terms
 of the GNU General Public License as published by the Free Software
@@ -31,7 +31,7 @@ General Public License for more details.
 @finalout
 @titlepage
 @title With-Editor User Manual
-@subtitle for version 3.2.0
+@subtitle for version 3.3.0
 @author Jonas Bernoulli
 @page
 @vskip 0pt plus 1filll
@@ -60,22 +60,9 @@ additional functionality which makes it useful even for end-users, who
 don't use Magit or another package which uses it internally.
 
 @noindent
-This manual is for With-Editor version 3.2.0.
+This manual is for With-Editor version 3.3.0.
 
-@quotation
-Copyright (C) 2015-2022 Jonas Bernoulli <jonas@@bernoul.li>
-
-You can redistribute this document and/or modify it under the terms
-of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any
-later version.
-
-This document is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE@.  See the GNU
-General Public License for more details.
-
-@end quotation
+@insertcopying
 @end ifnottex
 
 @menu
@@ -191,7 +178,7 @@ implementation:
 
 @lisp
 "sh -c '\
-echo \"WITH-EDITOR: $$ OPEN $0 IN $(pwd)\"; \
+echo \"WITH-EDITOR: $$ OPEN $0$1 IN $(pwd)\"; \
 trap \"exit 0\" USR1; \
 trap \"exit 1\" USR2; \
 while true; do sleep 1; done'"
