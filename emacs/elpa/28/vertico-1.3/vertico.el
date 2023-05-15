@@ -5,9 +5,10 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.2
+;; Version: 1.3
 ;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
 ;; Homepage: https://github.com/minad/vertico
+;; Keywords: convenience, files, matching, completion
 
 ;; This file is part of GNU Emacs.
 
@@ -191,19 +192,24 @@ The value should lie between 0 and vertico-count/2."
   "Recompute history hash table and return it."
   (or (and (equal (car vertico--history-hash) vertico--base) (cdr vertico--history-hash))
       (let* ((base vertico--base)
-             (base-size (length base))
+             (base-len (length base))
              (hist (and (not (eq minibuffer-history-variable t)) ;; Disabled for `t'.
                         (symbol-value minibuffer-history-variable)))
-             (hash (make-hash-table :test #'equal :size (length hist))))
+             (hash (make-hash-table :test #'equal :size (length hist)))
+             (file-p (and (> base-len 0) ;; Step-wise completion, unlike `project-find-file'
+                          (eq minibuffer-history-variable 'file-name-history)))
+             (curr-file (when-let ((win (and file-p (minibuffer-selected-window)))
+                                   (file (buffer-file-name (window-buffer win))))
+                          (abbreviate-file-name file))))
         (cl-loop for elem in hist for index from 0 do
-                 (when (or (= base-size 0)
-                           (and (>= (length elem) base-size)
-                                (eq t (compare-strings base 0 base-size elem 0 base-size))))
-                   (let ((file-sep (and (eq minibuffer-history-variable 'file-name-history)
-                                        (string-search "/" elem base-size))))
+                 (when (and (not (equal curr-file elem)) ;; Deprioritize current file
+                            (or (= base-len 0)
+                                (and (>= (length elem) base-len)
+                                     (eq t (compare-strings base 0 base-len elem 0 base-len)))))
+                   (let ((file-sep (and file-p (string-search "/" elem base-len))))
                      ;; Drop base string from history elements & special file handling.
-                     (when (or (> base-size 0) file-sep)
-                       (setq elem (substring elem base-size (and file-sep (1+ file-sep)))))
+                     (when (or (> base-len 0) file-sep)
+                       (setq elem (substring elem base-len (and file-sep (1+ file-sep)))))
                      (unless (gethash elem hash) (puthash elem index hash)))))
         (cdr (setq vertico--history-hash (cons base hash))))))
 
@@ -254,8 +260,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
                      (plist-get completion-extra-properties :annotation-function)))
         (cl-loop for cand in cands collect
                  (let ((suffix (or (funcall ann cand) "")))
-                   ;; The default completion UI adds the `completions-annotations' face
-                   ;; if no other faces are present.
+                   ;; The default completion UI adds the `completions-annotations'
+                   ;; face if no other faces are present.
                    (unless (text-property-not-all 0 (length suffix) 'face nil suffix)
                      (setq suffix (propertize suffix 'face 'completions-annotations)))
                    (list cand "" suffix)))
@@ -539,9 +545,9 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
     (cond
      ((>= vertico--index 0)
       (let ((cand (substring (nth vertico--index vertico--candidates))))
-        ;; XXX Drop the completions-common-part face which is added by `completion--twq-all'.
-        ;; This is a hack in Emacs and should better be fixed in Emacs itself, the corresponding
-        ;; code is already marked with a FIXME. Should this be reported as a bug?
+        ;; XXX Drop the completions-common-part face which is added by the
+        ;; `completion--twq-all' hack.  This should better be fixed in Emacs
+        ;; itself, the corresponding code is already marked with a FIXME.
         (vertico--remove-face 0 (length cand) 'completions-common-part cand)
         (concat vertico--base
                 (if hl (car (funcall vertico--highlight (list cand))) cand))))
@@ -587,7 +593,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
         (when (= index vertico--index)
           (setq curr-line (length lines)))
         (push (cons index cand) lines)
-        (setq index (1+ index))))
+        (cl-incf index)))
     ;; Drop excess lines
     (setq lines (nreverse lines))
     (cl-loop for count from (length lines) above vertico-count do
@@ -618,12 +624,10 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
               resize-mini-windows 'grow-only
               max-mini-window-height 1.0)
   (unless (frame-root-window-p (active-minibuffer-window))
-    (unless vertico-resize
-      (setq height (max height vertico-count)))
-    (let* ((window-resize-pixelwise t)
-           (dp (- (max (cdr (window-text-pixel-size))
-                       (* (default-line-height) (1+ height)))
-                  (window-pixel-height))))
+    (unless vertico-resize (setq height (max height vertico-count)))
+    (let ((dp (- (max (cdr (window-text-pixel-size))
+                      (* (default-line-height) (1+ height)))
+                 (window-pixel-height))))
       (when (or (and (> dp 0) (/= height 0))
                 (and (< dp 0) (eq vertico-resize t)))
         (window-resize nil dp nil nil 'pixelwise)))))

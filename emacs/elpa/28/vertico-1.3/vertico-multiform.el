@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.2"))
+;; Package-Requires: ((emacs "27.1") (vertico "1.3"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -62,10 +62,11 @@
 
 (defcustom vertico-multiform-commands nil
   "Alist of commands/regexps and list of settings to turn on per command.
-Takes precedence over `vertico-multiform-categories'.  A setting can
-either be a mode symbol, a function, an inverted mode symbol or
-function, or a cons cell of variable name and value.  The key t can be
-used to specify catch all/default settings."
+Takes precedence over `vertico-multiform-categories'.  A setting
+can either be a mode symbol, a function, an inverted mode symbol
+or function, or a cons cell of variable name and value.  The key
+t can be used to specify catch all/default settings.  The value
+of `this-command' is used as key for the lookup."
   :group 'vertico
   :type '(alist :key-type (choice symbol regexp (const t)) :value-type (repeat sexp)))
 
