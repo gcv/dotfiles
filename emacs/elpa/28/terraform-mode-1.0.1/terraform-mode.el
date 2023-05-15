@@ -4,8 +4,8 @@
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-terraform-mode
-;; Package-Version: 1.0.0
-;; Package-Commit: 7b1e482530c76dcf856ec4a20aee6586eb2e8ccf
+;; Package-Version: 1.0.1
+;; Package-Commit: 56f19abae95afb7e13e48ec3e6aeba3820d31307
 ;; Version: 0.06
 ;; Package-Requires: ((emacs "24.3") (hcl-mode "0.03") (dash "2.17.0"))
 
@@ -54,14 +54,14 @@
   :group 'terraform-mode)
 
 (defface terraform-resource-type-face
-  '((t :foreground "medium sea green"))
+  '((t :inherit font-lock-type-face))
   "Face for resource names."
   :group 'terraform-mode)
 
 (define-obsolete-face-alias 'terraform--resource-type-face 'terraform-resource-type-face "1.0.0")
 
 (defface terraform-resource-name-face
-  '((t :foreground "pink"))
+  '((t :inherit font-lock-function-name-face))
   "Face for resource names."
   :group 'terraform-mode)
 
