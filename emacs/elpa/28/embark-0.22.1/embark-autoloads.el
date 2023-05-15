@@ -16,6 +16,20 @@ This function is meant to be added to `minibuffer-setup-hook'." (setq-local emba
 
 (add-hook 'minibuffer-setup-hook #'embark--record-this-command)
 
+(autoload 'embark-eldoc-first-target "embark" "\
+Eldoc function reporting the first Embark target at point.
+This function uses the eldoc REPORT callback and is meant to be
+added to `eldoc-documentation-functions'.
+
+\(fn REPORT &rest _)" nil nil)
+
+(autoload 'embark-eldoc-target-types "embark" "\
+Eldoc function reporting the types of all Embark targets at point.
+This function uses the eldoc REPORT callback and is meant to be
+added to `eldoc-documentation-functions'.
+
+\(fn REPORT &rest _)" nil nil)
+
 (autoload 'embark-bindings-in-keymap "embark" "\
 Explore command key bindings in KEYMAP with `completing-read'.
 The selected command will be executed.  Interactively, prompt the
@@ -107,7 +121,7 @@ The target of the action is chosen by `embark-target-finders'.
 
 If the target comes from minibuffer completion, then the default
 action is the command that opened the minibuffer in the first
-place, unless overidden by `embark-default-action-overrides'.
+place, unless overridden by `embark-default-action-overrides'.
 
 For targets that do not come from minibuffer completion
 \(typically some thing at point in a regular buffer) and whose
