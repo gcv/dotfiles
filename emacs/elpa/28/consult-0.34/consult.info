@@ -1,4 +1,4 @@
-This is doc3KIqKn.info, produced by makeinfo version 6.7 from
+This is docO40Nji.info, produced by makeinfo version 6.7 from
 consult.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: doc3KIqKn.info,  Node: Top,  Next: Available commands,  Up: (dir)
+File: docO40Nji.info,  Node: Top,  Next: Available commands,  Up: (dir)
 
 consult.el - Consulting completing-read
 ***************************************
@@ -103,7 +103,7 @@ Indices
 
 
 
-File: doc3KIqKn.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
+File: docO40Nji.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
 
 1 Available commands
 ********************
@@ -136,7 +136,7 @@ their descriptions.
 * Miscellaneous::                Various other useful commands
 
 
-File: doc3KIqKn.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
+File: docO40Nji.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
 
 1.1 Virtual Buffers
 ===================
@@ -171,7 +171,7 @@ File: doc3KIqKn.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available com
      ‘recentf-mode’ enables tracking of recent files.
 
 
-File: doc3KIqKn.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
+File: docO40Nji.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
 
 1.2 Editing
 ===========
@@ -189,7 +189,7 @@ File: doc3KIqKn.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  
    • ‘consult-kmacro’: Select macro from the macro ring and execute it.
 
 
-File: doc3KIqKn.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
+File: docO40Nji.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
 
 1.3 Register
 ============
@@ -220,7 +220,7 @@ File: doc3KIqKn.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: A
         • ‘C-u 100 M-' x’: Store number in register ‘x’.
 
 
-File: doc3KIqKn.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
+File: docO40Nji.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
 
 1.4 Navigation
 ==============
@@ -241,7 +241,7 @@ File: doc3KIqKn.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Av
      imenu-anywhere (https://github.com/vspinu/imenu-anywhere).
 
 
-File: doc3KIqKn.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
+File: docO40Nji.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
 
 1.5 Search
 ==========
@@ -274,7 +274,7 @@ File: doc3KIqKn.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  U
      region restricts the filtering.
 
 
-File: doc3KIqKn.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
+File: docO40Nji.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
 
 1.6 Grep and Find
 =================
@@ -309,14 +309,14 @@ File: doc3KIqKn.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  
      for the consult grep commands.
 
 
-File: doc3KIqKn.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
+File: docO40Nji.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
 
 1.7 Compilation
 ===============
 
    • ‘consult-compile-error’: Jump to a compilation error.  Supports
      live preview narrowing and recursive editing.
-   • ‘consult-flymake’: Jump to flymake diagnostic.  Supports live
+   • ‘consult-flymake’: Jump to Flymake diagnostic.  Supports live
      preview and recursive editing.  The command supports narrowing.
      Press ‘e SPC’, ‘w SPC’, ‘n SPC’ to only show errors, warnings and
      notes respectively.
@@ -324,7 +324,7 @@ File: doc3KIqKn.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find
      ‘xref-show-xrefs-function’ and ‘xref-show-definitions-function’.
 
 
-File: doc3KIqKn.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
+File: docO40Nji.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
 
 1.8 Histories
 =============
@@ -347,7 +347,7 @@ File: doc3KIqKn.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: A
      ‘isearch-edit-string’.
 
 
-File: doc3KIqKn.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
+File: docO40Nji.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
 
 1.9 Modes
 =========
@@ -360,7 +360,7 @@ File: doc3KIqKn.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Avai
      local-minor/global-minor/major mode via the keys ‘l/g/m’.
 
 
-File: doc3KIqKn.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available commands
+File: docO40Nji.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available commands
 
 1.10 Org Mode
 =============
@@ -373,7 +373,7 @@ File: doc3KIqKn.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available
      live preview and recursive editing.
 
 
-File: doc3KIqKn.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: Available commands
+File: docO40Nji.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: Available commands
 
 1.11 Help
 =========
@@ -403,7 +403,7 @@ File: doc3KIqKn.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: A
                      "corfu" "cape" "tempel"))
 
 
-File: doc3KIqKn.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
+File: docO40Nji.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
 
 1.12 Miscellaneous
 ==================
@@ -420,8 +420,7 @@ File: doc3KIqKn.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
      (https://github.com/minad/corfu) as your in-buffer completion UI,
      this function can be set as ‘completion-in-region-function’.  Then
      your minibuffer completion UI (e.g., Vertico or Icomplete) will be
-     used for ‘completion-at-point’.  If you use Mct, you can give
-     ‘mct-region-mode’ a try.
+     used for ‘completion-at-point’.
           ;; Use `consult-completion-in-region' if Vertico is enabled.
           ;; Otherwise use the default `completion--in-region' function.
           (setq completion-in-region-function
@@ -444,7 +443,7 @@ File: doc3KIqKn.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
      the original buffer.
 
 
-File: doc3KIqKn.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
+File: docO40Nji.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
 
 2 Special features
 ******************
@@ -468,7 +467,7 @@ advanced features.
 * Embark integration::           Actions, Grep/Occur-buffer export
 
 
-File: doc3KIqKn.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
+File: docO40Nji.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
 
 2.1 Live previews
 =================
@@ -534,7 +533,7 @@ slow.  The delay results in a smoother UI experience.
                           :debounce 1 any))
 
 
-File: doc3KIqKn.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
+File: docO40Nji.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
 
 2.2 Narrowing and grouping
 ==========================
@@ -569,7 +568,7 @@ keys are automatically shown in the which-key window after pressing the
 ‘consult-narrow-key’.
 
 
-File: doc3KIqKn.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
+File: docO40Nji.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
 
 2.3 Asynchronous search
 =======================
@@ -635,7 +634,7 @@ status:
      provided.
 
 
-File: doc3KIqKn.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
+File: docO40Nji.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
 
 2.4 Multiple sources
 ====================
@@ -764,7 +763,7 @@ used to create new multi-source commands, but is part of the internal
 API as of now, since some details may still change.
 
 
-File: doc3KIqKn.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
+File: docO40Nji.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
 
 2.5 Embark integration
 ======================
@@ -808,7 +807,7 @@ package is installed.  These three workflows are symmetric.
      ‘wdired-change-to-wdired-mode’ for editing.
 
 
-File: doc3KIqKn.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
+File: docO40Nji.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
 
 3 Configuration
 ***************
@@ -835,7 +834,7 @@ For this reason many Consult-related snippets require lexical binding.
 * Fine-tuning::                  Fine-grained configuration for special requirements
 
 
-File: doc3KIqKn.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
+File: docO40Nji.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
 
 3.1 Use-package example
 =======================
@@ -856,14 +855,14 @@ additional configuration examples.
      ;; Example configuration for Consult
      (use-package consult
        ;; Replace bindings. Lazily loaded due by `use-package'.
-       :bind (;; C-c bindings (mode-specific-map)
+       :bind (;; C-c bindings in `mode-specific-map'
               ("C-c M-x" . consult-mode-command)
               ("C-c h" . consult-history)
               ("C-c k" . consult-kmacro)
               ("C-c m" . consult-man)
               ("C-c i" . consult-info)
               ([remap Info-search] . consult-info)
-              ;; C-x bindings (ctl-x-map)
+              ;; C-x bindings in `ctl-x-map'
               ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
               ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
               ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
@@ -876,7 +875,7 @@ additional configuration examples.
               ("C-M-#" . consult-register)
               ;; Other custom bindings
               ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-              ;; M-g bindings (goto-map)
+              ;; M-g bindings in `goto-map'
               ("M-g e" . consult-compile-error)
               ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
               ("M-g g" . consult-goto-line)             ;; orig. goto-line
@@ -886,7 +885,7 @@ additional configuration examples.
               ("M-g k" . consult-global-mark)
               ("M-g i" . consult-imenu)
               ("M-g I" . consult-imenu-multi)
-              ;; M-s bindings (search-map)
+              ;; M-s bindings in `search-map'
               ("M-s d" . consult-find)
               ("M-s D" . consult-locate)
               ("M-s g" . consult-grep)
@@ -973,7 +972,7 @@ additional configuration examples.
      )
 
 
-File: doc3KIqKn.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
+File: docO40Nji.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
 
 3.2 Custom variables
 ====================
@@ -1028,7 +1027,7 @@ consult-widen-key                  Widening key during completion
 consult-yank-rotate                Rotate kill ring
 
 
-File: doc3KIqKn.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
+File: docO40Nji.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
 
 3.3 Fine-tuning of individual commands
 ======================================
@@ -1099,7 +1098,7 @@ by the following techniques:
   5. Write or propose a patch.
 
 
-File: doc3KIqKn.info,  Node: Recommended packages,  Next: Auxiliary packages,  Prev: Configuration,  Up: Top
+File: docO40Nji.info,  Node: Recommended packages,  Next: Auxiliary packages,  Prev: Configuration,  Up: Top
 
 4 Recommended packages
 **********************
@@ -1138,7 +1137,7 @@ components, you can first start without it - or you could use with
 Embark right away and add the other components later on.
 
 
-File: doc3KIqKn.info,  Node: Auxiliary packages,  Next: Bug reports,  Prev: Recommended packages,  Up: Top
+File: docO40Nji.info,  Node: Auxiliary packages,  Next: Bug reports,  Prev: Recommended packages,  Up: Top
 
 5 Auxiliary packages
 ********************
@@ -1227,7 +1226,7 @@ follow a similar spirit or offer functionality based on
      the completion UI.
 
 
-File: doc3KIqKn.info,  Node: Bug reports,  Next: Contributions,  Prev: Auxiliary packages,  Up: Top
+File: docO40Nji.info,  Node: Bug reports,  Next: Contributions,  Prev: Auxiliary packages,  Up: Top
 
 6 Bug reports
 *************
@@ -1294,7 +1293,7 @@ lexical binding
 Consult often relies on lambdas and lexical closures.
 
 
-File: doc3KIqKn.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
+File: docO40Nji.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
 
 7 Contributions
 ***************
@@ -1314,7 +1313,7 @@ contribute to the Consult wiki (https://github.com/minad/consult/wiki),
 in case you want to share small configuration or command snippets.
 
 
-File: doc3KIqKn.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
+File: docO40Nji.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
 
 8 Acknowledgments
 *****************
@@ -1404,7 +1403,7 @@ great contributors and thanks to the feedback of many users.  Thank you!
      (https://github.com/youngker/consult-codesearch.el))
 
 
-File: doc3KIqKn.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
+File: docO40Nji.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 
 9 Indices
 *********
@@ -1415,7 +1414,7 @@ File: doc3KIqKn.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 * Concept index::                List of all Consult-specific concepts
 
 
-File: doc3KIqKn.info,  Node: Function index,  Next: Concept index,  Up: Indices
+File: docO40Nji.info,  Node: Function index,  Next: Concept index,  Up: Indices
 
 9.1 Function index
 ==================
@@ -1471,7 +1470,7 @@ File: doc3KIqKn.info,  Node: Function index,  Next: Concept index,  Up: Indices
 * consult-yank-replace:                  Editing.               (line 6)
 
 
-File: doc3KIqKn.info,  Node: Concept index,  Prev: Function index,  Up: Indices
+File: docO40Nji.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
 9.2 Concept index
 =================
@@ -1518,24 +1517,24 @@ Node: Modes17972
 Node: Org Mode18452
 Node: Help18960
 Node: Miscellaneous20071
-Node: Special features22266
-Node: Live previews23395
-Node: Narrowing and grouping26800
-Node: Asynchronous search28803
-Node: Multiple sources31885
-Node: Embark integration37641
-Node: Configuration39836
-Node: Use-package example40938
-Node: Custom variables48025
-Node: Fine-tuning51762
-Node: Recommended packages54783
-Node: Auxiliary packages56618
-Node: Bug reports61211
-Node: Contributions64324
-Node: Acknowledgments65234
-Node: Indices69737
-Node: Function index69975
-Node: Concept index73477
+Node: Special features22202
+Node: Live previews23331
+Node: Narrowing and grouping26736
+Node: Asynchronous search28739
+Node: Multiple sources31821
+Node: Embark integration37577
+Node: Configuration39772
+Node: Use-package example40874
+Node: Custom variables47973
+Node: Fine-tuning51710
+Node: Recommended packages54731
+Node: Auxiliary packages56566
+Node: Bug reports61159
+Node: Contributions64272
+Node: Acknowledgments65182
+Node: Indices69685
+Node: Function index69923
+Node: Concept index73425
 
 End Tag Table
 

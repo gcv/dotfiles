@@ -84,7 +84,7 @@ Select a subset of the lines in the current buffer with live preview.
 The selected lines are kept and the other lines are deleted.  When called
 interactively, the lines selected are those that match the minibuffer input.  In
 order to match the inverse of the input, prefix the input with `! '.  When
-called from elisp, the filtering is performed by a FILTER function.  This
+called from Elisp, the filtering is performed by a FILTER function.  This
 command obeys narrowing.
 
 FILTER is the filter function.
@@ -99,7 +99,7 @@ The selected lines are shown and the other lines hidden.  When called
 interactively, the lines selected are those that match the minibuffer input.  In
 order to match the inverse of the input, prefix the input with `! '.  With
 optional prefix argument SHOW reveal the hidden lines.  Alternatively the
-command can be restarted to reveal the lines.  When called from elisp, the
+command can be restarted to reveal the lines.  When called from Elisp, the
 filtering is performed by a FILTER function.  This command obeys narrowing.
 
 FILTER is the filter function.
@@ -342,14 +342,6 @@ buffers in the current project instead of just the current buffer.
 
 ;;;***
 
-;;;### (autoloads nil "consult-icomplete" "consult-icomplete.el"
-;;;;;;  (0 0 0 0))
-;;; Generated autoloads from consult-icomplete.el
-
-(register-definition-prefixes "consult-icomplete" '("consult-icomplete--refresh"))
-
-;;;***
-
 ;;;### (autoloads nil "consult-imenu" "consult-imenu.el" (0 0 0 0))
 ;;; Generated autoloads from consult-imenu.el
 
@@ -480,14 +472,6 @@ kmacro.
 \(fn ARG)" t nil)
 
 (register-definition-prefixes "consult-register" '("consult-register-"))
-
-;;;***
-
-;;;### (autoloads nil "consult-vertico" "consult-vertico.el" (0 0
-;;;;;;  0 0))
-;;; Generated autoloads from consult-vertico.el
-
-(register-definition-prefixes "consult-vertico" '("consult-vertico--"))
 
 ;;;***
 

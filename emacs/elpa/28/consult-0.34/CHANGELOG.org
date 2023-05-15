@@ -2,6 +2,24 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 0.34 (2023-04-21)
+
+- Bugfixes.
+- =consult-org-heading=: Support tag inheritance.
+- Use pure =consult--fast-abbreviate-file-name= function to abbreviate file names
+  in =consult-buffer= and =consult-recent-file=. This ensures that abbreviation does
+  not access the file system (or worse remote hosts via Tramp) and is always
+  fast. The downside is that some paths may not get abbreviated.
+- Introduce buffer sources =consult--source-project-buffer-hidden= and
+  =consult--source-project-recent-file-hidden=. Set the buffer sources of
+  =consult-project= to =consult--source-project-buffer= and
+  =consult--source-project-recent-file= to ease customization.
+- =consult-buffer=: Explicitly save =window-next-buffers= and =window-prev-buffers=.
+- When previewing files literally (=consult-preview-raw-size=), set the multi byte
+  flag of the previewed buffer, such that UTF-8 buffers are not garbled.
+- Do not create preview cursor overlay. Instead display the actual point by
+  ensuring that =cursor-in-non-selected-windows= is set.
+
 * Version 0.33 (2023-03-11)
 
 - BREAKING: The key convention has been updated. The old key convention is not
