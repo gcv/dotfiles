@@ -73,6 +73,8 @@ whatever supported by Nix.
 (autoload 'nix-flake-init "nix-flake" "\
 Run \"nix flake init\" command via a transient interface." t nil)
 
+(add-to-list 'auto-mode-alist '("\\flake.lock\\'" . js-mode))
+
 (register-definition-prefixes "nix-flake" '("nix-flake-"))
 
 ;;;***

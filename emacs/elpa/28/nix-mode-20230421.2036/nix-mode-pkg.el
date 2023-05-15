@@ -1,8 +1,10 @@
-(define-package "nix-mode" "20230329.1948" "Major mode for editing .nix files"
+(define-package "nix-mode" "20230421.2036" "Major mode for editing .nix files"
   '((emacs "25.1")
     (magit-section "0")
     (transient "0.3"))
-  :commit "8a5c9d3437a7b21e3a10df635c8ec283eda1ad08" :maintainer
+  :commit "719feb7868fb567ecfe5578f6119892c771ac5e5" :maintainers
+  '(("Matthew Bauer" . "mjbauer95@gmail.com"))
+  :maintainer
   '("Matthew Bauer" . "mjbauer95@gmail.com")
   :keywords
   '("nix" "languages" "tools" "unix")
