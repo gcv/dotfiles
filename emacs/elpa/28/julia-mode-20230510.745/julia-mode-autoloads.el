@@ -30,7 +30,7 @@ Run an inferior instance of julia inside Emacs.")
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from julia-mode-latexsubs.el
 
-(register-definition-prefixes "julia-mode-latexsubs" '("julia-mode-latexsubs"))
+(register-definition-prefixes "julia-mode-latexsubs" '("julia-"))
 
 ;;;***
 
