@@ -4,10 +4,10 @@
 
 ;; Author: Alvaro Ramirez https://xenodium.com
 ;; URL: https://github.com/xenodium/chatgpt-shell
-;; Package-Version: 20230502.2000
-;; Package-Commit: 89f78ca017e7024d28e39aa0d5ecb516f4ceb381
-;; Version: 0.23.1
-;; Package-Requires: ((emacs "27.1") (shell-maker "0.17.1"))
+;; Package-Version: 20230515.837
+;; Package-Commit: eca332c365e257f11c8c8c443222f98f557e4395
+;; Version: 0.32.1
+;; Package-Requires: ((emacs "27.1") (shell-maker "0.21.1"))
 
 ;; This package is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -138,7 +138,18 @@ Can be used compile or run source block at point."
                            (cons 'primary-action function))))
   :group 'chatgpt-shell)
 
-(defcustom chatgpt-shell-model-version "gpt-3.5-turbo"
+(defcustom chatgpt-shell-model-versions
+  '("gpt-3.5-turbo"
+    "gpt-4")
+  "The list of ChatGPT OpenAI models to swap from.
+
+The list of models supported by /v1/chat/completions endpoint is
+documented at
+https://platform.openai.com/docs/models/model-endpoint-compatibility."
+  :type '(repeat string)
+  :group 'chatgpt-shell)
+
+(defcustom chatgpt-shell-model-version (nth 0 chatgpt-shell-model-versions)
   "The used ChatGPT OpenAI model.
 
 The list of models supported by /v1/chat/completions endpoint is
@@ -169,14 +180,25 @@ for details."
   :type '(repeat string)
   :group 'chatgpt-shell)
 
-(defcustom chatgpt-shell-system-prompt (nth 0 chatgpt-shell-system-prompts)
+(defcustom chatgpt-shell-system-prompt 0
   "The system message helps set the behavior of the assistant.
 
 For example: You are a helpful assistant that translates English to French.
 
 See https://platform.openai.com/docs/guides/chat/introduction"
-  :type 'string
+  :type '(choice (string :tag "String")
+                 (integer :tag "Integer"))
   :group 'chatgpt-shell)
+
+(defun chatgpt-shell-system-prompt ()
+  "Return current system prompt."
+  (cond ((stringp chatgpt-shell-system-prompt)
+         chatgpt-shell-system-prompt)
+        ((integerp chatgpt-shell-system-prompt)
+         (nth chatgpt-shell-system-prompt
+              chatgpt-shell-system-prompts))
+        (t
+         nil)))
 
 (defun chatgpt-shell-swap-system-prompt ()
   "Swap system prompt from `chatgpt-shell-system-prompts'."
@@ -184,11 +206,28 @@ See https://platform.openai.com/docs/guides/chat/introduction"
   (let ((choice (completing-read "System prompt: "
                                  (append
                                   (list "None")
-                                  chatgpt-shell-system-prompts))))
+                                  (seq-map (lambda (item)
+                                             (truncate-string-to-width
+                                              (nth 0 (split-string item "\n"))
+                                              (window-body-width)))
+                                           chatgpt-shell-system-prompts)))))
     (if (or (string-equal choice "None")
             (string-empty-p (string-trim choice)))
         (setq chatgpt-shell-system-prompt nil)
-      (setq chatgpt-shell-system-prompt choice))))
+      (setq chatgpt-shell-system-prompt
+            (or (seq-position chatgpt-shell-system-prompts choice
+                              (lambda (item prefix)
+                                (string-prefix-p prefix item)))
+                choice)))))
+
+(defun chatgpt-shell-swap-model-version ()
+  "Swap model version from `chatgpt-shell-model-versions'."
+  (interactive)
+  (setq chatgpt-shell-model-version
+        (completing-read "Model version: "
+                         chatgpt-shell-model-versions nil t))
+  (chatgpt-shell--update-prompt)
+  (chatgpt-shell-interrupt))
 
 (defcustom chatgpt-shell-streaming t
   "Whether or not to stream ChatGPT responses (show chunks as they arrive)."
@@ -286,7 +325,14 @@ or
 
 With NO-FOCUS, start the shell without focus."
   (interactive)
+  (setf (shell-maker-config-prompt chatgpt-shell--config)
+        (car (chatgpt-shell--prompt-pair)))
+  (setf (shell-maker-config-prompt-regexp chatgpt-shell--config)
+        (cdr (chatgpt-shell--prompt-pair)))
   (shell-maker-start chatgpt-shell--config no-focus)
+  (chatgpt-shell--update-prompt)
+  ;; Disabling advice for now. It gets in the way.
+  ;; (advice-add 'keyboard-quit :around #'chatgpt-shell--adviced:keyboard-quit)
   (define-key shell-maker-mode-map (kbd "C-M-h")
     #'chatgpt-shell-mark-at-point-dwim)
   (define-key shell-maker-mode-map (kbd "C-c C-c")
@@ -295,6 +341,42 @@ With NO-FOCUS, start the shell without focus."
     #'chatgpt-shell-previous-item)
   (define-key shell-maker-mode-map (kbd "C-c C-n")
     #'chatgpt-shell-next-item))
+
+(defun chatgpt-shell--prompt-pair ()
+  "Return a pair with prompt and prompt-regexp."
+  (cl-flet ((shrink-model-version (model-version) ;; gpt-3.5-turbo -> 3.5-turbo
+                                  (string-remove-prefix
+                                   "gpt-" (string-trim model-version))))
+    (cons
+     (format "ChatGPT(%s)> " (shrink-model-version
+                              chatgpt-shell-model-version))
+     (let ((elisp "(rx (or "))
+       (dolist (item chatgpt-shell-model-versions elisp)
+         (setq elisp (concat elisp (format "(seq bol \"ChatGPT(%s)> \") "
+                                           (shrink-model-version item)))))
+       (setq elisp (concat elisp "))"))
+       (eval (car (read-from-string elisp)))))))
+
+(defun chatgpt-shell--update-prompt ()
+  "Update prompt and prompt regexp from `chatgpt-shell-model-versions'."
+  (with-current-buffer (shell-maker-buffer chatgpt-shell--config)
+    (shell-maker-set-prompt
+     (car (chatgpt-shell--prompt-pair))
+     (cdr (chatgpt-shell--prompt-pair)))))
+
+(defun chatgpt-shell--adviced:keyboard-quit (orig-fun &rest args)
+  "Advice around `keyboard-quit' interrupting active shell.
+
+Applies ORIG-FUN and ARGS."
+  (chatgpt-shell-interrupt)
+  (apply orig-fun args))
+
+(defun chatgpt-shell-interrupt ()
+  "Interrupt `chatgpt-shell' from any buffer."
+  (interactive)
+  (with-current-buffer
+      (shell-maker-buffer-name chatgpt-shell--config)
+    (shell-maker-interrupt)))
 
 (defun chatgpt-shell-ctrl-c-ctrl-c ()
   "Ctrl-C Ctrl-C DWIM binding.
@@ -359,8 +441,146 @@ Otherwise interrupt if busy."
                 (cons 'start start)
                 (cons 'end end)))))))
 
-(defun chatgpt-shell--inline-codes ()
-  "Get a list of all inline codess in buffer."
+(defun chatgpt-shell--markdown-headers (&optional avoid-ranges)
+  "Extract markdown headers with AVOID-RANGES."
+  (let ((headers '())
+        (case-fold-search nil))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward
+              (rx bol (group (one-or-more "#"))
+                  (one-or-more space)
+                  (group (one-or-more (not (any "\n")))) eol)
+              nil t)
+        (when-let ((begin (match-beginning 0))
+                   (end (match-end 0)))
+          (unless (seq-find (lambda (avoided)
+                              (and (>= begin (car avoided))
+                                   (<= end (cdr avoided))))
+                            avoid-ranges)
+            (push
+             (list
+              'start begin
+              'end end
+              'level (cons (match-beginning 1) (match-end 1))
+              'title (cons (match-beginning 2) (match-end 2)))
+             headers)))))
+    (nreverse headers)))
+
+(defun chatgpt-shell--markdown-links (&optional avoid-ranges)
+  "Extract markdown links with AVOID-RANGES."
+  (let ((links '())
+        (case-fold-search nil))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward
+              (rx (seq "["
+                       (group (one-or-more (not (any "]"))))
+                       "]"
+                       "("
+                       (group (one-or-more (not (any ")"))))
+                       ")"))
+              nil t)
+        (when-let ((begin (match-beginning 0))
+                   (end (match-end 0)))
+          (unless (seq-find (lambda (avoided)
+                              (and (>= begin (car avoided))
+                                   (<= end (cdr avoided))))
+                            avoid-ranges)
+            (push
+             (list
+              'start begin
+              'end end
+              'title (cons (match-beginning 1) (match-end 1))
+              'url (cons (match-beginning 2) (match-end 2)))
+             links)))))
+    (nreverse links)))
+
+(defun chatgpt-shell--markdown-bolds (&optional avoid-ranges)
+  "Extract markdown bolds with AVOID-RANGES."
+  (let ((bolds '())
+        (case-fold-search nil))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward
+              (rx (or (group "**" (group (one-or-more (not (any "\n*")))) "**")
+                      (group "__" (group (one-or-more (not (any "\n_")))) "__")))
+              nil t)
+        (when-let ((begin (match-beginning 0))
+                   (end (match-end 0)))
+          (unless (seq-find (lambda (avoided)
+                              (and (>= begin (car avoided))
+                                   (<= end (cdr avoided))))
+                            avoid-ranges)
+            (push
+             (list
+              'start begin
+              'end end
+              'text (cons (or (match-beginning 2)
+                              (match-beginning 4))
+                          (or (match-end 2)
+                              (match-end 4))))
+             bolds)))))
+    (nreverse bolds)))
+
+(defun chatgpt-shell--markdown-strikethroughs (&optional avoid-ranges)
+  "Extract markdown strikethroughs with AVOID-RANGES."
+  (let ((strikethroughs '())
+        (case-fold-search nil))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward
+              (rx "~~" (group (one-or-more (not (any "\n~")))) "~~")
+              nil t)
+        (when-let ((begin (match-beginning 0))
+                   (end (match-end 0)))
+          (unless (seq-find (lambda (avoided)
+                              (and (>= begin (car avoided))
+                                   (<= end (cdr avoided))))
+                            avoid-ranges)
+            (push
+             (list
+              'start begin
+              'end end
+              'text (cons (match-beginning 1)
+                          (match-end 1)))
+             strikethroughs)))))
+    (nreverse strikethroughs)))
+
+(defun chatgpt-shell--markdown-italics (&optional avoid-ranges)
+  "Extract markdown italics with AVOID-RANGES."
+  (let ((italics '())
+        (case-fold-search nil))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward
+              (rx (or (group (or bol (one-or-more (any "\n \t")))
+                             (group "*")
+                             (group (one-or-more (not (any "\n*")))) "*")
+                      (group (or bol (one-or-more (any "\n \t")))
+                             (group "_")
+                             (group (one-or-more (not (any "\n_")))) "_")))
+              nil t)
+        (when-let ((begin (match-beginning 0))
+                   (end (match-end 0)))
+          (unless (seq-find (lambda (avoided)
+                              (and (>= begin (car avoided))
+                                   (<= end (cdr avoided))))
+                            avoid-ranges)
+            (push
+             (list
+              'start (or (match-beginning 2)
+                         (match-beginning 5))
+              'end end
+              'text (cons (or (match-beginning 3)
+                              (match-beginning 6))
+                          (or (match-end 3)
+                              (match-end 6))))
+             italics)))))
+    (nreverse italics)))
+
+(defun chatgpt-shell--markdown-inline-codes (&optional avoid-ranges)
+  "Get a list of all inline markdown code in buffer with AVOID-RANGES."
   (let ((codes '())
         (case-fold-search nil))
     (save-excursion
@@ -370,9 +590,13 @@ Otherwise interrupt if busy."
               nil t)
         (when-let ((begin (match-beginning 0))
                    (end (match-end 0)))
-          (push
-           (list
-            'body (cons (match-beginning 1) (match-end 1))) codes))))
+          (unless (seq-find (lambda (avoided)
+                              (and (>= begin (car avoided))
+                                   (<= end (cdr avoided))))
+                            avoid-ranges)
+            (push
+             (list
+              'body (cons (match-beginning 1) (match-end 1))) codes)))))
     (nreverse codes)))
 
 (defvar chatgpt-shell--source-block-regexp
@@ -531,13 +755,16 @@ With PREFIX, invert `chatgpt-shell-insert-queries-inline' choice."
                ""))
      nil prefix)
     (when overlay-blocks
-      (with-current-buffer (get-buffer-create "*chatgpt*")
+      (with-current-buffer
+          (shell-maker-buffer-name chatgpt-shell--config)
         (chatgpt-shell--put-source-block-overlays)))))
 
 (defun chatgpt-shell-send-region-with-header (header invert-insert-inline)
   "Send text with HEADER from region using ChatGPT.
 
 With INVERT-INSERT-INLINE, invert `chatgpt-shell-insert-queries-inline' choice."
+  (unless (region-active-p)
+    (user-error "No region active"))
   (chatgpt-shell-send-to-buffer
    (concat header
            "\n\n"
@@ -603,6 +830,123 @@ With prefix REVIEW prompt before sending to ChatGPT."
   (interactive)
   (chatgpt-shell-send-region t))
 
+(defun chatgpt-shell-command-line-from-prompt-file (file-path)
+  "Send prompt in FILE-PATH and output to standard output."
+  (let ((prompt (with-temp-buffer
+                  (insert-file-contents file-path)
+                  (buffer-string))))
+    (if (string-empty-p (string-trim prompt))
+        (princ (format "Could not read prompt from %s" file-path)
+               #'external-debugging-output)
+      (chatgpt-shell-command-line prompt))))
+
+(defun chatgpt-shell-command-line (prompt)
+  "Send PROMPT and output to standard output."
+  (let ((chatgpt-shell-insert-queries-inline nil)
+        (worker-done nil)
+        (buffered ""))
+    (chatgpt-shell-send-to-buffer
+     prompt nil nil
+     (lambda (_command output _error finished)
+       (setq buffered (concat buffered output))
+       (when finished
+         (setq worker-done t))))
+    (while buffered
+      (unless (string-empty-p buffered)
+        (princ buffered #'external-debugging-output))
+      (setq buffered "")
+      (when worker-done
+        (setq buffered nil))
+      (sleep-for 0.1))
+    (princ "\n")))
+
+(defun chatgpt-shell--eshell-last-last-command ()
+  "Get second to last eshell command."
+  (save-excursion
+    (if (string= major-mode "eshell-mode")
+        (let ((cmd-start)
+              (cmd-end))
+          ;; Find command start and end positions
+          (goto-char eshell-last-output-start)
+          (re-search-backward eshell-prompt-regexp nil t)
+          (setq cmd-start (point))
+          (goto-char eshell-last-output-start)
+          (setq cmd-end (point))
+
+          ;; Find output start and end positions
+          (goto-char eshell-last-output-start)
+          (forward-line 1)
+          (re-search-forward eshell-prompt-regexp nil t)
+          (forward-line -1)
+          (concat "What's wrong with this command?\n\n"
+                  (buffer-substring-no-properties cmd-start cmd-end)))
+      (message "Current buffer is not an eshell buffer."))))
+
+;; Based on https://emacs.stackexchange.com/a/48215
+(defun chatgpt-shell--source-eshell-string (string)
+  "Execute eshell command in STRING."
+  (let ((orig (point))
+        (here (point-max))
+        (inhibit-point-motion-hooks t))
+    (goto-char (point-max))
+    (with-silent-modifications
+      ;; FIXME: Use temporary buffer and avoid insert/delete.
+      (insert string)
+      (goto-char (point-max))
+      (throw 'eshell-replace-command
+             (prog1
+                 (list 'let
+                       (list (list 'eshell-command-name (list 'quote "source-string"))
+                             (list 'eshell-command-arguments '()))
+                       (eshell-parse-command (cons here (point))))
+               (delete-region here (point))
+               (goto-char orig))))))
+
+(defun chatgpt-shell-add-??-command-to-eshell ()
+  "Add `??' command to `eshell'."
+
+  (defun eshell/?? (&rest _args)
+    "Implements `??' eshell command."
+    (interactive)
+    (let ((prompt (concat
+                   "What's wrong with the following command execution?\n\n"
+                   (chatgpt-shell--eshell-last-last-command)))
+          (prompt-file (concat temporary-file-directory
+                               "chatgpt-shell-command-line-prompt")))
+      (when (file-exists-p prompt-file)
+        (delete-file prompt-file))
+      (with-temp-file prompt-file nil nil t
+                      (insert prompt))
+      (chatgpt-shell--source-eshell-string
+       (concat
+        (file-truename (expand-file-name invocation-name invocation-directory)) " "
+        "--quick --batch --eval "
+        "'"
+        (prin1-to-string
+         `(progn
+            (interactive)
+            (load ,(find-library-name "shell-maker") nil t)
+            (load ,(find-library-name "chatgpt-shell") nil t)
+            (require (intern "chatgpt-shell") nil t)
+            (setq chatgpt-shell-model-temperature 0)
+            (setq chatgpt-shell-openai-key ,(chatgpt-shell-openai-key))
+            (chatgpt-shell-command-line-from-prompt-file ,prompt-file)))
+        "'"))))
+
+  (add-hook 'eshell-post-command-hook
+            (defun chatgpt-shell--eshell-post-??-execution ()
+              (when (string-match (symbol-name #'chatgpt-shell-command-line-from-prompt-file)
+                                  (string-join eshell-last-arguments " "))
+                (save-excursion
+                  (save-restriction
+                    (narrow-to-region (eshell-beginning-of-output)
+                                      (eshell-end-of-output))
+                    (chatgpt-shell--put-source-block-overlays))))))
+
+  (require 'esh-cmd)
+
+  (add-to-list 'eshell-complex-commands "??"))
+
 (defun chatgpt-shell-send-to-buffer (text &optional review invert-insert-inline handler)
   "Send TEXT to *chatgpt* buffer.
 Set REVIEW to make changes before submitting to ChatGPT.
@@ -620,7 +964,7 @@ If passing HANDLER function, use it instead of inserting inline."
     (when (region-active-p)
       (setq marker (copy-marker (max (region-beginning)
                                      (region-end)))))
-    (chatgpt-shell insert-inline)
+    (chatgpt-shell (or handler insert-inline))
     (cl-flet ((send ()
                     (when shell-maker--busy
                       (shell-maker-interrupt))
@@ -654,12 +998,12 @@ If passing HANDLER function, use it instead of inserting inline."
                                                            (marker-position marker))))))))
                          (or handler (lambda (_command _output _error _finished))))
                        t))))
-      (if insert-inline
+      (if (or handler insert-inline)
           (with-current-buffer (shell-maker-buffer chatgpt-shell--config)
             (goto-char (point-max))
             (send))
         (with-selected-window
-            (get-buffer-window (get-buffer-create "*chatgpt*"))
+            (get-buffer-window (shell-maker-buffer-name chatgpt-shell--config))
           (send))))))
 
 (defun chatgpt-shell-send-to-ielm-buffer (text &optional execute save-excursion)
@@ -810,12 +1154,12 @@ For example:
                 (chatgpt-shell--unpaired-length
                  chatgpt-shell-transmitted-context-length)))))
   (let ((request-data `((model . ,chatgpt-shell-model-version)
-                        (messages . ,(if chatgpt-shell-system-prompt
+                        (messages . ,(if (chatgpt-shell-system-prompt)
                                          (vconcat ;; Vector for json
                                           (list
                                            (list
                                             (cons 'role "system")
-                                            (cons 'content chatgpt-shell-system-prompt)))
+                                            (cons 'content (chatgpt-shell-system-prompt))))
                                           history)
                                        history)))))
     (when chatgpt-shell-model-temperature
@@ -852,12 +1196,12 @@ Very much EXPERIMENTAL."
   (unless (eq major-mode 'shell-maker-mode)
     (user-error "Not in a shell"))
   (let* ((path (read-file-name "Restore from: " nil nil t))
-         (prompt (shell-maker-prompt shell-maker-config))
+         (prompt-regexp (shell-maker-prompt-regexp shell-maker-config))
          (history (with-temp-buffer
                     (insert-file-contents path)
                     (chatgpt-shell--extract-history
                      (buffer-string)
-                     prompt)))
+                     prompt-regexp)))
          (execute-command (shell-maker-config-execute-command
                            shell-maker-config))
          (validate-command (shell-maker-config-validate-command
@@ -926,7 +1270,10 @@ Use QUOTES1-START QUOTES1-END LANG LANG-START LANG-END BODY-START
                                     (downcase (string-trim lang)))
                                    "-mode")))
         (string (buffer-substring-no-properties body-start body-end))
-        (buf (shell-maker-buffer shell-maker-config))
+        (buf (if (and (boundp 'shell-maker-config)
+                      shell-maker-config)
+                 (shell-maker-buffer shell-maker-config)
+               (current-buffer)))
         (pos 0)
         (props)
         (overlay)
@@ -955,6 +1302,80 @@ Use QUOTES1-START QUOTES1-END LANG LANG-START LANG-END BODY-START
       (overlay-put (make-overlay body-start body-end buf)
                    'face 'font-lock-doc-markup-face))))
 
+(defun chatgpt-shell--fontify-link (start end title-start title-end url-start url-end)
+  "Fontify a markdown link.
+Use START END TITLE-START TITLE-END URL-START URL-END."
+  ;; Hide markup before
+  (overlay-put (make-overlay start title-start) 'invisible 'chatgpt-shell)
+  ;; Show title as link
+  (overlay-put (make-overlay title-start title-end) 'face 'link)
+  ;; Make RET open the URL
+  (define-key (let ((map (make-sparse-keymap)))
+                (define-key map (kbd "RET")
+                  (lambda () (interactive)
+                    (browse-url (buffer-substring-no-properties url-start url-end))))
+                (overlay-put (make-overlay title-start title-end) 'keymap map)
+                map)
+    [remap self-insert-command] 'ignore)
+  ;; Hide markup after
+  (overlay-put (make-overlay title-end end) 'invisible 'chatgpt-shell))
+
+(defun chatgpt-shell--fontify-bold (start end text-start text-end)
+  "Fontify a markdown bold.
+Use START END TEXT-START TEXT-END."
+  ;; Hide markup before
+  (overlay-put (make-overlay start text-start) 'invisible 'chatgpt-shell)
+  ;; Show title as bold
+  (overlay-put (make-overlay text-start text-end) 'face 'bold)
+  ;; Hide markup after
+  (overlay-put (make-overlay text-end end) 'invisible 'chatgpt-shell))
+
+(defun chatgpt-shell--fontify-header (start end level-start level-end title-start title-end)
+  "Fontify a markdown header.
+Use START END LEVEL-START LEVEL-END TITLE-START TITLE-END."
+  ;; Hide markup before
+  (overlay-put (make-overlay start title-start) 'invisible 'chatgpt-shell)
+  ;; Show title as header
+  (overlay-put (make-overlay title-start title-end) 'face
+               (cond ((eq (- level-end level-start) 1)
+                      'org-level-1)
+                     ((eq (- level-end level-start) 2)
+                      'org-level-2)
+                     ((eq (- level-end level-start) 3)
+                      'org-level-3)
+                     ((eq (- level-end level-start) 4)
+                      'org-level-4)
+                     ((eq (- level-end level-start) 5)
+                      'org-level-5)
+                     ((eq (- level-end level-start) 6)
+                      'org-level-6)
+                     ((eq (- level-end level-start) 7)
+                      'org-level-7)
+                     ((eq (- level-end level-start) 8)
+                      'org-level-8)
+                     (t
+                      'org-level-1))))
+
+(defun chatgpt-shell--fontify-italic (start end text-start text-end)
+  "Fontify a markdown italic.
+Use START END TEXT-START TEXT-END."
+  ;; Hide markup before
+  (overlay-put (make-overlay start text-start) 'invisible 'chatgpt-shell)
+  ;; Show title as italic
+  (overlay-put (make-overlay text-start text-end) 'face 'italic)
+  ;; Hide markup after
+  (overlay-put (make-overlay text-end end) 'invisible 'chatgpt-shell))
+
+(defun chatgpt-shell--fontify-strikethrough (start end text-start text-end)
+  "Fontify a markdown strikethrough.
+Use START END TEXT-START TEXT-END."
+  ;; Hide markup before
+  (overlay-put (make-overlay start text-start) 'invisible 'chatgpt-shell)
+  ;; Show title as strikethrough
+  (overlay-put (make-overlay text-start text-end) 'face '(:strike-through t))
+  ;; Hide markup after
+  (overlay-put (make-overlay text-end end) 'invisible 'chatgpt-shell))
+
 (defun chatgpt-shell--fontify-inline-code (body-start body-end)
   "Fontify a source block.
 Use QUOTES1-START QUOTES1-END LANG LANG-START LANG-END BODY-START
@@ -965,7 +1386,10 @@ Use QUOTES1-START QUOTES1-END LANG LANG-START LANG-END BODY-START
   (overlay-put (make-overlay body-end
                              (1+ body-end)) 'invisible 'chatgpt-shell)
   (overlay-put (make-overlay body-start body-end
-                             (shell-maker-buffer shell-maker-config))
+                             (if (and (boundp 'shell-maker-config)
+                                      shell-maker-config)
+                                 (shell-maker-buffer shell-maker-config)
+                               (current-buffer)))
                'face 'font-lock-doc-markup-face))
 
 (defun chatgpt-shell-rename-block-at-point ()
@@ -989,26 +1413,69 @@ Use QUOTES1-START QUOTES1-END LANG LANG-START LANG-END BODY-START
   (dolist (overlay (overlays-in (point-min) (point-max)))
     (delete-overlay overlay)))
 
+(defun chatgpt-shell-refresh-rendering ()
+  "Refresh markdown rendering by re-applying to entire buffer."
+  (interactive)
+  (chatgpt-shell--put-source-block-overlays))
+
 (defun chatgpt-shell--put-source-block-overlays ()
   "Put overlays for all source blocks."
-  (dolist (overlay (overlays-in (point-min) (point-max)))
-    (delete-overlay overlay))
-  (dolist (block (chatgpt-shell--source-blocks))
-    (chatgpt-shell--fontify-source-block
-     (car (map-elt block 'start))
-     (cdr (map-elt block 'start))
-     (buffer-substring-no-properties (car (map-elt block 'language))
-                                     (cdr (map-elt block 'language)))
-     (car (map-elt block 'language))
-     (cdr (map-elt block 'language))
-     (car (map-elt block 'body))
-     (cdr (map-elt block 'body))
-     (car (map-elt block 'end))
-     (cdr (map-elt block 'end))))
-  (dolist (block (chatgpt-shell--inline-codes))
-    (chatgpt-shell--fontify-inline-code
-     (car (map-elt block 'body))
-     (cdr (map-elt block 'body)))))
+  (let* ((source-blocks (chatgpt-shell--source-blocks))
+         (avoid-ranges (seq-map (lambda (block)
+                                 (map-elt block 'body))
+                               source-blocks)))
+    (dolist (overlay (overlays-in (point-min) (point-max)))
+      (delete-overlay overlay))
+    (dolist (block source-blocks)
+      (chatgpt-shell--fontify-source-block
+       (car (map-elt block 'start))
+       (cdr (map-elt block 'start))
+       (buffer-substring-no-properties (car (map-elt block 'language))
+                                       (cdr (map-elt block 'language)))
+       (car (map-elt block 'language))
+       (cdr (map-elt block 'language))
+       (car (map-elt block 'body))
+       (cdr (map-elt block 'body))
+       (car (map-elt block 'end))
+       (cdr (map-elt block 'end))))
+    (dolist (link (chatgpt-shell--markdown-links avoid-ranges))
+      (chatgpt-shell--fontify-link
+       (map-elt link 'start)
+       (map-elt link 'end)
+       (car (map-elt link 'title))
+       (cdr (map-elt link 'title))
+       (car (map-elt link 'url))
+       (cdr (map-elt link 'url))))
+    (dolist (header (chatgpt-shell--markdown-headers avoid-ranges))
+      (chatgpt-shell--fontify-header
+       (map-elt header 'start)
+       (map-elt header 'end)
+       (car (map-elt header 'level))
+       (cdr (map-elt header 'level))
+       (car (map-elt header 'title))
+       (cdr (map-elt header 'title))))
+    (dolist (bold (chatgpt-shell--markdown-bolds avoid-ranges))
+      (chatgpt-shell--fontify-bold
+       (map-elt bold 'start)
+       (map-elt bold 'end)
+       (car (map-elt bold 'text))
+       (cdr (map-elt bold 'text))))
+    (dolist (italic (chatgpt-shell--markdown-italics avoid-ranges))
+      (chatgpt-shell--fontify-italic
+       (map-elt italic 'start)
+       (map-elt italic 'end)
+       (car (map-elt italic 'text))
+       (cdr (map-elt italic 'text))))
+    (dolist (strikethrough (chatgpt-shell--markdown-strikethroughs avoid-ranges))
+      (chatgpt-shell--fontify-strikethrough
+       (map-elt strikethrough 'start)
+       (map-elt strikethrough 'end)
+       (car (map-elt strikethrough 'text))
+       (cdr (map-elt strikethrough 'text))))
+    (dolist (inline-code (chatgpt-shell--markdown-inline-codes avoid-ranges))
+      (chatgpt-shell--fontify-inline-code
+       (car (map-elt inline-code 'body))
+       (cdr (map-elt inline-code 'body))))))
 
 (defun chatgpt-shell--unpaired-length (length)
   "Expand LENGTH to include paired responses.
