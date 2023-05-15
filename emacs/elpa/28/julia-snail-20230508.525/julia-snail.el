@@ -3,7 +3,7 @@
 
 ;; URL: https://github.com/gcv/julia-snail
 ;; Package-Requires: ((emacs "26.2") (dash "2.16.0") (julia-mode "0.3") (s "1.12.0") (spinner "1.7.3") (vterm "0.0.1") (popup "0.5.9"))
-;; Version: 1.2.0
+;; Version: 1.2.2
 ;; Created: 2019-10-27
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -564,7 +564,9 @@ Returns nil if the poll timed out, t otherwise."
      ((equal nil remote-method)
       (format "%s %s -L %s" julia-snail-executable extra-args julia-snail--server-file))
      ;; remote REPL
-     ((string-equal "ssh" remote-method)
+     ((or (string-equal "ssh" remote-method)
+          (string-equal "scp" remote-method)
+          (string-equal "scpx" remote-method))
       (format "ssh -t -L %1$s:localhost:%2$s %3$s %4$s %5$s -L %6$s"
               julia-snail-port
               (or julia-snail-remote-port julia-snail-port)
@@ -580,7 +582,10 @@ Returns nil if the poll timed out, t otherwise."
 	      remote-host
 	      julia-snail-executable
 	      extra-args
-	      remote-dir-server-file)))))
+	      remote-dir-server-file))
+     ;; unsupported method
+     (t
+      (user-error "Unsupported Tramp method %s" remote-method)))))
 
 (defun julia-snail--efn (path &optional starting-dir)
   "A variant of expand-file-name that (1) just does
