@@ -1,12 +1,13 @@
-;;; macrostep.el --- interactive macro expander  -*- lexical-binding: t; -*-
+;;; macrostep.el --- Interactive macro expander  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2015 Jon Oddie
+;; Copyright (C) 2020-2023 Free Software Foundation, Inc.
 
 ;; Author: Jon Oddie <j.j.oddie@gmail.com>
 ;; Url: https://github.com/emacsorphanage/macrostep
 ;; Keywords: lisp, languages, macro, debugging
 
-;; Package-Version: 0.9.1
+;; Package-Version: 0.9.2
 ;; Package-Requires: ((cl-lib "0.5"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -237,6 +238,10 @@
 ;; 8 Changelog
 ;; ===========
 
+;;   - v0.9.2, 2023-05-12:
+;;     - name the keymap macrostep-mode-map, fixing a regression in v0.9.1
+;;   - v0.9.1, 2023-03-12:
+;;     - bug fixes, cleanup and modernization
 ;;   - v0.9, 2015-10-01:
 ;;     - separate into Elisp-specific and generic components
 ;;     - highlight and expand compiler macros
@@ -457,8 +462,9 @@ The default value, `macrostep-macro-form-p', is specific to Emacs Lisp.")
 
 
 ;;; Define keymap and minor mode
-(define-obsolete-variable-alias 'macrostep-keymap 'macrostep-mode-keymap "2022")
-(defvar macrostep-mode-keymap
+(define-obsolete-variable-alias 'macrostep-mode-keymap 'macrostep-mode-map "2023")
+(define-obsolete-variable-alias 'macrostep-keymap 'macrostep-mode-map "2022")
+(defvar macrostep-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "RET") #'macrostep-expand)
     (define-key map "=" #'macrostep-expand)
@@ -482,12 +488,13 @@ The default value, `macrostep-macro-form-p', is specific to Emacs Lisp.")
 (define-minor-mode macrostep-mode
   "Minor mode for inline expansion of macros in Emacs Lisp source buffers.
 
-\\<macrostep-keymap>Progressively expand macro forms with \\[macrostep-expand], collapse them with \\[macrostep-collapse],
-and move back and forth with \\[macrostep-next-macro] and \\[macrostep-prev-macro].
-Use \\[macrostep-collapse-all] or collapse all visible expansions to
-quit and return to normal editing.
+\\<macrostep-mode-map>Progressively expand macro forms with \
+\\[macrostep-expand], collapse them with \\[macrostep-collapse],
+and move back and forth with \\[macrostep-next-macro] and \
+\\[macrostep-prev-macro].  Use \\[macrostep-collapse-all] or collapse all
+visible expansions to quit and return to normal editing.
 
-\\{macrostep-keymap}"
+\\{macrostep-mode-map}"
   :lighter " Macro-Stepper"
   :group 'macrostep
   (if macrostep-mode
@@ -500,9 +507,10 @@ quit and return to normal editing.
               buffer-read-only t)
         ;; Set up post-command hook to bail out on leaving read-only
         (add-hook 'post-command-hook #'macrostep-command-hook nil t)
-        (message
-         (substitute-command-keys
-          "\\<macrostep-keymap>Entering macro stepper mode. Use \\[macrostep-expand] to expand, \\[macrostep-collapse] to collapse, \\[macrostep-collapse-all] to exit.")))
+        (message (substitute-command-keys "\
+\\<macrostep-mode-map>Entering macro stepper mode. \
+Use \\[macrostep-expand] to expand, \\[macrostep-collapse] to collapse, \
+\\[macrostep-collapse-all] to exit.")))
 
     ;; Exiting mode
     (if macrostep-expansion-buffer
@@ -640,13 +648,12 @@ If no more macro expansions are visible after this, exit
 (defun macrostep-next-macro ()
   "Move point forward to the next macro form in macro-expanded text."
   (interactive)
-  (let* ((start
-	 (if (get-text-property (point) 'macrostep-macro-start)
-	     (1+ (point))
-	   (point)))
-	 (next (next-single-property-change start 'macrostep-macro-start)))
+  (let* ((start (if (get-text-property (point) 'macrostep-macro-start)
+                    (1+ (point))
+                  (point)))
+         (next (next-single-property-change start 'macrostep-macro-start)))
     (if next
-	(goto-char next)
+        (goto-char next)
       (error "No more macro forms found"))))
 
 (defun macrostep-prev-macro ()
@@ -655,15 +662,15 @@ If no more macro expansions are visible after this, exit
   (let (prev)
     (save-excursion
       (while
-	  (progn
-	    (setq prev
-		  (previous-single-property-change (point) 'macrostep-macro-start))
-	    (if (or (not prev)
-		    (get-text-property (1- prev) 'macrostep-macro-start))
-		nil
-	      (prog1 t (goto-char prev))))))
+          (progn
+            (setq prev (previous-single-property-change
+                        (point) 'macrostep-macro-start))
+            (if (or (not prev)
+                    (get-text-property (1- prev) 'macrostep-macro-start))
+                nil
+              (prog1 t (goto-char prev))))))
     (if prev
-	(goto-char (1- prev))
+        (goto-char (1- prev))
       (error "No previous macro form found"))))
 
 
@@ -671,9 +678,7 @@ If no more macro expansions are visible after this, exit
 
 (defun macrostep-overlay-at-point ()
   "Return the innermost macro stepper overlay at point."
-  (let ((result
-	 (get-char-property-and-overlay (point) 'macrostep-original-text)))
-    (cdr result)))
+  (cdr (get-char-property-and-overlay (point) 'macrostep-original-text)))
 
 (defun macrostep-collapse-overlay (overlay &optional no-restore-p)
   "Collapse a macro-expansion overlay and restore the unexpanded source text.
@@ -802,7 +807,7 @@ value of DEFINITION in the result will be nil."
         (let ((compiler-macro-definition
                (and macrostep-expand-compiler-macros
                     (or (get head 'compiler-macro)
-			(get head 'cl-compiler-macro)))))
+                        (get head 'cl-compiler-macro)))))
           (if (and compiler-macro-definition
                    (not (eq form
                             (apply compiler-macro-definition form (cdr form)))))
@@ -834,11 +839,10 @@ expansion until a non-macro-call results."
       ((macro)
        (apply definition (cdr form)))
       ((compiler-macro)
-       (let ((expansion
-	      (apply definition form (cdr form))))
-	 (if (equal form expansion)
-	     (error "Form left unchanged by compiler macro")
-	   expansion))))))
+       (let ((expansion (apply definition form (cdr form))))
+         (if (equal form expansion)
+             (error "Form left unchanged by compiler macro")
+           expansion))))))
 
 (put 'macrostep-grab-environment-failed 'error-conditions
      '(macrostep-grab-environment-failed error))
@@ -867,14 +871,14 @@ lambda expression that returns its expansion."
       ;; we back up progressively through the containing forms until
       ;; it succeeds.
       (save-excursion
-	(catch 'done
-	  (while t
-	    (condition-case nil
-		(throw 'done (macrostep-environment-at-point-1))
-	      (macrostep-grab-environment-failed
-	       (condition-case nil
-		   (backward-sexp)
-		 (scan-error (backward-up-list)))))))))))
+        (catch 'done
+          (while t
+            (condition-case nil
+                (throw 'done (macrostep-environment-at-point-1))
+              (macrostep-grab-environment-failed
+               (condition-case nil
+                   (backward-sexp)
+                 (scan-error (backward-up-list)))))))))))
 
 (defun macrostep-environment-at-point-1 ()
   "Attempt to extract the macro environment that would be active at point.
@@ -1032,10 +1036,10 @@ should be dynamically let-bound around calls to this function."
    ((listp sexp)
     ;; Print quoted and quasiquoted forms nicely.
     (let ((head (car sexp)))
-      (cond ((and (eq head 'quote)	; quote
-		  (= (length sexp) 2))
-	     (insert "'")
-	     (macrostep-print-sexp (cadr sexp)))
+      (cond ((and (eq head 'quote)      ; quote
+                  (= (length sexp) 2))
+             (insert "'")
+             (macrostep-print-sexp (cadr sexp)))
 
             ((and (eq head '\`)         ; backquote
                   (= (length sexp) 2))
@@ -1048,12 +1052,12 @@ should be dynamically let-bound around calls to this function."
                (insert "`"))
              (macrostep-print-sexp (cadr sexp)))
 
-	    ((and (memq head '(\, \,@)) ; unquote
-		  (= (length sexp) 2))
-	     (princ head (current-buffer))
-	     (macrostep-print-sexp (cadr sexp)))
+            ((and (memq head '(\, \,@)) ; unquote
+                  (= (length sexp) 2))
+             (princ head (current-buffer))
+             (macrostep-print-sexp (cadr sexp)))
 
-	    (t				; other list form
+            (t                          ; other list form
              (cl-destructuring-bind (macro? . environment)
                  (or (assq sexp macrostep-collected-macro-form-alist)
                      '(nil . nil))
@@ -1106,14 +1110,16 @@ fontified using the same face (modulo the number of faces; see
 `macrostep-gensym-faces')."
   (or (get symbol 'macrostep-gensym-face)
       (progn
-	(if (not macrostep-gensyms-this-level)
-	    (setq macrostep-gensym-depth (1+ macrostep-gensym-depth)
-		  macrostep-gensyms-this-level t))
-	(let ((face (ring-ref macrostep-gensym-faces macrostep-gensym-depth)))
-	  (put symbol 'macrostep-gensym-face face)
-	  face))))
+        (if (not macrostep-gensyms-this-level)
+            (setq macrostep-gensym-depth (1+ macrostep-gensym-depth)
+                  macrostep-gensyms-this-level t))
+        (let ((face (ring-ref macrostep-gensym-faces macrostep-gensym-depth)))
+          (put symbol 'macrostep-gensym-face face)
+          face))))
 
 
 (provide 'macrostep)
-
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 ;;; macrostep.el ends here
