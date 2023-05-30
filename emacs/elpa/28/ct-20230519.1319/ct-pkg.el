@@ -1,8 +1,8 @@
-(define-package "ct" "20230508.0" "Color Tools - a color api"
+(define-package "ct" "20230519.1319" "Color Tools - a color api"
   '((emacs "26.1")
     (dash "2.18.0")
     (hsluv "1.0.0"))
-  :commit "9e43c8587f25d3665f89487ad3e1cd85f3ef4dc4" :authors
+  :commit "02f209fe6c8ad85c832d8f80193255d0bf78e218" :authors
   '(("neeasade"))
   :maintainers
   '(("neeasade"))
