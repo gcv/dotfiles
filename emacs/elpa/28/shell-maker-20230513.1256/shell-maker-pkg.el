@@ -1,2 +1,0 @@
-;;; Generated package description from shell-maker.el  -*- no-byte-compile: t -*-
-(define-package "shell-maker" "20230513.1256" "Interaction mode for making comint shells" '((emacs "27.1")) :commit "195cda9b06c2c9996c586cabdba9c79f23ab12e7" :authors '(("Alvaro Ramirez https://xenodium.com")) :maintainers '(("Alvaro Ramirez https://xenodium.com")) :maintainer '("Alvaro Ramirez https://xenodium.com") :url "https://github.com/xenodium/chatgpt-shell")
