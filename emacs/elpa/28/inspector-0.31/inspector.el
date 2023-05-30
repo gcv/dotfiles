@@ -5,7 +5,7 @@
 ;; Author: Mariano Montone <marianomontone@gmail.com>
 ;; URL: https://github.com/mmontone/emacs-inspector
 ;; Keywords: debugging, tool, lisp, development
-;; Version: 0.30
+;; Version: 0.31
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -732,7 +732,7 @@ is expected to be used.")
   (inspector--insert-title (inspector--princ-to-string (type-of integer)))
   (inspector--insert-label "integer")
   (insert (inspector--princ-to-string integer))
-  (when (<= 0 integer)
+  (when (<= 0 integer (max-char))
     (newline)
     (inspector--insert-label "character")
     (insert (inspector--princ-to-string (char-to-string integer)))))
