@@ -1,2 +1,0 @@
-;;; Generated package description from chatgpt-shell.el  -*- no-byte-compile: t -*-
-(define-package "chatgpt-shell" "20230515.837" "Interaction mode for ChatGPT" '((emacs "27.1") (shell-maker "0.21.1")) :commit "eca332c365e257f11c8c8c443222f98f557e4395" :authors '(("Alvaro Ramirez https://xenodium.com")) :maintainers '(("Alvaro Ramirez https://xenodium.com")) :maintainer '("Alvaro Ramirez https://xenodium.com") :url "https://github.com/xenodium/chatgpt-shell")
