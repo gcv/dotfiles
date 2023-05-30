@@ -3,7 +3,7 @@
 
 ;; URL: https://github.com/gcv/julia-snail
 ;; Package-Requires: ((emacs "26.2") (dash "2.16.0") (julia-mode "0.3") (s "1.12.0") (spinner "1.7.3") (vterm "0.0.1") (popup "0.5.9"))
-;; Version: 1.2.2
+;; Version: 1.2.3
 ;; Created: 2019-10-27
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -1852,8 +1852,10 @@ The following keys are set:
           (advice-add 'spinner-print :around #'julia-snail--spinner-print-around)
           (setq julia-snail--imenu-fallback-index-function imenu-create-index-function)
           (setq imenu-create-index-function 'julia-snail-imenu)
-          (if (and (or (package-installed-p 'company-quickhelp)
-                       (package-installed-p 'corfu-doc))
+          (if (and (or (locate-library "company-quickhelp")
+                       (locate-library "corfu-doc") ; deprecated; keeping around for backwards compatibility
+                       ;; TODO / FIXME: Implement a clean check for corfu-popupinfo, the Corfu documentation display system
+                       )
                    julia-snail-completions-doc-enable)
               (add-hook 'completion-at-point-functions #'julia-snail-completions-doc-capf nil t)
             (add-hook 'completion-at-point-functions #'julia-snail-repl-completion-at-point nil t)))
