@@ -1022,6 +1022,10 @@
   )
 
 
+(use-package racket-mode
+  :pin nongnu)
+
+
 (use-package rainbow-mode
   :pin gnu
   :diminish ""
