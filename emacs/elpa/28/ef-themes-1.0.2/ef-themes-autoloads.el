@@ -22,6 +22,34 @@ is ignored in this scenario.
 
 \(fn THEME &optional VARIANT)" t nil)
 
+(autoload 'ef-themes-select-light "ef-themes" "\
+Load a light Ef THEME.
+Run `ef-themes-post-load-hook' after loading the theme.
+
+Also see `ef-themes-select-dark'.
+
+This command is the same as `ef-themes-select' except it only
+prompts for light themes when called interactively.  Calling it
+from Lisp behaves the same as `ef-themes-select' for the THEME
+argument, meaning that it loads the Ef THEME regardless of
+whether it is light or dark.
+
+\(fn THEME)" t nil)
+
+(autoload 'ef-themes-select-dark "ef-themes" "\
+Load a dark Ef THEME.
+Run `ef-themes-post-load-hook' after loading the theme.
+
+Also see `ef-themes-select-light'.
+
+This command is the same as `ef-themes-select' except it only
+prompts for light themes when called interactively.  Calling it
+from Lisp behaves the same as `ef-themes-select' for the THEME
+argument, meaning that it loads the Ef THEME regardless of
+whether it is light or dark.
+
+\(fn THEME)" t nil)
+
 (autoload 'ef-themes-toggle "ef-themes" "\
 Toggle between the two `ef-themes-to-toggle'.
 If `ef-themes-to-toggle' does not specify two Ef themes, inform
@@ -68,9 +96,10 @@ corresponding entries.
 ;;;;;;  "ef-cherie-theme.el" "ef-cyprus-theme.el" "ef-dark-theme.el"
 ;;;;;;  "ef-day-theme.el" "ef-deuteranopia-dark-theme.el" "ef-deuteranopia-light-theme.el"
 ;;;;;;  "ef-duo-dark-theme.el" "ef-duo-light-theme.el" "ef-frost-theme.el"
-;;;;;;  "ef-light-theme.el" "ef-night-theme.el" "ef-spring-theme.el"
-;;;;;;  "ef-summer-theme.el" "ef-themes-pkg.el" "ef-trio-dark-theme.el"
-;;;;;;  "ef-trio-light-theme.el" "ef-tritanopia-dark-theme.el" "ef-tritanopia-light-theme.el"
+;;;;;;  "ef-kassio-theme.el" "ef-light-theme.el" "ef-night-theme.el"
+;;;;;;  "ef-spring-theme.el" "ef-summer-theme.el" "ef-symbiosis-theme.el"
+;;;;;;  "ef-themes-pkg.el" "ef-trio-dark-theme.el" "ef-trio-light-theme.el"
+;;;;;;  "ef-tritanopia-dark-theme.el" "ef-tritanopia-light-theme.el"
 ;;;;;;  "ef-winter-theme.el") (0 0 0 0))
 
 ;;;***

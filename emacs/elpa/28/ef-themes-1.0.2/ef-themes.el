@@ -6,7 +6,7 @@
 ;; Maintainer: Ef-Themes Development <~protesilaos/ef-themes@lists.sr.ht>
 ;; URL: https://git.sr.ht/~protesilaos/ef-themes
 ;; Mailing-List: https://lists.sr.ht/~protesilaos/ef-themes
-;; Version: 0.11.0
+;; Version: 1.0.2
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: faces, theme, accessibility
 
@@ -37,8 +37,8 @@
 ;; is the opposite of dystopia (δυστοπία): a good place as opposed to
 ;; a bad place.
 ;;
-;; The backronym of the `ef-themes' is: Extremely Fatigued of Themes
-;; Having Exaggerated Markings, Embellishments, and Sparkles.
+;; The backronym of the `ef-themes' is: Eclectic Fashion in Themes
+;; Hides Exaggerated Markings, Embellishments, and Sparkles.
 
 ;;; Code:
 
@@ -62,6 +62,7 @@
     ef-deuteranopia-light
     ef-duo-light
     ef-frost
+    ef-kassio
     ef-light
     ef-spring
     ef-summer
@@ -77,10 +78,14 @@
     ef-deuteranopia-dark
     ef-duo-dark
     ef-night
+    ef-symbiosis
     ef-trio-dark
     ef-tritanopia-dark
     ef-winter)
   "List of symbols with the dark Ef themes.")
+
+(defvaralias 'ef-themes-items 'ef-themes-collection
+  "Alias of `ef-themes-collection'.")
 
 (defconst ef-themes-collection
   (append ef-themes-light-themes ef-themes-dark-themes)
@@ -317,8 +322,7 @@ Other examples:
               (const :tag "More intense background (also override text color)" accented))
   :link '(info-link "(ef-themes) Style of region highlight"))
 
-;; TODO 2022-12-30: Make the palette overrides a `defcustom'
-(defvar ef-themes-common-palette-overrides nil
+(defcustom ef-themes-common-palette-overrides nil
   "Set palette overrides for all the Ef themes.
 
 Mirror the elements of a theme's palette, overriding their value.
@@ -327,7 +331,15 @@ individual theme overrides are THEME-NAME-palette-overrides.  The
 THEME-NAME is one of the symbols in `ef-themes-collection'.
 
 Individual theme overrides take precedence over these common
-overrides.")
+overrides.
+
+To preview the palette entries, use `ef-themes-preview-colors' or
+`ef-themes-preview-colors-current' (read the documentation for
+further details)."
+  :group 'ef-themes
+  :package-version '(ef-themes . "1.0.0")
+  :type '(repeat (list symbol (choice symbol string)))
+  :link '(info-link "(ef-themes) Palette overrides"))
 
 ;;; Helpers for user options
 
@@ -534,26 +546,43 @@ overrides."
        (?l "light" "Load a random light theme"))
      "Limit to the dark or light subset of the Ef themes collection."))))
 
+(defun ef-themes--annotate-theme (theme)
+  "Return completion annotation for THEME."
+  (format " -- %s" (car (split-string (get (intern theme) 'theme-documentation) "\\."))))
+
 (defvar ef-themes--select-theme-history nil
   "Minibuffer history of `ef-themes--select-prompt'.")
+
+(defun ef-themes--load-subset (subset)
+  "Return the `light' or `dark' SUBSET of the Ef themes.
+If SUBSET is neither `light' nor `dark', return all the known Ef themes."
+  (pcase subset
+    ('dark ef-themes-dark-themes)
+    ('light ef-themes-light-themes)
+    (_ (ef-themes--list-known-themes))))
+
+(defun ef-themes--maybe-prompt-subset (variant)
+  "Helper function for `ef-themes--select-prompt' VARIANT argument."
+  (cond
+   ((null variant))
+   ((or (eq variant 'light) (eq variant 'dark)) variant)
+   (t (ef-themes--choose-subset))))
 
 (defun ef-themes--select-prompt (&optional prompt variant)
   "Minibuffer prompt for `ef-themes-select'.
 With optional PROMPT string, use it.  Else use a generic prompt.
 
-With optional VARIANT, prompt for a subset of themes divided into
-light and dark variants.  Then limit the completion candidates
-accordingly."
-  (let* ((subset (when variant (ef-themes--choose-subset)))
-         (themes (pcase subset
-                   ('dark ef-themes-dark-themes)
-                   ('light ef-themes-light-themes)
-                   ;; NOTE 2022-11-02: This condition made sense when
-                   ;; the code now in `ef-themes--choose-subset' used
-                   ;; `completing-read'.  With `read-multiple-choice'
-                   ;; we never meet this condition, as far as I can
-                   ;; tell.  But it does no harm to keep it here.
-                   (_ (ef-themes--list-known-themes)))))
+With optional VARIANT as a non-nil value, prompt for a subset of
+themes divided into light and dark variants.  Then limit the
+completion candidates accordingly.
+
+If VARIANT is either `light' or `dark' then use it directly
+instead of prompting the user for a choice.
+
+When VARIANT is nil, all Ef themes are candidates for completion."
+  (let* ((subset (ef-themes--maybe-prompt-subset variant))
+         (themes (ef-themes--load-subset subset))
+         (completion-extra-properties `(:annotation-function ,#'ef-themes--annotate-theme)))
     (intern
      (completing-read
       (or prompt "Select Ef Theme: ")
@@ -591,6 +620,40 @@ Run `ef-themes-post-load-hook' after loading the theme.
 When called from Lisp, THEME is the symbol of a theme.  VARIANT
 is ignored in this scenario."
   (interactive (list (ef-themes--select-prompt nil current-prefix-arg)))
+  (ef-themes--load-theme theme))
+
+;;;###autoload
+(defun ef-themes-select-light (theme)
+  "Load a light Ef THEME.
+Run `ef-themes-post-load-hook' after loading the theme.
+
+Also see `ef-themes-select-dark'.
+
+This command is the same as `ef-themes-select' except it only
+prompts for light themes when called interactively.  Calling it
+from Lisp behaves the same as `ef-themes-select' for the THEME
+argument, meaning that it loads the Ef THEME regardless of
+whether it is light or dark."
+  (interactive
+   (list
+    (ef-themes--select-prompt "Select light Ef theme: " 'light)))
+  (ef-themes--load-theme theme))
+
+;;;###autoload
+(defun ef-themes-select-dark (theme)
+  "Load a dark Ef THEME.
+Run `ef-themes-post-load-hook' after loading the theme.
+
+Also see `ef-themes-select-light'.
+
+This command is the same as `ef-themes-select' except it only
+prompts for light themes when called interactively.  Calling it
+from Lisp behaves the same as `ef-themes-select' for the THEME
+argument, meaning that it loads the Ef THEME regardless of
+whether it is light or dark."
+  (interactive
+   (list
+    (ef-themes--select-prompt "Select light Ef theme: " 'dark)))
   (ef-themes--load-theme theme))
 
 (defun ef-themes--toggle-theme-p ()
@@ -707,7 +770,8 @@ color mappings of the palette, instead of its named colors."
 (defun ef-themes--preview-colors-prompt ()
   "Prompt for Ef theme.
 Helper function for `ef-themes-preview-colors'."
-  (let ((def (format "%s" (ef-themes--current-theme))))
+  (let ((def (format "%s" (ef-themes--current-theme)))
+        (completion-extra-properties `(:annotation-function ,#'ef-themes--annotate-theme)))
     (completing-read
      (format "Use palette from theme [%s]: " def)
      (ef-themes--list-known-themes) nil t nil
@@ -812,7 +876,10 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(cursor ((,c :background ,cursor)))
     `(default ((,c :background ,bg-main :foreground ,fg-main)))
     `(italic ((,c :slant italic)))
+    `(menu ((,c :background ,bg-dim :foreground ,fg-main)))
     `(region ((,c ,@(ef-themes--region bg-region bg-alt bg-region-intense bg-active fg-intense))))
+    `(scroll-bar ((,c :background ,bg-dim :foreground ,fg-dim)))
+    `(tool-bar ((,c :background ,bg-dim :foreground ,fg-main)))
     `(vertical-border ((,c :foreground ,border)))
 ;;;;; all other basic faces
     `(button ((,c :foreground ,link :underline ,border)))
@@ -843,7 +910,7 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(shadow ((,c :foreground ,fg-dim)))
     `(success ((,c :inherit bold :foreground ,info)))
     `(tooltip ((,c :background ,bg-alt :foreground ,fg-intense)))
-    `(trailing-whitespace ((,c :background ,bg-red :foreground ,fg-intense)))
+    `(trailing-whitespace ((,c :background ,bg-red-intense :foreground ,fg-intense)))
     `(warning ((,c :inherit bold :foreground ,warning)))
 ;;;; all-the-icons
     `(all-the-icons-blue ((,c :foreground ,blue-cooler)))
@@ -947,10 +1014,10 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(calendar-today ((,c :inherit bold :underline t)))
     `(calendar-weekday-header ((,c :foreground ,date-weekday)))
     `(calendar-weekend-header ((,c :foreground ,date-weekend)))
-    `(diary ((,c :background ,bg-dim :foreground ,accent-0)))
-    `(diary-anniversary ((,c :foreground ,accent-1)))
+    `(diary ((,c :foreground ,date-common)))
+    `(diary-anniversary ((,c :foreground ,date-holiday)))
     `(diary-time ((,c :foreground ,date-common)))
-    `(holiday ((,c :background ,bg-dim :foreground ,date-holiday)))
+    `(holiday ((,c :foreground ,date-holiday)))
 ;;;; cider
     `(cider-deprecated-face ((,c :background ,bg-warning :foreground ,warning)))
     `(cider-enlightened-face ((,c :box ,warning)))
@@ -985,7 +1052,7 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(company-echo-common ((,c :inherit bold :foreground ,accent-0)))
     `(company-preview ((,c :background ,bg-dim :foreground ,fg-dim)))
     `(company-preview-common ((,c :inherit company-echo-common)))
-    `(company-preview-search ((,c :background ,bg-yellow :foreground ,fg-intense)))
+    `(company-preview-search ((,c :background ,bg-yellow-intense :foreground ,fg-intense)))
     `(company-scrollbar-bg ((,c :background ,bg-active)))
     `(company-scrollbar-fg ((,c :background ,fg-main)))
     `(company-template-field ((,c :background ,bg-active :foreground ,fg-intense)))
@@ -1020,7 +1087,6 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(consult-imenu-prefix ((,c :inherit shadow)))
     `(consult-line-number ((,c :inherit shadow)))
     `(consult-line-number-prefix ((,c :inherit shadow)))
-    `(consult-preview-cursor ((,c :background ,cursor :foreground ,bg-main)))
     `(consult-separator ((,c :foreground ,border)))
 ;;;; corfu
     `(corfu-current ((,c :background ,bg-completion)))
@@ -1028,7 +1094,8 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(corfu-border ((,c :background ,bg-active)))
     `(corfu-default ((,c :background ,bg-inactive)))
 ;;;; custom (M-x customize)
-    `(custom-button ((,c :box ,fg-dim :background ,bg-active :foreground ,fg-intense)))
+    `(custom-button ((,c :box (:color ,border :style released-button)
+                         :background ,bg-active :foreground ,fg-intense)))
     `(custom-button-mouse ((,c :inherit (highlight custom-button))))
     `(custom-button-pressed ((,c :inherit (secondary-selection custom-button))))
     `(custom-changed ((,c :background ,bg-changed)))
@@ -1133,7 +1200,7 @@ Optional prefix argument MAPPINGS has the same meaning as for
     ;; is for the `vertical-border'.  We want this to be more subtle.
     `(fill-column-indicator ((,c :height 1 :background ,bg-alt :foreground ,bg-alt)))
 ;;;; doom-modeline
-    `(doom-modeline-bar ((,c :background ,bg-accent)))
+    `(doom-modeline-bar ((,c :background ,keybind)))
     `(doom-modeline-bar-inactive ((,c :background ,bg-alt)))
     `(doom-modeline-battery-charging ((,c :foreground ,modeline-info)))
     `(doom-modeline-battery-critical ((,c :underline t :foreground ,modeline-err)))
@@ -1168,18 +1235,18 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(doom-modeline-urgent ((,c :inherit bold-italic :foreground ,modeline-err)))
     `(doom-modeline-warning ((,c :inherit bold :foreground ,modeline-warning)))
 ;;;; ediff
-    `(ediff-current-diff-A ((,c :inherit diff-removed)))
-    `(ediff-current-diff-Ancestor ((,c :background ,bg-region))) ; TODO 2022-08-14: Needs review
-    `(ediff-current-diff-B ((,c :inherit diff-added)))
-    `(ediff-current-diff-C ((,c :inherit diff-changed)))
+    `(ediff-current-diff-A ((,c :background ,bg-removed :foreground ,fg-removed)))
+    `(ediff-current-diff-Ancestor ((,c :background ,bg-region)))
+    `(ediff-current-diff-B ((,c :background ,bg-added :foreground ,fg-added)))
+    `(ediff-current-diff-C ((,c :background ,bg-changed :foreground ,fg-changed)))
     `(ediff-even-diff-A ((,c :background ,bg-dim)))
     `(ediff-even-diff-Ancestor ((,c :background ,bg-dim)))
     `(ediff-even-diff-B ((,c :background ,bg-dim)))
     `(ediff-even-diff-C ((,c :background ,bg-dim)))
-    `(ediff-fine-diff-A ((,c :inherit diff-refine-removed)))
-    `(ediff-fine-diff-Ancestor ((,c :inherit diff-refine-cyan)))
-    `(ediff-fine-diff-B ((,c :inherit diff-refine-added)))
-    `(ediff-fine-diff-C ((,c :inherit diff-refine-changed)))
+    `(ediff-fine-diff-A ((,c :background ,bg-removed-refine :foreground ,fg-removed)))
+    `(ediff-fine-diff-Ancestor ((,c :inherit modus-themes-subtle-cyan)))
+    `(ediff-fine-diff-B ((,c :background ,bg-added-refine :foreground ,fg-added)))
+    `(ediff-fine-diff-C ((,c :background ,bg-changed-refine :foreground ,fg-changed)))
     `(ediff-odd-diff-A ((,c :inherit ediff-even-diff-A)))
     `(ediff-odd-diff-Ancestor ((,c :inherit ediff-even-diff-Ancestor)))
     `(ediff-odd-diff-B ((,c :inherit ediff-even-diff-B)))
@@ -1249,9 +1316,16 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(flycheck-info ((,c :inherit ef-themes-underline-info)))
     `(flycheck-warning ((,c :inherit ef-themes-underline-warning)))
 ;;;; flymake
+    `(flymake-end-of-line-diagnostics-face ((,c :inherit italic :height 0.85 :box ,border)))
     `(flymake-error ((,c :inherit ef-themes-underline-error)))
+    `(flymake-error-echo ((,c :inherit error)))
+    `(flymake-error-echo-at-eol ((,c :inherit flymake-end-of-line-diagnostics-face :foreground ,err)))
     `(flymake-note ((,c :inherit ef-themes-underline-info)))
+    `(flymake-note-echo ((,c :inherit success)))
+    `(flymake-note-echo-at-eol ((,c :inherit flymake-end-of-line-diagnostics-face :foreground ,info)))
     `(flymake-warning ((,c :inherit ef-themes-underline-warning)))
+    `(flymake-warning-echo ((,c :inherit warning)))
+    `(flymake-note-echo-at-eol ((,c :inherit flymake-end-of-line-diagnostics-face :foreground ,warning)))
 ;;;; flyspell
     `(flyspell-duplicate ((,c :inherit ef-themes-underline-warning)))
     `(flyspell-incorrect ((,c :inherit ef-themes-underline-error)))
@@ -1400,12 +1474,12 @@ Optional prefix argument MAPPINGS has the same meaning as for
 ;;;; ibuffer
     `(ibuffer-locked-buffer ((,c :foreground ,warning)))
 ;;;; image-dired
-    `(image-dired-thumb-flagged ((,c :background ,err)))
+    `(image-dired-thumb-flagged ((,c :background ,err :box (:line-width -3))))
     `(image-dired-thumb-header-file-name ((,c :inherit bold)))
     `(image-dired-thumb-header-file-size ((,c :foreground ,info)))
-    `(image-dired-thumb-mark ((,c :background ,info)))
+    `(image-dired-thumb-mark ((,c :background ,info :box (:line-width -3))))
 ;;;; info
-    `(Info-quoted ((,c :inherit ef-themes-fixed-pitch :foreground ,accent-0))) ; the capitalization is canonical
+    `(Info-quoted ((,c :inherit ef-themes-fixed-pitch :foreground ,prose-verbatim))) ; the capitalization is canonical
     `(info-header-node ((,c :inherit (shadow bold))))
     `(info-index-match ((,c :inherit match)))
     `(info-menu-header ((,c :inherit bold)))
@@ -1416,15 +1490,17 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(info-title-3 ((,c :inherit ef-themes-heading-3)))
     `(info-title-4 ((,c :inherit ef-themes-heading-4)))
 ;;;; isearch, occur, and the like
-    `(isearch ((,c :background ,bg-yellow :foreground ,fg-intense)))
-    `(isearch-fail ((,c :background ,bg-red :foreground ,fg-intense)))
-    `(isearch-group-1 ((,c :background ,bg-green :foreground ,fg-intense)))
-    `(isearch-group-2 ((,c :background ,bg-magenta :foreground ,fg-intense)))
-    `(lazy-highlight ((,c :background ,bg-blue :foreground ,fg-intense)))
+    `(isearch ((,c :background ,bg-yellow-intense :foreground ,fg-intense)))
+    `(isearch-fail ((,c :background ,bg-red-intense :foreground ,fg-intense)))
+    `(isearch-group-1 ((,c :background ,bg-green-intense :foreground ,fg-intense)))
+    `(isearch-group-2 ((,c :background ,bg-magenta-intense :foreground ,fg-intense)))
+    `(lazy-highlight ((,c :background ,bg-blue-intense :foreground ,fg-intense)))
     `(match ((,c :background ,bg-warning)))
-    `(query-replace ((,c :background ,bg-red :foreground ,fg-intense)))
+    `(query-replace ((,c :background ,bg-red-intense :foreground ,fg-intense)))
 ;;;; jit-spell
     `(jit-spell-misspelling ((,c :inherit ef-themes-underline-error)))
+;;;;; jinx
+    `(jinx-misspelled ((,c :inherit ef-themes-underline-warning)))
 ;;;; keycast
     `(keycast-command ((,c :inherit bold)))
     `(keycast-key ((,c :inherit bold :background ,bg-hover :foreground ,fg-intense :box (:line-width -1 :color ,fg-dim))))
@@ -1707,6 +1783,7 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(orderless-match-face-2 ((,c :inherit bold :foreground ,accent-2)))
     `(orderless-match-face-3 ((,c :inherit bold :foreground ,accent-3)))
 ;;;; org
+    `(org-agenda-calendar-daterange ((,c :foreground ,date-range)))
     `(org-agenda-calendar-event ((,c :foreground ,date-event)))
     `(org-agenda-calendar-sexp ((,c :inherit (italic org-agenda-calendar-event))))
     `(org-agenda-clocking ((,c :background ,bg-warning :foreground ,warning)))
@@ -1735,7 +1812,7 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(org-checkbox-statistics-done ((,c :inherit org-done)))
     `(org-checkbox-statistics-todo ((,c :inherit org-todo)))
     `(org-clock-overlay ((,c :background ,bg-hover-secondary)))
-    `(org-code ((,c :inherit ef-themes-fixed-pitch :foreground ,accent-1)))
+    `(org-code ((,c :inherit ef-themes-fixed-pitch :foreground ,prose-code)))
     `(org-column ((,c :inherit default :background ,bg-alt)))
     `(org-column-title ((,c :inherit (bold default) :underline t :background ,bg-alt)))
     `(org-date ((,c :inherit ef-themes-fixed-pitch :foreground ,date-common)))
@@ -1790,14 +1867,14 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(org-verse ((,c :inherit org-block)))
     `(org-warning ((,c :inherit warning)))
 ;;;; org-habit
-    `(org-habit-alert-face ((,c :background ,yellow-graph-0-bg :foreground "black"))) ; special case
-    `(org-habit-alert-future-face ((,c :background ,yellow-graph-1-bg)))
-    `(org-habit-clear-face ((,c :background ,blue-graph-0-bg :foreground "black"))) ; special case
-    `(org-habit-clear-future-face ((,c :background ,blue-graph-1-bg)))
-    `(org-habit-overdue-face ((,c :background ,red-graph-0-bg)))
-    `(org-habit-overdue-future-face ((,c :background ,red-graph-1-bg)))
-    `(org-habit-ready-face ((,c :background ,green-graph-0-bg :foreground "black"))) ; special case
-    `(org-habit-ready-future-face ((,c :background ,green-graph-1-bg)))
+    `(org-habit-alert-face ((,c :background ,bg-graph-yellow-0 :foreground "black"))) ; special case
+    `(org-habit-alert-future-face ((,c :background ,bg-graph-yellow-1)))
+    `(org-habit-clear-face ((,c :background ,bg-graph-blue-0 :foreground "black"))) ; special case
+    `(org-habit-clear-future-face ((,c :background ,bg-graph-blue-1)))
+    `(org-habit-overdue-face ((,c :background ,bg-graph-red-0)))
+    `(org-habit-overdue-future-face ((,c :background ,bg-graph-red-1)))
+    `(org-habit-ready-face ((,c :background ,bg-graph-green-0 :foreground "black"))) ; special case
+    `(org-habit-ready-future-face ((,c :background ,bg-graph-green-1)))
 ;;;; org-modern
     `(org-modern-date-active ((,c :inherit (ef-themes-fixed-pitch org-modern-label) :background ,bg-alt)))
     `(org-modern-date-inactive ((,c :inherit (ef-themes-fixed-pitch org-modern-label) :background ,bg-dim :foreground ,fg-dim)))
@@ -1836,6 +1913,24 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(package-status-unsigned ((,c :inherit error)))
 ;;;; perspective
     `(persp-selected-face ((,c :inherit mode-line-emphasis)))
+;;;;; proced
+    `(proced-cpu ((,c :foreground ,keyword)))
+    `(proced-emacs-pid ((,c :foreground ,identifier :underline t)))
+    `(proced-executable ((,c :foreground ,name)))
+    `(proced-interruptible-sleep-status-code ((,c :inherit shadow)))
+    `(proced-mem ((,c :foreground ,type)))
+    `(proced-memory-high-usage ((,c :foreground ,err)))
+    `(proced-memory-low-usage ((,c :foreground ,info)))
+    `(proced-memory-medium-usage ((,c :foreground ,warning)))
+    `(proced-pgrp ((,c :inherit proced-pid)))
+    `(proced-pid ((,c :foreground ,identifier)))
+    `(proced-ppid ((,c :inherit proced-pid)))
+    `(proced-run-status-code ((,c :inherit success)))
+    `(proced-sess ((,c :inherit proced-pid)))
+    `(proced-session-leader-pid ((,c :inherit bold :foreground ,identifier)))
+    `(proced-time-colon (( )))
+    `(proced-uninterruptible-sleep-status-code ((,c :inherit error)))
+    `(proced-user (( )))
 ;;;; powerline
     `(powerline-active0 ((,c :background ,fg-dim :foreground ,bg-main)))
     `(powerline-active1 ((,c :inherit mode-line)))
@@ -1864,7 +1959,7 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(rainbow-delimiters-depth-7-face ((,c :foreground ,rainbow-6)))
     `(rainbow-delimiters-depth-8-face ((,c :foreground ,rainbow-7)))
     `(rainbow-delimiters-depth-9-face ((,c :foreground ,rainbow-8)))
-    `(rainbow-delimiters-mismatched-face ((,c :background ,bg-red :foreground ,fg-intense)))
+    `(rainbow-delimiters-mismatched-face ((,c :background ,bg-red-intense :foreground ,fg-intense)))
     `(rainbow-delimiters-unmatched-face ((,c :inherit (bold rainbow-delimiters-mismatched-face))))
 ;;;; rcirc
     `(rcirc-bright-nick ((,c :inherit bold :foreground ,fg-intense)))
@@ -1884,12 +1979,19 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(recursion-indicator-general ((,c :foreground ,modeline-err)))
     `(recursion-indicator-minibuffer ((,c :foreground ,modeline-info)))
 ;;;; regexp-builder (re-builder)
-    `(reb-match-0 ((,c :background ,bg-cyan :foreground ,fg-intense)))
-    `(reb-match-1 ((,c :background ,bg-red :foreground ,fg-intense)))
-    `(reb-match-2 ((,c :background ,bg-magenta :foreground ,fg-intense)))
-    `(reb-match-3 ((,c :background ,bg-yellow :foreground ,fg-intense)))
+    `(reb-match-0 ((,c :background ,bg-cyan-intense :foreground ,fg-intense)))
+    `(reb-match-1 ((,c :background ,bg-red-intense :foreground ,fg-intense)))
+    `(reb-match-2 ((,c :background ,bg-magenta-intense :foreground ,fg-intense)))
+    `(reb-match-3 ((,c :background ,bg-yellow-intense :foreground ,fg-intense)))
     `(reb-regexp-grouping-backslash ((,c :inherit font-lock-regexp-grouping-backslash)))
     `(reb-regexp-grouping-construct ((,c :inherit font-lock-regexp-grouping-construct)))
+;;;;; rst-mode
+    `(rst-level-1 ((,c :inherit ef-themes-heading-1)))
+    `(rst-level-2 ((,c :inherit ef-themes-heading-2)))
+    `(rst-level-3 ((,c :inherit ef-themes-heading-3)))
+    `(rst-level-4 ((,c :inherit ef-themes-heading-4)))
+    `(rst-level-5 ((,c :inherit ef-themes-heading-5)))
+    `(rst-level-6 ((,c :inherit ef-themes-heading-6)))
 ;;;; ruler-mode
     `(ruler-mode-column-number ((,c :inherit ruler-mode-default)))
     `(ruler-mode-comment-column ((,c :inherit ruler-mode-default :foreground ,red)))
@@ -1904,7 +2006,7 @@ Optional prefix argument MAPPINGS has the same meaning as for
 ;;;; show-paren-mode
     `(show-paren-match ((,c :background ,bg-paren :foreground ,fg-intense)))
     `(show-paren-match-expression ((,c :background ,bg-alt)))
-    `(show-paren-mismatch ((,c :background ,bg-red :foreground ,fg-intense)))
+    `(show-paren-mismatch ((,c :background ,bg-red-intense :foreground ,fg-intense)))
 ;;;; shell-script-mode (sh-mode)
     `(sh-heredoc ((,c :inherit font-lock-doc-face)))
     `(sh-quoted-exec ((,c :inherit font-lock-builtin-face)))
@@ -2029,6 +2131,23 @@ Optional prefix argument MAPPINGS has the same meaning as for
 ;;;; vertico
     `(vertico-current ((,c :background ,bg-completion)))
     `(vertico-group-title ((,c :inherit bold :foreground ,name)))
+;;;;; vterm
+    `(vterm-color-black ((,c :background "gray35" :foreground "black")))
+    `(vterm-color-blue ((,c :background ,blue-warmer :foreground ,blue)))
+    `(vterm-color-cyan ((,c :background ,cyan-cooler :foreground ,cyan)))
+    `(vterm-color-default ((,c :background ,bg-main :foreground ,fg-main)))
+    `(vterm-color-green ((,c :background ,green-cooler :foreground ,green)))
+    `(vterm-color-inverse-video ((,c :background ,bg-main :inverse-video t)))
+    `(vterm-color-magenta ((,c :background ,magenta-cooler :foreground ,magenta)))
+    `(vterm-color-red ((,c :background ,red-warmer :foreground ,red)))
+    `(vterm-color-underline ((,c :underline t)))
+    `(vterm-color-white ((,c :background "white" :foreground "gray65")))
+    `(vterm-color-yellow ((,c :background ,yellow-warmer :foreground ,yellow)))
+;;;; vundo
+    `(vundo-default ((,c :inherit shadow)))
+    `(vundo-highlight ((,c :inherit (bold vundo-node) :foreground ,err)))
+    `(vundo-last-saved ((,c :inherit (bold vundo-node) :foreground ,fg-intense)))
+    `(vundo-saved ((,c :inherit vundo-node :foreground ,fg-intense)))
 ;;;; wgrep
     `(wgrep-delete-face ((,c :inherit warning)))
     `(wgrep-done-face ((,c :background ,bg-info :foreground ,info)))
@@ -2046,7 +2165,7 @@ Optional prefix argument MAPPINGS has the same meaning as for
     `(whitespace-newline ((,c :inherit whitespace-indentation)))
     `(whitespace-space ((,c :inherit whitespace-indentation)))
     `(whitespace-space-after-tab ((,c :inherit whitespace-space-before-tab)))
-    `(whitespace-space-before-tab ((,c :background ,bg-red)))
+    `(whitespace-space-before-tab ((,c :background ,bg-red-intense)))
     `(whitespace-tab ((,c :inherit whitespace-indentation)))
     `(whitespace-trailing ((,c :inherit whitespace-space-before-tab)))
 ;;;; widget
@@ -2071,8 +2190,8 @@ Optional prefix argument MAPPINGS has the same meaning as for
   '(
 ;;;; chart
     `(chart-face-color-list
-      '( ,red-graph-0-bg ,green-graph-0-bg ,yellow-graph-0-bg ,blue-graph-0-bg ,magenta-graph-0-bg ,cyan-graph-0-bg
-         ,red-graph-1-bg ,green-graph-1-bg ,yellow-graph-1-bg ,blue-graph-1-bg ,magenta-graph-1-bg ,cyan-graph-1-bg))
+      '( ,bg-graph-red-0 ,bg-graph-green-0 ,bg-graph-yellow-0 ,bg-graph-blue-0 ,bg-graph-magenta-0 ,bg-graph-cyan-0
+         ,bg-graph-red-1 ,bg-graph-green-1 ,bg-graph-yellow-1 ,bg-graph-blue-1 ,bg-graph-magenta-1 ,bg-graph-cyan-1))
 ;;;; flymake fringe indicators
     `(flymake-error-bitmap '(flymake-double-exclamation-mark ef-themes-mark-delete))
     `(flymake-warning-bitmap '(exclamation-mark ef-themes-mark-other))

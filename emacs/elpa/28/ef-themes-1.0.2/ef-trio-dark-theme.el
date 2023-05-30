@@ -8,7 +8,7 @@
 ;; Mailing-List: https://lists.sr.ht/~protesilaos/ef-themes
 ;; Keywords: faces, theme, accessibility
 
-;; This file is part of GNU Emacs.
+;; This file is NOT part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -83,12 +83,12 @@
 
 ;;; Basic hues for background values
 
-      (bg-red      "#bd1f30")
-      (bg-green    "#20a020")
-      (bg-yellow   "#845020")
-      (bg-blue     "#3633b0")
-      (bg-magenta  "#b04fcf")
-      (bg-cyan     "#2270be")
+      (bg-red-intense     "#bd1f30")
+      (bg-green-intense   "#20a020")
+      (bg-yellow-intense  "#845020")
+      (bg-blue-intense    "#3633b0")
+      (bg-magenta-intense "#b04fcf")
+      (bg-cyan-intense    "#2270be")
 
       (bg-red-subtle      "#6a002a")
       (bg-green-subtle    "#00422a")
@@ -116,24 +116,23 @@
 
 ;;; Graphs
 
-      (red-graph-0-bg     "#b52c2c")
-      (red-graph-1-bg     "#702020")
-      (green-graph-0-bg   "#4fd100")
-      (green-graph-1-bg   "#007800")
-      (yellow-graph-0-bg  "#f1e00a")
-      (yellow-graph-1-bg  "#b08600")
-      (blue-graph-0-bg    "#2fafef")
-      (blue-graph-1-bg    "#1f2f8f")
-      (magenta-graph-0-bg "#bf94fe")
-      (magenta-graph-1-bg "#5f509f")
-      (cyan-graph-0-bg    "#47dfea")
-      (cyan-graph-1-bg    "#00808f")
+      (bg-graph-red-0     "#b52c2c")
+      (bg-graph-red-1     "#702020")
+      (bg-graph-green-0   "#0fed00")
+      (bg-graph-green-1   "#007800")
+      (bg-graph-yellow-0  "#f1e00a")
+      (bg-graph-yellow-1  "#b08940")
+      (bg-graph-blue-0    "#2fafef")
+      (bg-graph-blue-1    "#1f2f8f")
+      (bg-graph-magenta-0 "#bf94fe")
+      (bg-graph-magenta-1 "#5f509f")
+      (bg-graph-cyan-0    "#47dfea")
+      (bg-graph-cyan-1    "#00808f")
 
 ;;; Special hues
 
       (bg-mode-line       "#6a294f")
       (fg-mode-line       "#ffdfdf")
-      (bg-accent          "#cc88ff")
       (bg-completion      "#2f335a")
       (bg-hover           "#004f3f")
       (bg-hover-secondary "#452f5f")
@@ -202,8 +201,9 @@
       (date-common cyan-cooler)
       (date-deadline red-warmer)
       (date-event fg-alt)
-      (date-holiday blue-warmer)
+      (date-holiday magenta-warmer)
       (date-now fg-main)
+      (date-range fg-alt)
       (date-scheduled yellow)
       (date-weekday cyan)
       (date-weekend red-faint)
@@ -250,14 +250,22 @@ Semantic color mappings have the form (MAPPING-NAME COLOR-NAME)
 with both as symbols.  The latter is a color that already exists
 in the palette and is associated with a HEX-VALUE.")
 
-  (defvar ef-trio-dark-palette-overrides nil
+  (defcustom ef-trio-dark-palette-overrides nil
     "Overrides for `ef-trio-dark-palette'.
 
 Mirror the elements of the aforementioned palette, overriding
 their value.
 
 For overrides that are shared across all of the Ef themes,
-refer to `ef-themes-common-palette-overrides'.")
+refer to `ef-themes-common-palette-overrides'.
+
+To preview the palette entries, use `ef-themes-preview-colors' or
+`ef-themes-preview-colors-current' (read the documentation for
+further details)."
+  :group 'ef-themes
+  :package-version '(ef-themes . "1.0.0")
+  :type '(repeat (list symbol (choice symbol string)))
+  :link '(info-link "(ef-themes) Palette overrides"))
 
   (ef-themes-theme ef-trio-dark ef-trio-dark-palette ef-trio-dark-palette-overrides)
 
