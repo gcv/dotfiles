@@ -1,4 +1,6 @@
-(define-package "leuven-theme" "20230413.2003" "Awesome Emacs color theme on white background" 'nil :commit "0c80179b7eda6724cd4dd4946176b5dc745f0a63" :authors
+(define-package "leuven-theme" "20230523.841" "Elegant Emacs color theme for a white background" 'nil :commit "59123b1f0a4a1d195bf1726bf82371e3455470a8" :authors
+  '(("Fabrice Niessen <(concat \"fniessen\" at-sign \"pirilampo.org\")>"))
+  :maintainers
   '(("Fabrice Niessen <(concat \"fniessen\" at-sign \"pirilampo.org\")>"))
   :maintainer
   '("Fabrice Niessen <(concat \"fniessen\" at-sign \"pirilampo.org\")>")
