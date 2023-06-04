@@ -1023,7 +1023,15 @@
 
 
 (use-package racket-mode
-  :pin nongnu)
+  :pin nongnu
+
+  :config
+  (defun /racket-mode-hook ()
+    (paredit-mode 1)
+    (racket-xp-mode 1))
+
+  (add-hook 'racket-mode-hook #'/racket-mode-hook)
+  )
 
 
 (use-package rainbow-mode
