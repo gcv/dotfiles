@@ -1031,6 +1031,11 @@
     (racket-xp-mode 1))
 
   (add-hook 'racket-mode-hook #'/racket-mode-hook)
+
+  (defun /racket-repl-mode-hook ()
+    (paredit-mode 1))
+
+  (add-hook 'racket-repl-mode-hook #'/racket-repl-mode-hook)
   )
 
 
