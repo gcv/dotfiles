@@ -378,7 +378,14 @@
 
 ;;; eat: Emulate A Terminal - vterm alternative
 (use-package eat
-  :pin nongnu)
+  :pin nongnu
+
+  :config
+  (delete [?\C-u] eat-semi-char-non-bound-keys)
+  (delete [?\C-g] eat-semi-char-non-bound-keys)
+  (eat-update-semi-char-mode-map)
+  (eat-reload)
+  )
 
 
 ;;; eglot: LSP support mode. For Emacs <29, only version 1.9 or earlier work.
