@@ -19,9 +19,13 @@ fi
 # - bat and cat
 # - exa and ls
 packages=(
-    #ansible
+    # spelling checkers
     aspell
-    aspell-dict-en
+    aspellDicts.en aspellDicts.en-computers aspellDicts.en-science aspellDicts.ru
+    nuspell
+    hunspellDicts.en_US hunspell.ru_RU
+    # everything else:
+    #ansible
     autoconf
     autojump
     automake
