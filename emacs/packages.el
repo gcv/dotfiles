@@ -488,6 +488,11 @@
   )
 
 
+(use-package go-mode
+  :pin melpa-stable
+  )
+
+
 ;;; obsolete: replaced by zoom
 ;; (use-package golden-ratio
 ;;   :pin melpa
