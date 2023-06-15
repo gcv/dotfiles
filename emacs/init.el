@@ -445,8 +445,8 @@
     (osc52-copy-to-clipboard str))
   (funcall orig-fn str))
 (unless (display-graphic-p)
-  (add-function :around (local 'interprogram-cut-function) #'osc52-kill-advice)
-  ;;(remove-function (local 'interprogram-cut-function) #'osc52-kill-advice)
+  (add-function :around interprogram-cut-function #'osc52-kill-advice)
+  ;;(remove-function interprogram-cut-function #'osc52-kill-advice)
   )
 
 (defun copy-last-kill-to-clipboard ()
