@@ -429,19 +429,31 @@
 
 
 ;;; terminal mode: clipboard integration
-(defun copy-last-kill-to-clipboard ()
+(defun osc52-copy-to-clipboard (str)
   "Use ANSI OSC52 escape sequence to send last kill-ring entry to clipboard"
   ;; See https://sunaku.github.io/tmux-yank-osc52.html an explanation. If this
   ;; does not work in some situations, try https://github.com/spudlyo/clipetty
   ;; instead. It tries to detect the exact pseudo-tty to which to send the
   ;; escape sequence.
   ;; Not sure how this interacts with xclip.el.
+  (let* ((txt (base64-encode-string (encode-coding-string str 'utf-8) t))
+         (esc-seq (format "\033]52;c;%s\a" txt)))
+    (send-string-to-terminal esc-seq)))
+
+(defun osc52-kill-advice (orig-fn str)
+  (unless (display-graphic-p)
+    (osc52-copy-to-clipboard str))
+  (funcall orig-fn str))
+(unless (display-graphic-p)
+  (add-function :around (local 'interprogram-cut-function) #'osc52-kill-advice)
+  ;;(remove-function (local 'interprogram-cut-function) #'osc52-kill-advice)
+  )
+
+(defun copy-last-kill-to-clipboard ()
   (interactive)
   (when (display-graphic-p)
     (user-error "copy-last-kill-to-clipboard is not necessary in GUI Emacs"))
-  (let* ((txt (base64-encode-string (encode-coding-string (substring-no-properties (nth 0 kill-ring)) 'utf-8) t))
-         (esc-seq (format "\033]52;c;%s\a" txt)))
-    (send-string-to-terminal esc-seq)))
+  (osc52-copy-to-clipboard (substring-no-properties (nth 0 kill-ring))))
 
 
 ;;; terminal mode: fix key bindings
