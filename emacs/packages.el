@@ -490,6 +490,12 @@
 
 (use-package go-mode
   :pin melpa-stable
+
+  :config
+  (defun /go-mode-hook ()
+    (setq-local tab-width 4))
+
+  (add-hook 'go-mode-hook #'/go-mode-hook)
   )
 
 
