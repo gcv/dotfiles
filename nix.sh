@@ -52,7 +52,6 @@ packages=(
     fdupes
     ffmpeg
     findutils
-    fish
     fzf
     getopt             # enhanced option parser for shell scripts
     git

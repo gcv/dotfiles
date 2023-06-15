@@ -45,7 +45,6 @@ parse_params() {
     link_direnv=0
     link_elvish=0
     link_emacs=0
-    link_fish=0
     link_git=0
     link_hammerspoon=0
     link_helix=0
@@ -64,7 +63,6 @@ parse_params() {
             --direnv) link_all=0; link_direnv=1 ;;
             --emacs) link_all=0; link_emacs=1 ;;
             --elvish) link_all=0; link_elvish=1 ;;
-            --fish) link_all=0; link_fish=1 ;;
             --git) link_all=0; link_git=1 ;;
             --hammerspoon) link_all=0; link_hammerspoon=1 ;;
             --helix) link_all=0; link_helix=1 ;;
@@ -165,13 +163,6 @@ fi
 
 if [[ $link_all = "1" || $link_emacs = "1" ]]; then
     link "emacs" ".emacs.d"
-fi
-
-if [[ $link_all = "1" || $link_fish = "1" ]]; then
-    link "public/fish" ".config/fish"
-    if [[ -L "${basedir}/private" ]]; then
-        link "private/history-files/fish_$(hostname -s)_history" ".local/share/fish"
-    fi
 fi
 
 if [[ $link_all = "1" || $link_git = "1" ]]; then
