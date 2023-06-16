@@ -22,8 +22,8 @@ packages=(
     # spelling checkers
     aspell
     aspellDicts.en aspellDicts.en-computers aspellDicts.en-science aspellDicts.ru
-    nuspell
-    hunspellDicts.en_US hunspell.ru_RU
+    #nuspell
+    #hunspellDicts.en_US hunspell.ru_RU
     # everything else:
     #ansible
     autoconf
