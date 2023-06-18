@@ -830,6 +830,7 @@
 ;;; has GitHub Issues (tickets) turned off for both Binder and
 ;;; Olivetti.
 (use-package olivetti
+  :pin melpa
   :custom
   (olivetti-body-width 0.9)
 

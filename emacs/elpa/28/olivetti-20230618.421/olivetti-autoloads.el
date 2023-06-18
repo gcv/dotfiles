@@ -33,6 +33,10 @@ The mode's hook is called both when the mode is enabled and when it is disabled.
 
 ;;;***
 
+;;;### (autoloads nil nil ("olivetti-pkg.el") (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t

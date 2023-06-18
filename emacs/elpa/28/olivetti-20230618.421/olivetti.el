@@ -4,8 +4,6 @@
 
 ;; Author: Paul W. Rankin <pwr@bydasein.com>
 ;; Keywords: wp, text
-;; Package-Version: 2.0.4
-;; Package-Commit: a31ac05a161a91fe5c157930b62a6c07037982ee
 ;; Version: 2.0.4
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/olivetti
@@ -294,6 +292,13 @@ if it is an integer, and otherwise return WIDTH."
   "Call `olivetti-reset-window' on all windows."
   (walk-windows #'olivetti-reset-window nil t))
 
+;; FIXME: these split-window functions seem to be ignored by
+;; `window-toggle-side-windows'
+;; WORKAROUND:
+;; (with-eval-after-load 'olivetti
+;;   (advice-add 'window-toggle-side-windows
+;;               :before 'olivetti-reset-all-windows))
+
 (defun olivetti-split-window (&optional window size side pixelwise)
   "Call `split-window' after resetting WINDOW.
 Pass SIZE, SIDE and PIXELWISE unchanged."
@@ -425,10 +430,10 @@ If prefixed with ARG, incrementally increase."
     (when (and (bound-and-true-p mouse-wheel-mode)
                (boundp 'mouse-wheel-down-event)
                (boundp 'mouse-wheel-up-event))
-      (define-key map (vector 'left-margin mouse-wheel-down-event) 'mwheel-scroll)
-      (define-key map (vector 'left-margin mouse-wheel-up-event) 'mwheel-scroll)
-      (define-key map (vector 'right-margin mouse-wheel-down-event) 'mwheel-scroll)
-      (define-key map (vector 'right-margin mouse-wheel-up-event) 'mwheel-scroll))
+      (define-key map (vector 'left-margin 'mouse-wheel-down-event) 'mwheel-scroll)
+      (define-key map (vector 'left-margin 'mouse-wheel-up-event) 'mwheel-scroll)
+      (define-key map (vector 'right-margin 'mouse-wheel-down-event) 'mwheel-scroll)
+      (define-key map (vector 'right-margin 'mouse-wheel-up-event) 'mwheel-scroll))
     map)
   "Mode map for `olivetti-mode'.")
 
