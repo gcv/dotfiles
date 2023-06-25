@@ -379,6 +379,8 @@
 ;;; eat: Emulate A Terminal - vterm alternative
 (use-package eat
   :pin nongnu
+  :custom
+  (eat-kill-buffer-on-exit t)
 
   :config
   (delete [?\C-u] eat-semi-char-non-bound-keys)
@@ -679,6 +681,7 @@
   :pin melpa
 
   :custom
+  (julia-snail-terminal-type :eat)
   (julia-snail-repl-display-eval-results t)
 
   :hook
