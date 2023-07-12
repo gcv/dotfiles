@@ -10,13 +10,17 @@
 ;;; Generated autoloads from chatgpt-shell.el
 
 (autoload 'chatgpt-shell "chatgpt-shell" "\
-Start a ChatGPT shell.
+Start a ChatGPT shell interactive command.
 
-With NO-FOCUS, start the shell without focus.
+With NEW-SESSION, start a new session.
 
-\(fn &optional NO-FOCUS)" t nil)
+\(fn &optional NEW-SESSION)" t nil)
 
 (register-definition-prefixes "chatgpt-shell" '("chatgpt-shell-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("chatgpt-shell-pkg.el") (0 0 0 0))
 
 ;;;***
 
