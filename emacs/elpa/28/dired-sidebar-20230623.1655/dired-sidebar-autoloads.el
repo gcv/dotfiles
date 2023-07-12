@@ -37,6 +37,10 @@ If it's not showing, act as `dired-sidebar-toggle-sidebar'." t nil)
 
 ;;;***
 
+;;;### (autoloads nil nil ("dired-sidebar-pkg.el") (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t

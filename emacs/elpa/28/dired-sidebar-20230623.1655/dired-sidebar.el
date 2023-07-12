@@ -5,8 +5,6 @@
 ;; Author: James Nguyen <james@jojojames.com>
 ;; Maintainer: James Nguyen <james@jojojames.com>
 ;; URL: https://github.com/jojojames/dired-sidebar
-;; Package-Version: 20230216.432
-;; Package-Commit: 5569d3b53585f5413cf87a694650d0fd6e040803
 ;; Version: 0.0.1
 ;; Package-Requires: ((emacs "25.1") (dired-subtree "0.0.1"))
 ;; Keywords: dired, files, tools
@@ -1147,7 +1145,7 @@ after."
                         (if (dired-subtree--is-expanded-p)
                             (insert (concat collapsible-icon " "))
                           (insert (concat expandable-icon " ")))
-                      (insert "")))))))
+                      (insert (if (eq dired-sidebar-theme 'nerd) "  " ""))))))))
           (forward-line 1))))))
 
 (defun dired-sidebar-tui-update-with-delay (&rest _)
