@@ -1,4 +1,4 @@
-This is docO40Nji.info, produced by makeinfo version 6.7 from
+This is docuMwWvw.info, produced by makeinfo version 6.7 from
 consult.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docO40Nji.info,  Node: Top,  Next: Available commands,  Up: (dir)
+File: docuMwWvw.info,  Node: Top,  Next: Available commands,  Up: (dir)
 
 consult.el - Consulting completing-read
 ***************************************
@@ -103,7 +103,7 @@ Indices
 
 
 
-File: docO40Nji.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
+File: docuMwWvw.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
 
 1 Available commands
 ********************
@@ -136,7 +136,7 @@ their descriptions.
 * Miscellaneous::                Various other useful commands
 
 
-File: docO40Nji.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
+File: docuMwWvw.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
 
 1.1 Virtual Buffers
 ===================
@@ -171,7 +171,7 @@ File: docO40Nji.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available com
      ‘recentf-mode’ enables tracking of recent files.
 
 
-File: docO40Nji.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
+File: docuMwWvw.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
 
 1.2 Editing
 ===========
@@ -189,7 +189,7 @@ File: docO40Nji.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  
    • ‘consult-kmacro’: Select macro from the macro ring and execute it.
 
 
-File: docO40Nji.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
+File: docuMwWvw.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
 
 1.3 Register
 ============
@@ -220,13 +220,16 @@ File: docO40Nji.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: A
         • ‘C-u 100 M-' x’: Store number in register ‘x’.
 
 
-File: docO40Nji.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
+File: docuMwWvw.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
 
 1.4 Navigation
 ==============
 
    • ‘consult-goto-line’: Jump to line number enhanced with live
-     preview.  This is a drop-in replacement for ‘goto-line’.
+     preview.  This is a drop-in replacement for ‘goto-line’.  Enter a
+     line number to jump to the first column of the given line.
+     Alternatively enter ‘line:column’ in order to jump to a specific
+     column.
    • ‘consult-mark’: Jump to a marker in the ‘mark-ring’.  Supports live
      preview and recursive editing.
    • ‘consult-global-mark’: Jump to a marker in the ‘global-mark-ring’.
@@ -241,7 +244,7 @@ File: docO40Nji.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Av
      imenu-anywhere (https://github.com/vspinu/imenu-anywhere).
 
 
-File: docO40Nji.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
+File: docuMwWvw.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
 
 1.5 Search
 ==========
@@ -274,7 +277,7 @@ File: docO40Nji.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  U
      region restricts the filtering.
 
 
-File: docO40Nji.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
+File: docuMwWvw.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
 
 1.6 Grep and Find
 =================
@@ -309,7 +312,7 @@ File: docO40Nji.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  
      for the consult grep commands.
 
 
-File: docO40Nji.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
+File: docuMwWvw.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
 
 1.7 Compilation
 ===============
@@ -324,7 +327,7 @@ File: docO40Nji.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find
      ‘xref-show-xrefs-function’ and ‘xref-show-definitions-function’.
 
 
-File: docO40Nji.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
+File: docuMwWvw.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
 
 1.8 Histories
 =============
@@ -347,7 +350,7 @@ File: docO40Nji.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: A
      ‘isearch-edit-string’.
 
 
-File: docO40Nji.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
+File: docuMwWvw.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
 
 1.9 Modes
 =========
@@ -360,7 +363,7 @@ File: docO40Nji.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Avai
      local-minor/global-minor/major mode via the keys ‘l/g/m’.
 
 
-File: docO40Nji.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available commands
+File: docuMwWvw.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available commands
 
 1.10 Org Mode
 =============
@@ -373,7 +376,7 @@ File: docO40Nji.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available
      live preview and recursive editing.
 
 
-File: docO40Nji.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: Available commands
+File: docuMwWvw.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: Available commands
 
 1.11 Help
 =========
@@ -403,7 +406,7 @@ File: docO40Nji.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: A
                      "corfu" "cape" "tempel"))
 
 
-File: docO40Nji.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
+File: docuMwWvw.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
 
 1.12 Miscellaneous
 ==================
@@ -443,7 +446,7 @@ File: docO40Nji.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
      the original buffer.
 
 
-File: docO40Nji.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
+File: docuMwWvw.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
 
 2 Special features
 ******************
@@ -467,7 +470,7 @@ advanced features.
 * Embark integration::           Actions, Grep/Occur-buffer export
 
 
-File: docO40Nji.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
+File: docuMwWvw.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
 
 2.1 Live previews
 =================
@@ -514,14 +517,24 @@ be considered.
    In this case one may wonder what the difference is between using an
 Embark action on the current candidate in comparison to a manually
 triggered preview.  The main difference is that the files opened by
-manual preview are closed again after the completion session.
-Furthermore during preview some functionality is disabled to improve the
-performance, see for example the customization variables
-‘consult-preview-allowed-hooks’ and ‘consult-preview-variables’.  Files
-larger than ‘consult-preview-raw-size’ are previewed literally without
-syntax highlighting and without changing the major mode.  Delaying the
-preview is also useful for ‘consult-theme’, since the theme preview is
-slow.  The delay results in a smoother UI experience.
+manual preview are closed again after the completion session.  During
+preview some functionality is disabled to improve the performance, see
+for example the customization variables ‘consult-preview-variables’ and
+‘consult-preview-allowed-hooks’.  Only the hooks listed in
+‘consult-preview-allowed-hooks’ are executed when a file is opened
+(‘find-file-hook’).  In order to enable additional font locking during
+preview, add the corresponding hooks to the allow list.  The following
+code demonstrates this for org-modern
+(https://github.com/minad/org-modern) and hl-todo
+(https://github.com/tarsius/hl-todo).
+
+     (add-to-list 'consult-preview-allowed-hooks 'global-org-modern-mode-check-buffers)
+     (add-to-list 'consult-preview-allowed-hooks 'global-hl-todo-mode-check-buffers)
+
+   Files larger than ‘consult-preview-raw-size’ are previewed literally
+without syntax highlighting and without changing the major mode.
+Delaying the preview is also useful for ‘consult-theme’, since the theme
+preview is slow.  The delay results in a smoother UI experience.
 
      ;; Preview on any key press, but delay 0.5s
      (consult-customize consult-theme :preview-key '(:debounce 0.5 any))
@@ -533,7 +546,7 @@ slow.  The delay results in a smoother UI experience.
                           :debounce 1 any))
 
 
-File: docO40Nji.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
+File: docuMwWvw.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
 
 2.2 Narrowing and grouping
 ==========================
@@ -568,7 +581,7 @@ keys are automatically shown in the which-key window after pressing the
 ‘consult-narrow-key’.
 
 
-File: docO40Nji.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
+File: docuMwWvw.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
 
 2.3 Asynchronous search
 =======================
@@ -634,7 +647,7 @@ status:
      provided.
 
 
-File: docO40Nji.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
+File: docuMwWvw.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
 
 2.4 Multiple sources
 ====================
@@ -763,7 +776,7 @@ used to create new multi-source commands, but is part of the internal
 API as of now, since some details may still change.
 
 
-File: docO40Nji.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
+File: docuMwWvw.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
 
 2.5 Embark integration
 ======================
@@ -807,7 +820,7 @@ package is installed.  These three workflows are symmetric.
      ‘wdired-change-to-wdired-mode’ for editing.
 
 
-File: docO40Nji.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
+File: docuMwWvw.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
 
 3 Configuration
 ***************
@@ -834,7 +847,7 @@ For this reason many Consult-related snippets require lexical binding.
 * Fine-tuning::                  Fine-grained configuration for special requirements
 
 
-File: docO40Nji.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
+File: docuMwWvw.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
 
 3.1 Use-package example
 =======================
@@ -972,7 +985,7 @@ additional configuration examples.
      )
 
 
-File: docO40Nji.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
+File: docuMwWvw.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
 
 3.2 Custom variables
 ====================
@@ -1027,7 +1040,7 @@ consult-widen-key                  Widening key during completion
 consult-yank-rotate                Rotate kill ring
 
 
-File: docO40Nji.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
+File: docuMwWvw.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
 
 3.3 Fine-tuning of individual commands
 ======================================
@@ -1040,11 +1053,9 @@ configuration examples.
 
    Commands and buffer sources allow flexible, individual customization
 by using the ‘consult-customize’ macro.  You can override any option
-passed to the internal ‘consult--read’ API.  The Consult wiki
-(https://github.com/minad/consult/wiki) already contains a numerous
-useful configuration examples.  Note that since ‘consult--read’ is part
-of the internal API, options could be removed, replaced or renamed in
-future versions of the package.
+passed to the internal ‘consult--read’ API.  Note that since
+‘consult--read’ is part of the internal API, options could be removed,
+replaced or renamed in future versions of the package.
 
    Useful options are:
    • ‘:prompt’ set the prompt string
@@ -1098,7 +1109,7 @@ by the following techniques:
   5. Write or propose a patch.
 
 
-File: docO40Nji.info,  Node: Recommended packages,  Next: Auxiliary packages,  Prev: Configuration,  Up: Top
+File: docuMwWvw.info,  Node: Recommended packages,  Next: Auxiliary packages,  Prev: Configuration,  Up: Top
 
 4 Recommended packages
 **********************
@@ -1137,7 +1148,7 @@ components, you can first start without it - or you could use with
 Embark right away and add the other components later on.
 
 
-File: docO40Nji.info,  Node: Auxiliary packages,  Next: Bug reports,  Prev: Recommended packages,  Up: Top
+File: docuMwWvw.info,  Node: Auxiliary packages,  Next: Bug reports,  Prev: Recommended packages,  Up: Top
 
 5 Auxiliary packages
 ********************
@@ -1149,12 +1160,15 @@ packages depending on your preferences and requirements.
    • consult-ag (https://github.com/yadex205/consult-ag): Support for
      the Silver Searcher (https://github.com/ggreer/the_silver_searcher)
      in the style of ‘consult-grep’.
-   • consult-company (https://github.com/mohkale/consult-company):
-     Completion at point using the Company
-     (https://github.com/company-mode/company-mode) backends.
    • consult-codesearch
      (https://github.com/youngker/consult-codesearch.el): Integration
      with Code Search (https://github.com/google/codesearch).
+   • consult-company (https://github.com/mohkale/consult-company):
+     Completion at point using the Company
+     (https://github.com/company-mode/company-mode) backends.
+   • consult-compile-multi
+     (https://github.com/mohkale/consult-compile-multi): Integration
+     with compile-multi (https://github.com/mohkale/compile-multi).
    • consult-dir (https://github.com/karthink/consult-dir): Directory
      jumper using Consult multi sources.
    • consult-dash (https://codeberg.org/ravi/consult-dash): Consult
@@ -1222,11 +1236,13 @@ follow a similar spirit or offer functionality based on
    • wgrep (https://github.com/mhayashi1120/Emacs-wgrep): Editing of
      grep buffers, use together with ‘consult-grep’ via ‘embark-export’.
    • all-the-icons-completion
-     (https://github.com/iyefrat/all-the-icons-completion): Icons for
-     the completion UI.
+     (https://github.com/iyefrat/all-the-icons-completion),
+     nerd-icons-completion
+     (https://github.com/rainstormstudio/nerd-icons-completion): Icons
+     for the completion UI.
 
 
-File: docO40Nji.info,  Node: Bug reports,  Next: Contributions,  Prev: Auxiliary packages,  Up: Top
+File: docuMwWvw.info,  Node: Bug reports,  Next: Contributions,  Prev: Auxiliary packages,  Up: Top
 
 6 Bug reports
 *************
@@ -1293,7 +1309,7 @@ lexical binding
 Consult often relies on lambdas and lexical closures.
 
 
-File: docO40Nji.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
+File: docuMwWvw.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
 
 7 Contributions
 ***************
@@ -1313,7 +1329,7 @@ contribute to the Consult wiki (https://github.com/minad/consult/wiki),
 in case you want to share small configuration or command snippets.
 
 
-File: docO40Nji.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
+File: docuMwWvw.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
 
 8 Acknowledgments
 *****************
@@ -1375,7 +1391,8 @@ great contributors and thanks to the feedback of many users.  Thank you!
    • Karthik Chikmagalur (https://github.com/karthink) (consult-dir
      (https://github.com/karthink/consult-dir))
    • Mohsin Kaleem (https://github.com/mohkale) (consult-company
-     (https://github.com/mohkale/consult-company), consult-eglot
+     (https://github.com/mohkale/consult-company), consult-compile-multi
+     (https://github.com/mohkale/consult-compile-multi), consult-eglot
      (https://github.com/mohkale/consult-eglot), consult-yasnippet
      (https://github.com/mohkale/consult-yasnippet))
    • Marco Pawłowski (https://gitlab.com/OlMon) (consult-flyspell
@@ -1403,7 +1420,7 @@ great contributors and thanks to the feedback of many users.  Thank you!
      (https://github.com/youngker/consult-codesearch.el))
 
 
-File: docO40Nji.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
+File: docuMwWvw.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 
 9 Indices
 *********
@@ -1414,7 +1431,7 @@ File: docO40Nji.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 * Concept index::                List of all Consult-specific concepts
 
 
-File: docO40Nji.info,  Node: Function index,  Next: Concept index,  Up: Indices
+File: docuMwWvw.info,  Node: Function index,  Next: Concept index,  Up: Indices
 
 9.1 Function index
 ==================
@@ -1470,7 +1487,7 @@ File: docO40Nji.info,  Node: Function index,  Next: Concept index,  Up: Indices
 * consult-yank-replace:                  Editing.               (line 6)
 
 
-File: docO40Nji.info,  Node: Concept index,  Prev: Function index,  Up: Indices
+File: docuMwWvw.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
 9.2 Concept index
 =================
@@ -1509,32 +1526,32 @@ Node: Virtual Buffers6696
 Node: Editing8383
 Node: Register9239
 Node: Navigation10951
-Node: Search12034
-Node: Grep and Find13945
-Node: Compilation16076
-Node: Histories16752
-Node: Modes17972
-Node: Org Mode18452
-Node: Help18960
-Node: Miscellaneous20071
-Node: Special features22202
-Node: Live previews23331
-Node: Narrowing and grouping26736
-Node: Asynchronous search28739
-Node: Multiple sources31821
-Node: Embark integration37577
-Node: Configuration39772
-Node: Use-package example40874
-Node: Custom variables47973
-Node: Fine-tuning51710
-Node: Recommended packages54731
-Node: Auxiliary packages56566
-Node: Bug reports61159
-Node: Contributions64272
-Node: Acknowledgments65182
-Node: Indices69685
-Node: Function index69923
-Node: Concept index73425
+Node: Search12194
+Node: Grep and Find14105
+Node: Compilation16236
+Node: Histories16912
+Node: Modes18132
+Node: Org Mode18612
+Node: Help19120
+Node: Miscellaneous20231
+Node: Special features22362
+Node: Live previews23491
+Node: Narrowing and grouping27430
+Node: Asynchronous search29433
+Node: Multiple sources32515
+Node: Embark integration38271
+Node: Configuration40466
+Node: Use-package example41568
+Node: Custom variables48667
+Node: Fine-tuning52404
+Node: Recommended packages55308
+Node: Auxiliary packages57143
+Node: Bug reports61994
+Node: Contributions65107
+Node: Acknowledgments66017
+Node: Indices70599
+Node: Function index70837
+Node: Concept index74339
 
 End Tag Table
 

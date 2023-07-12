@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler and Consult contributors
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 0.34
+;; Version: 0.35
 ;; Package-Requires: ((emacs "27.1") (compat "29.1.4.1"))
 ;; Homepage: https://github.com/minad/consult
 ;; Keywords: matching, files, completion
@@ -156,13 +156,14 @@ of the line after the prompt."
 nil shows all `custom-available-themes'."
   :type '(repeat (choice symbol regexp)))
 
-(defcustom consult-after-jump-hook '(recenter)
+(defcustom consult-after-jump-hook (list #'consult--maybe-recenter)
   "Function called after jumping to a location.
 
-Commonly used functions for this hook are `recenter' and
-`reposition-window'.  You may want to add a function which pulses the
-current line, e.g., `pulse-momentary-highlight-one-line' is supported on
-Emacs 28 and newer.  The hook called during preview and for the jump
+Commonly used functions for this hook are
+`consult--maybe-recenter', `recenter' and `reposition-window'.
+You may want to add a function which pulses the current line,
+e.g., `pulse-momentary-highlight-one-line' is supported on Emacs
+28 and newer.  The hook called during preview and for the jump
 after selection."
   :type 'hook)
 
@@ -207,8 +208,9 @@ for navigation commands like `consult-line'."
     "\\`\\*tramp/.*\\*\\'")
   "Filter regexps for `consult-buffer'.
 
-The default setting is to filter ephemeral buffer names beginning with a space
-character, the *Completions* buffer and a few log buffers."
+The default setting is to filter ephemeral buffer names beginning
+with a space character, the *Completions* buffer and a few log
+buffers.  The regular expressions are matched case sensitively."
   :type '(repeat regexp))
 
 (defcustom consult-buffer-sources
@@ -237,7 +239,7 @@ See `consult--multi' for a description of the source data structure."
   '(;; Filter commands
     "-mode\\'" "--"
     ;; Filter whole features
-    simple mwheel time so-long recentf)
+    simple mwheel time so-long recentf tab-bar tab-line)
   "Filter commands for `consult-mode-command'."
   :type '(repeat (choice symbol regexp)))
 
@@ -320,7 +322,8 @@ individual keys must be strings accepted by `key-valid-p'."
   "Number of files to keep open at once during preview."
   :type 'natnum)
 
-(defcustom consult-preview-excluded-files nil
+(defcustom consult-preview-excluded-files
+  '("\\`/[^/|:]+:") ;; Do not preview remote files
   "List of regexps matched against names of files, which are not previewed."
   :type '(repeat regexp))
 
@@ -378,15 +381,17 @@ Each element of the list must have the form (char name handler)."
 (defface consult-highlight-match
   '((t :inherit match))
   "Face used to highlight matches in the completion candidates.
-Used for example in `consult-grep'.")
+Used for example by `consult-grep'.")
+
+(defface consult-highlight-mark
+  '((t :inherit consult-highlight-match))
+  "Face used for mark positions in completion candidates.
+Used for example by `consult-mark'.  The face should be different
+than the `cursor' face to avoid confusion.")
 
 (defface consult-preview-match
   '((t :inherit isearch))
   "Face used for match previews, e.g., in `consult-line'.")
-
-(defface consult-preview-cursor
-  '((t :inherit cursor))
-  "Face used for cursor previews and marks, e.g., in `consult-mark'.")
 
 (defface consult-preview-insertion
   '((t :inherit region))
@@ -552,6 +557,11 @@ We use invalid characters outside the Unicode range.")
 
 ;;;; Miscellaneous helper functions
 
+(defun consult--maybe-recenter ()
+  "Maybe recenter current window if point is outside of visible region."
+  (when (or (< (point) (window-start)) (> (point) (window-end nil t)))
+    (recenter)))
+
 (defun consult--key-parse (key)
   "Parse KEY or signal error if invalid."
   (unless (key-valid-p key)
@@ -570,14 +580,20 @@ We use invalid characters outside the Unicode range.")
   (if (functionp table)
       (consult--in-buffer
        (lambda (str pred action)
-         (if (eq action 'metadata)
-             (mapcar
-              (lambda (x)
-                (if (and (string-suffix-p (symbol-name (car-safe x)) "-function") (cdr x))
-                    (cons (car x) (consult--in-buffer (cdr x)))
-                  x))
-              (funcall table str pred action))
-           (funcall table str pred action)))
+         (let ((result (funcall table str pred action)))
+           (pcase action
+             ('metadata
+              (setq result
+                    (mapcar
+                     (lambda (x)
+                       (if (and (string-suffix-p (symbol-name (car-safe x)) "-function") (cdr x))
+                           (cons (car x) (consult--in-buffer (cdr x)))
+                         x))
+                     result)))
+             ((and 'completion--unquote (guard (functionp (cadr result))))
+              (cl-callf consult--in-buffer (cadr result) buffer)
+              (cl-callf consult--in-buffer (cadddr result) buffer)))
+           result))
        buffer)
     table))
 
@@ -892,12 +908,10 @@ When no project is found and MAY-PROMPT is non-nil ask the user."
   "Show delayed MESSAGE if BODY takes too long.
 Also temporarily increase the GC limit via `consult--with-increased-gc'."
   (declare (indent 1))
-  ;; FIXME `with-delayed-message' is broken in combination with
-  ;; `inhibit-message'. Report this as a bug.
-  (ignore message)
-  `(progn ;; with-delayed-message (1 ,message)
-     (consult--with-increased-gc
-      ,@body)))
+  `(let (set-message-function) ;; bug#63253: Broken `with-delayed-message'
+     (with-delayed-message (1 ,message)
+       (consult--with-increased-gc
+        ,@body))))
 
 (defun consult--count-lines (pos)
   "Move to position POS and return number of lines."
@@ -920,7 +934,7 @@ Also temporarily increase the GC limit via `consult--with-increased-gc'."
           ;; Location data might be invalid by now!
           (ignore-errors
             (forward-line (1- line))
-            (forward-char column))
+            (goto-char (min (+ (point) column) (pos-eol))))
           (point-marker))))))
 
 (defun consult--line-prefix (&optional curr-line)
@@ -970,22 +984,16 @@ region has been fontified."
         str)
     (buffer-substring-no-properties beg end)))
 
-(defun consult--region-with-cursor (beg end marker)
-  "Return region string with a marking at the cursor position.
-
-BEG is the begin position.
-END is the end position.
-MARKER is the cursor position."
-  (let ((str (consult--buffer-substring beg end 'fontify)))
+(defun consult--line-with-mark (marker)
+  "Current line string where the MARKER position is highlighted."
+  (let* ((beg (pos-bol))
+         (end (pos-eol))
+         (str (consult--buffer-substring beg end 'fontify)))
     (if (>= marker end)
-        (concat str #(" " 0 1 (face consult-preview-cursor)))
+        (concat str #(" " 0 1 (face consult-highlight-mark)))
       (put-text-property (- marker beg) (- (1+ marker) beg)
-                         'face 'consult-preview-cursor str)
+                         'face 'consult-highlight-mark str)
       str)))
-
-(defun consult--line-with-cursor (marker)
-  "Return current line where the cursor MARKER is highlighted."
-  (consult--region-with-cursor (pos-bol) (pos-eol) marker))
 
 ;;;; Tofu cooks
 
@@ -1391,7 +1399,8 @@ ORIG is the original function, HOOKS the arguments."
 See `isearch-open-necessary-overlays' and `isearch-open-overlay-temporary'."
   (if (and (derived-mode-p #'org-mode) (fboundp 'org-fold-show-set-visibility))
       ;; New Org 9.6 fold-core API
-      (org-fold-show-set-visibility 'canonical)
+      (let ((inhibit-redisplay t)) ;; HACK: Prevent flicker due to premature redisplay
+        (org-fold-show-set-visibility 'canonical))
     (dolist (ov (overlays-in (pos-bol) (pos-eol)))
       (when-let (fun (overlay-get ov 'isearch-open-invisible))
         (when (invisible-p (overlay-get ov 'invisible))
@@ -1429,7 +1438,8 @@ See `isearch-open-necessary-overlays' and `isearch-open-overlay-temporary'."
                                  (when (markerp end) (set-marker end nil)))
                                (kill-local-variable 'consult--org-fold-regions))))))))
               (add-hook 'minibuffer-exit-hook hook))))
-        (org-fold-show-set-visibility 'canonical)
+        (let ((inhibit-redisplay t)) ;; HACK: Prevent flicker due to premature redisplay
+          (org-fold-show-set-visibility 'canonical))
         (list (lambda ()
                 (pcase-dolist (`(,beg ,end ,spec) consult--org-fold-regions)
                   (org-fold-core-region beg end t spec)))))
@@ -1447,7 +1457,7 @@ See `isearch-open-necessary-overlays' and `isearch-open-overlay-temporary'."
       restore)))
 
 (defun consult--jump-1 (pos)
-  "Go to POS and recenter."
+  "Go to POS, switch buffer and widen if necessary."
   (if (and (markerp pos) (not (marker-buffer pos)))
       ;; Only print a message, no error in order to not mess
       ;; with the minibuffer update hook.
@@ -1462,7 +1472,9 @@ See `isearch-open-necessary-overlays' and `isearch-open-overlay-temporary'."
       (goto-char pos))))
 
 (defun consult--jump (pos)
-  "Push current position to mark ring, go to POS and recenter."
+  "Jump to POS.
+First push current position to mark ring, then move to new
+position and run `consult-after-jump-hook'."
   (when pos
     ;; Extract marker from list with with overlay positions, see `consult--line-match'
     (when (consp pos) (setq pos (car pos)))
@@ -1950,6 +1962,13 @@ PLIST is the splitter configuration, including the separator."
 
 ;;;; Asynchronous filtering functions
 
+(defun consult--async-p (fun)
+  "Return t if FUN is an asynchronous completion function."
+  (and (functionp fun)
+       (condition-case nil
+           (progn (funcall fun "" nil 'metadata) nil)
+         (wrong-number-of-arguments t))))
+
 (defmacro consult--with-async (bind &rest body)
   "Setup asynchronous completion in BODY.
 
@@ -1965,7 +1984,7 @@ BIND is the asynchronous function binding."
            ;; `consult--split-setup'.
            (:append
             (lambda ()
-              (when (functionp ,async)
+              (when (consult--async-p ,async)
                 (setq orig-chunk read-process-output-max
                       read-process-output-max new-chunk)
                 (funcall ,async 'setup)
@@ -1987,7 +2006,7 @@ BIND is the asynchronous function binding."
                   (fset hook (lambda (&rest _) (run-at-time 0 nil fun)))
                   (add-hook 'after-change-functions hook nil 'local)
                   (funcall hook)))))
-         (let ((,async (if (functionp ,async) ,async (lambda (_) ,async))))
+         (let ((,async (if (consult--async-p ,async) ,async (lambda (_) ,async))))
            (unwind-protect
                ,(macroexp-progn body)
              (funcall ,async 'destroy)
@@ -2024,7 +2043,7 @@ string   Update with the current user input string.  Return nil."
            (when (eq (window-buffer win) buffer)
              (with-selected-window win
                (run-hooks 'consult--completion-refresh-hook)
-               ;; Interaction between asynchronous completion tables and
+               ;; Interaction between asynchronous completion functions and
                ;; preview: We have to trigger preview immediately when
                ;; candidates arrive (gh:minad/consult#436).
                (when (and consult--preview-function candidates)
@@ -2068,18 +2087,12 @@ SPLIT is the splitting function."
                      (funcall split action))
                     (async-len (length async-str))
                     (input-len (length action))
-                    (prompt (minibuffer-prompt-end))
-                    (field-beg prompt)
-                    (field-idx 0))
+                    (end (minibuffer-prompt-end)))
          ;; Highlight punctuation characters
-         (remove-list-of-text-properties prompt (+ prompt input-len) '(face field))
+         (remove-list-of-text-properties end (+ end input-len) '(face))
          (dolist (hl highlights)
-           (put-text-property field-beg (+ prompt (cdr hl))
-                              'field field-idx)
-           (put-text-property (+ prompt (car hl)) (+ prompt (cdr hl))
-                              'face 'consult-async-split)
-           (setq field-beg (+ prompt (cdr hl))
-                 field-idx (1+ field-idx)))
+           (put-text-property (+ end (car hl)) (+ end (cdr hl))
+                              'face 'consult-async-split))
          (funcall async
                   ;; Pass through if the input is long enough!
                   (if (or force (>= async-len consult-async-min-input))
@@ -2212,7 +2225,7 @@ PROPS are optional properties passed to `make-process'."
         (_ (funcall async action))))))
 
 (defun consult--async-highlight (async builder)
-  "Return ASYNC function which highlights the candidates.
+  "Return a new ASYNC function with candidate highlighting.
 BUILDER is the command line builder function."
   (let (highlight)
     (lambda (action)
@@ -2491,18 +2504,18 @@ PREVIEW-KEY are the preview keys."
                         (propertize ann 'face 'completions-annotations))))))
           cands))
 
-(cl-defun consult--read-1 (candidates &key
-                                      prompt predicate require-match history default
-                                      keymap category initial narrow add-history annotate
-                                      state preview-key sort lookup group inherit-input-method)
+(cl-defun consult--read-1 (table &key
+                                 prompt predicate require-match history default
+                                 keymap category initial narrow add-history annotate
+                                 state preview-key sort lookup group inherit-input-method)
   "See `consult--read' for the documentation of the arguments."
   (consult--minibuffer-with-setup-hook
       (:append (lambda ()
                  (add-hook 'after-change-functions #'consult--tofu-hide-in-minibuffer nil 'local)
-                 (consult--setup-keymap keymap (functionp candidates) narrow preview-key)
+                 (consult--setup-keymap keymap (consult--async-p table) narrow preview-key)
                  (setq-local minibuffer-default-add-function
-                             (apply-partially #'consult--add-history (functionp candidates) add-history))))
-    (consult--with-async (async candidates)
+                             (apply-partially #'consult--add-history (consult--async-p table) add-history))))
+    (consult--with-async (async table)
       ;; NOTE: Do not unnecessarily let-bind the lambdas to avoid over-capturing
       ;; in the interpreter.  This will make closures and the lambda string
       ;; representation larger, which makes debugging much worse.  Fortunately
@@ -2528,9 +2541,13 @@ PREVIEW-KEY are the preview keys."
                                    'consult--completion-candidate-hook)
                 (completing-read prompt
                                  (lambda (str pred action)
-                                   (if (eq action 'metadata)
-                                       metadata
-                                     (complete-with-action action (funcall async nil) str pred)))
+                                   (let ((result (complete-with-action action (funcall async nil) str pred)))
+                                     (if (eq action 'metadata)
+                                         (if (and (eq (car result) 'metadata) (cdr result))
+                                             ;; Merge metadata
+                                             `(metadata ,@(cdr metadata) ,@(cdr result))
+                                           metadata)
+                                       result)))
                                  predicate require-match initial
                                  (if (symbolp history) history (cadr history))
                                  default
@@ -2542,11 +2559,11 @@ PREVIEW-KEY are the preview keys."
           ((pred symbolp)))
         (car result)))))
 
-(cl-defun consult--read (candidates &rest options &key
-                                    prompt predicate require-match history default
-                                    keymap category initial narrow add-history annotate
-                                    state preview-key sort lookup group inherit-input-method)
-  "Enhanced completing read function to select from CANDIDATES.
+(cl-defun consult--read (table &rest options &key
+                               prompt predicate require-match history default
+                               keymap category initial narrow add-history annotate
+                               state preview-key sort lookup group inherit-input-method)
+  "Enhanced completing read function to select from TABLE.
 
 The function is a thin wrapper around `completing-read'.  Keyword
 arguments are used instead of positional arguments for code
@@ -2583,17 +2600,17 @@ KEYMAP is a command-specific keymap.
 INHERIT-INPUT-METHOD, if non-nil the minibuffer inherits the
 input method."
   ;; supported types
-  (cl-assert (or (functionp candidates)     ;; async table
-                 (obarrayp candidates)      ;; obarray
-                 (hash-table-p candidates)  ;; hash table
-                 (not candidates)           ;; empty list
-                 (stringp (car candidates)) ;; string list
-                 (and (consp (car candidates)) (stringp (caar candidates)))   ;; string alist
-                 (and (consp (car candidates)) (symbolp (caar candidates))))) ;; symbol alist
+  (cl-assert (or (functionp table)     ;; dynamic table or asynchronous function
+                 (obarrayp table)      ;; obarray
+                 (hash-table-p table)  ;; hash table
+                 (not table)           ;; empty list
+                 (stringp (car table)) ;; string list
+                 (and (consp (car table)) (stringp (caar table)))   ;; string alist
+                 (and (consp (car table)) (symbolp (caar table))))) ;; symbol alist
   (ignore prompt predicate require-match history default
           keymap category initial narrow add-history annotate
           state preview-key sort lookup group inherit-input-method)
-  (apply #'consult--read-1 candidates
+  (apply #'consult--read-1 table
          (append
           (consult--customize-get)
           options
@@ -2964,7 +2981,12 @@ These configuration options are supported:
                             consult-preview-key))
              (initial (buffer-substring-no-properties start end))
              (metadata (completion-metadata initial collection predicate))
-             (threshold (or (plist-get config :cycle-threshold) (completion--cycle-threshold metadata)))
+             ;; NOTE: `minibuffer-completing-file-name' is mostly
+             ;; deprecated. Packages should instead use the completion metadata!
+             (minibuffer-completing-file-name
+              (eq 'file (completion-metadata-get metadata 'category)))
+             (threshold (or (plist-get config :cycle-threshold)
+                            (completion--cycle-threshold metadata)))
              (all (completion-all-completions initial collection predicate (length initial)))
              ;; Wrap all annotation functions to ensure that they are executed
              ;; in the original buffer.
@@ -2988,7 +3010,6 @@ These configuration options are supported:
                  (and completion-cycling completion-all-sorted-completions)))
         (completion--in-region start end collection predicate)
       (let* ((limit (car (completion-boundaries initial collection predicate "")))
-             (category (completion-metadata-get metadata 'category))
              (completion
               (cond
                ((atom all) nil)
@@ -3000,44 +3021,18 @@ These configuration options are supported:
                        ;; preview state
                        (consult--insertion-preview start end)
                        ;; transformation function
-                       (if (eq category 'file)
-                           (cond
-                            ;; Transform absolute file names
-                            ((file-name-absolute-p initial)
-                             (lambda (_narrow _inp cand)
-                               (substitute-in-file-name cand)))
-                            ;; Ensure that ./ prefix is kept for the shell
-                            ;; (gh:minad/consult#356).
-                            ((string-match-p "\\`\\.\\.?/" initial)
-                             (lambda (_narrow _inp cand)
-                               (setq cand (file-relative-name (substitute-in-file-name cand)))
-                               (if (string-match-p "\\`\\.\\.?/" cand) cand (concat "./" cand))))
-                            ;; Simplify relative file names
-                            (t
-                             (lambda (_narrow _inp cand)
-                               (file-relative-name (substitute-in-file-name cand)))))
-                         (lambda (_narrow _inp cand) cand))
+                       (lambda (_narrow _inp cand) cand)
                        ;; candidate function
                        (apply-partially #'run-hook-with-args-until-success
                                         'consult--completion-candidate-hook)
                      (consult--local-let ((enable-recursive-minibuffers t))
-                       (if (eq category 'file)
-                           ;; We use read-file-name, since many completion UIs make it nicer to
-                           ;; navigate the file system this way; and we insert the initial text
-                           ;; directly into the minibuffer to allow the user's completion
-                           ;; styles to expand it as appropriate (particularly useful for the
-                           ;; partial-completion and initials styles, which allow for very
-                           ;; condensed path specification).
-                           (consult--minibuffer-with-setup-hook
-                               (lambda () (insert initial))
-                             (read-file-name prompt nil initial require-match nil predicate))
-                         ;; Evaluate completion table in the original buffer.
-                         ;; This is a reasonable thing to do and required by
-                         ;; some completion tables in particular by lsp-mode.
-                         ;; See gh:minad/vertico#61.
-                         (completing-read prompt
-                                          (consult--completion-table-in-buffer collection)
-                                          predicate require-match initial)))))))))
+                       ;; Evaluate completion table in the original buffer.
+                       ;; This is a reasonable thing to do and required by
+                       ;; some completion tables in particular by lsp-mode.
+                       ;; See gh:minad/vertico#61.
+                       (completing-read prompt
+                                        (consult--completion-table-in-buffer collection)
+                                        predicate require-match initial))))))))
         (if completion
             (progn
               ;; bug#55205: completion--replace removes properties!
@@ -3139,7 +3134,7 @@ The symbol at point is added to the future history."
             ;; line-number-at-pos does not hurt much, since the mark ring is
             ;; usually small since it is limited by `mark-ring-max'.
             (push (consult--location-candidate
-                   (consult--line-with-cursor marker) marker
+                   (consult--line-with-mark marker) marker
                    (line-number-at-pos pos consult-line-numbers-widen)
                    marker)
                   candidates)))))
@@ -3188,7 +3183,7 @@ The symbol at point is added to the future history."
                           (consult--format-file-line-match (buffer-name buf) line "")
                           'consult-location (cons marker line)
                           'consult-strip t)
-                         (consult--line-with-cursor marker)
+                         (consult--line-with-mark marker)
                          (consult--tofu-encode marker))
                         candidates))))))))
     (unless candidates
@@ -3486,7 +3481,7 @@ to `consult--buffer-query'."
         (when font-lock-orig (font-lock-mode 1))))))
 
 ;;;###autoload
-(defun consult-keep-lines (&optional filter initial)
+(defun consult-keep-lines (filter &optional initial)
   "Select a subset of the lines in the current buffer with live preview.
 
 The selected lines are kept and the other lines are deleted.  When called
@@ -3588,7 +3583,7 @@ INITIAL is the initial input."
           (mapc #'delete-overlay overlays)
           (goto-char pt-orig))
          ((equal input "")
-          (consult-focus-lines 'show)
+          (consult-focus-lines nil 'show)
           (goto-char pt-orig))
          (t
           ;; Successfully terminated -> Remember invisible overlays
@@ -3602,7 +3597,7 @@ INITIAL is the initial input."
                        pt-orig))))))))
 
 ;;;###autoload
-(defun consult-focus-lines (&optional show filter initial)
+(defun consult-focus-lines (filter &optional show initial)
   "Hide or show lines using overlays.
 
 The selected lines are shown and the other lines hidden.  When called
@@ -3615,11 +3610,11 @@ filtering is performed by a FILTER function.  This command obeys narrowing.
 FILTER is the filter function.
 INITIAL is the initial input."
   (interactive
-   (list current-prefix-arg
-         (lambda (pattern cands)
+   (list (lambda (pattern cands)
            ;; Use consult-location completion category when filtering lines
            (consult--completion-filter-dispatch
-            pattern cands 'consult-location nil))))
+            pattern cands 'consult-location nil))
+         current-prefix-arg))
   (if show
       (progn
         (mapc #'delete-overlay consult--focus-lines-overlays)
@@ -3641,31 +3636,31 @@ INITIAL is the initial input."
 (defun consult--goto-line-position (str msg)
   "Transform input STR to line number.
 Print an error message with MSG function."
-  (if-let (line (and str
-                     (string-match-p "\\`[[:digit:]]+\\'" str)
-                     (string-to-number str)))
-      (let ((pos (save-excursion
-                   (save-restriction
-                     (when consult-line-numbers-widen
-                       (widen))
-                     (goto-char (point-min))
-                     (forward-line (1- line))
-                     (point)))))
-        (if (consult--in-range-p pos)
-            pos
-          (funcall msg "Line number out of range.")
-          nil))
-    (when (and str (not (equal str "")))
-      (funcall msg "Please enter a number."))
-    nil))
+  (save-match-data
+    (if (and str (string-match "\\`\\([[:digit:]]+\\):?\\([[:digit:]]*\\)\\'" str))
+        (let ((line (string-to-number (match-string 1 str)))
+              (col (string-to-number (match-string 2 str))))
+          (save-excursion
+            (save-restriction
+              (when consult-line-numbers-widen
+                (widen))
+              (goto-char (point-min))
+              (forward-line (1- line))
+              (goto-char (min (+ (point) col) (pos-eol)))
+              (point))))
+      (when (and str (not (equal str "")))
+        (funcall msg "Please enter a number."))
+      nil)))
 
 ;;;###autoload
 (defun consult-goto-line (&optional arg)
   "Read line number and jump to the line with preview.
 
-Jump directly if a line number is given as prefix ARG.  The command respects
-narrowing and the settings `consult-goto-line-numbers' and
-`consult-line-numbers-widen'."
+Enter either a line number to jump to the first column of the
+given line or line:column in order to jump to a specific column.
+Jump directly if a line number is given as prefix ARG.  The
+command respects narrowing and the settings
+`consult-goto-line-numbers' and `consult-line-numbers-widen'."
   (interactive "P")
   (if arg
       (call-interactively #'goto-line)
@@ -3741,7 +3736,8 @@ narrowing and the settings `consult-goto-line-numbers' and
 
 The list of features is searched for files belonging to the modes.
 From these files, the commands are extracted."
-  (let* ((buffer (current-buffer))
+  (let* ((case-fold-search)
+         (buffer (current-buffer))
          (command-filter (consult--regexp-filter (seq-filter #'stringp consult-mode-command-filter)))
          (feature-filter (seq-filter #'symbolp consult-mode-command-filter))
          (minor-hash (consult--string-hash minor-mode-list))
@@ -3940,10 +3936,9 @@ There exists no equivalent of this command in Emacs 28."
        preview action
        ;; Only preview bookmarks with the default handler.
        (when-let ((bm (and cand (eq action 'preview) (assoc cand bookmark-alist)))
-                  (handler (bookmark-get-handler bm))
-                  (file (and (or (not handler)
-                                 (eq handler #'bookmark-default-handler))
-                             (bookmark-get-filename bm)))
+                  (handler (or (bookmark-get-handler bm) #'bookmark-default-handler))
+                  ((eq handler #'bookmark-default-handler))
+                  (file (bookmark-get-filename bm))
                   (pos (bookmark-get-position bm))
                   (buf (funcall open file)))
          (set-marker (make-marker) pos buf))))))
@@ -4169,7 +4164,7 @@ starts a new Isearch session otherwise."
            (consult--read
             candidates
             :prompt "I-search: "
-            :category 'consult-isearch
+            :category 'consult-isearch-history
             :history t ;; disable history
             :sort nil
             :initial isearch-string
@@ -4385,7 +4380,8 @@ AS is a conversion function."
     (when (or filter mode as root)
       (let ((mode (ensure-list mode))
             (exclude-re (consult--regexp-filter exclude))
-            (include-re (consult--regexp-filter include)))
+            (include-re (consult--regexp-filter include))
+            (case-fold-search))
         (consult--keep! buffers
           (and
            (or (not mode)
@@ -4768,10 +4764,9 @@ input."
 
 (defun consult--grep-lookahead-p (&rest cmd)
   "Return t if grep CMD supports look-ahead."
-  (with-temp-buffer
-    (insert "xaxbx")
-    (eq 0 (apply #'call-process-region (point-min) (point-max)
-                 (car cmd) nil nil nil `(,@(cdr cmd) "^(?=.*b)(?=.*a)")))))
+  (eq 0 (process-file-shell-command
+         (concat "echo xaxbx | "
+                 (mapconcat #'shell-quote-argument `(,@cmd "^(?=.*b)(?=.*a)") " ")))))
 
 (defun consult--grep-make-builder (paths)
   "Build grep command line and grep across PATHS."
@@ -4928,7 +4923,7 @@ INITIAL is initial input."
   (let* ((cmd (seq-mapcat (lambda (x)
                             (if (equal x ".") paths (list x)))
                           (consult--build-args consult-find-args)))
-         (type (if (eq 0 (call-process-shell-command
+         (type (if (eq 0 (process-file-shell-command
                           (concat (car cmd) " -regextype emacs -version")))
                    'emacs 'basic)))
     (lambda (input)

@@ -90,7 +90,7 @@ command obeys narrowing.
 FILTER is the filter function.
 INITIAL is the initial input.
 
-\(fn &optional FILTER INITIAL)" t nil)
+\(fn FILTER &optional INITIAL)" t nil)
 
 (autoload 'consult-focus-lines "consult" "\
 Hide or show lines using overlays.
@@ -105,14 +105,16 @@ filtering is performed by a FILTER function.  This command obeys narrowing.
 FILTER is the filter function.
 INITIAL is the initial input.
 
-\(fn &optional SHOW FILTER INITIAL)" t nil)
+\(fn FILTER &optional SHOW INITIAL)" t nil)
 
 (autoload 'consult-goto-line "consult" "\
 Read line number and jump to the line with preview.
 
-Jump directly if a line number is given as prefix ARG.  The command respects
-narrowing and the settings `consult-goto-line-numbers' and
-`consult-line-numbers-widen'.
+Enter either a line number to jump to the first column of the
+given line or line:column in order to jump to a specific column.
+Jump directly if a line number is given as prefix ARG.  The
+command respects narrowing and the settings
+`consult-goto-line-numbers' and `consult-line-numbers-widen'.
 
 \(fn &optional ARG)" t nil)
 
