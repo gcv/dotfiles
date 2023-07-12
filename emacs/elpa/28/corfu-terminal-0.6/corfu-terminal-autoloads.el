@@ -13,29 +13,25 @@
 (defvar corfu-terminal-mode nil "\
 Non-nil if Corfu-Terminal mode is enabled.
 See the `corfu-terminal-mode' command
-for a description of this minor mode.
-Setting this variable directly does not take effect;
-either customize it (see the info node `Easy Customization')
-or call the function `corfu-terminal-mode'.")
+for a description of this minor mode.")
 
 (custom-autoload 'corfu-terminal-mode "corfu-terminal" nil)
 
 (autoload 'corfu-terminal-mode "corfu-terminal" "\
 Corfu popup on terminal.
 
-This is a minor mode.  If called interactively, toggle the
-`Corfu-Terminal mode' mode.  If the prefix argument is positive,
-enable the mode, and if it is zero or negative, disable the mode.
+This is a minor mode.  If called interactively, toggle the `Corfu-Terminal mode'
+mode.  If the prefix argument is positive, enable the mode, and if it is zero or
+negative, disable the mode.
 
-If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
-the mode if ARG is nil, omitted, or is a positive number.
-Disable the mode if ARG is a negative number.
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable the mode if ARG
+is nil, omitted, or is a positive number.  Disable the mode if ARG is a negative
+number.
 
-To check whether the minor mode is enabled in the current buffer,
-evaluate `(default-value \\='corfu-terminal-mode)'.
+To check whether the minor mode is enabled in the current buffer, evaluate
+`(default-value \\='corfu-terminal-mode)'.
 
-The mode's hook is called both when the mode is enabled and when
-it is disabled.
+The mode's hook is called both when the mode is enabled and when it is disabled.
 
 \(fn &optional ARG)" t nil)
 

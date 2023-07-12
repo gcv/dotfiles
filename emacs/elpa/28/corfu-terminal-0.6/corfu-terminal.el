@@ -4,8 +4,8 @@
 
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-04-11
-;; Version: 0.5
-;; Package-Requires: ((emacs "26.1") (corfu "0.24") (popon "0.1"))
+;; Version: 0.6
+;; Package-Requires: ((emacs "26.1") (corfu "0.36") (popon "0.1"))
 ;; Keywords: convenience
 ;; Homepage: https://codeberg.org/akib/emacs-corfu-terminal
 
@@ -79,14 +79,16 @@ https://codeberg.org/akib/emacs-corfu-terminal/issues."
 (defvar corfu-terminal--last-position nil
   "Position of last popon, and some data to make sure that's valid.")
 
-(defun corfu-terminal--popup-support-p ()
+(cl-defmethod corfu--popup-support-p (&context (corfu-terminal-mode
+                                                (eql t)))
   "Return whether corfu-terminal supports showing popon now."
   (or (not (minibufferp))
       corfu-terminal-enable-on-minibuffer
       (and corfu-terminal-disable-on-gui
            (display-graphic-p))))
 
-(defun corfu-terminal--popup-hide (fn)
+(cl-defmethod corfu--popup-hide (&context (corfu-terminal-mode
+                                           (eql t)))
   "Hide popup.
 
 If `corfu-terminal-disable-on-gui' is non-nil and  `display-graphic-p'
@@ -94,13 +96,15 @@ returns non-nil then call FN instead, where FN should be the original
 definition in Corfu."
   (if (and corfu-terminal-disable-on-gui
            (display-graphic-p))
-      (funcall fn)
+      (cl-call-next-method)
     (when corfu-terminal--popon
       (setq corfu-terminal--popon
             (popon-kill corfu-terminal--popon)))))
 
-(defun corfu-terminal--popup-show ( fn pos off width lines &optional
-                                    curr lo bar)
+(cl-defmethod corfu--popup-show ( pos off width lines
+                                  &context (corfu-terminal-mode
+                                            (eql t))
+                                  &optional curr lo bar)
   "Show popup at OFF columns before POS.
 
 Show LINES, a list of lines.  Highlight CURRth line as current
@@ -111,8 +115,8 @@ returns non-nil then call FN instead, where FN should be the original
 definition in Corfu."
   (if (and corfu-terminal-disable-on-gui
            (display-graphic-p))
-      (funcall fn pos off width lines curr lo bar)
-    (corfu-terminal--popup-hide #'ignore)  ; Hide the popup first.
+      (cl-call-next-method)
+    (corfu--popup-hide) ; Hide the popup first.
     (when (and (window-minibuffer-p)
                (< (/ (window-body-height nil 'pixelwise)
                      (default-font-height))
@@ -165,26 +169,26 @@ definition in Corfu."
               (+ width margin-left-width margin-right-width)))
            (popon-pos
             (if (equal (cdr corfu-terminal--last-position)
-                       (list pos popon-width (window-start)
-                             (buffer-modified-tick)))
+                       (list (posn-point pos) popon-width
+                             (window-start) (buffer-modified-tick)))
                 (car corfu-terminal--last-position)
-              (let ((pos (popon-x-y-at-pos pos)))
+              (let ((x-y (popon-x-y-at-posn pos)))
                 (cons
                  (max
-                  (min (- (car pos) (+ off margin-left-width))
+                  (min (- (car x-y) (+ off margin-left-width))
                        (- (window-max-chars-per-line)
                           corfu-terminal-position-right-margin
                           popon-width))
                   0)
                  (if (and (< (/ (window-body-height nil 'pixelwise)
                                 (default-font-height))
-                             (+ (1+ (cdr pos)) (length lines)))
-                          (>= (cdr pos) (length lines)))
-                     (- (cdr pos) (length lines))
-                   (1+ (cdr pos))))))))
+                             (+ (1+ (cdr x-y)) (length lines)))
+                          (>= (cdr x-y) (length lines)))
+                     (- (cdr x-y) (length lines))
+                   (1+ (cdr x-y))))))))
       (setq corfu-terminal--last-position
-            (list popon-pos pos popon-width (window-start)
-                  (buffer-modified-tick)))
+            (list popon-pos (posn-point pos) popon-width
+                  (window-start) (buffer-modified-tick)))
       (setq corfu-terminal--popon
             (popon-create
              (cons
@@ -215,19 +219,7 @@ definition in Corfu."
 (define-minor-mode corfu-terminal-mode
   "Corfu popup on terminal."
   :global t
-  :group 'corfu-terminal
-  (if corfu-terminal-mode
-      (progn
-        (advice-add #'corfu--popup-show :around
-                    #'corfu-terminal--popup-show)
-        (advice-add #'corfu--popup-hide :around
-                    #'corfu-terminal--popup-hide)
-        (advice-add #'corfu--popup-support-p :override
-                    #'corfu-terminal--popup-support-p))
-    (advice-remove #'corfu--popup-show #'corfu-terminal--popup-show)
-    (advice-remove #'corfu--popup-hide #'corfu-terminal--popup-hide)
-    (advice-remove #'corfu--popup-support-p
-                   #'corfu-terminal--popup-support-p)))
+  :group 'corfu-terminal)
 
 (provide 'corfu-terminal)
 ;;; corfu-terminal.el ends here
