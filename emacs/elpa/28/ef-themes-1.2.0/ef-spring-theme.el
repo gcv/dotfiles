@@ -104,9 +104,9 @@
       (bg-added-refine   "#b3efcf")
       (fg-added          "#005000")
 
-      (bg-changed        "#ffdfb9")
-      (bg-changed-faint  "#ffefcb")
-      (bg-changed-refine "#ffcfa0")
+      (bg-changed        "#f0e8bd")
+      (bg-changed-faint  "#f5efcb")
+      (bg-changed-refine "#efd299")
       (fg-changed        "#553d00")
 
       (bg-removed        "#ffd6e0")
@@ -154,6 +154,10 @@
       (underline-err     "#ef0f1f")
       (underline-warning "#bf5f00")
       (underline-info    "#02af52")
+
+      (bg-char-0 "#7feaff")
+      (bg-char-1 "#ffaaff")
+      (bg-char-2 "#dff000")
 
 ;;; Conditional hues
 
@@ -230,6 +234,18 @@
       (mail-recipient green-cooler)
       (mail-subject cyan)
       (mail-other cyan-cooler)
+
+;;;; Space mappings
+
+      (bg-space unspecified)
+      (fg-space border)
+      (bg-space-err bg-yellow-intense)
+
+;;;; Tab mappings
+
+      (bg-tab-bar      bg-alt)
+      (bg-tab-current  bg-main)
+      (bg-tab-other    bg-active)
 
 ;;;; Rainbow mappings
 

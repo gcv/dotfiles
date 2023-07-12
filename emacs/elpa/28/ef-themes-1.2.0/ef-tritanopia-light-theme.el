@@ -158,6 +158,10 @@
       (underline-warning "#af7f90")
       (underline-info    "#22afc2")
 
+      (bg-char-0 "#ff908f")
+      (bg-char-1 "#bfbfff")
+      (bg-char-2 "#5fcfdf")
+
 ;;; Conditional hues
 
       (bg-region-intense "#dfa5a5")
@@ -233,6 +237,18 @@
       (mail-recipient magenta)
       (mail-subject red-warmer)
       (mail-other magenta-cooler)
+
+;;;; Space mappings
+
+      (bg-space unspecified)
+      (fg-space border)
+      (bg-space-err bg-red-intense)
+
+;;;; Tab mappings
+
+      (bg-tab-bar      bg-alt)
+      (bg-tab-current  bg-main)
+      (bg-tab-other    bg-active)
 
 ;;;; Rainbow mappings
 

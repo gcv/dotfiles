@@ -1,4 +1,4 @@
-This is docXKUHIe.info, produced by makeinfo version 6.7 from
+This is docdPApVs.info, produced by makeinfo version 6.7 from
 ef-themes.texi.
 
 Copyright (C) 2022-2023 Free Software Foundation, Inc.
@@ -20,7 +20,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docXKUHIe.info,  Node: Top,  Next: Installation,  Up: (dir)
+File: docdPApVs.info,  Node: Top,  Next: Installation,  Up: (dir)
 
 ef-themes: colorful and legible themes
 **************************************
@@ -43,11 +43,11 @@ package called ‘ef-themes’, and provides every other piece of
 information pertinent to it.
 
    The documentation furnished herein corresponds to stable version
-1.0.0, released on 2023-05-16.  Any reference to a newer feature which
+1.2.0, released on 2023-06-30.  Any reference to a newer feature which
 does not yet form part of the latest tagged commit, is explicitly marked
 as such.
 
-   Current development target is 1.1.0-dev.
+   Current development target is 1.3.0-dev.
 
    • Package name (GNU ELPA): ‘ef-themes’
    • Official manual: <https://protesilaos.com/emacs/ef-themes>
@@ -140,7 +140,7 @@ Indices
 
 
 
-File: docXKUHIe.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
+File: docdPApVs.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
 
 1 Installation
 **************
@@ -151,7 +151,7 @@ File: docXKUHIe.info,  Node: Installation,  Next: Sample configuration,  Prev: T
 * Manual installation::
 
 
-File: docXKUHIe.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
+File: docdPApVs.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
 
 1.1 GNU ELPA package
 ====================
@@ -170,7 +170,7 @@ archive.  Read:
 <https://protesilaos.com/codelog/2022-05-13-emacs-elpa-devel/>.
 
 
-File: docXKUHIe.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
+File: docdPApVs.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
 
 1.2 Manual installation
 =======================
@@ -197,7 +197,7 @@ following commands in a shell prompt:
    Everything is in place to set up the package.
 
 
-File: docXKUHIe.info,  Node: Sample configuration,  Next: Themes for red-green or blue-yellow color deficiency,  Prev: Installation,  Up: Top
+File: docdPApVs.info,  Node: Sample configuration,  Next: Themes for red-green or blue-yellow color deficiency,  Prev: Installation,  Up: Top
 
 2 Sample configuration
 **********************
@@ -213,15 +213,15 @@ File: docXKUHIe.info,  Node: Sample configuration,  Next: Themes for red-green o
      (setq ef-themes-to-toggle '(ef-summer ef-winter))
 
      (setq ef-themes-headings ; read the manual's entry or the doc string
-           '((0 . (variable-pitch light 1.9))
-             (1 . (variable-pitch light 1.8))
-             (2 . (variable-pitch regular 1.7))
-             (3 . (variable-pitch regular 1.6))
-             (4 . (variable-pitch regular 1.5))
-             (5 . (variable-pitch 1.4)) ; absence of weight means `bold'
-             (6 . (variable-pitch 1.3))
-             (7 . (variable-pitch 1.2))
-             (t . (variable-pitch 1.1))))
+           '((0 variable-pitch light 1.9)
+             (1 variable-pitch light 1.8)
+             (2 variable-pitch regular 1.7)
+             (3 variable-pitch regular 1.6)
+             (4 variable-pitch regular 1.5)
+             (5 variable-pitch 1.4) ; absence of weight means `bold'
+             (6 variable-pitch 1.3)
+             (7 variable-pitch 1.2)
+             (t variable-pitch 1.1)))
 
      ;; They are nil by default...
      (setq ef-themes-mixed-fonts t
@@ -254,7 +254,7 @@ File: docXKUHIe.info,  Node: Sample configuration,  Next: Themes for red-green o
      ;; - `ef-themes-preview-colors-current'
 
 
-File: docXKUHIe.info,  Node: Themes for red-green or blue-yellow color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
+File: docdPApVs.info,  Node: Themes for red-green or blue-yellow color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
 
 3 Themes for red-green or blue-yellow color deficiency
 ******************************************************
@@ -273,7 +273,7 @@ themes that are optimized for such cases.  The names of the themes are:
    *note Loading a theme::.
 
 
-File: docXKUHIe.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green or blue-yellow color deficiency,  Up: Top
+File: docdPApVs.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green or blue-yellow color deficiency,  Up: Top
 
 4 Customization options
 ***********************
@@ -297,7 +297,7 @@ Principles.).
 * Palette overrides::
 
 
-File: docXKUHIe.info,  Node: Disable other themes,  Next: Toggle between two Ef themes,  Up: Customization options
+File: docdPApVs.info,  Node: Disable other themes,  Next: Toggle between two Ef themes,  Up: Customization options
 
 4.1 Disable other themes
 ========================
@@ -320,7 +320,7 @@ customizations.  Users who use such customization bundles must set this
 variable to a nil value.
 
 
-File: docXKUHIe.info,  Node: Toggle between two Ef themes,  Next: Enable mixed fonts,  Prev: Disable other themes,  Up: Customization options
+File: docdPApVs.info,  Node: Toggle between two Ef themes,  Next: Enable mixed fonts,  Prev: Disable other themes,  Up: Customization options
 
 4.2 Toggle between two Ef themes
 ================================
@@ -341,7 +341,7 @@ either with minibuffer completion or at random (*note Commands to load
 an Ef theme::).
 
 
-File: docXKUHIe.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Toggle between two Ef themes,  Up: Customization options
+File: docdPApVs.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Toggle between two Ef themes,  Up: Customization options
 
 4.3 Enable mixed fonts
 ======================
@@ -370,7 +370,7 @@ family of the ‘fixed-pitch’ and ‘variable-pitch’ faces.  The ‘fontaine
 package on GNU ELPA (by Protesilaos) can be helpful in this regard.
 
 
-File: docXKUHIe.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
+File: docdPApVs.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
 
 4.4 UI typeface
 ===============
@@ -394,7 +394,7 @@ family of the ‘fixed-pitch’ and ‘variable-pitch’ faces.  The ‘fontaine
 package on GNU ELPA (by Protesilaos) can be helpful in this regard.
 
 
-File: docXKUHIe.info,  Node: Option for headings,  Next: Style of region highlight,  Prev: UI typeface,  Up: Customization options
+File: docdPApVs.info,  Node: Option for headings,  Next: Style of region highlight,  Prev: UI typeface,  Up: Customization options
 
 4.5 Option for headings
 =======================
@@ -417,12 +417,12 @@ described below.  Here is a complete sample with various stylistic
 combinations, followed by a presentation of all available properties:
 
      (setq ef-themes-headings
-           '((1 . (light variable-pitch 1.5))
-             (2 . (regular 1.3))
-             (3 . (1.1))
-             (agenda-date . (1.3))
-             (agenda-structure . (variable-pitch light 1.8))
-             (t . (variable-pitch))))
+           '((1 light variable-pitch 1.5)
+             (2 regular 1.3)
+             (3 1.1)
+             (agenda-date 1.3)
+             (agenda-structure variable-pitch light 1.8)
+             (t variable-pitch)))
 
    By default (a ‘nil’ value for this variable), all headings have a
 bold typographic weight, a font family that is the same as the ‘default’
@@ -461,27 +461,27 @@ in these examples:
    In user configuration files the form may look like this:
 
      (setq ef-themes-headings
-           '((1 . (light variable-pitch 1.5))
-             (2 . (regular 1.3))
-             (3 . (1.1))
-             (t . (variable-pitch))))
+           '((1 light variable-pitch 1.5)
+             (2 regular 1.3)
+             (3 1.1)
+             (t variable-pitch)))
 
    When defining the styles per heading level, it is possible to pass a
-non-‘nil’ value (t) instead of a list of properties.  This will retain
-the original aesthetic for that level.  For example:
+non-‘nil’ non-list value (e.g.  ‘t’) instead of a list of properties.
+This will retain the original aesthetic for that level.  For example:
 
      (setq ef-themes-headings
            '((1 . t)           ; keep the default style
-             (2 . (variable-pitch 1.2))
-             (t . (variable-pitch)))) ; style for all unspecified headings
+             (2 variable-pitch 1.2)
+             (t variable-pitch))) ; style for all unspecified headings
 
      (setq ef-themes-headings
-           '((1 . (variable-pitch 1.6))
-             (2 . (1.3))
+           '((1 variable-pitch 1.6)
+             (2 1.3)
              (t . t))) ; default style for all unspecified levels
 
 
-File: docXKUHIe.info,  Node: Style of region highlight,  Next: Palette overrides,  Prev: Option for headings,  Up: Customization options
+File: docdPApVs.info,  Node: Style of region highlight,  Next: Palette overrides,  Prev: Option for headings,  Up: Customization options
 
 4.6 Style of region highlight
 =============================
@@ -516,7 +516,7 @@ legible.
      (setq ef-themes-region '(intense no-extend neutral))
 
 
-File: docXKUHIe.info,  Node: Palette overrides,  Prev: Style of region highlight,  Up: Customization options
+File: docdPApVs.info,  Node: Palette overrides,  Prev: Style of region highlight,  Up: Customization options
 
 4.7 Palette overrides
 =====================
@@ -673,7 +673,7 @@ top of the buffer.  In the above example, the first instance of
 ‘blue-warmer’ is the override and the second is the original one.
 
 
-File: docXKUHIe.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
+File: docdPApVs.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
 
 5 Loading a theme
 *****************
@@ -705,7 +705,7 @@ theme::).  For example:
      (ef-themes-select 'ef-summer)
 
 
-File: docXKUHIe.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
+File: docdPApVs.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
 
 6 Commands to load an Ef theme
 ******************************
@@ -780,7 +780,7 @@ a light/dark theme and then loads an appropriate Ef theme at random:
        (ef-themes-load-random 'light))
 
 
-File: docXKUHIe.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
+File: docdPApVs.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
 
 7 Preview theme colors
 **********************
@@ -811,10 +811,10 @@ color as a backdrop.
 
    The name of the buffer describes the given Ef theme and what the
 contents are, such as ‘*ef-summer-list-colors*’ for named colors and
-‘=*ef-summer-list-mappings*’ for the semantic color mappings.
+‘*ef-summer-list-mappings*’ for the semantic color mappings.
 
 
-File: docXKUHIe.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
+File: docdPApVs.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
 
 8 Use colors from the active Ef theme
 *************************************
@@ -843,7 +843,7 @@ color mapping are still possible.  At any rate, we will not outright
 break any code that uses ‘ef-themes-with-colors’.
 
 
-File: docXKUHIe.info,  Node: Do-It-Yourself customizations,  Next: Faces defined by the Ef themes,  Prev: Use colors from the active Ef theme,  Up: Top
+File: docdPApVs.info,  Node: Do-It-Yourself customizations,  Next: Faces defined by the Ef themes,  Prev: Use colors from the active Ef theme,  Up: Top
 
 9 Do-It-Yourself customizations
 *******************************
@@ -863,7 +863,7 @@ their liking.
 * Tweak goto-address-mode faces::
 
 
-File: docXKUHIe.info,  Node: Get a single color from the palette,  Next: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
+File: docdPApVs.info,  Node: Get a single color from the palette,  Next: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
 9.1 Get a single color from the palette
 =======================================
@@ -917,7 +917,7 @@ with/without overrides and when recursive mappings are introduced.
      ;; => "#d3303a"
 
 
-File: docXKUHIe.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Prev: Get a single color from the palette,  Up: Do-It-Yourself customizations
+File: docdPApVs.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Prev: Get a single color from the palette,  Up: Do-It-Yourself customizations
 
 9.2 The general approach to advanced DIY changes
 ================================================
@@ -1004,7 +1004,7 @@ mechanism.  We are willing to help and shall provide comprehensive
 documentation where necessary.
 
 
-File: docXKUHIe.info,  Node: A theme-agnostic hook for theme loading,  Next: Add support for hl-todo,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
+File: docdPApVs.info,  Node: A theme-agnostic hook for theme loading,  Next: Add support for hl-todo,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
 9.3 A theme-agnostic hook for theme loading
 ===========================================
@@ -1055,7 +1055,7 @@ the user can replace it with ‘after-enable-theme-hook’ should they need
 to (provided they understand the implications).
 
 
-File: docXKUHIe.info,  Node: Add support for hl-todo,  Next: Make the mode line like the modus-themes default,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
+File: docdPApVs.info,  Node: Add support for hl-todo,  Next: Make the mode line like the modus-themes default,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
 
 9.4 Add support for hl-todo
 ===========================
@@ -1099,7 +1099,7 @@ method.
 commands for previewing the palette (*note Preview theme colors::).
 
 
-File: docXKUHIe.info,  Node: Make the mode line like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
+File: docdPApVs.info,  Node: Make the mode line like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
 
 9.5 Make the mode line like the ‘modus-themes’ default
 ======================================================
@@ -1133,7 +1133,7 @@ snippet:
      `(mode-line ((,c :background ,bg-mode-line :foreground ,fg-mode-line :box (:line-width 1 :color ,fg-dim))))
 
 
-File: docXKUHIe.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the mode line like the modus-themes default,  Up: Do-It-Yourself customizations
+File: docdPApVs.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the mode line like the modus-themes default,  Up: Do-It-Yourself customizations
 
 9.6 Configure bold and italic faces
 ===================================
@@ -1185,7 +1185,7 @@ pick fonts that work in tandem):
 provides the means to configure font families via faces.
 
 
-File: docXKUHIe.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
+File: docdPApVs.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
 
 9.7 Tweak ‘org-modern’ timestamps
 =================================
@@ -1215,7 +1215,7 @@ further trouble (*note Enable mixed fonts::).
    For any further issues, you are welcome to ask for help.
 
 
-File: docXKUHIe.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
+File: docdPApVs.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
 
 9.8 Tweak goto-address-mode faces
 =================================
@@ -1240,7 +1240,7 @@ addresses stand out more, due to the use of the uncommon ‘@’ caharacter
 but also because they are often enclosed in angled brackets).
 
 
-File: docXKUHIe.info,  Node: Faces defined by the Ef themes,  Next: Supported packages or face groups,  Prev: Do-It-Yourself customizations,  Up: Top
+File: docdPApVs.info,  Node: Faces defined by the Ef themes,  Next: Supported packages or face groups,  Prev: Do-It-Yourself customizations,  Up: Top
 
 10 Faces defined by the Ef themes
 *********************************
@@ -1275,7 +1275,7 @@ packages, like Dired, Trashed, Ibuffer.
    • ‘ef-themes-underline-warning’
 
 
-File: docXKUHIe.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Faces defined by the Ef themes,  Up: Top
+File: docdPApVs.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Faces defined by the Ef themes,  Up: Top
 
 11 Supported packages or face groups
 ************************************
@@ -1292,7 +1292,7 @@ already covers everything most users need.
 * Packages that are hard to support::
 
 
-File: docXKUHIe.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docdPApVs.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.1 Explicitly supported packages or face groups
 =================================================
@@ -1304,10 +1304,12 @@ File: docXKUHIe.info,  Node: Explicitly supported packages or face groups,  Next
    • ansi-color
    • auctex
    • auto-dim-other-buffers
+   • avy
    • bongo
    • bookmark
    • calendar and diary
    • cider
+   • centaur-tabs
    • change-log and log-view (part of VC)
    • chart
    • clojure-mode
@@ -1316,6 +1318,7 @@ File: docXKUHIe.info,  Node: Explicitly supported packages or face groups,  Next
    • completions
    • consult
    • corfu
+   • csv-mode
    • custom (‘M-x customize’)
    • dashboard
    • denote
@@ -1334,6 +1337,7 @@ File: docXKUHIe.info,  Node: Explicitly supported packages or face groups,  Next
    • elfeed
    • embark
    • epa
+   • ert
    • eshell
    • eww
    • flycheck
@@ -1341,6 +1345,8 @@ File: docXKUHIe.info,  Node: Explicitly supported packages or face groups,  Next
    • flyspell
    • font-lock
    • git-commit
+   • git-gutter
+   • git-gutter-fr
    • git-rebase
    • gnus
    • hi-lock (‘M-x highlight-regexp’)
@@ -1359,7 +1365,11 @@ File: docXKUHIe.info,  Node: Explicitly supported packages or face groups,  Next
    • markdown-mode
    • messages
    • mode-line
+   • mood-line
    • mu4e
+   • nerd-icons
+   • nerd-icons-dired
+   • nerd-icons-ibuffer
    • neotree
    • notmuch
    • olivetti
@@ -1400,13 +1410,14 @@ File: docXKUHIe.info,  Node: Explicitly supported packages or face groups,  Next
    • vundo
    • wgrep
    • which-function-mode
+   • which-key
    • whitespace-mode
    • widget
    • writegood-mode
    • woman
 
 
-File: docXKUHIe.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docdPApVs.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.2 Implicitly supported packages or face groups
 =================================================
@@ -1425,7 +1436,6 @@ themes already cover:
    • multiple-cursors
    • paren-face
    • sxhkdrc-mode
-   • which-key
    • xref
 
    Note that “implicitly supported” does not mean that they always fit
@@ -1433,7 +1443,7 @@ in perfectly.  If there are refinements we need to made, then we need to
 intervene (*note Explicitly supported packages or face groups::).
 
 
-File: docXKUHIe.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docdPApVs.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.3 Packages that are hard to support
 ======================================
@@ -1501,7 +1511,7 @@ web-mode
    The above list is non-exhaustive though you get the idea.
 
 
-File: docXKUHIe.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
+File: docdPApVs.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
 
 12 Principles
 *************
@@ -1545,7 +1555,7 @@ File: docXKUHIe.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages o
 * Minimal VS maximal scope::
 
 
-File: docXKUHIe.info,  Node: Minimal VS maximal scope,  Up: Principles
+File: docdPApVs.info,  Node: Minimal VS maximal scope,  Up: Principles
 
 12.1 Minimal VS maximal scope
 =============================
@@ -1564,7 +1574,7 @@ necessity.  The ‘modus-themes’ are such because:
 have such a lofty accessibility target.
 
 
-File: docXKUHIe.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
+File: docdPApVs.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
 
 13 FAQ
 ******
@@ -1580,7 +1590,7 @@ File: docXKUHIe.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  U
 * Add something like Nord or Zenburn?::
 
 
-File: docXKUHIe.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
+File: docdPApVs.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
 
 13.1 What does Ef mean?
 =======================
@@ -1590,7 +1600,7 @@ good, nice, and/or easy.  For example, eftopia (ευτοπία) is the opposite
 of dystopia (δυστοπία): a good place as opposed to a bad place.
 
 
-File: docXKUHIe.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
+File: docdPApVs.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
 
 13.2 Will you stop using the modus-themes?
 ==========================================
@@ -1599,7 +1609,7 @@ No.  For my workflow, accessibility is the most important quality.  The
 ‘modus-themes’ will remain my default choice.
 
 
-File: docXKUHIe.info,  Node: Then why develop the ef-themes?,  Next: Difference between ef-themes and modus-themes?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
+File: docdPApVs.info,  Node: Then why develop the ef-themes?,  Next: Difference between ef-themes and modus-themes?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
 
 13.3 Then why develop the ef-themes?
 ====================================
@@ -1612,7 +1622,7 @@ considerations for legibility, and (ii) are not designed on a whimsy.
 fine with a bit more relaxed accessibility target.
 
 
-File: docXKUHIe.info,  Node: Difference between ef-themes and modus-themes?,  Next: Too many options what should I do?,  Prev: Then why develop the ef-themes?,  Up: FAQ
+File: docdPApVs.info,  Node: Difference between ef-themes and modus-themes?,  Next: Too many options what should I do?,  Prev: Then why develop the ef-themes?,  Up: FAQ
 
 13.4 Difference between ef-themes and modus-themes?
 ===================================================
@@ -1676,7 +1686,7 @@ pay attention.  In short: I am not picking random colors and
 implementing them on a whimsy.  Theme development is not easy.
 
 
-File: docXKUHIe.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Difference between ef-themes and modus-themes?,  Up: FAQ
+File: docdPApVs.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Difference between ef-themes and modus-themes?,  Up: FAQ
 
 13.5 Too many options, what should I do?
 ========================================
@@ -1689,7 +1699,7 @@ tweaks to toggle between those two and don’t worry anymore about the
 abundance of choice (*note Toggle between two Ef themes::).  Good luck!
 
 
-File: docXKUHIe.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
+File: docdPApVs.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
 
 13.6 Let Org tags inherit the heading color?
 ============================================
@@ -1722,7 +1732,7 @@ Realigning tags by inserting spaces also creates noise in
 version-controlled files, which is undesirable.
 
 
-File: docXKUHIe.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
+File: docdPApVs.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
 
 13.7 Add something like Nord or Zenburn?
 ========================================
@@ -1751,7 +1761,7 @@ compromises and sub-optimal choices, which make no sense for a project
 with opinionanted design principles.
 
 
-File: docXKUHIe.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
+File: docdPApVs.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
 
 14 Acknowledgements
 *******************
@@ -1763,16 +1773,17 @@ Author/maintainer
      Protesilaos Stavrou.
 
 Contributions to code or the manual
-     Alex Lu, Christopher League, Philip Kaludercic, Walheimat.
+     Alex Lu, Christopher League, Eshel Yaron, Philip Kaludercic,
+     Walheimat.
 
 Ideas and/or user feedback
-     Alan Schmitt, Anthony Chavez, Benjamin (zealotrush), Daniel
-     Mendler, Federico Stilman, Iris Garcia, Jean-Philippe Gagné Guay,
-     Jonas Collberg, Saša Janiška, Spike-Leung, Steve Molitor, Summer
-     Emacs, Sven Seebeck, Thanos Apollo, Zoltán Király, goldfita.
+     Alan Schmitt, Amo DelBello, Anthony Chavez, Benjamin (zealotrush),
+     Daniel Mendler, Federico Stilman, Iris Garcia, Jean-Philippe Gagné
+     Guay, Jonas Collberg, Saša Janiška, Spike-Leung, Steve Molitor,
+     Summer Emacs, Sven Seebeck, Thanos Apollo, Zoltán Király, goldfita.
 
 
-File: docXKUHIe.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
+File: docdPApVs.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
 
 15 GNU Free Documentation License
 *********************************
@@ -2254,7 +2265,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docXKUHIe.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
+File: docdPApVs.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
 
 16 Indices
 **********
@@ -2266,7 +2277,7 @@ File: docXKUHIe.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up
 * Concept index::
 
 
-File: docXKUHIe.info,  Node: Function index,  Next: Variable index,  Up: Indices
+File: docdPApVs.info,  Node: Function index,  Next: Variable index,  Up: Indices
 
 16.1 Function index
 ===================
@@ -2294,7 +2305,7 @@ File: docXKUHIe.info,  Node: Function index,  Next: Variable index,  Up: Indices
                                                                (line  6)
 
 
-File: docXKUHIe.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
+File: docdPApVs.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
 
 16.2 Variable index
 ===================
@@ -2337,7 +2348,7 @@ File: docXKUHIe.info,  Node: Variable index,  Next: Concept index,  Prev: Functi
 * ef-winter-palette-overrides:           Palette overrides.    (line 66)
 
 
-File: docXKUHIe.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
+File: docdPApVs.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 16.3 Concept index
 ==================
@@ -2360,49 +2371,49 @@ Node: Installation4551
 Node: GNU ELPA package4733
 Node: Manual installation5297
 Node: Sample configuration6078
-Node: Themes for red-green or blue-yellow color deficiency8271
-Node: Customization options9135
-Node: Disable other themes9858
-Node: Toggle between two Ef themes10792
-Node: Enable mixed fonts11685
-Node: UI typeface13061
-Node: Option for headings13997
-Node: Style of region highlight17717
-Node: Palette overrides18918
-Node: Loading a theme24046
-Node: Commands to load an Ef theme25242
-Node: Preview theme colors28630
-Node: Use colors from the active Ef theme30141
-Node: Do-It-Yourself customizations31352
-Node: Get a single color from the palette31984
-Node: The general approach to advanced DIY changes34011
-Node: A theme-agnostic hook for theme loading38080
-Node: Add support for hl-todo40614
-Node: Make the mode line like the modus-themes default42531
-Node: Configure bold and italic faces44101
-Node: Tweak org-modern timestamps46528
-Node: Tweak goto-address-mode faces47915
-Node: Faces defined by the Ef themes49016
-Node: Supported packages or face groups50286
-Node: Explicitly supported packages or face groups50892
-Node: Implicitly supported packages or face groups53215
-Node: Packages that are hard to support54098
-Node: Principles56235
-Node: Minimal VS maximal scope58245
-Node: FAQ59004
-Node: What does Ef mean?59430
-Node: Will you stop using the modus-themes?59818
-Node: Then why develop the ef-themes?60175
-Node: Difference between ef-themes and modus-themes?60764
-Node: Too many options what should I do?64280
-Node: Let Org tags inherit the heading color?64980
-Node: Add something like Nord or Zenburn?66803
-Node: Acknowledgements68097
-Node: GNU Free Documentation License68777
-Node: Indices94122
-Node: Function index94300
-Node: Variable index95761
-Node: Concept index98330
+Node: Themes for red-green or blue-yellow color deficiency8235
+Node: Customization options9099
+Node: Disable other themes9822
+Node: Toggle between two Ef themes10756
+Node: Enable mixed fonts11649
+Node: UI typeface13025
+Node: Option for headings13961
+Node: Style of region highlight17645
+Node: Palette overrides18846
+Node: Loading a theme23974
+Node: Commands to load an Ef theme25170
+Node: Preview theme colors28558
+Node: Use colors from the active Ef theme30068
+Node: Do-It-Yourself customizations31279
+Node: Get a single color from the palette31911
+Node: The general approach to advanced DIY changes33938
+Node: A theme-agnostic hook for theme loading38007
+Node: Add support for hl-todo40541
+Node: Make the mode line like the modus-themes default42458
+Node: Configure bold and italic faces44028
+Node: Tweak org-modern timestamps46455
+Node: Tweak goto-address-mode faces47842
+Node: Faces defined by the Ef themes48943
+Node: Supported packages or face groups50213
+Node: Explicitly supported packages or face groups50819
+Node: Implicitly supported packages or face groups53341
+Node: Packages that are hard to support54207
+Node: Principles56344
+Node: Minimal VS maximal scope58354
+Node: FAQ59113
+Node: What does Ef mean?59539
+Node: Will you stop using the modus-themes?59927
+Node: Then why develop the ef-themes?60284
+Node: Difference between ef-themes and modus-themes?60873
+Node: Too many options what should I do?64389
+Node: Let Org tags inherit the heading color?65089
+Node: Add something like Nord or Zenburn?66912
+Node: Acknowledgements68206
+Node: GNU Free Documentation License68918
+Node: Indices94263
+Node: Function index94441
+Node: Variable index95902
+Node: Concept index98471
 
 End Tag Table
 

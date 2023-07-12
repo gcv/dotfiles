@@ -43,7 +43,7 @@ Run `ef-themes-post-load-hook' after loading the theme.
 Also see `ef-themes-select-light'.
 
 This command is the same as `ef-themes-select' except it only
-prompts for light themes when called interactively.  Calling it
+prompts for dark themes when called interactively.  Calling it
 from Lisp behaves the same as `ef-themes-select' for the THEME
 argument, meaning that it loads the Ef THEME regardless of
 whether it is light or dark.
@@ -95,12 +95,13 @@ corresponding entries.
 ;;;### (autoloads nil nil ("ef-autumn-theme.el" "ef-bio-theme.el"
 ;;;;;;  "ef-cherie-theme.el" "ef-cyprus-theme.el" "ef-dark-theme.el"
 ;;;;;;  "ef-day-theme.el" "ef-deuteranopia-dark-theme.el" "ef-deuteranopia-light-theme.el"
-;;;;;;  "ef-duo-dark-theme.el" "ef-duo-light-theme.el" "ef-frost-theme.el"
-;;;;;;  "ef-kassio-theme.el" "ef-light-theme.el" "ef-night-theme.el"
-;;;;;;  "ef-spring-theme.el" "ef-summer-theme.el" "ef-symbiosis-theme.el"
-;;;;;;  "ef-themes-pkg.el" "ef-trio-dark-theme.el" "ef-trio-light-theme.el"
-;;;;;;  "ef-tritanopia-dark-theme.el" "ef-tritanopia-light-theme.el"
-;;;;;;  "ef-winter-theme.el") (0 0 0 0))
+;;;;;;  "ef-duo-dark-theme.el" "ef-duo-light-theme.el" "ef-elea-dark-theme.el"
+;;;;;;  "ef-elea-light-theme.el" "ef-frost-theme.el" "ef-kassio-theme.el"
+;;;;;;  "ef-light-theme.el" "ef-night-theme.el" "ef-spring-theme.el"
+;;;;;;  "ef-summer-theme.el" "ef-symbiosis-theme.el" "ef-themes-pkg.el"
+;;;;;;  "ef-trio-dark-theme.el" "ef-trio-light-theme.el" "ef-tritanopia-dark-theme.el"
+;;;;;;  "ef-tritanopia-light-theme.el" "ef-winter-theme.el") (0 0
+;;;;;;  0 0))
 
 ;;;***
 
