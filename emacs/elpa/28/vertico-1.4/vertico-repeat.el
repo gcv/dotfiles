@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.3"))
+;; Package-Requires: ((emacs "27.1") (vertico "1.4"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -117,8 +117,7 @@ If called interactively from an existing Vertico session,
 last selected candidate for the current command."
   (interactive
    (list (or (if vertico-repeat--command
-                 (seq-find (lambda (x) (eq (car x) vertico-repeat--command))
-                           vertico-repeat-history)
+                 (assq vertico-repeat--command vertico-repeat-history)
                (car vertico-repeat-history))
              (user-error "No repeatable Vertico session"))))
   (if (and vertico-repeat--command (eq vertico-repeat--command (car session)))

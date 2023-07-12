@@ -6,7 +6,7 @@
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.3"))
+;; Package-Requires: ((emacs "27.1") (vertico "1.4"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -59,11 +59,6 @@
   #("   |   " 3 4 (display (space :width (1)) face (:inherit shadow :inverse-video t)))
   "Separator between columns."
   :type 'string
-  :group 'vertico)
-
-(defcustom vertico-grid-rows 6
-  "Number of grid rows."
-  :type 'natnum
   :group 'vertico)
 
 (defcustom vertico-grid-lookahead 100
@@ -123,9 +118,9 @@ When scrolling beyond this limit, candidates may be truncated."
 
 (cl-defmethod vertico--arrange-candidates (&context (vertico-grid-mode (eql t)))
   (when (<= vertico--index 0)
-    (let ((cand vertico--candidates) (n 0) (w (1+ vertico-grid-annotate)))
+    (let ((cand vertico--candidates) (n 0) (w 1))
       (while (and cand (< n vertico-grid-lookahead))
-        (setq w (max w (length (car cand))) n (1+ n))
+        (setq w (max w (+ vertico-grid-annotate (length (car cand)))) n (1+ n))
         (pop cand))
       (setq vertico-grid--columns
             (max vertico-grid-min-columns
