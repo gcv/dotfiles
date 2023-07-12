@@ -2,7 +2,6 @@
   <a href="http://www.gnu.org/licenses/gpl-3.0.txt"><img src="https://img.shields.io/badge/license-GPL_3-green.svg" alt="License GPL 3" /></a>
   <a href="https://melpa.org/#/helm"><img alt="MELPA" src="https://melpa.org/packages/helm-badge.svg"/></a>
   <a href="https://stable.melpa.org/#/helm"><img alt="MELPA Stable" src="https://stable.melpa.org/packages/helm-badge.svg"/></a>
-  <a href="https://travis-ci.org/emacs-helm/helm"><img alt="Travis CI" src="https://travis-ci.org/emacs-helm/helm.svg?branch=master"/></a>
 </p>
 
 
@@ -43,3 +42,12 @@
 </p>
 
 [badge-license]: https://img.shields.io/badge/license-GPL_3-green.svg
+
+<p>Maintainance of Helm is a lot of work please consider making a donation, thank you!</p>
+
+
+<a href="https://www.patreon.com/user?u=86324343">
+    <img title="Donate monthly using Patreon"
+    alt="Donate monthly using Patreon"
+    style="height: 50px; width: auto;"
+    src="https://github.com/emacs-helm/helm/blob/master/images/patreon-25x.png?raw=true"></a>

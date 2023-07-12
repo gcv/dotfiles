@@ -1,10 +1,10 @@
-;;; helm-core.el --- Development files for Helm  -*- lexical-binding: t; -*-
+;;; helm-core.el --- Development files for Helm  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022  Thierry Volpiatto
+;; Copyright (C) 2022 ~ 2023  Thierry Volpiatto
 
 ;; Author: Thierry Volpiatto <thievol@posteo.net>
 ;; URL: https://emacs-helm.github.io/helm/
-;; Version: 3.9.0
+;; Version: 3.9.1
 ;; Package-Requires: ((emacs "25.1") (async "1.9.7"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -23,6 +23,8 @@
 ;;; Commentary:
 
 ;; Contains the main code for Helm.
+;; As a package helm-core provides the files helm-core.el, helm-lib.el,
+;; helm-source.el and helm-multi-match.el.
 
 ;;; Code:
 
@@ -348,7 +350,7 @@ i.e. the loop is not entered after running COMMAND."
           ;; COMMAND, SUBKEY and OTHER-SUBKEYS.
           (concat
            (format "Run `%s' and bound it to `%s' for subsequent calls."
-                   command (if (numberp subkey) (char-to-string subkey) subkey))
+                   command (if (numberp subkey) (single-key-description subkey) subkey))
            (if other-subkeys
                (helm-basic-docstring-from-alist other-subkeys)
              ""))))
@@ -362,7 +364,7 @@ i.e. the loop is not entered after running COMMAND."
                                         " and ")
                                        ((> count 1) ",")
                                        (t ""))
-                       for key = (if (numberp k) (char-to-string k) k)
+                       for key = (if (numberp k) (single-key-description k) k)
                        concat (format "%s`%s'" sep key) into ks
                        concat (format "%s`%s'" sep v) into kv
                        finally return (list ks kv))))
@@ -419,6 +421,10 @@ i.e. the loop is not entered after running COMMAND."
     (define-key map (kbd "C-M-e")      #'helm-display-all-sources)
     (define-key map (kbd "C-s")        #'undefined)
     (define-key map (kbd "M-s")        #'undefined)
+    (define-key map (kbd "C-r")        #'undefined)
+    (define-key map (kbd "C-M-r")      #'undefined)
+    (define-key map (kbd "C-M-s")      #'undefined)
+    (define-key map (kbd "C-z")        #'undefined)
     (define-key map (kbd "C-}")        #'helm-narrow-window)
     (define-key map (kbd "C-{")        #'helm-enlarge-window)
     (define-key map (kbd "C-c -")      #'helm-swap-windows)
@@ -452,7 +458,7 @@ i.e. the loop is not entered after running COMMAND."
       (kbd "C-w") ?\C-w #'helm-yank-text-at-point
       '((?\C-_ . helm-undo-yank-text-at-point)))
     ;; Use `describe-mode' key in `global-map'.
-    (cl-dolist (k (where-is-internal #'describe-mode global-map))
+    (dolist (k (where-is-internal #'describe-mode global-map))
       (define-key map k #'helm-help))
     ;; Bind all actions from f1 to f12, `helm-select-nth-action'
     ;; counts from 0, i.e. (helm-select-nth-action 0) = action 1.
@@ -567,7 +573,7 @@ NOTE: When non-nil (default), disable
   :group 'helm
   :type 'boolean)
 
-(defcustom helm-candidate-number-limit 100
+(defcustom helm-candidate-number-limit 50
   "Global limit for number of candidates displayed.
 When the pattern is empty, the number of candidates shown will be
 as set here instead of the entire list, which may be hundreds or
@@ -676,6 +682,16 @@ the same window scheme as the previous session unless
 `helm-split-window-default-side' is \\='same or \\='other."
   :group 'helm
   :type 'boolean)
+
+(defcustom helm-split-width-threshold nil
+  "The value of `split-width-threshold' for helm windows.
+This affect the behavior of `helm-split-window-default-fn'.
+When the value is an integer, `split-window-sensibly' is used inconditionally
+and all the helm variables that affect window splitting are ignored."
+  :group 'helm
+  :type '(choice
+           (const :tag "Maybe use `split-window-sensibly'" nil)
+           (integer :tag "Inconditionally use `split-window-sensibly'")))
 
 (defcustom helm-split-window-preferred-function 'helm-split-window-default-fn
   "Default function used for splitting window."
@@ -928,7 +944,9 @@ update Helm."
                 (const :tag "Provide guidance only for complex methods" complex-only)))
 
 (defcustom helm-display-header-line t
-  "Display header-line when non nil."
+  "Display header-line when non nil.
+It has to be non nil when you want to display minibuffer contents in there with
+`helm-echo-input-in-header-line'."
   :group 'helm
   :type 'boolean)
 
@@ -940,7 +958,9 @@ The default is to enable this by default and then toggle
   :type 'boolean)
 
 (defcustom helm-echo-input-in-header-line nil
-  "Send current input to header-line when non-nil."
+  "Send current input to header-line when non-nil.
+Note that `helm-display-header-line' has to be non nil as well for this to take
+effect."
   :group 'helm
   :type 'boolean)
 
@@ -1325,18 +1345,12 @@ It is either a string or a list of two string arguments where the
 first string is the name and the second string is displayed in
 the mode-line. When nil, it defaults to `mode-line-format'.")
 
-(defvar helm-minibuffer-set-up-hook nil
+(defvar helm-minibuffer-set-up-hook '(helm-hide-minibuffer-maybe)
   "Hook that runs at minibuffer initialization.
 A hook useful for modifying minibuffer settings in Helm.
 
-An example that hides the minibuffer when using
-`helm-echo-input-in-header-line':
-
-      (add-hook \\='helm-minibuffer-set-up-hook #'helm-hide-minibuffer-maybe)
-
-Note that we check `helm-echo-input-in-header-line' value
-from `helm-buffer' which allows detecting possible local
-value of this var.")
+Uses `helm-hide-minibuffer-maybe' by default which hide minibuffer contents with
+header-line contents when `helm-echo-input-in-header-line' is non nil.")
 
 (defvar helm-help-message
   "* Helm Generic Help
@@ -1643,8 +1657,10 @@ slow frame popup in Emacs-26, to workaround this slowness in Emacs-26 use instea
 #+end_src
 
 WARNING:
-There is a package called posframe and also one called helm-posframe,
+There is a package called Posframe and also one called Helm-posframe,
 you DO NOT need these packages to display helm buffers in frames.
+Thus Posframe package use child frames which have no minibuffers
+and are by the way not compatible with Helm.
 
 ** Helm's basic operations and default key bindings
 
@@ -1962,7 +1978,7 @@ Use optional arguments ARGS like in `format'."
       (buffer-disable-undo)
       (let ((inhibit-read-only t))
         (goto-char (point-max))
-        (insert (let ((tm (time-convert nil 'list)))
+        (insert (let ((tm (current-time)))
                   (format (concat (if (string-match "Start session" format-string)
                                       "* " "** ")
                                   "%s.%06d (%s)\n %s\n")
@@ -2621,7 +2637,7 @@ precedent function.  Return the result of last function call."
                           ;; `helm-sources' are local to helm-buffer.
                           (with-helm-buffer helm-sources)))))
     (when sources
-      (cl-dolist (source sources)
+      (dolist (source sources)
         (helm-aif (assoc-default attr source)
             (helm-apply-functions-from-source source it))))))
 
@@ -3298,11 +3314,13 @@ to `helm-default-display-buffer' is called from
 `helm-display-buffer' the value of
 `split-window-preferred-function' will be used by
 `display-buffer'."
-  (let* (split-width-threshold
+  (let* ((split-width-threshold (and (integerp helm-split-width-threshold)
+                                     helm-split-width-threshold))
          (win (if (and (fboundp 'window-in-direction)
                        ;; Don't try to split when starting in a minibuffer
                        ;; e.g M-: and try to use helm-show-kill-ring.
-                       (not (minibufferp helm-current-buffer)))
+                       (not (minibufferp helm-current-buffer))
+                       (null helm-split-width-threshold))
                   (if (or (one-window-p t)
                           helm-split-window-inside-p)
                       (split-window
@@ -4434,7 +4452,7 @@ This function is used with sources built with `helm-source-sync'."
 (defun helm-score-candidate-for-pattern (candidate pattern)
   "Assign score to CANDIDATE according to PATTERN."
   ;; Unknown candidates always go on top.
-  (if (equal (get-text-property 0 'display candidate) "[?]")
+  (if (get-text-property 0 'helm-new-file candidate)
       200.00
     (funcall helm-fuzzy-default-score-fn candidate pattern)))
 
@@ -4672,7 +4690,7 @@ See `helm-fuzzy-default-highlight-match'."
   (cl-loop with diac = (helm-get-attr 'diacritics source)
            with file-comp-p = (and (not (helm-action-window))
                                    (or minibuffer-completing-file-name
-                                       (helm-guess-filename-at-point)))
+                                       (helm-get-attr 'completing-file-name source)))
            ;; helm-pattern may have been modified (fuzzy) so ensure to
            ;; use helm-input which is the raw pattern.
            with pattern = (if file-comp-p
@@ -4832,8 +4850,7 @@ emacs-27 to provide such scoring in emacs<27."
            ;; display a list of  candidates even with an empty
            ;; pattern.
            (helm--initialize-one-by-one-candidates
-            (helm-take-first-elements
-             (helm-get-cached-candidates source) limit)
+            (helm-take (helm-get-cached-candidates source) limit)
             source)
          ;; Compute candidates according to pattern with their match
          ;; fns.
@@ -5093,7 +5110,7 @@ passed as argument to `recenter'."
                  (helm-apply-functions-from-source
                   source 'helm-candidate-buffer))
       (kill-buffer it))
-  (cl-dolist (attr '(update init))
+  (dolist (attr '(update init))
     (helm-aif (assoc-default attr source)
         (helm-apply-functions-from-source source it)))
   (helm-remove-candidate-cache source))
@@ -6196,14 +6213,14 @@ message \\='no match'."
                (minibuffer-message " [confirm]"))
               ;; When require-match is strict (i.e. `t'), buffer
               ;; should be either empty or in read-file-name have an
-              ;; unknown candidate ([?] prefix), if it's not the case
+              ;; unknown candidate ([+] prefix), if it's not the case
               ;; fix it in helm-mode but not here.
               ((and (or empty-buffer-p unknown)
                     (eq minibuffer-completion-confirm t))
                (minibuffer-message " [No match]"))
               (empty-buffer-p
                ;; This is used when helm-buffer is totally empty,
-               ;; i.e. the [?] have not been added because must-match
+               ;; i.e. the [+] have not been added because must-match
                ;; is used from outside helm-comp-read i.e. from a helm
                ;; source built with :must-match.
                (setq helm-saved-selection helm-pattern
@@ -6332,7 +6349,7 @@ If action buffer is displayed, kill it."
   (message "Calculating all helm-related values...")
   (insert "If you debug some variables or forms, set `helm-debug-variables'
 to a list of forms.\n\n")
-  (cl-dolist (v (or vars
+  (dolist (v (or vars
                     helm-debug-variables
                     (apropos-internal "^helm-" 'boundp)))
     (insert "** "
@@ -6664,18 +6681,20 @@ computed by match-part-fn and stored in the match-part property."
         (matchfn (cond (helm-migemo-mode 'helm-mm-migemo-string-match)
                        (diacritics 'helm-mm-diacritics-string-match)
                        (t 'string-match))))
-    (if (string-match " " pattern)
-        (cl-loop for i in (helm-mm-split-pattern pattern) always
-                 (if (string-match "\\`!" i)
-                     (not (funcall matchfn (substring i 1) part))
-                   (funcall matchfn i part)))
-      (if (string-match "\\`!" pattern)
-          (if helm--in-fuzzy
-              ;; Fuzzy regexp have already been
-              ;; computed with substring 1.
-              (not (string-match fuzzy-regexp part))
-            (not (funcall matchfn (substring pattern 1) part)))
-        (funcall matchfn (if helm--in-fuzzy fuzzy-regexp pattern) part)))))
+    (condition-case _err
+        (if (string-match " " pattern)
+            (cl-loop for i in (helm-mm-split-pattern pattern) always
+                     (if (string-match "\\`!" i)
+                         (not (funcall matchfn (substring i 1) part))
+                       (funcall matchfn i part)))
+          (if (string-match "\\`!" pattern)
+              (if helm--in-fuzzy
+                  ;; Fuzzy regexp have already been
+                  ;; computed with substring 1.
+                  (not (string-match fuzzy-regexp part))
+                (not (funcall matchfn (substring pattern 1) part)))
+            (funcall matchfn (if helm--in-fuzzy fuzzy-regexp pattern) part)))
+      (invalid-regexp nil))))
 
 (defun helm-initial-candidates-from-candidate-buffer (get-line-fn limit)
   (cl-loop repeat limit
@@ -6841,6 +6860,9 @@ when initializing a source with `helm-source-in-buffer' class."
                (insert (mapconcat (lambda (i)
                                     (let ((cand (cond ((symbolp i) (symbol-name i))
                                                       ((numberp i) (number-to-string i))
+                                                      ((consp i) (propertize
+                                                                  (car i)
+                                                                  'helm-realvalue (cdr i)))
                                                       (t i))))
                                       (setq-local helm-candidate-buffer-longest-len
                                                   (max helm-candidate-buffer-longest-len
@@ -7077,15 +7099,21 @@ splitting inconditionally, it is unused actually."
              (attr-val (if (eq attr 'persistent-action-if)
                            (funcall (assoc-default attr source) selection)
                          (assoc-default attr source)))
-             ;; If attr value is a cons, use its car as persistent function
-             ;; and its car to decide if helm window should be splitted.
+             ;; If attr value is a cons, use its car as persistent function.
              (fn       (if (and (consp attr-val)
                                 ;; maybe a lambda.
                                 (not (functionp attr-val)))
                            (car attr-val) attr-val))
+             ;; And its cdr to decide if helm window should be splitted.
              (no-split (and (consp attr-val)
                             (not (functionp attr-val))
                             (cdr attr-val)))
+             ;; Is next-window (from helm-window) a suitable window for PA?
+             (no-suitable-win
+              (helm-aand (not helm--buffer-in-new-frame-p)
+                         (get-buffer-window helm-current-buffer)
+                         (or (window-dedicated-p it)
+                             (window-parameter it 'window-side))))
              (cursor-in-echo-area t)
              mode-line-in-non-selected-windows)
         (progn
@@ -7097,10 +7125,11 @@ splitting inconditionally, it is unused actually."
           (when source
             (with-helm-window
               (save-selected-window
+                ;; FIXME: Simplify SPLIT behavior, it is a mess actually. 
                 (if no-split
                     (helm-select-persistent-action-window :split 'never)
                   (helm-select-persistent-action-window
-                   :split (or split helm-onewindow-p)))
+                   :split (or split helm-onewindow-p no-suitable-win)))
                 (helm-log "helm-execute-persistent-action"
                           "current-buffer = %S" (current-buffer))
                 (let ((helm-in-persistent-action t)
@@ -7138,8 +7167,14 @@ The symbol `never' is kept for backward compatibility."
                                    (get-buffer-window-list helm-buffer))))
                  helm-persistent-action-display-window)
                 ((and helm--buffer-in-new-frame-p helm-initial-frame)
-                 (with-selected-frame helm-initial-frame (selected-window)))
-                ((and split (not (eq split 'never))) (split-window))
+                 (with-selected-frame helm-initial-frame
+                   (let ((win (selected-window)))
+                     (if (or (window-dedicated-p win)
+                             (window-parameter win 'window-side))
+                         (next-window win 1)
+                       win))))
+                ((and split (not (eq split 'never)))
+                 (split-window))
                 ((get-buffer-window helm-current-buffer))
                 (t (previous-window (selected-window) 1))))))
 
@@ -7355,7 +7390,7 @@ starting it is not needed."
                      (maxpoint  (or end (point-max))))
                 (while (< (point) maxpoint)
                   (helm-mark-current-line)
-                  (let* ((prefix (get-text-property (point-at-bol) 'display))
+                  (let* ((prefix (get-text-property (point-at-bol) 'helm-new-file))
                          (cand   (helm-get-selection
                                   nil (helm-get-attr 'marked-with-props src)
                                   src))
@@ -7368,7 +7403,7 @@ starting it is not needed."
                             ;; RFN. Display may be an image. See
                             ;; https://github.com/yyoncho/helm-treemacs-icons/issues/5
                             ;; and also Bug#2296.
-                            (equal prefix "[?]")
+                            prefix
                             (and filecomp-p
                                  (or
                                   ;; autosave files
@@ -7480,7 +7515,7 @@ sources."
   "Restore marked candidates when helm updates display."
   (with-current-buffer helm-buffer
     (save-excursion
-      (cl-dolist (o helm-visible-mark-overlays)
+      (dolist (o helm-visible-mark-overlays)
         (let* ((source (overlay-get o 'source))
                (ov-src-name (assoc-default 'name source))
                (ov-str (overlay-get o 'string))
@@ -7698,8 +7733,12 @@ source or `helm-follow-input-idle-delay' or
                  helm-follow-input-idle-delay
                  (or (and helm-input-idle-delay
                           (max helm-input-idle-delay 0.01))
-                     0.01))))
-    (when (and (not (get-buffer-window helm-action-buffer 'visible))
+                     0.01)))
+         (suspend (and helm--in-update
+                       ;; Specific to helm-find-files.
+                       (assoc-default 'suspend-follow-in-update src))))
+    (when (and (not suspend)
+               (not (get-buffer-window helm-action-buffer 'visible))
                (not (helm-pos-header-line-p))
                (or (helm-follow-mode-p src)
                    (and helm-follow-mode-persistent
