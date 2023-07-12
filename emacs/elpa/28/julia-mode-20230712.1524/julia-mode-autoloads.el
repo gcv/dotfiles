@@ -16,13 +16,7 @@ Major mode for editing julia code.
 
 \(fn)" t nil)
 
-(autoload 'inferior-julia "julia-mode" "\
-Run an inferior instance of julia inside Emacs." t nil)
-
-(defalias 'run-julia #'inferior-julia "\
-Run an inferior instance of julia inside Emacs.")
-
-(register-definition-prefixes "julia-mode" '("inferior-julia-" "julia-"))
+(register-definition-prefixes "julia-mode" '("julia-"))
 
 ;;;***
 
