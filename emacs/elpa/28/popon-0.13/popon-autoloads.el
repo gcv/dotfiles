@@ -100,6 +100,16 @@ Redisplay popon overlays." nil nil)
 (autoload 'popon-update "popon" "\
 Update popons if needed." nil nil)
 
+(autoload 'popon-x-y-at-posn "popon" "\
+Return the (X, Y) coodinate at position POSN as a cons.
+
+Return nil if a popon can't be shown at position POSN.
+
+NOTE: This uses `posn-at-point', which is slow.  So try to minimize
+calls to this function.
+
+\(fn POSN)" nil nil)
+
 (autoload 'popon-x-y-at-pos "popon" "\
 Return the (X, Y) coodinate of POINT in selected window as a cons.
 
