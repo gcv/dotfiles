@@ -1,4 +1,4 @@
-This is docS5PVLD.info, produced by makeinfo version 6.7 from
+This is docnpIaRm.info, produced by makeinfo version 6.7 from
 transient.texi.
 
      Copyright (C) 2018–2023 Free Software Foundation, Inc.
@@ -19,7 +19,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docS5PVLD.info,  Node: Top,  Next: Introduction,  Up: (dir)
+File: docnpIaRm.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
 Transient User and Developer Manual
 ***********************************
@@ -51,7 +51,7 @@ but suffix commands can also be configured to not exit the transient.
      available at
      <https://github.com/positron-solutions/transient-showcase>.
 
-This manual is for Transient version 0.4.0.
+This manual is for Transient version 0.4.1.
 
      Copyright (C) 2018–2023 Free Software Foundation, Inc.
 
@@ -132,7 +132,7 @@ Related Abstractions and Packages
 
 
 
-File: docS5PVLD.info,  Node: Introduction,  Next: Usage,  Prev: Top,  Up: Top
+File: docnpIaRm.info,  Node: Introduction,  Next: Usage,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -245,7 +245,7 @@ which the author of Transient did not anticipate (or didn’t get around
 to implementing yet).
 
 
-File: docS5PVLD.info,  Node: Usage,  Next: Modifying Existing Transients,  Prev: Introduction,  Up: Top
+File: docnpIaRm.info,  Node: Usage,  Next: Modifying Existing Transients,  Prev: Introduction,  Up: Top
 
 2 Usage
 *******
@@ -263,7 +263,7 @@ File: docS5PVLD.info,  Node: Usage,  Next: Modifying Existing Transients,  Prev:
 * Configuration::
 
 
-File: docS5PVLD.info,  Node: Invoking Transients,  Next: Aborting and Resuming Transients,  Up: Usage
+File: docnpIaRm.info,  Node: Invoking Transients,  Next: Aborting and Resuming Transients,  Up: Usage
 
 2.1 Invoking Transients
 =======================
@@ -287,7 +287,7 @@ commands may also set some value by side-effect, e.g., by setting the
 value of some variable.
 
 
-File: docS5PVLD.info,  Node: Aborting and Resuming Transients,  Next: Common Suffix Commands,  Prev: Invoking Transients,  Up: Usage
+File: docnpIaRm.info,  Node: Aborting and Resuming Transients,  Next: Common Suffix Commands,  Prev: Invoking Transients,  Up: Usage
 
 2.2 Aborting and Resuming Transients
 ====================================
@@ -343,7 +343,7 @@ command.  To learn how to get that binding back see
      if any.
 
 
-File: docS5PVLD.info,  Node: Common Suffix Commands,  Next: Saving Values,  Prev: Aborting and Resuming Transients,  Up: Usage
+File: docnpIaRm.info,  Node: Common Suffix Commands,  Next: Saving Values,  Prev: Aborting and Resuming Transients,  Up: Usage
 
 2.3 Common Suffix Commands
 ==========================
@@ -382,7 +382,7 @@ one of the following sections.
 of Magit-Popup; see *note FAQ:: for more information.
 
 
-File: docS5PVLD.info,  Node: Saving Values,  Next: Using History,  Prev: Common Suffix Commands,  Up: Usage
+File: docnpIaRm.info,  Node: Saving Values,  Next: Using History,  Prev: Common Suffix Commands,  Up: Usage
 
 2.4 Saving Values
 =================
@@ -423,7 +423,7 @@ their handling of buffer-local values is actually a bit more complicated
 than outlined above and even customizable.
 
 
-File: docS5PVLD.info,  Node: Using History,  Next: Getting Help for Suffix Commands,  Prev: Saving Values,  Up: Usage
+File: docnpIaRm.info,  Node: Using History,  Next: Getting Help for Suffix Commands,  Prev: Saving Values,  Up: Usage
 
 2.5 Using History
 =================
@@ -464,7 +464,7 @@ that read the same kind of value to also use the same history key (see
      the history is saved in ‘transient-history-file’.
 
 
-File: docS5PVLD.info,  Node: Getting Help for Suffix Commands,  Next: Enabling and Disabling Suffixes,  Prev: Using History,  Up: Usage
+File: docnpIaRm.info,  Node: Getting Help for Suffix Commands,  Next: Enabling and Disabling Suffixes,  Prev: Using History,  Up: Usage
 
 2.6 Getting Help for Suffix Commands
 ====================================
@@ -492,7 +492,7 @@ supported.  The fallback is to show the command’s doc string, for
 non-infix suffixes this is usually appropriate.
 
 
-File: docS5PVLD.info,  Node: Enabling and Disabling Suffixes,  Next: Other Commands,  Prev: Getting Help for Suffix Commands,  Up: Usage
+File: docnpIaRm.info,  Node: Enabling and Disabling Suffixes,  Next: Other Commands,  Prev: Getting Help for Suffix Commands,  Up: Usage
 
 2.7 Enabling and Disabling Suffixes
 ===================================
@@ -559,7 +559,7 @@ if the user lowers the transient level.
      state, you have to make sure that that state is currently active.
 
 
-File: docS5PVLD.info,  Node: Other Commands,  Next: Configuration,  Prev: Enabling and Disabling Suffixes,  Up: Usage
+File: docnpIaRm.info,  Node: Other Commands,  Next: Configuration,  Prev: Enabling and Disabling Suffixes,  Up: Usage
 
 2.8 Other Commands
 ==================
@@ -581,7 +581,7 @@ window, and the key bindings are the same as for ‘scroll-up-command’ and
      wrapper around ‘scroll-down-command’ (which see).
 
 
-File: docS5PVLD.info,  Node: Configuration,  Prev: Other Commands,  Up: Usage
+File: docnpIaRm.info,  Node: Configuration,  Prev: Other Commands,  Up: Usage
 
 2.9 Configuration
 =================
@@ -810,7 +810,7 @@ These options are mainly intended for developers.
      same customization.
 
 
-File: docS5PVLD.info,  Node: Modifying Existing Transients,  Next: Defining New Commands,  Prev: Usage,  Up: Top
+File: docnpIaRm.info,  Node: Modifying Existing Transients,  Next: Defining New Commands,  Prev: Usage,  Up: Top
 
 3 Modifying Existing Transients
 *******************************
@@ -900,7 +900,7 @@ functions only ‘transient-get-suffix’ and ‘transient-suffix-put’ may
 signal an error.
 
 
-File: docS5PVLD.info,  Node: Defining New Commands,  Next: Classes and Methods,  Prev: Modifying Existing Transients,  Up: Top
+File: docnpIaRm.info,  Node: Defining New Commands,  Next: Classes and Methods,  Prev: Modifying Existing Transients,  Up: Top
 
 4 Defining New Commands
 ***********************
@@ -914,7 +914,7 @@ File: docS5PVLD.info,  Node: Defining New Commands,  Next: Classes and Methods, 
 * Transient State::
 
 
-File: docS5PVLD.info,  Node: Defining Transients,  Next: Binding Suffix and Infix Commands,  Up: Defining New Commands
+File: docnpIaRm.info,  Node: Defining Transients,  Next: Binding Suffix and Infix Commands,  Up: Defining New Commands
 
 4.1 Defining Transients
 =======================
@@ -969,7 +969,7 @@ that is used to invoke that transient.
      the branch whose variables are being configured.
 
 
-File: docS5PVLD.info,  Node: Binding Suffix and Infix Commands,  Next: Defining Suffix and Infix Commands,  Prev: Defining Transients,  Up: Defining New Commands
+File: docnpIaRm.info,  Node: Binding Suffix and Infix Commands,  Next: Defining Suffix and Infix Commands,  Prev: Defining Transients,  Up: Defining New Commands
 
 4.2 Binding Suffix and Infix Commands
 =====================================
@@ -991,7 +991,7 @@ used in ‘transient-define-prefix’.
 * Suffix Specifications::
 
 
-File: docS5PVLD.info,  Node: Group Specifications,  Next: Suffix Specifications,  Up: Binding Suffix and Infix Commands
+File: docnpIaRm.info,  Node: Group Specifications,  Next: Suffix Specifications,  Up: Binding Suffix and Infix Commands
 
 4.2.1 Group Specifications
 --------------------------
@@ -1092,7 +1092,7 @@ This feature is experimental and should be avoided.
    The form of suffix specifications is documented in the next node.
 
 
-File: docS5PVLD.info,  Node: Suffix Specifications,  Prev: Group Specifications,  Up: Binding Suffix and Infix Commands
+File: docnpIaRm.info,  Node: Suffix Specifications,  Prev: Group Specifications,  Up: Binding Suffix and Infix Commands
 
 4.2.2 Suffix Specifications
 ---------------------------
@@ -1185,7 +1185,7 @@ argument supported by the constructor of that class.  See *note Suffix
 Slots::.
 
 
-File: docS5PVLD.info,  Node: Defining Suffix and Infix Commands,  Next: Using Infix Arguments,  Prev: Binding Suffix and Infix Commands,  Up: Defining New Commands
+File: docnpIaRm.info,  Node: Defining Suffix and Infix Commands,  Next: Using Infix Arguments,  Prev: Binding Suffix and Infix Commands,  Up: Defining New Commands
 
 4.3 Defining Suffix and Infix Commands
 ======================================
@@ -1255,7 +1255,7 @@ Note that an infix is a special kind of suffix.  Depending on context
      ‘transient-define-infix’ instead.
 
 
-File: docS5PVLD.info,  Node: Using Infix Arguments,  Next: Transient State,  Prev: Defining Suffix and Infix Commands,  Up: Defining New Commands
+File: docnpIaRm.info,  Node: Using Infix Arguments,  Next: Transient State,  Prev: Defining Suffix and Infix Commands,  Up: Defining New Commands
 
 4.4 Using Infix Arguments
 =========================
@@ -1316,7 +1316,7 @@ function, which for infix arguments serves about the same purpose as
      returned value is a symbol, the transient prefix command.
 
 
-File: docS5PVLD.info,  Node: Transient State,  Prev: Using Infix Arguments,  Up: Defining New Commands
+File: docnpIaRm.info,  Node: Transient State,  Prev: Using Infix Arguments,  Up: Defining New Commands
 
 4.5 Transient State
 ===================
@@ -1507,7 +1507,7 @@ Special Pre-Commands
      This is used when the user pressed ‘C-z’.
 
 
-File: docS5PVLD.info,  Node: Classes and Methods,  Next: Related Abstractions and Packages,  Prev: Defining New Commands,  Up: Top
+File: docnpIaRm.info,  Node: Classes and Methods,  Next: Related Abstractions and Packages,  Prev: Defining New Commands,  Up: Top
 
 5 Classes and Methods
 *********************
@@ -1561,7 +1561,7 @@ This happens in two ways.
 * Predicate Slots::
 
 
-File: docS5PVLD.info,  Node: Group Classes,  Next: Group Methods,  Up: Classes and Methods
+File: docnpIaRm.info,  Node: Group Classes,  Next: Group Methods,  Up: Classes and Methods
 
 5.1 Group Classes
 =================
@@ -1609,7 +1609,7 @@ beginning of the class specification, e.g., ‘[:class transient-columns
      their elements.
 
 
-File: docS5PVLD.info,  Node: Group Methods,  Next: Prefix Classes,  Prev: Group Classes,  Up: Classes and Methods
+File: docnpIaRm.info,  Node: Group Methods,  Next: Prefix Classes,  Prev: Group Classes,  Up: Classes and Methods
 
 5.2 Group Methods
 =================
@@ -1638,7 +1638,7 @@ File: docS5PVLD.info,  Node: Group Methods,  Next: Prefix Classes,  Prev: Group 
      temporarily make the ‘transient--source-buffer’ the current buffer.
 
 
-File: docS5PVLD.info,  Node: Prefix Classes,  Next: Suffix Classes,  Prev: Group Methods,  Up: Classes and Methods
+File: docnpIaRm.info,  Node: Prefix Classes,  Next: Suffix Classes,  Prev: Group Methods,  Up: Classes and Methods
 
 5.3 Prefix Classes
 ==================
@@ -1663,7 +1663,7 @@ is active, a clone of that object is stored in the variable
 to the active transient’s object should not affect later invocations.
 
 
-File: docS5PVLD.info,  Node: Suffix Classes,  Next: Suffix Methods,  Prev: Prefix Classes,  Up: Classes and Methods
+File: docnpIaRm.info,  Node: Suffix Classes,  Next: Suffix Methods,  Prev: Prefix Classes,  Up: Classes and Methods
 
 5.4 Suffix Classes
 ==================
@@ -1712,7 +1712,7 @@ classes will likely get generalized and added to Transient.  For now
 they are very much subject to change and not documented.
 
 
-File: docS5PVLD.info,  Node: Suffix Methods,  Next: Prefix Slots,  Prev: Suffix Classes,  Up: Classes and Methods
+File: docnpIaRm.info,  Node: Suffix Methods,  Next: Prefix Slots,  Prev: Suffix Classes,  Up: Classes and Methods
 
 5.5 Suffix Methods
 ==================
@@ -1726,7 +1726,7 @@ functions use ‘describe-function’.
 * Suffix Format Methods::
 
 
-File: docS5PVLD.info,  Node: Suffix Value Methods,  Next: Suffix Format Methods,  Up: Suffix Methods
+File: docnpIaRm.info,  Node: Suffix Value Methods,  Next: Suffix Format Methods,  Up: Suffix Methods
 
 5.5.1 Suffix Value Methods
 --------------------------
@@ -1791,7 +1791,7 @@ File: docS5PVLD.info,  Node: Suffix Value Methods,  Next: Suffix Format Methods,
      implementation, which is a noop.
 
 
-File: docS5PVLD.info,  Node: Suffix Format Methods,  Prev: Suffix Value Methods,  Up: Suffix Methods
+File: docnpIaRm.info,  Node: Suffix Format Methods,  Prev: Suffix Value Methods,  Up: Suffix Methods
 
 5.5.2 Suffix Format Methods
 ---------------------------
@@ -1831,7 +1831,7 @@ File: docS5PVLD.info,  Node: Suffix Format Methods,  Prev: Suffix Value Methods,
      the command’s doc string.
 
 
-File: docS5PVLD.info,  Node: Prefix Slots,  Next: Suffix Slots,  Prev: Suffix Methods,  Up: Classes and Methods
+File: docnpIaRm.info,  Node: Prefix Slots,  Next: Suffix Slots,  Prev: Suffix Methods,  Up: Classes and Methods
 
 5.6 Prefix Slots
 ================
@@ -1888,7 +1888,7 @@ set in calls to ‘transient-define-prefix’.
      method you should not have to deal with these slots.
 
 
-File: docS5PVLD.info,  Node: Suffix Slots,  Next: Predicate Slots,  Prev: Prefix Slots,  Up: Classes and Methods
+File: docnpIaRm.info,  Node: Suffix Slots,  Next: Predicate Slots,  Prev: Prefix Slots,  Up: Classes and Methods
 
 5.7 Suffix Slots
 ================
@@ -1975,7 +1975,7 @@ They are defined here anyway to allow sharing certain methods.
      "f2"))’.
 
    • ‘always-read’ For options, whether to read a value on every
-     invocation.  If this is nil, then options that have a value are
+     invocation.  If this is ‘nil’, then options that have a value are
      simply unset and have to be invoked a second time to set a new
      value.
 
@@ -2012,7 +2012,7 @@ Slots of ‘transient-switches’
      E.g., ‘\\(--\\(topo\\|author-date\\|date\\)-order\\)’.
 
 
-File: docS5PVLD.info,  Node: Predicate Slots,  Prev: Suffix Slots,  Up: Classes and Methods
+File: docnpIaRm.info,  Node: Predicate Slots,  Prev: Suffix Slots,  Up: Classes and Methods
 
 5.8 Predicate Slots
 ===================
@@ -2039,7 +2039,7 @@ depending on user preference.  See *note Enabling and Disabling
 Suffixes::.
 
 
-File: docS5PVLD.info,  Node: Related Abstractions and Packages,  Next: FAQ,  Prev: Classes and Methods,  Up: Top
+File: docnpIaRm.info,  Node: Related Abstractions and Packages,  Next: FAQ,  Prev: Classes and Methods,  Up: Top
 
 6 Related Abstractions and Packages
 ***********************************
@@ -2050,7 +2050,7 @@ File: docS5PVLD.info,  Node: Related Abstractions and Packages,  Next: FAQ,  Pre
 * Comparison With Other Packages::
 
 
-File: docS5PVLD.info,  Node: Comparison With Prefix Keys and Prefix Arguments,  Next: Comparison With Other Packages,  Up: Related Abstractions and Packages
+File: docnpIaRm.info,  Node: Comparison With Prefix Keys and Prefix Arguments,  Next: Comparison With Other Packages,  Up: Related Abstractions and Packages
 
 6.1 Comparison With Prefix Keys and Prefix Arguments
 ====================================================
@@ -2246,7 +2246,7 @@ implementation details are of little relevance to users and are covered
 elsewhere.
 
 
-File: docS5PVLD.info,  Node: Comparison With Other Packages,  Prev: Comparison With Prefix Keys and Prefix Arguments,  Up: Related Abstractions and Packages
+File: docnpIaRm.info,  Node: Comparison With Other Packages,  Prev: Comparison With Prefix Keys and Prefix Arguments,  Up: Related Abstractions and Packages
 
 6.2 Comparison With Other Packages
 ==================================
@@ -2343,7 +2343,7 @@ commands are outlined:
      currently exist.
 
 
-File: docS5PVLD.info,  Node: FAQ,  Next: Keystroke Index,  Prev: Related Abstractions and Packages,  Up: Top
+File: docnpIaRm.info,  Node: FAQ,  Next: Keystroke Index,  Prev: Related Abstractions and Packages,  Up: Top
 
 Appendix A FAQ
 **************
@@ -2430,7 +2430,7 @@ have implemented a function, ‘transient-bind-q-to-quit’ that makes the
 necessary changes.  See its doc string for more information.
 
 
-File: docS5PVLD.info,  Node: Keystroke Index,  Next: Command and Function Index,  Prev: FAQ,  Up: Top
+File: docnpIaRm.info,  Node: Keystroke Index,  Next: Command and Function Index,  Prev: FAQ,  Up: Top
 
 Appendix B Keystroke Index
 **************************
@@ -2461,7 +2461,7 @@ Appendix B Keystroke Index
                                                                (line 41)
 
 
-File: docS5PVLD.info,  Node: Command and Function Index,  Next: Variable Index,  Prev: Keystroke Index,  Up: Top
+File: docnpIaRm.info,  Node: Command and Function Index,  Next: Variable Index,  Prev: Keystroke Index,  Up: Top
 
 Appendix C Command and Function Index
 *************************************
@@ -2557,7 +2557,7 @@ Appendix C Command and Function Index
                                                               (line  18)
 
 
-File: docS5PVLD.info,  Node: Variable Index,  Next: Concept Index,  Prev: Command and Function Index,  Up: Top
+File: docnpIaRm.info,  Node: Variable Index,  Next: Concept Index,  Prev: Command and Function Index,  Up: Top
 
 Appendix D Variable Index
 *************************
@@ -2596,7 +2596,7 @@ Appendix D Variable Index
 * transient-values-file:                 Saving Values.       (line  31)
 
 
-File: docS5PVLD.info,  Node: Concept Index,  Next: GNU General Public License,  Prev: Variable Index,  Up: Top
+File: docnpIaRm.info,  Node: Concept Index,  Next: GNU General Public License,  Prev: Variable Index,  Up: Top
 
 Appendix E Concept Index
 ************************
@@ -2641,7 +2641,7 @@ Appendix E Concept Index
 * value history:                         Using History.        (line  6)
 
 
-File: docS5PVLD.info,  Node: GNU General Public License,  Prev: Concept Index,  Up: Top
+File: docnpIaRm.info,  Node: GNU General Public License,  Prev: Concept Index,  Up: Top
 
 Appendix F GNU General Public License
 *************************************
@@ -3402,27 +3402,27 @@ Ref: Internal Prefix Slots80028
 Node: Suffix Slots81285
 Ref: Slots of transient-suffix81653
 Ref: Slots of transient-infix82507
-Ref: Slots of transient-variable85627
-Ref: Slots of transient-switches85729
-Node: Predicate Slots86092
-Node: Related Abstractions and Packages87357
-Node: Comparison With Prefix Keys and Prefix Arguments87644
-Ref: Regular Prefix Commands88329
-Ref: Regular Prefix Arguments88677
-Ref: Transients89646
-Node: Comparison With Other Packages97917
-Ref: Magit-Popup98148
-Ref: Hydra99055
-Node: FAQ102111
-Ref: Can I control how the popup buffer is displayed?102254
-Ref: How can I copy text from the popup buffer?102435
-Ref: Why did some of the key bindings change?102907
-Ref: Why does q not quit popups anymore?105260
-Node: Keystroke Index106353
-Node: Command and Function Index108071
-Node: Variable Index114443
-Node: Concept Index116716
-Node: GNU General Public License119460
+Ref: Slots of transient-variable85633
+Ref: Slots of transient-switches85735
+Node: Predicate Slots86098
+Node: Related Abstractions and Packages87363
+Node: Comparison With Prefix Keys and Prefix Arguments87650
+Ref: Regular Prefix Commands88335
+Ref: Regular Prefix Arguments88683
+Ref: Transients89652
+Node: Comparison With Other Packages97923
+Ref: Magit-Popup98154
+Ref: Hydra99061
+Node: FAQ102117
+Ref: Can I control how the popup buffer is displayed?102260
+Ref: How can I copy text from the popup buffer?102441
+Ref: Why did some of the key bindings change?102913
+Ref: Why does q not quit popups anymore?105266
+Node: Keystroke Index106359
+Node: Command and Function Index108077
+Node: Variable Index114449
+Node: Concept Index116722
+Node: GNU General Public License119466
 
 End Tag Table
 
