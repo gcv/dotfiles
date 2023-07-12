@@ -4,11 +4,9 @@
 
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;; Keywords: processes, tools
-;; Package-Commit: 1954e8c0b5c8440ea9852eeb7c046a677fa544f6
 ;; Homepage: https://github.com/purcell/envrc
 ;; Package-Requires: ((seq "2") (emacs "25.1") (inheritenv "0.1"))
-;; Package-Version: 20230105.719
-;; Package-X-Original-Version: 0
+;; Package-Version: 0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -258,7 +256,7 @@ variable names and values."
                 (message "Direnv failed in %s" env-dir)
                 (setq result 'error))
               (envrc--at-end-of-special-buffer "*envrc*"
-                (insert "==== " (format-time-string "%Y-%m-%d %H:%M:%S") " ==== " env-dir " ====\n\n")
+                (insert "──── " (format-time-string "%Y-%m-%d %H:%M:%S") " ──── " env-dir " ────\n\n")
                 (let ((initial-pos (point)))
                   (insert-file-contents (let (ansi-color-context)
                                           (ansi-color-apply stderr-file)))
@@ -358,7 +356,12 @@ ARGS is as for `call-process'."
   "Reload the current env."
   (interactive)
   (envrc--with-required-current-env env-dir
-    (envrc--update-env env-dir)))
+    (let* ((default-directory env-dir)
+           (exit-code (envrc--call-process-with-global-env envrc-direnv-executable nil (get-buffer-create "*envrc-allow*") nil "reload")))
+      (if (zerop exit-code)
+          (envrc--update-env env-dir)
+        (display-buffer "*envrc-reload*")
+        (user-error "Error running direnv reload")))))
 
 (defun envrc-allow ()
   "Run \"direnv allow\" in the current env."
@@ -426,6 +429,7 @@ in a temp buffer.  ARGS is as for ORIG."
   sh-mode "envrc"
   "Major mode for .envrc files as used by direnv.
 \\{envrc-file-mode-map}"
+  (sh-set-shell "bash")
   (font-lock-add-keywords
    nil `((,(regexp-opt envrc-file-extra-keywords 'symbols)
           (0 font-lock-keyword-face)))))
@@ -440,5 +444,6 @@ in a temp buffer.  ARGS is as for ORIG."
 ;; LocalWords:  envrc direnv
 
 ;; Local Variables:
+;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
