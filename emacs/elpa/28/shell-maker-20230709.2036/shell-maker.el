@@ -4,9 +4,7 @@
 
 ;; Author: Alvaro Ramirez https://xenodium.com
 ;; URL: https://github.com/xenodium/chatgpt-shell
-;; Package-Version: 20230524.2217
-;; Package-Commit: f565873184f55a835e7d8626b3842ecc4b9d4226
-;; Version: 0.25.1
+;; Version: 0.42.1
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This package is free software; you can redistribute it and/or modify
@@ -68,14 +66,33 @@ Enable it for troubleshooting issues."
   :type 'boolean
   :group 'shell-maker)
 
+(defcustom shell-maker-transcript-default-path nil
+  "Default path to save transcripts to."
+  :type 'directory
+  :group 'shell-maker)
+
+(defcustom shell-maker-transcript-default-filename
+  (lambda ()
+    "transcript.txt")
+  "Default file name to save transcripts to.
+
+As a function, so it can also logic to generate a name.
+
+For example:
+
+\(lambda ()
+    (format-time-string \"%Y-%m-%d-%H:%M:%S-transcript.txt\"))"
+  :type 'function
+  :group 'shell-maker)
+
 (defcustom shell-maker-history-path user-emacs-directory
   "Root path to the location for storing history files."
   :type 'directory
   :group 'shell-maker)
 
-(defvar shell-maker--input nil)
+(defvar-local shell-maker--input nil)
 
-(defvar shell-maker--current-request-id 0)
+(defvar-local shell-maker--current-request-id 0)
 
 (defvar shell-maker--show-invisible-markers nil)
 
@@ -95,55 +112,138 @@ Enable it for troubleshooting issues."
 
 (defvar-local shell-maker--busy nil)
 
-(defvar-local shell-maker-config nil)
+(defvar-local shell-maker--config nil)
 
 (defvar-local shell-maker--file nil)
 
 (defvar-local shell-maker--request-process nil)
 
-(defvaralias 'shell-maker-mode-map 'shell-maker-map)
+(defvar-local shell-maker--buffer-name-override nil)
 
-(defvar shell-maker-map
-  (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
-    (define-key map [remap comint-send-input] 'shell-maker-return)
-    (define-key map [remap comint-interrupt-subjob] 'shell-maker-interrupt)
-    (define-key map (kbd "C-x C-s") 'shell-maker-save-session-transcript)
-    (define-key map (kbd "C-M-h") 'shell-maker-mark-output)
-    (define-key map [remap comint-history-isearch-backward-regexp] 'shell-maker-search-history)
-    map)
-  "Keymap for `shell-maker' shells.")
+(defmacro shell-maker--with-buffer-if (wrap buffer &rest body)
+  "If WRAP, wrap BODY `with-current-buffer' BUFFER."
+  `(if ,wrap
+       (with-current-buffer ,buffer ,@body)
+     ,@body))
 
-(declare-function shell-maker-mode "shell-maker" ())
+(defmacro shell-maker--with-temp-buffer-if (wrap &rest body)
+  "If WRAP, wrap BODY `with-temp-buffer'."
+  (declare (indent 1) (debug t))
+  `(if ,wrap
+       (with-temp-buffer ,@body)
+     ,@body))
 
-(defun shell-maker-start (config &optional no-focus)
+(defun shell-maker-start (config &optional no-focus welcome-function new-session buffer-name)
   "Start a shell with CONFIG.
 
-Specify NO-FOCUS if started shell should not be focused."
-  (define-derived-mode shell-maker-mode comint-mode
-    (shell-maker-config-name config)
-    "Major mode for interactively evaluating shell-maker prompts.
-Uses the interface provided by `comint-mode'"
-    nil)
+Specify NO-FOCUS if started shell should not be focused.
 
-  (make-local-variable 'shell-maker-map)
+Set WELCOME-FUNCTION to create and show a welcome message.
 
-  (let ((old-point)
-        (buf-name (shell-maker-buffer-name config)))
-    (unless (comint-check-proc buf-name)
-      (with-current-buffer (get-buffer-create buf-name)
-        (setq-local shell-maker--busy nil)
-        (unless (zerop (buffer-size))
-          (setq old-point (point)))
-        (shell-maker-mode)
-        (shell-maker--initialize config)))
-    (unless no-focus
-      (funcall shell-maker-display-function buf-name))
-    (when old-point
-      (push-mark old-point))))
+Set NEW-SESSION to start a new session.
+
+Set BUFFER-NAME to override the buffer name."
+  (shell-maker--with-temp-buffer-if new-session ;; Avoid picking up buffer-local vars from current buffer
+    (let* ((old-point)
+           (namespace (downcase (shell-maker-config-name config)))
+           (welcome-message))
+      (unless buffer-name
+        (setq buffer-name (shell-maker-buffer-default-name
+                           (shell-maker-config-name config))))
+      (when new-session
+        (setq buffer-name (generate-new-buffer-name buffer-name)))
+      ;; Alias with concrete shell symbols.
+      (fset (intern (concat namespace "-shell-previous-input")) #'comint-previous-input)
+      (fset (intern (concat namespace "-shell-next-input")) #'comint-next-input)
+      (fset (intern (concat namespace "-shell-submit")) #'shell-maker-submit)
+      (fset (intern (concat namespace "-shell-save-session-transcript"))
+            #'shell-maker-save-session-transcript)
+      (fset (intern (concat namespace "-shell-search-history")) #'shell-maker-search-history)
+      (fset (intern (concat namespace "-shell-newline")) #'newline)
+      (fset (intern (concat namespace "-shell-rename-buffer")) #'shell-maker-rename-buffer)
+      (eval
+       (macroexpand
+        `(define-derived-mode ,(shell-maker-major-mode config) comint-mode
+           ,(shell-maker-config-name config)
+           ,(format "Major mode for %s shell." (shell-maker-config-name config))
+           (define-key ,(shell-maker-major-mode-map config)
+             [remap comint-send-input] 'shell-maker-submit)
+           (define-key ,(shell-maker-major-mode-map config)
+             (kbd "S-<return>") #'newline)
+           (define-key ,(shell-maker-major-mode-map config)
+             [remap comint-interrupt-subjob] 'shell-maker-interrupt)
+           (define-key ,(shell-maker-major-mode-map config)
+             (kbd "C-x C-s") 'shell-maker-save-session-transcript)
+           (define-key ,(shell-maker-major-mode-map config)
+             (kbd "C-M-h") 'shell-maker-mark-output)
+           (define-key ,(shell-maker-major-mode-map config)
+             [remap comint-history-isearch-backward-regexp] 'shell-maker-search-history))))
+
+      (unless (comint-check-proc buffer-name)
+        (with-current-buffer (get-buffer-create buffer-name)
+          (funcall (shell-maker-major-mode config))
+          (setq-local shell-maker--busy nil)
+          (unless (equal (shell-maker-buffer-name config)
+                         buffer-name)
+            (setq-local shell-maker--buffer-name-override buffer-name))
+          (unless (zerop (buffer-size))
+            (setq old-point (point)))
+          (when welcome-function
+            (setq welcome-message
+                  (funcall welcome-function config)))
+          (when welcome-message
+            (insert welcome-message)
+            (insert (propertize "\n<shell-maker-failed-command>\n"
+                                'invisible (not shell-maker--show-invisible-markers))))
+          (shell-maker--initialize config)))
+      (unless no-focus
+        (funcall shell-maker-display-function buffer-name))
+      (when old-point
+        (push-mark old-point))
+      (get-buffer buffer-name))))
+
+(defun shell-maker-define-major-mode (config)
+  "Define the major mode for the shell using CONFIG."
+  (eval
+   (macroexpand
+    `(define-derived-mode ,(shell-maker-major-mode config) comint-mode
+       ,(shell-maker-config-name config)
+       ,(format "Major mode for %s shell." (shell-maker-config-name config))
+       (define-key ,(shell-maker-major-mode-map config)
+         [remap comint-send-input] 'shell-maker-submit)
+       (define-key ,(shell-maker-major-mode-map config)
+         (kbd "S-<return>") #'newline)
+       (define-key ,(shell-maker-major-mode-map config)
+         [remap comint-interrupt-subjob] 'shell-maker-interrupt)
+       (define-key ,(shell-maker-major-mode-map config)
+         (kbd "C-x C-s") 'shell-maker-save-session-transcript)
+       (define-key ,(shell-maker-major-mode-map config)
+         (kbd "C-M-h") 'shell-maker-mark-output)
+       (define-key ,(shell-maker-major-mode-map config)
+         [remap comint-history-isearch-backward-regexp] 'shell-maker-search-history)))))
+
+(defun shell-maker-welcome-message (config)
+  "Return a welcome message to be printed using CONFIG."
+  (format
+   "Welcome to %s shell\n\n  Type %s and press %s for details.\n\n  Like this package? Consider ✨%s✨\n\n"
+   (propertize (shell-maker-config-name config)
+               'font-lock-face 'font-lock-comment-face)
+   (propertize "help" 'font-lock-face 'italic)
+   (shell-maker--propertize-key-binding "-shell-submit" config)
+   (shell-maker-make-button-text "sponsoring"
+                                 (lambda ()
+                                   (browse-url "https://github.com/sponsors/xenodium")
+                                   (message "Thank you!")))))
+
+(defun shell-maker-local-config ()
+  "Return the shell buffer local config."
+  shell-maker--config)
 
 (defun shell-maker--initialize (config)
   "Initialize shell using CONFIG."
-  (setq-local shell-maker-config config)
+  (unless (eq major-mode (shell-maker-major-mode config))
+    (user-error "Not in a shell"))
+  (setq-local shell-maker--config (copy-sequence config))
   (visual-line-mode +1)
   (goto-address-mode +1)
   ;; Prevents fontifying streamed response as prompt.
@@ -157,16 +257,16 @@ Uses the interface provided by `comint-mode'"
   (setq comint-get-old-input 'shell-maker--get-old-input)
   (setq-local comint-completion-addsuffix nil)
   (setq-local imenu-generic-expression
-              `((nil ,(concat (shell-maker-prompt-regexp shell-maker-config) "\\(.*\\)") 1)))
+              `((nil ,(concat (shell-maker-prompt-regexp config) "\\(.*\\)") 1)))
   (shell-maker--read-input-ring-history config)
-  (unless (or (comint-check-proc (shell-maker-buffer shell-maker-config))
-              (get-buffer-process (shell-maker-buffer shell-maker-config)))
+  (unless (or (comint-check-proc (shell-maker-buffer config))
+              (get-buffer-process (shell-maker-buffer config)))
     (condition-case nil
-        (start-process (shell-maker-process-name shell-maker-config)
-                       (shell-maker-buffer shell-maker-config) "hexl")
+        (start-process (shell-maker-process-name config)
+                       (shell-maker-buffer config) "hexl")
       (file-error (start-process
-                   (shell-maker-process-name shell-maker-config)
-                   (shell-maker-buffer shell-maker-config) "cat")))
+                   (shell-maker-process-name config)
+                   (shell-maker-buffer config) "cat")))
     (set-process-query-on-exit-flag (shell-maker--process) nil)
     (goto-char (point-max))
     (setq-local comint-inhibit-carriage-motion t)
@@ -178,10 +278,10 @@ Uses the interface provided by `comint-mode'"
          (point-min) (point-max)
          '(rear-nonsticky t field output inhibit-line-move-field-capture t))))
     (shell-maker--output-filter (shell-maker--process)
-                                (shell-maker-prompt shell-maker-config))
+                                (shell-maker-prompt config))
     (set-marker comint-last-input-start (shell-maker--pm))
     (set-process-filter (get-buffer-process
-                         (shell-maker-buffer shell-maker-config))
+                         (shell-maker-buffer config))
                         'shell-maker--output-filter)))
 
 (defun shell-maker--write-reply (reply &optional failed)
@@ -195,19 +295,19 @@ Uses the interface provided by `comint-mode'"
                                         (propertize "\n<shell-maker-failed-command>\n"
                                                     'invisible (not shell-maker--show-invisible-markers))
                                       "")
-                                    (shell-maker-prompt shell-maker-config))))))
+                                    (shell-maker-prompt shell-maker--config))))))
 
-(defun shell-maker-return ()
-  "RET binding."
+(defun shell-maker-submit ()
+  "Submit current input."
   (interactive)
-  (unless (eq major-mode 'shell-maker-mode)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
   (shell-maker--send-input))
 
 (defun shell-maker-search-history ()
-  "Search comint input ring."
+  "Search previous input history."
   (interactive)
-  (unless (eq major-mode 'shell-maker-mode)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
   (let ((candidate (completing-read
                     "History: "
@@ -250,7 +350,7 @@ Uses the interface provided by `comint-mode'"
 
 (defun shell-maker--output-at-point ()
   "Output at point range with cons of start and end."
-  (unless (eq major-mode 'shell-maker-mode)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
   (let ((current-pos (point))
         (revert-pos)
@@ -270,7 +370,7 @@ Uses the interface provided by `comint-mode'"
             (forward-char (length "<shell-maker-end-of-prompt>"))
             t)
            ((re-search-backward
-             (shell-maker-prompt-regexp shell-maker-config) nil t)
+             (shell-maker-prompt-regexp shell-maker--config) nil t)
             (if (re-search-forward "<shell-maker-end-of-prompt>" nil t)
                 t
               (end-of-line))
@@ -281,7 +381,7 @@ Uses the interface provided by `comint-mode'"
       (setq start (point)))
     (save-excursion
       (unless (re-search-forward
-               (shell-maker-prompt-regexp shell-maker-config)  nil t)
+               (shell-maker-prompt-regexp shell-maker--config)  nil t)
         (goto-char current-pos)
         (setq revert-pos t))
       (beginning-of-line)
@@ -299,7 +399,7 @@ Uses the interface provided by `comint-mode'"
      begin
      (save-excursion
        (goto-char (shell-maker--prompt-end-position))
-       (re-search-forward (shell-maker-prompt-regexp shell-maker-config) nil t)
+       (re-search-forward (shell-maker-prompt-regexp shell-maker--config) nil t)
        (if (= begin (shell-maker--prompt-begin-position))
            (point-max)
          (shell-maker--prompt-begin-position))))))
@@ -315,7 +415,7 @@ Uses the interface provided by `comint-mode'"
   "If at latest prompt, mark last output.
 Otherwise mark current output at location."
   (interactive)
-  (unless (eq major-mode 'shell-maker-mode)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
   (let ((current-pos (point))
         (revert-pos)
@@ -338,7 +438,7 @@ Otherwise mark current output at location."
               (forward-char (length "<shell-maker-end-of-prompt>"))
               t)
              ((re-search-backward
-               (shell-maker-prompt-regexp shell-maker-config) nil t)
+               (shell-maker-prompt-regexp shell-maker--config) nil t)
               (if (re-search-forward "<shell-maker-end-of-prompt>" nil t)
                   t
                 (end-of-line))
@@ -380,7 +480,7 @@ Otherwise mark current output at location."
   "If at latest prompt, save last output.
 Otherwise save current output at location."
   (interactive)
-  (unless (eq major-mode 'shell-maker-mode)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
   (let ((orig-point (point))
         (orig-region-active (region-active-p))
@@ -404,9 +504,9 @@ Otherwise save current output at location."
 
 With prefix TREAT-AS-FAILURE, mark as failed."
   (interactive "P")
-  (unless (eq major-mode 'shell-maker-mode)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
-  (with-current-buffer (shell-maker-buffer shell-maker-config)
+  (with-current-buffer (shell-maker-buffer shell-maker--config)
     ;; Increment id, so in-flight request is ignored.
     (shell-maker--increment-request-id)
     (goto-char (point-max))
@@ -420,11 +520,11 @@ With prefix TREAT-AS-FAILURE, mark as failed."
     ;; ignore it. However, when not busy, generate a new prompt.
     (if shell-maker--busy
         (message "%s: interrupted!"
-                 (shell-maker-config-name shell-maker-config))
+                 (shell-maker-config-name shell-maker--config))
       (comint-send-input)
       (shell-maker--output-filter
        (shell-maker--process)
-       (concat "\n" (shell-maker-prompt shell-maker-config))))
+       (concat "\n" (shell-maker-prompt shell-maker--config))))
     (setq shell-maker--busy nil)))
 
 (defun shell-maker--eval-input (input-string &optional on-output no-announcement)
@@ -441,7 +541,7 @@ For example:
    (message \"Is finished: %s\" finished))
 
 NO-ANNOUNCEMENT skips announcing response when in background."
-  (let ((buffer (shell-maker-buffer shell-maker-config))
+  (let ((buffer (shell-maker-buffer shell-maker--config))
         (prefix-newline "")
         (suffix-newline "\n\n")
         (response-count 0)
@@ -449,26 +549,32 @@ NO-ANNOUNCEMENT skips announcing response when in background."
     (unless shell-maker--busy
       (setq shell-maker--busy t)
       (cond
+       ((string-equal "help" (string-trim input-string))
+        (shell-maker--print-help)
+        (setq shell-maker--busy nil))
        ((string-equal "clear" (string-trim input-string))
         (call-interactively #'comint-clear-buffer)
-        (shell-maker--output-filter (shell-maker--process) (shell-maker-prompt shell-maker-config))
+        (shell-maker--output-filter (shell-maker--process) (shell-maker-prompt shell-maker--config))
+        (setq shell-maker--busy nil))
+       ((string-equal "config" (string-trim input-string))
+        (shell-maker--write-reply (shell-maker--dump-config shell-maker--config))
         (setq shell-maker--busy nil))
        ((not (shell-maker--curl-version-supported))
         (shell-maker--write-reply "\nYou need curl version 7.76 or newer.\n\n")
         (setq shell-maker--busy nil))
        ((and (shell-maker-config-validate-command
-              shell-maker-config)
+              shell-maker--config)
              (funcall (shell-maker-config-validate-command
-                       shell-maker-config) input-string))
+                       shell-maker--config) input-string))
         (shell-maker--write-reply
          (concat "\n"
                  (funcall (shell-maker-config-validate-command
-                           shell-maker-config) input-string)
+                           shell-maker--config) input-string)
                  "\n\n"))
         (setq shell-maker--busy nil))
        ((string-empty-p (string-trim input-string))
         (shell-maker--output-filter (shell-maker--process)
-                                    (concat "\n" (shell-maker-prompt shell-maker-config)))
+                                    (concat "\n" (shell-maker-prompt shell-maker--config)))
         (setq shell-maker--busy nil))
        (t
         ;; For viewing prompt delimiter (used to handle multiline prompts).
@@ -476,12 +582,12 @@ NO-ANNOUNCEMENT skips announcing response when in background."
         (shell-maker--output-filter (shell-maker--process)
                                     (propertize "<shell-maker-end-of-prompt>"
                                                 'invisible (not shell-maker--show-invisible-markers)))
-        (funcall (shell-maker-config-execute-command shell-maker-config)
+        (funcall (shell-maker-config-execute-command shell-maker--config)
                  input-string
                  (shell-maker--extract-history
                   (with-current-buffer buffer
                     (buffer-string))
-                  (shell-maker-prompt-regexp shell-maker-config))
+                  (shell-maker-prompt-regexp shell-maker--config))
                  (lambda (response partial)
                    (setq response-count (1+ response-count))
                    (setq prefix-newline (if (> response-count 1)
@@ -500,12 +606,12 @@ NO-ANNOUNCEMENT skips announcing response when in background."
                            (shell-maker--announce-response buffer))
                          (setq shell-maker--busy nil)
                          (shell-maker--write-input-ring-history)
-                         (when (shell-maker-config-on-command-finished shell-maker-config)
+                         (when (shell-maker-config-on-command-finished shell-maker--config)
                            ;; FIXME use (concat prefix-newline response suffix-newline) if not streaming.
                            (when on-output
                              (funcall on-output
                                       input-string response nil t))
-                           (funcall (shell-maker-config-on-command-finished shell-maker-config)
+                           (funcall (shell-maker-config-on-command-finished shell-maker--config)
                                     input-string
                                     (shell-maker-last-output))
                            (goto-char (point-max))))
@@ -526,8 +632,8 @@ NO-ANNOUNCEMENT skips announcing response when in background."
                    (when on-output
                      (funcall on-output
                               input-string error t t))
-                   (when (shell-maker-config-on-command-finished shell-maker-config)
-                     (funcall (shell-maker-config-on-command-finished shell-maker-config)
+                   (when (shell-maker-config-on-command-finished shell-maker--config)
+                     (funcall (shell-maker-config-on-command-finished shell-maker--config)
                               input-string
                               error)
                      (goto-char (point-max))))))))))
@@ -546,13 +652,15 @@ NO-ANNOUNCEMENT skips announcing response when in background."
   "Run shell COMMAND asynchronously.
 Set STREAMING to enable it.  Calls RESPONSE-EXTRACTOR to extract the
 response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
-  (let* ((buffer (shell-maker-buffer shell-maker-config))
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
+    (user-error "Not in a shell"))
+  (let* ((buffer (shell-maker-buffer shell-maker--config))
          (request-id (shell-maker--increment-request-id))
          (output-buffer (generate-new-buffer " *temp*"))
-         (config shell-maker-config)
+         (config shell-maker--config)
          (request-process (condition-case err
                               (apply #'start-process (append (list
-                                                              (shell-maker-buffer-name shell-maker-config)
+                                                              (shell-maker-buffer-name shell-maker--config)
                                                               (buffer-name output-buffer))
                                                              command))
                             (error
@@ -571,7 +679,8 @@ response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
         (set-process-filter
          request-process
          (lambda (_process output)
-           (when (and (eq request-id shell-maker--current-request-id)
+           (when (and (eq request-id (with-current-buffer buffer
+                                      (shell-maker--current-request-id)))
                       (buffer-live-p buffer))
              (shell-maker--write-output-to-log-buffer
               (format "// Filter output\n\n%s\n\n" output) config)
@@ -594,7 +703,8 @@ response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
       (set-process-sentinel
        request-process
        (lambda (process _event)
-         (let ((active (and (eq request-id shell-maker--current-request-id)
+         (let ((active (and (eq request-id (with-current-buffer buffer
+                                               (shell-maker--current-request-id)))
                             (buffer-live-p buffer)))
                (output (with-current-buffer (process-buffer process)
                          (buffer-string)))
@@ -636,21 +746,27 @@ response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
     json-object))
 
 (defun shell-maker--increment-request-id ()
-  "Increment `shell-maker--current-request-id'."
+  "Increment variable `shell-maker--current-request-id'."
   (if (= shell-maker--current-request-id most-positive-fixnum)
       (setq shell-maker--current-request-id 0)
     (setq shell-maker--current-request-id (1+ shell-maker--current-request-id))))
+
+(defun shell-maker--current-request-id ()
+  "Access variable `shell-maker--current-request-id' with right mode ensured."
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
+    (error "Not in a shell"))
+  shell-maker--current-request-id)
 
 (defun shell-maker--set-pm (pos)
   "Set the process mark in the current buffer to POS."
   (set-marker (process-mark
                (get-buffer-process
-                (shell-maker-buffer shell-maker-config))) pos))
+                (shell-maker-buffer shell-maker--config))) pos))
 
 (defun shell-maker--pm nil
   "Return the process mark of the current buffer."
   (process-mark (get-buffer-process
-                 (shell-maker-buffer shell-maker-config))))
+                 (shell-maker-buffer shell-maker--config))))
 
 (defun shell-maker--input-sender (_proc input)
   "Set the variable `shell-maker--input' to INPUT.
@@ -741,13 +857,15 @@ NO-ANNOUNCEMENT skips announcing response when in background."
       (shell-maker-narrow-to-prompt)
       (let ((items (shell-maker--extract-history
                     (buffer-string)
-                    (shell-maker-prompt shell-maker-config))))
+                    (shell-maker-prompt shell-maker--config))))
         (cl-assert (or (seq-empty-p items)
                        (eq (length items) 1)))
         items))))
 
 (defun shell-maker--write-output-to-log-buffer (output config)
   "Write OUTPUT to log buffer using CONFIG."
+  (unless output
+    (setq output "<nil>"))
   (when (and shell-maker-logging config)
     (when (shell-maker-config-redact-log-output config)
       (setq output
@@ -762,14 +880,14 @@ NO-ANNOUNCEMENT skips announcing response when in background."
 
 (defun shell-maker--process nil
   "Get shell buffer process."
-  (get-buffer-process (shell-maker-buffer shell-maker-config)))
+  (get-buffer-process (shell-maker-buffer shell-maker--config)))
 
 (defun shell-maker-save-session-transcript ()
   "Save shell transcript to file.
 
 Very much EXPERIMENTAL."
   (interactive)
-  (unless (eq major-mode 'shell-maker-mode)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
   (if shell-maker--file
       (let ((content (buffer-string))
@@ -778,7 +896,9 @@ Very much EXPERIMENTAL."
           (insert content)
           (write-file path nil)))
     (when-let ((path (read-file-name "Write file: "
-                                     nil nil nil "transcript.txt"))
+				     (when shell-maker-transcript-default-path
+                                       (file-name-as-directory shell-maker-transcript-default-path))
+				     nil nil (funcall shell-maker-transcript-default-filename)))
                (content (buffer-string)))
       (with-temp-buffer
         (insert content)
@@ -876,9 +996,23 @@ Uses PROCESS and STRING same as `comint-output-filter'."
 
 (defun shell-maker-buffer-name (config)
   "Get buffer name from CONFIG."
-  (concat "*"
-          (downcase (shell-maker-config-name config))
-          "*"))
+  (if shell-maker--buffer-name-override
+      shell-maker--buffer-name-override
+    (shell-maker-buffer-default-name (shell-maker-config-name config))))
+
+(defun shell-maker-buffer-default-name (name)
+  "Make default buffer name from NAME."
+  (concat "*" (downcase name) "*"))
+
+(defun shell-maker-major-mode (config)
+  "Get major mode from CONFIG."
+  (unless config
+    (error "No shell-maker config available"))
+  (intern (concat (downcase (shell-maker-config-name config)) "-shell-mode")))
+
+(defun shell-maker-major-mode-map (config)
+  "Get major mode map from CONFIG."
+  (intern (concat (downcase (shell-maker-config-name config)) "-shell-mode-map")))
 
 (defun shell-maker-process-name (config)
   "Get process name from CONFIG."
@@ -897,14 +1031,34 @@ Uses PROCESS and STRING same as `comint-output-filter'."
       (shell-maker-config-prompt config)
     (concat (shell-maker-config-name config) "> ")))
 
+(defun shell-maker-rename-buffer ()
+  "Rename current shell buffer."
+  (interactive)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
+    (user-error "Not in a shell"))
+  (let ((new-name (string-trim
+                   (read-string "Rename buffer: " (buffer-name (current-buffer))))))
+    (shell-maker-set-buffer-name (current-buffer) new-name)))
+
+(defun shell-maker-set-buffer-name (buffer new-name)
+  "Set the BUFFER NEW-NAME."
+  (with-current-buffer buffer
+    (when (string-empty-p new-name)
+      (user-error "Name shouldn't be empty"))
+    (rename-buffer new-name t)
+    (setq shell-maker--buffer-name-override (buffer-name (current-buffer)))))
+
 (defun shell-maker-set-prompt (prompt prompt-regexp)
   "Set internal config's PROMPT and PROMPT-REGEXP."
-  (unless (eq major-mode 'shell-maker-mode)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
-  (setf (shell-maker-config-prompt shell-maker-config)
-        prompt)
-  (setf (shell-maker-config-prompt-regexp shell-maker-config)
-        prompt-regexp)
+  ;; Make a copy so pointed config isn't modified.
+  (let ((config (copy-sequence shell-maker--config)))
+    (setf (shell-maker-config-prompt config)
+          prompt)
+    (setf (shell-maker-config-prompt-regexp config)
+          prompt-regexp)
+    (setq shell-maker--config config))
   ;; Prevents fontifying streamed response as prompt.
   (setq comint-prompt-regexp prompt-regexp)
   (setq-local imenu-generic-expression
@@ -915,6 +1069,190 @@ Uses PROCESS and STRING same as `comint-output-filter'."
   (if (shell-maker-config-prompt-regexp config)
       (shell-maker-config-prompt-regexp config)
     (concat "^" (shell-maker-prompt config))))
+
+(defun shell-maker--print-help ()
+  "Print help."
+  (shell-maker-echo
+   (let ((rows))
+     (mapatoms
+      (lambda (symbol)
+        (when (and (string-match (concat "^" (downcase (shell-maker-config-name
+                                                        shell-maker--config)) "-shell")
+                                 (symbol-name symbol))
+                   (commandp symbol))
+          (push `(,(string-join
+                    (seq-filter
+                     (lambda (item)
+                       (not (string-match "menu" item)))
+                     (mapcar
+                      (lambda (keys)
+                        (propertize (key-description keys)
+                                    'font-lock-face 'font-lock-string-face))
+                      (or
+                       (where-is-internal
+                        (symbol-function symbol)
+                        comint-mode-map
+                        nil nil (command-remapping 'comint-next-input))
+                       (where-is-internal
+                        (symbol-function symbol)
+                        (symbol-value
+                         (shell-maker-major-mode-map shell-maker--config))
+                        nil nil (command-remapping symbol))
+                       (where-is-internal
+                        symbol (symbol-value
+                                (shell-maker-major-mode-map shell-maker--config))
+                        nil nil (command-remapping symbol))))) " or ")
+                  ,(propertize
+                    (symbol-name symbol)
+                    'font-lock-face 'font-lock-doc-face)
+                  ,(car
+                    (split-string
+                     (or (documentation symbol t) "")
+                     "\n")))
+                rows))))
+     (shell-maker--indent-text
+      2
+      (format "
+Type your input and press %s to submit.
+
+Type %s and press %s to clear all content.
+
+%s shell is based on %s. Check out the current %s for all enabled features.
+
+%s"
+              (shell-maker--propertize-key-binding "-shell-submit" shell-maker--config)
+              (propertize "clear" 'font-lock-face 'italic)
+              (shell-maker--propertize-key-binding "-shell-submit" shell-maker--config)
+              (propertize (shell-maker-config-name shell-maker--config)
+                          'font-lock-face 'font-lock-comment-face)
+              (shell-maker--actionable-text "comint-mode"
+                                            (lambda ()
+                                              (describe-function 'comint-mode)))
+              (shell-maker--actionable-text "major mode"
+                                            (lambda ()
+                                              (describe-mode)))
+              (shell-maker--align-docs
+               ;; Commands with keybinding listed first.
+               (sort rows
+                     (lambda (a b)
+                       (cond
+                        ((and (string-empty-p (nth 0 a))
+                              (string-empty-p (nth 0 b)))
+                         nil)
+                        ((string= (nth 0 a) "") nil)
+                        ((string= (nth 0 b) "") t)
+                        (t (string> (nth 0 a) (nth 0 b)))))) 3))))))
+
+(defun shell-maker-echo (text &optional keep-in-history)
+  "Echo TEXT to shell.
+
+If KEEP-IN-HISTORY, don't mark to ignore it."
+  (interactive "P")
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
+    (user-error "Not in a shell"))
+  (with-current-buffer (shell-maker-buffer shell-maker--config)
+    (goto-char (point-max))
+    (shell-maker--output-filter (shell-maker--process)
+                                (concat
+                                 text
+                                 (if keep-in-history
+                                     ""
+                                   (propertize "\n<shell-maker-failed-command>\n"
+                                               'invisible (not shell-maker--show-invisible-markers)))))
+    (comint-send-input)
+    (shell-maker--output-filter
+     (shell-maker--process)
+     (concat "\n" (shell-maker-prompt shell-maker--config)))))
+
+(defun shell-maker--align-docs (rows space-count)
+  "Align columns in ROWS using SPACE-COUNT."
+  (let ((first-col-width (apply #'max
+                                (mapcar (lambda (x)
+                                          (length (nth 0 x)))
+                                        rows)))
+        (space-str (make-string space-count ?\s)))
+    (mapconcat (lambda (row)
+                 (format (concat "%-" (number-to-string first-col-width)
+                                 "s" space-str "%s\n%" (number-to-string first-col-width)
+                                 "s" space-str "%s")
+                         (nth 0 row) (nth 1 row) "" (nth 2 row)))
+               rows "\n\n")))
+
+(defun shell-maker-align-columns (rows)
+  "Align columns in ROWS."
+  (let* ((columns (length (car rows)))
+         (max-widths (cl-mapcar (lambda (column)
+                                  (apply 'max
+                                         (mapcar (lambda (row)
+                                                   (length (format "%s" (nth column row))))
+                                                 rows)))
+                                (number-sequence 0 (1- columns))))
+         (fmt (mapconcat
+               (lambda (w)
+                 (format "%%-%ds" w))
+               max-widths "   ")))
+    (mapconcat
+     (lambda (row) (apply 'format fmt row))
+     rows "\n")))
+
+(defun shell-maker--make-ret-binding-map (fun)
+  "Make (kbd \"RET\") binding map to FUN."
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "RET") fun)
+    (define-key map [remap self-insert-command]
+      'ignore)
+    map))
+
+(defun shell-maker--actionable-text (text fun)
+  "Make actionable TEXT invoking FUN."
+  (propertize text
+              'font-lock-face 'link
+              'keymap (shell-maker--make-ret-binding-map
+                       (lambda ()
+                         (interactive)
+                         (funcall fun)))))
+
+(defun shell-maker--indent-text (n-spaces text)
+  "Indent TEXT by N-SPACES."
+  (replace-regexp-in-string "^" (make-string n-spaces ?\s) text t))
+
+(defun shell-maker--propertize-key-binding (symbol-suffix config)
+  "Propertize SYMBOL-SUFFIX using CONFIG."
+  (mapconcat
+   (lambda (keys)
+     (propertize (key-description keys)
+                 'font-lock-face 'font-lock-string-face))
+   (where-is-internal
+    (symbol-function (intern (concat (downcase (shell-maker-config-name config)) symbol-suffix)))
+    (symbol-value (shell-maker-major-mode-map config))) " or "))
+
+(defun shell-maker--buffers-with-local-var (var)
+  "Get a list of buffers with a local value for VAR."
+  (delq nil
+        (mapcar (lambda (buffer)
+                  (when (local-variable-p var buffer)
+                    buffer))
+                (buffer-list))))
+
+(defun shell-maker--dump-config (config)
+  "Dump CONFIG to a string."
+  (concat
+   "\nbuffer: " (buffer-name (current-buffer))
+   "\nname: " (shell-maker-config-name config)
+   "\nprompt: " (shell-maker-config-prompt config)
+   "\nprompt-regexp: " (shell-maker-config-prompt-regexp config)
+   (propertize "\n<shell-maker-failed-command>\n"
+               'invisible (not shell-maker--show-invisible-markers))
+   "\n\n"))
+
+(defun shell-maker-make-button-text (text action)
+  "Make button with TEXT and ACTION."
+  (with-temp-buffer
+    (insert-text-button text
+                        'action
+                        (lambda (_)
+                          (funcall action)))
+    (buffer-string)))
 
 (provide 'shell-maker)
 
