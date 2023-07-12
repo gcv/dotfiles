@@ -1,4 +1,4 @@
-This is docfHvNK9.info, produced by makeinfo version 6.7 from cape.texi.
+This is doc6x7FIn.info, produced by makeinfo version 6.7 from cape.texi.
 
 INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docfHvNK9.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
+File: doc6x7FIn.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
 
 cape.el - Let your completions fly!
 ***********************************
@@ -51,7 +51,7 @@ CAPF adapters and transformers
 
 
 
-File: docfHvNK9.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
+File: doc6x7FIn.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
 
 1 Available Capfs
 *****************
@@ -73,7 +73,7 @@ File: docfHvNK9.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top, 
    • ‘cape-rfc1345’: Complete Unicode char using RFC 1345 mnemonics.
 
 
-File: docfHvNK9.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
+File: doc6x7FIn.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
 
 2 Configuration
 ***************
@@ -125,7 +125,7 @@ configuration based on the popular ‘use-package’ macro.
      )
 
 
-File: docfHvNK9.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
+File: doc6x7FIn.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
 
 3 CAPF adapters and transformers
 ********************************
@@ -138,7 +138,7 @@ File: docfHvNK9.info,  Node: CAPF adapters and transformers,  Next: Contribution
 * Capf transformers::
 
 
-File: docfHvNK9.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
+File: doc6x7FIn.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.1 Company adapter
 ===================
@@ -203,7 +203,7 @@ single Company backend, which can then be used as a Capf via
                               '(company-dabbrev company-elisp)))))
 
 
-File: docfHvNK9.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
+File: doc6x7FIn.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
 
 3.2 Super-Capf - Merging multiple Capfs
 =======================================
@@ -246,7 +246,7 @@ multi-step completions like ‘cape-file’.
 Company, which allows you to merge multiple Company backends.
 
 
-File: docfHvNK9.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
+File: doc6x7FIn.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.3 Capf-Buster - Cache busting
 ===============================
@@ -266,7 +266,7 @@ similarly refreshing strategy.
                  (list (cape-capf-buster #'some-caching-capf)))
 
 
-File: docfHvNK9.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
+File: doc6x7FIn.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
 
 3.4 Capf transformers
 =====================
@@ -344,7 +344,7 @@ personal configuration.
                                             #'ignore-elisp-keywords)))
 
 
-File: docfHvNK9.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
+File: doc6x7FIn.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
 
 4 Contributions
 ***************
