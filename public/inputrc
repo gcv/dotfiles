@@ -1,3 +1,7 @@
 # highlight completions
 set colored-stats on
 set colored-completion-prefix on
+# one-tab completions (like zsh)
+set show-all-if-ambiguous on
+set completion-ignore-case on
+
