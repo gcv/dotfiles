@@ -1204,30 +1204,33 @@
   :init
   ;; when the module has to be compiled, set some environment variables to help
   ;; find the system libvterm:
-  (when (and (not (locate-library (concat "vterm-module" module-file-suffix)))
+  (when (and (not (or (locate-library (concat "vterm-module" module-file-suffix))
+                      (locate-library "vterm-module.so")))
              (file-exists-p "~/.nix-profile"))
     (setenv "LIB" (format "%s/.nix-profile/lib" (getenv "HOME")))
     (setenv "INCLUDE" (format "%s/.nix-profile/include" (getenv "HOME"))))
 
   :config
   ;; after the module is built, make it self-contained:
-  (when (eq 'darwin system-type)
-    (let* ((libfile "libvterm.0.dylib")
-           (modfile (locate-library (concat "vterm-module" module-file-suffix)))
-           (moddir (file-name-directory modfile))
-           (libfiledir (concat moddir libfile))
-           (default-directory moddir))
-      (when (not (file-exists-p libfile))
-        (let ((underlying (s-trim (shell-command-to-string (format "otool -L %s | grep libvterm | awk '{print $1}'" modfile)))))
-          (copy-file underlying moddir t nil nil)
-          (set-file-modes libfiledir #o755)
-          (shell-command (format "install_name_tool -id \"%s\" \"%s\""
-                                 libfiledir
-                                 libfiledir))
-          (shell-command (format "install_name_tool -change \"%s\" \"%s\" \"%s\""
-                                 underlying
-                                 libfiledir
-                                 modfile))))))
+  (let ((modfile (locate-library (concat "vterm-module" module-file-suffix))))
+    (when (and (eq 'darwin system-type)
+               modfile
+               (file-exists-p modfile))
+      (let* ((libfile "libvterm.0.dylib")
+             (moddir (file-name-directory modfile))
+             (libfiledir (concat moddir libfile))
+             (default-directory moddir))
+        (when (not (file-exists-p libfile))
+          (let ((underlying (s-trim (shell-command-to-string (format "otool -L %s | grep libvterm | awk '{print $1}'" modfile)))))
+            (copy-file underlying moddir t nil nil)
+            (set-file-modes libfiledir #o755)
+            (shell-command (format "install_name_tool -id \"%s\" \"%s\""
+                                   libfiledir
+                                   libfiledir))
+            (shell-command (format "install_name_tool -change \"%s\" \"%s\" \"%s\""
+                                   underlying
+                                   libfiledir
+                                   modfile)))))))
 
   (setq vterm-max-scrollback 10000)
   (setq vterm-min-window-width 20)
