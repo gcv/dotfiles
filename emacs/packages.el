@@ -386,7 +386,13 @@
   (delete [?\C-u] eat-semi-char-non-bound-keys)
   (delete [?\C-g] eat-semi-char-non-bound-keys)
   (eat-update-semi-char-mode-map)
-  (eat-reload)
+  ;; XXX: Workaround awkward need to call eat-reload after changing its keymaps,
+  ;; but reloading from :config section causes infinite recursion.
+  (defvar eat--prevent-use-package-config-recursion nil)
+  (unless eat--prevent-use-package-config-recursion
+    (setq eat--prevent-use-package-config-recursion t)
+    (eat-reload))
+  (makunbound 'eat--prevent-use-package-config-recursion)
   )
 
 
