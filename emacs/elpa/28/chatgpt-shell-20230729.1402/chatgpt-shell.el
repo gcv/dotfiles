@@ -4,7 +4,7 @@
 
 ;; Author: Alvaro Ramirez https://xenodium.com
 ;; URL: https://github.com/xenodium/chatgpt-shell
-;; Version: 0.62.1
+;; Version: 0.75.1
 ;; Package-Requires: ((emacs "27.1") (shell-maker "0.42.1"))
 
 ;; This package is free software; you can redistribute it and/or modify
@@ -375,6 +375,9 @@ Or nil if none."
 
 Downloaded from https://github.com/f/awesome-chatgpt-prompts."
   (interactive)
+  (unless (fboundp 'pcsv-parse-file)
+    (user-error "Please install pcsv"))
+  (require 'pcsv)
   (let ((csv-path (concat (temporary-file-directory) "awesome-chatgpt-prompts.csv")))
     (url-copy-file "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv"
                    csv-path t)
@@ -384,23 +387,12 @@ Downloaded from https://github.com/f/awesome-chatgpt-prompts."
           (seq-sort (lambda (rhs lhs)
                       (string-lessp (car rhs)
                                     (car lhs)))
-                    (with-temp-buffer
-                      (insert-file-contents csv-path)
-                      (cdr
-                       (mapcar
-                        (lambda (row)
-                          (cons (car row)
-                                (cadr row)))
-                        (mapcar
-                         (lambda (line)
-                           (mapcar
-                            (lambda (s)
-                              (replace-regexp-in-string "\"" "" s))
-                            (split-string line ",")))
-                         (seq-filter
-                          (lambda (line)
-                            (not (string-empty-p line)))
-                          (split-string (buffer-string) "\n"))))))))
+                    (cdr
+                     (mapcar
+                      (lambda (row)
+                        (cons (car row)
+                              (cadr row)))
+                      (pcsv-parse-file csv-path)))))
     (message "Loaded awesome-chatgpt-prompts")
     (setq chatgpt-shell-system-prompt nil)
     (chatgpt-shell--update-prompt t)
@@ -424,6 +416,11 @@ Downloaded from https://github.com/f/awesome-chatgpt-prompts."
 
 (defcustom chatgpt-shell-streaming t
   "Whether or not to stream ChatGPT responses (show chunks as they arrive)."
+  :type 'boolean
+  :group 'chatgpt-shell)
+
+(defcustom chatgpt-shell-highlight-blocks t
+  "Whether or not to highlight source blocks."
   :type 'boolean
   :group 'chatgpt-shell)
 
@@ -578,6 +575,8 @@ Set NEW-SESSION to start a separate new session."
       #'chatgpt-shell-previous-item)
     (define-key chatgpt-shell-mode-map (kbd "C-c C-n")
       #'chatgpt-shell-next-item)
+    (define-key chatgpt-shell-mode-map (kbd "C-c C-e")
+      #'chatgpt-shell-prompt-compose)
     shell-buffer))
 
 (defun chatgpt-shell--shrink-model-version (model-version)
@@ -725,7 +724,8 @@ With prefix IGNORE-ITEM, do not use interrupted item in context."
   "Markdown start/end cons if point at block.  nil otherwise."
   (save-excursion
     (save-restriction
-      (shell-maker-narrow-to-prompt)
+      (when (eq major-mode 'chatgpt-shell-mode)
+        (shell-maker-narrow-to-prompt))
       (let* ((language)
              (language-start)
              (language-end)
@@ -1052,6 +1052,86 @@ If region is active, append to prompt."
                                "\n```"
                              ""))))
     (chatgpt-shell-send-to-buffer prompt nil)))
+
+(defun chatgpt-shell-prompt-compose ()
+  "Compose and send prompt (kbd \"C-c C-c\") from a dedicated buffer.
+
+Appends any active region."
+  (interactive)
+  (let* ((exit-on-submit (eq major-mode 'chatgpt-shell-mode))
+         (buffer-name (concat (chatgpt-shell--minibuffer-prompt)
+                              "compose"))
+         (buffer (get-buffer-create buffer-name))
+         (map (make-sparse-keymap))
+         (region (when-let ((_ (region-active-p))
+                            (region (buffer-substring (region-beginning)
+                                                      (region-end))))
+                   (deactivate-mark)
+                   region))
+         (instructions (concat "Type "
+                               (propertize "C-c C-c" 'face 'help-key-binding)
+                               " to send prompt. "
+                               (propertize "C-c C-k" 'face 'help-key-binding)
+                               " to cancel and exit. "))
+         (prompt))
+    (add-to-list 'display-buffer-alist
+                 (cons buffer
+                       '((display-buffer-below-selected)
+                         (split-window-sensibly))))
+    (with-current-buffer buffer
+      (visual-line-mode +1)
+      (when view-mode
+        (view-mode -1)
+        (erase-buffer))
+      (when region
+        (save-excursion
+          (goto-char (point-max))
+          (insert (concat "\n\n" region))))
+      (local-set-key (kbd "C-c C-k")
+                     (lambda () (interactive)
+                       (quit-window t (get-buffer-window buffer))
+                       (message "exit")))
+      (local-set-key (kbd "C-M-h") (lambda ()
+                                     (interactive)
+                                     (when-let ((block (chatgpt-shell-markdown-block-at-point)))
+                                       (set-mark (map-elt block 'end))
+                                       (goto-char (map-elt block 'start)))))
+      (local-set-key (kbd "C-c C-n") #'chatgpt-shell-next-source-block)
+      (local-set-key (kbd "C-c C-p") #'chatgpt-shell-previous-source-block)
+      (local-set-key (kbd "C-c C-c")
+                     (lambda ()
+                       (interactive)
+                       (when (string-empty-p
+                              (string-trim
+                               (buffer-substring-no-properties
+                                (point-min) (point-max))))
+                         (erase-buffer)
+                         (user-error "Nothing to send"))
+                       (if view-mode
+                           (progn
+                             (view-mode -1)
+                             (erase-buffer)
+                             (message instructions))
+                         (setq prompt
+                               (string-trim
+                                (buffer-substring-no-properties
+                                 (point-min) (point-max))))
+                         (erase-buffer)
+                         (insert (propertize (concat prompt "\n\n") 'face font-lock-doc-face))
+                         (view-mode +1)
+                         (setq view-exit-action 'kill-buffer)
+                         (when (string-equal prompt "clear")
+                           (view-mode -1)
+                           (erase-buffer))
+                         (if exit-on-submit
+                             (let ((view-exit-action nil)
+                                   (chatgpt-shell-prompt-query-response-style 'shell))
+                               (quit-window t (get-buffer-window buffer))
+                               (chatgpt-shell-send-to-buffer prompt))
+                           (let ((chatgpt-shell-prompt-query-response-style 'inline))
+                             (chatgpt-shell-send-to-buffer prompt))))))
+      (message instructions))
+    (pop-to-buffer buffer-name)))
 
 (defun chatgpt-shell-prompt-appending-kill-ring ()
   "Make a ChatGPT request from the minibuffer appending kill ring."
@@ -1737,6 +1817,9 @@ Use START END TITLE-START TITLE-END URL-START URL-END."
   (overlay-put (make-overlay title-start title-end) 'face 'link)
   ;; Make RET open the URL
   (define-key (let ((map (make-sparse-keymap)))
+                (define-key map [mouse-1]
+                  (lambda () (interactive)
+                    (browse-url (buffer-substring-no-properties url-start url-end))))
                 (define-key map (kbd "RET")
                   (lambda () (interactive)
                     (browse-url (buffer-substring-no-properties url-start url-end))))
@@ -1846,62 +1929,63 @@ Use QUOTES1-START QUOTES1-END LANG LANG-START LANG-END BODY-START
 
 (defun chatgpt-shell--put-source-block-overlays ()
   "Put overlays for all source blocks."
-  (let* ((source-blocks (chatgpt-shell--source-blocks))
-         (avoid-ranges (seq-map (lambda (block)
-                                 (map-elt block 'body))
-                               source-blocks)))
-    (dolist (overlay (overlays-in (point-min) (point-max)))
-      (delete-overlay overlay))
-    (dolist (block source-blocks)
-      (chatgpt-shell--fontify-source-block
-       (car (map-elt block 'start))
-       (cdr (map-elt block 'start))
-       (buffer-substring-no-properties (car (map-elt block 'language))
-                                       (cdr (map-elt block 'language)))
-       (car (map-elt block 'language))
-       (cdr (map-elt block 'language))
-       (car (map-elt block 'body))
-       (cdr (map-elt block 'body))
-       (car (map-elt block 'end))
-       (cdr (map-elt block 'end))))
-    (dolist (link (chatgpt-shell--markdown-links avoid-ranges))
-      (chatgpt-shell--fontify-link
-       (map-elt link 'start)
-       (map-elt link 'end)
-       (car (map-elt link 'title))
-       (cdr (map-elt link 'title))
-       (car (map-elt link 'url))
-       (cdr (map-elt link 'url))))
-    (dolist (header (chatgpt-shell--markdown-headers avoid-ranges))
-      (chatgpt-shell--fontify-header
-       (map-elt header 'start)
-       (map-elt header 'end)
-       (car (map-elt header 'level))
-       (cdr (map-elt header 'level))
-       (car (map-elt header 'title))
-       (cdr (map-elt header 'title))))
-    (dolist (bold (chatgpt-shell--markdown-bolds avoid-ranges))
-      (chatgpt-shell--fontify-bold
-       (map-elt bold 'start)
-       (map-elt bold 'end)
-       (car (map-elt bold 'text))
-       (cdr (map-elt bold 'text))))
-    (dolist (italic (chatgpt-shell--markdown-italics avoid-ranges))
-      (chatgpt-shell--fontify-italic
-       (map-elt italic 'start)
-       (map-elt italic 'end)
-       (car (map-elt italic 'text))
-       (cdr (map-elt italic 'text))))
-    (dolist (strikethrough (chatgpt-shell--markdown-strikethroughs avoid-ranges))
-      (chatgpt-shell--fontify-strikethrough
-       (map-elt strikethrough 'start)
-       (map-elt strikethrough 'end)
-       (car (map-elt strikethrough 'text))
-       (cdr (map-elt strikethrough 'text))))
-    (dolist (inline-code (chatgpt-shell--markdown-inline-codes avoid-ranges))
-      (chatgpt-shell--fontify-inline-code
-       (car (map-elt inline-code 'body))
-       (cdr (map-elt inline-code 'body))))))
+  (when chatgpt-shell-highlight-blocks
+    (let* ((source-blocks (chatgpt-shell--source-blocks))
+           (avoid-ranges (seq-map (lambda (block)
+                                    (map-elt block 'body))
+                                  source-blocks)))
+      (dolist (overlay (overlays-in (point-min) (point-max)))
+        (delete-overlay overlay))
+      (dolist (block source-blocks)
+        (chatgpt-shell--fontify-source-block
+         (car (map-elt block 'start))
+         (cdr (map-elt block 'start))
+         (buffer-substring-no-properties (car (map-elt block 'language))
+                                         (cdr (map-elt block 'language)))
+         (car (map-elt block 'language))
+         (cdr (map-elt block 'language))
+         (car (map-elt block 'body))
+         (cdr (map-elt block 'body))
+         (car (map-elt block 'end))
+         (cdr (map-elt block 'end))))
+      (dolist (link (chatgpt-shell--markdown-links avoid-ranges))
+        (chatgpt-shell--fontify-link
+         (map-elt link 'start)
+         (map-elt link 'end)
+         (car (map-elt link 'title))
+         (cdr (map-elt link 'title))
+         (car (map-elt link 'url))
+         (cdr (map-elt link 'url))))
+      (dolist (header (chatgpt-shell--markdown-headers avoid-ranges))
+        (chatgpt-shell--fontify-header
+         (map-elt header 'start)
+         (map-elt header 'end)
+         (car (map-elt header 'level))
+         (cdr (map-elt header 'level))
+         (car (map-elt header 'title))
+         (cdr (map-elt header 'title))))
+      (dolist (bold (chatgpt-shell--markdown-bolds avoid-ranges))
+        (chatgpt-shell--fontify-bold
+         (map-elt bold 'start)
+         (map-elt bold 'end)
+         (car (map-elt bold 'text))
+         (cdr (map-elt bold 'text))))
+      (dolist (italic (chatgpt-shell--markdown-italics avoid-ranges))
+        (chatgpt-shell--fontify-italic
+         (map-elt italic 'start)
+         (map-elt italic 'end)
+         (car (map-elt italic 'text))
+         (cdr (map-elt italic 'text))))
+      (dolist (strikethrough (chatgpt-shell--markdown-strikethroughs avoid-ranges))
+        (chatgpt-shell--fontify-strikethrough
+         (map-elt strikethrough 'start)
+         (map-elt strikethrough 'end)
+         (car (map-elt strikethrough 'text))
+         (cdr (map-elt strikethrough 'text))))
+      (dolist (inline-code (chatgpt-shell--markdown-inline-codes avoid-ranges))
+        (chatgpt-shell--fontify-inline-code
+         (car (map-elt inline-code 'body))
+         (cdr (map-elt inline-code 'body)))))))
 
 (defun chatgpt-shell--unpaired-length (length)
   "Expand LENGTH to include paired responses.
