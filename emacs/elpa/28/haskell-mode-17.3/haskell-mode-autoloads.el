@@ -9,8 +9,6 @@
 ;;;### (autoloads nil "ghc-core" "ghc-core.el" (0 0 0 0))
 ;;; Generated autoloads from ghc-core.el
 
-(let ((loads (get 'ghc-core 'custom-loads))) (if (member '"ghc-core" loads) nil (put 'ghc-core 'custom-loads (cons '"ghc-core" loads))))
-
 (autoload 'ghc-core-create-core "ghc-core" "\
 Compile and load the current buffer as tidy core." t nil)
 
@@ -188,8 +186,9 @@ file), then this function returns nil.
 \(fn NAME)" t nil)
 
 (autoload 'haskell-cabal-get-dir "haskell-cabal" "\
-Get the Cabal dir for a new project. Various ways of figuring this out,
-   and indeed just prompting the user. Do them all.
+Get the Cabal dir for a new project.
+Various ways of figuring this out, and indeed just prompting the user.  Do them
+all.
 
 \(fn &optional USE-DEFAULTS)" nil nil)
 
@@ -203,8 +202,6 @@ below the top-folder.  If called with non-nil prefix argument
 OTHER-WINDOW use `find-file-other-window'.
 
 \(fn OTHER-WINDOW)" t nil)
-
-(let ((loads (get 'haskell-cabal 'custom-loads))) (if (member '"haskell-cabal" loads) nil (put 'haskell-cabal 'custom-loads (cons '"haskell-cabal" loads))))
 
 (register-definition-prefixes "haskell-cabal" '("haskell-"))
 
@@ -353,8 +350,6 @@ Find use cases of the identifier at point and highlight them all." t nil)
 ;;;;;;  0 0))
 ;;; Generated autoloads from haskell-compile.el
 
-(let ((loads (get 'haskell-compile 'custom-loads))) (if (member '"haskell-compile" loads) nil (put 'haskell-compile 'custom-loads (cons '"haskell-compile" loads))))
-
 (autoload 'haskell-compile "haskell-compile" "\
 Run a compile command for the current Haskell buffer.
 Obeys haskell-compiler-type to choose the appropriate build command.
@@ -395,8 +390,6 @@ base directory for build tools, or the current buffer for
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from haskell-completions.el
 
-(let ((loads (get 'haskell-completions 'custom-loads))) (if (member '"haskell-completions" loads) nil (put 'haskell-completions 'custom-loads (cons '"haskell-completions" loads))))
-
 (autoload 'haskell-completions-completion-at-point "haskell-completions" "\
 Provide completion list for thing at point.
 This function is used in non-interactive `haskell-mode'.  It
@@ -411,36 +404,12 @@ GHC's options, and language extensions, but not identifiers." nil nil)
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from haskell-customize.el
 
-(let ((loads (get 'haskell 'custom-loads))) (if (member '"haskell-customize" loads) nil (put 'haskell 'custom-loads (cons '"haskell-customize" loads))))
-
-(let ((loads (get 'haskell-interactive 'custom-loads))) (if (member '"haskell-customize" loads) nil (put 'haskell-interactive 'custom-loads (cons '"haskell-customize" loads))))
-
 (register-definition-prefixes "haskell-customize" '("haskell-" "inferior-haskell-root-dir"))
 
 ;;;***
 
 ;;;### (autoloads nil "haskell-debug" "haskell-debug.el" (0 0 0 0))
 ;;; Generated autoloads from haskell-debug.el
-
-(let ((loads (get 'haskell-debug 'custom-loads))) (if (member '"haskell-debug" loads) nil (put 'haskell-debug 'custom-loads (cons '"haskell-debug" loads))))
-
-(defface haskell-debug-warning-face '((t :inherit 'compilation-warning)) "\
-Face for warnings." :group 'haskell-debug)
-
-(defface haskell-debug-trace-number-face '((t :weight bold :background "#f5f5f5")) "\
-Face for numbers in backtrace." :group 'haskell-debug)
-
-(defface haskell-debug-newline-face '((t :weight bold :background "#f0f0f0")) "\
-Face for newlines in trace steps." :group 'haskell-debug)
-
-(defface haskell-debug-keybinding-face '((t :inherit 'font-lock-type-face :weight bold)) "\
-Face for keybindings." :group 'haskell-debug)
-
-(defface haskell-debug-heading-face '((t :inherit 'font-lock-keyword-face)) "\
-Face for headings." :group 'haskell-debug)
-
-(defface haskell-debug-muted-face '((t :foreground "#999")) "\
-Face for muteds." :group 'haskell-debug)
 
 (register-definition-prefixes "haskell-debug" '("haskell-debug"))
 
@@ -449,8 +418,6 @@ Face for muteds." :group 'haskell-debug)
 ;;;### (autoloads nil "haskell-decl-scan" "haskell-decl-scan.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from haskell-decl-scan.el
-
-(let ((loads (get 'haskell-decl-scan 'custom-loads))) (if (member '"haskell-decl-scan" loads) nil (put 'haskell-decl-scan 'custom-loads (cons '"haskell-decl-scan" loads))))
 
 (autoload 'haskell-ds-create-imenu-index "haskell-decl-scan" "\
 Function for finding `imenu' declarations in Haskell mode.
@@ -505,17 +472,66 @@ Invokes `haskell-decl-scan-mode-hook' on activation.
 ;;;### (autoloads nil "haskell-doc" "haskell-doc.el" (0 0 0 0))
 ;;; Generated autoloads from haskell-doc.el
 
-(let ((loads (get 'haskell-doc 'custom-loads))) (if (member '"haskell-doc" loads) nil (put 'haskell-doc 'custom-loads (cons '"haskell-doc" loads))))
-
 (autoload 'haskell-doc-mode "haskell-doc" "\
 Enter `haskell-doc-mode' for showing fct types in the echo area.
-See variable docstring.
+
+This is a minor mode.  If called interactively, toggle the
+`Haskell-Doc mode' mode.  If the prefix argument is positive,
+enable the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `haskell-doc-mode'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+When enabled, shows the type of the function near point or a related comment.
+
+If the identifier near point is a Haskell keyword and the variable
+`haskell-doc-show-reserved' is non-nil show a one line summary
+of the syntax.
+
+If the identifier near point is a Prelude or one of the standard library
+functions and `haskell-doc-show-prelude' is non-nil show its type.
+
+If the identifier near point is local (i.e. defined in this module) check
+the `imenu' list of functions for the type.  This obviously requires that
+your language mode uses `imenu'.
+
+If the identifier near point is global (i.e. defined in an imported module)
+and the variable `haskell-doc-show-global-types' is non-nil show the type of its
+function.
+
+If the identifier near point is a standard strategy or a function, type related
+related to strategies and `haskell-doc-show-strategy' is non-nil show the type
+of the function.  Strategies are special to the parallel execution of Haskell.
+If you're not interested in that just turn it off.
+
+If the identifier near point is a user defined function that occurs as key
+in the alist `haskell-doc-user-defined-ids' and the variable
+`haskell-doc-show-user-defined' is non-nil show the type of the function.
+
+This variable is buffer-local.
 
 \(fn &optional ARG)" t nil)
 
 (defalias 'turn-on-haskell-doc-mode 'haskell-doc-mode)
 
 (defalias 'turn-on-haskell-doc 'haskell-doc-mode)
+
+(autoload 'haskell-doc-eldoc-function "haskell-doc" "\
+Function for use by eldoc.
+
+By accepting CALLBACK, it is designed to be used in
+`eldoc-documentation-functions' in Emacs >= 28.1, but by making
+that argument optional it can also be set directly as
+`eldoc-documentation-function' in older Emacsen.
+
+\(fn &optional CALLBACK)" nil nil)
 
 (autoload 'haskell-doc-current-info "haskell-doc" "\
 Return the info about symbol at point.
@@ -537,30 +553,6 @@ current buffer.
 ;;;### (autoloads nil "haskell-font-lock" "haskell-font-lock.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from haskell-font-lock.el
-
-(let ((loads (get 'haskell-appearance 'custom-loads))) (if (member '"haskell-font-lock" loads) nil (put 'haskell-appearance 'custom-loads (cons '"haskell-font-lock" loads))))
-
-(defface haskell-keyword-face '((t :inherit font-lock-keyword-face)) "\
-Face used to highlight Haskell keywords." :group 'haskell-appearance)
-
-(defface haskell-type-face '((t :inherit font-lock-type-face)) "\
-Face used to highlight Haskell types" :group 'haskell-appearance)
-
-(defface haskell-constructor-face '((t :inherit font-lock-type-face)) "\
-Face used to highlight Haskell constructors." :group 'haskell-appearance)
-
-(defface haskell-operator-face '((t :inherit font-lock-variable-name-face)) "\
-Face used to highlight Haskell operators." :group 'haskell-appearance)
-
-(defface haskell-pragma-face '((t :inherit font-lock-preprocessor-face)) "\
-Face used to highlight Haskell pragmas ({-# ... #-})." :group 'haskell-appearance)
-
-(defface haskell-liquid-haskell-annotation-face '((t :inherit haskell-pragma-face)) "\
-Face used to highlight LiquidHaskell annotations ({-@ ... @-})." :group 'haskell-appearance)
-
-(defface haskell-literate-comment-face '((t :inherit font-lock-doc-face)) "\
-Face with which to fontify literate comments.
-Inherit from `default' to avoid fontification of them." :group 'haskell-appearance)
 
 (register-definition-prefixes "haskell-font-lock" '("haskell-"))
 
@@ -604,8 +596,6 @@ Lookup QUERY on local hoogle server." t nil)
 ;;;;;;  0))
 ;;; Generated autoloads from haskell-indent.el
 
-(let ((loads (get 'haskell-indent 'custom-loads))) (if (member '"haskell-indent" loads) nil (put 'haskell-indent 'custom-loads (cons '"haskell-indent" loads))))
-
 (autoload 'turn-on-haskell-indent "haskell-indent" "\
 Turn on ``intelligent'' Haskell indentation mode." nil nil)
 
@@ -646,8 +636,6 @@ Invokes `haskell-indent-hook' if not nil.
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from haskell-indentation.el
 
-(let ((loads (get 'haskell-indentation 'custom-loads))) (if (member '"haskell-indentation" loads) nil (put 'haskell-indentation 'custom-loads (cons '"haskell-indentation" loads))))
-
 (autoload 'haskell-indentation-mode "haskell-indentation" "\
 Haskell indentation mode that deals with the layout rule.
 It rebinds RET, DEL and BACKSPACE, so that indentations can be
@@ -681,26 +669,6 @@ Turn on the haskell-indentation minor mode." t nil)
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from haskell-interactive-mode.el
 
-(defface haskell-interactive-face-prompt '((t :inherit font-lock-function-name-face)) "\
-Face for the prompt." :group 'haskell-interactive)
-
-(defface haskell-interactive-face-prompt-cont '((t :inherit font-lock-keyword-face)) "\
-Face for GHCi's prompt-cont in multi-line mode." :group 'haskell-interactive)
-
-(define-obsolete-face-alias 'haskell-interactive-face-prompt2 'haskell-interactive-face-prompt-cont "16.2")
-
-(defface haskell-interactive-face-compile-error '((t :inherit compilation-error)) "\
-Face for compile errors." :group 'haskell-interactive)
-
-(defface haskell-interactive-face-compile-warning '((t :inherit compilation-warning)) "\
-Face for compiler warnings." :group 'haskell-interactive)
-
-(defface haskell-interactive-face-result '((t :inherit font-lock-string-face)) "\
-Face for the result." :group 'haskell-interactive)
-
-(defface haskell-interactive-face-garbage '((t :inherit font-lock-string-face)) "\
-Face for trailing garbage after a command has completed." :group 'haskell-interactive)
-
 (autoload 'haskell-interactive-mode-reset-error "haskell-interactive-mode" "\
 Reset the error cursor position.
 
@@ -733,15 +701,6 @@ function `haskell-presentation-present', depending on variable
 
 ;;;### (autoloads nil "haskell-load" "haskell-load.el" (0 0 0 0))
 ;;; Generated autoloads from haskell-load.el
-
-(defface haskell-error-face '((((supports :underline (:style wave))) :underline (:style wave :color "#dc322f")) (t :inherit error)) "\
-Face used for marking error lines." :group 'haskell-mode)
-
-(defface haskell-warning-face '((((supports :underline (:style wave))) :underline (:style wave :color "#b58900")) (t :inherit warning)) "\
-Face used for marking warning lines." :group 'haskell-mode)
-
-(defface haskell-hole-face '((((supports :underline (:style wave))) :underline (:style wave :color "#6c71c4")) (t :inherit warning)) "\
-Face used for marking hole lines." :group 'haskell-mode)
 
 (autoload 'haskell-process-reload-devel-main "haskell-load" "\
 Reload the module `DevelMain' and then run `DevelMain.update'.
@@ -812,17 +771,18 @@ Other modes:
       Scans top-level declarations, and places them in a menu.
 
     `haskell-doc-mode', Hans-Wolfgang Loidl
-      Echoes types of functions or syntax of keywords when the cursor is idle.
+      Sets up eldoc to echo types of functions or syntax of keywords
+      when the cursor is idle.
 
 To activate a minor-mode, simply run the interactive command. For
 example, `M-x haskell-doc-mode'. Run it again to disable it.
 
-To enable a mode for every haskell-mode buffer, add a hook in
+To enable a mode for every `haskell-mode' buffer, add a hook in
 your Emacs configuration. To do that you can customize
 `haskell-mode-hook' or add lines to your .emacs file. For
 example, to enable `interactive-haskell-mode', use the following:
 
-    (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+    (add-hook \\='haskell-mode-hook \\='interactive-haskell-mode)
 
 Minor modes that work well with `haskell-mode':
 
@@ -909,7 +869,9 @@ If DONTCREATE is non-nil don't create a new session.
 ;;; Generated autoloads from haskell-move-nested.el
 
 (autoload 'haskell-move-nested "haskell-move-nested" "\
-Shift the nested off-side-rule block adjacent to point by COLS columns to the right.
+Shift the nested off-side-rule block adjacent to point.
+It shift the nested off-side-rule block adjacent to point by COLS
+columns to the right.
 
 In Transient Mark mode, if the mark is active, operate on the contents
 of the region instead.
@@ -1085,8 +1047,6 @@ it is disabled.
 ;;;### (autoloads nil "inf-haskell" "inf-haskell.el" (0 0 0 0))
 ;;; Generated autoloads from inf-haskell.el
 
-(let ((loads (get 'inferior-haskell 'custom-loads))) (if (member '"inf-haskell" loads) nil (put 'inferior-haskell 'custom-loads (cons '"inf-haskell" loads))))
-
 (autoload 'run-haskell "inf-haskell" "\
 Show the inferior-haskell buffer.  Start the process if needed." t nil)
 
@@ -1096,9 +1056,6 @@ Show the inferior-haskell buffer.  Start the process if needed." t nil)
 
 ;;;### (autoloads nil "w3m-haddock" "w3m-haddock.el" (0 0 0 0))
 ;;; Generated autoloads from w3m-haddock.el
-
-(defface w3m-haddock-heading-face '((((class color)) :inherit highlight)) "\
-Face for quarantines." :group 'haskell)
 
 (register-definition-prefixes "w3m-haddock" '("haskell-w3m-" "w3m-haddock-"))
 

@@ -48,9 +48,10 @@
   "Mark used for the old beginning of the prompt.")
 
 (defun haskell-interactive-prompt-regex ()
-  "Generate a regex for searching for any occurrence of the prompt\
-at the beginning of the line.  This should prevent any
-interference with prompts that look like haskell expressions."
+  "Generate a regex for searching whether prompt or not.
+The regex is for searching for any occurrence of the prompt at the beginning of
+the line.  This should prevent any interference with prompts that look like
+haskell expressions."
   (concat "^" (regexp-quote haskell-interactive-prompt)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -123,40 +124,33 @@ be nil.")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Faces
 
-;;;###autoload
 (defface haskell-interactive-face-prompt
   '((t :inherit font-lock-function-name-face))
   "Face for the prompt."
   :group 'haskell-interactive)
 
-;;;###autoload
 (defface haskell-interactive-face-prompt-cont
   '((t :inherit font-lock-keyword-face))
   "Face for GHCi's prompt-cont in multi-line mode."
   :group 'haskell-interactive)
 
-;;;###autoload
 (define-obsolete-face-alias 'haskell-interactive-face-prompt2 'haskell-interactive-face-prompt-cont "16.2")
 
-;;;###autoload
 (defface haskell-interactive-face-compile-error
   '((t :inherit compilation-error))
   "Face for compile errors."
   :group 'haskell-interactive)
 
-;;;###autoload
 (defface haskell-interactive-face-compile-warning
   '((t :inherit compilation-warning))
   "Face for compiler warnings."
   :group 'haskell-interactive)
 
-;;;###autoload
 (defface haskell-interactive-face-result
   '((t :inherit font-lock-string-face))
   "Face for the result."
   :group 'haskell-interactive)
 
-;;;###autoload
 (defface haskell-interactive-face-garbage
   '((t :inherit font-lock-string-face))
   "Face for trailing garbage after a command has completed."
@@ -264,8 +258,8 @@ do the
           (lines (split-string expr "\n")))
       (cl-loop for elt on (cdr lines) do
                (setcar elt (replace-regexp-in-string pre "" (car elt))))
-      ;; Temporarily set prompt2 to be empty to avoid unwanted output
-      (concat ":set prompt2 \"\"\n"
+      ;; Temporarily set prompt-cont to be empty to avoid unwanted output
+      (concat ":set prompt-cont \"\"\n"
               ":{\n"
               (mapconcat #'identity lines "\n")
               "\n:}\n"
@@ -402,7 +396,7 @@ SESSION, otherwise operate on the current buffer."
                           'rear-nonsticky t)))))
 
 (defun haskell-interactive-mode-goto-end-point ()
-  "Go to the 'end' of the buffer (before the prompt)."
+  "Go to the \\='end\\=' of the buffer (before the prompt)."
   (goto-char haskell-interactive-mode-prompt-start)
   (goto-char (line-beginning-position)))
 
@@ -645,7 +639,7 @@ wrapped in compiler directive at the top of FILE."
   (haskell-interactive-mode-prompt))
 
 (defun haskell-interactive-popup-error (response)
-  "Popup an error."
+  "Pop up an error."
   (if haskell-interactive-popup-errors
       (let ((buf (get-buffer-create "*HS-Error*")))
         (pop-to-buffer buf nil t)
@@ -659,12 +653,13 @@ wrapped in compiler directive at the top of FILE."
                                 'haskell-interactive-face-compile-error))
             (goto-char (point-min))
             (delete-blank-lines)
-            (insert (propertize "-- Hit `q' to close this window.\n\n"
-                                'font-lock-face 'font-lock-comment-face))
-            (save-excursion
-              (goto-char (point-max))
-              (insert (propertize "\n-- To disable popups, customize `haskell-interactive-popup-errors'.\n\n"
-                                  'font-lock-face 'font-lock-comment-face))))))
+            (let ((start-comment (propertize "-- " 'font-lock-face 'font-lock-comment-delimiter-face)))
+              (insert start-comment (propertize "Hit `q' to close this window.\n\n" 'font-lock-face 'font-lock-comment-face))
+              (save-excursion
+                (goto-char (point-max))
+                (insert "\n" start-comment
+                        (propertize "To disable popups, customize `haskell-interactive-popup-errors'.\n\n"
+                                    'font-lock-face 'font-lock-comment-face)))))))
     (haskell-interactive-mode-insert-error response)))
 
 (defun haskell-interactive-next-error-function (&optional n reset)

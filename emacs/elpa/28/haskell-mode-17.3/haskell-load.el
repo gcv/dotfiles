@@ -130,7 +130,7 @@ actual Emacs buffer of the module being loaded."
                 process
                 "Failed, modules loaded: \\(.+\\)\\.$")
                nil)
-	      ((haskell-process-consume
+              ((haskell-process-consume
                 process
                 "Failed, no modules loaded\\.$") ;; for ghc 8.4
                nil)
@@ -265,9 +265,9 @@ list of modules where missed IDENT was found."
                      (get-buffer-create "*haskell-process-log*"))
       (switch-to-buffer-other-window (get-buffer "*haskell-process-log*")))
      (t (let ((app-name (cl-ecase (haskell-process-type)
-                          ('ghci haskell-process-path-cabal)
-                          ('cabal-repl haskell-process-path-cabal)
-                          ('stack-ghci haskell-process-path-stack))))
+                          (ghci haskell-process-path-cabal)
+                          (cabal-repl haskell-process-path-cabal)
+                          (stack-ghci haskell-process-path-stack))))
           (haskell-process-queue-command
            process
            (make-haskell-command
@@ -336,7 +336,6 @@ list of modules where missed IDENT was found."
          (modules (and modules-string (split-string modules-string ", "))))
     (cons modules modules-string)))
 
-;;;###autoload
 (defface haskell-error-face
   '((((supports :underline (:style wave)))
      :underline (:style wave :color "#dc322f"))
@@ -345,7 +344,6 @@ list of modules where missed IDENT was found."
   "Face used for marking error lines."
   :group 'haskell-mode)
 
-;;;###autoload
 (defface haskell-warning-face
   '((((supports :underline (:style wave)))
      :underline (:style wave :color "#b58900"))
@@ -354,7 +352,6 @@ list of modules where missed IDENT was found."
   "Face used for marking warning lines."
   :group 'haskell-mode)
 
-;;;###autoload
 (defface haskell-hole-face
   '((((supports :underline (:style wave)))
      :underline (:style wave :color "#6c71c4"))
@@ -542,11 +539,13 @@ When MODULE-BUFFER is non-NIL, paint error overlays."
              (line (plist-get location :line))
              (col1 (plist-get location :col)))
         (when (and module-buffer haskell-process-show-overlays)
-          (haskell-check-paint-overlay
-           module-buffer
-           (string= (file-truename (buffer-file-name module-buffer))
-                    (file-truename file))
-           line error-msg file type nil col1))
+          ;; conform default-directory to session current-dir for 'file-truename'
+          (let ((default-directory (haskell-session-current-dir session)))
+            (haskell-check-paint-overlay
+             module-buffer
+             (string= (file-truename (buffer-file-name module-buffer))
+                      (file-truename file))
+             line error-msg file type nil col1)))
         (if return-only
             (list :file file :line line :col col1 :msg error-msg :type type)
           (progn (funcall (cl-case type
@@ -564,15 +563,15 @@ When MODULE-BUFFER is non-NIL, paint error overlays."
                  t)))))))
 
 (defun haskell-interactive-show-load-message (session type module-name file-name echo th)
-  "Show the '(Compiling|Loading) X' message."
+  "Show the \\='(Compiling|Loading) X\\=' message."
   (let ((msg (concat
               (cl-ecase type
-                ('compiling
+                (compiling
                  (if haskell-interactive-mode-include-file-name
                      (format "Compiling: %s (%s)" module-name file-name)
                    (format "Compiling: %s" module-name)))
-                ('loading (format "Loading: %s" module-name))
-                ('import-cycle
+                (loading (format "Loading: %s" module-name))
+                (import-cycle
                  (format "Module has an import cycle: %s" module-name)))
               (if th " [TH]" ""))))
     (haskell-mode-message-line msg)

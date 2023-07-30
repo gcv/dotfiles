@@ -28,43 +28,36 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Configuration
 
-;;;###autoload
 (defgroup haskell-debug nil
   "Settings for debugging support."
   :link '(custom-manual "(haskell-mode)haskell-debug")
   :group 'haskell)
 
-;;;###autoload
 (defface haskell-debug-warning-face
   '((t :inherit 'compilation-warning))
   "Face for warnings."
   :group 'haskell-debug)
 
-;;;###autoload
 (defface haskell-debug-trace-number-face
   '((t :weight bold :background "#f5f5f5"))
   "Face for numbers in backtrace."
   :group 'haskell-debug)
 
-;;;###autoload
 (defface haskell-debug-newline-face
   '((t :weight bold :background "#f0f0f0"))
   "Face for newlines in trace steps."
   :group 'haskell-debug)
 
-;;;###autoload
 (defface haskell-debug-keybinding-face
   '((t :inherit 'font-lock-type-face :weight bold))
   "Face for keybindings."
   :group 'haskell-debug)
 
-;;;###autoload
 (defface haskell-debug-heading-face
   '((t :inherit 'font-lock-keyword-face))
   "Face for headings."
   :group 'haskell-debug)
 
-;;;###autoload
 (defface haskell-debug-muted-face
   '((t :foreground "#999"))
   "Face for muteds."
@@ -107,13 +100,13 @@
 (defmacro haskell-debug-with-breakpoints (&rest body)
   "Breakpoints need to exist to start stepping."
   `(if (haskell-debug-get-breakpoints)
-       ,@body
+       (progn ,@body)
      (error "No breakpoints to step into!")))
 
 (defmacro haskell-debug-with-modules (&rest body)
   "Modules need to exist to do debugging stuff."
   `(if (haskell-debug-get-modules)
-       ,@body
+       (progn ,@body)
      (error "No modules loaded!")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -260,11 +253,12 @@
    (let* ((breakpoints (haskell-debug-get-breakpoints))
           (context (haskell-debug-get-context))
           (string
-           (haskell-process-queue-sync-request
-            (haskell-debug-process)
-            (if expr
-                (concat ":step " expr)
-              ":step"))))
+           (haskell-debug-trim-break-location
+            (haskell-process-queue-sync-request
+             (haskell-debug-process)
+             (if expr
+                 (concat ":step " expr)
+               ":step")))))
      (cond
       ((string= string "not stopped at a breakpoint\n")
        (if haskell-debug-bindings-cache
@@ -317,11 +311,18 @@
   (format "*debug:%s*"
           (haskell-session-name session)))
 
+(defun haskell-debug-trim-break-location (string)
+  "Remove trailing location of current break from output STRING if exists."
+  (if-let ((i (string-match "^\\(... \\)?\\[[^]]+\\] $" string)))
+      (substring string 0 i)
+    string))
+
 (defun haskell-debug-get-breakpoints ()
   "Get the list of breakpoints currently set."
-  (let ((string (haskell-process-queue-sync-request
-                 (haskell-debug-process)
-                 ":show breaks")))
+  (let ((string (haskell-debug-trim-break-location
+                 (haskell-process-queue-sync-request
+                  (haskell-debug-process)
+                  ":show breaks"))))
     (if (string= string "No active breakpoints.\n")
         (list)
       (mapcar #'haskell-debug-parse-break-point
@@ -329,9 +330,10 @@
 
 (defun haskell-debug-get-modules ()
   "Get the list of modules currently set."
-  (let ((string (haskell-process-queue-sync-request
-                 (haskell-debug-process)
-                 ":show modules")))
+  (let ((string (haskell-debug-trim-break-location
+                 (haskell-process-queue-sync-request
+                  (haskell-debug-process)
+                  ":show modules"))))
     (if (string= string "")
         (list)
       (mapcar #'haskell-debug-parse-module
@@ -339,18 +341,20 @@
 
 (defun haskell-debug-get-context ()
   "Get the current context."
-  (let ((string (haskell-process-queue-sync-request
-                 (haskell-debug-process)
-                 ":show context")))
+  (let ((string (haskell-debug-trim-break-location
+                 (haskell-process-queue-sync-request
+                  (haskell-debug-process)
+                  ":show context"))))
     (if (string= string "")
         nil
       (haskell-debug-parse-context string))))
 
 (defun haskell-debug-get-history ()
   "Get the step history."
-  (let ((string (haskell-process-queue-sync-request
-                 (haskell-debug-process)
-                 ":history")))
+  (let ((string (haskell-debug-trim-break-location
+                 (haskell-process-queue-sync-request
+                  (haskell-debug-process)
+                  ":history"))))
     (if (or (string= string "")
             (string= string "Not stopped at a breakpoint\n"))
         nil
@@ -527,15 +531,13 @@ some old history, then display that."
                             (point-max)))))))))
 
 (defun haskell-debug-parse-stopped-at (string)
-  "Parse the location stopped at from the given string.
+  "Parse the location stopped at from the given STRING.
 
-For example:
+For examples:
 
 Stopped at /home/foo/project/src/x.hs:6:25-36
-
-"
-  (let ((index (string-match "Stopped at \\([^:]+\\):\\(.+\\)\n?"
-                             string)))
+Stopped in X.test, /home/foo/project/src/x.hs:6:25-36"
+  (let ((index (string-match "Stopped \\(?:at\\|in [^,]+,\\) \\([^:]+\\):\\(.+\\)\n?" string)))
     (when index
       (list :path (match-string 1 string)
             :span (haskell-debug-parse-span (match-string 2 string))
@@ -664,9 +666,10 @@ variances in source span notation."
 
 (defun haskell-debug-navigate (direction)
   "Navigate in DIRECTION \"back\" or \"forward\"."
-  (let ((string (haskell-process-queue-sync-request
-                 (haskell-debug-process)
-                 (concat ":" direction))))
+  (let ((string (haskell-debug-trim-break-location
+                 (haskell-process-queue-sync-request
+                  (haskell-debug-process)
+                  (concat ":" direction)))))
     (let ((bindings (haskell-debug-parse-logged string)))
       (setq haskell-debug-bindings-cache
             bindings)
