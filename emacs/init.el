@@ -727,6 +727,17 @@ See `eshell-prompt-regexp'."
 
 
 ;;; ----------------------------------------------------------------------------
+;;; tree-sitter
+;;; ----------------------------------------------------------------------------
+
+(unless (version< emacs-version "29")
+  (use-feature treesit
+    :custom
+    (treesit-extra-load-path (list (concat user-emacs-directory "treesit/")))
+    ))
+
+
+;;; ----------------------------------------------------------------------------
 ;;; configure smaller built-in features and modes
 ;;; ----------------------------------------------------------------------------
 
