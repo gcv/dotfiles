@@ -362,10 +362,6 @@
   )
 
 
-(use-package docker-tramp
-  :pin melpa)
-
-
 (use-package dumb-jump
   :bind
   (("H-." . dumb-jump-go)

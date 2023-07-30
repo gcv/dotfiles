@@ -194,9 +194,19 @@
 (when (version< emacs-version "29")
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
-    (package-install 'use-package)))
-
-(require 'use-package)
+    (package-install 'use-package))
+  (unless (and (package-installed-p 'quelpa)
+               (package-installed-p 'quelpa-use-package))
+    (package-refresh-contents)
+    (package-install 'quelpa)
+    (package-install 'quelpa-use-package))
+  (require 'use-package)
+  (require 'quelpa)
+  (require 'quelpa-use-package)
+  (setq quelpa-stable-p nil
+        quelpa-checkout-melpa-p nil)
+  (quelpa-use-package-activate-advice)    ; undocumented!
+  )
 
 (setq use-package-enable-imenu-support t
       use-package-always-ensure t
@@ -211,18 +221,6 @@
      ;;:straight nil
      :ensure nil
      ,@args))
-
-;; quelpa installation:
-(unless (and (package-installed-p 'quelpa)
-             (package-installed-p 'quelpa-use-package))
-  (package-refresh-contents)
-  (package-install 'quelpa)
-  (package-install 'quelpa-use-package))
-(require 'quelpa)
-(require 'quelpa-use-package)
-(setq quelpa-stable-p nil
-      quelpa-checkout-melpa-p nil)
-(quelpa-use-package-activate-advice)    ; undocumented!
 
 
 ;;; ----------------------------------------------------------------------------
@@ -1142,9 +1140,9 @@ See `eshell-prompt-regexp'."
 
 ;;; load more startup files; order matters!
 (let ((startup-files (list
+                      "packages.el"
                       "utils.el"
                       "interactives.el"
-                      "packages.el"
                       "org.el"
                       "elisp.el"
                       "themes.el"

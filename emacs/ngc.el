@@ -38,6 +38,8 @@
 
 
 (use-package consult-notes
+  :pin melpa
+  :after (vertico)
   :commands (consult-notes consult-notes-search-in-all-notes)
   :config
   (setq consult-notes-sources
