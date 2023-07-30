@@ -7,8 +7,11 @@ about, without reference to any other metadata.  Denote basically
 streamlines the creation of such files while providing facilities to
 link between them.
 
-[Watch the video demo that was produced before version 0.1.0 of the
-package](https://protesilaos.com/codelog/2022-06-18-denote-demo/).
+Denote's file-naming scheme is not limited to "notes".  It can be used
+for all types of file, including those that are not editable in Emacs,
+such as videos.  Naming files in a constistent way makes their
+filtering and retrieval considerably easier.  Denote provides relevant
+facilities to rename files, regardless of file type.
 
 + Package name (GNU ELPA): `denote`
 + Official manual: <https://protesilaos.com/emacs/denote> (the manual is
@@ -19,5 +22,6 @@ package](https://protesilaos.com/codelog/2022-06-18-denote-demo/).
     + GitHub: <https://github.com/protesilaos/denote>
     + GitLab: <https://gitlab.com/protesilaos/denote>
 + Mailing list: <https://lists.sr.ht/~protesilaos/denote>
++ Video demo: <https://protesilaos.com/codelog/2022-06-18-denote-demo/>
 + Backronyms: Denote Everything Neatly; Omit The Excesses.  Don't Ever
   Note Only The Epiphenomenal.

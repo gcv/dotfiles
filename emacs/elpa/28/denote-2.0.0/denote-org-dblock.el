@@ -1,6 +1,6 @@
 ;;; denote-org-dblock.el --- Org Dynamic blocks for denote.el -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022  Free Software Foundation, Inc.
+;; Copyright (C) 2022-2023  Free Software Foundation, Inc.
 
 ;; Author: Elias Storms <elias.storms@gmail.com>
 ;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
@@ -27,7 +27,7 @@
 ;; This file provides a specialized Org-mode extension to Denote: it
 ;; introduces Org Dynamic blocks that collect links to Denote notes
 ;; based on a provided regexp.  In short, this automates
-;; 'denote-link-add-links'.
+;; 'denote-add-links'.
 ;;
 ;; For more information, read the commented code below or refer to the
 ;; Denote manual
@@ -44,7 +44,7 @@
 ;; Org-mode has Dynamic blocks the content of which can be computed
 ;; dynamically based on their header. This functionality can be
 ;; leveraged to create automated lists of links to specific notes
-;; (similar to 'denote-link-add-links', but with the added benefit
+;; (similar to 'denote-add-links', but with the added benefit
 ;; that the list can be updated easily).
 ;;
 ;; A dynamic block of the 'denote-links' type looks like this:
@@ -55,7 +55,9 @@
 ;;
 ;; With point at the #+BEGIN: line, pressing 'C-c C-c' will replace the
 ;; contents of the block with links to notes matching the search
-;; ':regexp'. See also the denote manual on 'denote-link-add-links'.
+;; ':regexp'. The regular expression can be either a regexp string or
+;; a sexp form (the latter is translated via rx).
+;; See also the denote manual on 'denote-add-links'.
 ;;
 ;; Inserting a block can be done via the Org-mode entry point
 ;; 'org-dynamic-block-insert-dblock' and selecting 'denote-links' from
@@ -64,7 +66,8 @@
 ;;
 ;; Org Dynamic blocks of the denote-links type can have the follwoing
 ;; arguments (in any order):
-;;  1. :regexp "string" -- the search input (required)
+;;  1. :regexp input    -- the search input (required), either as a
+;;                         regexp string or a sexp (in rx notation)
 ;;  2. :missing-only t  -- to only include missing links
 ;;  3. :reverse t       -- reverse sort order (or don't, when nil)
 ;;  4. :block-name "n"  -- to include a name for later processing
@@ -98,23 +101,24 @@
 
 ;; By using the `org-dblock-write:' format, Org-mode knows how to
 ;; compute the dynamic block. Inner workings of this function copied
-;; from `denote-link-add-links'.
+;; from `denote-add-links'.
 (defun org-dblock-write:denote-links (params)
   "Function to update `denote-links' Org Dynamic blocks.
 Used by `org-dblock-update' with PARAMS provided by the dynamic block."
-  (let ((regexp (plist-get params :regexp))
-        (missing-only (plist-get params :missing-only))
-        (block-name (plist-get params :block-name))
-        (denote-link-add-links-sort (plist-get params :reverse))
-        (current-file (buffer-file-name)))
+  (let* ((regexp (plist-get params :regexp))
+         (rx (if (listp regexp) (macroexpand `(rx ,regexp)) regexp))
+         (missing-only (plist-get params :missing-only))
+         (block-name (plist-get params :block-name))
+         (denote-link-add-links-sort (plist-get params :reverse))
+         (current-file (buffer-file-name)))
     (when block-name
       (insert "#+name: " block-name "\n"))
     (if missing-only
         (progn
-          (denote-link-add-missing-links regexp)
+          (denote-add-missing-links rx)
           (join-line)) ;; remove trailing empty line left by denote-link--prepare-links
       (when-let ((files (delete current-file
-                                (denote-directory-files-matching-regexp regexp))))
+                                (denote-directory-files-matching-regexp rx))))
         (insert (denote-link--prepare-links files current-file nil))
         (join-line))))) ;; remove trailing empty line
 
@@ -123,8 +127,8 @@ Used by `org-dblock-update' with PARAMS provided by the dynamic block."
 ;; Similarly, we can create a 'denote-backlinks' block that inserts
 ;; links to notes that link to the current note.
 
-;; Note that this block type doesn't take any additional parameters
-;; (such as ':missing-only').
+;; This block type takes the following parameters:
+;;  1. :reverse t       -- reverse sort order (or don't, when nil)
 
 ;;;###autoload
 (defun denote-org-dblock-insert-backlinks ()
@@ -135,14 +139,15 @@ Used by `org-dblock-update' with PARAMS provided by the dynamic block."
 
 (org-dynamic-block-define "denote-backlinks" 'denote-org-dblock-insert-backlinks)
 
-(defun org-dblock-write:denote-backlinks (_params)
+(defun org-dblock-write:denote-backlinks (params)
   "Function to update `denote-backlinks' Org Dynamic blocks.
 Used by `org-dblock-update' with PARAMS provided by the dynamic block."
   (when-let* ((file (buffer-file-name))
               (id (denote-retrieve-filename-identifier file))
               (files (delete file (denote--retrieve-files-in-xrefs id))))
-    (insert (denote-link--prepare-links files file nil))
-    (join-line))) ;; remove trailing empty line
+    (let ((denote-link-add-links-sort (plist-get params :reverse)))
+      (insert (denote-link--prepare-links files file nil))
+      (join-line)))) ;; remove trailing empty line
 
 (provide 'denote-org-dblock)
 ;;; denote-org-dblock.el ends here
