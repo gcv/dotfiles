@@ -191,15 +191,17 @@
 
 (package-initialize)
 
-;; use-package installation:
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+(when (version< emacs-version "29")
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package)))
+
+(require 'use-package)
+
 (setq use-package-enable-imenu-support t
       use-package-always-ensure t
       use-package-always-defer t
       use-package-always-pin "melpa-stable")
-(require 'use-package)
 ;;(setq use-package-verbose t)
 
 (defmacro use-feature (name &rest args)
