@@ -392,8 +392,9 @@
   )
 
 
-;;; eglot: LSP support mode. For Emacs <29, only version 1.9 or earlier work.
-(use-package eglot)
+;;; eglot: LSP support mode (for Emacs <29, only version 1.9 or earlier work)
+(when (version<= emacs-version "29")
+  (use-package eglot))
 
 
 ;;; obsolete: set-fontset-font invocations with appropriate fonts should work
