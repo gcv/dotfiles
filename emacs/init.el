@@ -8,7 +8,7 @@
                       (time-subtract after-init-time before-init-time)))
              gcs-done)))
 
-(when (version< emacs-version "27.0")
+(when (< emacs-major-version 27)
   (load-file (expand-file-name "early-init.el" user-emacs-directory)))
 
 (setq custom-file (concat user-emacs-directory "custom.el"))    ; customize: don't touch init.el
@@ -191,27 +191,16 @@
 
 (package-initialize)
 
-(when (version< emacs-version "29")
+(when (< emacs-major-version 29)
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
-    (package-install 'use-package))
-  (unless (and (package-installed-p 'quelpa)
-               (package-installed-p 'quelpa-use-package))
-    (package-refresh-contents)
-    (package-install 'quelpa)
-    (package-install 'quelpa-use-package))
-  (require 'use-package)
-  (require 'quelpa)
-  (require 'quelpa-use-package)
-  (setq quelpa-stable-p nil
-        quelpa-checkout-melpa-p nil)
-  (quelpa-use-package-activate-advice)    ; undocumented!
-  )
+    (package-install 'use-package)))
+(require 'use-package)
 
-(setq use-package-enable-imenu-support t
-      use-package-always-ensure t
-      use-package-always-defer t
-      use-package-always-pin "melpa-stable")
+(customize-set-variable 'use-package-enable-imenu-support t)
+(customize-set-variable 'use-package-always-ensure t)
+(customize-set-variable 'use-package-always-defer t)
+(customize-set-variable 'use-package-always-pin "melpa-stable")
 ;;(setq use-package-verbose t)
 
 (defmacro use-feature (name &rest args)
@@ -221,6 +210,29 @@
      ;;:straight nil
      :ensure nil
      ,@args))
+
+;; add :vc or :quelpa keywords to use-package
+(cond ((< emacs-major-version 29)
+       ;; quelpa, and quelpa-use-package must be manually installed
+       (unless (and (package-installed-p 'quelpa)
+                    (package-installed-p 'quelpa-use-package))
+         (package-refresh-contents)
+         (package-install 'quelpa)
+         (package-install 'quelpa-use-package))
+       (require 'quelpa)
+       (require 'quelpa-use-package)
+       (setq quelpa-stable-p nil
+             quelpa-checkout-melpa-p nil)
+       (quelpa-use-package-activate-advice) ; undocumented!
+       )
+      ;; vc-use-package must be manually installed
+      ((and (>= emacs-major-version 29) (< emacs-major-version 30))
+       (unless (package-installed-p 'vc-use-package)
+         (package-vc-install "https://github.com/slotThe/vc-use-package"))
+       (require 'vc-use-package))
+      ;; Emacs 30+ have vc-use-package built-in
+      (t
+       (require 'vc-use-package)))
 
 
 ;;; ----------------------------------------------------------------------------
@@ -730,11 +742,11 @@ See `eshell-prompt-regexp'."
 ;;; tree-sitter
 ;;; ----------------------------------------------------------------------------
 
-(unless (version< emacs-version "29")
-  (use-feature treesit
-    :custom
-    (treesit-extra-load-path (list (concat user-emacs-directory "treesit/")))
-    ))
+(use-feature treesit
+  :if (>= emacs-major-version 29)
+  :custom
+  (treesit-extra-load-path (list (concat user-emacs-directory "treesit/")))
+  )
 
 
 ;;; ----------------------------------------------------------------------------

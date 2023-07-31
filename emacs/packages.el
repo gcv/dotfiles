@@ -393,8 +393,8 @@
 
 
 ;;; eglot: LSP support mode (for Emacs <29, only version 1.9 or earlier work)
-(when (version<= emacs-version "29")
-  (use-package eglot))
+(use-package eglot
+  :if (< emacs-major-version 29))
 
 
 ;;; obsolete: set-fontset-font invocations with appropriate fonts should work
@@ -856,9 +856,9 @@
   )
 
 
-(when (not (version<= emacs-version "28"))
-  (use-package org-contrib
-    :pin nongnu))
+(use-package org-contrib
+  :if (>= emacs-major-version 28)
+  :pin nongnu)
 
 
 (use-package origami
