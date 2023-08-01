@@ -590,10 +590,15 @@
 
 (use-feature dired
   :init
+  (require 'dired-x)
+
   (put 'dired-find-alternate-file 'disabled nil)
 
   (setq dired-recursive-deletes 'always
         dired-recursive-copies 'always)
+
+  (setq dired-clean-up-buffers-too t
+        dired-clean-confirm-killing-deleted-buffers t)
 
   ;; quick hack for using GNU ls
   (let* ((ls-binary (executable-find "ls"))
