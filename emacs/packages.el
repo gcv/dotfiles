@@ -55,6 +55,11 @@
   )
 
 
+(use-package breadcrumb
+  :if (>= emacs-major-version 29)
+  :vc (:fetcher github :repo "joaotavora/breadcrumb"))
+
+
 ;;; configuration bisect utility
 (use-package bug-hunter
   :pin "gnu")
