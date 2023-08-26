@@ -75,6 +75,7 @@ packages=(
     mediainfo
     mosh               # since 1.4.0, should not need to be built from mosh-git.nix derivation
     miniserve          # HTTP server
+    murex              # another shell with interesting scripting ideas and decent interactivity
     ngrok              # expose local service over a secure tunnel
     nix-direnv
     nmap
