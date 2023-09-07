@@ -46,8 +46,8 @@ packages=(
     elvish             # good for shell scripting; as of v0.18 too raw for interactive use
     emacs-nox
     entr               # watch a file for changes and act on them
-    exa                # ls replacement
     exif
+    eza                # ls replacement
     fd                 # find replacement
     fdupes
     ffmpeg
