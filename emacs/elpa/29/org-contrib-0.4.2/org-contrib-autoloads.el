@@ -89,15 +89,6 @@
 (register-definition-prefixes "ob-shen" '("org-babel-"))
 
 
-;;; Generated autoloads from ob-spice.el
-
-(autoload 'org-babel-execute:spice "ob-spice" "\
-Execute a block of Spice code `BODY' with org-babel and `PARAMS'.
-
-(fn BODY PARAMS)")
-(register-definition-prefixes "ob-spice" '("ob-spice-concat" "org-babel-expand-body:spice"))
-
-
 ;;; Generated autoloads from ob-stata.el
 
 (register-definition-prefixes "ob-stata" '("org-babel-"))
