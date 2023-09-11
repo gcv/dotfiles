@@ -1,7 +1,7 @@
-(define-package "doom-themes" "20230221.610" "an opinionated pack of modern color-themes"
+(define-package "doom-themes" "20230909.2157" "an opinionated pack of modern color-themes"
   '((emacs "25.1")
     (cl-lib "0.5"))
-  :commit "4c239dbe42232e81c28901000f435746de2a55ab" :authors
+  :commit "64eb74238bb395ac8278047c32226dcb37850686" :authors
   '(("Henrik Lissner" . "contact@henrik.io"))
   :maintainers
   '(("Henrik Lissner" . "contact@henrik.io"))
