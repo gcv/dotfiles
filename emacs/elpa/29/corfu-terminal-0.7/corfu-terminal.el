@@ -4,8 +4,8 @@
 
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-04-11
-;; Version: 0.6
-;; Package-Requires: ((emacs "26.1") (corfu "0.36") (popon "0.1"))
+;; Version: 0.7
+;; Package-Requires: ((emacs "26.1") (corfu "0.36") (popon "0.13"))
 ;; Keywords: convenience
 ;; Homepage: https://codeberg.org/akib/emacs-corfu-terminal
 
