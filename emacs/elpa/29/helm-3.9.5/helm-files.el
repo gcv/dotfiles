@@ -137,7 +137,6 @@ Don't set it directly, use instead `helm-ff-auto-update-initial-value'.")
 ;; watch out!
 (defvar helm-tramp-file-name-regexp "\\`/\\([^/:|]+\\):")
 (defvar helm-ff-tramp-method-regexp "[/|]:\\([^:]*\\)")
-(defvar helm-marked-buffer-name "*helm marked*")
 (defvar helm-ff--auto-update-state nil)
 (defvar helm-ff--deleting-char-backward nil)
 (defvar helm-multi-files--toggle-locate nil)
@@ -166,7 +165,10 @@ than `helm-candidate-number-limit'.")
 This is used only as a let binding.")
 (defvar helm-ff--show-thumbnails nil)
 (defvar helm-ff--thumbnailed-directories nil)
-
+(defvar helm-source-find-files nil
+  "The main source to browse files.
+Should not be used among other sources.")
+(defvar helm-ff-icon-mode nil)
 
 ;;; Helm-find-files - The helm file browser.
 ;;
@@ -652,6 +654,27 @@ currently transfered in an help-echo in mode-line, if you use
   "Percentage unicode sign to use in Rsync reporter."
   :type 'string)
 
+(defcustom helm-ff-rsync-progress-bar-style (if (display-graphic-p) 'bar 'text)
+  "Style of progress-bar for rsync action.
+Value can be either bar or text.
+Progress bar is inaccurate on non graphic displays, use text instead."
+  :type '(choice
+          (const :tag "Progress bar as a bar" bar)
+          (const :tag "Progress bar with text" text)))
+
+(defcustom helm-ff-rsync-progress-bar-info '(percent)
+  "Infos shown at end of Rsync progress bar.
+
+Valid value is a list containing one or more elements from
+percent, size, speed and remain.  When set to nil show nothing at end of
+progress bar.
+This Has no effect when `helm-ff-rsync-progress-bar-style' is text."
+  :type '(set :tag "Check zero or more items to show at end of Rsync progress bar"
+          (const :tag "Show the amount of data copied" size)
+          (const :tag "Show the percentage of data copied" percent)
+          (const :tag "Show the current speed of transfer" speed)
+          (const :tag "Show the time remaining" remain)))
+
 (defcustom helm-trash-default-directory nil
   "The default trash directory.
 You probably don't need to set this when using a Linux system using
@@ -852,10 +875,14 @@ present in this list."
          ;; Force rebuilding the source to remove the highlight match FCT.
          (setq helm-source-find-files nil)))
 
-(defcustom helm-ff-edit-marked-files-fn (if (< emacs-major-version 29)
-                                            #'helm-ff-wfnames
-                                          #'helm-marked-files-in-dired)
-  "A function to edit filenames in a special buffer."
+(defcustom helm-ff-edit-marked-files-fn #'helm-ff-wfnames
+  "A function to edit filenames in a special buffer.
+
+By default `wfnames' package is used to avoid wdired which
+doesn't always work with all emacs versions and also is quite
+clumsy about default-directory among other things.  If you still
+want to use it, helm is still providing
+`helm-marked-files-in-dired'."
   :type '(choice (function :tag "Use Wfnames package to edit filenames."
                   helm-ff-wfnames)
                  (function :tag "Use Wdired package to edit filenames."
@@ -1000,14 +1027,29 @@ present in this list."
   "Face used for rsync mode-line indicator."
   :group 'helm-files-faces)
 
+(defface helm-ff-rsync-progress-1
+  `((t ,@(and (>= emacs-major-version 27) '(:extend t))
+       :background "CadetBlue" :foreground "black"))
+  "Face used for rsync progress bar percentage and proc name."
+  :group 'helm-files-faces)
+
+(defface helm-ff-rsync-progress-2
+  `((t ,@(and (>= emacs-major-version 27) '(:extend t))
+       :background "orange"))
+  "Face used for rsync progress bar progress."
+  :group 'helm-files-faces)
+
+(defface helm-ff-rsync-progress-3
+  `((t ,@(and (>= emacs-major-version 27) '(:extend t))
+       :background "white"))
+  "Face used for rsync progress bar background."
+  :group 'helm-files-faces)
+
+
 
 ;;; Helm-find-files
 ;;
 ;;
-(defvar helm-source-find-files nil
-  "The main source to browse files.
-Should not be used among other sources.")
-
 (defclass helm-source-ffiles (helm-source-sync)
   ((header-name
     :initform (lambda (name)
@@ -1206,13 +1248,16 @@ ACTION can be `rsync' or any action supported by `helm-dired-action'."
                         :initial-input (helm-dwim-target-directory)
                         :history (helm-find-files-history nil :comp-read nil))))))
          (dest-dir-p (file-directory-p dest))
-         (dest-dir   (helm-basedir dest)))
+         (dest-dir   (if dest-dir-p dest (helm-basedir dest))))
     ;; We still need to handle directory creation for Emacs version < 27.1 that
-    ;; doesn't have `dired-create-destination-dirs'.
-    (unless (or (boundp 'dired-create-destination-dirs)
+    ;; doesn't have `dired-create-destination-dirs' and for rsync as well.
+    (unless (or (and (boundp 'dired-create-destination-dirs)
+                     (null (eq action 'rsync)))
                 dest-dir-p
                 (file-directory-p dest-dir))
       (when (y-or-n-p (format "Create directory `%s'? " dest-dir))
+        ;; When saying No here with rsync, `helm-rsync-copy-files' will raise an
+        ;; error about dest not existing.
         (make-directory dest-dir t)))
     (if (eq action 'rsync)
         (helm-rsync-copy-files ifiles dest rsync-switches)
@@ -1249,12 +1294,55 @@ ACTION can be `rsync' or any action supported by `helm-dired-action'."
         ;; instead of sending empty string.
         (unless (equal it "")
           (push (cons proc it) helm-rsync--last-progress-bar-alist))
-        (format " [%s]" (propertize
-                         (or (assoc-default proc helm-rsync--last-progress-bar-alist)
-                             ;; Avoid (wrong-type-argument stringp
-                             ;; nil) when process is not ready.
-                             "")
-                         'face 'helm-ff-rsync-progress)))))
+        (if (eq helm-ff-rsync-progress-bar-style 'text)
+            (format " [%s]" (propertize
+                             (or (assoc-default proc helm-rsync--last-progress-bar-alist)
+                                 ;; Avoid (wrong-type-argument stringp
+                                 ;; nil) when process is not ready.
+                                 "")
+                             'face 'helm-ff-rsync-progress))
+          (format " %s" (or (assoc-default proc helm-rsync--last-progress-bar-alist)
+                            ;; Avoid (wrong-type-argument stringp
+                            ;; nil) when process is not ready.
+                            ""))))))
+
+(defun helm-ff--rsync-progress-bar (progbar proc)
+  ;; progbar == "          2,83G  92%   98,65MB/s    0:00:02  "
+  (let ((infos (split-string
+                (replace-regexp-in-string
+                 "%" helm-rsync-percent-sign
+                 progbar)
+                " " t))
+        percent info)
+    (if (eq helm-ff-rsync-progress-bar-style 'text)
+        (mapconcat 'identity infos " ")
+      (setq info
+            (mapconcat (lambda (x)
+                         (pcase x
+                           (`size    (nth 0 infos))
+                           (`percent (nth 1 infos))
+                           (`speed   (nth 2 infos))
+                           (`remain  (nth 3 infos))))
+                       (helm-mklist helm-ff-rsync-progress-bar-info)
+                       ", "))
+      (when (string-match "\\([0-9]+\\)%" progbar)
+        (setq percent (string-to-number
+                       (match-string 1 progbar))))
+      (if percent
+          (format "%s%s%s%s"
+                  (propertize (capitalize (replace-regexp-in-string
+                                           "<\\([0-9]+\\)>" "(\\1)"
+                                           (process-name proc)))
+                              'display '(height 0.9)
+                              'face 'helm-ff-rsync-progress-1)
+                  (propertize " " 'display `(space :width ,(list percent))
+                              'face 'helm-ff-rsync-progress-2)
+                  (propertize " " 'display `(space :width ,(list (- 100 percent)))
+                              'face 'helm-ff-rsync-progress-3)
+                  (propertize info
+                              'display '(height 0.9)
+                              'face 'helm-ff-rsync-progress-1))
+        ""))))
 
 (defun helm-rsync-mode-line (proc)
   "Add Rsync progress to the mode line."
@@ -1283,9 +1371,9 @@ DEST must be a directory.  SWITCHES when unspecified default to
                        collect (helm-rsync-remote2rsync f))
         dest (helm-rsync-remote2rsync dest))
   (let* ((buf (generate-new-buffer-name helm-rsync-process-buffer))
-         (port (when (helm-aand (file-remote-p dest 'host)
-                                (string-match "#\\([0-9]+\\)" it))
-                 (match-string 1)))
+         (host (file-remote-p dest 'host))
+         (port (when (and host (string-match "#\\([0-9]+\\)" host))
+                 (match-string 1 host)))
          (proc (start-process-shell-command
                 "rsync" buf
                 (format "rsync %s"
@@ -1298,30 +1386,30 @@ DEST must be a directory.  SWITCHES when unspecified default to
                                       ;; unless user already specified
                                       ;; it himself with the -e option
                                       ;; by editing command.
-                                      (and switches
-                                           (cl-loop for arg in switches never
-                                                    (string-match-p
-                                                     "\\`-e" arg)))
+                                      switches
+                                      (cl-loop for arg in switches never
+                                               (string-match-p
+                                                "\\`-e" arg))
                                       (list (format "-e 'ssh -p %s'"
                                                     port)))
                                  files (list dest))
                                    " ")))))
     (helm-rsync-mode-line proc)
     (set-process-sentinel
-     proc `(lambda (process event)
-             (cond ((string= event "finished\n")
-                    (message "%s copied %s files"
-                             (capitalize (process-name process))
-                             ,(length files)))
-                   (t (error "Process %s %s with code %s"
-                             (process-name process)
-                             (process-status process)
-                             (process-exit-status process))))
-             (setq helm-rsync-progress-str-alist
-                   (delete (assoc process helm-rsync-progress-str-alist)
-                           helm-rsync-progress-str-alist))
-             (helm-rsync-restore-mode-line process)
-             (force-mode-line-update)))
+     proc (lambda (process event)
+            (cond ((string= event "finished\n")
+                   (message "%s copied %s files"
+                            (capitalize (process-name process))
+                            (length files)))
+                  (t (error "Process %s %s with code %s"
+                            (process-name process)
+                            (process-status process)
+                            (process-exit-status process))))
+            (setq helm-rsync-progress-str-alist
+                  (delete (assoc process helm-rsync-progress-str-alist)
+                          helm-rsync-progress-str-alist))
+            (helm-rsync-restore-mode-line process)
+            (force-mode-line-update)))
     (set-process-filter proc #'helm-rsync-process-filter)))
 
 (defun helm-rsync-process-filter (proc output)
@@ -1354,15 +1442,9 @@ DEST must be a directory.  SWITCHES when unspecified default to
         (when (re-search-backward "^[^[:cntrl:]]" nil t)
           (setq fname (helm-basename
                        (buffer-substring-no-properties
-                        (point) (point-at-eol))))))
+                        (point) (pos-eol))))))
       ;; Now format the string for the mode-line.
-      (let ((ml-str (mapconcat 'identity
-                               (split-string
-                                (replace-regexp-in-string
-                                 "%" helm-rsync-percent-sign
-                                 progbar)
-                                " " t)
-                               " ")))
+      (let ((ml-str (helm-ff--rsync-progress-bar progbar proc)))
         (setq ml-str (propertize ml-str 'help-echo
                                  (format "%s->%s" (process-name proc) fname)))
         ;; Now associate the formatted
@@ -1373,7 +1455,7 @@ DEST must be a directory.  SWITCHES when unspecified default to
                 (push (cons proc ml-str) helm-rsync-progress-str-alist)))))
     ;; Finally update mode-line.
     (unless helm-rsync-no-mode-line-update
-      (force-mode-line-update))))
+      (force-mode-line-update t))))
 
 (defun helm-ff-kill-rsync-process (process)
   "Kill rsync process PROCESS.
@@ -2838,6 +2920,7 @@ Ensure disabling `helm-ff-auto-update-flag' before undoing."
           (helm-check-minibuffer-input))
       (setq helm-ff-auto-update-flag old--flag)
       (setq helm-ff--auto-update-state helm-ff-auto-update-flag))))
+(put 'helm-ff-undo 'helm-only t)
 
 ;;; Auto-update - helm-find-files auto expansion of directories.
 ;;
@@ -3051,7 +3134,7 @@ and should be used carefully elsewhere, or not at all, using
                                     (string-match-p "/[[:alpha:]]:/" match))
                                 (1+ (match-beginning 0))
                                 (match-beginning 0)))
-                 (buffer-substring-no-properties (point) (point-at-eol)))
+                 (buffer-substring-no-properties (point) (pos-eol)))
                fname)))))
 
 (defun helm-point-file-in-dired (file)
@@ -3129,7 +3212,7 @@ editing absolute fnames in previous Emacs versions."
                      "\\):")
              nil t)
         (list
-         (buffer-substring-no-properties (point-at-bol) (match-beginning 2))
+         (buffer-substring-no-properties (pos-bol) (match-beginning 2))
          (buffer-substring-no-properties (match-beginning 2) (match-end 2)))))))
 
 (defun helm-ff--get-host-from-tramp-invalid-fname (fname)
@@ -3214,7 +3297,7 @@ debugging purpose."
                 (or (looking-back "[/|]" (1- (point)))
                     (looking-back
                      (mapconcat (lambda (m) (format "[/|]%s" m)) methods "\\|")
-                     (point-at-bol))))
+                     (pos-bol))))
               (setq result nil)
             (setq result it)))))
     result))
@@ -3568,13 +3651,13 @@ later in the transformer."
             (helm-acase (match-string 0)
               ("*" (replace-match "")
                    (put-text-property
-                    (point-at-bol) (point-at-eol) 'helm-ff-exe t))
+                    (pos-bol) (pos-eol) 'helm-ff-exe t))
               ("@" (replace-match "")
                    (put-text-property
-                    (point-at-bol) (point-at-eol) 'helm-ff-sym t))
+                    (pos-bol) (pos-eol) 'helm-ff-sym t))
               ("/" (replace-match "")
                    (put-text-property
-                    (point-at-bol) (point-at-eol) 'helm-ff-dir t))
+                    (pos-bol) (pos-eol) 'helm-ff-dir t))
               (("=" "|" ">") (replace-match "")))))
         (while (re-search-forward "[\"]" nil t)
           (replace-match ""))
@@ -4296,7 +4379,7 @@ Arg FILE is the real part of candidate, a filename with no props."
   "Action transformer for `helm-source-find-files'."
   (let ((str-at-point (with-helm-current-buffer
                         (buffer-substring-no-properties
-                         (point-at-bol) (point-at-eol)))))
+                         (pos-bol) (pos-eol)))))
     (when (file-regular-p candidate)
       (setq actions (helm-append-at-nth
                      actions '(("Checksum File" . helm-ff-checksum)) 4)))
@@ -4495,7 +4578,7 @@ specifying the trash directory with TRASH-DIR arg."
                              (when (re-search-forward "^path=" nil t)
                                (let ((path (helm-url-unhex-string
                                             (buffer-substring-no-properties
-                                             (point) (point-at-eol)))))
+                                             (point) (pos-eol)))))
                                  (if (string-match "\\`/" path)
                                      ;; path is absolute
                                      path
@@ -4511,7 +4594,7 @@ Line number should be added at end of fname preceded with \":\".
 E.g. \"foo:12\"."
   (let ((linum (with-helm-current-buffer
                  (let ((str (buffer-substring-no-properties
-                             (point-at-bol) (point-at-eol))))
+                             (pos-bol) (pos-eol))))
                    (when (string-match ":\\([0-9]+:?\\)" str)
                      (match-string 1 str))))))
     (find-file candidate)
@@ -5208,7 +5291,7 @@ arg."
                                          (save-excursion
                                            (when (re-search-backward
                                                   (regexp-quote guess)
-                                                  (point-at-bol) t)
+                                                  (pos-bol) t)
                                              (point))))
                               it (point)))
              (full-path-p (and (stringp guess)
@@ -5371,8 +5454,7 @@ Use it for non-interactive calls of `helm-find-files'."
                            (expand-file-name tap))))
          ;; Ensure not being prompted for password each time we
          ;; navigate to a directory.
-         (password-cache t)
-         (minibuffer-completing-file-name t))
+         (password-cache t))
     (helm-set-local-variable 'helm-follow-mode-persistent nil
                              'helm-drag-mouse-1-fn 'helm-ff-drag-mouse-1-fn)
     (unless helm-source-find-files
@@ -5583,7 +5665,7 @@ source is `helm-source-find-files'."
   "Try to find library path at point.
 Find inside `require' and `declare-function' sexp."
   (require 'find-func)
-  (let* ((beg-sexp (save-excursion (search-backward "(" (point-at-bol) t)))
+  (let* ((beg-sexp (save-excursion (search-backward "(" (pos-bol) t)))
          (end-sexp (save-excursion (ignore-errors (end-of-defun)) (point)))
          (sexp     (and beg-sexp end-sexp
                         (buffer-substring-no-properties

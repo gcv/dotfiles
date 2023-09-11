@@ -223,7 +223,7 @@ If `helm-turn-on-show-completion' is nil do nothing."
                     (or
                      (and (eq (char-before) ?\ )
                           (save-excursion
-                            (skip-syntax-backward " " (point-at-bol))
+                            (skip-syntax-backward " " (pos-bol))
                             (memq (symbol-at-point)
                                   helm-lisp-unquoted-function-list)))
                      (and (eq (char-before) ?\')
@@ -241,7 +241,7 @@ If `helm-turn-on-show-completion' is nil do nothing."
                     (and (eq (char-before) ?\')
                          (save-excursion
                            (forward-char (if (funcall fn-sym-p) -2 -1))
-                           (skip-syntax-backward " " (point-at-bol))
+                           (skip-syntax-backward " " (pos-bol))
                            (memq (symbol-at-point)
                                  helm-lisp-quoted-function-list)))
                     (eq (char-before) ?\())) ; no paren before str.
@@ -263,7 +263,7 @@ of symbol before point."
   (save-excursion
     (let (beg
           (end (point))
-          (boundary (field-beginning nil nil (point-at-bol))))
+          (boundary (field-beginning nil nil (pos-bol))))
       (if (re-search-backward (or regexp "\\_<") boundary t)
           (setq beg (match-end 0))
         (setq beg boundary))
@@ -416,6 +416,7 @@ Argument NAME allows specifiying what function to use to display
 documentation when SYM name is the same for function and variable."
   (let ((doc (condition-case _err
                  (pcase sym
+                   ((pred class-p) (cl--class-docstring (cl--find-class sym)))
                    ((and (pred fboundp) (pred boundp))
                     (pcase name
                       ("describe-function"
@@ -423,6 +424,10 @@ documentation when SYM name is the same for function and variable."
                       ("describe-variable"
                        (documentation-property sym 'variable-documentation t))
                       (_ (documentation sym t))))
+                   ((pred custom-theme-p)
+                    (documentation-property sym 'theme-documentation t))
+                   ((pred helm-group-p) (documentation-property
+                                         sym 'group-documentation t))
                    ((pred fboundp)  (documentation sym t))
                    ((pred boundp)   (documentation-property
                                      sym 'variable-documentation t))
@@ -436,7 +441,12 @@ documentation when SYM name is the same for function and variable."
         (truncate-string-to-width
          (substitute-command-keys (car (split-string doc "\n")))
          end-column nil nil t)
-      "Not documented")))
+      (if (or (symbol-function sym) (boundp sym) (facep sym) (helm-group-p sym))
+          "Not documented"
+        ;; Symbol exist but has no definition yet e.g.
+        ;; (advice-add 'foo-test :override (lambda () (message "invalid
+        ;; function"))) and foo-test is not already defined.
+        "Not already defined or loaded"))))
 
 ;;; File completion.
 ;;
@@ -453,7 +463,7 @@ documentation when SYM name is the same for function and variable."
                     (or force
                         (save-excursion
                           (end-of-line)
-                          (search-backward tap (point-at-bol) t)
+                          (search-backward tap (pos-bol) t)
                           (setq beg (point))
                           (looking-back "[^'`( ]" (1- (point)))))
                     (expand-file-name
@@ -489,7 +499,7 @@ double quote."
   (let* ((tap (thing-at-point 'filename)))
     (if (and tap (save-excursion
                    (end-of-line)
-                   (search-backward tap (point-at-bol) t)
+                   (search-backward tap (pos-bol) t)
                    (looking-back "[^'`( ]" (1- (point)))))
         (helm-complete-file-name-at-point)
       (helm-lisp-completion-at-point))))
@@ -533,8 +543,7 @@ is only used to test DEFAULT."
 
 (defun helm-apropos-short-doc-transformer (candidates _source)
   (if helm-apropos-show-short-doc
-      (cl-loop with max-len = (buffer-local-value 'helm-candidate-buffer-longest-len
-                                                  (get-buffer (helm-candidate-buffer)))
+      (cl-loop with max-len = (helm-in-buffer-get-longest-candidate)
                for cand in candidates
                for doc = (helm-get-first-line-documentation (intern-soft cand))
                collect (cons (format "%s%s%s"
@@ -615,7 +624,9 @@ is only used to test DEFAULT."
   (helm-build-in-buffer-source "Variables"
     :init (lambda ()
             (helm-apropos-init
-             (lambda (x) (and (boundp x) (not (keywordp x)))) default))
+             (lambda (x)
+               (and (boundp x) (not (keywordp x)) (not (class-p x))))
+             default))
     :fuzzy-match helm-apropos-fuzzy-match
     :filtered-candidate-transformer
     (delq nil (list (and (null helm-apropos-fuzzy-match)
@@ -721,7 +732,7 @@ is only used to test DEFAULT."
     :persistent-help "Toggle describe class"
     :keymap helm-apropos-map
     :action '(("Describe Class" . helm-describe-class)
-              ("Find Class" . helm-find-function)
+              ("Find Class (C-u for source)" . helm-find-function)
               ("Info lookup" . helm-info-lookup-symbol))))
 
 (defun helm-def-source--eieio-generic (&optional default)
@@ -743,7 +754,7 @@ is only used to test DEFAULT."
     :persistent-help "Toggle describe generic function"
     :keymap helm-apropos-map
     :action '(("Describe function" . helm-describe-function)
-              ("Find function" . helm-find-function)
+              ("Find function (C-u for source)" . helm-find-function)
               ("Info lookup" . helm-info-lookup-symbol))))
 
 (defun helm-info-lookup-fallback-source (candidate)

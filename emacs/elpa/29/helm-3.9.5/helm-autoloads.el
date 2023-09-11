@@ -71,17 +71,6 @@ Preconfigured `helm' for color." t)
 (register-definition-prefixes "helm-color" '("helm-"))
 
 
-;;; Generated autoloads from helm-comint.el
-
-(autoload 'helm-comint-prompts "helm-comint" "\
-Pre-configured `helm' to browse the prompts of the current comint buffer." t)
-(autoload 'helm-comint-prompts-all "helm-comint" "\
-Pre-configured `helm' to browse the prompts of all comint sessions." t)
-(autoload 'helm-comint-input-ring "helm-comint" "\
-Preconfigured `helm' that provide completion of `comint' history." t)
-(register-definition-prefixes "helm-comint" '("helm-"))
-
-
 ;;; Generated autoloads from helm-command.el
 
 (autoload 'helm-M-x "helm-command" "\
@@ -143,23 +132,6 @@ Preconfigured `helm' for timers." t)
 (autoload 'helm-complex-command-history "helm-elisp" "\
 Preconfigured `helm' for complex command history." t)
 (register-definition-prefixes "helm-elisp" '("helm-" "with-helm-show-completion"))
-
-
-;;; Generated autoloads from helm-elisp-package.el
-
-(autoload 'helm-list-elisp-packages "helm-elisp-package" "\
-Preconfigured `helm' for listing and handling Emacs packages.
-
-(fn ARG)" t)
-(autoload 'helm-list-elisp-packages-no-fetch "helm-elisp-package" "\
-Preconfigured Helm for Emacs packages.
-
-Same as `helm-list-elisp-packages' but don't fetch packages on
-remote.  Called with a prefix ARG always fetch packages on
-remote.
-
-(fn ARG)" t)
-(register-definition-prefixes "helm-elisp-package" '("helm-"))
 
 
 ;;; Generated autoloads from helm-epa.el
@@ -826,6 +798,20 @@ To use this bind it to a key in `isearch-mode-map'." t)
 (register-definition-prefixes "helm-occur" '("helm-"))
 
 
+;;; Generated autoloads from helm-packages.el
+
+(autoload 'helm-packages "helm-packages" "\
+Helm interface to manage packages.
+
+With a prefix arg ARG refresh package list.
+
+When installing or upgrading ensure to refresh the package list
+to avoid errors with outdated packages no more availables.
+
+(fn &optional ARG)" t)
+(register-definition-prefixes "helm-packages" '("helm-packages-"))
+
+
 ;;; Generated autoloads from helm-regexp.el
 
 (autoload 'helm-regexp "helm-regexp" "\
@@ -876,12 +862,6 @@ Fill in the symbol at point by default.
 
 (fn ARG)" t)
 (register-definition-prefixes "helm-semantic" '("helm-s"))
-
-
-;;; Generated autoloads from helm-shell.el
-
-(defalias 'helm-shell-prompts 'helm-comint-prompts)
-(defalias 'helm-shell-prompts-all 'helm-comint-prompts-all)
 
 
 ;;; Generated autoloads from helm-sys.el
