@@ -1,6 +1,6 @@
-(define-package "puni" "20230214.1156" "Parentheses Universalistic"
+(define-package "puni" "20230910.1438" "Parentheses Universalistic"
   '((emacs "26.1"))
-  :commit "a39a4ecac7279bed1a150a895bbc80baa7272888" :authors
+  :commit "67fd542d9b633d729bdc46fca50a8d0bb6ec6ffb" :authors
   '(("Hao Wang" . "amaikinono@gmail.com"))
   :maintainers
   '(("Hao Wang" . "amaikinono@gmail.com"))
