@@ -2,6 +2,13 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 0.38 (2023-08-14)
+
+- =corfu-quick=: Bugfix.
+- =corfu-mode-map=: Add mode map.
+- Replace =corfu-excluded-modes= with =global-corfu-modes=, the Emacs 28 convention
+  for globalized minor modes.
+
 * Version 0.37 (2023-07-02)
 
 - Bugfixes.

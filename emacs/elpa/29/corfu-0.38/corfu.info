@@ -1,4 +1,4 @@
-This is doc7LcqNy.info, produced by makeinfo version 6.7 from
+This is doczlMZ3b.info, produced by makeinfo version 6.8 from
 corfu.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: doc7LcqNy.info,  Node: Top,  Next: Features,  Up: (dir)
+File: doczlMZ3b.info,  Node: Top,  Next: Features,  Up: (dir)
 
 corfu.el - COmpletion in Region FUnction
 ****************************************
@@ -24,13 +24,11 @@ In-buffer completion UIs in Emacs can hook into ‘completion-in-region’,
 which implements the interaction with the user.  Completions at point
 are either provided by commands like ‘dabbrev-completion’ or by
 pluggable backends (‘completion-at-point-functions’, Capfs) and are then
-passed to ‘completion-in-region’.  Most programming, text and shell
-major modes implement a Capf.  The Emacs language server clients use
-Capfs, which retrieve completions from the server via the language
-server protocol (LSP). Corfu does not include its own completion
-backends.  The Emacs built-in Capfs and the Capfs provided by other
-programming language packages are usually sufficient.  A few additional
-Capfs and completion utilities are provided by the Cape
+passed to ‘completion-in-region’.  Many programming, text and shell
+major modes implement a Capf.  Corfu does not include its own completion
+backends.  The Emacs built-in Capfs and the Capfs provided by
+third-party programming language packages are often sufficient.
+Additional Capfs and completion utilities are provided by the Cape
 (https://github.com/minad/cape) package.
 
    *NOTE*: Corfu uses child frames to show the popup and falls back to
@@ -59,12 +57,13 @@ Installation and Configuration
 * Completing in the minibuffer::
 * Completing in the Eshell or Shell::
 * Orderless completion::
+* TAB-only completion::
 * TAB-and-Go completion::
 * Transfer completion to the minibuffer::
 
 
 
-File: doc7LcqNy.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
+File: doczlMZ3b.info,  Node: Features,  Next: Installation and Configuration,  Prev: Top,  Up: Top
 
 1 Features
 **********
@@ -93,7 +92,7 @@ File: doc7LcqNy.info,  Node: Features,  Next: Installation and Configuration,  P
      Candidate documentation in echo area, popup or separate buffer
 
 
-File: doc7LcqNy.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
+File: doczlMZ3b.info,  Node: Installation and Configuration,  Next: Key bindings,  Prev: Features,  Up: Top
 
 2 Installation and Configuration
 ********************************
@@ -135,7 +134,7 @@ before turning on ‘global-corfu-mode’.
 
        ;; Recommended: Enable Corfu globally.
        ;; This is recommended since Dabbrev can be used globally (M-/).
-       ;; See also `corfu-exclude-modes'.
+       ;; See also `global-corfu-modes'.
        :init
        (global-corfu-mode))
 
@@ -183,7 +182,7 @@ not a necessity.
        ;;       orderless-component-separator #'orderless-escapable-split-on-space)
        (setq completion-styles '(orderless basic)
              completion-category-defaults nil
-             completion-category-overrides '((file (styles . (partial-completion))))))
+             completion-category-overrides '((file (styles partial-completion)))))
 
    The ‘basic’ completion style is specified as fallback in addition to
 ‘orderless’ in order to ensure that completion commands which rely on
@@ -198,9 +197,9 @@ once with ‘find-file’ if you enter a wildcard.  You may also give the
 
    See also the Corfu Wiki (https://github.com/minad/corfu/wiki) and the
 Cape manual (https://github.com/minad/cape) for additional Capf
-configuration tips.  The Eglot and Lsp-mode configurations are
-documented in the wiki.  For more general documentation read the chapter
-about completion in the Emacs manual
+configuration tips.  The language server protocol (LSP) configurations
+are documented in the wiki.  For more general documentation read the
+chapter about completion in the Emacs manual
 (https://www.gnu.org/software/emacs/manual/html_node/emacs/Completion.html).
 If you want to create your own Capfs, you can find documentation about
 completion in the Elisp manual
@@ -212,11 +211,12 @@ completion in the Elisp manual
 * Completing in the minibuffer::
 * Completing in the Eshell or Shell::
 * Orderless completion::
+* TAB-only completion::
 * TAB-and-Go completion::
 * Transfer completion to the minibuffer::
 
 
-File: doc7LcqNy.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
+File: doczlMZ3b.info,  Node: Auto completion,  Next: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.1 Auto completion
 ===================
@@ -252,8 +252,8 @@ Elisp buffer or the Emacs scratch buffer.
    If you want to combine fast prefix filtering and Orderless filtering
 you can still do that by defining a custom Orderless completion style
 via ‘orderless-define-completion-style’.  We use a custom style
-dispatcher, which enables prefix filtering for input shorter than 4
-characters.  Note that such a setup is quite advanced.  Please refer to
+dispatcher, which enables efficient prefix filtering for input shorter
+than 4 characters.  Note that such a setup is advanced.  Please refer to
 the Orderless documentation and source code for further details.
 
      (defun orderless-fast-dispatch (word index total)
@@ -266,11 +266,11 @@ the Orderless documentation and source code for further details.
 
      (setq-local corfu-auto t
                  corfu-auto-delay 0
-                 corfu-auto-prefix 0
-                 completion-styles '(orderless-fast))
+                 corfu-auto-prefix 1
+                 completion-styles '(orderless-fast basic))
 
 
-File: doc7LcqNy.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
+File: doczlMZ3b.info,  Node: Completing in the minibuffer,  Next: Completing in the Eshell or Shell,  Prev: Auto completion,  Up: Installation and Configuration
 
 2.2 Completing in the minibuffer
 ================================
@@ -310,7 +310,7 @@ a password is read from the minibuffer.
      (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
-File: doc7LcqNy.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
+File: doczlMZ3b.info,  Node: Completing in the Eshell or Shell,  Next: Orderless completion,  Prev: Completing in the minibuffer,  Up: Installation and Configuration
 
 2.3 Completing in the Eshell or Shell
 =====================================
@@ -327,7 +327,7 @@ widely used shells like Bash, Zsh or Fish.
    When pressing ‘RET’ while the Corfu popup is visible, the
 ‘corfu-insert’ command will be invoked.  This command does inserts the
 currently selected candidate, but it does not send the prompt input to
-Eshell or the comint process.  Therefore you often have to press ‘RET’
+Eshell or the Comint process.  Therefore you often have to press ‘RET’
 twice which feels like an unnecessary double confirmation.  Fortunately
 it is easy to improve this!  In my configuration I define the advice
 ‘corfu-send-shell’ which sends the candidate after insertion.
@@ -359,16 +359,15 @@ Pcomplete offers the ‘pcomplete-from-help’ function which parses the
 functionality is not completely equivalent.  For example it does not
 display annotations in Eshell, but this may get fixed in Emacs 30.
 
-   Unfortunately Pcomplete had a few technical issues on Emacs 28 and
-older.  We can work around the issues with the Cape
-(https://github.com/minad/cape) library (Completion at point
-extensions).  Cape provides wrappers which sanitize the Pcomplete
-function.  If you use Emacs 28 or older installing these advices is
-strongly recommend such that Pcomplete works properly.  On Emacs 29 the
-advices are not necessary anymore, since almost all of the related bugs
-have been fixed.  I therefore recommend to remove the advices on Emacs
-29 and eventually report any remaining Pcomplete issues upstream, such
-that they can be fixed at the root.
+   Pcomplete has a few bugs on Emacs 28 and older.  We can work around
+the issues with the Cape (https://github.com/minad/cape) library
+(Completion at point extensions).  Cape provides wrappers which sanitize
+the Pcomplete function.  If you use Emacs 28 or older installing these
+advices is recommended such that Pcomplete works properly.  On Emacs 29
+the advices should not be necessary anymore, since most of the relevant
+bugs have been fixed.  I therefore recommend to remove the advices on
+Emacs 29 and eventually report any remaining Pcomplete issues upstream,
+such that they can be fixed.
 
      ;; The advices are only needed on Emacs 28 and older.
      (when (< emacs-major-version 29)
@@ -380,7 +379,7 @@ that they can be fixed at the root.
        (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
 
 
-File: doc7LcqNy.info,  Node: Orderless completion,  Next: TAB-and-Go completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
+File: doczlMZ3b.info,  Node: Orderless completion,  Next: TAB-only completion,  Prev: Completing in the Eshell or Shell,  Up: Installation and Configuration
 
 2.4 Orderless completion
 ========================
@@ -446,9 +445,48 @@ components.
        (global-corfu-mode))
 
 
-File: doc7LcqNy.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: Orderless completion,  Up: Installation and Configuration
+File: doczlMZ3b.info,  Node: TAB-only completion,  Next: TAB-and-Go completion,  Prev: Orderless completion,  Up: Installation and Configuration
 
-2.5 TAB-and-Go completion
+2.5 TAB-only completion
+=======================
+
+By default, Corfu steals both the ‘RET’ and ‘TAB’ keys, when the Corfu
+popup is open.  This can feel intrusive, in particular in combination
+with auto completion.  ‘RET’ may accidentally commit an automatically
+selected candidate, while you actually wanted to start a new line.  As
+an alternative we can unbind the ‘RET’ key completely from ‘corfu-map’
+or reserve the ‘RET’ key only in shell modes.
+
+     ;; TAB-only configuration
+     (use-package corfu
+       :custom
+       (corfu-auto t)               ;; Enable auto completion
+       (corfu-preselect 'directory) ;; Select the first candidate, except for directories
+
+       ;; Free the RET key for less intrusive behavior.
+       :bind
+       (:map corfu-map
+             ;; Option 1: Unbind RET completely
+             ;;; ("RET" . nil)
+             ;; Option 2: Use RET only in shell modes
+             ("RET" . (menu-item "" nil :filter corfu-insert-shell-filter)))
+
+       :init
+       (global-corfu-mode))
+
+     (defun corfu-insert-shell-filter (&optional _)
+       "Insert completion candidate and send when inside comint/eshell."
+       (when (derived-mode-p 'eshell-mode 'comint-mode)
+         (lambda ()
+           (interactive)
+           (corfu-insert)
+           ;; `corfu-send-shell' was defined above
+           (corfu-send-shell))))
+
+
+File: doczlMZ3b.info,  Node: TAB-and-Go completion,  Next: Transfer completion to the minibuffer,  Prev: TAB-only completion,  Up: Installation and Configuration
+
+2.6 TAB-and-Go completion
 =========================
 
 You may be interested in configuring Corfu in TAB-and-Go style.
@@ -476,9 +514,9 @@ candidate explicitly with ‘RET’.
        (global-corfu-mode))
 
 
-File: doc7LcqNy.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
+File: doczlMZ3b.info,  Node: Transfer completion to the minibuffer,  Prev: TAB-and-Go completion,  Up: Installation and Configuration
 
-2.6 Transfer completion to the minibuffer
+2.7 Transfer completion to the minibuffer
 =========================================
 
 Sometimes it is useful to transfer the Corfu completion session to the
@@ -505,7 +543,7 @@ via ‘completing-read’.
      (add-to-list 'corfu-continue-commands #'corfu-move-to-minibuffer)
 
 
-File: doc7LcqNy.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
+File: doczlMZ3b.info,  Node: Key bindings,  Next: Extensions,  Prev: Installation and Configuration,  Up: Top
 
 3 Key bindings
 **************
@@ -531,7 +569,7 @@ bindings:
    • ‘keyboard-escape-quit’ -> ‘corfu-reset’
 
 
-File: doc7LcqNy.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
+File: doczlMZ3b.info,  Node: Extensions,  Next: Complementary packages,  Prev: Key bindings,  Up: Top
 
 4 Extensions
 ************
@@ -571,7 +609,7 @@ the following extensions come with the Corfu ELPA package:
    See the Commentary of those files for configuration details.
 
 
-File: doc7LcqNy.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
+File: doczlMZ3b.info,  Node: Complementary packages,  Next: Alternatives,  Prev: Extensions,  Up: Top
 
 5 Complementary packages
 ************************
@@ -585,29 +623,33 @@ look into complementary packages to enhance your setup.
      The corfu-terminal package provides an overlay-based display for
      Corfu, such that you can use Corfu in terminal Emacs.
 
+   • corfu-candidate-overlay
+     (https://code.bsdgeek.org/adam/corfu-candidate-overlay): Shows
+     as-you-type auto-suggestion candidate overlay with a visual
+     indication of whether there are many or exactly one candidate
+     available (works only with ‘corfu-auto’ disabled).
+
    • Orderless (https://github.com/oantolin/orderless): Corfu supports
      completion styles, including the advanced ‘orderless’ completion
      style, where the filtering expressions are separated by spaces or
      another character (see ‘corfu-separator’).
 
-   • Cape (https://github.com/minad/cape): Additional Capf backends and
-     ‘completion-in-region’ commands are provided by the Cape package.
-     Among others, the package supplies the file completion backend
-     ‘cape-file’ and the Dabbrev backend ‘cape-dabbrev’.  Cape provides
-     the ‘cape-company-to-capf’ adapter to reuse Company backends in
-     Corfu.
+   • Cape (https://github.com/minad/cape): Provides additional Capf
+     backends and ‘completion-in-region’ commands.  Among others, the
+     package supplies the file completion backend ‘cape-file’ and the
+     Dabbrev backend ‘cape-dabbrev’.  Cape provides the
+     ‘cape-company-to-capf’ adapter to reuse Company backends in Corfu.
 
    • kind-icon (https://github.com/jdtsmith/kind-icon): Icons are
-     supported by Corfu via an external package.  The kind-icon package
+     supported by Corfu via external packages.  The kind-icon package
      provides beautifully styled SVG icons based on monochromatic icon
-     sets like material design.
+     sets.
 
    • pcmpl-args (https://github.com/JonWaltman/pcmpl-args.el): Extend
-     the Eshell/Shell Pcomplete mechanism with support for many more
-     commands.  Similar to the Fish shell, Pcomplete uses man page
+     the Eshell/Shell Pcomplete mechanism with support for many
+     commands.  Similar to the Fish shell, pcmpl-args uses man page
      parsing to dynamically retrieve the completions and helpful
-     annotations.  This package brings Eshell completions to another
-     level!
+     annotations.
 
    • Tempel (https://github.com/minad/tempel): Tiny template/snippet
      package with templates in Lisp syntax, which can be used in
@@ -618,7 +660,7 @@ look into complementary packages to enhance your setup.
      counterpart of Corfu.
 
 
-File: doc7LcqNy.info,  Node: Alternatives,  Next: Debugging Corfu,  Prev: Complementary packages,  Up: Top
+File: doczlMZ3b.info,  Node: Alternatives,  Next: Debugging Corfu,  Prev: Complementary packages,  Up: Top
 
 6 Alternatives
 **************
@@ -651,7 +693,7 @@ File: doc7LcqNy.info,  Node: Alternatives,  Next: Debugging Corfu,  Prev: Comple
      ‘consult-completion-in-region’ is your best option.
 
 
-File: doc7LcqNy.info,  Node: Debugging Corfu,  Next: Contributions,  Prev: Alternatives,  Up: Top
+File: doczlMZ3b.info,  Node: Debugging Corfu,  Next: Contributions,  Prev: Alternatives,  Up: Top
 
 7 Debugging Corfu
 *****************
@@ -673,7 +715,7 @@ given that the hooks are executed after every command.
      (advice-add #'corfu--post-command :around #'force-debug)
 
 
-File: doc7LcqNy.info,  Node: Contributions,  Prev: Debugging Corfu,  Up: Top
+File: doczlMZ3b.info,  Node: Contributions,  Prev: Debugging Corfu,  Up: Top
 
 8 Contributions
 ***************
@@ -686,20 +728,21 @@ copyright assignment to the FSF.
 
 Tag Table:
 Node: Top208
-Node: Features2378
-Node: Installation and Configuration3860
-Node: Auto completion9536
-Node: Completing in the minibuffer11907
-Node: Completing in the Eshell or Shell14063
-Node: Orderless completion17602
-Node: TAB-and-Go completion20704
-Node: Transfer completion to the minibuffer21816
-Node: Key bindings23254
-Node: Extensions24373
-Node: Complementary packages26173
-Node: Alternatives28389
-Node: Debugging Corfu30135
-Node: Contributions30927
+Node: Features2271
+Node: Installation and Configuration3753
+Node: Auto completion9460
+Node: Completing in the minibuffer11841
+Node: Completing in the Eshell or Shell13997
+Node: Orderless completion17492
+Node: TAB-only completion20592
+Node: TAB-and-Go completion22118
+Node: Transfer completion to the minibuffer23229
+Node: Key bindings24667
+Node: Extensions25786
+Node: Complementary packages27586
+Node: Alternatives29976
+Node: Debugging Corfu31722
+Node: Contributions32514
 
 End Tag Table
 

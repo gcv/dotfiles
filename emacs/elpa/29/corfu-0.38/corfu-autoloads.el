@@ -52,7 +52,7 @@ Corfu mode is enabled in all buffers where `corfu--on' would do it.
 See `corfu-mode' for more information on Corfu mode.
 
 (fn &optional ARG)" t)
-(register-definition-prefixes "corfu" '("corfu-"))
+(register-definition-prefixes "corfu" '("corfu-" "global-corfu-modes"))
 
 
 ;;; Generated autoloads from corfu-echo.el

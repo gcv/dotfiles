@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.37
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
+;; Version: 0.38
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.2"))
 ;; Homepage: https://github.com/minad/corfu
 ;; Keywords: abbrev, convenience, matching, completion, wp
 
@@ -123,10 +123,6 @@ separator: Only stay alive if there is no match and
 `corfu-separator' has been inserted."
   :type '(choice boolean (const separator)))
 
-(defcustom corfu-exclude-modes nil
-  "List of modes excluded by `global-corfu-mode'."
-  :type '(repeat symbol))
-
 (defcustom corfu-left-margin-width 0.5
   "Width of the left margin in units of the character width."
   :type 'float)
@@ -222,8 +218,11 @@ completion backend in use is expensive."
   '((t :inherit shadow :strike-through t))
   "Face used for deprecated candidates.")
 
+(defvar-keymap corfu-mode-map
+  :doc "Keymap used when `corfu-mode' is active.")
+
 (defvar-keymap corfu-map
-  :doc "Corfu keymap used when popup is shown."
+  :doc "Keymap used when popup is shown."
   "<remap> <move-beginning-of-line>" #'corfu-prompt-beginning
   "<remap> <move-end-of-line>" #'corfu-prompt-end
   "<remap> <beginning-of-buffer>" #'corfu-first
@@ -359,6 +358,33 @@ completion backend in use is expensive."
         (keymap-set map (format "<%s-%s>" k (1+ i)) #'ignore)))
     map)
   "Ignore all mouse clicks.")
+
+(defun corfu--capf-wrapper (fun &optional prefix)
+  "Wrapper for `completion-at-point' FUN.
+The wrapper determines if the Capf is applicable at the current position
+and performs sanity checking on the returned result.  PREFIX is a prefix
+length override, set to t for manual completion."
+  (pcase (funcall fun)
+    ((and res `(,beg ,end ,table . ,plist))
+     (and (integer-or-marker-p beg) ;; Valid Capf result
+          (<= beg (point) end)      ;; Sanity checking
+          ;; When auto completing, check the prefix length!
+          (let ((len (or prefix
+                         (plist-get plist :company-prefix-length)
+                         (- (point) beg))))
+            (or (eq len t) (>= len corfu-auto-prefix)))
+          ;; For non-exclusive Capfs, check for valid completion.
+          (or (not (eq 'no (plist-get plist :exclusive)))
+              (let* ((str (buffer-substring-no-properties beg end))
+                     (pt (- (point) beg))
+                     (pred (plist-get plist :predicate))
+                     (md (completion-metadata (substring str 0 pt) table pred)))
+                ;; We use `completion-try-completion' to check if there are
+                ;; completions. The upstream `completion--capf-wrapper' uses
+                ;; `try-completion' which is incorrect since it only checks for
+                ;; prefix completions.
+                (completion-try-completion str table pred pt md)))
+          (cons fun res)))))
 
 (defun corfu--make-buffer (name)
   "Create buffer with NAME."
@@ -1232,62 +1258,37 @@ Quit if no candidate is selected."
 ;;;###autoload
 (define-minor-mode corfu-mode
   "COmpletion in Region FUnction."
-  :global nil :group 'corfu
+  :group 'corfu :keymap corfu-mode-map
   (cond
    (corfu-mode
-    ;; FIXME: Install advice which fixes `completion--capf-wrapper', such that
-    ;; it respects the completion styles for non-exclusive Capfs. See FIXME in
-    ;; the `completion--capf-wrapper' function in minibuffer.el, where the
-    ;; issue has been mentioned. We never uninstall this advice since the
-    ;; advice is active *globally*.
-    (advice-add #'completion--capf-wrapper :around #'corfu--capf-wrapper-advice)
     (and corfu-auto (add-hook 'post-command-hook #'corfu--auto-post-command nil 'local))
     (setq-local completion-in-region-function #'corfu--in-region))
    (t
     (remove-hook 'post-command-hook #'corfu--auto-post-command 'local)
     (kill-local-variable 'completion-in-region-function))))
 
-(defun corfu--capf-wrapper (fun &optional prefix)
-  "Wrapper for `completion-at-point' FUN.
-The wrapper determines if the Capf is applicable at the current position
-and performs sanity checking on the returned result.  PREFIX is a prefix
-length override, set to t for manual completion."
-  (pcase (funcall fun)
-    ((and res `(,beg ,end ,table . ,plist))
-     (and (integer-or-marker-p beg) ;; Valid Capf result
-          (<= beg (point) end)      ;; Sanity checking
-          ;; When auto completing, check the prefix length!
-          (let ((len (or prefix
-                         (plist-get plist :company-prefix-length)
-                         (- (point) beg))))
-            (or (eq len t) (>= len corfu-auto-prefix)))
-          ;; For non-exclusive Capfs, check for valid completion.
-          (or (not (eq 'no (plist-get plist :exclusive)))
-              (let* ((str (buffer-substring-no-properties beg end))
-                     (pt (- (point) beg))
-                     (pred (plist-get plist :predicate))
-                     (md (completion-metadata (substring str 0 pt) table pred)))
-                ;; We use `completion-try-completion' to check if there are
-                ;; completions. The upstream `completion--capf-wrapper' uses
-                ;; `try-completion' which is incorrect since it only checks for
-                ;; prefix completions.
-                (completion-try-completion str table pred pt md)))
-          (cons fun res)))))
-
-(defun corfu--capf-wrapper-advice (orig fun which)
-  "Around advice for `completion--capf-wrapper'.
-The ORIG function takes the FUN and WHICH arguments."
-  (if corfu-mode (corfu--capf-wrapper fun t) (funcall orig fun which)))
+(defcustom global-corfu-modes t
+  "List of modes where Corfu should be enabled.
+The variable can either be t, nil or a list of t, nil, mode
+symbols or elements of the form (not modes)."
+  :type '(repeat sexp))
 
 ;;;###autoload
-(define-globalized-minor-mode global-corfu-mode corfu-mode corfu--on :group 'corfu)
+(define-globalized-minor-mode global-corfu-mode
+  corfu-mode corfu--on
+  :group 'corfu)
 
 (defun corfu--on ()
   "Turn `corfu-mode' on."
-  (unless (or noninteractive
-              buffer-read-only
-              (eq (aref (buffer-name) 0) ?\s)
-              (apply #'derived-mode-p corfu-exclude-modes))
+  (when (and (not (or noninteractive (eq (aref (buffer-name) 0) ?\s)))
+             ;; TODO backport `easy-mmode--globalized-predicate-p'
+             (or (eq t global-corfu-modes)
+                 (eq t (cl-loop for p in global-corfu-modes thereis
+                                (pcase-exhaustive p
+                                  ('t t)
+                                  ('nil 0)
+                                  ((pred symbolp) (and (derived-mode-p p) t))
+                                  (`(not . ,m) (and (apply #'derived-mode-p m) 0)))))))
     (corfu-mode 1)))
 
 ;; Emacs 28: Do not show Corfu commands with M-X
@@ -1296,11 +1297,24 @@ The ORIG function takes the FUN and WHICH arguments."
                corfu-insert-separator corfu-prompt-beginning corfu-prompt-end))
   (put sym 'completion-predicate #'ignore))
 
+(defun corfu--capf-wrapper-advice (orig fun which)
+  "Around advice for `completion--capf-wrapper'.
+The ORIG function takes the FUN and WHICH arguments."
+  (if corfu-mode (corfu--capf-wrapper fun t) (funcall orig fun which)))
+
 (defun corfu--eldoc-advice ()
   "Return non-nil if Corfu is currently not active."
   (not (and corfu-mode completion-in-region-mode)))
 
-(advice-add #'eldoc-display-message-no-interference-p :before-while #'corfu--eldoc-advice)
+;; Install advice which fixes `completion--capf-wrapper', such that it respects
+;; the completion styles for non-exclusive Capfs. See the fixme comment in the
+;; `completion--capf-wrapper' function in minibuffer.el, where the issue has
+;; been mentioned.
+(advice-add #'completion--capf-wrapper :around #'corfu--capf-wrapper-advice)
+
+;; Register Corfu with ElDoc
+(advice-add #'eldoc-display-message-no-interference-p
+            :before-while #'corfu--eldoc-advice)
 (eldoc-add-command #'corfu-complete #'corfu-insert)
 
 (provide 'corfu)
