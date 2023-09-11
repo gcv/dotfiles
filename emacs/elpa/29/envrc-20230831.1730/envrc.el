@@ -6,7 +6,7 @@
 ;; Keywords: processes, tools
 ;; Homepage: https://github.com/purcell/envrc
 ;; Package-Requires: ((seq "2") (emacs "25.1") (inheritenv "0.1"))
-;; Package-Version: 0
+;; Package-Version: 0.6
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -75,6 +75,10 @@
 Messages are written into the *envrc-debug* buffer."
   :type 'boolean)
 
+(defcustom envrc-update-on-eshell-directory-change t
+  "Whether envrc will update environment when changing directory in eshell."
+  :type 'boolean)
+
 (defcustom envrc-direnv-executable "direnv"
   "The direnv executable used by envrc."
   :type 'string)
@@ -104,6 +108,7 @@ You can set this to nil to disable the lighter."
     (define-key map (kbd "a") 'envrc-allow)
     (define-key map (kbd "d") 'envrc-deny)
     (define-key map (kbd "r") 'envrc-reload)
+    (define-key map (kbd "l") 'envrc-show-log)
     map)
   "Keymap for commands in `envrc-mode'.
 See `envrc-mode-map' for how to assign a prefix binding to these."
@@ -123,8 +128,12 @@ e.g. (define-key envrc-mode-map (kbd \"C-c e\") 'envrc-command-map)"
   :lighter envrc-lighter
   :keymap envrc-mode-map
   (if envrc-mode
-      (envrc--update)
-    (envrc--clear (current-buffer))))
+      (progn
+        (envrc--update)
+        (when (and (derived-mode-p 'eshell-mode) envrc-update-on-eshell-directory-change)
+          (add-hook 'eshell-directory-change-hook #'envrc--update nil t)))
+    (envrc--clear (current-buffer))
+    (remove-hook 'eshell-directory-change-hook #'envrc--update t)))
 
 ;;;###autoload
 (define-globalized-minor-mode envrc-global-mode envrc-mode
@@ -290,6 +299,7 @@ also appear in PAIRS."
   (with-current-buffer buf
     (kill-local-variable 'exec-path)
     (kill-local-variable 'process-environment)
+    (kill-local-variable 'info-directory-list)
     (when (derived-mode-p 'eshell-mode)
       (if (fboundp 'eshell-set-path)
           (eshell-set-path (butlast exec-path))
@@ -311,7 +321,9 @@ also appear in PAIRS."
         (when (derived-mode-p 'eshell-mode)
           (if (fboundp 'eshell-set-path)
               (eshell-set-path path)
-            (setq-local eshell-path-env path)))))))
+            (setq-local eshell-path-env path))))
+      (when-let ((info-path (getenv "INFOPATH")))
+        (setq-local Info-directory-list (parse-colon-path info-path))))))
 
 (defun envrc--update-env (env-dir)
   "Refresh the state of the direnv in ENV-DIR and apply in all relevant buffers."
@@ -357,7 +369,7 @@ ARGS is as for `call-process'."
   (interactive)
   (envrc--with-required-current-env env-dir
     (let* ((default-directory env-dir)
-           (exit-code (envrc--call-process-with-global-env envrc-direnv-executable nil (get-buffer-create "*envrc-allow*") nil "reload")))
+           (exit-code (envrc--call-process-with-global-env envrc-direnv-executable nil (get-buffer-create "*envrc-reload*") nil "reload")))
       (if (zerop exit-code)
           (envrc--update-env env-dir)
         (display-buffer "*envrc-reload*")
@@ -395,6 +407,12 @@ This can be useful if a .envrc has been deleted."
     (with-current-buffer buf
       (envrc--update))))
 
+(defun envrc-show-log ()
+  "Open envrc log buffer."
+  (interactive)
+  (if-let ((buffer (get-buffer "*envrc*")))
+      (pop-to-buffer buffer)
+    (message "Envrc log buffer does not exist")))
 
 
 ;;; Propagate local environment to commands that use temp buffers
