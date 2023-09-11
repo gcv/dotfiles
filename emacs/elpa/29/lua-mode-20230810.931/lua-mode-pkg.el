@@ -1,6 +1,6 @@
-(define-package "lua-mode" "20221218.605" "a major-mode for editing Lua scripts"
+(define-package "lua-mode" "20230810.931" "a major-mode for editing Lua scripts"
   '((emacs "24.3"))
-  :commit "ad639c62e38a110d8d822c4f914af3e20b40ccc4" :authors
+  :commit "7eb8eaa420c25477c830623b830fd18dc350cdfb" :authors
   '(("2011-2013 immerrr" . "immerrr+lua@gmail.com")
     ("2010-2011 Reuben Thomas" . "rrt@sc3d.org")
     ("2006 Juergen Hoetzel" . "juergen@hoetzel.info")
