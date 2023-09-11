@@ -1,11 +1,11 @@
 ;;; inspector.el --- Tool for inspection of Emacs Lisp objects  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2022 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 ;; Author: Mariano Montone <marianomontone@gmail.com>
 ;; URL: https://github.com/mmontone/emacs-inspector
 ;; Keywords: debugging, tool, lisp, development
-;; Version: 0.31
+;; Version: 0.33
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -243,13 +243,14 @@ LIMIT controls the truncation."
     (put-text-property (point-min) (point) 'inspector-form (gensym))
     ;; Make buttons from all the "..."s.  Since there might be many of
     ;; them, use text property buttons.
-    (goto-char (point-min))
-    (while (< (point) (point-max))
-      (let ((end (next-single-property-change (point) 'cl-print-ellipsis
-                                              nil (point-max))))
-        (when (get-text-property (point) 'cl-print-ellipsis)
-          (make-text-button (point) end :type 'backtrace-ellipsis))
-        (goto-char end)))
+    (unless (boundp 'cl-print-expand-ellipsis-function) ;Emacs-30
+      (goto-char (point-min))
+      (while (< (point) (point-max))
+        (let ((end (next-single-property-change (point) 'cl-print-ellipsis
+                                                nil (point-max))))
+          (when (get-text-property (point) 'cl-print-ellipsis)
+            (make-text-button (point) end :type 'backtrace-ellipsis))
+          (goto-char end))))
     (buffer-string)))
 
 (cl-defgeneric inspector--face-for-object (object)
@@ -732,7 +733,7 @@ is expected to be used.")
   (inspector--insert-title (inspector--princ-to-string (type-of integer)))
   (inspector--insert-label "integer")
   (insert (inspector--princ-to-string integer))
-  (when (<= 0 integer (max-char))
+  (when (characterp integer)
     (newline)
     (inspector--insert-label "character")
     (insert (inspector--princ-to-string (char-to-string integer)))))
@@ -893,8 +894,10 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
     (with-current-buffer-window "*inspector pprint*"
         nil nil
       (emacs-lisp-mode)
+      ;; local-set-key modifies the mode map of the entire buffer's major mode (emacs-lisp-mode-map).
+      ;; to modify the map for this buffer only, we need to use a copy of the mode-map:
+      (use-local-map (copy-keymap emacs-lisp-mode-map))
       (local-set-key "q" #'kill-this-buffer)
-
       (let ((pp-use-max-width inspector-pp-use-max-width)
             (pp-max-width inspector-pp-max-width))
         (ignore pp-use-max-width pp-max-width)
