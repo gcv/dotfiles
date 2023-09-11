@@ -230,6 +230,20 @@ Call `helm' only with SOURCES and BUFFER as args.
 (register-definition-prefixes "helm-multi-match" '("helm-m"))
 
 
+;;; Generated autoloads from helm-packages.el
+
+(autoload 'helm-packages "helm-packages" "\
+Helm interface to manage packages.
+
+With a prefix arg ARG refresh package list.
+
+When installing or upgrading ensure to refresh the package list
+to avoid errors with outdated packages no more availables.
+
+(fn &optional ARG)" t)
+(register-definition-prefixes "helm-packages" '("helm-packages-"))
+
+
 ;;; Generated autoloads from helm-source.el
 
 (register-definition-prefixes "helm-source" '("helm-"))
