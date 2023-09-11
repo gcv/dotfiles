@@ -2,6 +2,15 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 0.17 (2023-08-14)
+
+- Bugfixes.
+- =cape-dict=: Always use grep, remove =cape-dict-use-grep=.
+- =cape-dict=: Add =cape-dict-limit=.
+- Remove obsolete alias =cape-ispell=.
+- Generalize =cape--cached-table=. The candidate computation function must return
+  a pair of a predicate function and the list of candidates.
+
 * Version 0.16 (2023-07-02)
 
 - =cape-dabbrev=: Respect =dabbrev-abbrev-char-regexp= and

@@ -46,8 +46,9 @@ See the user options `cape-dabbrev-min-length' and
 (fn &optional INTERACTIVE)" t)
 (autoload 'cape-dict "cape" "\
 Complete word from dictionary at point.
-See the custom option `cape-dict-file'.
-If INTERACTIVE is nil the function acts like a Capf.
+This completion function works best if the dictionary is sorted
+by frequency.  See the custom option `cape-dict-file'.  If
+INTERACTIVE is nil the function acts like a Capf.
 
 (fn &optional INTERACTIVE)" t)
 (autoload 'cape-abbrev "cape" "\
