@@ -7,7 +7,7 @@
 ;;       Chris Barrett <chris.d.barrett@me.com>
 ;;       Bozhidar Batsov <bozhidar@batsov.com>
 ;;       Arthur Evstifeev <lod@pisem.net>
-;;       Michael Sanders <michael.sanders@fastmail.com>
+;;       Michael Sanders <https://github.com/msanders>
 
 ;; This file is not part of GNU Emacs.
 
@@ -571,9 +571,9 @@ SCHEME is the name of the project scheme in Xcode.  If it is nil or omitted,
 the value of `swift-mode:ios-project-scheme' is used."
   (interactive
    (let* ((default-project-directory
-            (or
-             (swift-mode:find-xcode-workspace-directory)
-             (swift-mode:find-xcode-project-directory)))
+           (or
+            (swift-mode:find-xcode-workspace-directory)
+            (swift-mode:find-xcode-project-directory)))
           (project-directory
            (if current-prefix-arg
                (swift-mode:read-project-directory default-project-directory)
@@ -902,9 +902,9 @@ SCHEME is the name of the project scheme in Xcode.  If it is nil or omitted,
 the value of `swift-mode:ios-project-scheme' is used."
   (interactive
    (let* ((default-project-directory
-            (or
-             (swift-mode:find-xcode-workspace-directory)
-             (swift-mode:find-xcode-project-directory)))
+           (or
+            (swift-mode:find-xcode-workspace-directory)
+            (swift-mode:find-xcode-project-directory)))
           (project-directory
            (if current-prefix-arg
                (swift-mode:read-project-directory default-project-directory)
