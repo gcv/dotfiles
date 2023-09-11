@@ -22,19 +22,7 @@ This function is designed for convenient use as an \"around\" advice.
 ARGS is as for ORIG.
 
 (fn FUNC &rest ARGS)")
-(autoload 'inheritenv "inheritenv" "\
-Wrap BODY so that the environment it sees will match the current value.
-This is useful if BODY creates a temp buffer, because that will
-not inherit any buffer-local values of variables `exec-path' and
-`process-environment'.
-
-(fn &rest BODY)" nil t)
-(autoload 'inheritenv-add-advice "inheritenv" "\
-Advise function FUNC with `inheritenv-apply'.
-This will ensure that any buffers (including temporary buffers)
-created by FUNC will inherit the caller's environment.
-
-(fn FUNC)" nil t)
+(register-definition-prefixes "inheritenv" '("inheritenv"))
 
 ;;; End of scraped data
 

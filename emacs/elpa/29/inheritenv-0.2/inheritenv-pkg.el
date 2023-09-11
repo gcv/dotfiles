@@ -1,6 +1,6 @@
-(define-package "inheritenv" "0.1" "Make temp buffers inherit buffer-local environment variables"
+(define-package "inheritenv" "0.2" "Make temp buffers inherit buffer-local environment variables"
   '((emacs "24.4"))
-  :commit "bc680a2670156cd482edba83d8c81142282174ba" :authors
+  :commit "00106bb208d06e5f1ec25d0c2f41c000cbb25076" :authors
   '(("Steve Purcell" . "steve@sanityinc.com"))
   :maintainers
   '(("Steve Purcell" . "steve@sanityinc.com"))
