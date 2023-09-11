@@ -106,7 +106,7 @@
 
       (bg-changed        "#f5e8b0")
       (bg-changed-faint  "#f5f2bf")
-      (bg-changed-refine "#f0df9a")
+      (bg-changed-refine "#f0db9a")
       (fg-changed        "#553d00")
 
       (bg-removed        "#f2d0c6")
@@ -176,7 +176,7 @@
       (name green-warmer)
       (keybind magenta)
       (identifier magenta-faint)
-      (prompt magenta)
+      (prompt magenta-warmer)
 
 ;;;; Code mappings
 

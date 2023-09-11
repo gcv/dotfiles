@@ -84,6 +84,16 @@
 (put 'ef-light 'theme-properties '(:background-mode light :kind color-scheme :family ef))
 
 
+;;; Generated autoloads from ef-maris-dark-theme.el
+
+(put 'ef-maris-dark 'theme-properties '(:background-mode dark :kind color-scheme :family ef))
+
+
+;;; Generated autoloads from ef-maris-light-theme.el
+
+(put 'ef-maris-light 'theme-properties '(:background-mode light :kind color-scheme :family ef))
+
+
 ;;; Generated autoloads from ef-night-theme.el
 
 (put 'ef-night 'theme-properties '(:background-mode dark :kind color-scheme :family ef))

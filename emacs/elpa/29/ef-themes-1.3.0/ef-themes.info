@@ -1,4 +1,4 @@
-This is docdPApVs.info, produced by makeinfo version 6.7 from
+This is doc77GeBN.info, produced by makeinfo version 6.7 from
 ef-themes.texi.
 
 Copyright (C) 2022-2023 Free Software Foundation, Inc.
@@ -20,7 +20,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docdPApVs.info,  Node: Top,  Next: Installation,  Up: (dir)
+File: doc77GeBN.info,  Node: Top,  Next: Installation,  Up: (dir)
 
 ef-themes: colorful and legible themes
 **************************************
@@ -43,11 +43,11 @@ package called ‘ef-themes’, and provides every other piece of
 information pertinent to it.
 
    The documentation furnished herein corresponds to stable version
-1.2.0, released on 2023-06-30.  Any reference to a newer feature which
+1.3.0, released on 2023-08-09.  Any reference to a newer feature which
 does not yet form part of the latest tagged commit, is explicitly marked
 as such.
 
-   Current development target is 1.3.0-dev.
+   Current development target is 1.4.0-dev.
 
    • Package name (GNU ELPA): ‘ef-themes’
    • Official manual: <https://protesilaos.com/emacs/ef-themes>
@@ -140,7 +140,7 @@ Indices
 
 
 
-File: docdPApVs.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
+File: doc77GeBN.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
 
 1 Installation
 **************
@@ -151,7 +151,7 @@ File: docdPApVs.info,  Node: Installation,  Next: Sample configuration,  Prev: T
 * Manual installation::
 
 
-File: docdPApVs.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
+File: doc77GeBN.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
 
 1.1 GNU ELPA package
 ====================
@@ -170,7 +170,7 @@ archive.  Read:
 <https://protesilaos.com/codelog/2022-05-13-emacs-elpa-devel/>.
 
 
-File: docdPApVs.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
+File: doc77GeBN.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
 
 1.2 Manual installation
 =======================
@@ -197,7 +197,7 @@ following commands in a shell prompt:
    Everything is in place to set up the package.
 
 
-File: docdPApVs.info,  Node: Sample configuration,  Next: Themes for red-green or blue-yellow color deficiency,  Prev: Installation,  Up: Top
+File: doc77GeBN.info,  Node: Sample configuration,  Next: Themes for red-green or blue-yellow color deficiency,  Prev: Installation,  Up: Top
 
 2 Sample configuration
 **********************
@@ -254,7 +254,7 @@ File: docdPApVs.info,  Node: Sample configuration,  Next: Themes for red-green o
      ;; - `ef-themes-preview-colors-current'
 
 
-File: docdPApVs.info,  Node: Themes for red-green or blue-yellow color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
+File: doc77GeBN.info,  Node: Themes for red-green or blue-yellow color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
 
 3 Themes for red-green or blue-yellow color deficiency
 ******************************************************
@@ -273,7 +273,7 @@ themes that are optimized for such cases.  The names of the themes are:
    *note Loading a theme::.
 
 
-File: docdPApVs.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green or blue-yellow color deficiency,  Up: Top
+File: doc77GeBN.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green or blue-yellow color deficiency,  Up: Top
 
 4 Customization options
 ***********************
@@ -297,7 +297,7 @@ Principles.).
 * Palette overrides::
 
 
-File: docdPApVs.info,  Node: Disable other themes,  Next: Toggle between two Ef themes,  Up: Customization options
+File: doc77GeBN.info,  Node: Disable other themes,  Next: Toggle between two Ef themes,  Up: Customization options
 
 4.1 Disable other themes
 ========================
@@ -320,7 +320,7 @@ customizations.  Users who use such customization bundles must set this
 variable to a nil value.
 
 
-File: docdPApVs.info,  Node: Toggle between two Ef themes,  Next: Enable mixed fonts,  Prev: Disable other themes,  Up: Customization options
+File: doc77GeBN.info,  Node: Toggle between two Ef themes,  Next: Enable mixed fonts,  Prev: Disable other themes,  Up: Customization options
 
 4.2 Toggle between two Ef themes
 ================================
@@ -341,7 +341,7 @@ either with minibuffer completion or at random (*note Commands to load
 an Ef theme::).
 
 
-File: docdPApVs.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Toggle between two Ef themes,  Up: Customization options
+File: doc77GeBN.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Toggle between two Ef themes,  Up: Customization options
 
 4.3 Enable mixed fonts
 ======================
@@ -370,7 +370,7 @@ family of the ‘fixed-pitch’ and ‘variable-pitch’ faces.  The ‘fontaine
 package on GNU ELPA (by Protesilaos) can be helpful in this regard.
 
 
-File: docdPApVs.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
+File: doc77GeBN.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
 
 4.4 UI typeface
 ===============
@@ -394,7 +394,7 @@ family of the ‘fixed-pitch’ and ‘variable-pitch’ faces.  The ‘fontaine
 package on GNU ELPA (by Protesilaos) can be helpful in this regard.
 
 
-File: docdPApVs.info,  Node: Option for headings,  Next: Style of region highlight,  Prev: UI typeface,  Up: Customization options
+File: doc77GeBN.info,  Node: Option for headings,  Next: Style of region highlight,  Prev: UI typeface,  Up: Customization options
 
 4.5 Option for headings
 =======================
@@ -481,7 +481,7 @@ This will retain the original aesthetic for that level.  For example:
              (t . t))) ; default style for all unspecified levels
 
 
-File: docdPApVs.info,  Node: Style of region highlight,  Next: Palette overrides,  Prev: Option for headings,  Up: Customization options
+File: doc77GeBN.info,  Node: Style of region highlight,  Next: Palette overrides,  Prev: Option for headings,  Up: Customization options
 
 4.6 Style of region highlight
 =============================
@@ -516,7 +516,7 @@ legible.
      (setq ef-themes-region '(intense no-extend neutral))
 
 
-File: docdPApVs.info,  Node: Palette overrides,  Prev: Style of region highlight,  Up: Customization options
+File: doc77GeBN.info,  Node: Palette overrides,  Prev: Style of region highlight,  Up: Customization options
 
 4.7 Palette overrides
 =====================
@@ -673,7 +673,7 @@ top of the buffer.  In the above example, the first instance of
 ‘blue-warmer’ is the override and the second is the original one.
 
 
-File: docdPApVs.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
+File: doc77GeBN.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
 
 5 Loading a theme
 *****************
@@ -705,7 +705,7 @@ theme::).  For example:
      (ef-themes-select 'ef-summer)
 
 
-File: docdPApVs.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
+File: doc77GeBN.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
 
 6 Commands to load an Ef theme
 ******************************
@@ -780,7 +780,7 @@ a light/dark theme and then loads an appropriate Ef theme at random:
        (ef-themes-load-random 'light))
 
 
-File: docdPApVs.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
+File: doc77GeBN.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
 
 7 Preview theme colors
 **********************
@@ -814,7 +814,7 @@ contents are, such as ‘*ef-summer-list-colors*’ for named colors and
 ‘*ef-summer-list-mappings*’ for the semantic color mappings.
 
 
-File: docdPApVs.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
+File: doc77GeBN.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
 
 8 Use colors from the active Ef theme
 *************************************
@@ -843,7 +843,7 @@ color mapping are still possible.  At any rate, we will not outright
 break any code that uses ‘ef-themes-with-colors’.
 
 
-File: docdPApVs.info,  Node: Do-It-Yourself customizations,  Next: Faces defined by the Ef themes,  Prev: Use colors from the active Ef theme,  Up: Top
+File: doc77GeBN.info,  Node: Do-It-Yourself customizations,  Next: Faces defined by the Ef themes,  Prev: Use colors from the active Ef theme,  Up: Top
 
 9 Do-It-Yourself customizations
 *******************************
@@ -863,7 +863,7 @@ their liking.
 * Tweak goto-address-mode faces::
 
 
-File: docdPApVs.info,  Node: Get a single color from the palette,  Next: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
+File: doc77GeBN.info,  Node: Get a single color from the palette,  Next: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
 9.1 Get a single color from the palette
 =======================================
@@ -917,7 +917,7 @@ with/without overrides and when recursive mappings are introduced.
      ;; => "#d3303a"
 
 
-File: docdPApVs.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Prev: Get a single color from the palette,  Up: Do-It-Yourself customizations
+File: doc77GeBN.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Prev: Get a single color from the palette,  Up: Do-It-Yourself customizations
 
 9.2 The general approach to advanced DIY changes
 ================================================
@@ -1004,7 +1004,7 @@ mechanism.  We are willing to help and shall provide comprehensive
 documentation where necessary.
 
 
-File: docdPApVs.info,  Node: A theme-agnostic hook for theme loading,  Next: Add support for hl-todo,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
+File: doc77GeBN.info,  Node: A theme-agnostic hook for theme loading,  Next: Add support for hl-todo,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
 9.3 A theme-agnostic hook for theme loading
 ===========================================
@@ -1055,7 +1055,7 @@ the user can replace it with ‘after-enable-theme-hook’ should they need
 to (provided they understand the implications).
 
 
-File: docdPApVs.info,  Node: Add support for hl-todo,  Next: Make the mode line like the modus-themes default,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
+File: doc77GeBN.info,  Node: Add support for hl-todo,  Next: Make the mode line like the modus-themes default,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
 
 9.4 Add support for hl-todo
 ===========================
@@ -1099,7 +1099,7 @@ method.
 commands for previewing the palette (*note Preview theme colors::).
 
 
-File: docdPApVs.info,  Node: Make the mode line like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
+File: doc77GeBN.info,  Node: Make the mode line like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
 
 9.5 Make the mode line like the ‘modus-themes’ default
 ======================================================
@@ -1133,7 +1133,7 @@ snippet:
      `(mode-line ((,c :background ,bg-mode-line :foreground ,fg-mode-line :box (:line-width 1 :color ,fg-dim))))
 
 
-File: docdPApVs.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the mode line like the modus-themes default,  Up: Do-It-Yourself customizations
+File: doc77GeBN.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the mode line like the modus-themes default,  Up: Do-It-Yourself customizations
 
 9.6 Configure bold and italic faces
 ===================================
@@ -1185,7 +1185,7 @@ pick fonts that work in tandem):
 provides the means to configure font families via faces.
 
 
-File: docdPApVs.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
+File: doc77GeBN.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
 
 9.7 Tweak ‘org-modern’ timestamps
 =================================
@@ -1215,7 +1215,7 @@ further trouble (*note Enable mixed fonts::).
    For any further issues, you are welcome to ask for help.
 
 
-File: docdPApVs.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
+File: doc77GeBN.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
 
 9.8 Tweak goto-address-mode faces
 =================================
@@ -1240,7 +1240,7 @@ addresses stand out more, due to the use of the uncommon ‘@’ caharacter
 but also because they are often enclosed in angled brackets).
 
 
-File: docdPApVs.info,  Node: Faces defined by the Ef themes,  Next: Supported packages or face groups,  Prev: Do-It-Yourself customizations,  Up: Top
+File: doc77GeBN.info,  Node: Faces defined by the Ef themes,  Next: Supported packages or face groups,  Prev: Do-It-Yourself customizations,  Up: Top
 
 10 Faces defined by the Ef themes
 *********************************
@@ -1275,7 +1275,7 @@ packages, like Dired, Trashed, Ibuffer.
    • ‘ef-themes-underline-warning’
 
 
-File: docdPApVs.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Faces defined by the Ef themes,  Up: Top
+File: doc77GeBN.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Faces defined by the Ef themes,  Up: Top
 
 11 Supported packages or face groups
 ************************************
@@ -1292,11 +1292,12 @@ already covers everything most users need.
 * Packages that are hard to support::
 
 
-File: docdPApVs.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: doc77GeBN.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.1 Explicitly supported packages or face groups
 =================================================
 
+   • ace-window
    • all basic faces
    • all-the-icons
    • all-the-icons-dired
@@ -1392,6 +1393,7 @@ File: docdPApVs.info,  Node: Explicitly supported packages or face groups,  Next
    • rst-mode
    • ruler-mode
    • shell-script-mode (sh-mode)
+   • shortdoc
    • show-paren-mode
    • shr
    • smerge
@@ -1417,7 +1419,7 @@ File: docdPApVs.info,  Node: Explicitly supported packages or face groups,  Next
    • woman
 
 
-File: docdPApVs.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
+File: doc77GeBN.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.2 Implicitly supported packages or face groups
 =================================================
@@ -1443,7 +1445,7 @@ in perfectly.  If there are refinements we need to made, then we need to
 intervene (*note Explicitly supported packages or face groups::).
 
 
-File: docdPApVs.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: doc77GeBN.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.3 Packages that are hard to support
 ======================================
@@ -1511,7 +1513,7 @@ web-mode
    The above list is non-exhaustive though you get the idea.
 
 
-File: docdPApVs.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
+File: doc77GeBN.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
 
 12 Principles
 *************
@@ -1555,7 +1557,7 @@ File: docdPApVs.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages o
 * Minimal VS maximal scope::
 
 
-File: docdPApVs.info,  Node: Minimal VS maximal scope,  Up: Principles
+File: doc77GeBN.info,  Node: Minimal VS maximal scope,  Up: Principles
 
 12.1 Minimal VS maximal scope
 =============================
@@ -1574,7 +1576,7 @@ necessity.  The ‘modus-themes’ are such because:
 have such a lofty accessibility target.
 
 
-File: docdPApVs.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
+File: doc77GeBN.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
 
 13 FAQ
 ******
@@ -1590,7 +1592,7 @@ File: docdPApVs.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  U
 * Add something like Nord or Zenburn?::
 
 
-File: docdPApVs.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
+File: doc77GeBN.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
 
 13.1 What does Ef mean?
 =======================
@@ -1600,7 +1602,7 @@ good, nice, and/or easy.  For example, eftopia (ευτοπία) is the opposite
 of dystopia (δυστοπία): a good place as opposed to a bad place.
 
 
-File: docdPApVs.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
+File: doc77GeBN.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
 
 13.2 Will you stop using the modus-themes?
 ==========================================
@@ -1609,7 +1611,7 @@ No.  For my workflow, accessibility is the most important quality.  The
 ‘modus-themes’ will remain my default choice.
 
 
-File: docdPApVs.info,  Node: Then why develop the ef-themes?,  Next: Difference between ef-themes and modus-themes?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
+File: doc77GeBN.info,  Node: Then why develop the ef-themes?,  Next: Difference between ef-themes and modus-themes?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
 
 13.3 Then why develop the ef-themes?
 ====================================
@@ -1622,7 +1624,7 @@ considerations for legibility, and (ii) are not designed on a whimsy.
 fine with a bit more relaxed accessibility target.
 
 
-File: docdPApVs.info,  Node: Difference between ef-themes and modus-themes?,  Next: Too many options what should I do?,  Prev: Then why develop the ef-themes?,  Up: FAQ
+File: doc77GeBN.info,  Node: Difference between ef-themes and modus-themes?,  Next: Too many options what should I do?,  Prev: Then why develop the ef-themes?,  Up: FAQ
 
 13.4 Difference between ef-themes and modus-themes?
 ===================================================
@@ -1686,7 +1688,7 @@ pay attention.  In short: I am not picking random colors and
 implementing them on a whimsy.  Theme development is not easy.
 
 
-File: docdPApVs.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Difference between ef-themes and modus-themes?,  Up: FAQ
+File: doc77GeBN.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Difference between ef-themes and modus-themes?,  Up: FAQ
 
 13.5 Too many options, what should I do?
 ========================================
@@ -1699,7 +1701,7 @@ tweaks to toggle between those two and don’t worry anymore about the
 abundance of choice (*note Toggle between two Ef themes::).  Good luck!
 
 
-File: docdPApVs.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
+File: doc77GeBN.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
 
 13.6 Let Org tags inherit the heading color?
 ============================================
@@ -1732,7 +1734,7 @@ Realigning tags by inserting spaces also creates noise in
 version-controlled files, which is undesirable.
 
 
-File: docdPApVs.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
+File: doc77GeBN.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
 
 13.7 Add something like Nord or Zenburn?
 ========================================
@@ -1761,7 +1763,7 @@ compromises and sub-optimal choices, which make no sense for a project
 with opinionanted design principles.
 
 
-File: docdPApVs.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
+File: doc77GeBN.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
 
 14 Acknowledgements
 *******************
@@ -1778,12 +1780,13 @@ Contributions to code or the manual
 
 Ideas and/or user feedback
      Alan Schmitt, Amo DelBello, Anthony Chavez, Benjamin (zealotrush),
-     Daniel Mendler, Federico Stilman, Iris Garcia, Jean-Philippe Gagné
-     Guay, Jonas Collberg, Saša Janiška, Spike-Leung, Steve Molitor,
-     Summer Emacs, Sven Seebeck, Thanos Apollo, Zoltán Király, goldfita.
+     Bruno Boal, Daniel Mendler, Federico Stilman, Iris Garcia,
+     Jean-Philippe Gagné Guay, Jonas Collberg, Saša Janiška,
+     Spike-Leung, Steve Molitor, Summer Emacs, Sven Seebeck, Thanos
+     Apollo, Zoltán Király, goldfita.
 
 
-File: docdPApVs.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
+File: doc77GeBN.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
 
 15 GNU Free Documentation License
 *********************************
@@ -2265,7 +2268,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docdPApVs.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
+File: doc77GeBN.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
 
 16 Indices
 **********
@@ -2277,7 +2280,7 @@ File: docdPApVs.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up
 * Concept index::
 
 
-File: docdPApVs.info,  Node: Function index,  Next: Variable index,  Up: Indices
+File: doc77GeBN.info,  Node: Function index,  Next: Variable index,  Up: Indices
 
 16.1 Function index
 ===================
@@ -2305,7 +2308,7 @@ File: docdPApVs.info,  Node: Function index,  Next: Variable index,  Up: Indices
                                                                (line  6)
 
 
-File: docdPApVs.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
+File: doc77GeBN.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
 
 16.2 Variable index
 ===================
@@ -2348,7 +2351,7 @@ File: docdPApVs.info,  Node: Variable index,  Next: Concept index,  Prev: Functi
 * ef-winter-palette-overrides:           Palette overrides.    (line 66)
 
 
-File: docdPApVs.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
+File: doc77GeBN.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 16.3 Concept index
 ==================
@@ -2396,24 +2399,24 @@ Node: Tweak goto-address-mode faces47842
 Node: Faces defined by the Ef themes48943
 Node: Supported packages or face groups50213
 Node: Explicitly supported packages or face groups50819
-Node: Implicitly supported packages or face groups53341
-Node: Packages that are hard to support54207
-Node: Principles56344
-Node: Minimal VS maximal scope58354
-Node: FAQ59113
-Node: What does Ef mean?59539
-Node: Will you stop using the modus-themes?59927
-Node: Then why develop the ef-themes?60284
-Node: Difference between ef-themes and modus-themes?60873
-Node: Too many options what should I do?64389
-Node: Let Org tags inherit the heading color?65089
-Node: Add something like Nord or Zenburn?66912
-Node: Acknowledgements68206
-Node: GNU Free Documentation License68918
-Node: Indices94263
-Node: Function index94441
-Node: Variable index95902
-Node: Concept index98471
+Node: Implicitly supported packages or face groups53375
+Node: Packages that are hard to support54241
+Node: Principles56378
+Node: Minimal VS maximal scope58388
+Node: FAQ59147
+Node: What does Ef mean?59573
+Node: Will you stop using the modus-themes?59961
+Node: Then why develop the ef-themes?60318
+Node: Difference between ef-themes and modus-themes?60907
+Node: Too many options what should I do?64423
+Node: Let Org tags inherit the heading color?65123
+Node: Add something like Nord or Zenburn?66946
+Node: Acknowledgements68240
+Node: GNU Free Documentation License68969
+Node: Indices94314
+Node: Function index94492
+Node: Variable index95953
+Node: Concept index98522
 
 End Tag Table
 
