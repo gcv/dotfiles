@@ -5,7 +5,7 @@
 ;; Author: Feng Shu <tumashu@163.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/vertico-posframe
-;; Version: 0.7.2
+;; Version: 0.7.3
 ;; Keywords: abbrev, convenience, matching, vertico
 ;; Package-Requires: ((emacs "26.0") (posframe "1.4.0") (vertico "1.1"))
 
@@ -264,6 +264,8 @@ minibuffer will not be hided by minibuffer-cover."
   (with-selected-window (vertico-posframe-last-window) ;Some posframe poshandlers need infos of last-window.
     (apply #'posframe-show
            buffer
+           :cursor 'box
+           :window-point window-point
            :font (buffer-local-value 'vertico-posframe-font buffer)
            ;; Variable settings in `vertico-multiform-commands' will
            ;; save to BUFFER as buffer-local variables, so we need to
@@ -275,8 +277,6 @@ minibuffer will not be hided by minibuffer-cover."
            ;;          (vertico-posframe-poshandler . posframe-poshandler-frame-top-center))
            ;;         (t buffer)))
            ;;
-           :cursor 'box
-           :window-point window-point
            :poshandler (buffer-local-value 'vertico-posframe-poshandler buffer)
            :background-color (face-attribute 'vertico-posframe :background nil t)
            :foreground-color (face-attribute 'vertico-posframe :foreground nil t)
@@ -307,7 +307,7 @@ minibuffer will not be hided by minibuffer-cover."
        (if (facep face)
            face
          face-fallback)))
-   :background))
+   :background nil t))
 
 (defun vertico-posframe-refposhandler-default (&optional frame)
   "The default posframe refposhandler used by vertico-posframe.
