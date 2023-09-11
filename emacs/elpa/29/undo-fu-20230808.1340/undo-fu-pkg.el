@@ -1,6 +1,6 @@
-(define-package "undo-fu" "20230109.2256" "Undo helper with redo"
+(define-package "undo-fu" "20230808.1340" "Undo helper with redo"
   '((emacs "25.1"))
-  :commit "d59bba01de48a808a42d6e29e011ef641cdb6a77" :authors
+  :commit "0e74116fd5c7797811a91ba4eadef50d67523eb6" :authors
   '(("Campbell Barton" . "ideasman42@gmail.com"))
   :maintainers
   '(("Campbell Barton" . "ideasman42@gmail.com"))
