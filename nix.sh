@@ -35,7 +35,9 @@ packages=(
     bat                # cat replacement
     bashInteractive    # when needed
     bitwarden-cli      # password manager
-    bottom             # htop-like monitor
+    bottom             # top replacement 2 (Rust)
+    broot              # file browser / manager
+    btop               # top replacement 3 (C++)
     cacert             # SSL certificates
     cmake
     coreutils
@@ -60,11 +62,10 @@ packages=(
     gnutar
     helix              # modal text editor, alternative to (neo)vi(m)
     htmlq              # command line HTML parser and query tool (like jq)
-    htop
+    htop               # top replacement 1
     httpie             # HTTP client, alternative to curl
     httrack            # web scraper, more stable than wget
     hyperfine          # benchmarking tool
-    joshuto            # file manager
     jq
     #julia
     lazydocker         # Docker UI
@@ -79,6 +80,7 @@ packages=(
     ngrok              # expose local service over a secure tunnel
     nix-direnv
     nmap
+    nnn                # file manager
     notmuch            # mail indexer
     p7zip
     pandoc
