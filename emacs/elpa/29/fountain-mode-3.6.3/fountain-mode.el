@@ -1,10 +1,10 @@
 ;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2014-2022  Paul W. Rankin
+;; Copyright (c) 2014-2023  Paul W. Rankin
 
 ;; Author: Paul W. Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 3.6.2
+;; Version: 3.6.3
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -2922,7 +2922,7 @@ Export command profiles are defined in
             (set-auto-mode t)
           (kill-buffer))))))
 
-(require 'dired-x)
+(when (<= emacs-major-version 28) (require 'dired-x))
 
 (defun fountain-export-view ()
   "Attempt to open the last exported output file.
@@ -3021,8 +3021,8 @@ MATCHER must be a lisp form."
 VALUE is from options group `fountain-align' and return value
 takes the form:
 
-    (space :align-to N)"
-  (list 'space :align-to
+    (space :width N)"
+  (list 'space :width
         (if (and value fountain-align-elements)
             (if (integerp value)
                 value

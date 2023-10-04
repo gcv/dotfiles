@@ -1,7 +1,7 @@
 This is fountain-mode.info, produced by makeinfo version 6.7 from
 fountain-mode.texi.
 
-Copyright (C) 2022 Paul W. Rankin
+Copyright (C) 2021-2023 Paul W. Rankin
 
    The following people contributed to this documentation:
 Paul W. Rankin, Kohl Sudduth
@@ -411,8 +411,17 @@ File: fountain-mode.info,  Node: Comments,  Prev: Center Text,  Up: Script Eleme
 Comments
 ========
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+Text that are in C-style comments, /* like this */, is not exported by
+export tools.  It's text that's "in the boneyard".  Unlike other
+Fountain syntax, these comments can span newlines and other formatting;
+structurally, it's as if the text were removed.
+
+   This "boneyard" is for text that you're on the brink of removing, or
+drafts that you aren't ready to "uncomment" and include yet, or just
+anything else you want to ignore.
+
+   If you instead just want to annotate your screenplay, use *note
+Notes:: or *note Synopses::.
 
 
 File: fountain-mode.info,  Node: Outlining,  Next: Navigation,  Prev: Script Elements,  Up: Top
@@ -876,42 +885,42 @@ Index of User Options
 
 
 Tag Table:
-Node: Top327
-Node: Overview1784
-Node: Installation3202
-Node: Requirements4202
-Node: Advanced Installation4790
-Node: Script Elements5350
-Node: Metadata6533
-Node: Section Headings8129
-Node: Scene Headings8553
-Node: Action9459
-Node: Characters10172
-Node: Dialogue11100
-Node: Parentheticals11426
-Node: Transitions11796
-Node: Notes12003
-Node: Synopses12192
-Node: Center Text12581
-Node: Comments12785
-Node: Outlining12966
-Node: Navigation15474
-Node: Syntax Highlighting16744
-Node: Element Aligning16970
-Node: Text Emphasis17193
-Node: Do What I Mean17666
-Node: Autocompletion19115
-Node: Scene Heading Completion19742
-Node: Character Name Completion20259
-Node: Scene Numbering22312
-Node: Pagination22524
-Node: Exporting22863
-Ref: Exporting-Footnote-124362
-Node: Contact24433
-Node: Indexes25334
-Node: Key Index25493
-Node: Index of Commands27363
-Node: Index of User Options28633
+Node: Top332
+Node: Overview1789
+Node: Installation3207
+Node: Requirements4207
+Node: Advanced Installation4795
+Node: Script Elements5355
+Node: Metadata6538
+Node: Section Headings8134
+Node: Scene Headings8558
+Node: Action9464
+Node: Characters10177
+Node: Dialogue11105
+Node: Parentheticals11431
+Node: Transitions11801
+Node: Notes12008
+Node: Synopses12197
+Node: Center Text12586
+Node: Comments12790
+Node: Outlining13426
+Node: Navigation15934
+Node: Syntax Highlighting17204
+Node: Element Aligning17430
+Node: Text Emphasis17653
+Node: Do What I Mean18126
+Node: Autocompletion19575
+Node: Scene Heading Completion20202
+Node: Character Name Completion20719
+Node: Scene Numbering22772
+Node: Pagination22984
+Node: Exporting23323
+Ref: Exporting-Footnote-124822
+Node: Contact24893
+Node: Indexes25794
+Node: Key Index25953
+Node: Index of Commands27823
+Node: Index of User Options29093
 
 End Tag Table
 
