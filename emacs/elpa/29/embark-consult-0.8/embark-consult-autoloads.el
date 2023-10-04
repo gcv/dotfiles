@@ -12,11 +12,6 @@
 ;;; Generated autoloads from embark-consult.el
 
 (register-definition-prefixes "embark-consult" '("embark-consult-"))
-
-
-;;; Generated autoloads from embark-org.el
-
-(register-definition-prefixes "embark-org" '("embark-org-"))
 
 ;;; End of scraped data
 
