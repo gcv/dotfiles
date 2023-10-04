@@ -86,6 +86,7 @@ packages=(
     pandoc
     pass               # password manager
     pastel             # color utility
+    pop                # mail sender
     pv                 # pipe viewer
     rclone
     restic             # backup utility
@@ -99,7 +100,8 @@ packages=(
     tectonic           # (La)TeX environment
     texinfo
     tmux
-    tree
+    tree              # file lister, obsoleted by eza and broot
+    tree-sitter       # parser framework
     unrar
     viddy             # watch replacement
     watch
