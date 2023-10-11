@@ -1147,6 +1147,13 @@ See `eshell-prompt-regexp'."
   (js-chain-indent t))
 
 
+;;; sh-script (shell script)
+(use-feature sh-script
+  :hook
+  (sh-mode . flymake-mode)
+  )
+
+
 ;;; cc-mode (C, C++, Objective-C)
 (defun /c-mode-common-hook ()
   (c-set-style "ellemtel")

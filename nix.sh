@@ -94,6 +94,7 @@ packages=(
     rlwrap
     rsync
     sd                 # a simpler sed for common cases
+    shellcheck         # shell script linter
     silver-searcher    # ag
     sqlite
     starship           # fancy prompt, good with fish
