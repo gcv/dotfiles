@@ -369,6 +369,11 @@
   )
 
 
+;;; dtrt: Do The Right Thing indentation mode (tries to cleanly deal with tab and space-formatted files)
+(use-package dtrt-indent
+  )
+
+
 (use-package dumb-jump
   :bind
   (("H-." . dumb-jump-go)
