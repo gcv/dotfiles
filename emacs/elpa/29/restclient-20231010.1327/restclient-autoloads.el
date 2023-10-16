@@ -16,11 +16,13 @@ Sends current request.
 Optional argument RAW don't reformat response if t.
 Optional argument STAY-IN-WINDOW do not move focus to response buffer if t.
 
-(fn &optional RAW STAY-IN-WINDOW)" t)
+(fn &optional RAW STAY-IN-WINDOW SUPPRESS-RESPONSE-BUFFER)" t)
 (autoload 'restclient-http-send-current-raw "restclient" "\
 Sends current request and get raw result (no reformatting or syntax highlight of XML, JSON or images)." t)
 (autoload 'restclient-http-send-current-stay-in-window "restclient" "\
 Send current request and keep focus in request window." t)
+(autoload 'restclient-http-send-current-suppress-response-buffer "restclient" "\
+Send current request but don't show response buffer." t)
 (autoload 'restclient-mode "restclient" "\
 Turn on restclient mode.
 
