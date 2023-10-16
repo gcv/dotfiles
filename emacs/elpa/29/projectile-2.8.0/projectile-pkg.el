@@ -1,6 +1,6 @@
-(define-package "projectile" "2.7.0" "Manage and navigate projects in Emacs easily"
+(define-package "projectile" "2.8.0" "Manage and navigate projects in Emacs easily"
   '((emacs "25.1"))
-  :commit "14beeaee7a77601aee4d4982811f6a27f696403c" :authors
+  :commit "e6889d7f4bc0d2c48ceac56dfe6f4a3d742a3b69" :authors
   '(("Bozhidar Batsov" . "bozhidar@batsov.dev"))
   :maintainers
   '(("Bozhidar Batsov" . "bozhidar@batsov.dev"))
