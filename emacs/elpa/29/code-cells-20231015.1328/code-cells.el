@@ -51,13 +51,11 @@
 
 ;;; Code:
 
-(require 'map)
-(require 'json)
 (require 'outline)
 (require 'pulse)
-(require 'subr-x)
 (eval-when-compile
   (require 'cl-lib)
+  (require 'let-alist)
   (require 'rx))
 
 (defgroup code-cells nil
@@ -67,36 +65,17 @@
 
 ;;; Cell navigation
 
-(defcustom code-cells-boundary-markers nil
-  "List of regular expressions specifying cell boundaries.
-They should match immediately after a comment start at the
-beginning of a line.  The length of the first capture determines
-the outline level."
-  :type '(repeat regexp))
-(make-obsolete-variable 'code-cells-boundary-markers
-                        'code-cells-boundary-regexp
-                        "0.3")
-
 (defcustom code-cells-boundary-regexp
-  (rx (+ (syntax comment-start))
+  (rx line-start
+      (+ (syntax comment-start))
       (or (seq (* (syntax whitespace)) "%" (group-n 1 (+ "%")))
           (group-n 1 (+ "*"))
           (seq " In[" (* (any space digit)) "]:")))
   "Regular expression specifying cell boundaries.
 It should match at the beginning of a line.  The length of the
 first capture determines the outline level."
-  :type 'regexp)
-
-(defun code-cells-boundary-regexp ()
-  "Return a regexp matching comment lines that serve as cell boundary."
-  (if code-cells-boundary-markers
-      (concat (rx line-start)
-              (or comment-start-skip
-                  (rx (+ (syntax comment-start)) (* (syntax whitespace))))
-              "\\(?:"
-              (string-join code-cells-boundary-markers "\\|")
-              "\\)")
-    (rx line-start (regexp code-cells-boundary-regexp))))
+  :type 'regexp
+  :safe #'stringp)
 
 ;;;###autoload
 (defun code-cells-forward-cell (&optional arg)
@@ -104,7 +83,7 @@ first capture determines the outline level."
 With ARG, repeat this that many times.  If ARG is negative, move
 backward."
   (interactive "p")
-  (let ((page-delimiter (code-cells-boundary-regexp)))
+  (let ((page-delimiter code-cells-boundary-regexp))
     (when (and (< 0 arg) (looking-at page-delimiter))
       (forward-char))
     (forward-page arg)
@@ -122,6 +101,10 @@ forward."
 (defun code-cells--bounds (&optional count use-region)
   "Return the bounds of the current code cell, as a cons.
 
+If COUNT is non-nil, return instead a region containing COUNT
+cells and starting or ending with the current cell, depending on
+the sign of COUNT.
+
 If USE-REGION is non-nil and the region is active, return the
 region bounds instead."
   (if (and use-region (use-region-p))
@@ -134,13 +117,12 @@ region bounds instead."
         (list (point) end)))))
 
 (defun code-cells--bounds-of-cell-relative-from (distance)
-  "Return the bounds of the code cell which is DISTANCE cells away
-from the current one."
+  "Return the bounds of the cell DISTANCE cells away from the current one."
   (save-excursion
     (when (/= 0 distance)
       ;; Except when at the boundary, `(code-cells-forward-cell -1)' doesn't
       ;; move out of current cell
-      (unless (looking-at-p (code-cells-boundary-regexp))
+      (unless (looking-at-p code-cells-boundary-regexp)
         (code-cells-backward-cell))
       (code-cells-forward-cell distance))
     (code-cells--bounds)))
@@ -154,9 +136,9 @@ Move up when ARG is negative and move down otherwise."
     (unless (save-excursion
               (and (/= current-beg next-beg)
                    (goto-char current-beg)
-                   (looking-at-p (code-cells-boundary-regexp))
+                   (looking-at-p code-cells-boundary-regexp)
                    (goto-char next-beg)
-                   (looking-at-p (code-cells-boundary-regexp))))
+                   (looking-at-p code-cells-boundary-regexp)))
       (user-error "Can't move cell"))
     (transpose-regions current-beg current-end next-beg next-end)))
 
@@ -168,7 +150,8 @@ Move up when ARG is negative and move down otherwise."
 
 ;;;###autoload
 (defun code-cells-mark-cell (&optional arg)
-  "Put point at the beginning of this cell, mark at end."
+  "Put point at the beginning of this cell, mark at end.
+If ARG is non-nil, mark that many cells."
   (interactive "p")
   (pcase-let ((`(,start ,end) (code-cells--bounds arg)))
     (goto-char start)
@@ -190,7 +173,7 @@ remove."
 
 ;;;###autoload
 (defun code-cells-command (fun &rest options)
-  "Return an anonymous command that calls FUN on the current cell.
+  "Return an anonymous command calling FUN on the current cell.
 
 FUN is a function that takes two character positions as argument.
 Most interactive commands that act on a region are of this form
@@ -218,7 +201,7 @@ COMMAND."
   (list 'menu-item nil command
         :filter (lambda (d)
                   (when (and (bolp)
-                             (looking-at (code-cells-boundary-regexp)))
+                             (looking-at code-cells-boundary-regexp))
                     d))))
 
 ;;; Code evaluation
@@ -252,13 +235,15 @@ Called from Lisp, evaluate region between START and END."
                      fun))
                  code-cells-eval-region-commands)
        (user-error
-        "No entry for the current modes in `code-cells-eval-region-commands'."))
+        "No entry for the current modes in `code-cells-eval-region-commands'"))
    start end)
   (pulse-momentary-highlight-region start end))
 
 ;;;###autoload
 (defun code-cells-eval-above (arg)
-  "Evaluate this and all above cells."
+  "Evaluate this and all above cells.
+ARG (interactively, the prefix argument) specifies how many
+additional cells after point to include."
   (interactive "p")
   (code-cells-eval (point-min) (save-excursion
                                  (code-cells-forward-cell arg)
@@ -274,17 +259,17 @@ Called from Lisp, evaluate region between START and END."
 To be used as the value of the variable `outline-level'.
 
 At a cell boundary, returns the cell outline level, as determined by
-`code-cells-boundary-markers'.  Otherwise, returns the sum of the
+`code-cells-boundary-regexp'.  Otherwise, returns the sum of the
 outline level as determined by the major mode and the current cell
 level."
-  (let* ((at-boundary (looking-at-p (code-cells-boundary-regexp)))
+  (let* ((at-boundary (looking-at-p code-cells-boundary-regexp))
          (mm-level (if at-boundary
                        0
                      (funcall (car code-cells--saved-vars))))
          (cell-level (if (or at-boundary
                              (save-excursion
                                (re-search-backward
-                                (code-cells-boundary-regexp) nil t)))
+                                code-cells-boundary-regexp nil t)))
                          (if (match-string 1)
                              (- (match-end 1) (match-beginning 1))
                            1)
@@ -296,7 +281,7 @@ level."
 
 (defun code-cells--font-lock-keywords ()
   "Font lock keywords to highlight cell boundaries."
-  `((,(rx (regexp (code-cells-boundary-regexp)) (* any) "\n")
+  `((,(rx (regexp code-cells-boundary-regexp) (* any) "\n")
      0 'code-cells-header-line append)))
 
 ;;;###autoload
@@ -311,11 +296,11 @@ level."
                                       outline-heading-end-regexp
                                       paragraph-start)
          outline-level 'code-cells--outline-level
-         outline-regexp (rx (or (regexp (code-cells-boundary-regexp))
+         outline-regexp (rx (or (regexp code-cells-boundary-regexp)
                                 (regexp outline-regexp)))
          outline-heading-end-regexp "\n"
          paragraph-separate (rx (or (regexp paragraph-separate)
-                                    (regexp (code-cells-boundary-regexp)))))
+                                    (regexp code-cells-boundary-regexp))))
         (font-lock-add-keywords nil (code-cells--font-lock-keywords)))
     (setq-local outline-level (pop code-cells--saved-vars)
                 outline-regexp (pop code-cells--saved-vars)
@@ -330,7 +315,7 @@ level."
 This function is useful when added to a major mode hook."
     (when (save-excursion
             (goto-char (point-min))
-            (re-search-forward (code-cells-boundary-regexp) 5000 t))
+            (re-search-forward code-cells-boundary-regexp 5000 t))
       (code-cells-mode)))
 
 (let ((map (make-sparse-keymap)))
@@ -348,20 +333,20 @@ This function is useful when added to a major mode hook."
 (defcustom code-cells-convert-ipynb-style
   '(("jupytext" "--to" "ipynb")
     ("jupytext" "--to" "auto:percent")
-    nil
+    code-cells--guess-mode
     code-cells-convert-ipynb-hook)
   "Determines how to convert ipynb files for editing.
 The first two entries are lists of strings: the command name and
 arguments used, respectively, to convert to and from ipynb
 format.
 
-The third entry, if present, specificies the major mode
-called after converting from ipynb.  If omitted, the major mode
-is determined from the notebook's language.
+The third entry is a function called with no arguments to
+determine the major mode to be called.  The default setting tries
+to guess it from the notebook metadata.
 
 The fourth entry, also optional, is a hook run after the new
 major mode is activated."
-  :type '(list sexp sexp sexp sexp))
+  :type '(list (repeat string) (repeat string) function symbol))
 
 (defvar code-cells-convert-ipynb-hook '(code-cells-mode)
   "Hook used in the default `code-cells-convert-ipynb-style'.")
@@ -372,38 +357,55 @@ Returns the process exit code.  COMMAND is a list of strings, the
 program name followed by arguments."
   (unless (executable-find (car command))
     (error "Can't find %s" (car command)))
-  (let ((logfile (make-temp-file "emacs-cells-")))
-    (prog1
-        (apply #'call-process-region nil nil (car command) nil
-               (list buffer logfile) nil
-               (cdr command))
-      (with-temp-buffer
-        (insert-file-contents logfile)
-        (when (> (buffer-size) 0)
-          (display-warning 'code-cells (buffer-substring-no-properties
-                                        (point-min) (point-max))))
-        (delete-file logfile)))))
+  (let ((logfile (make-temp-file "emacs-code-cells-")))
+    (unwind-protect
+        (prog1
+            (apply #'call-process-region nil nil (car command) nil
+                   (list buffer logfile) nil
+                   (cdr command))
+          (with-temp-buffer
+            (insert-file-contents logfile)
+            (unless (zerop (buffer-size))
+              (lwarn 'code-cells :warning
+                     "Notebook conversion command %s said:\n%s"
+                     command
+                     (buffer-substring-no-properties
+                      (point-min) (point-max))))))
+      (delete-file logfile))))
+
+(defun code-cells--guess-mode ()
+  "Guess major mode associated to the current ipynb buffer."
+  (require 'json)
+  (declare-function json-read "json.el")
+  (goto-char (point-min))
+  (let* ((nb (cl-letf ;; Skip over the possibly huge "cells" section
+                 (((symbol-function 'json-read-array) 'forward-sexp))
+               (json-read)))
+         (lang (let-alist nb
+                 (or .metadata.kernelspec.language
+                     .metadata.jupytext.main_language)))
+         (mode (intern (concat lang "-mode"))))
+    (alist-get mode (bound-and-true-p major-mode-remap-alist) mode)))
 
 ;;;###autoload
 (defun code-cells-convert-ipynb ()
   "Convert buffer from ipynb format to a regular script."
   (interactive)
-  (goto-char (point-min))
-  (let* ((nb (cl-letf ;; Skip over the possibly huge "cells" section
-                 (((symbol-function 'json-read-array) 'forward-sexp))
-               (json-read)))
-         (pt (point))
-         (lang (or (map-nested-elt nb '(metadata kernelspec language))
-                   (map-nested-elt nb '(metadata jupytext main_language))))
-         (mode (or (nth 2 code-cells-convert-ipynb-style)
-                   (intern (concat lang "-mode"))))
-         (exit (code-cells--call-process t (nth 1 code-cells-convert-ipynb-style))))
-    (unless (eq 0 exit)
-      (delete-region pt (point-max))
+  (let* ((mode (funcall (or (nth 2 code-cells-convert-ipynb-style)
+                            (progn      ;For backwards compatibility with v0.3
+                              (lwarn 'code-cells :warning "\
+The third entry of `code-cells-convert-ipynb-style' should not be nil.")
+                              #'code-cells--guess-mode))))
+         (exit (progn
+                 (goto-char (point-min))
+                 (code-cells--call-process t (nth 1 code-cells-convert-ipynb-style)))))
+    (unless (zerop exit)
+      (delete-region (point-min) (point))
       (error "Error converting notebook (exit code %s)" exit))
-    (delete-region (point-min) pt)
+    (delete-region (point) (point-max))
+    (goto-char (point-min))
     (set-buffer-modified-p nil)
-    (setq-local write-file-functions '(code-cells-write-ipynb))
+    (add-hook 'write-file-functions #'code-cells-write-ipynb 80 t)
     (when (fboundp mode)
       (funcall mode)
       (run-hooks (nth 3 code-cells-convert-ipynb-style)))))

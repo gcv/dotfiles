@@ -29,6 +29,7 @@ Move current code cell vertically up ARG cells.
 (fn &optional ARG)" t)
 (autoload 'code-cells-mark-cell "code-cells" "\
 Put point at the beginning of this cell, mark at end.
+If ARG is non-nil, mark that many cells.
 
 (fn &optional ARG)" t)
 (autoload 'code-cells-comment-or-uncomment "code-cells" "\
@@ -39,7 +40,7 @@ remove.
 
 (fn &optional ARG)" t)
 (autoload 'code-cells-command "code-cells" "\
-Return an anonymous command that calls FUN on the current cell.
+Return an anonymous command calling FUN on the current cell.
 
 FUN is a function that takes two character positions as argument.
 Most interactive commands that act on a region are of this form
@@ -73,6 +74,8 @@ Called from Lisp, evaluate region between START and END.
 (fn START END)" t)
 (autoload 'code-cells-eval-above "code-cells" "\
 Evaluate this and all above cells.
+ARG (interactively, the prefix argument) specifies how many
+additional cells after point to include.
 
 (fn ARG)" t)
 (autoload 'code-cells-mode "code-cells" "\
