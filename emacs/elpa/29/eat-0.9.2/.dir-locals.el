@@ -4,4 +4,5 @@
 ((nil . ((fill-column . 70)
          (indent-tabs-mode . nil)))
  (sh-mode . ((sh-basic-offset . 2)))
- (makefile-mode . ((indent-tabs-mode . t))))
+ (makefile-mode . ((indent-tabs-mode . t)))
+ (".git" . ((text-mode . ((fill-column . 63))))))

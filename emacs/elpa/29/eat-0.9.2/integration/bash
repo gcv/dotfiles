@@ -24,6 +24,8 @@ __eat_prompt_command () {
     printf '\e]51;e;H;%i\e\\' "$__eat_exit_status"
   fi
   __eat_current_command=""
+  # Inform that a new prompt is going to be printed.
+  printf '\e]51;e;J\e\\'
   # Send the current working directory, for directory tracking.
   printf '\e]51;e;A;%s;%s\e\\' "$(printf "%s" "$HOSTNAME" | base64)" \
          "$(printf "%s" "$PWD" | base64)"
@@ -87,21 +89,34 @@ __eat_enable_integration ()
   PROMPT_COMMAND+=(__eat_prompt_command)
   trap '__eat_before_exec' DEBUG
   # Wrap 'PROMPT_COMMAND' to avoid it getting trapped in 'DEBUG' trap.
-  # Step 1: Append to PROMPT_COMMAND.
-  PROMPT_COMMAND+=(__eat_after_prompt_command)
-  # Step 2: Prepend to PROMPT_COMMAND.
-  # Step 2.1: Move all elements to make the first index free.
   # Fun fact: Microsoft doesn't still about know this simple trick.
   # They ended up using something as silly and pityful as
   # 'VAR=$PROMPT_COMMAND' to copy a Bash array in VSCode Bash
   # integration script, which simply won't work ever, and then
   # complain about Bash in the comments!  xD
-  for i in $(eval "echo {${#PROMPT_COMMAND[*]}..1..-1}")
+  PROMPT_COMMAND+=(__eat_after_prompt_command)
+  PROMPT_COMMAND=(__eat_before_prompt_command "${PROMPT_COMMAND[@]}")
+  # Send the history, for native shell prompt.
+  printf '\e]51;e;I;0;bash;%s;%s\e\\' \
+         "$(printf "%s" "$HOSTNAME" | base64)" \
+         "$(printf "%s" "$HISTFILE" | base64)"
+  local REPLY
+  IFS=$';\e' read -r -s -t 10 -d "\\" -a REPLY
+  if test "${REPLY[4]}" != 0
+  then
+    printf '\e]51;e;I;1;bash;%s\e\\' \
+           "$(tail -n "${REPLY[4]}" "$HISTFILE" | base64)"
+  fi
+}
+
+_eat_msg () {
+  local msg=$'\e]51;e;M'
+  for _ in $(eval "echo {1..$#}")
   do
-    PROMPT_COMMAND[$i]=${PROMPT_COMMAND[$((i-1))]}
+    msg="$msg;$(printf "%s" "$1" | base64)"
+    shift
   done
-  # Step 2.2: Assign the first element.
-  PROMPT_COMMAND[0]=__eat_before_prompt_command
+  printf "%s\e\\" "$msg"
 }
 
 # Enable.

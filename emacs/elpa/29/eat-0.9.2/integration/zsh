@@ -25,12 +25,14 @@ __eat_precmd () {
     printf '\e]51;e;H;%i\e\\' "$__eat_exit_status"
   fi
   __eat_current_command=""
+  # Inform that a new prompt is going to be printed.
+  printf '\e]51;e;J\e\\'
   # Send the current working directory, for directory tracking.
   printf '\e]51;e;A;%s;%s\e\\' "$(printf "%s" "$HOST" | base64)" \
          "$(printf "%s" "$PWD" | base64)"
   # Update title.
   # "${PWD/$HOME/'~'}" converts "/home/akib/org/" to "~/org/".
-  # The next one is substituted with '$', or '#' if we're "root".
+  # The next one is substituted with '%', or '#' if we're "root".
   printf '\e]2;%s@%s:%s%s\e\\' "$USER" "$HOST" "${PWD/$HOME/~}" \
          "$(test $UID -eq 0 && echo '#' || echo '%')"
 }
@@ -65,6 +67,27 @@ __eat_enable_integration ()
   autoload -Uz add-zsh-hook
   add-zsh-hook precmd __eat_precmd
   add-zsh-hook preexec __eat_preexec
+  # Send the history, for native shell prompt.
+  printf '\e]51;e;I;0;bash;%s;%s\e\\' \
+         "$(printf "%s" "$HOSTNAME" | base64)" \
+         "$(printf "%s" "$HISTFILE" | base64)"
+  local REPLY
+  IFS=$';\e' read -r -s -t 10 -d "\\" -A REPLY
+  if test "${REPLY[5]}" != 0
+  then
+    printf '\e]51;e;I;1;zsh;%s\e\\' \
+           "$(tail -n "${REPLY[5]}" "$HISTFILE" | base64)"
+  fi
+}
+
+_eat_msg () {
+  local msg=$'\e]51;e;M'
+  for _ in $(eval "echo {1..$#}")
+  do
+    msg="$msg;$(printf "%s" "$1" | base64)"
+    shift
+  done
+  printf "%s\e\\" "$msg"
 }
 
 # Enable.

@@ -1,7 +1,7 @@
-This is doc92XSF2.info, produced by makeinfo version 6.7 from eat.texi.
+This is docMqqLfV.info, produced by makeinfo version 6.8 from eat.texi.
 
-This manual is for Eat (version 0.8, 13 April 2023), a terminal emulator
-for Emacs.
+This manual is for Eat (version 0.9.2, 10 October 2023), a terminal
+emulator for Emacs.
 
    Copyright © 2022, 2023 Akib Azmain Turja.
 
@@ -17,13 +17,13 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: doc92XSF2.info,  Node: Top,  Next: Intro,  Up: (dir)
+File: docMqqLfV.info,  Node: Top,  Next: Intro,  Up: (dir)
 
 Eat Manual
 **********
 
-This manual is for Eat (version 0.8, 13 April 2023), a terminal emulator
-for Emacs.
+This manual is for Eat (version 0.9.2, 10 October 2023), a terminal
+emulator for Emacs.
 
    Copyright © 2022, 2023 Akib Azmain Turja.
 
@@ -46,6 +46,7 @@ Basic Operations
 * Keyboard::            Most keyboard keys are captured by Eat.
 * Mouse::               Eat supports mouse.
 * Input Modes::         Input modes for various use-cases.
+* Password Input::      Safely inputting credentials.
 
 Advanced Customizations
 * Shell Integration::   Getting the most from Eat and your shell.
@@ -56,7 +57,7 @@ Advanced Customizations
 * Mouse Tracking::      Eat tracks mouse, but this can be changed.
 * Clipboard::           Integrating kill ring with terminal.
 * Colors::              Eat can show more than sixteen million colors.
-* Fonts::               Eat can show up to sixty font different fonts.
+* Fonts::               Eat can show up to sixteen different fonts.
 * Blinking Text::       Annoying blinking texts.
 * Performance Tuning::  Fine tuning to maximize performance.
 
@@ -72,7 +73,7 @@ Appendices
 * Index::               A list of various things.
 
 
-File: doc92XSF2.info,  Node: Intro,  Next: Hello Terminal,  Prev: Top,  Up: Top
+File: docMqqLfV.info,  Node: Intro,  Next: Hello Terminal,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -94,7 +95,7 @@ both graphical display and text display, while still allowing you to run
 full screen programs like Emacs within the terminal.
 
 
-File: doc92XSF2.info,  Node: Hello Terminal,  Next: Project-local Terminal,  Prev: Intro,  Up: Top
+File: docMqqLfV.info,  Node: Hello Terminal,  Next: Project-local Terminal,  Prev: Intro,  Up: Top
 
 2 Hello Terminal
 ****************
@@ -120,7 +121,7 @@ you’ll be prompted for the program or shell command to run, and it’ll be
 run in a newly created terminal.
 
 
-File: doc92XSF2.info,  Node: Project-local Terminal,  Next: Eshell Terminal,  Prev: Hello Terminal,  Up: Top
+File: docMqqLfV.info,  Node: Project-local Terminal,  Next: Eshell Terminal,  Prev: Hello Terminal,  Up: Top
 
 3 Project-local Terminal
 ************************
@@ -132,7 +133,7 @@ or switches to a already existing project terminal.  It too accepts
 prefix argument, just like the ordinary ‘eat’ command.
 
 
-File: doc92XSF2.info,  Node: Eshell Terminal,  Next: Keyboard,  Prev: Project-local Terminal,  Up: Top
+File: docMqqLfV.info,  Node: Eshell Terminal,  Next: Keyboard,  Prev: Project-local Terminal,  Up: Top
 
 4 Eshell Terminal Emulation
 ***************************
@@ -160,7 +161,7 @@ nil, since they’ll work in Eshell when ‘eat-eshell-mode’ is enabled.
 the global minor mode ‘eat-eshell-visual-command-mode’.
 
 
-File: doc92XSF2.info,  Node: Keyboard,  Next: Mouse,  Prev: Eshell Terminal,  Up: Top
+File: docMqqLfV.info,  Node: Keyboard,  Next: Mouse,  Prev: Eshell Terminal,  Up: Top
 
 5 Keyboard
 **********
@@ -183,7 +184,7 @@ example, to input ‘M-:’, use the key sequence ‘C-q M-:’.
 Char Mode::.
 
 
-File: doc92XSF2.info,  Node: Mouse,  Next: Input Modes,  Prev: Keyboard,  Up: Top
+File: docMqqLfV.info,  Node: Mouse,  Next: Input Modes,  Prev: Keyboard,  Up: Top
 
 6 Mouse
 *******
@@ -196,7 +197,7 @@ supports it.
    *Note Mouse Tracking:: to configure mouse tracking.
 
 
-File: doc92XSF2.info,  Node: Input Modes,  Next: Shell Integration,  Prev: Mouse,  Up: Top
+File: docMqqLfV.info,  Node: Input Modes,  Next: Password Input,  Prev: Mouse,  Up: Top
 
 7 Input Modes
 *************
@@ -285,10 +286,82 @@ and to “char mode” with ‘C-c M-d’.  In Eshell, the command
 ‘eshell-toggle-direct-send’ is remapped to enable “char-mode”, which is
 usually bound to ‘C-c M-d’.
 
-
-File: doc92XSF2.info,  Node: Shell Integration,  Next: Querying Before Kill,  Prev: Input Modes,  Up: Top
+7.4 Line Mode
+=============
 
-8 Shell Integration
+In “line mode”, input is sent one line at a line, similar to Comint or
+Shell mode (*note (emacs)Interactive Shell::).  Like “emacs mode”, you
+can interact with buffer as you wish; but at the very end of the buffer,
+you can edit the input line with usual Emacs commands.  This is not
+available in Eshell.
+
+   To enter “line mode”, press ‘C-c C-l’ from “semi-char mode” or “emacs
+mode”.
+
+   ‘<RET>’ sends the current input with a trailing newline, and clear
+the input area for new input to be written.  When called with a prefix
+argument, no newline is appended before sending input.  To input a
+newline character without actually sending it, you can press ‘C-c
+<SPC>’.
+
+   ‘C-c C-c’ discards the input completely and sends an interrupt to the
+terminal.  ‘C-d’ deletes the character after the point, or sends EOF if
+the input is empty.
+
+   You can’t modify the terminal in “line mode”, you can write only in
+the input line.  Eat automatically moves the point to the input line if
+you try to insert character in the terminal region.  This behavior can
+be disabled by customizing ‘eat-line-auto-move-to-input’ to ‘nil’.
+
+   You can exit to “emacs mode”, “semi-char mode” or “char mode” with
+‘C-c C-e’, ‘C-c C-j’ or ‘C-c M-d’ respectively.  If there’s any pending
+input when exiting line mode, it is sent as is to the terminal.
+
+   The input history is recorded.  You can cycle through the history
+with ‘M-p’ and ‘M-n’, and also with ‘C-<up>’ and ‘C-<down>’.  ‘C-c M-r’
+and ‘C-c M-s’ searches the input history taking the current input as the
+query.  ‘C-c M-r’ searches backward while ‘C-c M-s’ searches forward.
+And ‘C-c C-r’ searches the input history using minibuffer with
+completion, useful specially if you use any minibuffer completion
+UI/framework.
+
+   You can also use Isearch (*note (emacs)Incremental Search::) to
+search through the input history, with ‘M-r’.  You can also customize
+‘eat-line-input-history-isearch’ to use all standard Isearch commands to
+search the input history.
+
+ -- User Option: eat-line-input-history-isearch
+     Controls where Isearch searches in Eat buffer.  If ‘t’, usual
+     Isearch commands in Eat buffer search in the input history.  If
+     ‘dwim’, Isearch keys search in the input history only when initial
+     point position is on input line.  When starting Isearch from other
+     parts of the Eat buffer, they search in the Eat buffer.  If ‘nil’,
+     Isearch operates on the whole Eat buffer.
+
+   Input history is not loaded from the shell history file, to do that,
+*Note Line Mode Integration::.
+
+
+File: docMqqLfV.info,  Node: Password Input,  Next: Shell Integration,  Prev: Input Modes,  Up: Top
+
+8 Password Input
+****************
+
+By default, every keystroke gets recorded in the lossage, which can be
+seen by pressing ‘C-h l’.  This is actually a good thing, unless you’re
+inputting password.
+
+   Emacs doesn’t record keystrokes when a password is read from the
+minibuffer.  However, when the password prompt is in the terminal, the
+keys you use to type in your password gets recorded.  To prevent this
+from happening, you can use the command ‘eat-send-command’, it’ll read
+password from the minibuffer and send it.  Since the password is read
+from the minibuffer, it’s not recorded.
+
+
+File: docMqqLfV.info,  Node: Shell Integration,  Next: Querying Before Kill,  Prev: Password Input,  Up: Top
+
+9 Shell Integration
 *******************
 
 Eat comes with shell scripts to integrate your favorite shell with Eat.
@@ -307,7 +380,10 @@ shell, it’ll take care of everything and provide many useful features.
      [ -n "$EAT_SHELL_INTEGRATION_DIR" ] && \
        source "$EAT_SHELL_INTEGRATION_DIR/zsh"
 
-   After you’ve setup shell integration, the Eat will track the working
+9.1 Directory tracking
+======================
+
+After you’ve setup shell integration, the Eat will track the working
 directory of your shell.  That means ‘find-file’ will start from your
 shell’s current working directory.  This also works in Eshell, but after
 the program exits, the current working directory is changed back to the
@@ -317,7 +393,10 @@ directory from where the program was invoked.
      This controls directory tracking.  When set to non-‘nil’, Eat
      tracks the current working directory of programs.
 
-   You can navigate shell prompts in “emacs” and “semi-char” mode.  ‘C-c
+9.2 Shell Prompt Navigation
+===========================
+
+You can navigate shell prompts in “emacs” and “semi-char” mode.  ‘C-c
 C-p’, bound to ‘eat-previous-shell-prompt’, goes to the previous shell
 prompt.  ‘C-c C-n’, bound to ‘eat-next-shell-prompt’, is the opposite,
 it goes to the next shell prompt.  This doesn’t work in Eshell.
@@ -326,8 +405,11 @@ it goes to the next shell prompt.  This doesn’t work in Eshell.
 prompt and its output (if any) using the key sequence ‘C-x n d’, bound
 to ‘eat-narrow-to-shell-prompt’.
 
-   When shell integration is setup, Eat annotates each shell prompt.
-Eat puts a mark on the shell prompt indicating the whether the command
+9.3 Shell Prompt Annotation
+===========================
+
+When shell integration is setup, Eat annotates each shell prompt.  Eat
+puts a mark on the shell prompt indicating the whether the command
 entered in that prompt is running, exited successfully or exited with
 non-zero status.  This doesn’t work in Eshell.  You can disable this
 feature if you want.
@@ -359,11 +441,54 @@ face ‘eat-shell-prompt-annotation-failure’ control the indicator used to
 indicate the command has exited unsuccessfully with non-zero exit
 status.
 
-
-File: doc92XSF2.info,  Node: Querying Before Kill,  Next: Display,  Prev: Shell Integration,  Up: Top
+9.4 Message Passing
+===================
 
-9 Querying Before Kill
-**********************
+After enabling shell integration, you can send messages to Emacs from
+your shell.  Then you can handle the message on Emacs side using usual
+Emacs Lisp function.
+
+   When shell integration script is loaded, a function named ‘_eat_msg’
+is defined in your shell.  You can use this to send any message to
+Emacs.  (The ‘_’ in the beginning of the function name is intentional to
+prevent shadowing any actual command.)
+
+ -- Command: _eat_msg HANDLER-NAME MESSAGE...
+     Send message MESSAGE, handled by the handler named HANDLER-NAME in
+     Emacs.
+
+   The messages are handled with the handlers defined in
+‘eat-message-handler-alist’.
+
+ -- User Option: eat-message-handler-alist
+     Alist of message handler name and its handler function.  The keys
+     are the names of message handlers (i.e.  the HANDLER-NAME argument
+     of ‘_eat_msg’), and the values are their respective handler
+     functions.  The handler function is called with the MESSAGE
+     arguments of ‘_eat_msg’.  Messages with undefined handlers are
+     ignored.  To disable message passing, set this to nil.
+
+   Beware, messages can be sent by malicious and/or buggy programs
+running in the shell, therefore you should always verify the message
+before doing anywhere.
+
+9.5 Line Mode Integration
+=========================
+
+When shell integration is enabled, the input history of line mode is
+automatically filled with the shell history when the shell starts.  Also
+you can make Eat automatically switch to “line mode” (*note Line Mode::)
+for you when the shell prompt appears.
+
+ -- User Option: eat-enable-auto-line-mode
+     When non-nil, automatically switch to line mode the shell prompt
+     appears.
+
+
+File: docMqqLfV.info,  Node: Querying Before Kill,  Next: Display,  Prev: Shell Integration,  Up: Top
+
+10 Querying Before Kill
+***********************
 
 When a terminal is killed, the terminal process is also killed.  Since
 the process can do some important things, Eat asks for confirmation
@@ -381,9 +506,9 @@ this.
      essentially same as ‘t’, and Eat will always query.
 
 
-File: doc92XSF2.info,  Node: Display,  Next: Scrollback,  Prev: Querying Before Kill,  Up: Top
+File: docMqqLfV.info,  Node: Display,  Next: Scrollback,  Prev: Querying Before Kill,  Up: Top
 
-10 Display
+11 Display
 **********
 
 Display is the region you see on the terminal.  The program writes to
@@ -397,9 +522,9 @@ display size is controlled by the Emacs user option
 Buffers:: for the possible values of the user option.
 
 
-File: doc92XSF2.info,  Node: Scrollback,  Next: Cursor Types,  Prev: Display,  Up: Top
+File: docMqqLfV.info,  Node: Scrollback,  Next: Cursor Types,  Prev: Display,  Up: Top
 
-11 Scrollback
+12 Scrollback
 *************
 
 When you go too downward on the terminal, the terminal starts to
@@ -420,9 +545,9 @@ much memory.  You can change the limit, or remove it altogether.
      scrollback region is unlimited.
 
 
-File: doc92XSF2.info,  Node: Cursor Types,  Next: Mouse Tracking,  Prev: Scrollback,  Up: Top
+File: docMqqLfV.info,  Node: Cursor Types,  Next: Mouse Tracking,  Prev: Scrollback,  Up: Top
 
-12 Cursor Types
+13 Cursor Types
 ***************
 
 In terminal, cursor can be of up to three type: “visible”, “invisible”
@@ -473,9 +598,9 @@ as CURSOR-ON.  The blinking cursor switches between CURSOR-ON and
 CURSOR-OFF cursor shape.
 
 
-File: doc92XSF2.info,  Node: Mouse Tracking,  Next: Clipboard,  Prev: Cursor Types,  Up: Top
+File: docMqqLfV.info,  Node: Mouse Tracking,  Next: Clipboard,  Prev: Cursor Types,  Up: Top
 
-13 Mouse Tracking
+14 Mouse Tracking
 *****************
 
 Eat tracks mouse by default, when the program supports mouse.  But
@@ -488,9 +613,9 @@ mouse at all.  So mouse tracking can be toggled.
      tracking.  This is enabled by default.
 
 
-File: doc92XSF2.info,  Node: Clipboard,  Next: Colors,  Prev: Mouse Tracking,  Up: Top
+File: docMqqLfV.info,  Node: Clipboard,  Next: Colors,  Prev: Mouse Tracking,  Up: Top
 
-14 Clipboard
+15 Clipboard
 ************
 
 Just like any other buffer, you can yank text in terminal with ‘C-y’
@@ -519,9 +644,9 @@ the following user option to configure this:
      disabled by default for security reasons.
 
 
-File: doc92XSF2.info,  Node: Colors,  Next: Fonts,  Prev: Clipboard,  Up: Top
+File: docMqqLfV.info,  Node: Colors,  Next: Fonts,  Prev: Clipboard,  Up: Top
 
-15 Colors
+16 Colors
 *********
 
 Eat can show more than 16 million colors (16,777,216 colors exactly).
@@ -574,9 +699,9 @@ following user option:
      for the behavior described above.
 
 
-File: doc92XSF2.info,  Node: Fonts,  Next: Blinking Text,  Prev: Colors,  Up: Top
+File: docMqqLfV.info,  Node: Fonts,  Next: Sixel,  Prev: Colors,  Up: Top
 
-16 Fonts
+17 Fonts
 ********
 
 Programs may request the terminal to change the text font.  It can
@@ -603,9 +728,45 @@ number between 0 and 9 (inclusive).  For example, the font 6 is can be
 changed by customizing ‘eat-term-font-6’.  Font 0 is the default font.
 
 
-File: doc92XSF2.info,  Node: Blinking Text,  Next: Performance Tuning,  Prev: Fonts,  Up: Top
+File: docMqqLfV.info,  Node: Sixel,  Next: Blinking Text,  Prev: Fonts,  Up: Top
 
-17 Blinking Text
+18 Sixel
+********
+
+Eat can show Sixel graphics.  Sixel is a bitmap graphics format that can
+be used to display graphics in a terminal, for example, images, or
+plotting graphs.
+
+   You can control the display of Sixel images by customizing the
+following user options.
+
+ -- User Option: eat-sixel-scale
+     This is a non-negative number that specifies the amount to scale
+     the image by.
+
+ -- User Option: eat-sixel-aspect-ratio
+     This is a non-negative number that specifies the aspect ratio, i.e.
+     the ratio of width and height of a Sixel pixel.  For example, the
+     value of 2 means the width of a Sixel pixel is the double of its
+     height.
+
+   Eat converts Sixel graphics to an image format Emacs can natively
+display.  This preference of image formats can be configured by
+customizing the ‘eat-sixel-render-formats’ user option.
+
+ -- User Option: eat-sixel-render-formats
+     List of formats to render Sixel, in order of preference.  Each
+     element of the list is one of ‘xpm’, ‘svg’, ‘half-block’,
+     ‘background’, ‘none’.  ‘xpm’ and ‘svg’ means to use XPM and SVG
+     image format respectively, ‘half-block’ means to use UTF-8 half
+     block characters, ‘background’ means to just use background color,
+     and ‘none’ means to not render the image, instead just clear the
+     area.
+
+
+File: docMqqLfV.info,  Node: Blinking Text,  Next: Performance Tuning,  Prev: Sixel,  Up: Top
+
+19 Blinking Text
 ****************
 
 Programs can request the terminal to blink some text.  This helps to get
@@ -648,9 +809,9 @@ the rate of blinking:
      second.
 
 
-File: doc92XSF2.info,  Node: Performance Tuning,  Next: Common Problems,  Prev: Blinking Text,  Up: Top
+File: docMqqLfV.info,  Node: Performance Tuning,  Next: Common Problems,  Prev: Blinking Text,  Up: Top
 
-18 Performance Tuning
+20 Performance Tuning
 *********************
 
 Eat tries to be as fast as possible.  So Eat employs some techniques to
@@ -740,9 +901,9 @@ enough (unless the buffer is narrowed).  So Eat defers the correction.
 values, but the default values may change anytime.
 
 
-File: doc92XSF2.info,  Node: Common Problems,  Next: Reporting Bugs,  Prev: Performance Tuning,  Up: Top
+File: docMqqLfV.info,  Node: Common Problems,  Next: Reporting Bugs,  Prev: Performance Tuning,  Up: Top
 
-19 Common Problems
+21 Common Problems
 ******************
 
 This chapter describe how to recognize and handle situations in which
@@ -758,9 +919,9 @@ Eat does something unexpected, such as hangs, garbled text, etc.
 * Bugs in Manual::      What if there are problems in this manual?
 
 
-File: doc92XSF2.info,  Node: Not Recognized,  Next: Garbled Text,  Up: Common Problems
+File: docMqqLfV.info,  Node: Not Recognized,  Next: Garbled Text,  Up: Common Problems
 
-19.1 Terminal Not Recognized
+21.1 Terminal Not Recognized
 ============================
 
 If your program says that it can’t recognize the terminal, probably the
@@ -793,9 +954,9 @@ the directory where to put the Terminfo databases.  Then invoke the
 command ‘eat-compile-terminfo’ to compile the Terminfo databases.
 
 
-File: doc92XSF2.info,  Node: Garbled Text,  Next: Input Invisible,  Prev: Not Recognized,  Up: Common Problems
+File: docMqqLfV.info,  Node: Garbled Text,  Next: Input Invisible,  Prev: Not Recognized,  Up: Common Problems
 
-19.2 Garbled Text on Terminal
+21.2 Garbled Text on Terminal
 =============================
 
 If the text on the terminal looks wrong, first check out the value of
@@ -822,9 +983,9 @@ instructions on sending bug reports or feature request.
 definitely a bug, so please report it.
 
 
-File: doc92XSF2.info,  Node: Input Invisible,  Next: Not Responding,  Prev: Garbled Text,  Up: Common Problems
+File: docMqqLfV.info,  Node: Input Invisible,  Next: Not Responding,  Prev: Garbled Text,  Up: Common Problems
 
-19.3 Input Invisible
+21.3 Input Invisible
 ====================
 
 This can happen if the ‘stty’ program is unavailable on the system.  Eat
@@ -838,9 +999,9 @@ automatically fallback to bare Eshell when ‘stty’ is not available,
 ‘nil’ to do nothing, and ‘ask’ to ask interactively.
 
 
-File: doc92XSF2.info,  Node: Not Responding,  Next: Signaled an Error,  Prev: Input Invisible,  Up: Common Problems
+File: docMqqLfV.info,  Node: Not Responding,  Next: Signaled an Error,  Prev: Input Invisible,  Up: Common Problems
 
-19.4 Emacs or Eat Not Responding
+21.4 Emacs or Eat Not Responding
 ================================
 
 If you run something that outputs huge amount of data, your Emacs may
@@ -854,9 +1015,9 @@ those programs in faster terminals like bare Eshell (i.e.  without
 Eat-Eshell), Comint, or external terminal emulators.
 
 
-File: doc92XSF2.info,  Node: Signaled an Error,  Next: Bugs in Manual,  Prev: Not Responding,  Up: Common Problems
+File: docMqqLfV.info,  Node: Signaled an Error,  Next: Bugs in Manual,  Prev: Not Responding,  Up: Common Problems
 
-19.5 Eat Signaled an Error
+21.5 Eat Signaled an Error
 ==========================
 
 The worst thing that happen is that Eat might signal an error.  It is
@@ -874,9 +1035,9 @@ work with.  However, it mayn’t work if you’re really unlucky, in that
 case deleting the terminal and starting a new one is your only option.
 
 
-File: doc92XSF2.info,  Node: Bugs in Manual,  Prev: Signaled an Error,  Up: Common Problems
+File: docMqqLfV.info,  Node: Bugs in Manual,  Prev: Signaled an Error,  Up: Common Problems
 
-19.6 Bugs in Manual
+21.6 Bugs in Manual
 ===================
 
 Human makes mistake, and we are no exceptions.  But we are trying hard
@@ -901,18 +1062,18 @@ them must be wrong, and that’s a bug.
 instruction on how to report it.
 
 
-File: doc92XSF2.info,  Node: Reporting Bugs,  Next: Tracing the Terminal,  Prev: Common Problems,  Up: Top
+File: docMqqLfV.info,  Node: Reporting Bugs,  Next: Tracing the Terminal,  Prev: Common Problems,  Up: Top
 
-20 Reporting Bugs
+22 Reporting Bugs
 *****************
 
 We welcome bug reports and feature request.  If you think you have found
 a bug, please report it.  If you’re doubt, please send it anyway.  We
 can’t promise that we’ll fix the bug or implement your feature idea, or
 always agree that it’s a bug, but we always want to hear from you.
-Please report bugs at <https://codeberg.org/akib/emacs-eat/issues/new>.
-You may send the bug report by emailing to the maintain (‘M-x
-describe-package RET eat RET’ would show the email address), but we
+Please report bugs at <https://codeberg.org/akib/emacs-eat/issues/>.
+You may send the bug report by emailing to the maintainer (‘M-x
+describe-package <RET> eat <RET>’ would show the email address), but we
 prefer the former method, since the report is visible to everyone
 immediately.
 
@@ -963,9 +1124,9 @@ anything that reproduces the bug will suffice.  (Of course, if you like
 doing experiments, the smaller the example, the better.)
 
 
-File: doc92XSF2.info,  Node: Tracing the Terminal,  Next: GNU General Public License,  Prev: Reporting Bugs,  Up: Top
+File: docMqqLfV.info,  Node: Tracing the Terminal,  Next: GNU General Public License,  Prev: Reporting Bugs,  Up: Top
 
-21 Tracing the Terminal
+23 Tracing the Terminal
 ***********************
 
 When you run into a bug and want to report it, you’ll want to trace the
@@ -996,7 +1157,7 @@ ordinary users, it’s documented here only to help you debug Eat.  You
 mustn’t rely on the behavior of this functionality to do anything else.
 
 
-File: doc92XSF2.info,  Node: GNU General Public License,  Next: GNU Free Documentation License,  Prev: Tracing the Terminal,  Up: Top
+File: docMqqLfV.info,  Node: GNU General Public License,  Next: GNU Free Documentation License,  Prev: Tracing the Terminal,  Up: Top
 
 Appendix A GNU General Public License
 *************************************
@@ -1712,7 +1873,7 @@ GNU Lesser General Public License instead of this License.  But first,
 please read <https://www.gnu.org/licenses/why-not-lgpl.html>.
 
 
-File: doc92XSF2.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: GNU General Public License,  Up: Top
+File: docMqqLfV.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: GNU General Public License,  Up: Top
 
 Appendix B GNU Free Documentation License
 *****************************************
@@ -2194,7 +2355,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: doc92XSF2.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: docMqqLfV.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
 
 Appendix C Index
 ****************
@@ -2202,322 +2363,390 @@ Appendix C Index
  [index ]
 * Menu:
 
-* advertising colors:                    Colors.               (line 36)
-* aliases, color:                        Colors.               (line 20)
-* aliases, face:                         Colors.               (line 20)
-* annotate, prompt:                      Shell Integration.    (line 41)
-* annotate, shell prompt:                Shell Integration.    (line 41)
-* annotation, prompt:                    Shell Integration.    (line 41)
-* annotation, shell prompt:              Shell Integration.    (line 41)
-* blinking cursor:                       Cursor Types.         (line  3)
-* blinking text:                         Blinking Text.        (line  3)
-* bold text:                             Fonts.                (line 10)
-* bug reporting:                         Reporting Bugs.       (line  3)
-* bugs in manual:                        Bugs in Manual.       (line  3)
-* bugs, manual:                          Bugs in Manual.       (line  3)
-* C-c C-c (“semi-char mode”):            Input Modes.          (line 35)
-* C-c C-e (“semi-char mode”):            Input Modes.          (line 80)
-* C-c C-j (“emacs mode”):                Input Modes.          (line 85)
-* C-c C-k (“emacs mode”):                Input Modes.          (line 82)
-* C-c C-k (“semi-char mode”):            Input Modes.          (line 35)
-* C-c C-n (“emacs mode”):                Shell Integration.    (line 32)
-* C-c C-n (“semi-char mode”):            Shell Integration.    (line 32)
-* C-c C-p (“emacs mode”):                Shell Integration.    (line 32)
-* C-c C-p (“semi-char mode”):            Shell Integration.    (line 32)
-* C-c M-d (“emacs mode”):                Input Modes.          (line 85)
-* C-c M-d (“semi-char mode”):            Input Modes.          (line 61)
-* C-M-m (“char mode”):                   Input Modes.          (line 70)
-* C-q (“semi-char mode”):                Input Modes.          (line 27)
-* C-x n d (“emacs mode”):                Shell Integration.    (line 37)
-* C-x n d (“semi-char mode”):            Shell Integration.    (line 37)
-* C-y (“semi-char mode”):                Clipboard.            (line  6)
-* cause of flickering:                   Performance Tuning.   (line 19)
-* changing cursor:                       Cursor Types.         (line  3)
-* char mode:                             Input Modes.          (line 53)
-* clipboard:                             Clipboard.            (line  3)
-* clipboard integration:                 Clipboard.            (line 10)
-* color advertisement:                   Colors.               (line 36)
-* color aliases:                         Colors.               (line 20)
-* colors:                                Colors.               (line  3)
-* common problems:                       Common Problems.      (line  3)
-* confirm before kill:                   Querying Before Kill. (line  3)
-* confirm before kill terminal:          Querying Before Kill. (line  3)
-* cursor blinking:                       Cursor Types.         (line  3)
-* cursor types:                          Cursor Types.         (line  3)
-* customizing colors:                    Colors.               (line  3)
-* customizing cursor:                    Cursor Types.         (line  3)
-* customizing font families:             Fonts.                (line 24)
-* customizing semi-char mode:            Input Modes.          (line 38)
-* customizing semi-char mode keybindings: Input Modes.         (line 38)
-* customizing semi-char mode keys:       Input Modes.          (line 38)
-* cwd tracking:                          Shell Integration.    (line 22)
-* directory tracking:                    Shell Integration.    (line 22)
-* display:                               Display.              (line  3)
-* eat:                                   Hello Terminal.       (line  6)
-* eat not responding:                    Not Responding.       (line  3)
-* eat signaled an error:                 Signaled an Error.    (line  3)
-* eat, eshell:                           Eshell Terminal.      (line  3)
-* eat-blink-mode:                        Blinking Text.        (line 15)
-* eat-compile-terminfo:                  Not Recognized.       (line 24)
-* eat-default-cursor-type:               Cursor Types.         (line 16)
-* eat-default-cursor-type <1>:           Cursor Types.         (line 16)
-* eat-enable-blinking-text:              Blinking Text.        (line 10)
-* eat-enable-blinking-text <1>:          Blinking Text.        (line 10)
-* eat-enable-directory-tracking:         Shell Integration.    (line 28)
-* eat-enable-directory-tracking <1>:     Shell Integration.    (line 28)
-* eat-enable-kill-from-terminal:         Clipboard.            (line 17)
-* eat-enable-kill-from-terminal <1>:     Clipboard.            (line 17)
-* eat-enable-mouse:                      Mouse Tracking.       (line 10)
-* eat-enable-mouse <1>:                  Mouse Tracking.       (line 10)
-* eat-enable-shell-prompt-annotation:    Shell Integration.    (line 47)
-* eat-enable-shell-prompt-annotation <1>: Shell Integration.   (line 47)
-* eat-enable-yank-to-terminal:           Clipboard.            (line 26)
-* eat-enable-yank-to-terminal <1>:       Clipboard.            (line 26)
-* eat-eshell-fallback-if-stty-not-available: Input Invisible.  (line 10)
-* eat-eshell-mode:                       Eshell Terminal.      (line 11)
-* eat-eshell-semi-char-non-bound-keys:   Input Modes.          (line 38)
-* eat-eshell-update-semi-char-mode-map:  Input Modes.          (line 47)
-* eat-fast-blink-frequency:              Blinking Text.        (line 38)
-* eat-fast-blink-frequency <1>:          Blinking Text.        (line 38)
-* eat-horizontal-bar-cursor-type:        Cursor Types.         (line 34)
-* eat-horizontal-bar-cursor-type <1>:    Cursor Types.         (line 34)
-* eat-input-chunk-size:                  Performance Tuning.   (line 14)
-* eat-input-chunk-size <1>:              Performance Tuning.   (line 14)
-* eat-invisible-cursor-type:             Cursor Types.         (line 19)
-* eat-invisible-cursor-type <1>:         Cursor Types.         (line 19)
-* eat-maximum-latency:                   Performance Tuning.   (line 64)
-* eat-maximum-latency <1>:               Performance Tuning.   (line 64)
-* eat-minimum-latency:                   Performance Tuning.   (line 45)
-* eat-minimum-latency <1>:               Performance Tuning.   (line 45)
-* eat-narrow-to-shell-prompt:            Shell Integration.    (line 37)
-* eat-next-shell-prompt:                 Shell Integration.    (line 32)
-* eat-previous-shell-prompt:             Shell Integration.    (line 32)
+* _eat_msg:                              Shell Integration.   (line  95)
+* advertising colors:                    Colors.              (line  36)
+* aliases, color:                        Colors.              (line  20)
+* aliases, face:                         Colors.              (line  20)
+* annotate, prompt:                      Shell Integration.   (line  46)
+* annotate, shell prompt:                Shell Integration.   (line  47)
+* annotation, prompt:                    Shell Integration.   (line  47)
+* annotation, shell prompt:              Shell Integration.   (line  47)
+* blinking cursor:                       Cursor Types.        (line   3)
+* blinking text:                         Blinking Text.       (line   3)
+* bold text:                             Fonts.               (line  10)
+* bug reporting:                         Reporting Bugs.      (line   3)
+* bugs in manual:                        Bugs in Manual.      (line   3)
+* bugs, manual:                          Bugs in Manual.      (line   3)
+* C-c C-c (“line mode”):                 Input Modes.         (line 108)
+* C-c C-c (“semi-char mode”):            Input Modes.         (line  35)
+* C-c C-e (“line mode”):                 Input Modes.         (line 117)
+* C-c C-e (“semi-char mode”):            Input Modes.         (line  80)
+* C-c C-j (“emacs mode”):                Input Modes.         (line  85)
+* C-c C-j (“line mode”):                 Input Modes.         (line 117)
+* C-c C-k (“emacs mode”):                Input Modes.         (line  82)
+* C-c C-k (“semi-char mode”):            Input Modes.         (line  35)
+* C-c C-l (“emacs mode”):                Input Modes.         (line  99)
+* C-c C-l (“semi-char mode”):            Input Modes.         (line  99)
+* C-c C-n (“emacs mode”):                Shell Integration.   (line  38)
+* C-c C-n (“semi-char mode”):            Shell Integration.   (line  38)
+* C-c C-p (“emacs mode”):                Shell Integration.   (line  38)
+* C-c C-p (“semi-char mode”):            Shell Integration.   (line  38)
+* C-c C-r (“line mode”):                 Input Modes.         (line 121)
+* C-c M-d (“emacs mode”):                Input Modes.         (line  85)
+* C-c M-d (“line mode”):                 Input Modes.         (line 117)
+* C-c M-d (“semi-char mode”):            Input Modes.         (line  61)
+* C-c M-r (“line mode”):                 Input Modes.         (line 121)
+* C-c M-s (“line mode”):                 Input Modes.         (line 121)
+* C-c <SPC> (“line mode”):               Input Modes.         (line 102)
+* C-d (“line mode”):                     Input Modes.         (line 108)
+* C-<down> (“line mode”):                Input Modes.         (line 121)
+* C-M-m (“char mode”):                   Input Modes.         (line  70)
+* C-q (“semi-char mode”):                Input Modes.         (line  27)
+* C-<up> (“line mode”):                  Input Modes.         (line 121)
+* C-x n d (“emacs mode”):                Shell Integration.   (line  43)
+* C-x n d (“semi-char mode”):            Shell Integration.   (line  43)
+* C-y (“semi-char mode”):                Clipboard.           (line   6)
+* cause of flickering:                   Performance Tuning.  (line  19)
+* changing cursor:                       Cursor Types.        (line   3)
+* char mode:                             Input Modes.         (line  53)
+* clipboard:                             Clipboard.           (line   3)
+* clipboard integration:                 Clipboard.           (line  10)
+* color advertisement:                   Colors.              (line  36)
+* color aliases:                         Colors.              (line  20)
+* colors:                                Colors.              (line   3)
+* common problems:                       Common Problems.     (line   3)
+* confirm before kill:                   Querying Before Kill.
+                                                              (line   3)
+* confirm before kill terminal:          Querying Before Kill.
+                                                              (line   3)
+* credential input:                      Password Input.      (line   3)
+* cursor blinking:                       Cursor Types.        (line   3)
+* cursor types:                          Cursor Types.        (line   3)
+* customizing colors:                    Colors.              (line   3)
+* customizing cursor:                    Cursor Types.        (line   3)
+* customizing font families:             Fonts.               (line  24)
+* customizing semi-char mode:            Input Modes.         (line  38)
+* customizing semi-char mode keybindings: Input Modes.        (line  38)
+* customizing semi-char mode keys:       Input Modes.         (line  38)
+* cwd tracking:                          Shell Integration.   (line  22)
+* directory tracking:                    Shell Integration.   (line  22)
+* display:                               Display.             (line   3)
+* eat:                                   Hello Terminal.      (line   6)
+* eat not responding:                    Not Responding.      (line   3)
+* eat signaled an error:                 Signaled an Error.   (line   3)
+* eat, eshell:                           Eshell Terminal.     (line   3)
+* eat-blink-mode:                        Blinking Text.       (line  15)
+* eat-compile-terminfo:                  Not Recognized.      (line  24)
+* eat-default-cursor-type:               Cursor Types.        (line  16)
+* eat-default-cursor-type <1>:           Cursor Types.        (line  16)
+* eat-enable-auto-line-mode:             Shell Integration.   (line 122)
+* eat-enable-auto-line-mode <1>:         Shell Integration.   (line 122)
+* eat-enable-blinking-text:              Blinking Text.       (line  10)
+* eat-enable-blinking-text <1>:          Blinking Text.       (line  10)
+* eat-enable-directory-tracking:         Shell Integration.   (line  31)
+* eat-enable-directory-tracking <1>:     Shell Integration.   (line  31)
+* eat-enable-kill-from-terminal:         Clipboard.           (line  17)
+* eat-enable-kill-from-terminal <1>:     Clipboard.           (line  17)
+* eat-enable-mouse:                      Mouse Tracking.      (line  10)
+* eat-enable-mouse <1>:                  Mouse Tracking.      (line  10)
+* eat-enable-shell-prompt-annotation:    Shell Integration.   (line  56)
+* eat-enable-shell-prompt-annotation <1>: Shell Integration.  (line  56)
+* eat-enable-yank-to-terminal:           Clipboard.           (line  26)
+* eat-enable-yank-to-terminal <1>:       Clipboard.           (line  26)
+* eat-eshell-fallback-if-stty-not-available: Input Invisible. (line  10)
+* eat-eshell-mode:                       Eshell Terminal.     (line  11)
+* eat-eshell-semi-char-non-bound-keys:   Input Modes.         (line  38)
+* eat-eshell-update-semi-char-mode-map:  Input Modes.         (line  47)
+* eat-fast-blink-frequency:              Blinking Text.       (line  38)
+* eat-fast-blink-frequency <1>:          Blinking Text.       (line  38)
+* eat-horizontal-bar-cursor-type:        Cursor Types.        (line  34)
+* eat-horizontal-bar-cursor-type <1>:    Cursor Types.        (line  34)
+* eat-input-chunk-size:                  Performance Tuning.  (line  14)
+* eat-input-chunk-size <1>:              Performance Tuning.  (line  14)
+* eat-invisible-cursor-type:             Cursor Types.        (line  19)
+* eat-invisible-cursor-type <1>:         Cursor Types.        (line  19)
+* eat-line-auto-move-to-input:           Input Modes.         (line 112)
+* eat-line-input-history-isearch:        Input Modes.         (line 134)
+* eat-line-input-history-isearch <1>:    Input Modes.         (line 134)
+* eat-maximum-latency:                   Performance Tuning.  (line  64)
+* eat-maximum-latency <1>:               Performance Tuning.  (line  64)
+* eat-message-handler-alist:             Shell Integration.   (line 102)
+* eat-message-handler-alist <1>:         Shell Integration.   (line 102)
+* eat-minimum-latency:                   Performance Tuning.  (line  45)
+* eat-minimum-latency <1>:               Performance Tuning.  (line  45)
+* eat-narrow-to-shell-prompt:            Shell Integration.   (line  43)
+* eat-next-shell-prompt:                 Shell Integration.   (line  38)
+* eat-previous-shell-prompt:             Shell Integration.   (line  38)
 * eat-project:                           Project-local Terminal.
-                                                               (line  6)
+                                                              (line   6)
 * eat-query-before-killing-running-terminal: Querying Before Kill.
-                                                               (line 12)
+                                                              (line  12)
 * eat-query-before-killing-running-terminal <1>: Querying Before Kill.
-                                                               (line 12)
-* eat-reload:                            Input Modes.          (line 47)
-* eat-reset:                             Signaled an Error.    (line 12)
-* eat-semi-char-non-bound-keys:          Input Modes.          (line 38)
-* eat-shell-prompt-annotation-delay:     Performance Tuning.   (line 80)
-* eat-shell-prompt-annotation-delay <1>: Performance Tuning.   (line 80)
-* eat-shell-prompt-annotation-failure:   Shell Integration.    (line 60)
+                                                              (line  12)
+* eat-reload:                            Input Modes.         (line  47)
+* eat-reset:                             Signaled an Error.   (line  12)
+* eat-semi-char-non-bound-keys:          Input Modes.         (line  38)
+* eat-send-command:                      Password Input.      (line  10)
+* eat-shell-prompt-annotation-delay:     Performance Tuning.  (line  80)
+* eat-shell-prompt-annotation-delay <1>: Performance Tuning.  (line  80)
+* eat-shell-prompt-annotation-failure:   Shell Integration.   (line  69)
 * eat-shell-prompt-annotation-failure-margin-indicator: Shell Integration.
-                                                               (line 60)
-* eat-shell-prompt-annotation-position:  Shell Integration.    (line 55)
-* eat-shell-prompt-annotation-position <1>: Shell Integration. (line 55)
-* eat-shell-prompt-annotation-running:   Shell Integration.    (line 60)
+                                                              (line  69)
+* eat-shell-prompt-annotation-position:  Shell Integration.   (line  64)
+* eat-shell-prompt-annotation-position <1>: Shell Integration.
+                                                              (line  64)
+* eat-shell-prompt-annotation-running:   Shell Integration.   (line  69)
 * eat-shell-prompt-annotation-running-margin-indicator: Shell Integration.
-                                                               (line 60)
-* eat-shell-prompt-annotation-success:   Shell Integration.    (line 60)
+                                                              (line  69)
+* eat-shell-prompt-annotation-success:   Shell Integration.   (line  69)
 * eat-shell-prompt-annotation-success-margin-indicator: Shell Integration.
-                                                               (line 60)
-* eat-slow-blink-frequency:              Blinking Text.        (line 32)
-* eat-slow-blink-frequency <1>:          Blinking Text.        (line 32)
-* eat-term-bold:                         Fonts.                (line 10)
-* eat-term-bold <1>:                     Fonts.                (line 13)
-* eat-term-fast-blink:                   Blinking Text.        (line 23)
-* eat-term-italic:                       Fonts.                (line 16)
-* eat-term-name:                         Colors.               (line 48)
-* eat-term-name <1>:                     Colors.               (line 48)
-* eat-term-name <2>:                     Not Recognized.       (line  9)
-* eat-term-scrollback-size:              Scrollback.           (line 17)
-* eat-term-scrollback-size <1>:          Scrollback.           (line 17)
-* eat-term-slow-blink:                   Blinking Text.        (line 23)
-* eat-term-terminfo-directory:           Not Recognized.       (line 15)
-* eat-trace-mode:                        Tracing the Terminal. (line 10)
-* eat-trace-replay:                      Tracing the Terminal. (line 27)
-* eat-update-semi-char-mode-map:         Input Modes.          (line 47)
-* eat-vertical-bar-cursor-type:          Cursor Types.         (line 27)
-* eat-vertical-bar-cursor-type <1>:      Cursor Types.         (line 27)
-* eat-very-visible-cursor-type:          Cursor Types.         (line 22)
-* eat-very-visible-cursor-type <1>:      Cursor Types.         (line 22)
-* eat-very-visible-horizontal-bar-cursor-type: Cursor Types.   (line 37)
+                                                              (line  69)
+* eat-sixel-aspect-ratio:                Sixel.               (line  17)
+* eat-sixel-aspect-ratio <1>:            Sixel.               (line  17)
+* eat-sixel-render-formats:              Sixel.               (line  27)
+* eat-sixel-render-formats <1>:          Sixel.               (line  27)
+* eat-sixel-scale:                       Sixel.               (line  13)
+* eat-sixel-scale <1>:                   Sixel.               (line  13)
+* eat-slow-blink-frequency:              Blinking Text.       (line  32)
+* eat-slow-blink-frequency <1>:          Blinking Text.       (line  32)
+* eat-term-bold:                         Fonts.               (line  10)
+* eat-term-bold <1>:                     Fonts.               (line  13)
+* eat-term-fast-blink:                   Blinking Text.       (line  23)
+* eat-term-italic:                       Fonts.               (line  16)
+* eat-term-name:                         Colors.              (line  48)
+* eat-term-name <1>:                     Colors.              (line  48)
+* eat-term-name <2>:                     Not Recognized.      (line   9)
+* eat-term-scrollback-size:              Scrollback.          (line  17)
+* eat-term-scrollback-size <1>:          Scrollback.          (line  17)
+* eat-term-slow-blink:                   Blinking Text.       (line  23)
+* eat-term-terminfo-directory:           Not Recognized.      (line  15)
+* eat-trace-mode:                        Tracing the Terminal.
+                                                              (line  10)
+* eat-trace-replay:                      Tracing the Terminal.
+                                                              (line  27)
+* eat-update-semi-char-mode-map:         Input Modes.         (line  47)
+* eat-vertical-bar-cursor-type:          Cursor Types.        (line  27)
+* eat-vertical-bar-cursor-type <1>:      Cursor Types.        (line  27)
+* eat-very-visible-cursor-type:          Cursor Types.        (line  22)
+* eat-very-visible-cursor-type <1>:      Cursor Types.        (line  22)
+* eat-very-visible-horizontal-bar-cursor-type: Cursor Types.  (line  37)
 * eat-very-visible-horizontal-bar-cursor-type <1>: Cursor Types.
-                                                               (line 37)
-* eat-very-visible-vertical-bar-cursor-type: Cursor Types.     (line 30)
-* eat-very-visible-vertical-bar-cursor-type <1>: Cursor Types. (line 30)
-* eat-yank:                              Clipboard.            (line  6)
-* eat-yank-pop:                          Clipboard.            (line  6)
-* emacs mode:                            Input Modes.          (line 73)
-* emacs not responding:                  Not Responding.       (line  3)
-* environment variable, TERM:            Colors.               (line 43)
-* eshell:                                Eshell Terminal.      (line  3)
-* eshell terminal:                       Eshell Terminal.      (line  3)
-* eshell terminal emulation:             Eshell Terminal.      (line  3)
-* eshell, eat:                           Eshell Terminal.      (line  3)
-* face aliases:                          Colors.               (line 20)
-* faint text:                            Fonts.                (line 13)
-* fixing flickering:                     Performance Tuning.   (line 35)
-* flickering:                            Performance Tuning.   (line 19)
-* flickering fix:                        Performance Tuning.   (line 35)
-* font family:                           Fonts.                (line 19)
-* fonts:                                 Fonts.                (line  3)
-* garbled text:                          Garbled Text.         (line  3)
-* hello terminal:                        Hello Terminal.       (line  3)
-* input invisible:                       Input Invisible.      (line  3)
-* input mode, char:                      Input Modes.          (line 52)
-* input mode, emacs:                     Input Modes.          (line 72)
-* input mode, semi-char:                 Input Modes.          (line 18)
-* input mode, semi-char, adding exceptions: Input Modes.       (line 38)
-* input mode, semi-char, customizing:    Input Modes.          (line 38)
-* input mode, semi-char, exception, add: Input Modes.          (line 38)
-* input modes:                           Input Modes.          (line  3)
-* input, invisible:                      Input Invisible.      (line  3)
-* inputting exceptional characters:      Input Modes.          (line 27)
-* integration, shell:                    Shell Integration.    (line  3)
-* introduction:                          Intro.                (line  3)
-* invisible input:                       Input Invisible.      (line  3)
-* invisible, input:                      Input Invisible.      (line  3)
-* italic text:                           Fonts.                (line 16)
-* keybinding mode, char:                 Input Modes.          (line 53)
-* keybinding mode, emacs:                Input Modes.          (line 73)
-* keybinding mode, semi-char:            Input Modes.          (line 19)
-* keybinding mode, semi-char, adding exceptions: Input Modes.  (line 38)
-* keybinding mode, semi-char, customizing: Input Modes.        (line 38)
-* keybinding mode, semi-char, exception, add: Input Modes.     (line 38)
-* keybinding modes:                      Input Modes.          (line  3)
-* keybindings, char mode:                Input Modes.          (line 53)
-* keybindings, emacs mode:               Input Modes.          (line 73)
-* keybindings, semi-char mode:           Input Modes.          (line 19)
-* keybindings, semi-char mode, adding exceptions: Input Modes. (line 38)
-* keybindings, semi-char mode, customizing: Input Modes.       (line 38)
-* keybindings, semi-char mode, exception, add: Input Modes.    (line 38)
-* keyboard:                              Keyboard.             (line  3)
-* latency:                               Performance Tuning.   (line 35)
-* M-RET (“char mode”):                   Input Modes.          (line 70)
-* M-y (“semi-char mode”):                Clipboard.            (line  6)
-* manual, bugs:                          Bugs in Manual.       (line  3)
-* manual, typos:                         Bugs in Manual.       (line  3)
-* mode, char:                            Input Modes.          (line 53)
-* mode, emacs:                           Input Modes.          (line 73)
-* mode, semi-char:                       Input Modes.          (line 19)
-* mode, semi-char, adding exceptions:    Input Modes.          (line 38)
-* mode, semi-char, customizing:          Input Modes.          (line 38)
-* mode, semi-char, exception, add:       Input Modes.          (line 38)
-* modes, input:                          Input Modes.          (line  3)
-* modes, keybinding:                     Input Modes.          (line  3)
-* mouse:                                 Mouse.                (line  3)
-* mouse tracking:                        Mouse Tracking.       (line  3)
-* narrow to prompt:                      Shell Integration.    (line 37)
-* narrow to shell prompt:                Shell Integration.    (line 37)
-* narrow, prompt:                        Shell Integration.    (line 37)
-* narrow, shell prompt:                  Shell Integration.    (line 37)
-* navigation, prompt:                    Shell Integration.    (line 32)
-* not recognized:                        Not Recognized.       (line  3)
-* not responding, eat:                   Not Responding.       (line  3)
-* not responding, emacs:                 Not Responding.       (line  3)
-* performance tuning:                    Performance Tuning.   (line  3)
-* problem, common:                       Common Problems.      (line  3)
-* problem, eat not responding:           Not Responding.       (line  3)
-* problem, eat signaled an error:        Signaled an Error.    (line  3)
-* problem, emacs not responding:         Not Responding.       (line  3)
-* problem, garbled text:                 Garbled Text.         (line  3)
-* problem, not recognized:               Not Recognized.       (line  3)
-* problem, not responding, eat:          Not Responding.       (line  3)
-* problem, not responding, emacs:        Not Responding.       (line  3)
-* problem, reporting:                    Reporting Bugs.       (line  3)
-* problem, signaled an error:            Signaled an Error.    (line  3)
-* problem, terminal not recognized:      Not Recognized.       (line  3)
-* problem, text garbled:                 Garbled Text.         (line  3)
-* problems, bugs in manual:              Bugs in Manual.       (line  3)
-* problems, bugs, manual:                Bugs in Manual.       (line  3)
-* problems, manual, bugs:                Bugs in Manual.       (line  3)
-* problems, manual, typos:               Bugs in Manual.       (line  3)
-* problems, typos in manual:             Bugs in Manual.       (line  3)
-* problems, typos, manual:               Bugs in Manual.       (line  3)
+                                                              (line  37)
+* eat-very-visible-vertical-bar-cursor-type: Cursor Types.    (line  30)
+* eat-very-visible-vertical-bar-cursor-type <1>: Cursor Types.
+                                                              (line  30)
+* eat-yank:                              Clipboard.           (line   6)
+* eat-yank-pop:                          Clipboard.           (line   6)
+* emacs mode:                            Input Modes.         (line  73)
+* emacs not responding:                  Not Responding.      (line   3)
+* environment variable, TERM:            Colors.              (line  43)
+* eshell:                                Eshell Terminal.     (line   3)
+* eshell terminal:                       Eshell Terminal.     (line   3)
+* eshell terminal emulation:             Eshell Terminal.     (line   3)
+* eshell, eat:                           Eshell Terminal.     (line   3)
+* face aliases:                          Colors.              (line  20)
+* faint text:                            Fonts.               (line  13)
+* fixing flickering:                     Performance Tuning.  (line  35)
+* flickering:                            Performance Tuning.  (line  19)
+* flickering fix:                        Performance Tuning.  (line  35)
+* font family:                           Fonts.               (line  19)
+* fonts:                                 Fonts.               (line   3)
+* garbled text:                          Garbled Text.        (line   3)
+* hello terminal:                        Hello Terminal.      (line   3)
+* input invisible:                       Input Invisible.     (line   3)
+* input mode, char:                      Input Modes.         (line  52)
+* input mode, emacs:                     Input Modes.         (line  72)
+* input mode, line:                      Input Modes.         (line  89)
+* input mode, semi-char:                 Input Modes.         (line  18)
+* input mode, semi-char, adding exceptions: Input Modes.      (line  38)
+* input mode, semi-char, customizing:    Input Modes.         (line  38)
+* input mode, semi-char, exception, add: Input Modes.         (line  38)
+* input modes:                           Input Modes.         (line   3)
+* input, credential:                     Password Input.      (line   3)
+* input, invisible:                      Input Invisible.     (line   3)
+* input, password:                       Password Input.      (line   3)
+* inputting exceptional characters:      Input Modes.         (line  27)
+* integration, shell:                    Shell Integration.   (line   3)
+* integration, shell, line mode:         Shell Integration.   (line 113)
+* introduction:                          Intro.               (line   3)
+* invisible input:                       Input Invisible.     (line   3)
+* invisible, input:                      Input Invisible.     (line   3)
+* italic text:                           Fonts.               (line  16)
+* keybinding mode, char:                 Input Modes.         (line  53)
+* keybinding mode, emacs:                Input Modes.         (line  73)
+* keybinding mode, line:                 Input Modes.         (line  90)
+* keybinding mode, semi-char:            Input Modes.         (line  19)
+* keybinding mode, semi-char, adding exceptions: Input Modes. (line  38)
+* keybinding mode, semi-char, customizing: Input Modes.       (line  38)
+* keybinding mode, semi-char, exception, add: Input Modes.    (line  38)
+* keybinding modes:                      Input Modes.         (line   3)
+* keybindings, char mode:                Input Modes.         (line  53)
+* keybindings, emacs mode:               Input Modes.         (line  73)
+* keybindings, line mode:                Input Modes.         (line  90)
+* keybindings, semi-char mode:           Input Modes.         (line  19)
+* keybindings, semi-char mode, adding exceptions: Input Modes.
+                                                              (line  38)
+* keybindings, semi-char mode, customizing: Input Modes.      (line  38)
+* keybindings, semi-char mode, exception, add: Input Modes.   (line  38)
+* keyboard:                              Keyboard.            (line   3)
+* latency:                               Performance Tuning.  (line  35)
+* line mode:                             Input Modes.         (line  90)
+* line mode integration:                 Shell Integration.   (line 114)
+* line mode shell integration:           Shell Integration.   (line 114)
+* M-n (“line mode”):                     Input Modes.         (line 121)
+* M-p (“line mode”):                     Input Modes.         (line 121)
+* M-r (“line mode”):                     Input Modes.         (line 121)
+* M-RET (“char mode”):                   Input Modes.         (line  70)
+* M-y (“semi-char mode”):                Clipboard.           (line   6)
+* manual, bugs:                          Bugs in Manual.      (line   3)
+* manual, typos:                         Bugs in Manual.      (line   3)
+* mode, char:                            Input Modes.         (line  53)
+* mode, emacs:                           Input Modes.         (line  73)
+* mode, line:                            Input Modes.         (line  90)
+* mode, semi-char:                       Input Modes.         (line  19)
+* mode, semi-char, adding exceptions:    Input Modes.         (line  38)
+* mode, semi-char, customizing:          Input Modes.         (line  38)
+* mode, semi-char, exception, add:       Input Modes.         (line  38)
+* modes, input:                          Input Modes.         (line   3)
+* modes, keybinding:                     Input Modes.         (line   3)
+* mouse:                                 Mouse.               (line   3)
+* mouse tracking:                        Mouse Tracking.      (line   3)
+* narrow to prompt:                      Shell Integration.   (line  43)
+* narrow to shell prompt:                Shell Integration.   (line  43)
+* narrow, prompt:                        Shell Integration.   (line  43)
+* narrow, shell prompt:                  Shell Integration.   (line  43)
+* navigation, prompt:                    Shell Integration.   (line  34)
+* not recognized:                        Not Recognized.      (line   3)
+* not responding, eat:                   Not Responding.      (line   3)
+* not responding, emacs:                 Not Responding.      (line   3)
+* password input:                        Password Input.      (line   3)
+* performance tuning:                    Performance Tuning.  (line   3)
+* problem, common:                       Common Problems.     (line   3)
+* problem, eat not responding:           Not Responding.      (line   3)
+* problem, eat signaled an error:        Signaled an Error.   (line   3)
+* problem, emacs not responding:         Not Responding.      (line   3)
+* problem, garbled text:                 Garbled Text.        (line   3)
+* problem, not recognized:               Not Recognized.      (line   3)
+* problem, not responding, eat:          Not Responding.      (line   3)
+* problem, not responding, emacs:        Not Responding.      (line   3)
+* problem, reporting:                    Reporting Bugs.      (line   3)
+* problem, signaled an error:            Signaled an Error.   (line   3)
+* problem, terminal not recognized:      Not Recognized.      (line   3)
+* problem, text garbled:                 Garbled Text.        (line   3)
+* problems, bugs in manual:              Bugs in Manual.      (line   3)
+* problems, bugs, manual:                Bugs in Manual.      (line   3)
+* problems, manual, bugs:                Bugs in Manual.      (line   3)
+* problems, manual, typos:               Bugs in Manual.      (line   3)
+* problems, typos in manual:             Bugs in Manual.      (line   3)
+* problems, typos, manual:               Bugs in Manual.      (line   3)
 * project terminal:                      Project-local Terminal.
-                                                               (line  3)
+                                                              (line   3)
 * project’s terminal:                    Project-local Terminal.
-                                                               (line  3)
+                                                              (line   3)
 * project-local terminal:                Project-local Terminal.
-                                                               (line  3)
-* prompt annotation:                     Shell Integration.    (line 41)
-* prompt navigation:                     Shell Integration.    (line 32)
-* querying before kill:                  Querying Before Kill. (line  3)
-* querying before kill terminal:         Querying Before Kill. (line  3)
-* reason behind flickering:              Performance Tuning.   (line 19)
-* reporting bugs:                        Reporting Bugs.       (line  3)
-* scrollback:                            Scrollback.           (line  3)
-* semi-char mode:                        Input Modes.          (line 19)
-* shell integration:                     Shell Integration.    (line  3)
-* shell navigation, shell prompt:        Shell Integration.    (line 32)
-* shell prompt annotation:               Shell Integration.    (line 41)
-* shell prompt navigation:               Shell Integration.    (line 32)
-* signaled an error:                     Signaled an Error.    (line  3)
-* slant text:                            Fonts.                (line 16)
-* TERM:                                  Colors.               (line 43)
-* TERM environment variable:             Colors.               (line 43)
-* terminal emulation, eshell:            Eshell Terminal.      (line  3)
-* terminal not recognized:               Not Recognized.       (line  3)
-* terminal recording:                    Tracing the Terminal. (line  3)
-* terminal tracing:                      Tracing the Terminal. (line  3)
-* terminal, eshell:                      Eshell Terminal.      (line  3)
-* terminal, hello:                       Hello Terminal.       (line  3)
-* terminal, kill, confirm:               Querying Before Kill. (line  3)
-* terminal, kill, query:                 Querying Before Kill. (line  3)
+                                                              (line   3)
+* prompt annotation:                     Shell Integration.   (line  47)
+* prompt navigation:                     Shell Integration.   (line  35)
+* querying before kill:                  Querying Before Kill.
+                                                              (line   3)
+* querying before kill terminal:         Querying Before Kill.
+                                                              (line   3)
+* reason behind flickering:              Performance Tuning.  (line  19)
+* reporting bugs:                        Reporting Bugs.      (line   3)
+* <RET> (“line mode”):                   Input Modes.         (line 102)
+* scrollback:                            Scrollback.          (line   3)
+* semi-char mode:                        Input Modes.         (line  19)
+* shell integration:                     Shell Integration.   (line   3)
+* shell navigation, shell prompt:        Shell Integration.   (line  35)
+* shell prompt annotation:               Shell Integration.   (line  47)
+* shell prompt navigation:               Shell Integration.   (line  35)
+* signaled an error:                     Signaled an Error.   (line   3)
+* sixel:                                 Sixel.               (line   3)
+* slant text:                            Fonts.               (line  16)
+* <TAB> (“line mode”):                   Input Modes.         (line 121)
+* TERM:                                  Colors.              (line  43)
+* TERM environment variable:             Colors.              (line  43)
+* terminal emulation, eshell:            Eshell Terminal.     (line   3)
+* terminal not recognized:               Not Recognized.      (line   3)
+* terminal recording:                    Tracing the Terminal.
+                                                              (line   3)
+* terminal tracing:                      Tracing the Terminal.
+                                                              (line   3)
+* terminal, eshell:                      Eshell Terminal.     (line   3)
+* terminal, hello:                       Hello Terminal.      (line   3)
+* terminal, kill, confirm:               Querying Before Kill.
+                                                              (line   3)
+* terminal, kill, query:                 Querying Before Kill.
+                                                              (line   3)
 * terminal, project:                     Project-local Terminal.
-                                                               (line  3)
+                                                              (line   3)
 * terminal, project-local:               Project-local Terminal.
-                                                               (line  3)
-* text, blinking:                        Blinking Text.        (line  3)
-* text, bold:                            Fonts.                (line 10)
-* text, faint:                           Fonts.                (line 13)
-* text, font family:                     Fonts.                (line 19)
-* text, italic:                          Fonts.                (line 16)
-* text, slant:                           Fonts.                (line 16)
-* tracing the terminal:                  Tracing the Terminal. (line  3)
-* tracking cwd:                          Shell Integration.    (line 22)
-* tracking directory:                    Shell Integration.    (line 22)
-* tracking mouse:                        Mouse Tracking.       (line  3)
-* tracking working directory:            Shell Integration.    (line 22)
-* tuning performance:                    Performance Tuning.   (line  3)
-* types, cursor:                         Cursor Types.         (line  3)
-* typos in manual:                       Bugs in Manual.       (line  3)
-* typos, manual:                         Bugs in Manual.       (line  3)
-* window-adjust-process-window-size-function: Display.         (line 11)
-* working directory tracking:            Shell Integration.    (line 22)
-* yanking:                               Clipboard.            (line  6)
+                                                              (line   3)
+* text, blinking:                        Blinking Text.       (line   3)
+* text, bold:                            Fonts.               (line  10)
+* text, faint:                           Fonts.               (line  13)
+* text, font family:                     Fonts.               (line  19)
+* text, italic:                          Fonts.               (line  16)
+* text, slant:                           Fonts.               (line  16)
+* tracing the terminal:                  Tracing the Terminal.
+                                                              (line   3)
+* tracking cwd:                          Shell Integration.   (line  21)
+* tracking directory:                    Shell Integration.   (line  22)
+* tracking mouse:                        Mouse Tracking.      (line   3)
+* tracking working directory:            Shell Integration.   (line  22)
+* tuning performance:                    Performance Tuning.  (line   3)
+* types, cursor:                         Cursor Types.        (line   3)
+* typos in manual:                       Bugs in Manual.      (line   3)
+* typos, manual:                         Bugs in Manual.      (line   3)
+* window-adjust-process-window-size-function: Display.        (line  11)
+* working directory tracking:            Shell Integration.   (line  22)
+* yanking:                               Clipboard.           (line   6)
 
 
 
 Tag Table:
-Node: Top716
-Node: Intro2922
-Node: Hello Terminal3768
-Node: Project-local Terminal4900
-Node: Eshell Terminal5408
-Node: Keyboard6603
-Node: Mouse7601
-Node: Input Modes7985
-Ref: Semi-char Mode8687
-Ref: Char Mode10438
-Ref: Emacs Mode11284
-Node: Shell Integration11960
-Node: Querying Before Kill15484
-Node: Display16483
-Node: Scrollback17109
-Node: Cursor Types18048
-Node: Mouse Tracking20510
-Node: Clipboard21059
-Node: Colors22404
-Node: Fonts25132
-Node: Blinking Text26300
-Node: Performance Tuning28312
-Node: Common Problems32975
-Node: Not Recognized33625
-Node: Garbled Text35400
-Node: Input Invisible36671
-Node: Not Responding37391
-Node: Signaled an Error38122
-Node: Bugs in Manual39136
-Node: Reporting Bugs39961
-Node: Tracing the Terminal42678
-Node: GNU General Public License44160
-Node: GNU Free Documentation License81979
-Node: Index107348
+Node: Top720
+Node: Intro2981
+Node: Hello Terminal3827
+Node: Project-local Terminal4959
+Node: Eshell Terminal5467
+Node: Keyboard6662
+Node: Mouse7660
+Node: Input Modes8044
+Ref: Semi-char Mode8743
+Ref: Char Mode10494
+Ref: Emacs Mode11340
+Ref: Line Mode12016
+Node: Password Input14722
+Node: Shell Integration15431
+Ref: Directory tracking16173
+Ref: Shell Prompt Navigation16733
+Ref: Shell Prompt Annotation17278
+Ref: Message Passing19111
+Ref: Line Mode Integration20410
+Node: Querying Before Kill20850
+Node: Display21851
+Node: Scrollback22477
+Node: Cursor Types23416
+Node: Mouse Tracking25878
+Node: Clipboard26427
+Node: Colors27772
+Node: Fonts30500
+Node: Sixel31660
+Node: Blinking Text33102
+Node: Performance Tuning35114
+Node: Common Problems39777
+Node: Not Recognized40427
+Node: Garbled Text42202
+Node: Input Invisible43473
+Node: Not Responding44193
+Node: Signaled an Error44924
+Node: Bugs in Manual45938
+Node: Reporting Bugs46763
+Node: Tracing the Terminal49483
+Node: GNU General Public License50965
+Node: GNU Free Documentation License88784
+Node: Index114153
 
 End Tag Table
 

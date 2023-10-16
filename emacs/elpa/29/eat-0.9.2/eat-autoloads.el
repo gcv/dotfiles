@@ -33,6 +33,23 @@ in a newly created session.
 PROGRAM can be a shell command.
 
 (fn &optional PROGRAM ARG)" t)
+(autoload 'eat-other-window "eat" "\
+Start a new Eat terminal emulator in a buffer in another window.
+
+Start a new Eat session, or switch to an already active session.
+Return the buffer selected (or created).
+
+With a non-numeric prefix ARG, create a new session.
+
+With a numeric prefix ARG switch to the session with that number, or
+create it if it doesn't already exist.
+
+With double prefix argument ARG, ask for the program to run and run it
+in a newly created session.
+
+PROGRAM can be a shell command.
+
+(fn &optional PROGRAM ARG)" t)
 (defvar eat-eshell-mode nil "\
 Non-nil if Eat-Eshell mode is enabled.
 See the `eat-eshell-mode' command
@@ -88,6 +105,19 @@ it is disabled.
 (fn &optional ARG)" t)
 (autoload 'eat-project "eat" "\
 Start Eat in the current project's root directory.
+
+Start a new Eat session, or switch to an already active session.
+Return the buffer selected (or created).
+
+With a non-numeric prefix ARG, create a new session.
+
+With a numeric prefix ARG (like
+\\[universal-argument] 42 \\[eat-project]), switch to the session with
+that number, or create it if it doesn't already exist.
+
+(fn &optional ARG)" t)
+(autoload 'eat-project-other-window "eat" "\
+Start Eat in the current project root directory in another window.
 
 Start a new Eat session, or switch to an already active session.
 Return the buffer selected (or created).

@@ -2,8 +2,8 @@
 
 @comment %**start of header
 @setfilename eat.info
-@set UPDATED 13 April 2023
-@set VERSION 0.8
+@set UPDATED 10 October 2023
+@set VERSION 0.9.2
 @documentencoding UTF-8
 @codequotebacktick on
 @codequoteundirected on
@@ -62,6 +62,7 @@ Basic Operations
 * Keyboard::            Most keyboard keys are captured by Eat.
 * Mouse::               Eat supports mouse.
 * Input Modes::         Input modes for various use-cases.
+* Password Input::      Safely inputting credentials.
 
 Advanced Customizations
 * Shell Integration::   Getting the most from Eat and your shell.
@@ -72,7 +73,7 @@ Advanced Customizations
 * Mouse Tracking::      Eat tracks mouse, but this can be changed.
 * Clipboard::           Integrating kill ring with terminal.
 * Colors::              Eat can show more than sixteen million colors.
-* Fonts::               Eat can show up to sixty font different fonts.
+* Fonts::               Eat can show up to sixteen different fonts.
 * Blinking Text::       Annoying blinking texts.
 * Performance Tuning::  Fine tuning to maximize performance.
 
@@ -364,6 +365,109 @@ From ``emacs mode'', you can switch to ``semi-char mode'' with
 command @command{eshell-toggle-direct-send} is remapped to enable
 ``char-mode'', which is usually bound to @kbd{C-c M-d}.
 
+@anchor{Line Mode}
+@cindex line mode
+@cindex mode, line
+@cindex keybindings, line mode
+@cindex keybinding mode, line
+@cindex input mode, line
+@section Line Mode
+
+In ``line mode'', input is sent one line at a line, similar to Comint
+or Shell mode (@pxref{Interactive Shell,,, emacs, GNU Emacs Manual}).
+Like ``emacs mode'', you can interact with buffer as you wish; but at
+the very end of the buffer, you can edit the input line with usual
+Emacs commands.  This is not available in Eshell.
+
+@kindex C-c C-l @r{(``semi-char mode'')}
+@kindex C-c C-l @r{(``emacs mode'')}
+To enter ``line mode'', press @kbd{C-c C-l} from ``semi-char mode'' or
+``emacs mode''.
+
+@kindex @key{RET} @r{(``line mode'')}
+@kindex C-c @key{SPC} @r{(``line mode'')}
+@kbd{@key{RET}} sends the current input with a trailing newline, and
+clear the input area for new input to be written.  When called with a
+prefix argument, no newline is appended before sending input.  To
+input a newline character without actually sending it, you can press
+@kbd{C-c @key{SPC}}.
+
+@kindex C-c C-c @r{(``line mode'')}
+@kindex C-d @r{(``line mode'')}
+@kbd{C-c C-c} discards the input completely and sends an interrupt to
+the terminal.  @kbd{C-d} deletes the character after the point, or
+sends EOF if the input is empty.
+
+@vindex eat-line-auto-move-to-input
+You can't modify the terminal in ``line mode'', you can write only in
+the input line.  Eat automatically moves the point to the input line
+if you try to insert character in the terminal region.  This behavior
+can be disabled by customizing @code{eat-line-auto-move-to-input} to
+@code{nil}.
+
+@kindex C-c C-e @r{(``line mode'')}
+@kindex C-c C-j @r{(``line mode'')}
+@kindex C-c M-d @r{(``line mode'')}
+You can exit to ``emacs mode'', ``semi-char mode'' or ``char mode''
+with @kbd{C-c C-e}, @kbd{C-c C-j} or @kbd{C-c M-d} respectively.  If
+there's any pending input when exiting line mode, it is sent as is to
+the terminal.
+
+@kindex M-p @r{(``line mode'')}
+@kindex M-n @r{(``line mode'')}
+@kindex C-@key{up} @r{(``line mode'')}
+@kindex C-@key{down} @r{(``line mode'')}
+@kindex M-r @r{(``line mode'')}
+@kindex C-c M-r @r{(``line mode'')}
+@kindex C-c M-s @r{(``line mode'')}
+@kindex C-c C-r @r{(``line mode'')}
+@kindex @key{TAB} @r{(``line mode'')}
+The input history is recorded.  You can cycle through the history with
+@kbd{M-p} and @kbd{M-n}, and also with @kbd{C-@key{up}} and
+@kbd{C-@key{down}}.  @kbd{C-c M-r} and @kbd{C-c M-s} searches the
+input history taking the current input as the query.  @kbd{C-c M-r}
+searches backward while @kbd{C-c M-s} searches forward.  And @kbd{C-c
+C-r} searches the input history using minibuffer with completion,
+useful specially if you use any minibuffer completion UI/framework.
+
+You can also use Isearch
+(@pxref{Incremental Search,,, emacs, GNU Emacs Manual}) to search
+through the input history, with @kbd{M-r}.  You can also customize
+@code{eat-line-input-history-isearch} to use all standard Isearch
+commands to search the input history.
+
+@vindex eat-line-input-history-isearch
+@defopt eat-line-input-history-isearch
+Controls where Isearch searches in Eat buffer.  If @code{t}, usual
+Isearch commands in Eat buffer search in the input history.  If
+@code{dwim}, Isearch keys search in the input history only when
+initial point position is on input line.  When starting Isearch from
+other parts of the Eat buffer, they search in the Eat buffer.  If
+@code{nil}, Isearch operates on the whole Eat buffer.
+@end defopt
+
+Input history is not loaded from the shell history file, to do that,
+@xref{Line Mode Integration}.
+
+@node Password Input
+@cindex password input
+@cindex credential input
+@cindex input, password
+@cindex input, credential
+@chapter Password Input
+
+By default, every keystroke gets recorded in the lossage, which can be
+seen by pressing @kbd{C-h l}.  This is actually a good thing, unless
+you're inputting password.
+
+@findex eat-send-command
+Emacs doesn't record keystrokes when a password is read from the
+minibuffer.  However, when the password prompt is in the terminal, the
+keys you use to type in your password gets recorded.  To prevent this
+from happening, you can use the command @command{eat-send-command},
+it'll read password from the minibuffer and send it.  Since the
+password is read from the minibuffer, it's not recorded.
+
 @part Part III:@* Advanced Customizations
 
 @node Shell Integration
@@ -392,12 +496,14 @@ If you use Zsh, put the following in your @samp{.zshrc} file:
   source "$EAT_SHELL_INTEGRATION_DIR/zsh"
 @end example
 
+@anchor{Directory tracking}
 @cindex directory tracking
 @cindex tracking directory
 @cindex working directory tracking
 @cindex tracking working directory
 @cindex cwd tracking
 @cindex tracking cwd
+@section Directory tracking
 After you've setup shell integration, the Eat will track the working
 directory of your shell.  That means @command{find-file} will start
 from your shell's current working directory.  This also works in
@@ -410,10 +516,12 @@ This controls directory tracking.  When set to non-@code{nil}, Eat
 tracks the current working directory of programs.
 @end defopt
 
+@anchor{Shell Prompt Navigation}
 @cindex shell prompt navigation
 @cindex shell navigation, shell prompt
 @cindex prompt navigation
 @cindex navigation, prompt
+@section Shell Prompt Navigation
 @kindex C-c C-p @r{(``emacs mode''})
 @kindex C-c C-p @r{(``semi-char mode'')}
 @findex eat-previous-shell-prompt
@@ -437,12 +545,14 @@ You can narrow (@pxref{Narrowing,,, emacs, GNU Emacs Manual}) down Eat
 buffer to a shell prompt and its output (if any) using the key
 sequence @kbd{C-x n d}, bound to @command{eat-narrow-to-shell-prompt}.
 
+@anchor{Shell Prompt Annotation}
 @cindex shell prompt annotation
 @cindex annotation, shell prompt
 @cindex annotate, shell prompt
 @cindex prompt annotation
 @cindex annotation, prompt
 @cindex annotate, prompt
+@section Shell Prompt Annotation
 When shell integration is setup, Eat annotates each shell prompt.  Eat
 puts a mark on the shell prompt indicating the whether the command
 entered in that prompt is running, exited successfully or exited with
@@ -473,7 +583,6 @@ When set to @code{right-margin}, Eat uses the right margin.
 @vindex eat-shell-prompt-annotation-success
 @vindex eat-shell-prompt-annotation-failure-margin-indicator
 @vindex eat-shell-prompt-annotation-failure
-
 Eat uses the strings ``-'', ``0'' and ``X'' respectively to indicate
 the command is running, the command has succeeded and the command has
 failed.  You can also customize the them. The user option
@@ -488,6 +597,57 @@ the user option
 face @code{eat-shell-prompt-annotation-failure} control the indicator
 used to indicate the command has exited unsuccessfully with non-zero
 exit status.
+
+@anchor{Message Passing}
+@section Message Passing
+
+After enabling shell integration, you can send messages to Emacs from
+your shell.  Then you can handle the message on Emacs side using usual
+Emacs Lisp function.
+
+When shell integration script is loaded, a function named
+@command{_eat_msg} is defined in your shell.  You can use this to send
+any message to Emacs.  (The @samp{_} in the beginning of the function
+name is intentional to prevent shadowing any actual command.)
+
+@deffn Command _eat_msg @var{handler-name} @var{message}...
+Send message @var{message}, handled by the handler named
+@var{handler-name} in Emacs.
+@end deffn
+
+The messages are handled with the handlers defined in
+@code{eat-message-handler-alist}.
+
+@vindex eat-message-handler-alist
+@defopt eat-message-handler-alist
+Alist of message handler name and its handler function.  The keys are
+the names of message handlers (i.e. the @var{handler-name} argument of
+@command{_eat_msg}), and the values are their respective handler
+functions.  The handler function is called with the @var{message}
+arguments of @command{_eat_msg}.  Messages with undefined handlers are
+ignored.  To disable message passing, set this to nil.
+@end defopt
+
+Beware, messages can be sent by malicious and/or buggy programs
+running in the shell, therefore you should always verify the message
+before doing anywhere.
+
+@anchor{Line Mode Integration}
+@cindex line mode integration
+@cindex line mode shell integration
+@cindex integration, shell, line mode
+@section Line Mode Integration
+
+When shell integration is enabled, the input history of line mode is
+automatically filled with the shell history when the shell starts.
+Also you can make Eat automatically switch to ``line mode''
+(@pxref{Line Mode}) for you when the shell prompt appears.
+
+@vindex eat-enable-auto-line-mode
+@defopt eat-enable-auto-line-mode
+When non-nil, automatically switch to line mode the shell prompt
+appears.
+@end defopt
 
 @node Querying Before Kill
 @cindex querying before kill
@@ -798,6 +958,46 @@ like @code{eat-term-font-@var{n}}, which corresponds to color @var{n},
 and @var{n} can be any number between 0 and 9 (inclusive).  For
 example, the font 6 is can be changed by customizing
 @code{eat-term-font-6}.  Font 0 is the default font.
+
+@node Sixel
+@cindex sixel
+@chapter Sixel
+
+Eat can show Sixel graphics.  Sixel is a bitmap graphics format that
+can be used to display graphics in a terminal, for example, images, or
+plotting graphs.
+
+You can control the display of Sixel images by customizing the
+following user options.
+
+@vindex eat-sixel-scale
+@defopt eat-sixel-scale
+This is a non-negative number that specifies the amount to scale the
+image by.
+@end defopt
+
+@vindex eat-sixel-aspect-ratio
+@defopt eat-sixel-aspect-ratio
+This is a non-negative number that specifies the aspect ratio, i.e.
+the ratio of width and height of a Sixel pixel.  For example, the
+value of 2 means the width of a Sixel pixel is the double of its
+height.
+@end defopt
+
+Eat converts Sixel graphics to an image format Emacs can natively
+display.  This preference of image formats can be configured by
+customizing the @code{eat-sixel-render-formats} user option.
+
+@vindex eat-sixel-render-formats
+@defopt eat-sixel-render-formats
+List of formats to render Sixel, in order of preference.  Each element
+of the list is one of @code{xpm}, @code{svg}, @code{half-block},
+@code{background}, @code{none}.  @code{xpm} and @code{svg} means to
+use XPM and SVG image format respectively, @code{half-block} means to
+use UTF-8 half block characters, @code{background} means to just use
+background color, and @code{none} means to not render the image,
+instead just clear the area.
+@end defopt
 
 @node Blinking Text
 @cindex blinking text
@@ -1158,11 +1358,11 @@ found a bug, please report it.  If you're doubt, please send it
 anyway.  We can't promise that we'll fix the bug or implement your
 feature idea, or always agree that it's a bug, but we always want to
 hear from you.  Please report bugs at
-@url{https://codeberg.org/akib/emacs-eat/issues/new}.  You may send
-the bug report by emailing to the maintain
-(@kbd{M-x describe-package RET eat RET} would show the email address),
-but we prefer the former method, since the report is visible to
-everyone immediately.
+@url{https://codeberg.org/akib/emacs-eat/issues/}.  You may send the
+bug report by emailing to the maintainer
+(@kbd{M-x describe-package @key{RET} eat @key{RET}} would show the
+email address), but we prefer the former method, since the report is
+visible to everyone immediately.
 
 The most important principle in reporting a bug is to report
 @emph{facts}.  Hypotheses and verbal descriptions are useful when they
