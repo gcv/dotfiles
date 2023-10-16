@@ -31,15 +31,12 @@
 
 (require 'cider-client)
 (require 'cider-common)
+(require 'cider-completion-context)
 (require 'cider-doc)
+(require 'cider-docstring)
 (require 'cider-eldoc)
 (require 'nrepl-dict)
-
-(defcustom cider-completion-use-context t
-  "When true, uses context at point to improve completion suggestions."
-  :type 'boolean
-  :group 'cider
-  :package-version '(cider . "0.7.0"))
+(require 'seq)
 
 (defcustom cider-annotate-completion-candidates t
   "When true, annotate completion candidates with some extra information."
@@ -115,55 +112,6 @@ if the candidate is not namespace-qualified."
                  (const :tag "never" nil))
   :group 'cider
   :package-version '(cider . "0.9.0"))
-
-(defvar cider-completion-last-context nil)
-
-(defun cider-completion-symbol-start-pos ()
-  "Find the starting position of the symbol at point, unless inside a string."
-  (let ((sap (symbol-at-point)))
-    (when (and sap (not (nth 3 (syntax-ppss))))
-      (car (bounds-of-thing-at-point 'symbol)))))
-
-(defun cider-completion-get-context-at-point ()
-  "Extract the context at point.
-If point is not inside the list, returns nil; otherwise return \"top-level\"
-form, with symbol at point replaced by __prefix__."
-  (when (save-excursion
-          (condition-case _
-              (progn
-                (up-list)
-                (check-parens)
-                t)
-            (scan-error nil)
-            (user-error nil)))
-    (save-excursion
-      (let* ((pref-end (point))
-             (pref-start (cider-completion-symbol-start-pos))
-             (context (cider-defun-at-point))
-             (_ (beginning-of-defun))
-             (expr-start (point)))
-        (concat (when pref-start (substring context 0 (- pref-start expr-start)))
-                "__prefix__"
-                (substring context (- pref-end expr-start)))))))
-
-(defun cider-completion-get-context ()
-  "Extract context depending on `cider-completion-use-context' and major mode."
-  (let ((context (if (and cider-completion-use-context
-                          ;; Important because `beginning-of-defun' and
-                          ;; `ending-of-defun' work incorrectly in the REPL
-                          ;; buffer, so context extraction fails there.
-                          (derived-mode-p 'clojure-mode))
-                     ;; We use ignore-errors here since grabbing the context
-                     ;; might fail because of unbalanced parens, or other
-                     ;; technical reasons, yet we don't want to lose all
-                     ;; completions and throw error to user because of that.
-                     (or (ignore-errors (cider-completion-get-context-at-point))
-                         "nil")
-                   "nil")))
-    (if (string= cider-completion-last-context context)
-        ":same"
-      (setq cider-completion-last-context context)
-      context)))
 
 (defun cider-completion--parse-candidate-map (candidate-map)
   "Get \"candidate\" from CANDIDATE-MAP.
@@ -246,14 +194,14 @@ performed by `cider-annotate-completion-function'."
               ;;
               ;; This api is better described in the section
               ;; '21.6.7 Programmed Completion' of the elisp manual.
-              (cond ((eq action 'metadata) `(metadata (category . cider)))
+              (cond ((eq action 'metadata) `(metadata (category . cider))) ;; defines a completion category named 'cider, used later in our `completion-category-overrides` logic.
                     ((eq (car-safe action) 'boundaries) nil)
                     (t (with-current-buffer (current-buffer)
                          (complete-with-action action
                                                (cider-complete prefix) prefix pred)))))
             :annotation-function #'cider-annotate-symbol
             :company-kind #'cider-company-symbol-kind
-            :company-doc-buffer #'cider-create-doc-buffer
+            :company-doc-buffer #'cider-create-compact-doc-buffer
             :company-location #'cider-company-location
             :company-docsig #'cider-company-docsig))))
 
@@ -281,11 +229,10 @@ in the buffer."
 
 (defun cider-company-docsig (thing)
   "Return signature for THING."
-  (let* ((eldoc-info (cider-eldoc-info thing))
-         (ns (lax-plist-get eldoc-info "ns"))
-         (symbol (lax-plist-get eldoc-info "symbol"))
-         (arglists (lax-plist-get eldoc-info "arglists")))
-    (when eldoc-info
+  (when-let ((eldoc-info (cider-eldoc-info thing)))
+    (let* ((ns (lax-plist-get eldoc-info "ns"))
+           (symbol (lax-plist-get eldoc-info "symbol"))
+           (arglists (lax-plist-get eldoc-info "arglists")))
       (format "%s: %s"
               (cider-eldoc-format-thing ns symbol thing
                                         (cider-eldoc-thing-type eldoc-info))
@@ -297,15 +244,50 @@ in the buffer."
   "Return CIDER completion candidates for STRING as is, unfiltered."
   (cider-complete string))
 
+;; defines a completion style named `cider' (which ideally would have been named `cider-fuzzy').
+;; note that there's already a completion category named `cider' (grep for `(metadata (category . cider))` in this file),
+;; which can be confusing given the identical name.
+;; The `cider' completion style should be removed because the `flex' style is essentially equivalent.
+;; (To be fair, `flex' was introduced in Emacs 27, 3 years in after our commit 04e428b
+;;  which introduced `cider-company-enable-fuzzy-completion')
 (add-to-list 'completion-styles-alist
              '(cider
                cider-company-unfiltered-candidates
                cider-company-unfiltered-candidates
                "CIDER backend-driven completion style."))
 
+;; Currently CIDER completions only work for `basic`, and not `initials`, `partial-completion`, `orderless`, etc.
+;; So we ensure that those other styles aren't used with CIDER, otherwise one would see bad or no completions at all.
+;; This `add-to-list` call can be removed once we implement the other completion styles.
+;; (When doing that, please refactor `cider-enable-flex-completion' as well)
+(add-to-list 'completion-category-overrides '(cider (styles basic)))
+
 (defun cider-company-enable-fuzzy-completion ()
-  "Enable backend-driven fuzzy completion in the current buffer."
+  "Enable backend-driven fuzzy completion in the current buffer.
+
+DEPRECATED: please use `cider-enable-flex-completion' instead."
   (setq-local completion-styles '(cider)))
+
+(make-obsolete 'cider-company-enable-fuzzy-completion 'cider-enable-flex-completion "1.8.0")
+
+(defun cider-enable-flex-completion ()
+  "Enables `flex' (fuzzy) completion for CIDER in all buffers.
+
+Only affects the `cider' completion category.`"
+  (interactive)
+  (when (< emacs-major-version 27)
+    (user-error "`cider-enable-flex-completion' requires Emacs 27 or later"))
+  (let ((found-styles (when-let ((cider (assq 'cider completion-category-overrides)))
+                        (assq 'styles cider)))
+        (found-cycle (when-let ((cider (assq 'cider completion-category-overrides)))
+                       (assq 'cycle cider))))
+    (setq completion-category-overrides (seq-remove (lambda (x)
+                                                      (equal 'cider (car x)))
+                                                    completion-category-overrides))
+    (unless (member 'flex found-styles)
+      (setq found-styles (append found-styles '(flex))))
+    (add-to-list 'completion-category-overrides (apply #'list 'cider found-styles (when found-cycle
+                                                                                    (list found-cycle))))))
 
 (provide 'cider-completion)
 ;;; cider-completion.el ends here

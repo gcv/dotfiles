@@ -71,12 +71,12 @@ Setting this to nil removes the fontification restriction."
 
 (defun cider-in-string-p ()
   "Return non-nil if point is in a string."
-  (let ((beg (save-excursion (beginning-of-defun) (point))))
+  (let ((beg (save-excursion (beginning-of-defun-raw) (point))))
     (nth 3 (parse-partial-sexp beg (point)))))
 
 (defun cider-in-comment-p ()
   "Return non-nil if point is in a comment."
-  (let ((beg (save-excursion (beginning-of-defun) (point))))
+  (let ((beg (save-excursion (beginning-of-defun-raw) (point))))
     (nth 4 (parse-partial-sexp beg (point)))))
 
 (defun cider--tooling-file-p (file-name)
@@ -109,14 +109,22 @@ If BOUNDS is non-nil, return a list of its starting and ending position
 instead."
   (save-excursion
     (save-match-data
-      (end-of-defun)
+      (if (derived-mode-p 'cider-repl-mode)
+          (goto-char (point-max)) ;; in repls, end-of-defun won't work, so we perform the closest reasonable thing
+        (end-of-defun))
       (let ((end (point)))
         (clojure-backward-logical-sexp 1)
         (cider--text-or-limits bounds (point) end)))))
 
+(defun cider-get-ns-name ()
+  "Calls `clojure-find-ns', suppressing any errors.
+Therefore, possibly returns nil,
+so please handle that value from any callsites."
+  (clojure-find-ns :supress-errors))
+
 (defun cider-ns-form ()
   "Retrieve the ns form."
-  (when (clojure-find-ns)
+  (when (cider-get-ns-name)
     (save-excursion
       (goto-char (match-beginning 0))
       (cider-defun-at-point))))
@@ -726,6 +734,7 @@ through a stack of help buffers.  Variables `help-back-label' and
     "Press <\\[cider-apropos]> to look for a symbol by some search string."
     "Press <\\[cider-apropos-documentation]> to look for a symbol that has some string in its docstring."
     "Press <\\[cider-eval-defun-at-point]> to eval the top-level form at point."
+    "Press <\\[cider-eval-dwim]> to eval to run cider-eval-region if a region is active, and cider-eval-defun-at-point otherwise."
     "Press <\\[cider-eval-defun-up-to-point]> to eval the top-level form up to the point."
     "Press <\\[cider-eval-sexp-up-to-point]> to eval the current form up to the point."
     "Press <\\[cider-eval-sexp-at-point]> to eval the current form around the point."

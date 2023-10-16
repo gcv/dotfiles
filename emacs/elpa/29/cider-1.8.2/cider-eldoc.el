@@ -33,6 +33,8 @@
 
 (require 'cider-client)
 (require 'cider-common) ; for cider-symbol-at-point
+(require 'cider-completion-context)
+(require 'cider-docstring)
 (require 'subr-x)
 (require 'cider-util)
 (require 'nrepl-dict)
@@ -214,8 +216,14 @@ THING is the variable name.  ELDOC-INFO is a p-list containing the eldoc
 information."
   (let* ((ns (lax-plist-get eldoc-info "ns"))
          (symbol (lax-plist-get eldoc-info "symbol"))
-         (docstring (lax-plist-get eldoc-info "docstring"))
-         (formatted-var (cider-eldoc-format-thing ns symbol thing 'var)))
+         (docstring (or (cider--render-docstring-first-sentence eldoc-info)
+                        (cider--render-docstring eldoc-info)
+                        (cider-docstring--dumb-trim (lax-plist-get eldoc-info "docstring"))))
+         ;; if it's a single class (and not multiple class candidates), that's it
+         (maybe-class (car (lax-plist-get eldoc-info "class")))
+         (formatted-var (or (when maybe-class
+                              (cider-propertize maybe-class 'var))
+                            (cider-eldoc-format-thing ns symbol thing 'var))))
     (when docstring
       (cider-eldoc-format-sym-doc formatted-var ns docstring))))
 
@@ -228,6 +236,22 @@ arglists.  ELDOC-INFO is a p-list containing the eldoc information."
         (arglists (lax-plist-get eldoc-info "arglists")))
     (format "%s: %s"
             (cider-eldoc-format-thing ns symbol thing 'fn)
+            (cider-eldoc-format-arglist arglists pos))))
+
+(defun cider-eldoc-format-special-form (thing pos eldoc-info)
+  "Return the formatted eldoc string for a special-form.
+THING is the special form's name.  POS is the argument index of the
+special-form's arglists.  ELDOC-INFO is a p-list containing the eldoc
+information."
+  (let* ((ns (lax-plist-get eldoc-info "ns"))
+         (special-form-symbol (lax-plist-get eldoc-info "symbol"))
+         (arglists (mapcar (lambda (arglist)
+                             (if (equal (car arglist) special-form-symbol)
+                                 (cdr arglist)
+                               arglist))
+                           (lax-plist-get eldoc-info "arglists"))))
+    (format "%s: %s"
+            (cider-eldoc-format-thing ns special-form-symbol thing 'fn)
             (cider-eldoc-format-arglist arglists pos))))
 
 (defun cider-highlight-args (arglist pos)
@@ -307,12 +331,13 @@ if the maximum number of sexps to skip is exceeded."
 (defun cider-eldoc-thing-type (eldoc-info)
   "Return the type of the ELDOC-INFO being displayed by eldoc.
 It can be a function or var now."
-  (pcase (lax-plist-get eldoc-info "type")
-    ("function" 'fn)
-    ("special-form" 'special-form)
-    ("macro" 'macro)
-    ("method" 'method)
-    ("variable" 'var)))
+  (or (pcase (lax-plist-get eldoc-info "type")
+        ("function" 'fn)
+        ("special-form" 'special-form)
+        ("macro" 'macro)
+        ("method" 'method)
+        ("variable" 'var))
+      'fn))
 
 (defun cider-eldoc-info-at-point ()
   "Return eldoc info at point.
@@ -365,7 +390,7 @@ Otherwise return the eldoc of the first symbol of the sexp."
     (_ thing)))
 
 (defun cider-eldoc-info (thing)
-  "Return the info for THING.
+  "Return the info for THING (as string).
 This includes the arglist and ns and symbol name (if available)."
   (let ((thing (cider-eldoc--convert-ns-keywords thing)))
     (when (and (cider-nrepl-op-supported-p "eldoc")
@@ -393,7 +418,7 @@ This includes the arglist and ns and symbol name (if available)."
        ;; generic case
        (t (if (equal thing (car cider-eldoc-last-symbol))
               (cadr cider-eldoc-last-symbol)
-            (when-let* ((eldoc-info (cider-sync-request:eldoc thing)))
+            (when-let* ((eldoc-info (cider-sync-request:eldoc thing nil nil (cider-completion-get-context t))))
               (let* ((arglists (nrepl-dict-get eldoc-info "eldoc"))
                      (docstring (nrepl-dict-get eldoc-info "docstring"))
                      (type (nrepl-dict-get eldoc-info "type"))
@@ -408,9 +433,15 @@ This includes the arglist and ns and symbol name (if available)."
                                          name
                                        (format ".%s" member)))
                      (eldoc-plist (list "ns" ns-or-class
+                                        "class" class
                                         "symbol" name-or-member
                                         "arglists" arglists
                                         "docstring" docstring
+                                        "doc-fragments" (nrepl-dict-get eldoc-info "doc-fragments")
+                                        "doc-first-sentence-fragments" (nrepl-dict-get eldoc-info
+                                                                                       "doc-first-sentence-fragments")
+                                        "doc-block-tags-fragments" (nrepl-dict-get eldoc-info
+                                                                                   "doc-block-tags-fragments")
                                         "type" type)))
                 ;; add context dependent args if requested by defcustom
                 ;; do not cache this eldoc info to avoid showing info
@@ -470,9 +501,12 @@ Only useful for interop forms.  Clojure forms would be returned unchanged."
            (pos (lax-plist-get sexp-eldoc-info "pos"))
            (thing (lax-plist-get sexp-eldoc-info "thing")))
       (when eldoc-info
-        (if (eq (cider-eldoc-thing-type eldoc-info) 'var)
-            (cider-eldoc-format-variable thing eldoc-info)
-          (cider-eldoc-format-function thing pos eldoc-info))))))
+        (cond
+         ((eq (cider-eldoc-thing-type eldoc-info) 'var)
+          (cider-eldoc-format-variable thing eldoc-info))
+         ((eq (cider-eldoc-thing-type eldoc-info) 'special-form)
+          (cider-eldoc-format-special-form thing pos eldoc-info))
+         (t (cider-eldoc-format-function thing pos eldoc-info)))))))
 
 (defun cider-eldoc-setup ()
   "Setup eldoc in the current buffer.

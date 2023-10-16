@@ -70,7 +70,15 @@ not to be automatically shown.
 
 Irrespective of the value of this variable, the `cider-error-buffer' is
 always generated in the background.  Use `cider-selector' to
-navigate to this buffer."
+navigate to this buffer.
+
+Please note, if the error phase belongs to
+one of the `cider-clojure-compilation-error-phases',
+then no stacktrace showing will happen.
+That defcustom takes precedence over this one.
+
+See its doc for understanding its rationale.  You can also customize it to nil
+in order to void its effect."
   :type '(choice (const :tag "always" t)
                  (const except-in-repl)
                  (const only-in-repl)
@@ -320,6 +328,7 @@ If CONNECTION is nil, use `cider-current-repl'."
     "cider.nrepl/wrap-format"
     "cider.nrepl/wrap-info"
     "cider.nrepl/wrap-inspect"
+    "cider.nrepl/wrap-log"
     "cider.nrepl/wrap-macroexpand"
     "cider.nrepl/wrap-ns"
     "cider.nrepl/wrap-out"
@@ -477,8 +486,33 @@ op/situation that originated this error."
     (let ((error-buffer (cider-new-error-buffer #'cider-stacktrace-mode error-types)))
       (cider-stacktrace-render error-buffer (reverse causes) error-types))))
 
-(defun cider--handle-stacktrace-response (response causes)
-  "Handle stacktrace op RESPONSE, aggregating the result into CAUSES.
+(defcustom cider-clojure-compilation-error-phases '("read-source"
+                                                    "macro-syntax-check"
+                                                    "macroexpansion"
+                                                    "compile-syntax-check"
+                                                    "compilation"
+                                                    ;; "execution" is certainly not to be included here.
+                                                    ;; "read-eval-result" and "print-eval-result" are not to be included here,
+                                                    ;; because they mean that the code has been successfully executed.
+                                                    )
+  "Error phases which will not cause the `*cider-error*' buffer to pop up.
+
+The default value results in no stacktrace being shown for compile-time errors.
+
+Note that `*cider-error*' pop behavior is otherwise controlled
+by the `cider-show-error-buffer' defcustom.
+
+`cider-clojure-compilation-error-phases' takes precedence.
+If you wish phases to be ignored, set this variable to nil instead.
+
+You can learn more about Clojure's error phases at:
+https://clojure.org/reference/repl_and_main#_at_repl"
+  :type 'list
+  :group 'cider
+  :package-version '(cider . "0.18.0"))
+
+(defun cider--handle-stacktrace-response (response causes ex-phase)
+  "Handle stacktrace RESPONSE, aggregate the result into CAUSES, honor EX-PHASE.
 If RESPONSE contains a cause, cons it onto CAUSES and return that.  If
 RESPONSE is the final message (i.e. it contains a status), render CAUSES
 into a new error buffer."
@@ -486,12 +520,14 @@ into a new error buffer."
     (cond ((and (member "notification" status) causes)
            (nrepl-notify msg type))
           (class (cons response causes))
-          (status (cider--render-stacktrace-causes causes)))))
+          (status
+           (unless (member ex-phase cider-clojure-compilation-error-phases)
+             (cider--render-stacktrace-causes causes))))))
 
 (defun cider-default-err-op-handler ()
   "Display the last exception, with middleware support."
   ;; Causes are returned as a series of messages, which we aggregate in `causes'
-  (let (causes)
+  (let (causes ex-phase)
     (cider-nrepl-send-request
      (thread-last
        (map-merge 'list
@@ -499,10 +535,13 @@ into a new error buffer."
                   (cider--nrepl-print-request-map fill-column))
        (seq-mapcat #'identity))
      (lambda (response)
+       (nrepl-dbind-response response (phase)
+         (when phase
+           (setq ex-phase phase)))
        ;; While the return value of `cider--handle-stacktrace-response' is not
        ;; meaningful for the last message, we do not need the value of `causes'
        ;; after it has been handled, so it's fine to set it unconditionally here
-       (setq causes (cider--handle-stacktrace-response response causes))))))
+       (setq causes (cider--handle-stacktrace-response response causes ex-phase))))))
 
 (defun cider-default-err-handler ()
   "This function determines how the error buffer is shown.
@@ -522,7 +561,9 @@ It delegates the actual error content to the eval or op handler."
 (defconst cider-clojure-1.10-error `(sequence
                                      "Syntax error "
                                      (minimal-match (zero-or-more anything))
-                                     "compiling "
+                                     (or "compiling "
+                                         "macroexpanding "
+                                         "reading source ")
                                      (minimal-match (zero-or-more anything))
                                      "at ("
                                      (group-n 2 (minimal-match (zero-or-more anything)))
@@ -556,7 +597,16 @@ It delegates the actual error content to the eval or op handler."
    `(rx bol (or ,cider-clojure-1.9-error
                 ,cider-clojure-warning
                 ,cider-clojure-1.10-error))
-   t))
+   t)
+  "A few example values that will match:
+\"Reflection warning, /tmp/foo/src/foo/core.clj:14:1 - \"
+\"CompilerException java.lang.RuntimeException: Unable to resolve symbol: \\
+lol in this context, compiling:(/foo/core.clj:10:1)\"
+\"Syntax error compiling at (src/workspace_service.clj:227:3).\"")
+
+(replace-regexp-in-string cider-clojure-compilation-regexp
+                          ""
+                          "Reflection warning, /tmp/foo/src/foo/core.clj:14:1 - call to java.lang.Integer ctor can't be resolved.")
 
 
 (defvar cider-compilation-regexp
@@ -625,14 +675,21 @@ If location could not be found, return nil."
                     (goto-char (point-min))
                     (forward-line (1- line))
                     (move-to-column (or col 0))
-                    (let ((begin (progn (if col (cider--goto-expression-start) (back-to-indentation))
-                                        (point)))
-                          (end (progn (if col (forward-list) (move-end-of-line nil))
-                                      (point))))
-                      (list begin end buffer))))))))))))
+                    ;; if this condition is false, it means that `col` was a spuriously large value,
+                    ;; therefore the whole calculation should be discarded:
+                    (when (or (not col) ;; if there's no col info, we cannot judge if it's spurious/not
+                              ;; (current-column) never goes past the last column in the actual line,
+                              ;; so if it's <, then the message had spurious info:
+                              (>= (1+ (current-column))
+                                  col))
+                      (let ((begin (progn (if col (cider--goto-expression-start) (back-to-indentation))
+                                          (point)))
+                            (end (progn (if col (forward-list) (move-end-of-line nil))
+                                        (point))))
+                        (list begin end buffer)))))))))))))
 
-(defun cider-handle-compilation-errors (message eval-buffer)
-  "Highlight and jump to compilation error extracted from MESSAGE.
+(defun cider-handle-compilation-errors (message eval-buffer &optional no-jump)
+  "Highlight and jump to compilation error extracted from MESSAGE, honor NO-JUMP.
 EVAL-BUFFER is the buffer that was current during user's interactive
 evaluation command.  Honor `cider-auto-jump-to-error'."
   (when-let* ((loc (cider--find-last-error-location message))
@@ -640,10 +697,11 @@ evaluation command.  Honor `cider-auto-jump-to-error'."
               (info (cider-extract-error-info cider-compilation-regexp message)))
     (let* ((face (nth 3 info))
            (note (nth 4 info))
-           (auto-jump (if (eq cider-auto-jump-to-error 'errors-only)
-                          (not (or (eq face 'cider-warning-highlight-face)
-                                   (string-match-p "warning" note)))
-                        cider-auto-jump-to-error)))
+           (auto-jump (unless no-jump
+                        (if (eq cider-auto-jump-to-error 'errors-only)
+                            (not (or (eq face 'cider-warning-highlight-face)
+                                     (string-match-p "warning" note)))
+                          cider-auto-jump-to-error))))
       (overlay-put overlay 'cider-note-p t)
       (overlay-put overlay 'font-lock-face face)
       (overlay-put overlay 'cider-note note)
@@ -727,6 +785,19 @@ REPL buffer.  This is controlled via
             (cider--make-fringe-overlay (point)))
         (scan-error nil)))))
 
+(defun cider--error-phase-of-last-exception (buffer)
+  "Returns the :phase of the latest exception associated to BUFFER, if any."
+  (when cider-clojure-compilation-error-phases
+    (when-let ((conn (with-current-buffer buffer
+                       (cider-current-repl))))
+      (when (cider-nrepl-op-supported-p "analyze-last-stacktrace" conn)
+        (when-let* ((result (nrepl-send-sync-request (thread-last (map-merge 'list
+                                                                             '(("op" "analyze-last-stacktrace"))
+                                                                             (cider--nrepl-print-request-map fill-column))
+                                                                  (seq-mapcat #'identity))
+                                                     conn)))
+          (nrepl-dict-get result "phase"))))))
+
 (declare-function cider-inspect-last-result "cider-inspector")
 (defun cider-interactive-eval-handler (&optional buffer place)
   "Make an interactive eval handler for BUFFER.
@@ -749,17 +820,36 @@ when `cider-auto-inspect-after-eval' is non-nil."
                                    (cider--display-interactive-eval-result res end))
                                  (lambda (_buffer out)
                                    (cider-emit-interactive-eval-output out))
-                                 (lambda (_buffer err)
+                                 (lambda (buffer err)
                                    (cider-emit-interactive-eval-err-output err)
 
-                                   (when (or (not cider-show-error-buffer)
-                                             (not (cider-connection-has-capability-p 'jvm-compilation-errors)))
+                                   (let ((phase (cider--error-phase-of-last-exception buffer)))
+                                     (when (or
+                                            ;; if we won't show *cider-error*, because of configuration, the overlay is adequate because it compensates for the lack of info in a compact manner:
+                                            (not cider-show-error-buffer)
+                                            (not (cider-connection-has-capability-p 'jvm-compilation-errors))
+                                            ;; if we won't show *cider-error*, because of an ignored phase, the overlay is adequate:
+                                            (and cider-show-error-buffer
+                                                 (member phase cider-clojure-compilation-error-phases)))
+                                       ;; Display errors as temporary overlays
+                                       (let ((cider-result-use-clojure-font-lock nil)
+                                             (trimmed-err (thread-last err
+                                                                       (replace-regexp-in-string cider-clojure-compilation-regexp
+                                                                                                 "")
+                                                                       (string-trim))))
+                                         (cider--display-interactive-eval-result
+                                          trimmed-err
+                                          end
+                                          'cider-error-overlay-face)))
 
-                                     ;; Display errors as temporary overlays
-                                     (let ((cider-result-use-clojure-font-lock nil))
-                                       (cider--display-interactive-eval-result
-                                        err end 'cider-error-overlay-face)))
-                                   (cider-handle-compilation-errors err eval-buffer))
+                                     (cider-handle-compilation-errors err
+                                                                      eval-buffer
+                                                                      ;; we prevent jumping behavior on compilation errors,
+                                                                      ;; because lines tend to be spurious (e.g. 0:0)
+                                                                      ;; and because on compilation errors, normally
+                                                                      ;; the error is 'right there' in the current line
+                                                                      ;; and needs no jumping:
+                                                                      phase)))
                                  (lambda (buffer)
                                    (if beg
                                        (unless fringed
@@ -1272,6 +1362,17 @@ buffer, else display in a popup buffer."
                    'help-echo "Breakpoint. Reevaluate this form to remove it."
                    :type 'cider-fragile))))
 
+(defun cider-eval-dwim (&optional debug-it)
+  "If no region is active, call `cider-eval-defun-at-point' with DEBUG-IT.
+If a region is active, run `cider-eval-region'.
+
+Always binds `clojure-toplevel-inside-comment-form' to t."
+  (interactive "P")
+  (let ((clojure-toplevel-inside-comment-form t))
+    (if (use-region-p)
+        (cider-eval-region (region-beginning) (region-end))
+      (cider-eval-defun-at-point debug-it))))
+
 (defun cider-eval-defun-at-point (&optional debug-it)
   "Evaluate the current toplevel form, and print result in the minibuffer.
 With DEBUG-IT prefix argument, also debug the entire form as with the
@@ -1315,7 +1416,7 @@ buffer.  It constructs an expression to eval in the following manner:
 - It balances this bit of code by closing all open expressions;
 - It evaluates the resulting code using `cider-interactive-eval'."
   (interactive "P")
-  (let* ((beg-of-defun (save-excursion (beginning-of-defun) (point)))
+  (let* ((beg-of-defun (save-excursion (beginning-of-defun-raw) (point)))
          (code (buffer-substring-no-properties beg-of-defun (point)))
          (code (cider--insert-closing-delimiters code)))
     (cider-interactive-eval code
@@ -1368,7 +1469,7 @@ buffer, else display in a popup buffer."
   "Evaluate the current buffer's namespace form.
 When UNDEF-ALL is non-nil, unmap all symbols and aliases first."
   (interactive "P")
-  (when-let ((ns (clojure-find-ns)))
+  (when-let ((ns (cider-get-ns-name)))
     (save-excursion
       (goto-char (match-beginning 0))
       (when undef-all
@@ -1454,6 +1555,7 @@ passing arguments."
     (define-key map (kbd "w") #'cider-eval-last-sexp-and-replace)
     (define-key map (kbd "r") #'cider-eval-region)
     (define-key map (kbd "n") #'cider-eval-ns-form)
+    (define-key map (kbd "s") #'cider-eval-dwim)
     (define-key map (kbd "d") #'cider-eval-defun-at-point)
     (define-key map (kbd "e") #'cider-eval-last-sexp)
     (define-key map (kbd "q") #'cider-tap-last-sexp)
@@ -1472,6 +1574,7 @@ passing arguments."
     (define-key map (kbd "C-w") #'cider-eval-last-sexp-and-replace)
     (define-key map (kbd "C-r") #'cider-eval-region)
     (define-key map (kbd "C-n") #'cider-eval-ns-form)
+    (define-key map (kbd "C-s") #'cider-eval-dwim)
     (define-key map (kbd "C-d") #'cider-eval-defun-at-point)
     (define-key map (kbd "C-e") #'cider-eval-last-sexp)
     (define-key map (kbd "C-q") #'cider-tap-last-sexp)

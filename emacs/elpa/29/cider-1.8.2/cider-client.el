@@ -34,6 +34,7 @@
 (require 'spinner)
 
 (require 'cider-connection)
+(require 'cider-completion-context)
 (require 'cider-common)
 (require 'cider-util)
 (require 'nrepl-client)
@@ -120,16 +121,19 @@ Useful for special buffers (e.g. REPL, doc buffers) that have to keep track
 of a namespace.  This should never be set in Clojure buffers, as there the
 namespace should be extracted from the buffer's ns form.")
 
-(defun cider-current-ns (&optional no-default)
+(defun cider-current-ns (&optional no-default no-repl-check)
   "Return the current ns.
 The ns is extracted from the ns form for Clojure buffers and from
 `cider-buffer-ns' for all other buffers.  If it's missing, use the current
-REPL's ns, otherwise fall back to \"user\".  When NO-DEFAULT is non-nil, it
-will return nil instead of \"user\"."
+REPL's ns, otherwise fall back to \"user\".
+When NO-DEFAULT is non-nil, it will return nil instead of \"user\".
+When NO-REPL-CHECK is non-nil, `cider-current-repl' will not be queried,
+improving performance (at the possible cost of accuracy)."
   (or cider-buffer-ns
-      (clojure-find-ns)
-      (when-let* ((repl (cider-current-repl)))
-        (buffer-local-value 'cider-buffer-ns repl))
+      (cider-get-ns-name)
+      (unless no-repl-check
+        (when-let* ((repl (cider-current-repl)))
+          (buffer-local-value 'cider-buffer-ns repl)))
       (if no-default nil "user")))
 
 (defun cider-path-to-ns (relpath)
@@ -470,6 +474,38 @@ itself is present."
   (with-current-buffer (cider-current-repl)
     nrepl-tooling-session))
 
+(declare-function ido-exit-minibuffer "ido" t)
+
+;; Not used anywhere, except in documentation as a suggestion for users.
+(defmacro cider--with-temporary-ido-keys (UP DOWN &rest body)
+  "Temporarily define UP, DOWN keys for ido and execute BODY.
+
+This makes the UX for auto-completion more streamlined,
+since one often wants to go to the next candidate (DOWN key)
+without having to specify a Java class for the current candidate
+\(because the current candidate may be irrelevant to the user)."
+  `(if (bound-and-true-p ido-common-completion-map)
+       (let ((original-up-binding (lookup-key ido-common-completion-map (kbd ,UP)))
+             (original-down-binding (lookup-key ido-common-completion-map (kbd ,DOWN))))
+         (define-key ido-common-completion-map (kbd ,UP) (lambda ()
+                                                           (interactive)
+                                                           (ido-exit-minibuffer)))
+         (define-key ido-common-completion-map (kbd ,DOWN) (lambda ()
+                                                             (interactive)
+                                                             (ido-exit-minibuffer)))
+         (unwind-protect
+             (progn ,@body)
+           (define-key ido-common-completion-map (kbd ,UP) original-up-binding)
+           (define-key ido-common-completion-map (kbd ,DOWN) original-down-binding)))
+     ,@body))
+
+(defun cider-class-choice-completing-read (prompt candidates)
+  "A completing read that can be customized with the `advice' mechanism,
+forwarding PROMPT and CANDIDATES as-is.
+
+See also: `cider--with-temporary-ido-keys'."
+  (completing-read prompt candidates))
+
 (defun cider--var-choice (var-info)
   "Prompt to choose from among multiple VAR-INFO candidates, if required.
 This is needed only when the symbol queried is an unqualified host platform
@@ -478,7 +514,7 @@ contain a `candidates' key, it is returned as is."
   (let ((candidates (nrepl-dict-get var-info "candidates")))
     (if candidates
         (let* ((classes (nrepl-dict-keys candidates))
-               (choice (completing-read "Member in class: " classes nil t))
+               (choice (cider-class-choice-completing-read "Member in class: " classes))
                (info (nrepl-dict-get candidates choice)))
           info)
       var-info)))
@@ -517,7 +553,7 @@ When multiple matching vars are returned you'll be prompted to select one,
 unless ALL is truthy."
   (when (and var (not (string= var "")))
     (let ((var-info (cond
-                     ((cider-nrepl-op-supported-p "info") (cider-sync-request:info var))
+                     ((cider-nrepl-op-supported-p "info") (cider-sync-request:info var nil nil (cider-completion-get-context t)))
                      ((cider-nrepl-op-supported-p "lookup") (cider-sync-request:lookup var))
                      (t (cider-fallback-eval:info var)))))
       (if all var-info (cider--var-choice var-info)))))
@@ -525,7 +561,7 @@ unless ALL is truthy."
 (defun cider-member-info (class member)
   "Return the CLASS MEMBER's info as an alist with list cdrs."
   (when (and class member)
-    (cider-sync-request:info nil class member)))
+    (cider-sync-request:info nil class member (cider-completion-get-context t))))
 
 
 ;;; Requests
@@ -643,13 +679,14 @@ CONTEXT represents a completion context for compliment."
                                  nil
                                  'abort-on-input))
 
-(defun cider-sync-request:info (symbol &optional class member)
-  "Send \"info\" op with parameters SYMBOL or CLASS and MEMBER."
+(defun cider-sync-request:info (symbol &optional class member context)
+  "Send \"info\" op with parameters SYMBOL or CLASS and MEMBER, honor CONTEXT."
   (let ((var-info (thread-first `("op" "info"
                                   "ns" ,(cider-current-ns)
                                   ,@(when symbol `("sym" ,symbol))
                                   ,@(when class `("class" ,class))
-                                  ,@(when member `("member" ,member)))
+                                  ,@(when member `("member" ,member))
+                                  ,@(when context `("context" ,context)))
                                 (cider-nrepl-send-sync-request (cider-current-repl)))))
     (if (member "no-info" (nrepl-dict-get var-info "status"))
         nil
@@ -666,13 +703,14 @@ CONTEXT represents a completion context for compliment."
         nil
       (nrepl-dict-get var-info "info"))))
 
-(defun cider-sync-request:eldoc (symbol &optional class member)
-  "Send \"eldoc\" op with parameters SYMBOL or CLASS and MEMBER."
+(defun cider-sync-request:eldoc (symbol &optional class member context)
+  "Send \"eldoc\" op with parameters SYMBOL or CLASS and MEMBER, honor CONTEXT."
   (when-let* ((eldoc (thread-first `("op" "eldoc"
                                      "ns" ,(cider-current-ns)
                                      ,@(when symbol `("sym" ,symbol))
                                      ,@(when class `("class" ,class))
-                                     ,@(when member `("member" ,member)))
+                                     ,@(when member `("member" ,member))
+                                     ,@(when context `("context" ,context)))
                                    (cider-nrepl-send-sync-request (cider-current-repl)
                                                                   'abort-on-input))))
     (if (member "no-eldoc" (nrepl-dict-get eldoc "status"))
@@ -729,12 +767,29 @@ returned."
                 (cider-nrepl-send-sync-request)
                 (nrepl-dict-get "ns-vars")))
 
-(defun cider-sync-request:ns-path (ns)
-  "Get the path to the file containing NS."
-  (thread-first `("op" "ns-path"
-                  "ns" ,ns)
-                (cider-nrepl-send-sync-request)
-                (nrepl-dict-get "path")))
+(defun cider-sync-request:ns-path (ns &optional favor-url)
+  "Get the path to the file containing NS, FAVOR-URL if specified.
+
+FAVOR-URL ensures a Java URL is returned.
+
+* This always is the case if the underlying runtime is JVM Clojure.
+* For ClojureScript, the default is a resource name.
+  * This often cannot be open by `cider-find-file'
+    (unless there was already a buffer opening that file)
+
+Generally, you always want to FAVOR-URL.
+The option is kept for backwards compatibility.
+
+Note that even when favoring a url, the url itself might be nil,
+in which case we'll fall back to the resource name."
+  (unless ns
+    (error "No ns provided"))
+  (let ((response (cider-nrepl-send-sync-request `("op" "ns-path"
+                                                   "ns" ,ns))))
+    (nrepl-dbind-response response (path url)
+      (if (and favor-url url)
+          url
+        path))))
 
 (defun cider-sync-request:ns-vars-with-meta (ns)
   "Get a map of the vars in NS to its metadata information."

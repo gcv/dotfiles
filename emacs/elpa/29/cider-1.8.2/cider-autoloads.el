@@ -24,7 +24,9 @@ double prefix prompt for all these parameters.
 (autoload 'cider-jack-in-cljs "cider" "\
 Start an nREPL server for the current project and connect to it.
 PARAMS is a plist optionally containing :project-dir, :jack-in-cmd and
-:cljs-repl-type (e.g. Node, Figwheel, etc).  With the prefix argument,
+:cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).
+
+With the prefix argument,
 allow editing of the jack in command; with a double prefix prompt for all
 these parameters.
 
@@ -32,9 +34,12 @@ these parameters.
 (autoload 'cider-jack-in-clj&cljs "cider" "\
 Start an nREPL server and connect with clj and cljs REPLs.
 PARAMS is a plist optionally containing :project-dir, :jack-in-cmd and
-:cljs-repl-type (e.g. Node, Figwheel, etc).  With the prefix argument,
-allow for editing of the jack in command; with a double prefix prompt for
-all these parameters.  When SOFT-CLJS-START is non-nil, start cljs REPL
+:cljs-repl-type (e.g. 'shadow, 'node, 'fighweel, etc).
+
+With the prefix argument, allow for editing of the jack in command;
+with a double prefix prompt for all these parameters.
+
+When SOFT-CLJS-START is non-nil, start cljs REPL
 only when the ClojureScript dependencies are met.
 
 (fn &optional PARAMS SOFT-CLJS-START)" t)
@@ -48,8 +53,10 @@ server is created.
 (fn PARAMS &optional OTHER-REPL)" t)
 (autoload 'cider-connect-sibling-cljs "cider" "\
 Create a ClojureScript REPL with the same server as OTHER-REPL.
-PARAMS is a plist optionally containing :cljs-repl-type (e.g. Node,
-Figwheel, etc).  All other parameters are inferred from the OTHER-REPL.
+PARAMS is a plist optionally containing :cljs-repl-type (e.g. 'node,
+'figwheel, 'shadow, etc).
+
+All other parameters are inferred from the OTHER-REPL.
 OTHER-REPL defaults to `cider-current-repl' but in programs can also be a
 server buffer, in which case a new session for that server is created.
 
@@ -63,14 +70,16 @@ prefix argument, prompt for all the parameters.
 (autoload 'cider-connect-cljs "cider" "\
 Initialize a ClojureScript connection to an nREPL server.
 PARAMS is a plist optionally containing :host, :port, :project-dir and
-:cljs-repl-type (e.g. Node, Figwheel, etc).  On prefix, prompt for all the
+:cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).
+
+On prefix, prompt for all the
 parameters regardless of their supplied or default values.
 
 (fn &optional PARAMS)" t)
 (autoload 'cider-connect-clj&cljs "cider" "\
 Initialize a Clojure and ClojureScript connection to an nREPL server.
 PARAMS is a plist optionally containing :host, :port, :project-dir and
-:cljs-repl-type (e.g. Node, Figwheel, etc).  When SOFT-CLJS-START is
+:cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).  When SOFT-CLJS-START is
 non-nil, don't start if ClojureScript requirements are not met.
 
 (fn PARAMS &optional SOFT-CLJS-START)" t)
@@ -214,17 +223,13 @@ opposite of what that option dictates.
 (register-definition-prefixes "cider-completion" '("cider-"))
 
 
+;;; Generated autoloads from cider-completion-context.el
+
+(register-definition-prefixes "cider-completion-context" '("cider-completion-"))
+
+
 ;;; Generated autoloads from cider-connection.el
 
-(defvar cider-merge-sessions nil "\
-Controls session combination behaviour.
-
-Symbol `host' combines all sessions of a project associated with the same host.
-Symbol `project' combines all sessions of a project.
-
-All other values do not combine any sessions.")
-(custom-autoload 'cider-merge-sessions "cider-connection" t)
-(put 'cider-merge-sessions 'safe-local-variable #'symbolp)
 (register-definition-prefixes "cider-connection" '("cider-"))
 
 
@@ -244,6 +249,11 @@ a number of keys will be prompted to the user." t)
 ;;; Generated autoloads from cider-doc.el
 
 (register-definition-prefixes "cider-doc" '("cider-"))
+
+
+;;; Generated autoloads from cider-docstring.el
+
+(register-definition-prefixes "cider-docstring" '("cider-"))
 
 
 ;;; Generated autoloads from cider-eldoc.el
@@ -364,6 +374,17 @@ current buffer's namespace.
 ;;; Generated autoloads from cider-jar.el
 
 (register-definition-prefixes "cider-jar" '("cider-jar-"))
+
+
+;;; Generated autoloads from cider-log.el
+
+ (autoload 'cider-log-info "cider-log-info" "Show the Cider log current log buffer, framework, appender and consumer." t)
+ (autoload 'cider-log-framework "cider-log" "Show the Cider log framework menu." t)
+ (autoload 'cider-log-appender "cider-log" "Show the Cider log appender menu." t)
+ (autoload 'cider-log-consumer "cider-log" "Show the Cider log consumer menu." t)
+ (autoload 'cider-log-event "cider-log" "Show the Cider log event menu." t)
+ (autoload 'cider-log "cider-log" "Show the Cider log menu." t)
+(register-definition-prefixes "cider-log" '("cider-"))
 
 
 ;;; Generated autoloads from cider-macroexpansion.el
@@ -629,6 +650,11 @@ Displays the function dependencies for  NS and SYMBOL using completing read.
 
 (fn &optional NS SYMBOL)" t)
 (register-definition-prefixes "cider-xref" '("cider-"))
+
+
+;;; Generated autoloads from cider-xref-backend.el
+
+(register-definition-prefixes "cider-xref-backend" '("cider--"))
 
 
 ;;; Generated autoloads from nrepl-client.el

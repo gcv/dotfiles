@@ -39,8 +39,10 @@
 (require 'cider-doc) ; required only for the menu
 (require 'cider-profile) ; required only for the menu
 (require 'cider-completion)
+(require 'cider-completion-context)
 (require 'cider-inspector)
 (require 'cider-find)
+(require 'cider-xref-backend)
 (require 'subr-x)
 
 (defcustom cider-mode-line-show-connection t
@@ -203,7 +205,8 @@ With a prefix argument, prompt for function to run instead of -main."
     (define-key map (kbd "C-e") #'cider-insert-last-sexp-in-repl)
     (define-key map (kbd "C-d") #'cider-insert-defun-in-repl)
     (define-key map (kbd "C-r") #'cider-insert-region-in-repl)
-    (define-key map (kbd "C-n") #'cider-insert-ns-form-in-repl)))
+    (define-key map (kbd "C-n") #'cider-insert-ns-form-in-repl)
+    map))
 
 (defcustom cider-switch-to-repl-on-insert t
   "Whether to switch to the REPL when inserting a form into the REPL."
@@ -335,6 +338,7 @@ If invoked with a prefix ARG eval the expression after inserting it."
     ["Eval last sexp and pretty-print to REPL" cider-pprint-eval-last-sexp-to-repl]
     ["Eval last sexp and pretty-print to comment" cider-pprint-eval-last-sexp-to-comment]
     "--"
+    ["Eval selected region if active, otherwise top-level sexp" cider-eval-dwim]
     ["Eval selected region" cider-eval-region]
     ["Eval ns form" cider-eval-ns-form]
     "--"
@@ -529,6 +533,13 @@ higher precedence."
     (define-key map (kbd "C-c C-? C-d") #'cider-xref-fn-deps-select)
     (define-key map (kbd "C-c C-q") #'cider-quit)
     (define-key map (kbd "C-c M-r") #'cider-restart)
+    ;; NOTE: all cider-log* vars are autoloaded. Please do not add a require.
+    (define-key map (kbd "C-c M-l a") #'cider-log-appender)
+    (define-key map (kbd "C-c M-l c") #'cider-log-consumer)
+    (define-key map (kbd "C-c M-l e") #'cider-log-event)
+    (define-key map (kbd "C-c M-l f") #'cider-log-framework)
+    (define-key map (kbd "C-c M-l i") #'cider-log-info)
+    (define-key map (kbd "C-c M-l l") #'cider-log)
     (dolist (variable '(cider-mode-interactions-menu
                         cider-mode-eval-menu
                         cider-mode-menu))
@@ -944,7 +955,7 @@ before point."
     ;; If the inside of a `ns' form changed, reparse it from the start.
     (when (and (not (bobp))
                (get-text-property (1- (point)) 'cider-block-dynamic-font-lock))
-      (ignore-errors (beginning-of-defun)))
+      (ignore-errors (beginning-of-defun-raw)))
     (save-excursion
       ;; Move up until we reach a sexp that encloses the entire region (or
       ;; a top-level sexp), and set that as the new BEG.
@@ -973,7 +984,7 @@ before point."
   "Return a string of what would be displayed by `cider-docview-render'.
 SYM and INFO is passed to `cider-docview-render'"
   (with-temp-buffer
-    (cider-docview-render (current-buffer) sym info)
+    (cider-docview-render (current-buffer) sym info :compact :for-tooltip) ;; :compact because we don't want huge tooltips - especially for Java
     (goto-char (point-max))
     (forward-line -1)
     (replace-regexp-in-string
@@ -1009,7 +1020,7 @@ See \(info \"(elisp) Special Properties\")"
                             (let* ((locals (nrepl-dict-get cider--debug-mode-response "locals"))
                                    (local-val (cadr (assoc sym locals))))
                               (format " with value:\n%s" local-val))))
-                (let* ((info (cider-sync-request:info sym))
+                (let* ((info (cider-sync-request:info sym nil nil (cider-completion-get-context t)))
                        (candidates (nrepl-dict-get info "candidates")))
                   (if candidates
                       (concat "There were ambiguities resolving this symbol:\n\n"
