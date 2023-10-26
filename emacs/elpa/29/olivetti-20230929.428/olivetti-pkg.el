@@ -1,6 +1,6 @@
-(define-package "olivetti" "20230729.403" "Minor mode for a nice writing environment"
+(define-package "olivetti" "20230929.428" "Minor mode for a nice writing environment"
   '((emacs "24.4"))
-  :commit "a644ee9d24c7283435ce42e11498951e100608c9" :authors
+  :commit "8404b53a24393a7edcf3a295b958ca85971edc13" :authors
   '(("Paul W. Rankin" . "hello@paulwrankin.com"))
   :maintainers
   '(("Paul W. Rankin" . "hello@paulwrankin.com"))
