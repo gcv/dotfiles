@@ -1,3 +1,70 @@
+2023-10-19  Akib Azmain Turja  <akib@disroot.org>
+
+	* eat.ti (eat-mono): Remove unused capability 'Ed'
+
+2023-10-17  Akib Azmain Turja  <akib@disroot.org>
+
+	Fix input processing & auto line mode
+
+	* eat.el (eat--process-input-queue): Set
+	'eat--process-input-queue-timer' to 'nil'.
+	* eat.el (eat--auto-line-mode-pending-toggles): New variable.
+	* eat.el (eat--line-mode-enter-auto-1): Don't take any
+	argument.
+	* eat.el (eat--line-mode-exit-auto-1): Don't take any argument.
+	Don't call 'eat-line-mode'.
+	* eat.el (eat--line-mode-enter-auto, eat--line-mode-exit-auto):
+	Queue the toggle in 'eat--auto-line-mode-pending-toggles'
+	instead of starting a timer.
+	* eat.el (eat--line-mode-do-toggles): New function.
+	* eat.el (eat--process-output-queue): Let-bind
+	'eat--auto-line-mode-pending-toggles' to nil.  Call
+	'eat--line-mode-do-toggles'.
+
+2023-10-17  Akib Azmain Turja  <akib@disroot.org>
+
+	Fix compiler warnings
+
+	* eat.el: Wrap all 'emacs-major-version' checks with
+	'eval-when-compile'.
+	* eat.el (eat--process-input-queue): Don't use obsolete
+	generalized variable 'buffer-local-value'.
+
+2023-10-17  Akib Azmain Turja  <akib@disroot.org>
+
+	Don't let 'eat--process-input-queue' to recurse
+
+	* eat.el (eat--defer-input-processing): New variable.
+	* eat.el (eat-mode, eat--eshell-local-mode): Make
+	'eat--defer-input-processing' buffer-local.
+	* eat.el (eat--process-input-queue): If
+	'eat--defer-input-processing' is non-nil, do nothing, otherwise
+	bind it to non-nil while sending input.
+
+2023-10-17  Akib Azmain Turja  <akib@disroot.org>
+
+	Don't mess up terminal when switching to line mode
+
+	* eat.el (eat--line-mode-enter-auto-1)
+	(eat--line-mode-exit-auto-1): New function.
+	* eat.el (eat--line-mode-enter-auto, eat--line-mode-exit-auto):
+	Do everything after the output is processed.
+
+2023-10-10  Akib Azmain Turja  <akib@disroot.org>
+
+	Don't flicker due to screen line breaking
+
+	* eat.el (eat--eshell-synchronize-scroll)
+	(eat--synchronize-scroll): Use 'recenter' instead of
+	'set-window-start' to synchronize scrolling.
+
+2023-10-10  Akib Azmain Turja  <akib@disroot.org>
+
+	Fix side-effect in 'eat--set-term-sixel-params'
+
+	* eat.el (eat--set-term-sixel-params): Fix unintended
+	side-effect.
+
 2023-10-10  Akib Azmain Turja  <akib@disroot.org>
 
 	Fix 'eat--set-term-sixel-params' on text display

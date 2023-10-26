@@ -1,6 +1,6 @@
-This is docMqqLfV.info, produced by makeinfo version 6.8 from eat.texi.
+This is docOZzgsp.info, produced by makeinfo version 6.8 from eat.texi.
 
-This manual is for Eat (version 0.9.2, 10 October 2023), a terminal
+This manual is for Eat (version 0.9.3, 19 October 2023), a terminal
 emulator for Emacs.
 
    Copyright © 2022, 2023 Akib Azmain Turja.
@@ -17,12 +17,12 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docMqqLfV.info,  Node: Top,  Next: Intro,  Up: (dir)
+File: docOZzgsp.info,  Node: Top,  Next: Intro,  Up: (dir)
 
 Eat Manual
 **********
 
-This manual is for Eat (version 0.9.2, 10 October 2023), a terminal
+This manual is for Eat (version 0.9.3, 19 October 2023), a terminal
 emulator for Emacs.
 
    Copyright © 2022, 2023 Akib Azmain Turja.
@@ -73,7 +73,7 @@ Appendices
 * Index::               A list of various things.
 
 
-File: docMqqLfV.info,  Node: Intro,  Next: Hello Terminal,  Prev: Top,  Up: Top
+File: docOZzgsp.info,  Node: Intro,  Next: Hello Terminal,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -95,7 +95,7 @@ both graphical display and text display, while still allowing you to run
 full screen programs like Emacs within the terminal.
 
 
-File: docMqqLfV.info,  Node: Hello Terminal,  Next: Project-local Terminal,  Prev: Intro,  Up: Top
+File: docOZzgsp.info,  Node: Hello Terminal,  Next: Project-local Terminal,  Prev: Intro,  Up: Top
 
 2 Hello Terminal
 ****************
@@ -121,7 +121,7 @@ you’ll be prompted for the program or shell command to run, and it’ll be
 run in a newly created terminal.
 
 
-File: docMqqLfV.info,  Node: Project-local Terminal,  Next: Eshell Terminal,  Prev: Hello Terminal,  Up: Top
+File: docOZzgsp.info,  Node: Project-local Terminal,  Next: Eshell Terminal,  Prev: Hello Terminal,  Up: Top
 
 3 Project-local Terminal
 ************************
@@ -133,7 +133,7 @@ or switches to a already existing project terminal.  It too accepts
 prefix argument, just like the ordinary ‘eat’ command.
 
 
-File: docMqqLfV.info,  Node: Eshell Terminal,  Next: Keyboard,  Prev: Project-local Terminal,  Up: Top
+File: docOZzgsp.info,  Node: Eshell Terminal,  Next: Keyboard,  Prev: Project-local Terminal,  Up: Top
 
 4 Eshell Terminal Emulation
 ***************************
@@ -161,7 +161,7 @@ nil, since they’ll work in Eshell when ‘eat-eshell-mode’ is enabled.
 the global minor mode ‘eat-eshell-visual-command-mode’.
 
 
-File: docMqqLfV.info,  Node: Keyboard,  Next: Mouse,  Prev: Eshell Terminal,  Up: Top
+File: docOZzgsp.info,  Node: Keyboard,  Next: Mouse,  Prev: Eshell Terminal,  Up: Top
 
 5 Keyboard
 **********
@@ -184,7 +184,7 @@ example, to input ‘M-:’, use the key sequence ‘C-q M-:’.
 Char Mode::.
 
 
-File: docMqqLfV.info,  Node: Mouse,  Next: Input Modes,  Prev: Keyboard,  Up: Top
+File: docOZzgsp.info,  Node: Mouse,  Next: Input Modes,  Prev: Keyboard,  Up: Top
 
 6 Mouse
 *******
@@ -197,7 +197,7 @@ supports it.
    *Note Mouse Tracking:: to configure mouse tracking.
 
 
-File: docMqqLfV.info,  Node: Input Modes,  Next: Password Input,  Prev: Mouse,  Up: Top
+File: docOZzgsp.info,  Node: Input Modes,  Next: Password Input,  Prev: Mouse,  Up: Top
 
 7 Input Modes
 *************
@@ -342,7 +342,7 @@ search the input history.
 *Note Line Mode Integration::.
 
 
-File: docMqqLfV.info,  Node: Password Input,  Next: Shell Integration,  Prev: Input Modes,  Up: Top
+File: docOZzgsp.info,  Node: Password Input,  Next: Shell Integration,  Prev: Input Modes,  Up: Top
 
 8 Password Input
 ****************
@@ -359,7 +359,7 @@ password from the minibuffer and send it.  Since the password is read
 from the minibuffer, it’s not recorded.
 
 
-File: docMqqLfV.info,  Node: Shell Integration,  Next: Querying Before Kill,  Prev: Password Input,  Up: Top
+File: docOZzgsp.info,  Node: Shell Integration,  Next: Querying Before Kill,  Prev: Password Input,  Up: Top
 
 9 Shell Integration
 *******************
@@ -485,7 +485,7 @@ for you when the shell prompt appears.
      appears.
 
 
-File: docMqqLfV.info,  Node: Querying Before Kill,  Next: Display,  Prev: Shell Integration,  Up: Top
+File: docOZzgsp.info,  Node: Querying Before Kill,  Next: Display,  Prev: Shell Integration,  Up: Top
 
 10 Querying Before Kill
 ***********************
@@ -506,7 +506,7 @@ this.
      essentially same as ‘t’, and Eat will always query.
 
 
-File: docMqqLfV.info,  Node: Display,  Next: Scrollback,  Prev: Querying Before Kill,  Up: Top
+File: docOZzgsp.info,  Node: Display,  Next: Scrollback,  Prev: Querying Before Kill,  Up: Top
 
 11 Display
 **********
@@ -522,7 +522,7 @@ display size is controlled by the Emacs user option
 Buffers:: for the possible values of the user option.
 
 
-File: docMqqLfV.info,  Node: Scrollback,  Next: Cursor Types,  Prev: Display,  Up: Top
+File: docOZzgsp.info,  Node: Scrollback,  Next: Cursor Types,  Prev: Display,  Up: Top
 
 12 Scrollback
 *************
@@ -545,7 +545,7 @@ much memory.  You can change the limit, or remove it altogether.
      scrollback region is unlimited.
 
 
-File: docMqqLfV.info,  Node: Cursor Types,  Next: Mouse Tracking,  Prev: Scrollback,  Up: Top
+File: docOZzgsp.info,  Node: Cursor Types,  Next: Mouse Tracking,  Prev: Scrollback,  Up: Top
 
 13 Cursor Types
 ***************
@@ -598,7 +598,7 @@ as CURSOR-ON.  The blinking cursor switches between CURSOR-ON and
 CURSOR-OFF cursor shape.
 
 
-File: docMqqLfV.info,  Node: Mouse Tracking,  Next: Clipboard,  Prev: Cursor Types,  Up: Top
+File: docOZzgsp.info,  Node: Mouse Tracking,  Next: Clipboard,  Prev: Cursor Types,  Up: Top
 
 14 Mouse Tracking
 *****************
@@ -613,7 +613,7 @@ mouse at all.  So mouse tracking can be toggled.
      tracking.  This is enabled by default.
 
 
-File: docMqqLfV.info,  Node: Clipboard,  Next: Colors,  Prev: Mouse Tracking,  Up: Top
+File: docOZzgsp.info,  Node: Clipboard,  Next: Colors,  Prev: Mouse Tracking,  Up: Top
 
 15 Clipboard
 ************
@@ -644,7 +644,7 @@ the following user option to configure this:
      disabled by default for security reasons.
 
 
-File: docMqqLfV.info,  Node: Colors,  Next: Fonts,  Prev: Clipboard,  Up: Top
+File: docOZzgsp.info,  Node: Colors,  Next: Fonts,  Prev: Clipboard,  Up: Top
 
 16 Colors
 *********
@@ -699,7 +699,7 @@ following user option:
      for the behavior described above.
 
 
-File: docMqqLfV.info,  Node: Fonts,  Next: Sixel,  Prev: Colors,  Up: Top
+File: docOZzgsp.info,  Node: Fonts,  Next: Sixel,  Prev: Colors,  Up: Top
 
 17 Fonts
 ********
@@ -728,7 +728,7 @@ number between 0 and 9 (inclusive).  For example, the font 6 is can be
 changed by customizing ‘eat-term-font-6’.  Font 0 is the default font.
 
 
-File: docMqqLfV.info,  Node: Sixel,  Next: Blinking Text,  Prev: Fonts,  Up: Top
+File: docOZzgsp.info,  Node: Sixel,  Next: Blinking Text,  Prev: Fonts,  Up: Top
 
 18 Sixel
 ********
@@ -764,7 +764,7 @@ customizing the ‘eat-sixel-render-formats’ user option.
      area.
 
 
-File: docMqqLfV.info,  Node: Blinking Text,  Next: Performance Tuning,  Prev: Sixel,  Up: Top
+File: docOZzgsp.info,  Node: Blinking Text,  Next: Performance Tuning,  Prev: Sixel,  Up: Top
 
 19 Blinking Text
 ****************
@@ -809,7 +809,7 @@ the rate of blinking:
      second.
 
 
-File: docMqqLfV.info,  Node: Performance Tuning,  Next: Common Problems,  Prev: Blinking Text,  Up: Top
+File: docOZzgsp.info,  Node: Performance Tuning,  Next: Common Problems,  Prev: Blinking Text,  Up: Top
 
 20 Performance Tuning
 *********************
@@ -901,7 +901,7 @@ enough (unless the buffer is narrowed).  So Eat defers the correction.
 values, but the default values may change anytime.
 
 
-File: docMqqLfV.info,  Node: Common Problems,  Next: Reporting Bugs,  Prev: Performance Tuning,  Up: Top
+File: docOZzgsp.info,  Node: Common Problems,  Next: Reporting Bugs,  Prev: Performance Tuning,  Up: Top
 
 21 Common Problems
 ******************
@@ -919,7 +919,7 @@ Eat does something unexpected, such as hangs, garbled text, etc.
 * Bugs in Manual::      What if there are problems in this manual?
 
 
-File: docMqqLfV.info,  Node: Not Recognized,  Next: Garbled Text,  Up: Common Problems
+File: docOZzgsp.info,  Node: Not Recognized,  Next: Garbled Text,  Up: Common Problems
 
 21.1 Terminal Not Recognized
 ============================
@@ -954,7 +954,7 @@ the directory where to put the Terminfo databases.  Then invoke the
 command ‘eat-compile-terminfo’ to compile the Terminfo databases.
 
 
-File: docMqqLfV.info,  Node: Garbled Text,  Next: Input Invisible,  Prev: Not Recognized,  Up: Common Problems
+File: docOZzgsp.info,  Node: Garbled Text,  Next: Input Invisible,  Prev: Not Recognized,  Up: Common Problems
 
 21.2 Garbled Text on Terminal
 =============================
@@ -983,7 +983,7 @@ instructions on sending bug reports or feature request.
 definitely a bug, so please report it.
 
 
-File: docMqqLfV.info,  Node: Input Invisible,  Next: Not Responding,  Prev: Garbled Text,  Up: Common Problems
+File: docOZzgsp.info,  Node: Input Invisible,  Next: Not Responding,  Prev: Garbled Text,  Up: Common Problems
 
 21.3 Input Invisible
 ====================
@@ -999,7 +999,7 @@ automatically fallback to bare Eshell when ‘stty’ is not available,
 ‘nil’ to do nothing, and ‘ask’ to ask interactively.
 
 
-File: docMqqLfV.info,  Node: Not Responding,  Next: Signaled an Error,  Prev: Input Invisible,  Up: Common Problems
+File: docOZzgsp.info,  Node: Not Responding,  Next: Signaled an Error,  Prev: Input Invisible,  Up: Common Problems
 
 21.4 Emacs or Eat Not Responding
 ================================
@@ -1015,7 +1015,7 @@ those programs in faster terminals like bare Eshell (i.e.  without
 Eat-Eshell), Comint, or external terminal emulators.
 
 
-File: docMqqLfV.info,  Node: Signaled an Error,  Next: Bugs in Manual,  Prev: Not Responding,  Up: Common Problems
+File: docOZzgsp.info,  Node: Signaled an Error,  Next: Bugs in Manual,  Prev: Not Responding,  Up: Common Problems
 
 21.5 Eat Signaled an Error
 ==========================
@@ -1035,7 +1035,7 @@ work with.  However, it mayn’t work if you’re really unlucky, in that
 case deleting the terminal and starting a new one is your only option.
 
 
-File: docMqqLfV.info,  Node: Bugs in Manual,  Prev: Signaled an Error,  Up: Common Problems
+File: docOZzgsp.info,  Node: Bugs in Manual,  Prev: Signaled an Error,  Up: Common Problems
 
 21.6 Bugs in Manual
 ===================
@@ -1062,7 +1062,7 @@ them must be wrong, and that’s a bug.
 instruction on how to report it.
 
 
-File: docMqqLfV.info,  Node: Reporting Bugs,  Next: Tracing the Terminal,  Prev: Common Problems,  Up: Top
+File: docOZzgsp.info,  Node: Reporting Bugs,  Next: Tracing the Terminal,  Prev: Common Problems,  Up: Top
 
 22 Reporting Bugs
 *****************
@@ -1124,7 +1124,7 @@ anything that reproduces the bug will suffice.  (Of course, if you like
 doing experiments, the smaller the example, the better.)
 
 
-File: docMqqLfV.info,  Node: Tracing the Terminal,  Next: GNU General Public License,  Prev: Reporting Bugs,  Up: Top
+File: docOZzgsp.info,  Node: Tracing the Terminal,  Next: GNU General Public License,  Prev: Reporting Bugs,  Up: Top
 
 23 Tracing the Terminal
 ***********************
@@ -1157,7 +1157,7 @@ ordinary users, it’s documented here only to help you debug Eat.  You
 mustn’t rely on the behavior of this functionality to do anything else.
 
 
-File: docMqqLfV.info,  Node: GNU General Public License,  Next: GNU Free Documentation License,  Prev: Tracing the Terminal,  Up: Top
+File: docOZzgsp.info,  Node: GNU General Public License,  Next: GNU Free Documentation License,  Prev: Tracing the Terminal,  Up: Top
 
 Appendix A GNU General Public License
 *************************************
@@ -1873,7 +1873,7 @@ GNU Lesser General Public License instead of this License.  But first,
 please read <https://www.gnu.org/licenses/why-not-lgpl.html>.
 
 
-File: docMqqLfV.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: GNU General Public License,  Up: Top
+File: docOZzgsp.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: GNU General Public License,  Up: Top
 
 Appendix B GNU Free Documentation License
 *****************************************
@@ -2355,7 +2355,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docMqqLfV.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: docOZzgsp.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
 
 Appendix C Index
 ****************

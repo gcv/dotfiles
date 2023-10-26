@@ -4,7 +4,7 @@
 
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-08-15
-;; Version: 0.9.2
+;; Version: 0.9.3
 ;; Package-Requires: ((emacs "26.1") (compat "29.1"))
 ;; Keywords: terminals processes
 ;; Homepage: https://codeberg.org/akib/emacs-eat
@@ -783,7 +783,8 @@ If your process is choking on big inputs, try lowering the value."
       (let ((face (intern (format "eat-term-color-%i" face-counter))))
         (custom-declare-face
          face `((t :inherit
-                   ,(intern (format (if (>= emacs-major-version 28)
+                   ,(intern (format (if (eval-when-compile
+                                          (>= emacs-major-version 28))
                                         "ansi-color-%s"
                                       "term-color-%s")
                                     color))))
@@ -797,7 +798,8 @@ If your process is choking on big inputs, try lowering the value."
       (let ((face (intern (format "eat-term-color-%i" face-counter))))
         (custom-declare-face
          face `((t :inherit
-                   ,(intern (format (if (>= emacs-major-version 28)
+                   ,(intern (format (if (eval-when-compile
+                                          (>= emacs-major-version 28))
                                         "ansi-color-bright-%s"
                                       "term-color-%s")
                                     color))))
@@ -4454,7 +4456,8 @@ client process may get confused."
                   (pos (if (memq 'drag modifiers)
                            (event-end mouse)
                          (event-start mouse)))
-                  (x-y (if (< emacs-major-version 29)
+                  (x-y (if (eval-when-compile
+                             (< emacs-major-version 29))
                            (posn-col-row pos)
                          (with-suppressed-warnings
                              ((callargs posn-col-row))
@@ -4474,7 +4477,8 @@ client process may get confused."
                      b)))
              (when ref-pos
                (let ((ref-x-y
-                      (if (< emacs-major-version 29)
+                      (if (eval-when-compile
+                            (< emacs-major-version 29))
                           (posn-col-row ref-pos)
                         (with-suppressed-warnings
                             ((callargs posn-col-row))
@@ -4552,7 +4556,8 @@ client process may get confused."
                 (pred mouse-movement-p)
                 movement)
            (let* ((pos (event-start movement))
-                  (x-y (if (< emacs-major-version 29)
+                  (x-y (if (eval-when-compile
+                             (< emacs-major-version 29))
                            (posn-col-row pos)
                          (with-suppressed-warnings
                              ((callargs posn-col-row))
@@ -4566,7 +4571,8 @@ client process may get confused."
                      35)))
              (when ref-pos
                (let ((ref-x-y
-                      (if (< emacs-major-version 29)
+                      (if (eval-when-compile
+                            (< emacs-major-version 29))
                           (posn-col-row ref-pos)
                         (with-suppressed-warnings
                             ((callargs posn-col-row))
@@ -4996,6 +5002,11 @@ return \"eat-color\", otherwise return \"eat-mono\"."
 (defvar eat--auto-line-mode-prev-mode nil
   "The input mode active before line mode.")
 
+(defvar eat--auto-line-mode-pending-toggles nil
+  "Automatic line mode toggles left to do.
+
+Don't change the toplevel value of this, let-bind instead.")
+
 (defun eat-reset ()
   "Perform a terminal reset."
   (interactive)
@@ -5087,10 +5098,9 @@ selection, or nil if none."
             (_ (cons (default-font-width) (default-font-height)))))
          (scale-x (* eat-sixel-aspect-ratio eat-sixel-scale))
          (scale-y eat-sixel-scale))
-    (setf (car dimensions) (max 1 (round (/ (car dimensions)
-                                            (float scale-x)))))
-    (setf (cdr dimensions) (max 1 (round (/ (cdr dimensions)
-                                            (float scale-y)))))
+    (setq dimensions
+          (cons (max 1 (round (/ (car dimensions) (float scale-x))))
+                (max 1 (round (/ (cdr dimensions) (float scale-y))))))
     (setf (eat-term-parameter eat-terminal 'sixel-render-format)
           render-fmt)
     (setf (eat-term-parameter eat-terminal 'char-dimensions)
@@ -5142,7 +5152,7 @@ If HOST isn't the host Emacs is running on, don't do anything."
 (defvar eat--semi-char-mode)
 (defvar eat--char-mode)
 
-(defun eat--line-mode-enter-auto ()
+(defun eat--line-mode-enter-auto-1 ()
   "Enter line mode."
   (unless (or eat--inhibit-auto-line-mode eat--line-mode)
     (unless eat--line-mode
@@ -5155,7 +5165,11 @@ If HOST isn't the host Emacs is running on, don't do anything."
       ;; automatically.
       (setq eat--inhibit-auto-line-mode nil))))
 
-(defun eat--line-mode-exit-auto ()
+(defun eat--line-mode-enter-auto ()
+  "Arrange that line mode will be enabled eventually."
+  (push 'enter eat--auto-line-mode-pending-toggles))
+
+(defun eat--line-mode-exit-auto-1 ()
   "Exit line mode."
   (when (and (not eat--inhibit-auto-line-mode)
              eat--auto-line-mode-prev-mode)
@@ -5166,8 +5180,36 @@ If HOST isn't the host Emacs is running on, don't do anything."
     (setq eat--auto-line-mode-prev-mode nil)
     (when (/= (eat-term-end eat-terminal) (point-max))
       (eat-line-send))
+    ;; Toggle line mode _after_ we exit from
+    ;; `eat-term-process-output'.
     (eat--line-mode -1)
     (setq buffer-undo-list nil)))
+
+(defun eat--line-mode-exit-auto ()
+  "Arrange that line mode will be disabled eventually."
+  (push 'exit eat--auto-line-mode-pending-toggles))
+
+(defun eat--line-mode-do-toggles ()
+  "Do the pending line mode toggle."
+  (let* ((inhibit-quit t)
+         (actions (nreverse eat--auto-line-mode-pending-toggles))
+         (toggle nil))
+    (while (setq toggle (pop actions))
+      (pcase-exhaustive toggle
+        ('enter (eat--line-mode-enter-auto-1))
+        ('exit (eat--line-mode-exit-auto-1)))
+      ;; Don't do extra unnecessary toggles.
+      (let ((loop t))
+        (while loop
+          (setq loop nil)
+          (while (eq toggle (car actions))
+            (pop actions))
+          (while (and (car actions) (cadr actions)
+                      (not (eq (car actions) (cadr actions))))
+            (pop actions)
+            (pop actions)
+            (setq loop t)))))
+    (setq eat--auto-line-mode-pending-toggles nil)))
 
 (defun eat--post-prompt ()
   "Put a mark in the marginal area and enter line mode."
@@ -5649,11 +5691,11 @@ ARG is passed to `yank', which see."
 STRING and ARG are passed to `yank-pop', which see."
   (interactive
    (progn
-     (unless (>= emacs-major-version 28)
+     (unless (eval-when-compile (>= emacs-major-version 28))
        (error "`eat-yank-from-kill-ring' requires at least Emacs 28"))
      (list (read-from-kill-ring "Yank from kill-ring: ")
            current-prefix-arg)))
-  (unless (>= emacs-major-version 28)
+  (unless (eval-when-compile (>= emacs-major-version 28))
     (error "`eat-yank-from-kill-ring' requires at least Emacs 28"))
   (when eat-terminal
     (funcall eat--synchronize-scroll-function
@@ -6484,10 +6526,14 @@ symbol `buffer', in which case the point of current buffer is set."
   (dolist (window windows)
     (if (eq window 'buffer)
         (goto-char (eat-term-display-cursor eat-terminal))
-      (set-window-start
-       window (eat-term-display-beginning eat-terminal))
-      (set-window-point
-       window (eat-term-display-cursor eat-terminal)))))
+      (with-selected-window window
+        (set-window-point nil (eat-term-display-cursor eat-terminal))
+        (recenter
+         (- (how-many "\n" (eat-term-display-beginning eat-terminal)
+                      (eat-term-display-cursor eat-terminal))
+            (cdr (eat-term-size eat-terminal))
+            (max 0 (- (floor (window-screen-lines))
+                      (cdr (eat-term-size eat-terminal))))))))))
 
 (defun eat--setup-glyphless-chars ()
   "Setup the display of glyphless characters."
@@ -6554,6 +6600,7 @@ END if it's safe to do so."
           isearch-push-state-function
           eat--pending-input-chunks
           eat--process-input-queue-timer
+          eat--defer-input-processing
           eat--pending-output-chunks
           eat--output-queue-first-chunk-time
           eat--process-output-queue-timer
@@ -6693,6 +6740,9 @@ The input chunks are pushed, so last input appears first.")
 (defvar eat--process-input-queue-timer nil
   "Timer to process input queue.")
 
+(defvar eat--defer-input-processing nil
+  "Non-nil meaning process input later.")
+
 (defvar eat--shell-prompt-annotation-correction-timer nil
   "Timer to correct shell prompt annotations.")
 
@@ -6730,24 +6780,30 @@ OS's."
 
 (defun eat--process-input-queue (buffer)
   "Process the input queue on BUFFER."
-  (setf (buffer-local-value 'eat--process-input-queue-timer buffer)
-        nil)
-  (when-let* (((buffer-live-p buffer))
-              (terminal (buffer-local-value 'eat-terminal buffer))
-              (proc (eat-term-parameter terminal 'eat--process))
-              ((process-live-p proc)))
+  (when (buffer-live-p buffer)
     (with-current-buffer buffer
-      (let ((chunks (nreverse eat--pending-input-chunks)))
-        (setq eat--pending-input-chunks nil)
-        (dolist (str chunks)
-          (eat--send-string proc str))))))
+      ;; We don't want to recurse this function.
+      (unless eat--defer-input-processing
+        (let ((inhibit-quit t)          ; Don't disturb!
+              (eat--defer-input-processing t)
+              (proc (eat-term-parameter eat-terminal 'eat--process)))
+          (when (process-live-p proc)
+            (while eat--pending-input-chunks
+              (let ((chunks (nreverse eat--pending-input-chunks)))
+                (setq eat--pending-input-chunks nil)
+                (dolist (str chunks)
+                  (eat--send-string proc str)))))))
+      (when eat--process-input-queue-timer
+        (cancel-timer eat--process-input-queue-timer))
+      (setq eat--process-input-queue-timer nil))))
 
 (defun eat--process-output-queue (buffer)
   "Process the output queue on BUFFER."
   (when (buffer-live-p buffer)
     (with-current-buffer buffer
       (let ((inhibit-quit t)        ; Don't disturb!
-            (sync-windows (eat--synchronize-scroll-windows)))
+            (sync-windows (eat--synchronize-scroll-windows))
+            (eat--auto-line-mode-pending-toggles nil))
         (save-restriction
           (widen)
           (let ((inhibit-read-only t)
@@ -6782,6 +6838,7 @@ OS's."
              `( read-only t field eat-terminal
                 ,@(when eat--line-mode
                     '(front-sticky t rear-nonsticky t))))))
+        (eat--line-mode-do-toggles)
         (funcall eat--synchronize-scroll-function sync-windows))
       (run-hooks 'eat-update-hook))))
 
@@ -7304,7 +7361,7 @@ PROGRAM can be a shell command."
           #'eat--eshell-handle-uic)
     (eat--set-term-sixel-params)
     (setf (eat-term-parameter eat-terminal 'eat--process) proc)
-    (unless (>= emacs-major-version 29)
+    (unless (eval-when-compile (>= emacs-major-version 29))
       (setf (eat-term-parameter eat-terminal 'eat--input-process)
             proc))
     (setf (eat-term-parameter eat-terminal 'eat--output-process) proc)
@@ -7332,9 +7389,12 @@ PROGRAM can be a shell command."
       (set-marker eshell-last-output-end (point))
       (eat--cursor-blink-mode -1)
       (eat--grab-mouse nil nil)
-      (set-process-filter (eat-term-parameter
-                           eat-terminal 'eat--output-process)
-                          #'eshell-output-filter)
+      (set-process-filter
+       (eat-term-parameter
+        eat-terminal 'eat--output-process)
+       (if (eval-when-compile (< emacs-major-version 30))
+           #'eshell-output-filter
+         #'eshell-interactive-process-filter))
       (eat-term-delete eat-terminal)
       (setq eat-terminal nil)
       (kill-local-variable 'eshell-output-filter-functions)
@@ -7345,6 +7405,8 @@ PROGRAM can be a shell command."
     (run-hooks 'eat-eshell-exit-hook)))
 
 (declare-function eshell-output-filter "esh-mode" (process string))
+(declare-function eshell-interactive-process-filter "esh-mode"
+                  (process string))
 
 (defun eat--eshell-process-output-queue (process buffer)
   "Process the output queue on BUFFER from PROCESS."
@@ -7355,15 +7417,18 @@ PROGRAM can be a shell command."
       (setq eat--output-queue-first-chunk-time nil)
       (let ((queue eat--pending-output-chunks))
         (setq eat--pending-output-chunks nil)
-        (if (< emacs-major-version 27)
+        (if (eval-when-compile (< emacs-major-version 27))
             (eshell-output-filter
              process (string-join (nreverse queue)))
           (combine-change-calls
-           (eat-term-beginning eat-terminal)
-           (eat-term-end eat-terminal)
-           ;; TODO: Is `string-join' OK or should we use a loop?
-           (eshell-output-filter
-            process (string-join (nreverse queue)))))))))
+              (eat-term-beginning eat-terminal)
+              (eat-term-end eat-terminal)
+            ;; TODO: Is `string-join' OK or should we use a loop?
+            (if (eval-when-compile (< emacs-major-version 30))
+                (eshell-output-filter
+                 process (string-join (nreverse queue)))
+              (eshell-interactive-process-filter
+               process (string-join (nreverse queue))))))))))
 
 (defun eat--eshell-filter (process string)
   "Process output STRING from PROCESS."
@@ -7442,7 +7507,7 @@ Disable terminal emulation? ")))
       (unwind-protect
           (cond
            ;; Emacs 29 and above.
-           ((>= emacs-major-version 29)
+           ((eval-when-compile (>= emacs-major-version 29))
             (cl-letf*
                 ((make-process (symbol-function #'make-process))
                  ((symbol-function #'make-process)
@@ -7499,24 +7564,11 @@ symbol `buffer', in which case the point of current buffer is set."
   (dolist (window windows)
     (if (eq window 'buffer)
         (goto-char (eat-term-display-cursor eat-terminal))
-      (set-window-start
-       window
-       (if (or (eat-term-in-alternative-display-p eat-terminal)
-               eat--eshell-char-mode)
-           (eat-term-display-beginning eat-terminal)
-         (save-restriction
-           (narrow-to-region (eat-term-beginning eat-terminal)
-                             (eat-term-end eat-terminal))
-           (let ((start-line (- (floor (window-screen-lines))
-                                (line-number-at-pos (point-max)))))
-             (goto-char (point-min))
-             (widen)
-             (if (<= start-line 0)
-                 (eat-term-display-beginning eat-terminal)
-               (vertical-motion (- start-line))
-               (point))))))
-      (set-window-point
-       window (eat-term-display-cursor eat-terminal)))))
+      (with-selected-window window
+        (set-window-point nil (eat-term-display-cursor eat-terminal))
+        (recenter
+         (- (1+ (how-many "\n" (eat-term-display-cursor eat-terminal)
+                          (eat-term-end eat-terminal)))))))))
 
 (defun eat--eshell-update-cwd ()
   "Update the current working directory."
@@ -7536,6 +7588,7 @@ symbol `buffer', in which case the point of current buffer is set."
                   eat--mouse-grabbing-type
                   eat--pending-input-chunks
                   eat--process-input-queue-timer
+                  eat--defer-input-processing
                   eat--pending-output-chunks
                   eat--output-queue-first-chunk-time
                   eat--process-output-queue-timer
@@ -7647,7 +7700,7 @@ symbol `buffer', in which case the point of current buffer is set."
       (dolist (buffer (buffer-list))
         (with-current-buffer buffer
           (when (eq major-mode #'eshell-mode)
-            (when (if (< emacs-major-version 29)
+            (when (if (eval-when-compile (< emacs-major-version 29))
                       (bound-and-true-p eshell-last-async-proc)
                     (bound-and-true-p eshell-last-async-procs))
               (user-error
@@ -7662,7 +7715,7 @@ symbol `buffer', in which case the point of current buffer is set."
     (add-hook 'eshell-directory-change-hook #'eat--eshell-update-cwd)
     (advice-add #'eshell-gather-process-output :around
                 #'eat--eshell-adjust-make-process-args)
-    (when (>= emacs-major-version 29)
+    (when (eval-when-compile (>= emacs-major-version 29))
       (advice-add #'eshell-resume-eval :after
                   #'eat--eshell-set-input-process)))
    (t
@@ -7672,7 +7725,7 @@ symbol `buffer', in which case the point of current buffer is set."
         (with-current-buffer buffer
           (when (and (eq major-mode #'eshell-mode)
                      eat--eshell-local-mode)
-            (when (if (< emacs-major-version 29)
+            (when (if (eval-when-compile (< emacs-major-version 29))
                       (bound-and-true-p eshell-last-async-proc)
                     (bound-and-true-p eshell-last-async-procs))
               (user-error
@@ -7688,7 +7741,7 @@ symbol `buffer', in which case the point of current buffer is set."
                  #'eat--eshell-update-cwd)
     (advice-remove #'eshell-gather-process-output
                    #'eat--eshell-adjust-make-process-args)
-    (when (>= emacs-major-version 29)
+    (when (eval-when-compile (>= emacs-major-version 29))
       (advice-remove #'eshell-resume-eval
                      #'eat--eshell-set-input-process)))))
 
