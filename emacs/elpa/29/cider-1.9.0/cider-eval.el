@@ -558,19 +558,31 @@ It delegates the actual error content to the eval or op handler."
 ;; old and the new format, by utilizing a combination of two different regular
 ;; expressions.
 
-(defconst cider-clojure-1.10-error `(sequence
-                                     "Syntax error "
-                                     (minimal-match (zero-or-more anything))
-                                     (or "compiling "
-                                         "macroexpanding "
-                                         "reading source ")
-                                     (minimal-match (zero-or-more anything))
-                                     "at ("
-                                     (group-n 2 (minimal-match (zero-or-more anything)))
-                                     ":"
-                                     (group-n 3 (one-or-more digit))
-                                     (optional ":" (group-n 4 (one-or-more digit)))
-                                     ")."))
+(defconst cider-clojure-1.10--location `("at ("
+                                         (group-n 2 (minimal-match (zero-or-more anything)))
+                                         ":"
+                                         (group-n 3 (one-or-more digit))
+                                         (optional ":" (group-n 4 (one-or-more digit)))
+                                         ")."))
+
+(defconst cider-clojure-1.10-error (append `(sequence
+                                             "Syntax error "
+                                             (minimal-match (zero-or-more anything))
+                                             (or "compiling "
+                                                 "macroexpanding "
+                                                 "reading source ")
+                                             (minimal-match (zero-or-more anything)))
+                                           cider-clojure-1.10--location))
+
+(defconst cider-clojure-unexpected-error (append `(sequence
+                                                   "Unexpected error ("
+                                                   (minimal-match (one-or-more anything))
+                                                   ") "
+                                                   (or "compiling "
+                                                       "macroexpanding "
+                                                       "reading source ")
+                                                   (minimal-match (one-or-more anything)))
+                                                 cider-clojure-1.10--location))
 
 (defconst cider-clojure-1.9-error `(sequence
                                     (zero-or-more anything)
@@ -591,23 +603,34 @@ It delegates the actual error content to the eval or op handler."
                                   (optional ":" (group-n 4 (one-or-more digit)))
                                   " - "))
 
-
 (defconst cider-clojure-compilation-regexp
   (eval
    `(rx bol (or ,cider-clojure-1.9-error
                 ,cider-clojure-warning
-                ,cider-clojure-1.10-error))
+                ,cider-clojure-1.10-error
+                ,cider-clojure-unexpected-error))
    t)
   "A few example values that will match:
 \"Reflection warning, /tmp/foo/src/foo/core.clj:14:1 - \"
 \"CompilerException java.lang.RuntimeException: Unable to resolve symbol: \\
 lol in this context, compiling:(/foo/core.clj:10:1)\"
-\"Syntax error compiling at (src/workspace_service.clj:227:3).\"")
+\"Syntax error compiling at (src/workspace_service.clj:227:3).\"
+\"Unexpected error (ClassCastException) macroexpanding defmulti at (src/haystack/parser.cljc:21:1).\"")
 
-(replace-regexp-in-string cider-clojure-compilation-regexp
-                          ""
-                          "Reflection warning, /tmp/foo/src/foo/core.clj:14:1 - call to java.lang.Integer ctor can't be resolved.")
-
+(defconst cider-module-info-regexp
+  (rx " ("
+      (minimal-match (one-or-more anything))
+      " is in"
+      (minimal-match (one-or-more anything)) ;; module or unnamed module
+      " of loader "
+      (minimal-match (one-or-more anything))
+      "; "
+      (minimal-match (one-or-more anything))
+      " is in "
+      (minimal-match (one-or-more anything)) ;; module or unnamed module
+      " of loader "
+      (minimal-match (one-or-more anything))
+      ")"))
 
 (defvar cider-compilation-regexp
   (list cider-clojure-compilation-regexp  2 3 4 '(1))
@@ -798,6 +821,26 @@ REPL buffer.  This is controlled via
                                                      conn)))
           (nrepl-dict-get result "phase"))))))
 
+(defcustom cider-inline-error-message-function #'cider--shorten-error-message
+  "A function that will shorten a given error message,
+as shown in overlays / the minibuffer (per `cider-use-overlays').
+
+The function takes a single arg.  You may want to use `identity',
+for leaving the message as-is."
+  :type 'boolean
+  :group 'cider
+  :package-version '(cider . "1.19.0"))
+
+(defun cider--shorten-error-message (err)
+  "Removes from ERR the prefix matched by `cider-clojure-compilation-regexp',
+and the suffix matched by `cider-module-info-regexp'."
+  (thread-last err
+               (replace-regexp-in-string cider-clojure-compilation-regexp
+                                         "")
+               (replace-regexp-in-string cider-module-info-regexp
+                                         "")
+               (string-trim)))
+
 (declare-function cider-inspect-last-result "cider-inspector")
 (defun cider-interactive-eval-handler (&optional buffer place)
   "Make an interactive eval handler for BUFFER.
@@ -817,7 +860,7 @@ when `cider-auto-inspect-after-eval' is non-nil."
     (nrepl-make-response-handler (or buffer eval-buffer)
                                  (lambda (_buffer value)
                                    (setq res (concat res value))
-                                   (cider--display-interactive-eval-result res end))
+                                   (cider--display-interactive-eval-result res 'value end))
                                  (lambda (_buffer out)
                                    (cider-emit-interactive-eval-output out))
                                  (lambda (buffer err)
@@ -833,12 +876,10 @@ when `cider-auto-inspect-after-eval' is non-nil."
                                                  (member phase cider-clojure-compilation-error-phases)))
                                        ;; Display errors as temporary overlays
                                        (let ((cider-result-use-clojure-font-lock nil)
-                                             (trimmed-err (thread-last err
-                                                                       (replace-regexp-in-string cider-clojure-compilation-regexp
-                                                                                                 "")
-                                                                       (string-trim))))
+                                             (trimmed-err (funcall cider-inline-error-message-function err)))
                                          (cider--display-interactive-eval-result
                                           trimmed-err
+                                          'error
                                           end
                                           'cider-error-overlay-face)))
 
@@ -872,7 +913,7 @@ Optional argument DONE-HANDLER lambda will be run once load is complete."
         (res ""))
     (nrepl-make-response-handler (or buffer eval-buffer)
                                  (lambda (buffer value)
-                                   (cider--display-interactive-eval-result value)
+                                   (cider--display-interactive-eval-result value 'value)
                                    (when cider-eval-register
                                      (setq res (concat res value)))
                                    (when (buffer-live-p buffer)

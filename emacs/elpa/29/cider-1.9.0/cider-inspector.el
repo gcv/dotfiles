@@ -106,6 +106,7 @@ by clicking or navigating to them by other means."
     (define-key map "a" #'cider-inspector-set-max-atom-length)
     (define-key map "c" #'cider-inspector-set-max-coll-size)
     (define-key map "d" #'cider-inspector-def-current-val)
+    (define-key map "t" #'cider-inspector-tap-current-val)
     (define-key map [tab] #'cider-inspector-next-inspectable-object)
     (define-key map "\C-i" #'cider-inspector-next-inspectable-object)
     (define-key map "n" #'cider-inspector-next-inspectable-object)
@@ -113,6 +114,8 @@ by clicking or navigating to them by other means."
     (define-key map "p" #'cider-inspector-previous-inspectable-object)
     (define-key map "f" #'forward-char)
     (define-key map "b" #'backward-char)
+    (define-key map "9" #'cider-inspector-previous-sibling)
+    (define-key map "0" #'cider-inspector-next-sibling)
     ;; Emacs translates S-TAB to BACKTAB on X.
     (define-key map [backtab] #'cider-inspector-previous-inspectable-object)
     (easy-menu-define cider-inspector-mode-menu map
@@ -223,8 +226,27 @@ See `cider-sync-request:inspect-pop' and `cider-inspector--render-value'."
 (defun cider-inspector-push (idx)
   "Inspect the value at IDX in the inspector stack and render it.
 See `cider-sync-request:inspect-push' and `cider-inspector--render-value'"
-  (push (point) cider-inspector-location-stack)
+  (interactive)
   (when-let* ((value (cider-sync-request:inspect-push idx)))
+    (push (point) cider-inspector-location-stack)
+    (cider-inspector--render-value value)
+    (cider-inspector-next-inspectable-object 1)))
+
+(defun cider-inspector-previous-sibling ()
+  "Inspect the previous sibling value within a sequential parent.
+See `cider-sync-request:inspect-previous-sibling' and `cider-inspector--render-value'"
+  (interactive)
+  (when-let* ((value (cider-sync-request:inspect-previous-sibling)))
+    (push (point) cider-inspector-location-stack)
+    (cider-inspector--render-value value)
+    (cider-inspector-next-inspectable-object 1)))
+
+(defun cider-inspector-next-sibling ()
+  "Inspect the next sibling value within a sequential parent.
+See `cider-sync-request:inspect-next-sibling' and `cider-inspector--render-value'"
+  (interactive)
+  (when-let* ((value (cider-sync-request:inspect-next-sibling)))
+    (push (point) cider-inspector-location-stack)
     (cider-inspector--render-value value)
     (cider-inspector-next-inspectable-object 1)))
 
@@ -307,6 +329,19 @@ current-namespace."
     (cider-inspector--render-value value)
     (message "%s#'%s/%s = %s" cider-eval-result-prefix ns var-name value)))
 
+(defun cider-inspector-tap-current-val ()
+  "Sends the current Inspector current value to `tap>'."
+  (interactive)
+  ;; NOTE: we don't set `cider-inspector--current-repl', because we mean to tap the current value of an existing Inspector,
+  ;; so whatever repl was used for it, should be used here.
+  (if cider-inspector--current-repl
+      (let ((response (cider-sync-request:inspect-tap-current-val)))
+        (nrepl-dbind-response response (value err)
+          (if value
+              (message "Successfully tapped the current Inspector value")
+            (error "Could not tap the current Inspector value: %s" err))))
+    (user-error "No CIDER session found")))
+
 ;; nREPL interactions
 (defun cider-sync-request:inspect-pop ()
   "Move one level up in the inspector stack."
@@ -318,6 +353,18 @@ current-namespace."
   "Inspect the inside value specified by IDX."
   (thread-first `("op" "inspect-push"
                   "idx" ,idx)
+                (cider-nrepl-send-sync-request cider-inspector--current-repl)
+                (nrepl-dict-get "value")))
+
+(defun cider-sync-request:inspect-previous-sibling ()
+  "Inspect the previous sibling value within a sequential parent."
+  (thread-first `("op" "inspect-previous-sibling")
+                (cider-nrepl-send-sync-request cider-inspector--current-repl)
+                (nrepl-dict-get "value")))
+
+(defun cider-sync-request:inspect-next-sibling ()
+  "Inspect the next sibling value within a sequential parent."
+  (thread-first `("op" "inspect-next-sibling")
                 (cider-nrepl-send-sync-request cider-inspector--current-repl)
                 (nrepl-dict-get "value")))
 
@@ -369,6 +416,10 @@ MAX-SIZE is the new value."
                 (cider-nrepl-send-sync-request cider-inspector--current-repl)
                 (nrepl-dict-get "value")))
 
+(defun cider-sync-request:inspect-tap-current-val ()
+  "Sends current inspector value to tap>."
+  (cider-nrepl-send-sync-request '("op" "inspect-tap-current-value") cider-inspector--current-repl))
+
 (defun cider-sync-request:inspect-expr (expr ns page-size max-atom-length max-coll-size)
   "Evaluate EXPR in context of NS and inspect its result.
 Set the page size in paginated view to PAGE-SIZE, maximum length of atomic
@@ -388,8 +439,15 @@ MAX-COLL-SIZE if non nil."
 ;; Render Inspector from Structured Values
 (defun cider-inspector--render-value (value)
   "Render VALUE."
-  (cider-make-popup-buffer cider-inspector-buffer 'cider-inspector-mode 'ancillary)
-  (cider-inspector-render cider-inspector-buffer value)
+  (let ((font-size (when-let* ((b (get-buffer cider-inspector-buffer))
+                               (variable 'text-scale-mode-amount)
+                               (continue (local-variable-p variable b)))
+                     ;; The font size is lost between inspector 'screens',
+                     ;; because on each re-rendering, we wipe everything, including the mode.
+                     ;; Enabling cider-inspector-mode is the specific step that loses the font size.
+                     (buffer-local-value variable b))))
+    (cider-make-popup-buffer cider-inspector-buffer 'cider-inspector-mode 'ancillary)
+    (cider-inspector-render cider-inspector-buffer value font-size))
   (cider-popup-buffer-display cider-inspector-buffer cider-inspector-auto-select-buffer)
   (when cider-inspector-fill-frame (delete-other-windows))
   (ignore-errors (cider-inspector-next-inspectable-object 1))
@@ -408,30 +466,63 @@ MAX-COLL-SIZE if non nil."
       (when cider-inspector-page-location-stack
         (goto-char (pop cider-inspector-page-location-stack))))))
 
-(defun cider-inspector-render (buffer str)
+(defun cider-inspector-render (buffer str &optional font-size)
   "Render STR in BUFFER."
   (with-current-buffer buffer
     (cider-inspector-mode)
+    (when font-size
+      (text-scale-set font-size))
     (let ((inhibit-read-only t))
       (condition-case nil
           (cider-inspector-render* (car (read-from-string str)))
         (error (insert "\nInspector error for: " str))))
     (goto-char (point-min))))
 
+(defvar cider-inspector-looking-at-java-p nil)
+
 (defun cider-inspector-render* (elements)
   "Render ELEMENTS."
+  (setq cider-inspector-looking-at-java-p nil)
   (dolist (el elements)
     (cider-inspector-render-el* el)))
 
+(defconst cider--inspector-java-headers
+  ;; NOTE "--- Static fields:" "--- Instance fields:" are for objects,
+  ;; and don't deserve Java syntax highlighting (they can contain a Clojure value like `:foo/bar`, for instance)
+  '("--- Interfaces:"
+    "--- Fields:" ;; rendered only for Class objects (and not other objects) - see previous comment
+    "--- Constructors:"
+    "--- Methods:"
+    "--- Imports:"))
+
 (defun cider-inspector-render-el* (el)
   "Render EL."
-  (cond ((symbolp el) (insert (symbol-name el)))
-        ((stringp el) (insert (propertize el 'font-lock-face 'font-lock-keyword-face)))
-        ((and (consp el) (eq (car el) :newline))
-         (insert "\n"))
-        ((and (consp el) (eq (car el) :value))
-         (cider-inspector-render-value (cadr el) (cl-caddr el)))
-        (t (message "Unrecognized inspector object: %s" el))))
+  (let ((header-p (or (member el cider--inspector-java-headers)
+                      (and (stringp el)
+                           (string-prefix-p "--- " el)))))
+    ;; Headers reset the Java syntax coloring:
+    (when header-p
+      (setq cider-inspector-looking-at-java-p nil))
+
+    (cond ((symbolp el) (insert (symbol-name el)))
+          ((stringp el) (insert (if cider-inspector-looking-at-java-p
+                                    (cider-font-lock-as 'java-mode el)
+                                  (let ((trimmed-el (replace-regexp-in-string (regexp-quote "<non-inspectable value>")
+                                                                              ""
+                                                                              el)))
+                                    (propertize trimmed-el 'font-lock-face (if header-p
+                                                                               'font-lock-comment-face
+                                                                             'font-lock-keyword-face))))))
+          ((and (consp el) (eq (car el) :newline))
+           (insert "\n"))
+          ((and (consp el) (eq (car el) :value))
+           (cider-inspector-render-value (cadr el) (cl-caddr el)))
+          (t (message "Unrecognized inspector object: %s" el))))
+
+  ;; Java-related headers indicate that the next elements to be rendered
+  ;; should be syntax-colored as Java:
+  (when (member el cider--inspector-java-headers)
+    (setq cider-inspector-looking-at-java-p t)))
 
 (defun cider-inspector-render-value (value idx)
   "Render VALUE at IDX."

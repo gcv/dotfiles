@@ -11,8 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: http://www.github.com/clojure-emacs/cider
-;; Version: 1.8.2
-;; Package-Requires: ((emacs "26") (clojure-mode "5.17.1") (parseedn "1.2.0") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2") (transient "0.4.1"))
+;; Version: 1.9.0
+;; Package-Requires: ((emacs "26") (clojure-mode "5.18.0") (parseedn "1.2.0") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2") (transient "0.4.1"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -93,10 +93,10 @@
 (require 'sesman)
 (require 'package)
 
-(defconst cider-version "1.8.2"
+(defconst cider-version "1.9.0"
   "The current version of CIDER.")
 
-(defconst cider-codename "Geneva"
+(defconst cider-codename "Barcelona"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -527,7 +527,7 @@ the artifact.")
 (defconst cider-latest-clojure-version "1.10.1"
   "Latest supported version of Clojure.")
 
-(defconst cider-required-middleware-version "0.40.0"
+(defconst cider-required-middleware-version "0.41.0"
   "The CIDER nREPL version that's known to work properly with CIDER.")
 
 (defcustom cider-injected-middleware-version cider-required-middleware-version
