@@ -17,7 +17,7 @@ This function is called by `org-babel-execute-src-block'
 
 (fn BODY PARAMS)")
 (autoload 'org-babel-variable-assignments:restclient "ob-restclient" "\
-Return a list of restclient statements assigning the block's variables specified in PARAMS.
+Return a list of statements assigning variables specified in PARAMS.
 
 (fn PARAMS)")
 (register-definition-prefixes "ob-restclient" '("org-babel-"))
