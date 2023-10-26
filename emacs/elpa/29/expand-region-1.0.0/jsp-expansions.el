@@ -1,6 +1,6 @@
-;;; jsp-expansions.el --- JSP-specific expansions for expand-region
+;;; jsp-expansions.el --- JSP-specific expansions for expand-region  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2011 Magnar Sveen
+;; Copyright (C) 2011-2023  Free Software Foundation, Inc
 
 ;; Author: Magnar Sveen <magnars@gmail.com>
 ;; Keywords: marking region
@@ -28,7 +28,7 @@
 ;; These expansions aren't loaded by default, so you'll have to explicitly
 ;; ask for them in your init file with:
 ;;
-;;     (eval-after-load "sgml-mode" '(require 'jsp-expansions))
+;;     (eval-after-load 'sgml-mode '(require 'jsp-expansions))
 ;;
 ;; Feel free to contribute any other expansions for JSP at
 ;;
@@ -57,7 +57,7 @@ If point is inside the brackets, they will be marked first anyway."
                                                   er/try-expand-list
                                                   '(er/mark-jstl-escape))))
 
-(er/enable-mode-expansions 'html-mode 'er/add-jsp-expansions)
+(er/enable-mode-expansions 'html-mode #'er/add-jsp-expansions)
 
 (provide 'jsp-expansions)
 

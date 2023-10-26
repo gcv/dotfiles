@@ -59,6 +59,14 @@ before calling `er/expand-region' for the first time.
 
 ;;; Generated autoloads from expand-region-core.el
 
+(autoload 'er/contract-region "expand-region-core" "\
+Contract the selected region to its previous size.
+With prefix argument contracts that many times.
+If prefix argument is negative calls `er/expand-region'.
+If prefix argument is 0 it resets point and mark to their state
+before calling `er/expand-region' for the first time.
+
+(fn ARG)" t)
 (register-definition-prefixes "expand-region-core" '("er--" "er/"))
 
 
@@ -99,7 +107,12 @@ keep it there; otherwise, put it at the end of the region.
 
 If set to nil, always place the cursor at the beginning of the region.")
 (custom-autoload 'expand-region-smart-cursor "expand-region-custom" t)
-(register-definition-prefixes "expand-region-custom" '("expand-region-guess-python-mode"))
+(define-obsolete-variable-alias 'er/enable-subword-mode? 'expand-region-subword-enabled "\
+2019-03-23")
+(defvar expand-region-subword-enabled nil "\
+Whether expand-region should use subword expansions.")
+(custom-autoload 'expand-region-subword-enabled "expand-region-custom" t)
+(register-definition-prefixes "expand-region-custom" '("expand-region-"))
 
 
 ;;; Generated autoloads from feature-mode-expansions.el
@@ -185,6 +198,11 @@ If set to nil, always place the cursor at the beginning of the region.")
 ;;; Generated autoloads from web-mode-expansions.el
 
 (register-definition-prefixes "web-mode-expansions" '("er/add-web-mode-expansions"))
+
+
+;;; Generated autoloads from yaml-mode-expansions.el
+
+(register-definition-prefixes "yaml-mode-expansions" '("er--" "er/" "yaml-indent"))
 
 ;;; End of scraped data
 
