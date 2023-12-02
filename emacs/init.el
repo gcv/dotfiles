@@ -402,13 +402,22 @@
 
 ;;; clicking in a different window should not move the cursor inside that window
 (defun /mouse-set-point (orig-fn &rest args)
-  (let* ((event (car args))
-         (event-name (car event))
-         (event-target-window (caadr event)))
-    (if (and (eql 'down-mouse-1 event-name)
-             (eql event-target-window (frame-selected-window)))
-        (apply orig-fn args)
-      (set-frame-selected-window nil event-target-window))))
+  (condition-case err
+      (let* ((event (car args))
+             (event-name (car event))
+             (event-target-window (caadr event)))
+        (if (and (eql 'down-mouse-1 event-name)
+                 (eql event-target-window (frame-selected-window)))
+            (apply orig-fn args)
+          (set-frame-selected-window nil event-target-window)))
+    (wrong-type-argument
+     ;; Ignore this error and continue; it seems to happen when a keyboard
+     ;; action emulates a mouse click for some reason. In devdocs-mode,
+     ;; following a link with the keyboard makes an event object that goes calls
+     ;; mouse-set-point but with an event object which does not destructure the
+     ;; way this code expects. /shrugs
+     (apply orig-fn args)
+     )))
 
 (advice-add 'mouse-set-point :around #'/mouse-set-point)
 
