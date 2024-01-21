@@ -36,7 +36,7 @@ packages=(
     bashInteractive    # when needed
     bitwarden-cli      # password manager
     bottom             # top replacement 2 (Rust)
-    broot              # file browser / manager
+    broot              # file browser / file manager 2
     btop               # top replacement 3 (C++)
     cacert             # SSL certificates
     cmake
@@ -73,6 +73,7 @@ packages=(
     ledger
     libvterm-neovim
     magic-wormhole     # peer-to-peer file transfer (cf croc)
+    mc                 # file browser / file manager 1 (Midnight Commander)
     mediainfo
     mosh               # since 1.4.0, should not need to be built from mosh-git.nix derivation
     miniserve          # HTTP server
@@ -80,7 +81,6 @@ packages=(
     ngrok              # expose local service over a secure tunnel
     nix-direnv
     nmap
-    nnn                # file manager
     notmuch            # mail indexer
     p7zip
     pandoc
@@ -109,6 +109,7 @@ packages=(
     wget              # weak web scraper (no restart support)
     xcp               # cp replacement
     xz
+    yazi              # file browser / file manager 3 (Rust)
     #youtube-dl        # outdated?
     yt-dlp            # new youtube-dl
     zsh
