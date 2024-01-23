@@ -92,8 +92,8 @@ alias v="ls -lahF"
 alias grep="grep --color"
 alias rm="rm -i"
 alias cp="cp -p"
-if command_exists exa; then
-    alias e="exa -l"
+if command_exists eza; then
+    alias e="eza -l"
 fi
 
 if command_exists emacsclient; then
@@ -107,6 +107,12 @@ fi
 #[[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
 #    alias et='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -a "" -t' || \
 #    alias et='emacsclient -a "" -t'
+
+if command_exists mc; then # use Midnight Commander directory-following wrapper
+    if [[ -f "${HOME}/.nix-profile/libexec/mc/mc-wrapper.sh" ]]; then
+        alias mc=". ${HOME}/.nix-profile/libexec/mc/mc-wrapper.sh"
+    fi
+fi
 
 [[ ${UNAME} == "Darwin" && -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ]] && \
     alias firewall="sudo /usr/libexec/ApplicationFirewall/socketfilterfw"
