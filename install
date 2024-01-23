@@ -48,7 +48,6 @@ parse_params() {
     link_git=0
     link_hammerspoon=0
     link_helix=0
-    link_mc=0
     link_misc=0
     link_notmuch=0
     link_nix=0
@@ -69,7 +68,6 @@ parse_params() {
             --git) link_all=0; link_git=1 ;;
             --hammerspoon) link_all=0; link_hammerspoon=1 ;;
             --helix) link_all=0; link_helix=1 ;;
-            --mc) link_all=0; link_mc=1 ;;
             --misc) link_all=0; link_misc=1 ;;
             --notmuch) link_all=0; link_notmuch=1 ;;
             --nix) link_all=0; link_nix=1 ;;
@@ -183,10 +181,6 @@ fi
 
 if [[ $link_all = "1" || $link_helix = "1" ]]; then
     link "public/helix" ".config/helix"
-fi
-
-if [[ $link_all = "1" || $link_mc = "1" ]]; then
-    link "public/mc" ".config/mc"
 fi
 
 if [[ $link_all = "1" || $link_misc = "1" ]]; then
