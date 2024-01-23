@@ -52,7 +52,9 @@ parse_params() {
     link_notmuch=0
     link_nix=0
     link_sh=0
+    link_ssh=0
     link_sqlite=0
+    link_starship=0
     link_tmux=0
     link_zsh=0
 
@@ -71,6 +73,7 @@ parse_params() {
             --nix) link_all=0; link_nix=1 ;;
             --sh) link_all=0; link_sh=1 ;;
             --sqlite) link_all=0; link_sqlite=1 ;;
+            --ssh) link_all=0; link_ssh=1 ;;
             --starship) link_all=0; link_starship=1 ;;
             --tmux) link_all=0; link_tmux=1 ;;
             --zsh) link_all=0; link_zsh=1 ;;
@@ -188,9 +191,9 @@ if [[ $link_all = "1" || $link_misc = "1" ]]; then
 fi
 
 if [[ $link_all = "1" || $link_notmuch = "1" ]]; then
-   if [[ -L "${basedir}/private" ]]; then
-       link "private/notmuch-config" ".notmuch-config"
-   fi
+    if [[ -L "${basedir}/private" ]]; then
+        link "private/notmuch-config" ".notmuch-config"
+    fi
 fi
 
 if [[ $link_all = "1" || $link_nix = "1" ]]; then
@@ -205,6 +208,16 @@ fi
 
 if [[ $link_all = "1" || $link_sqlite = "1" ]]; then
     link "public/sqliterc" ".sqliterc"
+fi
+
+if [[ $link_all = "1" || $link_ssh = "1" ]]; then
+    if [[ -L "${basedir}/private" ]]; then
+        [[ ! -d "${HOME}/.ssh" ]] && mkdir "${HOME}/.ssh"
+        if [[ ! -f "${HOME}/.ssh/config-base" ]]; then
+            echo "Include ~/.ssh/config-base\n" > "${HOME}/.ssh/config-base"
+        fi
+        link "private/ssh-config-base" ".ssh/config-base"
+   fi
 fi
 
 if [[ $link_all = "1" || $link_starship = "1" ]]; then
