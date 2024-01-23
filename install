@@ -214,7 +214,7 @@ if [[ $link_all = "1" || $link_ssh = "1" ]]; then
     if [[ -L "${basedir}/private" ]]; then
         [[ ! -d "${HOME}/.ssh" ]] && mkdir "${HOME}/.ssh"
         if [[ ! -f "${HOME}/.ssh/config-base" ]]; then
-            echo "Include ~/.ssh/config-base\n" > "${HOME}/.ssh/config-base"
+            echo "Include ~/.ssh/config-base\n" > "${HOME}/.ssh/config"
         fi
         link "private/ssh-config-base" ".ssh/config-base"
    fi
