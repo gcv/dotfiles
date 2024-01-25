@@ -75,13 +75,14 @@ abbreviation for a day and the number of that day in the week."
   :group 'ledger-schedule)
 
 (defsubst ledger-between (val low high)
-  "Return TRUE if VAL > LOW and < HIGH."
-  (and (>= val low) (<= val high)))
+  "Return TRUE if VAL >= LOW and <= HIGH."
+  (declare (obsolete <= "Ledger-mode v4.0.1"))
+  (<= low val high))
 
 (defun ledger-schedule-days-in-month (month year)
   "Return number of days in the MONTH, MONTH is from 1 to 12.
 If YEAR is nil, assume it is not a leap year"
-  (if (ledger-between month 1 12)
+  (if (<= 1 month 12)
       (if (and year (date-leap-year-p year) (= 2 month))
           29
         (nth (1- month) '(31 28 31 30 31 30 31 31 30 31 30 31)))
@@ -98,16 +99,16 @@ If YEAR is nil, assume it is not a leap year"
 For example, return true if date is the 3rd Thursday of the
 month.  Negative COUNT starts from the end of the month. (EQ
 COUNT 0) means EVERY day-of-week (eg. every Saturday)"
-  (if (and (ledger-between count -6 6) (ledger-between day-of-week 0 6))
+  (if (and (<= -6 count 6) (<= 0 day-of-week 6))
       (cond ((zerop count) ;; Return true if day-of-week matches
              `(eq (nth 6 (decode-time date)) ,day-of-week))
             ((> count 0) ;; Positive count
              (let ((decoded (cl-gensym)))
                `(let ((,decoded (decode-time date)))
                   (and (eq (nth 6 ,decoded) ,day-of-week)
-                       (ledger-between  (nth 3 ,decoded)
-                                        ,(* (1- count) 7)
-                                        ,(* count 7))))))
+                       (<= ,(* (1- count) 7)
+                           (nth 3 ,decoded)
+                           ,(* count 7))))))
             ((< count 0)
              (let ((days-in-month (cl-gensym))
                    (decoded (cl-gensym)))
@@ -116,9 +117,9 @@ COUNT 0) means EVERY day-of-week (eg. every Saturday)"
                                         (nth 4 ,decoded)
                                         (nth 5 ,decoded))))
                   (and (eq (nth 6 ,decoded) ,day-of-week)
-                       (ledger-between  (nth 3 ,decoded)
-                                        (+ ,days-in-month ,(* count 7))
-                                        (+ ,days-in-month ,(* (1+ count) 7)))))))
+                       (<= (+ ,days-in-month ,(* count 7))
+                           (nth 3 ,decoded)
+                           (+ ,days-in-month ,(* (1+ count) 7)))))))
             (t
              (error "COUNT out of range, COUNT=%S" count)))
     (error "Invalid argument to ledger-schedule-day-in-month-macro %S %S"
@@ -126,7 +127,8 @@ COUNT 0) means EVERY day-of-week (eg. every Saturday)"
            day-of-week)))
 
 (defun ledger-schedule-constrain-every-count-day (day-of-week skip start-date)
-  "Return a form that is true for every DAY-OF-WEEK skipping SKIP, starting on START-DATE.
+  "Return a form that is true for every DAY-OF-WEEK.
+Skips SKIP, and starts on START-DATE.
 For example every second Friday, regardless of month."
   (let ((start-day (nth 6 (decode-time start-date))))
     (if (eq start-day day-of-week)  ;; good, can proceed
@@ -134,7 +136,8 @@ For example every second Friday, regardless of month."
       (error "START-DATE day of week doesn't match DAY-OF-WEEK"))))
 
 (defun ledger-schedule-constrain-date-range (month1 day1 month2 day2)
-  "Return a form of DATE that is true if DATE falls between MONTH1 DAY1 and MONTH2 DAY2."
+  "Return a form of DATE that is true if DATE falls between two dates.
+The dates are given by the pairs MONTH1 DAY1 and MONTH2 DAY2."
   (let ((decoded (cl-gensym))
         (target-month (cl-gensym))
         (target-day (cl-gensym)))
@@ -247,6 +250,8 @@ YEAR-DESC, MONTH-DESC, and DAY-DESC are the string portions of the
 date descriptor."
   (cond ((string= day-desc "*")
          t)
+        ((string= day-desc "L")
+         `(= (nth 3 (decode-time date)) (ledger-schedule-days-in-month (nth 4 (decode-time date)) (nth 5 (decode-time date)))))
         ((string-match "[A-Za-z]" day-desc)  ;; There is something other than digits and commas
          (ledger-schedule-parse-complex-date year-desc month-desc day-desc))
         ((/= 0 (string-to-number day-desc))
@@ -260,8 +265,8 @@ date descriptor."
   "Parse day descriptors that have repeats."
   (let ((years (mapcar 'string-to-number (split-string year-desc ",")))
         (months (mapcar 'string-to-number (split-string month-desc ",")))
-        (day-parts (split-string day-desc "+"))
-        (every-nth (string-match "+" day-desc)))
+        (day-parts (split-string day-desc "\\+"))
+        (every-nth (string-match "\\+" day-desc)))
     (if every-nth
         (let ((base-day (string-to-number (car day-parts)))
               (increment (string-to-number (substring (cadr day-parts) 0
@@ -275,7 +280,8 @@ date descriptor."
         (ledger-schedule-constrain-day-in-month count day-of-week)))))
 
 (defun ledger-schedule-list-upcoming-xacts (candidate-items early horizon)
-  "Search CANDIDATE-ITEMS for xacts that occur within the period today - EARLY  to today + HORIZON."
+  "Search CANDIDATE-ITEMS for xacts that occur within the given period.
+The period runs from (today - EARLY) to (today + HORIZON)."
   (let ((start-date (time-subtract (current-time) (days-to-time early)))
         test-date items)
     (cl-loop for day from 0 to (+ early horizon) by 1 do
@@ -301,9 +307,9 @@ date descriptor."
 
 FILE is the file containing the scheduled transaction,
 default to `ledger-schedule-file'.
-LOOK-BACKWARD is the number of day in the past to look at
+LOOK-BACKWARD is the number of days in the past to look at
 default to `ledger-schedule-look-backward'
-LOOK-FORWARD is the number of day in the futur to look at
+LOOK-FORWARD is the number of days in the future to look at
 default to `ledger-schedule-look-forward'
 
 Use a prefix arg to change the default value"

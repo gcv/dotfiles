@@ -26,6 +26,8 @@
 (require 'ledger-regex)
 (require 'ledger-navigate)
 
+(declare-function ledger-string-to-number "ledger-commodities" (str &optional decimal-comma))
+
 ;;; Code:
 
 (defgroup ledger-post nil
@@ -35,12 +37,14 @@
 (defcustom ledger-post-account-alignment-column 4
   "The column Ledger-mode attempts to align accounts to."
   :type 'integer
-  :group 'ledger-post)
+  :group 'ledger-post
+  :safe 'integerp)
 
 (defcustom ledger-post-amount-alignment-column 52
   "The column Ledger-mode attempts to align amounts to."
   :type 'integer
-  :group 'ledger-post)
+  :group 'ledger-post
+  :safe 'integerp)
 
 (defcustom ledger-post-amount-alignment-at :end
   "Position at which the amount is aligned.
@@ -50,7 +54,8 @@ followed by unaligned commodity) or :decimal to align at the
 decimal separator."
   :type '(radio (const :tag "align at the end of amount" :end)
                 (const :tag "align at the decimal separator" :decimal))
-  :group 'ledger-post)
+  :group 'ledger-post
+  :safe (lambda (x) (memq x '(:end :decimal))))
 
 (defcustom ledger-post-auto-align t
   "When non-nil, realign post amounts when indenting or completing."
@@ -95,7 +100,8 @@ Looks only as far as END, if supplied, otherwise `point-max'."
     (ledger-post-align-postings (car bounds) (cadr bounds))))
 
 (defun ledger-post-align-postings (beg end)
-  "Align all accounts and amounts between BEG and END, or the current region, or, if no region, the current line."
+  "Align all accounts and amounts between BEG and END.
+The current region is used, or, if no region, the current line."
   (interactive "r")
   (save-match-data
     (save-excursion
@@ -155,26 +161,30 @@ regular text."
    (t (call-interactively 'ledger-post-align-xact))))
 
 (defun ledger-post-edit-amount ()
-  "Call 'calc-mode' and push the amount in the posting to the top of stack."
+  "Call `calc' and push the amount in the posting to the top of stack, if any.
+
+In the calc buffer, press y to use the top value in the stack as
+the amount and return to ledger."
   (interactive)
-  (goto-char (line-beginning-position))
+  (beginning-of-line)
   (when (re-search-forward ledger-post-line-regexp (line-end-position) t)
-    (goto-char (match-end ledger-regex-post-line-group-account)) ;; go to the and of the account
-    (let ((end-of-amount (re-search-forward "[-.,0-9]+" (line-end-position) t)))
-      ;; determine if there is an amount to edit
-      (if end-of-amount
-          (let ((val-string (match-string 0)))
-            (goto-char (match-beginning 0))
-            (delete-region (match-beginning 0) (match-end 0))
-            (push-mark)
-            (calc)
-            (calc-eval val-string 'push)) ;; edit the amount
-        (progn ;;make sure there are two spaces after the account name and go to calc
-          (if (search-backward "  " (- (point) 3) t)
-              (goto-char (line-end-position))
-            (insert "  "))
-          (push-mark)
-          (calc))))))
+    (goto-char (match-end ledger-regex-post-line-group-account)) ;; go to the end of the account
+    ;; determine if there is an amount to edit
+    (if (re-search-forward ledger-amount-regexp (line-end-position) t)
+        (let ((val-string (match-string 0)))
+          (goto-char (match-beginning 0))
+          (delete-region (match-beginning 0) (match-end 0))
+          (push-mark (point) 'nomsg)
+          (calc)
+          ;; edit the amount, first removing thousands separators and converting
+          ;; decimal commas to calc's input format
+          (calc-eval (number-to-string (ledger-string-to-number val-string)) 'push))
+      ;; make sure there are two spaces after the account name and go to calc
+      (if (search-backward "  " (- (point) 3) t)
+          (end-of-line)
+        (insert "  "))
+      (push-mark (point) 'nomsg)
+      (calc))))
 
 (provide 'ledger-post)
 

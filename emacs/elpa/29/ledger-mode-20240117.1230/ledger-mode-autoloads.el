@@ -37,10 +37,7 @@
 ;;; Generated autoloads from ledger-flymake.el
 
 (autoload 'ledger-flymake-enable "ledger-flymake" "\
-Enable `flymake-mode' in `ledger-mode' buffers.
-
-Don't enable flymake if flycheck is on and flycheck-ledger is
-available.")
+Enable `flymake-mode' in `ledger-mode' buffers.")
 (register-definition-prefixes "ledger-flymake" '("ledger-"))
 
 

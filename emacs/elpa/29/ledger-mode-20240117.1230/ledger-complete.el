@@ -23,6 +23,8 @@
 ;; Functions providing payee and account auto complete.
 
 (require 'cl-lib)
+(eval-when-compile
+  (require 'subr-x))
 
 ;; In-place completion support
 
@@ -115,7 +117,8 @@ Then one of the elements this function returns will be
   (\"assert\" . \"commodity == \"$\"\"))"
   (save-excursion
     (goto-char (point-min))
-    (let (account-list)
+    (let (account-list
+          (seen (make-hash-table :test #'equal :size 1)))
       ;; First, consider accounts declared with "account" directives, which may or
       ;; may not have associated data. The data is on the following lines up to a
       ;; line not starting with whitespace.
@@ -127,19 +130,15 @@ Then one of the elements this function returns will be
                              (point))))
               data)
           (dolist (d (split-string lines "\n"))
-            (setq d
-                  ;; TODO: This is basically (string-trim d) but string-trim
-                  ;; doesn't exist in Emacs 24. Replace once we drop Emacs 24.
-                  (if (string-match "[[:space:]]+" d)
-                      (substring d (match-end 0))
-                    d))
+            (setq d (string-trim d))
             (unless (string= d "")
               (if (string-match " " d)
                   (push (cons (substring d 0 (match-beginning 0))
                               (substring d (match-end 0) nil))
                         data)
                 (push (cons d nil) data))))
-          (push (cons account data) account-list)))
+          (push (cons account data) account-list)
+          (puthash account t seen)))
       ;; Next, gather all accounts declared in postings
       (unless
           ;; FIXME: People who have set `ledger-flymake-be-pedantic' to non-nil
@@ -147,16 +146,21 @@ Then one of the elements this function returns will be
           ;; with directives.  But the name is a little misleading.  Should we
           ;; make a ledger-mode-be-pedantic and use that instead?
           (bound-and-true-p ledger-flymake-be-pedantic)
-        (goto-char (point-min))
-        (while (re-search-forward ledger-account-name-or-directive-regex nil t)
-          (let ((account (match-string-no-properties 1)))
-            (unless (member account (mapcar #'car account-list))
-              (push (cons account nil) account-list)))))
+        (ledger-xact-iterate-transactions
+         (lambda (_pos _date _state _payee)
+           (let ((end (save-excursion (ledger-navigate-end-of-xact))))
+             (forward-line)
+             (while (re-search-forward ledger-account-name-or-directive-regex end t)
+               (let ((account (match-string-no-properties 1)))
+                 (unless (gethash account seen)
+                   (puthash account t seen)
+                   (push (cons account nil) account-list))))))))
       (sort account-list (lambda (a b) (string-lessp (car a) (car b)))))))
 
 (defun ledger-accounts-list-in-buffer ()
   "Return a list of all known account names in the current buffer as strings.
-Considers both accounts listed in postings and those declared with \"account\" directives."
+Considers both accounts listed in postings and those declared
+with \"account\" directives."
   (let ((accounts (ledger-accounts-in-buffer)))
     (when ledger-accounts-exclude-function
       (setq accounts (cl-remove-if ledger-accounts-exclude-function accounts)))
@@ -173,7 +177,6 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
     (ledger-accounts-list-in-buffer)))
 
 (defun ledger-find-accounts-in-buffer ()
-  (interactive)
   (let ((account-tree (list t))
         (account-elements nil)
         (prefix ""))
@@ -296,10 +299,12 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
            (setq start (save-excursion (backward-word) (point)))
            (setq collection #'ledger-payees-in-buffer))
           (;; Accounts
-           (looking-back (rx-to-string `(seq bol (one-or-more space) (group (zero-or-more (not space))))) (line-beginning-position))
-           (setq start (match-beginning 1)
-                 delete-suffix (save-excursion
-                                 (when (search-forward-regexp (rx (or eol (repeat 2 space))) (line-end-position) t)
+           (save-excursion
+             (back-to-indentation)
+             (skip-chars-forward "([") ;; for virtual accounts
+             (setq start (point)))
+           (setq delete-suffix (save-excursion
+                                 (when (search-forward-regexp (rx (or eol (or ?\t (repeat 2 space)))) (line-end-position) t)
                                    (- (match-beginning 0) end)))
                  realign-after t
                  collection (if ledger-complete-in-steps
@@ -309,7 +314,7 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
       (let ((prefix (buffer-substring-no-properties start end)))
         (list start end
               (if (functionp collection)
-                  (completion-table-dynamic
+                  (completion-table-with-cache
                    (lambda (_)
                      (cl-remove-if (apply-partially 'string= prefix) (funcall collection))))
                 collection)
@@ -324,10 +329,12 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
   (replace-regexp-in-string "[ \t]*$" "" str))
 
 (defun ledger-fully-complete-xact ()
-  "Completes a transaction if there is another matching payee in the buffer."
+  "Completes a transaction if there is another matching payee in the buffer.
+
+Interactively, if point is after a payee, complete the
+transaction with the details from the last transaction to that
+payee."
   (interactive)
-  (unless (looking-back ledger-payee-any-status-regex (line-beginning-position))
-    (user-error "Point is not after payee"))
   (let* ((name (ledger-trim-trailing-whitespace (caar (ledger-parse-arguments))))
          (rest-of-name name)
          xacts)
@@ -346,7 +353,8 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
     (save-excursion
       (insert rest-of-name ?\n)
       (insert xacts)
-      (insert ?\n))
+      (unless (looking-at-p "\n\n")
+        (insert "\n")))
     (forward-line)
     (goto-char (line-end-position))
     (when (re-search-backward "\\(\t\\| [ \t]\\)" nil t)

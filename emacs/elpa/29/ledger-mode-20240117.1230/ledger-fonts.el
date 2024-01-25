@@ -69,7 +69,9 @@
   :group 'ledger-faces)
 
 (defface ledger-font-xact-highlight-face
-  `((t :inherit ledger-occur-xact-face))
+  `((t
+     ,@(and (>= emacs-major-version 27) '(:extend t))
+     :inherit ledger-occur-xact-face))
   "Default face for transaction under point"
   :group 'ledger-faces)
 
@@ -358,7 +360,7 @@
   :group 'ledger-faces)
 
 (defface ledger-font-posting-account-face
-  `((t :inherit ledger-font-default-face))
+  `((t :inherit ledger-font-default-directive-face))
   "Face for Ledger accounts"
   :group 'ledger-faces)
 
@@ -597,7 +599,7 @@ See `font-lock-keywords' for the full description."
     (,(concat "^\\(P\\)"
               "\\(?:[[:blank:]]+\\([^[:blank:]\n]+"
               "\\(?:[[:blank:]]+[[:digit:]][^[:blank:]\n]*\\)?\\)"
-              "\\(?:[[:blank:]]+\\([^[:blank:]\n]+\\)"
+              "\\(?:[[:blank:]]+\\(\".*?\"\\|[^[:blank:]\n]+\\)"
               "\\(?:[[:blank:]]+\\(.*\\)\\)?\\)?\\)?$")
      (1 'ledger-font-price-directive-face)
      (2 'ledger-font-price-date-face nil :lax)
@@ -618,8 +620,8 @@ See `font-lock-keywords' for the full description."
               "\\(?:[[:blank:]]+\\([^[:blank:]\n]+"
               "\\(?:[[:blank:]]+[^[:blank:]\n]+\\)?\\)"
               "\\(?:[[:blank:]]+\\(.*?\\)"
-              "\\(?:\t\\|[ \t]\\{2,\\}\\(.*?\\)"
-              "\\(?:\t\\|[ \t]\\{2,\\}\\(;.*\\)\\)?\\)?\\)?\\)?$")
+              "\\(?:\\(?:\t\\|[ \t]\\{2,\\}\\)\\(.*?\\)"
+              "\\(?:\\(?:\t\\|[ \t]\\{2,\\}\\)\\(;.*\\)\\)?\\)?\\)?\\)?$")
      (1 'ledger-font-timeclock-directive-face)
      (2 'ledger-font-posting-date-face nil :lax)
      (3 (ledger-font-face-by-timeclock-state 1 '(ledger-font-posting-account-cleared-face
@@ -651,7 +653,7 @@ See `font-lock-keywords' for the full description."
               ledger-xact-after-date-regex "\\)") ; mark 4, code 5, desc 6, comment 7
      (1 (cond ((equal "=" (match-string 2)) 'ledger-font-auto-xact-face)
               ((equal "~" (match-string 2)) 'ledger-font-periodic-xact-face)
-              (t 'ledger-font-default-face))
+              (t 'ledger-font-default-directive-face))
         nil :lax)
      (3 'ledger-font-posting-date-face nil :lax)
      (5 'ledger-font-code-face nil :lax)

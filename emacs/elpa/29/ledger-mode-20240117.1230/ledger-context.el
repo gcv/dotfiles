@@ -36,12 +36,13 @@
 (defconst ledger-separator-string "\\(\\s-\\s-+\\)")
 (defconst ledger-amount-string ledger-amount-regexp)
 (defconst ledger-commoditized-amount-string ledger-commoditized-amount-regexp)
+(defconst ledger-cost-string ledger-cost-regexp)
 (defconst ledger-balance-assertion-string ledger-balance-assertion-regexp)
-(defconst ledger-comment-string "[ \t]*;[ \t]*\\(.*?\\)")
+(defconst ledger-comment-string "\\(?:[ \t]*\n\\)?[ \t]*;[ \t]*\\(.*?\\)")
 (defconst ledger-nil-string "\\([ \t]+\\)")
 (defconst ledger-date-string "^\\([0-9]\\{4\\}[/-][01]?[0-9][/-][0123]?[0-9]\\)\\(?:=[0-9]\\{4\\}[/-][01]?[0-9][/-][0123]?[0-9]\\)?")
 (defconst ledger-code-string "\\((.*)\\)?")
-(defconst ledger-payee-string "\\(.*[^[:space:]]\\)")
+(defconst ledger-payee-string "\\(.*[^[:space:]\n]\\)")
 
 
 (defun ledger-get-regex-str (name)
@@ -53,29 +54,32 @@
   (concat (apply 'concat (mapcar 'ledger-get-regex-str elements)) "[ \t]*$"))
 
 (defmacro ledger-single-line-config (&rest elements)
-  "Take list of ELEMENTS and return regex and element list for use in context-at-point."
+  "Take ELEMENTS and return regex and element list for use in context-at-point."
   `(list (ledger-line-regex (quote ,elements)) (quote ,elements)))
 
 (defconst ledger-line-config
-  (list (list 'xact (list (ledger-single-line-config date nil status nil code nil payee separator comment)
+  (list (list 'xact (list (ledger-single-line-config date nil status nil code nil payee comment)
                           (ledger-single-line-config date nil status nil code nil payee)
-                          (ledger-single-line-config date nil status nil payee separator comment)
+                          (ledger-single-line-config date nil status nil payee comment)
                           (ledger-single-line-config date nil status nil payee)
-                          (ledger-single-line-config date nil code nil payee separator comment)
+                          (ledger-single-line-config date nil code nil payee comment)
                           (ledger-single-line-config date nil code nil payee)
-                          (ledger-single-line-config date nil payee separator comment)
+                          (ledger-single-line-config date nil payee comment)
                           (ledger-single-line-config date nil payee)))
         (list 'acct-transaction (list (ledger-single-line-config indent comment)
+                                      (ledger-single-line-config indent status nil account separator commoditized-amount nil cost nil balance-assertion)
                                       (ledger-single-line-config indent status nil account separator commoditized-amount nil balance-assertion)
-                                      (ledger-single-line-config indent status nil account separator commoditized-amount separator comment)
+                                      (ledger-single-line-config indent status nil account separator commoditized-amount nil cost comment)
+                                      (ledger-single-line-config indent status nil account separator commoditized-amount nil cost)
+                                      (ledger-single-line-config indent status nil account separator commoditized-amount comment)
                                       (ledger-single-line-config indent status nil account separator commoditized-amount)
                                       (ledger-single-line-config indent status nil account separator amount)
-                                      (ledger-single-line-config indent status nil account separator comment)
+                                      (ledger-single-line-config indent status nil account comment)
                                       (ledger-single-line-config indent status nil account)
-                                      (ledger-single-line-config indent account separator commoditized-amount separator comment)
+                                      (ledger-single-line-config indent account separator commoditized-amount comment)
                                       (ledger-single-line-config indent account separator commoditized-amount)
                                       (ledger-single-line-config indent account separator amount)
-                                      (ledger-single-line-config indent account separator comment)
+                                      (ledger-single-line-config indent account comment)
                                       (ledger-single-line-config indent account)))))
 
 (defun ledger-extract-context-info (line-type pos)
@@ -105,11 +109,11 @@ where the \"users\" point was."
     (list line-type field fields)))
 
 (defun ledger-thing-at-point ()
-  "Describe thing at points.  Return 'transaction, 'posting, or nil.
+  "Describe thing at points.  Return \='transaction, \='posting, or nil.
 Leave point at the beginning of the thing under point"
   (let ((here (point)))
     (goto-char (line-beginning-position))
-    (cond ((looking-at "^[0-9/.=-]+\\(\\s-+\\*\\)?\\(\\s-+(.+?)\\)?\\s-+")
+    (cond ((looking-at "^\\(?:[~=][ \t]\\|[0-9/.=-]+\\(\\s-+\\*\\)?\\(\\s-+(.+?)\\)?\\s-+\\)")
            (goto-char (match-end 0))
            'transaction)
           ((looking-at "^\\s-+\\([*!]\\s-+\\)?[[(]?\\([^\\s-]\\)")

@@ -67,7 +67,7 @@
 (defun ledger-navigate-beginning-of-xact ()
   "Move point to the beginning of the current xact."
   (interactive)
-  ;; need to start at the beginning of a line incase we are in the first line of an xact already.
+  ;; need to start at the beginning of a line in case we are in the first line of an xact already.
   (beginning-of-line)
   (let ((sreg (concat "^[=~[:digit:]]")))
     (unless (looking-at sreg)
@@ -98,13 +98,13 @@ Requires empty line separating xacts."
           (ledger-navigate-end-of-xact))))
 
 (defun ledger-navigate-skip-lines-backwards (re)
-  "Move backwards if necessary until RE does not match at the beginning of the line."
+  "Move backwards if necessary until the line beginning does not match RE."
   (beginning-of-line)
   (while (and (looking-at-p re)
               (zerop (forward-line -1)))))
 
 (defun ledger-navigate-skip-lines-forwards (re)
-  "Move forwards if necessary until RE does not match at the beginning of the line."
+  "Move forwards if necessary until the line beginning does not match RE."
   (beginning-of-line)
   (while (and (looking-at-p re)
               (zerop (forward-line 1)))))
@@ -116,7 +116,7 @@ Requires empty line separating xacts."
                       (point)))
         (end (progn (forward-line 1)
                     (ledger-navigate-skip-lines-forwards "[ \t]")
-                    (point)))
+                    (1- (point))))
         (comment-re " *;"))
     ;; handle block comments here
     (goto-char begin)

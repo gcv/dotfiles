@@ -40,6 +40,13 @@
   :type 'boolean
   :group 'ledger)
 
+(defcustom ledger-add-transaction-prompt-for-text t
+  "When non-nil, use ledger xact to format transaction.
+When nil, `ledger-add-transaction' will not prompt twice."
+  :type 'boolean
+  :package-version '(ledger-mode . "4.0.1")
+  :group 'ledger)
+
 (defvar-local ledger-xact-highlight-overlay (list))
 
 (defun ledger-highlight-make-overlay ()
@@ -117,37 +124,41 @@ MOMENT is an encoded date"
   (let* ((now (current-time))
          (current-year (nth 5 (decode-time now))))
     (while (not (eobp))
-      (when (looking-at ledger-iterate-regex)
-        (let ((found-y-p (match-string 2)))
+      (when (looking-at ledger-iterate-regexp)
+        (let ((found-y-p (match-string 1)))
           (if found-y-p
               (setq current-year (string-to-number found-y-p)) ;; a Y directive was found
             (let ((start (match-beginning 0))
-                  (year (match-string 4))
-                  (month (string-to-number (match-string 5)))
-                  (day (string-to-number (match-string 6)))
-                  (mark (match-string 7))
-                  (desc (match-string 9)))
+                  (year (match-string (+ ledger-regex-iterate-group-actual-date 1)))
+                  (month (string-to-number (match-string (+ ledger-regex-iterate-group-actual-date 2))))
+                  (day (string-to-number (match-string (+ ledger-regex-iterate-group-actual-date 3))))
+                  (state (match-string ledger-regex-iterate-group-state))
+                  (payee (match-string ledger-regex-iterate-group-payee)))
               (if (and year (> (length year) 0))
                   (setq year (string-to-number year)))
               (funcall callback start
                        (encode-time 0 0 0 day month
                                     (or year current-year))
-                       mark desc)))))
+                       state payee)))))
       (forward-line))))
 
-(defvar ledger-copy-transaction-insert-blank-line-after nil
-  "Non-nil means insert blank line after a transaction inserted with ‘ledger-copy-transaction-at-point’.")
+(defcustom ledger-copy-transaction-insert-blank-line-after nil
+  "When non-nil, insert a blank line after `ledger-copy-transaction-at-point'."
+  :type 'boolean
+  :group 'ledger)
 
 (defun ledger-copy-transaction-at-point (date)
-  "Ask for a new DATE and copy the transaction under point to that date.  Leave point on the first amount."
+  "Ask for a new DATE and copy the transaction under point to that date.
+Leave point on the first amount."
   (interactive  (list
                  (ledger-read-date "Copy to date: ")))
   (let* ((extents (ledger-navigate-find-xact-extents (point)))
          (transaction (buffer-substring-no-properties (car extents) (cadr extents)))
          (encoded-date (ledger-parse-iso-date date)))
+    (push-mark)
     (ledger-xact-find-slot encoded-date)
     (insert transaction
-            (if ledger-copy-transaction-insert-blank-line-after
+            (if (and ledger-copy-transaction-insert-blank-line-after (not (eobp)))
                 "\n\n"
               "\n"))
     (beginning-of-line -1)
@@ -159,7 +170,7 @@ MOMENT is an encoded date"
         (goto-char (match-beginning 0)))))
 
 (defun ledger-delete-current-transaction (pos)
-  "Delete the transaction surrounging POS."
+  "Delete the transaction surrounding POS."
   (interactive "d")
   (let ((bounds (ledger-navigate-find-xact-extents pos)))
     (delete-region (car bounds) (cadr bounds)))
@@ -170,15 +181,10 @@ MOMENT is an encoded date"
 
 (defun ledger-read-transaction ()
   "Read the text of a transaction, which is at least the current date."
-  (let* ((reference-date (or ledger-add-transaction-last-date (current-time)))
-         (full-date-string (ledger-format-date reference-date))
-         ;; Pre-fill year and month, but not day: this assumes DD is the last format arg.
-         (initial-string (replace-regexp-in-string "[0-9]+$" "" full-date-string))
-         (entered-string (read-string "Transaction: "
-                                      initial-string 'ledger-minibuffer-history)))
-    (if (string= initial-string entered-string)
-        full-date-string
-      entered-string)))
+  (let ((date (ledger-read-date "Date: ")))
+    (concat date " "
+            (when ledger-add-transaction-prompt-for-text
+              (read-string (concat "xact " date ": ") nil 'ledger-minibuffer-history)))))
 
 (defun ledger-parse-iso-date (date)
   "Try to parse DATE using `ledger-iso-date-regexp' and return a time value or nil."
@@ -192,7 +198,8 @@ MOMENT is an encoded date"
   "Use ledger xact TRANSACTION-TEXT to add a transaction to the buffer.
 If INSERT-AT-POINT is non-nil insert the transaction there,
 otherwise call `ledger-xact-find-slot' to insert it at the
-correct chronological place in the buffer."
+correct chronological place in the buffer.  Interactively, the
+date is requested via `ledger-read-date'."
   (interactive (list (ledger-read-transaction)))
   (let* ((args (with-temp-buffer
                  (insert transaction-text)

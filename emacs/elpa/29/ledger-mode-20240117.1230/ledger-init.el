@@ -37,6 +37,9 @@
 Adding the dotted pair (\"decimal-comma\" . t) will tell ledger
 to treat commas as decimal separator.")
 
+(defconst ledger-iso-date-format "%Y-%m-%d"
+  "The format for ISO 8601 dates.")
+
 (defcustom ledger-default-date-format "%Y/%m/%d"
   "The date format that ledger uses throughout.
 Set this to the value of `ledger-iso-date-format' if you prefer
@@ -45,14 +48,11 @@ ISO 8601 dates."
   :package-version '(ledger-mode . "4.0.0")
   :group 'ledger)
 
-(defconst ledger-iso-date-format "%Y-%m-%d"
-  "The format for ISO 8601 dates.")
-
 (defun ledger-format-date (&optional date)
   "Format DATE according to the current preferred date format.
 Returns the current date if DATE is nil or not supplied."
   (format-time-string
-   (or (cdr (assoc "date-format" ledger-environment-alist))
+   (or (cdr (assoc "input-date-format" ledger-environment-alist))
        ledger-default-date-format)
    date))
 
@@ -81,17 +81,17 @@ Returns the current date if DATE is nil or not supplied."
 (defun ledger-init-load-init-file ()
   "Load and parse the .ledgerrc file."
   (interactive)
-  (let ((init-base-name (file-name-nondirectory ledger-init-file-name)))
-    (if (get-buffer init-base-name) ;; init file already loaded, parse it and leave it
-        (setq ledger-environment-alist
-              (ledger-init-parse-initialization init-base-name))
-      (when (and ledger-init-file-name
-                 (file-exists-p ledger-init-file-name)
-                 (file-readable-p ledger-init-file-name))
-        (let ((init-buffer (find-file-noselect ledger-init-file-name)))
+  (when ledger-init-file-name
+    (let ((init-base-name (file-name-nondirectory ledger-init-file-name)))
+      (if (get-buffer init-base-name) ;; init file already loaded, parse it and leave it
           (setq ledger-environment-alist
-                (ledger-init-parse-initialization init-buffer))
-          (kill-buffer init-buffer))))))
+                (ledger-init-parse-initialization init-base-name))
+        (when (and (file-exists-p ledger-init-file-name)
+                   (file-readable-p ledger-init-file-name))
+          (let ((init-buffer (find-file-noselect ledger-init-file-name)))
+            (setq ledger-environment-alist
+                  (ledger-init-parse-initialization init-buffer))
+            (kill-buffer init-buffer)))))))
 
 (provide 'ledger-init)
 

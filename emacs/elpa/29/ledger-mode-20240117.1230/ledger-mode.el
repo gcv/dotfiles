@@ -4,7 +4,7 @@
 
 ;; This file is not part of GNU Emacs.
 
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This is free software; you can redistribute it and/or modify it under
 ;; the terms of the GNU General Public License as published by the Free
@@ -21,18 +21,16 @@
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 ;; MA 02110-1301 USA.
 
-
-
 ;;; Commentary:
-;; Most of the general ledger-mode code is here.
+;; This Emacs library provides a major mode for editing files in the format used
+;; by the `ledger' command-line accounting system.
+
+;; It also provides automated support for some `ledger' workflows, such as
+;; reconciling transactions, or running certain reports.
 
 ;;; Code:
 
 (require 'ledger-regex)
-(require 'cus-edit)
-(require 'esh-util)
-(require 'esh-arg)
-(require 'easymenu)
 (require 'org)
 (require 'ledger-commodities)
 (require 'ledger-complete)
@@ -54,6 +52,8 @@
 (require 'ledger-schedule)
 (require 'ledger-check)
 
+(declare-function custom-group-members "cus-edit" (symbol groups-only))
+
 ;;; Code:
 
 (defgroup ledger nil
@@ -63,7 +63,7 @@
 (defconst ledger-version "3.0"
   "The version of ledger.el currently loaded.")
 
-(defconst ledger-mode-version "3.0.0")
+(defconst ledger-mode-version "4.0.0")
 
 (defun ledger-mode-dump-variable (var)
   "Format VAR for dump to buffer."
@@ -72,6 +72,7 @@
 
 (defun ledger-mode-dump-group (group)
   "Dump GROUP customizations to current buffer."
+  (require 'cus-edit)
   (let ((members (custom-group-members group nil)))
     (dolist (member members)
       (cond ((eq (cadr member) 'custom-group)
@@ -96,19 +97,21 @@
                                          (ledger-accounts-list))))
 
 (defun ledger-read-date (prompt)
-  "Return user-supplied date after `PROMPT', defaults to today."
+  "Return user-supplied date after `PROMPT', defaults to today.
+This uses `org-read-date', which see."
   (ledger-format-date (let ((org-read-date-prefer-future nil))
                         (org-read-date nil t nil prompt))))
 
 (defun ledger-get-minibuffer-prompt (prompt default)
-  "Return a string composing of PROMPT and DEFAULT appropriate for a minibuffer prompt."
+  "Return a minibuffer prompt string composing PROMPT and DEFAULT."
   (concat prompt
           (if default
               (concat " (" default "): ")
             ": ")))
 
 (defun ledger-completing-read-with-default (prompt default collection)
-  "Return a user supplied string after PROMPT, or DEFAULT while providing completions from COLLECTION."
+  "Return a user-supplied string after PROMPT.
+Use the given DEFAULT, while providing completions from COLLECTION."
   (completing-read (ledger-get-minibuffer-prompt prompt default)
                    collection nil nil nil 'ledger-minibuffer-history default))
 
@@ -157,7 +160,7 @@ And calculate the target-delta of the account being reconciled."
   (let ((context (car (ledger-context-at-point))))
     (save-excursion
       (save-restriction
-        (narrow-to-region (point-at-bol) (point-at-eol))
+        (narrow-to-region (line-beginning-position) (line-end-position))
         (beginning-of-line)
         (cond ((eq 'xact context)
                (re-search-forward ledger-iso-date-regexp)
@@ -190,7 +193,7 @@ With a prefix argument, remove the effective date."
     (let* ((context (car (ledger-context-at-point)))
            (date-string (or date (ledger-read-date "Effective date: "))))
       (save-restriction
-        (narrow-to-region (point-at-bol) (point-at-eol))
+        (narrow-to-region (line-beginning-position) (line-end-position))
         (cond
          ((eq 'xact context)
           (beginning-of-line)
@@ -213,8 +216,8 @@ With a prefix argument, remove the effective date."
   "Indent, remove multiple line feeds and sort the buffer."
   (interactive)
   (let ((start (point-min-marker))
-        (end (point-max-marker)))
-    (ledger-navigate-beginning-of-xact)
+        (end (point-max-marker))
+        (distance-in-xact (- (point) (ledger-navigate-beginning-of-xact))))
     (beginning-of-line)
     (let ((target (buffer-substring (point) (progn
                                               (end-of-line)
@@ -225,7 +228,9 @@ With a prefix argument, remove the effective date."
       (ledger-post-align-postings start end)
       (ledger-mode-remove-extra-lines)
       (goto-char start)
-      (search-forward target))))
+      (search-forward target)
+      (beginning-of-line)
+      (forward-char distance-in-xact))))
 
 (defvar ledger-mode-syntax-table
   (let ((table (make-syntax-table text-mode-syntax-table)))
@@ -236,35 +241,38 @@ With a prefix argument, remove the effective date."
 
 (defvar ledger-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(control ?c) (control ?a)] #'ledger-add-transaction)
-    (define-key map [(control ?c) (control ?b)] #'ledger-post-edit-amount)
-    (define-key map [(control ?c) (control ?c)] #'ledger-toggle-current)
-    (define-key map [(control ?c) (control ?d)] #'ledger-delete-current-transaction)
-    (define-key map [(control ?c) (control ?e)] #'ledger-toggle-current-transaction)
-    (define-key map [(control ?c) (control ?f)] #'ledger-occur)
-    (define-key map [(control ?c) (control ?k)] #'ledger-copy-transaction-at-point)
-    (define-key map [(control ?c) (control ?r)] #'ledger-reconcile)
-    (define-key map [(control ?c) (control ?s)] #'ledger-sort-region)
-    (define-key map [(control ?c) (control ?t)] #'ledger-insert-effective-date)
-    (define-key map [(control ?c) (control ?u)] #'ledger-schedule-upcoming)
-    (define-key map [(control ?c) (control ?p)] #'ledger-display-balance-at-point)
-    (define-key map [(control ?c) (control ?l)] #'ledger-display-ledger-stats)
-    (define-key map [(control ?c) (control ?q)] #'ledger-post-align-xact)
+    (define-key map (kbd "C-c C-a") #'ledger-add-transaction)
+    (define-key map (kbd "C-c C-b") #'ledger-post-edit-amount)
+    (define-key map (kbd "C-c C-c") #'ledger-toggle-current)
+    (define-key map (kbd "C-c C-d") #'ledger-delete-current-transaction)
+    (define-key map (kbd "C-c C-e") #'ledger-toggle-current-transaction)
+    (define-key map (kbd "C-c C-f") #'ledger-occur)
+    (define-key map (kbd "C-c C-k") #'ledger-copy-transaction-at-point)
+    (define-key map (kbd "C-c C-r") #'ledger-reconcile)
+    (define-key map (kbd "C-c C-s") #'ledger-sort-region)
+    (define-key map (kbd "C-c C-t") #'ledger-insert-effective-date)
+    (define-key map (kbd "C-c C-u") #'ledger-schedule-upcoming)
+    (define-key map (kbd "C-c C-p") #'ledger-display-balance-at-point)
+    (define-key map (kbd "C-c C-l") #'ledger-display-ledger-stats)
+    (define-key map (kbd "C-c C-q") #'ledger-post-align-xact)
 
-    (define-key map [(control tab)] #'ledger-post-align-xact)
-    (define-key map [(control ?c) tab] #'ledger-fully-complete-xact)
-    (define-key map [(control ?c) (control ?i)] #'ledger-fully-complete-xact)
+    (define-key map (kbd "C-TAB") #'ledger-post-align-xact)
+    (define-key map (kbd "C-c TAB") #'ledger-fully-complete-xact)
+    (define-key map (kbd "C-c C-i") #'ledger-fully-complete-xact)
 
-    (define-key map [(control ?c) (control ?o) (control ?a)] #'ledger-report-redo)
-    (define-key map [(control ?c) (control ?o) (control ?e)] #'ledger-report-edit-report)
-    (define-key map [(control ?c) (control ?o) (control ?g)] #'ledger-report-goto)
-    (define-key map [(control ?c) (control ?o) (control ?k)] #'ledger-report-quit)
-    (define-key map [(control ?c) (control ?o) (control ?r)] #'ledger-report)
-    (define-key map [(control ?c) (control ?o) (control ?s)] #'ledger-report-save)
+    (define-key map (kbd "C-c C-o C-a") #'ledger-report-redo)
+    (define-key map (kbd "C-c C-o C-e") #'ledger-report-edit-report)
+    (define-key map (kbd "C-c C-o C-g") #'ledger-report-goto)
+    (define-key map (kbd "C-c C-o C-k") #'ledger-report-quit)
+    (define-key map (kbd "C-c C-o C-r") #'ledger-report)
+    (define-key map (kbd "C-c C-o C-s") #'ledger-report-save)
 
-    (define-key map [(meta ?p)] #'ledger-navigate-prev-xact-or-directive)
-    (define-key map [(meta ?n)] #'ledger-navigate-next-xact-or-directive)
-    (define-key map [(meta ?q)] #'ledger-post-align-dwim)
+    (define-key map (kbd "M-p") #'ledger-navigate-prev-xact-or-directive)
+    (define-key map (kbd "M-n") #'ledger-navigate-next-xact-or-directive)
+    (define-key map (kbd "M-q") #'ledger-post-align-dwim)
+
+    ;; Reset the `text-mode' override of this standard binding
+    (define-key map (kbd "C-M-i") 'completion-at-point)
     map)
   "Keymap for `ledger-mode'.")
 
@@ -323,7 +331,9 @@ With a prefix argument, remove the effective date."
   (ledger-init-load-init-file)
   (setq-local comment-start ";")
   (setq-local indent-line-function #'ledger-indent-line)
-  (setq-local indent-region-function 'ledger-post-align-postings))
+  (setq-local indent-region-function 'ledger-post-align-postings)
+  (setq-local beginning-of-defun-function #'ledger-navigate-beginning-of-xact)
+  (setq-local end-of-defun-function #'ledger-navigate-end-of-xact))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.ledger\\'" . ledger-mode))

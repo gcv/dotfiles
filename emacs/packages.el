@@ -710,10 +710,14 @@
 
 
 (use-package ledger-mode
-  :mode "\\.dat$"
+  :pin melpa
+
+  :custom
+  (ledger-post-account-alignment-column 2)
+  (ledger-post-amount-alignment-column (- fill-column 4))
 
   :bind
-  (("C-c C-f" . flush-to-fill-column))
+  (("C-c C-f" . flush-to-fill-column))  ; historical
   )
 
 
