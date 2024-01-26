@@ -12,6 +12,7 @@
   (require 'ob-calc)
   (require 'ob-emacs-lisp)
   (require 'ob-gnuplot)
+  (require 'ob-hledger)
   (require 'ob-ledger)
   (require 'ob-lilypond)
   (require 'ob-lua)
