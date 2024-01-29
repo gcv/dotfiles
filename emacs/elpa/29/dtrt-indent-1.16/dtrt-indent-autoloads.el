@@ -23,7 +23,7 @@ and `indent-tabs-mode' will be guessed for newly opened files and
 adjusted transparently.
 
 This is a minor mode.  If called interactively, toggle the
-`dtrt-indent mode' mode.  If the prefix argument is positive,
+`Dtrt-Indent mode' mode.  If the prefix argument is positive,
 enable the mode, and if it is zero or negative, disable the mode.
 
 If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
