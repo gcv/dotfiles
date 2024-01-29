@@ -15,7 +15,7 @@ SLIME
 *****
 
 SLIME is the “Superior Lisp Interaction Mode for Emacs”.  This is the
-manual for version 2.28.  (Last updated July 30, 2023)
+manual for version 2.29.1.  (Last updated January 29, 2024)
 
    Written by Luke Gorrie and others.
 
@@ -1005,8 +1005,8 @@ File: slime.info,  Node: Macro-expansion,  Next: Disassembly,  Prev: Cross-refer
 ‘C-c C-m’
 ‘M-x slime-expand-1’
      Macroexpand (or compiler-macroexpand) the expression starting at
-     point once.  If invoked with a prefix argument use macroexpand
-     instead or macroexpand-1 (or compiler-macroexpand instead of
+     point once.  If invoked with a prefix argument, use macroexpand
+     instead of macroexpand-1 (or compiler-macroexpand instead of
      compiler-macroexpand-1).
 
 ‘M-x slime-macroexpand-1’
@@ -3058,7 +3058,7 @@ Nikodemus Siivola        Marco Baringer           João Távora
 Alan Ruttenberg          Mark Evenson             Henry Harrington
 Christophe Rhodes        Edi Weitz                Martin Simmons
 Juho Snellman            Attila Lendvai           Peter Seibel
-Geo Carncross            Douglas Crosher          Daniel Kochmanski
+Geo Carncross            Daniel Kochmanski        Douglas Crosher
 Chris Schafmeister       Gábor Melis              Daniel Barlow
 Wolfgang Jenkner         Luís Borges de           Jan Moringen
                          Oliveira
@@ -3066,49 +3066,51 @@ Stelian Ionescu          Michael Weber            Didier Verna
 Lawrence Mitchell        Anton Kovalenko          Terje Norderhaug
 Mark                     Brian Downing            Bill Clementson
 Andras Simon             Adlai Chandrasekhar      Zach Beane
-Ivan Shvedunov           Francois-Rene Rideau     Espen Wiborg
-Christian Schafmeister   António Menezes Leitão   Utz-Uwe Haus
-Thomas Schilling         Thomas F. Burdick        Takehiko Abe
-Sébastien Villemot       Richard M Kreuter        Raymond Toy
-Matthew Danish           Mark Harig               James Bielman
-Harald Hanche-Olsen      Gabor Melis              Ed Langley
+Tarn W. Burton           Ivan Shvedunov           Gabor Melis
+Francois-Rene Rideau     Espen Wiborg             Christian Schafmeister
+Bike                     António Menezes Leitão   Alexander Artemenko
+Utz-Uwe Haus             Thomas Schilling         Thomas F. Burdick
+Takehiko Abe             Sébastien Villemot       Richard M Kreuter
+Raymond Toy              Matthew Danish           Mark Harig
+James Bielman            Harald Hanche-Olsen      Ed Langley
 Ariel Badichi            Andreas Fuchs            Willem Broekema
 Taylor R. Campbell       Steve Purcell            Phil Hargett
-Paulo Madeira            Lars Magne               Kris Katterjohn
-                         Ingebrigtsen
-John Paul Wallington     Joerg Hoehle             Douglas Katzman
-David Reitter            Charles Zhang            Bryan O’Connor
-Bruno Cichon             Bart Botta               Alexander Artemenko
+Paulo Madeira            Nicolas Martyanoff       Lars Magne
+                                                  Ingebrigtsen
+Kris Katterjohn          John Paul Wallington     Joerg Hoehle
+Douglas Katzman          David Reitter            Charles Zhang
+Bryan O’Connor           Bruno Cichon             Bart Botta
 Alan Shutko              Ursa americanus          Travis Cross
                          kermodei
-Tobias Rittweiler        Tiago Maduro-Dias        Tarn W. Burton
-Stefan Kamphausen        Sean O’Rourke            Robert Lehr
-Robert E. Brown          Robert Brown             Philipp Stephani
-Philipp Marek            Peter S. Housel          Nicolas Martyanoff
-Nathan Trapuzzano        Nathan Bird              Mike Appleby
+Tobias Rittweiler        Tiago Maduro-Dias        Stefan Kamphausen
+Sean O’Rourke            Robert Lehr              Robert E. Brown
+Robert Brown             Renke Christian von      Philipp Stephani
+                         Seggern
+Philipp Marek            Peter S. Housel          Nathan Trapuzzano
+Nathan Bird              Mike Appleby             Matteo Landi
 Knut Olav Bøhmer         Jouni K Seppanen         Jon Oddie
 Ivan Toshkov             Ian Eslick               Geoff Wozniak
 Gary King                Fice T                   Eric Blood
 Eduardo Muñoz            Christophe Junke         Christian Lynbech
 Chris Capel              Bjørn Nordbø             Anton Vodonosov
 Alexey Dejneka           Alan Caulkins            Zachary Beane
-Yu-Chiang Hsu            Yaroslav Kavenchuk       YOKOTA Yuki
-Wolfgang Mederle         Wojciech Kaczmarek       William Bland
-Wesley Harvey            Vitaly Mayatskikh        Tomas Zellerin
-Tom Pierce               Tim Daly Jr.             Thomas Fitzsimmons
-The Gendl Project        Syohei YOSHIDA           Sven Van Caekenberghe
-Svein Ove Aas            Steve Smith              StanisBaw Halik
-Sergey Kostyaev          Samuel Freilich          Russell Sim
-Russell McManus          Russ Tyndall             Rui Patrocínio
-Robert P. Goldman        Robert Macomber          Richard Garner
-Reini Urban              R. Matthew Emerson       R Primus
-Peter Feigl              Peter                    Pawel Ostrowski
-Paul Eggert              Paul Donnelly            Paul Collins
-Patrick Poitras          Olof-Joachim Frahm       Neil Van Dyke
-Nathan Ringo             NIIMI Satoshi            Mészáros Levente
-Mikel Bancroft           Michał Herda             Michał "phoe" Herda
-Michael White            Matthew Kennedy          Matthew D. Swank
-Matteo Landi             Matt Pillsbury           Masayuki Onjo
+Yu-Chiang Hsu            Yaroslav Kavenchuk       Yan
+YOKOTA Yuki              Wolfgang Mederle         Wojciech Kaczmarek
+William Bland            Wesley Harvey            Vitaly Mayatskikh
+Tomas Zellerin           Tom Pierce               Tim Daly Jr.
+Thomas Fitzsimmons       The Gendl Project        Syohei YOSHIDA
+Sven Van Caekenberghe    Svein Ove Aas            Steve Smith
+StanisBaw Halik          Sergey Kostyaev          Samuel Freilich
+Russell Sim              Russell McManus          Russ Tyndall
+Rui Patrocínio           Robert P. Goldman        Robert Macomber
+Richard Garner           Reini Urban              R. Matthew Emerson
+R Primus                 Peter Feigl              Peter
+Pawel Ostrowski          Paul Eggert              Paul Donnelly
+Paul Collins             Patrick Poitras          Olof-Joachim Frahm
+Neil Van Dyke            Nathan Ringo             NIIMI Satoshi
+Mészáros Levente         Mikel Bancroft           Michał Herda
+Michał "phoe" Herda      Michael White            Matthew Kennedy
+Matthew D. Swank         Matt Pillsbury           Masayuki Onjo
 Mark Wooding             Mark Karpov              Mark H. David
 Marius Gerbershagen      Marco Monteiro           Lynn Quam
 Levente Mészáros         Leo Liu                  Lasse Rasinen
@@ -3119,15 +3121,16 @@ Johan Bockgård           Joe Robertson            Jimmy Aguilar Mena
 Jim Newton               Javier Olaechea          Jan Rychter
 James McIlree            Jack Pugmire             Jacek Podkanski
 Ivan Sokolov             Ivan Boldyrev            Ignas Mikalajunas
-Hannu Koivisto           Graham Dobbins           Gerd Flaig
-Gail Zacharias           Frederic Brunel          Eric Timmons
-Eric Schulte             Dustin Long              Dmitry Igrishin
-Deokhwan Kim             Denis Budyak             Daniel Koning
-Daniel Kochmański        Dan Weinreb              Dan Pierson
-Dacoda Strack            Cyrus Harmon             Christoph Keßler
-Cecil Westerhof          Brian Mastenbrook        Brandon Bergren
-Bozhidar Batsov          Bob Halley               Barry Fishman
-B.Scott Michel           Angelo Rossi             Andrew Myers
+Hannu Koivisto           Grant Shangreaux         Graham Dobbins
+Gleefre                  Gerd Flaig               Gail Zacharias
+Frederic Brunel          Eric Timmons             Eric Schulte
+Dustin Long              Dmitry Igrishin          Deokhwan Kim
+Denis Budyak             Daniel Koning            Daniel Kochmański
+Dan Weinreb              Dan Pierson              Dacoda Strack
+Cyrus Harmon             Christoph Keßler         Cecil Westerhof
+Brian Mastenbrook        Brandon Bergren          Bozhidar Batsov
+Bob Halley               Barry Fishman            B.Scott Michel
+Angelo Rossi             Andrew Myers             Andre A. Gomes
 Alexander Konstantinov   Aleksandar Bakic         Alain Picard
 Al Hoang                 Adam Bozanich
 
@@ -3624,112 +3627,112 @@ Variable and Concept Index
 
 Tag Table:
 Node: Top285
-Node: Introduction2524
-Node: Getting started3805
-Node: Platforms4079
-Node: Downloading5277
-Node: Git5778
-Node: Git Incantations6796
-Node: Installation7326
-Node: Running8592
-Node: Setup Tuning9135
-Node: Basic customization9666
-Node: Multiple Lisps10639
-Node: Loading Swank faster13133
-Ref: init-example14226
-Node: SLIME mode14515
-Node: User-interface conventions15113
-Node: Temporary buffers15522
-Node: Inferior-lisp16975
-Node: Multithreading17800
-Node: Key bindings19045
-Ref: describe-key20511
-Ref: describe-bindings20654
-Ref: describe-mode20797
-Ref: view-lossage20981
-Node: Evaluation22176
-Node: Compilation24081
-Node: Completion26840
-Node: Finding definitions27471
-Node: Documentation28611
-Node: Cross-reference30778
-Node: Xref buffer commands32515
-Node: Macro-expansion33074
-Node: Disassembly34095
-Node: Recovery34640
-Node: Inspector35409
-Node: Profiling37647
-Node: Other38444
-Node: Semantic indentation38697
-Ref: Semantic indentation-Footnote-140828
-Node: Reader conditionals40923
-Node: Debugger41274
-Node: Examining frames41914
-Node: Restarts43046
-Ref: sldb-quit43260
-Node: Frame Navigation43687
-Node: Stepping44387
-Node: Miscellaneous45059
-Node: Misc45998
-Node: slime-selector46185
-Node: slime-macroexpansion-minor-mode47993
-Node: Multiple connections48848
-Node: Customization51908
-Node: Emacs-side customization52083
-Ref: slime-completion-at-point-functions52776
-Ref: slime-net-coding-system53667
-Node: Hooks54340
-Ref: slime-connected-hook54705
-Node: Lisp-side55189
-Node: Communication style55599
-Node: Other configurables58161
-Ref: *SLDB-QUIT-RESTART*59559
-Node: Tips and Tricks62150
-Node: Connecting to a remote lisp62375
-Node: Setting up the lisp image63080
-Ref: Setting up the lisp image-Footnote-164823
-Ref: Setting up the lisp image-Footnote-264903
-Node: Setting up Emacs65079
-Ref: Setting up Emacs-Footnote-165915
-Node: Setting up pathname translations66095
-Node: Global IO Redirection67736
-Node: Auto-SLIME68669
-Node: Contributed Packages69090
-Node: Loading Contribs69839
-Node: REPL71799
-Node: REPL commands73214
-Node: Input Navigation74375
-Node: Shortcuts75899
-Node: slime-mrepl77395
-Node: inferior-slime-mode77903
-Node: Compound Completion78608
-Ref: slime-complete-symbol*78785
-Ref: Compound Completion-Footnote-182037
-Node: Fuzzy Completion82161
-Ref: slime-fuzzy-complete-symbol82414
-Node: slime-autodoc-mode85706
-Node: ASDF87124
-Node: Banner89082
-Node: Editing Commands89528
-Node: Fancy Inspector91155
-Node: Presentations91886
-Ref: Presentations-Footnote-198442
-Node: Typeout frames98683
-Node: TRAMP99807
-Node: Documentation Links100083
-Node: Xref and Class Browser100508
-Node: Highlight Edits101100
-Node: Scratch Buffer101572
-Ref: slime-scratch101734
-Node: SLIME Trace Dialog102389
-Node: slime-sprof106377
-Node: SLIME Enhanced M-.107365
-Node: slime-fancy107747
-Node: Quicklisp108103
-Node: Credits108631
-Node: Key Index114945
-Node: Command Index126735
-Node: Variable Index141977
+Node: Introduction2529
+Node: Getting started3810
+Node: Platforms4084
+Node: Downloading5282
+Node: Git5783
+Node: Git Incantations6801
+Node: Installation7331
+Node: Running8597
+Node: Setup Tuning9140
+Node: Basic customization9671
+Node: Multiple Lisps10644
+Node: Loading Swank faster13138
+Ref: init-example14231
+Node: SLIME mode14520
+Node: User-interface conventions15118
+Node: Temporary buffers15527
+Node: Inferior-lisp16980
+Node: Multithreading17805
+Node: Key bindings19050
+Ref: describe-key20516
+Ref: describe-bindings20659
+Ref: describe-mode20802
+Ref: view-lossage20986
+Node: Evaluation22181
+Node: Compilation24086
+Node: Completion26845
+Node: Finding definitions27476
+Node: Documentation28616
+Node: Cross-reference30783
+Node: Xref buffer commands32520
+Node: Macro-expansion33079
+Node: Disassembly34101
+Node: Recovery34646
+Node: Inspector35415
+Node: Profiling37653
+Node: Other38450
+Node: Semantic indentation38703
+Ref: Semantic indentation-Footnote-140834
+Node: Reader conditionals40929
+Node: Debugger41280
+Node: Examining frames41920
+Node: Restarts43052
+Ref: sldb-quit43266
+Node: Frame Navigation43693
+Node: Stepping44393
+Node: Miscellaneous45065
+Node: Misc46004
+Node: slime-selector46191
+Node: slime-macroexpansion-minor-mode47999
+Node: Multiple connections48854
+Node: Customization51914
+Node: Emacs-side customization52089
+Ref: slime-completion-at-point-functions52782
+Ref: slime-net-coding-system53673
+Node: Hooks54346
+Ref: slime-connected-hook54711
+Node: Lisp-side55195
+Node: Communication style55605
+Node: Other configurables58167
+Ref: *SLDB-QUIT-RESTART*59565
+Node: Tips and Tricks62156
+Node: Connecting to a remote lisp62381
+Node: Setting up the lisp image63086
+Ref: Setting up the lisp image-Footnote-164829
+Ref: Setting up the lisp image-Footnote-264909
+Node: Setting up Emacs65085
+Ref: Setting up Emacs-Footnote-165921
+Node: Setting up pathname translations66101
+Node: Global IO Redirection67742
+Node: Auto-SLIME68675
+Node: Contributed Packages69096
+Node: Loading Contribs69845
+Node: REPL71805
+Node: REPL commands73220
+Node: Input Navigation74381
+Node: Shortcuts75905
+Node: slime-mrepl77401
+Node: inferior-slime-mode77909
+Node: Compound Completion78614
+Ref: slime-complete-symbol*78791
+Ref: Compound Completion-Footnote-182043
+Node: Fuzzy Completion82167
+Ref: slime-fuzzy-complete-symbol82420
+Node: slime-autodoc-mode85712
+Node: ASDF87130
+Node: Banner89088
+Node: Editing Commands89534
+Node: Fancy Inspector91161
+Node: Presentations91892
+Ref: Presentations-Footnote-198448
+Node: Typeout frames98689
+Node: TRAMP99813
+Node: Documentation Links100089
+Node: Xref and Class Browser100514
+Node: Highlight Edits101106
+Node: Scratch Buffer101578
+Ref: slime-scratch101740
+Node: SLIME Trace Dialog102395
+Node: slime-sprof106383
+Node: SLIME Enhanced M-.107371
+Node: slime-fancy107753
+Node: Quicklisp108109
+Node: Credits108637
+Node: Key Index115137
+Node: Command Index126927
+Node: Variable Index142169
 
 End Tag Table
 
