@@ -15,6 +15,8 @@
 (autoload 'denote "denote" "\
 Create a new note with the appropriate metadata and file name.
 
+Run the `denote-after-new-note-hook' after creating the new note.
+
 When called interactively, the metadata and file name are prompted
 according to the value of `denote-prompts'.
 
@@ -86,6 +88,12 @@ Create note while prompting for a file signature.
 This is the equivalent to calling `denote' when `denote-prompts'
 is set to \\='(signature title keywords)." t)
 (function-put 'denote-signature 'interactive-only 't)
+(autoload 'denote-region "denote" "\
+Call `denote' and insert therein the text of the active region.
+Prompt for title and keywords.  With no active region, call
+`denote' ordinarily (refer to its documentation for the
+technicalities)." t)
+(function-put 'denote-region 'interactive-only 't)
 (autoload 'denote-open-or-create "denote" "\
 Visit TARGET file in variable `denote-directory'.
 If file does not exist, invoke `denote' to create a file.
@@ -98,6 +106,17 @@ note's actual title.  At the `denote-file-prompt' type
 \\<minibuffer-local-map>\\[previous-history-element].
 
 (fn TARGET)" t)
+(autoload 'denote-open-or-create-with-command "denote" "\
+Visit TARGET file in variable `denote-directory'.
+If file does not exist, invoke `denote' to create a file.
+
+If TARGET file does not exist, add the user input that was used
+to search for it to the minibuffer history of the
+`denote-file-prompt'.  The user can then retrieve and possibly
+further edit their last input, using it as the newly created
+note's actual title.  At the `denote-file-prompt' type
+\\<minibuffer-local-map>\\[previous-history-element]." t)
+(function-put 'denote-open-or-create-with-command 'interactive-only 't)
 (autoload 'denote-keywords-add "denote" "\
 Prompt for KEYWORDS to add to the current note's front matter.
 When called from Lisp, KEYWORDS is a list of strings.
@@ -117,57 +136,80 @@ the new front matter, per `denote-rename-file-using-front-matter'." t)
 Rename file and update existing front matter if appropriate.
 
 If in Dired, consider FILE to be the one at point, else prompt
-with minibuffer completion for one.
+with minibuffer completion for one.  When called from Lisp, FILE
+is a filesystem path represented as a string.
 
 If FILE has a Denote-compliant identifier, retain it while
-updating the TITLE and KEYWORDS fields of the file name.  Else
-create an identifier based on the following conditions:
+updating the TITLE, KEYWORDS, and SIGNATURE components of the
+file name.
 
-- If FILE does not have an identifier and optional DATE is
-  non-nil (such as with a prefix argument), invoke the function
-  `denote-prompt-for-date-return-id'.  It prompts for a date and
-  uses it to derive the identifier.
+Else create an identifier based on the following conditions:
 
-- If FILE does not have an identifier and optional DATE is
-  nil (this is the case without a prefix argument), use the file
-  attributes to determine the last modified date and format it as
-  an identifier.
+1. If optional ASK-DATE is non-nil (such as with a prefix
+   argument), prompt for a date and use it to derive the
+   identifier.
 
-- As a fallback, derive an identifier from the current time.
+2. If optional ASK-DATE is nil (this is the case without a prefix
+   argument), use the file attributes to determine the last
+   modified date and format it as an identifier.
 
-- If the resulting identifier is not unique among the files in
-  the variable `denote-directory', increment it such that it
-  becomes unique.
+3. As a fallback, derive an identifier from the current time.
 
-The default TITLE is retrieved from a line starting with a title
-field in the file's contents, depending on the given file
-type (e.g. #+title for Org).  Else, the file name is used as a
-default value at the minibuffer prompt.
+4. If the resulting identifier is not unique among the files in
+   the variable `denote-directory', increment it such that it
+   becomes unique.
 
-As a final step after the FILE, TITLE, and KEYWORDS prompts, ask
-for confirmation, showing the difference between old and new file
-names.
+Add TITLE to FILE.  In interactive use, prompt for user input and
+retrieve the default TITLE value from a line starting with a
+title field in the file's contents, depending on the given file
+type (e.g. #+title for Org).  Else, use the file name as a
+default value at the minibuffer prompt.  When called from Lisp,
+TITLE is a string.
 
-The file type extension (like .txt) is read from the underlying
-file and is preserved through the renaming process.  Files that
-have no extension are simply left without one.
+If TITLE is nil or an empty string, do not add it to a newly
+renamed file or remove it from an existing file.
+
+Add SIGNATURE to FILE.  In interactive use, prompt for SIGNATURE,
+using an existing one as the default value at the minibuffer
+prompt.  When called from Lisp, SIGNATURE is a string.
+
+If SIGNATURE is nil or an empty string, do not add it to a newly
+renamed file or remove it from an existing file.
+
+Add KEYWORDS to FILE.  In interactive use, prompt for KEYWORDS.
+More than one keyword can be inserted when separated by the
+`crm-sepator' (normally a comma).  When called from Lisp,
+KEYWORDS is a list of strings.
+
+If KEYWORDS is nil or an empty string, do not add it to a newly
+renamed file or remove it from an existing file.
+
+Read the file type extension (like .txt) from the underlying file
+and preserve it through the renaming process.  Files that have no
+extension are left without one.
 
 Renaming only occurs relative to the current directory.  Files
 are not moved between directories.
+
+As a final step after the FILE, TITLE, KEYWORDS, and SIGNATURE
+are collected, ask for confirmation, showing the difference
+between old and new file names.  Do not ask for confirmation if
+the user option `denote-rename-no-confirm' is set to a non-nil
+value.
 
 If the FILE has Denote-style front matter for the TITLE and
 KEYWORDS, ask to rewrite their values in order to reflect the new
 input (this step always requires confirmation and the underlying
 buffer is not saved, so consider invoking `diff-buffer-with-file'
-to double-check the effect).  The rewrite of the FILE and
+to double-check the effect).  The rewrite of the TITLE and
 KEYWORDS in the front matter should not affect the rest of the
-block.
+front matter.
 
-If the file doesn't have front matter but is among the supported
+If the file does not have front matter but is among the supported
 file types (per `denote-file-type'), add front matter at the top
 of it and leave the buffer unsaved for further inspection.
 
-For per-file-type front matter, refer to the variables:
+For the front matter of each file type, refer to the variables:
 
 - `denote-org-front-matter'
 - `denote-text-front-matter'
@@ -178,78 +220,45 @@ This command is intended to (i) rename existing Denote notes
 while updating their title and keywords in the front matter, (ii)
 convert existing supported file types to Denote notes, and (ii)
 rename non-note files (e.g. PDF) that can benefit from Denote's
-file-naming scheme.  The latter is a convenience we provide,
-since we already have all the requisite mechanisms in
-place (though Denote does not---and will not---manage such
-files).
+file-naming scheme.
 
-(fn FILE TITLE KEYWORDS &optional DATE)" t)
-(autoload 'denote-change-file-type "denote" "\
-Change file type of FILE and add an appropriate front matter.
-
-If in Dired, consider FILE to be the one at point, else prompt
-with minibuffer completion for one.
-
-Add a front matter in the format of the NEW-FILE-TYPE at the
-beginning of the file.
-
-Retrieve the title of FILE from a line starting with a title
-field in its front matter, depending on the previous file
-type (e.g.  #+title for Org).  The same process applies for
-keywords.
-
-As a final step, ask for confirmation, showing the difference
-between old and new file names.
-
-Important note: No attempt is made to modify any other elements
-of the file.  This needs to be done manually.
-
-(fn FILE NEW-FILE-TYPE)" t)
-(autoload 'denote-dired-rename-marked-files "denote" "\
-Rename marked files in Dired to a Denote file name.
+(fn FILE TITLE KEYWORDS SIGNATURE &optional ASK-DATE)" t)
+(autoload 'denote-dired-rename-files "denote" "\
+Rename Dired marked files same way as `denote-rename-file'.
+Rename each file in sequence, making all the relevant prompts.
+Unlike `denote-rename-file', do not prompt for confirmation of
+the changes made to the file: perform them outright." '(dired-mode))
+(function-put 'denote-dired-rename-files 'interactive-only 't)
+(autoload 'denote-dired-rename-marked-files-with-keywords "denote" "\
+Rename marked files in Dired to a Denote file name by writing keywords.
 
 Specifically, do the following:
 
 - retain the file's existing name and make it the TITLE field,
   per Denote's file-naming scheme;
 
-- downcase and sluggify the TITLE, per our conventions;
+- `denote-letter-case' and sluggify the TITLE, according to our
+  conventions (check the user option `denote-file-name-letter-casing');
 
 - prepend an identifier to the TITLE;
 
 - preserve the file's extension, if any;
 
 - prompt once for KEYWORDS and apply the user's input to the
-  corresponding field in the file name;
+  corresponding field in the file name, rewriting any keywords
+  that may exist while removing keywords that do exist if
+  KEYWORDS is empty;
 
 - add or rewrite existing front matter to the underlying file, if
   it is recognized as a Denote note (per `denote-file-type'),
-  such that it includes the new keywords;
+  such that it includes the new keywords.
 
-- prompt at the outset for a confirmation, unless optional
-  SKIP-FRONT-MATTER-PROMPT is non-nil (such as with a universal
-  prefix argument).
-
-  [ Note that the affected buffers are not saved.  Users can thus
-    check them to confirm that the new front matter does not
-    cause any problems (e.g. with the `diff-buffer-with-file'
-    command).  Multiple buffers can be saved in one go with
-    `save-some-buffers' (read its doc string). ]
-
-With the optional NO-UNIQUE-ID-CHECK as non-nil (such as as a
-double prefix argument), do not process the file identifiers of
-the marked files for potential duplicates.  The default is to
-check for duplicates and increment them such that they become
-unique.  The reason this optional argument exists is for those
-who want to speed up the process, perhaps because they know ahead
-of time all identifiers will be unique or do not care about them.
-
-[ When renaming files in Dired, it is possible to produce
-  duplicate identifiers.  This can happen when multiple files
-  share the same modification time, which can be casually done
-  with the `touch' command, `git', and others. ]
-
-(fn &optional SKIP-FRONT-MATTER-PROMPT NO-UNIQUE-ID-CHECK)" '(dired-mode))
+[ Note that the affected buffers are not saved.  Users can thus
+  check them to confirm that the new front matter does not cause
+  any problems (e.g. with the `diff-buffer-with-file' command).
+  Multiple buffers can be saved in one go with the command
+  `save-some-buffers' (read its doc string).  ]" '(dired-mode))
+(function-put 'denote-dired-rename-marked-files-with-keywords 'interactive-only 't)
 (autoload 'denote-rename-file-using-front-matter "denote" "\
 Rename FILE using its front matter as input.
 When called interactively, FILE is the return value of the
@@ -266,41 +275,21 @@ edited in the front matter.  Denote considers the file name to be
 the source of truth in this case to avoid potential breakage with
 typos and the like.
 
-Refrain from performing the operation if the buffer has unsaved
-changes.  Inform the user about the need to save their changes
-first.  If AUTO-CONFIRM is non-nil, then save the buffer and
-proceed with the renaming.
+If AUTO-CONFIRM is non-nil, then proceed with the renaming
+operation without prompting for confirmation.  This is what the
+command `denote-dired-rename-marked-files-using-front-matter'
+does internally.
 
 (fn FILE &optional AUTO-CONFIRM)" t)
 (autoload 'denote-dired-rename-marked-files-using-front-matter "denote" "\
-Rename marked files in Dired using their front matter as input.
+Call `denote-rename-file-using-front-matter' over the Dired marked files.
+Refer to the documentation of that command for the technicalities.
+
 Marked files must count as notes for the purposes of Denote,
 which means that they at least have an identifier in their file
 name and use a supported file type, per `denote-file-type'.
-Files that do not meet this criterion are ignored.
-
-The operation does the following:
-
-- the title in the front matter becomes the TITLE component of
-  the file name, with hyphenation per Denote's file-naming
-  scheme;
-
-- the keywords in the front matter are used for the KEYWORDS
-  component of the file name and are processed accordingly, if
-  needed;
-
-- the identifier remains unchanged in the file name even if it is
-  modified in the front matter (this is done to avoid breakage
-  caused by typos and the like).
-
-NOTE that files must be saved, because Denote reads from the
-underlying file, not a modified buffer (this is done to avoid
-potential mistakes).  The return value of a modified buffer is
-the one prior to the modification, i.e. the one already written
-on disk.
-
-This command is useful for synchronizing multiple file names with
-their respective front matter." '(dired-mode))
+Files that do not meet this criterion are ignored because Denote
+cannot know if they have front matter and what that may be." '(dired-mode))
 (autoload 'denote-add-front-matter "denote" "\
 Insert front matter at the top of FILE.
 
@@ -331,6 +320,27 @@ to make it comply with our file-naming scheme and then add the
 relevant front matter.
 
 (fn FILE TITLE KEYWORDS)" t)
+(autoload 'denote-change-file-type-and-front-matter "denote" "\
+Change file type of FILE and add an appropriate front matter.
+
+If in Dired, consider FILE to be the one at point, else prompt
+with minibuffer completion for one.
+
+Add a front matter in the format of the NEW-FILE-TYPE at the
+beginning of the file.
+
+Retrieve the title of FILE from a line starting with a title
+field in its front matter, depending on the previous file
+type (e.g.  #+title for Org).  The same process applies for
+keywords.
+
+As a final step, ask for confirmation, showing the difference
+between old and new file names.
+
+Important note: No attempt is made to modify any other elements
+of the file.  This needs to be done manually.
+
+(fn FILE NEW-FILE-TYPE)" t)
 (autoload 'denote-dired-mode "denote" "\
 Fontify all Denote-style file names.
 
@@ -354,28 +364,52 @@ it is disabled.
 (fn &optional ARG)" t)
 (autoload 'denote-dired-mode-in-directories "denote" "\
 Enable `denote-dired-mode' in `denote-dired-directories'.
-Add this function to `dired-mode-hook'.")
+Add this function to `dired-mode-hook'.
+
+If `denote-dired-directories-include-subdirectories' is non-nil,
+also enable it in all subdirectories.")
 (autoload 'denote-link "denote" "\
-Create link to TARGET note in variable `denote-directory'.
-With optional ID-ONLY, such as a universal prefix
-argument (\\[universal-argument]), insert links with just the
-identifier and no further description.  In this case, the link
-format is always [[denote:IDENTIFIER]].
+Create link to FILE note in variable `denote-directory' with DESCRIPTION.
 
-Use TARGET's title for the link's description.  The title comes
-either from the front matter or the file name.
+When called interactively, prompt for FILE using completion.  In
+this case, derive FILE-TYPE from the selected FILE, as well as
+the DESCRIPTION from the title of FILE.  The title comes either
+from the front matter or the file name.  With an active region,
+the DESCRIPTION is the text of the region, despite the
+aforementioned.  If active region is empty (i.e whitespace-only),
+insert an ID-ONLY link.
 
-If region is active, use its text as the link's description
-instead of TARGET's title.  If active region is empty (i.e
-whitespace-only), insert an ID-ONLY link.
+With optional ID-ONLY as a non-nil argument, such as with a
+universal prefix (\\[universal-argument]), insert links with just
+the identifier and no further description.  In this case, the
+link format is always [[denote:IDENTIFIER]].
 
-(fn TARGET &optional ID-ONLY)" t)
+When called from Lisp, FILE is a string representing a full file
+system path.  FILE-TYPE is a symbol as described in
+`denote-file-type'.  DESCRIPTION is a string.  Whether the caller
+treats the active region specially, is up to it.
+
+(fn FILE FILE-TYPE DESCRIPTION &optional ID-ONLY)" t)
+(autoload 'denote-link-with-signature "denote" "\
+Insert link to file with signature.
+Prompt for file using minibuffer completion, limiting the list of
+candidates to files with a signature in their file name.
+
+The description of the link includes the signature followed by
+the file's title, if any.  For this case, the signature is
+assumed present.
+
+For more advanced uses with Lisp, refer to the `denote-link'
+function." t)
+(function-put 'denote-link-with-signature 'interactive-only 't)
 (autoload 'denote-find-link "denote" "\
 Use minibuffer completion to visit linked file." t)
+(function-put 'denote-find-link 'interactive-only 't)
 (autoload 'denote-find-backlink "denote" "\
 Use minibuffer completion to visit backlink to current file.
 
 Like `denote-find-link', but select backlink to follow." t)
+(function-put 'denote-find-backlink 'interactive-only 't)
 (autoload 'denote-link-after-creating "denote" "\
 Create new note in the background and link to it directly.
 
@@ -386,6 +420,8 @@ conditions.
 With optional ID-ONLY as a prefix argument create a link that
 consists of just the identifier.  Else try to also include the
 file's title.  This has the same meaning as in `denote-link'.
+
+For a variant of this, see `denote-link-after-creating-with-command'.
 
 IMPORTANT NOTE: Normally, `denote' does not save the buffer it
 produces for the new note.  This is a safety precaution to not
@@ -398,6 +434,15 @@ links, and (ii) retrieve whatever front matter from the target
 file.
 
 (fn &optional ID-ONLY)" t)
+(autoload 'denote-link-after-creating-with-command "denote" "\
+Like `denote-link-after-creating' but prompt for note-making COMMAND.
+Use this to, for example, call `denote-signature' so that the
+newly created note has a signature as part of its file name.
+
+Optional ID-ONLY has the same meaning as in the command
+`denote-link-after-creating'.
+
+(fn COMMAND &optional ID-ONLY)" t)
 (autoload 'denote-link-or-create "denote" "\
 Use `denote-link' on TARGET file, creating it if necessary.
 
@@ -454,15 +499,6 @@ Insert links to all notes matching REGEXP.
 Use this command to reference multiple files at once.
 Particularly useful for the creation of metanotes (read the
 manual for more on the matter).
-
-Optional ID-ONLY has the same meaning as in `denote-link': it
-inserts links with just the identifier.
-
-(fn REGEXP &optional ID-ONLY)" t)
-(autoload 'denote-add-missing-links "denote" "\
-Insert missing links to all notes matching REGEXP.
-Similar to `denote-add-links' but insert only links not yet
-present in the current buffer.
 
 Optional ID-ONLY has the same meaning as in `denote-link': it
 inserts links with just the identifier.
@@ -606,15 +642,60 @@ it is disabled.
 (register-definition-prefixes "denote" '("denote-"))
 
 
+;;; Generated autoloads from denote-journal-extras.el
+
+(autoload 'denote-journal-extras-new-entry "denote-journal-extras" "\
+Create a new journal entry in variable `denote-journal-extras-directory'.
+Use `denote-journal-extras-keyword' as a keyword for the newly
+created file.  Set the title of the new entry according to the
+value of the user option `denote-journal-extras-title-format'.
+
+With optional DATE as a prefix argument, prompt for a date.  If
+`denote-date-prompt-use-org-read-date' is non-nil, use the Org
+date selection module.
+
+When called from Lisp DATE is a string and has the same format as
+that covered in the documentation of the `denote' function.  It
+is internally processed by `denote-journal-extras--get-date'.
+
+(fn &optional DATE)" t)
+(autoload 'denote-journal-extras-new-or-existing-entry "denote-journal-extras" "\
+Locate an existing journal entry or create a new one.
+A journal entry is one that has `denote-journal-extras-keyword' as
+part of its file name.
+
+If there are multiple journal entries for the current date,
+prompt for one using minibuffer completion.  If there is only
+one, visit it outright.  If there is no journal entry, create one
+by calling `denote-journal-extra-new-entry'.
+
+With optional DATE as a prefix argument, prompt for a date.  If
+`denote-date-prompt-use-org-read-date' is non-nil, use the Org
+date selection module.
+
+When called from Lisp, DATE is a string and has the same format
+as that covered in the documentation of the `denote' function.
+It is internally processed by `denote-journal-extras--get-date'.
+
+(fn &optional DATE)" t)
+(register-definition-prefixes "denote-journal-extras" '("denote-journal-extras-"))
+
+
 ;;; Generated autoloads from denote-org-dblock.el
 
 (autoload 'denote-org-dblock-insert-links "denote-org-dblock" "\
 Create Org dynamic block to insert Denote links matching REGEXP.
 
-(fn REGEXP)" t)
+(fn REGEXP)" '(org-mode))
 (autoload 'denote-org-dblock-insert-backlinks "denote-org-dblock" "\
-Insert new Org dynamic block to include backlinks." t)
-(register-definition-prefixes "denote-org-dblock" '("org-dblock-write:denote-"))
+Create Org dynamic block to insert Denote backlinks to current file." '(org-mode))
+(autoload 'denote-org-dblock-insert-files "denote-org-dblock" "\
+Create Org dynamic block to insert Denote files matching REGEXP.
+Sort the files according to SORT-BY-COMPONENT, which is a symbol
+among `denote-sort-components'.
+
+(fn REGEXP SORT-BY-COMPONENT)" '(org-mode))
+(register-definition-prefixes "denote-org-dblock" '("denote-org-dblock-" "org-dblock-write:denote-"))
 
 
 ;;; Generated autoloads from denote-rename-buffer.el
@@ -651,7 +732,62 @@ The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
 (fn &optional ARG)" t)
-(register-definition-prefixes "denote-rename-buffer" '("denote-rename-buffer-"))
+(register-definition-prefixes "denote-rename-buffer" '("denote-rename-buffer"))
+
+
+;;; Generated autoloads from denote-silo-extras.el
+
+(autoload 'denote-silo-extras-create-note "denote-silo-extras" "\
+Select SILO and run `denote' in it.
+SILO is a file path from `denote-silo-extras-directories'.
+
+(fn &optional SILO)" t)
+(autoload 'denote-silo-extras-open-or-create "denote-silo-extras" "\
+Select SILO and run `denote-open-or-create' in it.
+SILO is a file path from `denote-silo-extras-directories'.
+
+(fn &optional SILO)" t)
+(autoload 'denote-silo-extras-select-silo-then-command "denote-silo-extras" "\
+Select SILO and run Denote COMMAND in it.
+SILO is a file path from `denote-silo-extras-directories', while
+COMMAND is one among `denote-silo-extras-commands'.
+
+(fn SILO COMMAND)" t)
+(register-definition-prefixes "denote-silo-extras" '("denote-silo-extras-"))
+
+
+;;; Generated autoloads from denote-sort.el
+
+(autoload 'denote-sort-files "denote-sort" "\
+Returned sorted list of Denote FILES.
+
+With COMPONENT as a symbol among `denote-sort-components',
+sort files based on the corresponding file name component.
+
+With COMPONENT as a nil value keep the original date-based
+sorting which relies on the identifier of each file name.
+
+With optional REVERSE as a non-nil value, reverse the sort order.
+
+(fn FILES COMPONENT &optional REVERSE)")
+(autoload 'denote-sort-dired "denote-sort" "\
+Produce Dired dired-buffer with sorted files from variable `denote-directory'.
+When called interactively, prompt for FILES-MATCHING-REGEXP,
+SORT-BY-COMPONENT, and REVERSE.
+
+1. FILES-MATCHING-REGEXP limits the list of Denote files to
+   those matching the provided regular expression.
+
+2. SORT-BY-COMPONENT sorts the files by their file name
+   component (one among `denote-sort-components').
+
+3. REVERSE is a boolean to reverse the order when it is a non-nil value.
+
+When called from Lisp, the arguments are a string, a keyword, and
+a non-nil value, respectively.
+
+(fn FILES-MATCHING-REGEXP SORT-BY-COMPONENT REVERSE)" t)
+(register-definition-prefixes "denote-sort" '("denote-sort-"))
 
 ;;; End of scraped data
 
