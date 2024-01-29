@@ -4,7 +4,7 @@ fountain-mode.texi.
 Copyright (C) 2021-2023 Paul W. Rankin
 
    The following people contributed to this documentation:
-Paul W. Rankin, Kohl Sudduth
+Paul W. Rankin, Kohl Sudduth, Sandra Snan
 INFO-DIR-SECTION Emacs
 START-INFO-DIR-ENTRY
 * Fountain Mode: (fountain-mode).	Write screenplays.
@@ -16,18 +16,14 @@ File: fountain-mode.info,  Node: Top,  Next: Overview,  Up: (dir)
 Fountain Mode
 *************
 
-     n.b.: This manual is a work in progress with many parts still
-     missing.  Please consult the help functions within Emacs for
-     current documentation.
-
-   Fountain Mode is a screenwriting (and playwriting) program for
+Fountain Mode is a screenwriting (and playwrighting) program for
 GNU Emacs version 24.4 or later.  The Fountain markup format is a
 plain-text format designed to be easily readable and editable, portable
 and future-proof, and to look as much like a script as possible.
 
-   This is the Fountain Mode Manual updated for version 3.6.
+   This is the Fountain Mode Manual updated for version 3.7.
 
-   The public Fountain Mode repository is hosted on GitHub
+   The public Fountain Mode code repository is hosted on GitHub
 (https://github.com/rnkn/fountain-mode).
 
 * Menu:
@@ -61,7 +57,7 @@ customizable, free/libre text editor.  It enables the writer to engage
 with all aspects of realizing a screenplay -- story development,
 outlining, drafting, and rewriting.
 
-   To quickly get up to speed with Fountain syntax, memorize the rules
+   To quickly get up to speed with Fountain syntax, memorize the syntax
 for the six most used elements of the screenplay format: *note Scene
 Headings::, *note Action::, *note Characters::, *note Dialogue::, *note
 Parentheticals::, and *note Transitions::.
@@ -248,9 +244,7 @@ File: fountain-mode.info,  Node: Scene Headings,  Next: Action,  Prev: Section H
 Scene Headings
 ==============
 
-A scene begins with a scene heading.
-
-   Scene headings begin with a prefix, specified in
+Scene headings begin with a prefix, specified in
 'fountain-scene-heading-prefix-list', which defaults to:
 
      INT, EXT, EST, INT./EXT., INT/EXT, I/E
@@ -266,10 +260,23 @@ are equivalent:
      This options allows setting your own scene heading prefixes.  These
      entries are case-insensitive.
 
+ -- User Option: fountain-scene-heading-suffix-list
+     This options allows setting your own scene heading suffixes (or
+     time-of-day).  These entries are case-insensitive.
+
  -- User Option: fountain-scene-heading-suffix-separator
      This option allows setting the separator (a regular expression)
      between the scene location and time of day.  The default ' --? '
      allows either one or two dashes.
+
+ -- User Option: fountain-auto-upcase-scene-headings
+     Enabling this option will automatically upcase text after a scene
+     heading prefix as you type.
+
+ -- User Option: fountain-double-space-scene-headings
+     Enabling this option will display two blank lines above scene
+     headings, regardless of what's in the file.  n.b.  This option does
+     not affect calculation of pagination.
 
    *Note Scene Heading Completion::.
 
@@ -335,6 +342,10 @@ that's fine too.  The following will still be parsed as action.
 
      JOLENE throws the chair at PHILIP.
 
+ -- User Option: fountain-character-extension-list
+     This option allows setting your own character extensions, e.g.
+     "(O.C.)".
+
    *Note Character Name Completion::.
 
 
@@ -355,8 +366,8 @@ File: fountain-mode.info,  Node: Parentheticals,  Next: Transitions,  Prev: Dial
 Parentheticals
 ==============
 
-Anytime the writer types a (parens) inside of a dialogue block, the text
-auto-formats into the correct position.
+Any text inside parentheticals and within dialogue is parsed as a
+parenthetical element, e.g.
 
      JOLENE
      (concerned)
@@ -370,8 +381,13 @@ File: fountain-mode.info,  Node: Transitions,  Next: Notes,  Prev: Parenthetical
 Transitions
 ===========
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+A transition is any line ending with 'TO:', or you can force a
+transition by prefixing it with '>'.
+
+ -- User Option: fountain-trans-suffix-list
+     This option allows setting your own transition suffixes, so that
+     lines ending in these will be parsed as transitions.  These entries
+     are case-insensitive.
 
 
 File: fountain-mode.info,  Node: Notes,  Next: Synopses,  Prev: Transitions,  Up: Script Elements
@@ -379,8 +395,29 @@ File: fountain-mode.info,  Node: Notes,  Next: Synopses,  Prev: Transitions,  Up
 Notes
 =====
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+Text enclosed in '[[ ]]' (double brackets) is parsed as a note, and is
+generally not included in export.  Use these for keeping draft notes,
+research, feedback, etc.
+
+'C-c C-z'
+     This will insert a note based on 'fountain-note-template' (see
+     below) beneath the current element, or if the region is active,
+     surround the region with note delimiters ('fountain-insert-note').
+
+ -- User Option: fountain-note-template
+     Template for inserting a new note.  Passed to 'format-spec' with
+     the following specification:
+
+        * '%u user-login-name'
+        * '%n user-full-name'
+        * '%e user-mail-address'
+        * '%x' date in locale’s preferred format
+        * '%F' date in ISO format
+        * '%P' leave point here
+
+     The default '%P - %n %x' inserts something like:
+
+          [[ | - Alan Smithee 12/31/2017 ]]"
 
 
 File: fountain-mode.info,  Node: Synopses,  Next: Center Text,  Prev: Notes,  Up: Script Elements
@@ -402,8 +439,10 @@ File: fountain-mode.info,  Node: Center Text,  Next: Comments,  Prev: Synopses, 
 Center Text
 ===========
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+Any text surrounded with '>' and '<' (greater and less than signs) will
+be centered in output, e.g.:
+
+     > Once Upon a Time... <
 
 
 File: fountain-mode.info,  Node: Comments,  Prev: Center Text,  Up: Script Elements
@@ -420,8 +459,8 @@ structurally, it's as if the text were removed.
 drafts that you aren't ready to "uncomment" and include yet, or just
 anything else you want to ignore.
 
-   If you instead just want to annotate your screenplay, use *note
-Notes:: or *note Synopses::.
+   If you instead just want to annotate your screenplay, *note Notes::
+or *note Synopses::.
 
 
 File: fountain-mode.info,  Node: Outlining,  Next: Navigation,  Prev: Script Elements,  Up: Top
@@ -429,54 +468,14 @@ File: fountain-mode.info,  Node: Outlining,  Next: Navigation,  Prev: Script Ele
 Outlining
 *********
 
-There are five levels of section headings.  Scene headings count as the
-sixth level headings.
+Acts and sequences can be given meaningful section titles, giving you an
+overview of the story structure.
+
+   There are five levels of section headings.  Scene headings count as
+the sixth level headings.
 
    Cycle an individual subtree visibility with 'TAB'.  Cycle global
 outline visibility with 'S-TAB' (shift-tab) or 'C-u TAB'.
-
-   Acts, Sequences, Sections, and Scenes can be given meaningful titles,
-giving the writer a bird's eye view of the story and structure at a
-moments notice.
-
-   There are many ways to approach writing a screenplay.  Here's one
-example of how to use Fountain Mode to Outline a script.
-
-     # Act
-
-     = Synopsis of an Act. A short summary of all the crazy things that
-     happen for the next 30-60 pages.
-
-     [[ Act One Note. Useful for character motivation and obstacles. Ideas to
-     remember, etc.]]
-
-     ## Sequence
-
-     = Synopsis of a Sequence.
-
-     [[ Sequence Notes. A sequence can be thought of as a series of several
-     scenes that make up their own mini-story. ]]
-
-     INT. SCENE - NIGHT
-
-     = Synopsis of a scene.
-
-     [[ Notes to remember for a scene, such as the following:
-     - Who wants what from whom?
-     - What are they willing to do get what they want?
-     - What happens if they don't get it? ]]
-
-   Experimenting with different structures can be accomplished by
-folding a Section Heading and moving the section to the new desired
-location using keyboard shortcuts.
-
-   Note: all text contained within the fold is carried to the new
-location.
-
-   Just as there are many ways to tell a story, there are many ways to
-outline a script.  Because Fountain Mode uses plaintext, it does not
-force the writer into a single way of working.  Possible structures are
-limited only by one's imagination.
 
  -- Command: fountain-insert-section-heading
      Bound to 'M-RET', insert an empty section heading at the current
@@ -501,35 +500,57 @@ File: fountain-mode.info,  Node: Navigation,  Next: Syntax Highlighting,  Prev: 
 Navigation
 **********
 
- -- Command: fountain-outline-next
-     Bound to 'C-M-n', move to the next visible heading line.  Also
-     'fountain-outline-previous', bound to 'C-M-p'.
+Because a Fountain script is structured text, there are plenty of ways
+to quickly move to where you want to be.
 
- -- Command: fountain-outline-forward
-     Bound to 'C-M-f', move forward to the ARG'th subheading at same
-     level as this one.  Also 'fountain-outline-backward', bound to
-     'C-M-b'.
+'C-M-n'
+     Move to the next visible scene or section heading
+     ('fountain-outline-next').
 
- -- Command: fountain-outline-beginning
-     Bound to 'C-M-a', move to the beginning of the current subtree.
+'C-M-p'
+     Move to the previous visible scene or section heading
+     ('fountain-outline-previous').
 
- -- Command: fountain-outline-up
-     Bound to 'C-M-u', move to the visible heading line of which the
-     present line is a subheading.
+'C-M-f'
+     Move forward to the next visible scene or section heading at same
+     outline level ('fountain-outline-forward')
 
- -- Command: fountain-forward-character
-     Bound to 'M-n', goto Nth next character (or Nth previous is N is
-     negative).  Also 'fountain-backward-character', bound to 'M-p'.
+'C-M-b'
+     Move backward to the previous visible scene or section heading at
+     the same outline level ('fountain-outline-backward').
 
- -- Command: fountain-forward-page
-     Bound to 'C-x ]', move to Nth next page (or Nth previous if N is
-     negative).  Also 'fountain-backward-page', bound to 'C-x ['.
+'C-M-a'
+     Move to the beginning of the current scene or section
+     ('fountain-outline-beginning').
 
- -- Command: fountain-goto-scene
-     Bound to 'M-g s', move point to Nth scene in current buffer.
+'C-M-u'
+     Move up to the parent section heading ('fountain-outline-up').
 
- -- Command: fountain-goto-page
-     Bound to 'M-g p', move point to Nth page in current buffer.
+'M-n'
+     Move to next character name ('fountain-forward-character').
+
+'M-p'
+     Move to previous character name ('fountain-backward-character').
+
+'C-x ]'
+     Move to next page.  This command does not move by one page but
+     actually moves to the next page-break point in the text pagination
+     properties ('fountain-forward-page').
+
+'C-x ['
+     Move to previous page ('fountain-backward-page').
+
+'M-g s'
+     Prompt for a scene number string and move to the specified scene.
+     If scenes are numbered, this command will take you to the scene
+     matching that string, otherwise it will count the scenes from
+     beginning of the accessible buffer, recalculating when encountering
+     a numbered scene ('fountain-goto-scene').
+
+'M-g p'
+     Prompt for a number and move to the specified page.  This command
+     does not actually count pages but uses the text pagination
+     properties ('fountain-goto-page').
 
 
 File: fountain-mode.info,  Node: Syntax Highlighting,  Next: Element Aligning,  Prev: Navigation,  Up: Top
@@ -537,8 +558,27 @@ File: fountain-mode.info,  Node: Syntax Highlighting,  Next: Element Aligning,  
 Syntax Highlighting
 *******************
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+In Fountain Mode, each Fountain element can have Font Lock syntax
+highlighting toggled individually -- or none at all.  *Note (emacs) Font
+Lock::.
+
+   In addition to faces for specific elements, Fountain Mode uses an
+Emacs feature called face remapping, which means the 'default' face is
+displayed using the 'fountain' face.  This allows you to customize the
+'fountain' face just for Fountain Mode buffers.  *Note (emacs) Face
+Customization::.
+
+ -- User Option: fountain-highlight-elements
+     This option is a list of Fountain elements to be highlighted.
+
+ -- Command: fountain-toggle-hide-emphasis-markup
+     Bound to 'C-c C-x *' this command will toggle the display of text
+     emphasis markup.  *Note Text Emphasis::.
+
+ -- Command: fountain-toggle-hide-element-markup
+     Bound to 'C-c C-x !', this command, like above, will toggle the
+     display of element markup.  This means the leadings characters in
+     section headings and forced elements.
 
 
 File: fountain-mode.info,  Node: Element Aligning,  Next: Text Emphasis,  Prev: Syntax Highlighting,  Up: Top
@@ -546,8 +586,17 @@ File: fountain-mode.info,  Node: Element Aligning,  Next: Text Emphasis,  Prev: 
 Element Aligning
 ****************
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+In addition to syntax highlighting, Fountain Mode has the ability to
+automatically align, or indent, script elements, so your script looks
+more like real script.  This is display only and does not change the
+file contents, and can be turned off if you don't like it.
+
+ -- User Option: fountain-align-elements
+     Whether to automatically align elements.
+
+   Different script formats have different alignment, so each element
+can be aligned on a per-format basis -- see the Customize group
+'fountain-align'.
 
 
 File: fountain-mode.info,  Node: Text Emphasis,  Next: Do What I Mean,  Prev: Element Aligning,  Up: Top
@@ -556,12 +605,11 @@ Text Emphasis
 *************
 
 Text can be underlined, italic, bold, or a combination thereof.
+Demarcate emphasized text with:
 
-   Underlined text is surrounded by '_underscores_'.
-
-   Italic text is surrounded by '*single asterisks*'
-
-   Bold text is surrounded by '**double asterisks**'
+   * '_underscores_' for underline,
+   * '*single asterisks*' for italic,
+   * and '**double asterisks**' for bold.
 
    For the writer pursists who want to work the way our ancestors did on
 typewriters, stick to underlining.
@@ -715,8 +763,20 @@ File: fountain-mode.info,  Node: Scene Numbering,  Next: Pagination,  Prev: Auto
 Scene Numbering
 ***************
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+Scene numbers are appended to scene headings between '# #' (hash).
+Fountain Mode can automatically add scene numbers for you.
+
+ -- Command: fountain-add-scene-numbers
+     Bound to 'C-c C-x #', add scene numbers to scene headings in
+     current buffer.  Remove scene numbers by prefixing with 'C-u'.
+
+   Whether scene numbers are applied or not, you can still navigate by
+scene number.  *Note Navigation::.
+
+   Scene numbers can be displayed in the window margins.
+
+ -- User Option: fountain-display-scene-numbers-in-margin
+     Display scene numbers in left and right margins.
 
 
 File: fountain-mode.info,  Node: Pagination,  Next: Exporting,  Prev: Scene Numbering,  Up: Top
@@ -724,12 +784,38 @@ File: fountain-mode.info,  Node: Pagination,  Next: Exporting,  Prev: Scene Numb
 Pagination
 **********
 
-Sorry, this node is not yet written.  You can help by submitting a
-patch!
+Fountain Mode features internal pagination.  This is achieved by
+periodically calculating where page breaks occur in the whole buffer and
+applying pagination properties to the text.  When the text is changed
+enough to invalidate these properties they are recalculated.
+
+ -- User Option: fountain-pagination-max-change
+     Maximum change in page characters before invalidating pagination.
+     Set this to a lower value to get more accurate pagination, high if
+     you find the updates annoying.
+
+ -- User Option: fountain-page-size
+     An important factor in calculating pagination is the page size.
+     This is the target page size.  Valid options are 'letter' or 'a4'.
+
+ -- User Option: fountain-page-max-lines
+     This option specifies how many lines fit on each of the page sizes.
+
+ -- User Option: fountain-pagination-break-sentences
+     Whether pagination will break pages within sentences, or only at
+     sentence ends.
+
+   You can optionally show the current page and total page count in the
+mode line by enabling 'which-function-mode', *Note (emacs) Which
+Function::.  This will display something like this:
+
+     [Page 31 of 108]
 
  -- Command: fountain-count-pages
      Bound to 'C-c C-p', return both the current page and the total page
      count of the current buffer.
+
+   You can also navigate by page number.  *Note Navigation::.
 
 
 File: fountain-mode.info,  Node: Exporting,  Next: Contact,  Prev: Pagination,  Up: Top
@@ -737,16 +823,70 @@ File: fountain-mode.info,  Node: Exporting,  Next: Contact,  Prev: Pagination,  
 Exporting
 *********
 
-Exporting a script in Fountain Mode is handled by one or more external
-command-line tools.  Here are some recommended export tools:
+Fountain Mode can export to PostScript or PDF using the troff format as
+an intermediary.  This requires only a 'troff' program on your system,
+such as GNU roff (https://www.gnu.org/software/groff/).  One advantage
+of this is that the internal pagination will match the output exactly.
+
+   Alternatively you can export using an external command-line program,
+which is covered further below.
+
+ -- Command: fountain-export-troff
+     This command, bound to 'C-c C-e t', will export using the internal
+     exporter and typeset using a 'troff' program.
+
+ -- Command: fountain-export-view
+     This command, bound to 'C-c C-v', attempts to open the last
+     exported file.  This works by finding the other most recently
+     modified file in the current directory matching the current file
+     base-name.
+
+ -- User Option: fountain-export-format
+     This is the target format for internal troff export.  Valid options
+     are Postscript ('ps') or PDF ('pdf').
+
+ -- User Option: fountain-export-troff-command
+     The name of the 'troff' program on your system.
+
+ -- User Option: fountain-export-troff-extra-options
+     Extra option flags passed to the 'troff' program.  The default
+     tells 'troff' the to use UTF-8.
+
+ -- User Option: fountain-export-title-page
+     Whether to include a title page in export.  This only affects the
+     internal troff export.
+
+ -- User Option: fountain-export-number-first-page
+     Whether to include a page number on the first page in export.  This
+     only affects the internal troff export.
+
+ -- User Option: fountain-export-scene-heading-format
+     A list specifying the export scene heading format.  Available
+     options are zero or more of 'bold', 'double-space', and
+     'underline'.  This option only affects the internal troff export.
+
+* Menu:
+
+* External Programs::		Export using an external program.
+
+
+File: fountain-mode.info,  Node: External Programs,  Up: Exporting
+
+Exporting Using an External Program
+===================================
+
+As an alternative to the internal export system you can use an external
+command-line program.
+
+   Here are some recommended export programs:
 
    * Afterwriting (https://github.com/ifrost/afterwriting-labs)
    * Wrap (https://github.com/Wraparound/wrap)
    * Screenplain (https://github.com/vilcans/screenplain)
    * Textplay (https://github.com/olivertaylor/Textplay) (1)
 
-   By defining an "export profile", you can easily interface with an
-external tool from within Emacs.  A profile is essentially a shell
+   By defining an "export profile" you can easily interface with an
+external program from within Emacs.  A profile is essentially a shell
 command, interpolated with a selection of values:
 
    * '%b' is the 'buffer-file-name'
@@ -757,16 +897,17 @@ command, interpolated with a selection of values:
    * '%F' is the current date in ISO format
    * '%x' is the current date in your locale's "preferred" format
 
+   The default command profiles are only intended as examples.  You are
+encouraged to edit/replace these to suit your own needs.
+
  -- Command: fountain-export-command
-     This command, bound to 'C-c C-e', will prompt for an export
+     This command, bound to 'C-c C-e e', will prompt for an export
      profile.  The first profile is considered default, so just hitting
      RET is a quick way to export in your usual way.
 
- -- Command: fountain-export-view
-     This command, bound to 'C-c C-v', attempts to open the last
-     exported file.  This works by finding the other most recently
-     modified file in the current directory matching the current file
-     base-name.
+ -- User Option: fountain-export-command-profiles
+     This option contains the list of shell command profiles for
+     exporting.  The first profile is considered the default.
 
    ---------- Footnotes ----------
 
@@ -788,15 +929,13 @@ request, you can email the maintainer Paul W. Rankin directly at
 
    You can also try the '#emacs' IRC channel on Libera.chat
 (https://libera.chat) where Fountain Mode's maintainer uses the nickname
-'rnkn', but please note that most other users on the channel are
-unlikely to be screenwriters.
-
-   Known issues are tracked with 'FIXME' comments in the source.
+'pwr', but please note that most other users on the channel are unlikely
+to be screenwriters.
 
    Financial reward is not a consideration in maintaining Fountain Mode,
-but if you would still like to support development, donations are
-graciously accepted via GitHub (https://github.com/sponsors/rnkn) or
-Liberapay (https://liberapay.com/rnkn/).
+but if you would like to support development, donations are graciously
+accepted via GitHub (https://github.com/sponsors/rnkn) or Liberapay
+(https://liberapay.com/rnkn/).
 
 
 File: fountain-mode.info,  Node: Indexes,  Prev: Contact,  Up: Top
@@ -819,23 +958,27 @@ Key Index
  [index ]
 * Menu:
 
-* C-c C-e:                               Exporting.            (line 30)
-* C-c C-p:                               Pagination.           (line 11)
-* C-c C-v:                               Exporting.            (line 35)
+* C-c C-e e:                             External Programs.    (line 35)
+* C-c C-e t:                             Exporting.            (line 17)
+* C-c C-p:                               Pagination.           (line 36)
+* C-c C-v:                               Exporting.            (line 23)
+* C-c C-x #:                             Scene Numbering.      (line 13)
 * C-c C-x a:                             Autocompletion.       (line 15)
-* C-M-a:                                 Navigation.           (line 17)
-* C-M-b:                                 Navigation.           (line 14)
-* C-M-f:                                 Navigation.           (line 14)
-* C-M-n:                                 Navigation.           (line  9)
-* C-M-p:                                 Navigation.           (line  9)
-* C-M-u:                                 Navigation.           (line 21)
-* C-x [:                                 Navigation.           (line 29)
-* C-x ]:                                 Navigation.           (line 29)
-* M-g p:                                 Navigation.           (line 34)
-* M-g s:                                 Navigation.           (line 32)
-* M-n:                                   Navigation.           (line 25)
-* M-p:                                   Navigation.           (line 25)
-* M-RET:                                 Outlining.            (line 59)
+* C-c C-x b:                             Outlining.            (line 25)
+* C-c C-z:                               Notes.                (line 11)
+* C-M-a:                                 Navigation.           (line 26)
+* C-M-b:                                 Navigation.           (line 22)
+* C-M-f:                                 Navigation.           (line 18)
+* C-M-n:                                 Navigation.           (line 10)
+* C-M-n <1>:                             Navigation.           (line 14)
+* C-M-u:                                 Navigation.           (line 30)
+* C-x [:                                 Navigation.           (line 44)
+* C-x ]:                                 Navigation.           (line 39)
+* M-g p:                                 Navigation.           (line 54)
+* M-g s:                                 Navigation.           (line 47)
+* M-n:                                   Navigation.           (line 33)
+* M-p:                                   Navigation.           (line 36)
+* M-RET:                                 Outlining.            (line 18)
 * S-TAB:                                 Outlining.            (line  6)
 * TAB:                                   Outlining.            (line  6)
 * TAB <1>:                               Do What I Mean.       (line  6)
@@ -853,21 +996,37 @@ Index of Commands
  [index ]
 * Menu:
 
+* backward-character:                    Navigation.           (line 36)
+* backward-page:                         Navigation.           (line 44)
+* completion-update:                     Autocompletion.       (line 15)
+* count-pages:                           Pagination.           (line 36)
+* dwim:                                  Do What I Mean.       (line 32)
+* export-command:                        External Programs.    (line 35)
+* export-view:                           Exporting.            (line 23)
+* forward-character:                     Navigation.           (line 33)
+* forward-page:                          Navigation.           (line 39)
+* fountain-add-scene-numbers:            Scene Numbering.      (line 10)
 * fountain-completion-update:            Autocompletion.       (line 12)
-* fountain-count-pages:                  Pagination.           (line  9)
+* fountain-count-pages:                  Pagination.           (line 33)
 * fountain-dwim:                         Do What I Mean.       (line 30)
-* fountain-export-command:               Exporting.            (line 26)
-* fountain-export-view:                  Exporting.            (line 31)
-* fountain-forward-character:            Navigation.           (line 22)
-* fountain-forward-page:                 Navigation.           (line 26)
-* fountain-goto-page:                    Navigation.           (line 33)
-* fountain-goto-scene:                   Navigation.           (line 30)
-* fountain-insert-section-heading:       Outlining.            (line 56)
-* fountain-outline-beginning:            Navigation.           (line 15)
-* fountain-outline-forward:              Navigation.           (line 10)
-* fountain-outline-next:                 Navigation.           (line  6)
-* fountain-outline-to-indirect-buffer:   Outlining.            (line 60)
-* fountain-outline-up:                   Navigation.           (line 18)
+* fountain-export-command:               External Programs.    (line 31)
+* fountain-export-troff:                 Exporting.            (line 14)
+* fountain-export-view:                  Exporting.            (line 18)
+* fountain-insert-section-heading:       Outlining.            (line 15)
+* fountain-outline-to-indirect-buffer:   Outlining.            (line 19)
+* fountain-toggle-hide-element-markup:   Syntax Highlighting.  (line 23)
+* fountain-toggle-hide-emphasis-markup:  Syntax Highlighting.  (line 19)
+* goto-page:                             Navigation.           (line 54)
+* goto-scene:                            Navigation.           (line 47)
+* insert-note:                           Notes.                (line 13)
+* insert-section-heading:                Outlining.            (line 18)
+* outline-backward:                      Navigation.           (line 22)
+* outline-beginning:                     Navigation.           (line 26)
+* outline-forward:                       Navigation.           (line 18)
+* outline-next:                          Navigation.           (line 10)
+* outline-previous:                      Navigation.           (line 14)
+* outline-to-indirect-buffer:            Outlining.            (line 25)
+* outline-up:                            Navigation.           (line 30)
 
 
 File: fountain-mode.info,  Node: Index of User Options,  Prev: Index of Commands,  Up: Indexes
@@ -878,49 +1037,70 @@ Index of User Options
  [index ]
 * Menu:
 
-* fountain-pop-up-indirect-windows:      Outlining.            (line 67)
-* fountain-scene-heading-prefix-list:    Scene Headings.       (line 20)
-* fountain-scene-heading-suffix-separator: Scene Headings.     (line 24)
+* fountain-align-elements:               Element Aligning.     (line 11)
+* fountain-auto-upcase-scene-headings:   Scene Headings.       (line 31)
+* fountain-character-extension-list:     Characters.           (line 34)
+* fountain-display-scene-numbers-in-margin: Scene Numbering.   (line 19)
+* fountain-double-space-scene-headings:  Scene Headings.       (line 35)
+* fountain-export-command-profiles:      External Programs.    (line 36)
+* fountain-export-format:                Exporting.            (line 24)
+* fountain-export-number-first-page:     Exporting.            (line 39)
+* fountain-export-scene-heading-format:  Exporting.            (line 43)
+* fountain-export-title-page:            Exporting.            (line 35)
+* fountain-export-troff-command:         Exporting.            (line 28)
+* fountain-export-troff-extra-options:   Exporting.            (line 31)
+* fountain-highlight-elements:           Syntax Highlighting.  (line 16)
+* fountain-note-template:                Notes.                (line 15)
+* fountain-page-max-lines:               Pagination.           (line 20)
+* fountain-page-size:                    Pagination.           (line 16)
+* fountain-pagination-break-sentences:   Pagination.           (line 23)
+* fountain-pagination-max-change:        Pagination.           (line 11)
+* fountain-pop-up-indirect-windows:      Outlining.            (line 26)
+* fountain-scene-heading-prefix-list:    Scene Headings.       (line 18)
+* fountain-scene-heading-suffix-list:    Scene Headings.       (line 22)
+* fountain-scene-heading-suffix-separator: Scene Headings.     (line 26)
+* fountain-trans-suffix-list:            Transitions.          (line  9)
 
 
 
 Tag Table:
-Node: Top332
-Node: Overview1789
-Node: Installation3207
-Node: Requirements4207
-Node: Advanced Installation4795
-Node: Script Elements5355
-Node: Metadata6538
-Node: Section Headings8134
-Node: Scene Headings8558
-Node: Action9464
-Node: Characters10177
-Node: Dialogue11105
-Node: Parentheticals11431
-Node: Transitions11801
-Node: Notes12008
-Node: Synopses12197
-Node: Center Text12586
-Node: Comments12790
-Node: Outlining13426
-Node: Navigation15934
-Node: Syntax Highlighting17204
-Node: Element Aligning17430
-Node: Text Emphasis17653
-Node: Do What I Mean18126
-Node: Autocompletion19575
-Node: Scene Heading Completion20202
-Node: Character Name Completion20719
-Node: Scene Numbering22772
-Node: Pagination22984
-Node: Exporting23323
-Ref: Exporting-Footnote-124822
-Node: Contact24893
-Node: Indexes25794
-Node: Key Index25953
-Node: Index of Commands27823
-Node: Index of User Options29093
+Node: Top345
+Node: Overview1644
+Node: Installation3063
+Node: Requirements4063
+Node: Advanced Installation4651
+Node: Script Elements5211
+Node: Metadata6394
+Node: Section Headings7990
+Node: Scene Headings8414
+Node: Action9853
+Node: Characters10566
+Node: Dialogue11629
+Node: Parentheticals11955
+Node: Transitions12306
+Node: Notes12754
+Node: Synopses13713
+Node: Center Text14102
+Node: Comments14363
+Node: Outlining14995
+Node: Navigation16182
+Node: Syntax Highlighting17995
+Node: Element Aligning19105
+Node: Text Emphasis19762
+Node: Do What I Mean20222
+Node: Autocompletion21671
+Node: Scene Heading Completion22298
+Node: Character Name Completion22815
+Node: Scene Numbering24868
+Node: Pagination25585
+Node: Exporting27060
+Node: External Programs29027
+Ref: External Programs-Footnote-130625
+Node: Contact30696
+Node: Indexes31524
+Node: Key Index31683
+Node: Index of Commands33845
+Node: Index of User Options36283
 
 End Tag Table
 

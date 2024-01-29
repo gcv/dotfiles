@@ -1,7 +1,7 @@
-(define-package "fountain-mode" "3.6.3" "Major mode for screenwriting in Fountain markup"
+(define-package "fountain-mode" "3.7.1" "Major mode for screenwriting in Fountain markup"
   '((emacs "24.4")
     (seq "2.20"))
-  :commit "1f2004d6e905dab5b8dd7e1b068e4df86596d955" :authors
+  :commit "e2c0b952b297d99dd16f2d55f883eec8bfdfa896" :authors
   '(("Paul W. Rankin" . "hello@paulwrankin.com"))
   :maintainers
   '(("Paul W. Rankin" . "hello@paulwrankin.com"))
@@ -9,7 +9,7 @@
   '("Paul W. Rankin" . "hello@paulwrankin.com")
   :keywords
   '("wp" "text")
-  :url "https://github.com/rnkn/fountain-mode")
+  :url "https://www.fountain-mode.org")
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:
