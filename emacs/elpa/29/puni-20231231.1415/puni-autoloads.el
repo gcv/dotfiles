@@ -171,6 +171,12 @@ whole buffer is the list around point." t)
 Mark the sexp around point." t)
 (autoload 'puni-expand-region "puni" "\
 Expand selected region by semantic units." t)
+(autoload 'puni-contract-region "puni" "\
+Contract selected region by semantic units.
+When given a numeric prefix argument ARG, contract that many
+times.
+
+(fn ARG)" t)
 (autoload 'puni-squeeze "puni" "\
 Copy the list around point, and delete the sexp around point.
 This can be used to \"rewrap\" a sexp.  You could squeeze it

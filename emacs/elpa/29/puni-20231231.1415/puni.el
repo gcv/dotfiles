@@ -76,15 +76,27 @@ Nil means use `pulse-highlight-start-face'."
   :type 'boolean
   :group 'puni)
 
-(defcustom puni-blink-for-slurp-barf t
-  "Whether blinking the moved delimiter when slurping & barfing."
+(defcustom puni-blink-for-sexp-manipulating t
+  "Whether using blinking as a visual cue when manipulating sexps."
   :type 'boolean
   :group 'puni)
+
+(make-obsolete-variable 'puni-blink-for-slurp-barf
+                        'puni-blink-for-sexp-manipulating
+                        "Nov 11 2023")
 
 ;;;; Internals
 
 (defvar puni--debug nil
   "Turn on debug mode when non-nil.")
+
+(defvar puni--region-history nil
+  "History of regions selected by `puni-expand-region'.
+This list takes the form ((MARK . POINT) ...) where MARK and POINT are
+both integers.")
+
+;; Region history should be unique for each buffer.
+(make-variable-buffer-local 'puni--region-history)
 
 ;;;;; Probes
 
@@ -273,7 +285,7 @@ of `char-syntax'."
 
 (defun puni--backward-same-syntax (&optional bound)
   "Backward version of `puni--forward-same-syntax'."
-  (when-let (syntax (puni--syntax-char-after (1- (point))))
+  (when-let ((syntax (puni--syntax-char-after (1- (point)))))
     (puni--backward-syntax (char-to-string syntax) bound)))
 
 ;;;;; Basic move: symbol
@@ -310,7 +322,20 @@ If BOUND is non-nil, stop before BOUND."
   ;; of operators).  Unfortunately there are major modes where "<>" should be
   ;; delimiters, but are given the punctuation syntax.
   (puni--error-if-before-point bound)
-  (let ((from (point)))
+  (let* ((from (point))
+         ;; Some major mode gives symbol syntax to non-symbol chars, e.g., in
+         ;; nxml-mode:
+         ;;
+         ;;     <a>foo</a>
+         ;;
+         ;; All the punctuations here are given symbol syntax.  When this
+         ;; happens, we see if `forward-sexp-function' of the major mode knows
+         ;; the actual boundary of symbols (luckily, nxml-mode does).
+         (end-of-primitive-sexp (save-excursion
+                                  (puni--primitive-forward-sexp)))
+         (bound (if (and end-of-primitive-sexp bound)
+                    (min end-of-primitive-sexp bound)
+                  (or end-of-primitive-sexp bound))))
     (when (puni--symbol-prefix-p)
       (puni--forward-same-syntax bound))
     (while (and (puni--symbol-syntax-p)
@@ -322,7 +347,12 @@ If BOUND is non-nil, stop before BOUND."
 (defun puni--backward-symbol (&optional bound)
   "Backward version of `puni--forward-symbol'."
   (puni--error-if-after-point bound)
-  (let ((from (point)))
+  (let* ((from (point))
+         (beg-of-primitive-sexp (save-excursion
+                                  (puni--primitive-backward-sexp)))
+         (bound (if (and beg-of-primitive-sexp bound)
+                    (max beg-of-primitive-sexp bound)
+                  (or beg-of-primitive-sexp bound))))
     (while (and (puni--symbol-syntax-p (1- (point)))
                 (puni--backward-same-syntax bound)))
     (let ((to (point)))
@@ -1638,13 +1668,24 @@ means kill lines backward.
 
 This respects the variable `kill-whole-line'."
   (interactive "P")
-  (let* ((from (point))
-         to col-after-spaces-in-line delete-spaces-to)
-    (if (and n (< n 0))
-        (puni-backward-kill-line (- n))
+  (if (and n (< n 0))
+      (puni-backward-kill-line (- n))
+    (let (from to col-after-spaces-in-line delete-spaces-to bolp)
+      (setq bolp (bolp))
+      ;; Move point properly so when the point is in the initial whitespaces of
+      ;; a line, or in an empty line, deleting the line indents what comes
+      ;; after the point properly.  Suggested by @andreyorst, see
+      ;; https://github.com/AmaiKinono/puni/issues/16#issuecomment-1344493831.
+      ;; This won't work for multi-line sexps coming after the point, and we
+      ;; may want to switch to `puni--reindent-region'.
+      (when (looking-back (rx line-start (* blank)) (line-beginning-position))
+        (if (puni--line-empty-p)
+            (puni--indent-line)
+          (back-to-indentation)))
+      (setq from (point))
       (setq to (save-excursion (forward-line (or n 1))
                                (point)))
-      (unless (or kill-whole-line
+      (unless (or (and kill-whole-line bolp)
                   ;; This is default behavior of Emacs: When the prefix
                   ;; argument is specified, always kill whole line.
                   n
@@ -1664,7 +1705,7 @@ This respects the variable `kill-whole-line'."
                     col-after-spaces-in-line))
         (save-excursion
           (move-to-column col-after-spaces-in-line)
-          (puni-delete-region (point) delete-spaces-to 'kill))))))
+          (puni-delete-region (point) delete-spaces-to))))))
 
 ;;;###autoload
 (defun puni-backward-kill-line (&optional n)
@@ -1912,8 +1953,8 @@ whole buffer is the list around point."
             (funcall find-bigger-bounds #'puni-bounds-of-sexp-at-point)))
          (bounds-of-list-around
           (lambda ()
-            (when-let (bounds (funcall find-bigger-bounds
-                                       #'puni-bounds-of-list-around-point))
+            (when-let ((bounds (funcall find-bigger-bounds
+                                        #'puni-bounds-of-list-around-point)))
               ;; Don't select blanks around the list.
               (save-excursion
                 (goto-char (car bounds))
@@ -1926,17 +1967,66 @@ whole buffer is the list around point."
          (bounds-of-sexp-around
           (lambda ()
             (funcall find-bigger-bounds #'puni-bounds-of-sexp-around-point)))
-         (replace-mark (eq last-command this-command))
-         current-bounds)
+         (replace-mark (eq last-command this-command)))
     (unless
-        (cl-dolist (f (list bounds-of-sexp-at bounds-of-list-around
+        (cl-dolist (f (list bounds-of-sexp-at
+                            bounds-of-list-around
                             bounds-of-sexp-around))
-          (setq current-bounds (funcall f))
-          (when (puni--interval-contain-p current-bounds orig-bounds)
-            (puni--mark-region (car current-bounds) (cdr current-bounds)
-                               nil replace-mark)
-            (cl-return t)))
+          (pcase-let* ((current-bounds (funcall f))
+                       (`(,beg . ,end) current-bounds))
+            (when (puni--interval-contain-p current-bounds orig-bounds)
+              (puni--mark-region beg end nil replace-mark)
+
+              ;; To avoid unpredictable behaviour, reset history if
+              ;; the last command was neither an expansion nor a
+              ;; contraction.
+              (unless (memq last-command '(puni-expand-region
+                                           puni-contract-region))
+                (setq puni--region-history nil))
+
+              ;; Record the newly expanded region so that contraction
+              ;; is later possible.  No need to do this if the whole
+              ;; buffer is selected.
+              (unless (and (= beg (point-min))
+                           (= end (point-max)))
+                (push (cons (min beg end)
+                            (max beg end))
+                      puni--region-history))
+
+              (cl-return t))))
+
       (user-error "Active region is not balanced"))))
+
+;;;###autoload
+(defun puni-contract-region (arg)
+  "Contract selected region by semantic units.
+When given a numeric prefix argument ARG, contract that many
+times."
+  (interactive "p")
+
+  ;; To avoid unpredictable behaviour, reset history if the last
+  ;; command was neither an expansion nor a contraction.
+  (unless (memq last-command '(puni-expand-region
+                               puni-contract-region))
+    (setq puni--region-history nil))
+
+  (if (< arg 0)
+      ;; When given a negative ARG, call `puni-expand-region'.
+      (puni-expand-region)
+    (when puni--region-history
+      ;; When ARG is 0, return to initial history position.
+      (when (= arg 0)
+        (setq arg (length puni--region-history)))
+
+      ;; Pop history ARG times, or until it just has one element.
+      (while (and (cdr puni--region-history)
+                  (> arg 0))
+        (setq arg (1- arg))
+        (pop puni--region-history))
+
+      (pcase-let ((`(,beg . ,end) (car puni--region-history)))
+        (set-mark beg)
+        (goto-char end)))))
 
 ;;;; Sexp manipulating commands
 
@@ -1993,8 +2083,8 @@ line and the point, don't move and return nil."
 
 (defun puni--maybe-blink-region (beg end)
   "Maybe blink the region between BEG and END.
-This depends on `puni-blink-for-slurp-barf'."
-  (when puni-blink-for-slurp-barf
+This depends on `puni-blink-for-sexp-manipulating'."
+  (when puni-blink-for-sexp-manipulating
     (pulse-momentary-highlight-region beg end puni-blink-region-face)))
 
 (defun puni--beg-pos-of-sexps-around-point ()
@@ -2265,9 +2355,8 @@ With positive prefix argument N, barf that many sexps."
     (puni-delete-region beg1 end1)
     (puni-delete-region (- beg2 open-delim-length)
                         (- end2 open-delim-length))
-    (pulse-momentary-highlight-region
-     beg1 (- end2 open-delim-length close-delim-length)
-     puni-blink-region-face)
+    (puni--maybe-blink-region
+     beg1 (- end2 open-delim-length close-delim-length))
     (setq deactivate-mark nil)))
 
 ;;;###autoload
