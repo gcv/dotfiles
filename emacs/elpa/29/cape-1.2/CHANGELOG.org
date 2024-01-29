@@ -2,6 +2,30 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 1.2 (2024-01-23)
+
+- =cape-capf-super=: Bugfixes.
+
+* Version 1.1 (2023-12-27)
+
+- =cape-capf-super=, =cape-company-to-capf=: Support duplicate candidates.
+- Remove obsolete function aliases ~cape-super-capf~, ~cape-interactive-capf~ and
+  ~cape-symbol~.
+
+* Version 1.0 (2023-12-01)
+
+- =cape-emoji=: New Capf available on Emacs 29 and newer.
+- =cape-wrap-debug=, =cape-capf-debug=: New Capf transformers to add debug messages
+  to a Capf.
+- =cape-wrap-passthrough=, =cape-capf-passthrough=: New Capf transformers to defeat
+  completion style filtering.
+- =cape-capf-inside-faces=, =cape-wrap-inside-faces=: New transformer
+- Rename =cape-super-capf= to =cape-capf-super=. Add =cape-wrap-super= for consistency
+  with other Capf combinators.
+- Rename =cape-interactive-capf= to =cape-capf-interactive= for consistency with
+  other Capf combinators.
+- Rename =cape-symbol= to =cape-elisp-symbol=.
+
 * Version 0.17 (2023-08-14)
 
 - Bugfixes.

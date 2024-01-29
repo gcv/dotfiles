@@ -1,6 +1,6 @@
 ;;; cape-keyword.el --- Keyword completion function -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
 ;; This file is part of GNU Emacs.
 
@@ -51,6 +51,13 @@
      "float" "for" "goto" "if" "inline" "int" "long" "register" "restrict"
      "return" "short" "signed" "sizeof" "static" "struct" "switch" "typedef"
      "union" "unsigned" "void" "volatile" "while")
+    (caml-mode  ;; ocaml, from https://v2.ocaml.org/manual/lex.html#sss:keywords
+     "and" "as" "asr" "assert" "begin" "class" "constraint" "do" "done" "downto"
+     "else" "end" "exception" "external" "false" "for" "fun" "function"
+     "functor" "if" "in" "include" "inherit" "initializer" "land" "lazy" "let"
+     "lor" "lsl" "lsr" "lxor" "match" "method" "mod" "module" "mutable" "new"
+     "nonrec" "object" "of" "open" "or" "private" "rec" "sig" "struct" "then"
+     "to" "true" "try" "type" "val" "virtual" "when" "while" "with")
     (crystal-mode ;; https://github.com/crystal-lang/crystal-book "abstract"
      "alias" "annotation" "as" "as?" "asm" "begin" "break" "case" "class" "def"
      "do" "else" "elsif" "end" "ensure" "enum" "extend" "false" "for" "fun" "if"
@@ -259,10 +266,10 @@
      "in" "infix" "infixl" "infixr" "instance" "let" "module" "newtype" "of"
      "then" "type" "where")
     (python-mode ;; https://docs.python.org/3/reference/lexical_analysis.html#keywords
-     "False" "None" "True" "and" "as" "assert" "break" "class" "continue" "def"
-     "del" "elif" "else" "except" "exec" "finally" "for" "from" "global" "if"
-     "import" "in" "is" "lambda" "nonlocal" "not" "or" "pass" "print" "raise"
-     "return" "try" "while" "with" "yield")
+     "False" "None" "True" "and" "as" "assert" "break" "case" "class" "continue"
+     "def" "del" "elif" "else" "except" "exec" "finally" "for" "from" "global"
+     "if" "import" "in" "is" "lambda" "match" "nonlocal" "not" "or" "pass"
+     "print" "raise" "return" "try" "while" "with" "yield")
     (ruby-mode
      "BEGIN" "END" "alias" "and" "begin" "break" "case" "class" "def" "defined?"
      "do" "else" "elsif" "end" "ensure" "false" "for" "if" "in" "module" "next"
@@ -369,18 +376,19 @@
     (js2-mode javascript-mode)
     (phps-mode php-mode)
     (rjsx-mode javascript-mode)
+    (tuareg-mode caml-mode)
     ;; Emacs 29 treesitter modes
     (c++-ts-mode c++-mode)
     (c-ts-mode c-mode)
     (csharp-ts-mode csharp-mode)
     (css-ts-mode css-mode)
+    (elixir-ts-mode elixir-mode)
     (go-ts-mode go-mode)
     (java-ts-mode java-mode)
     (js-ts-mode javascript-mode)
     (python-ts-mode python-mode)
     (ruby-ts-mode ruby-mode)
-    (rust-ts-mode rust-mode)
-    (elixir-ts-mode elixir-mode))
+    (rust-ts-mode rust-mode))
   "Alist of major modes and keywords."
   :type 'alist
   :group 'cape)
@@ -407,7 +415,7 @@ If INTERACTIVE is nil the function acts like a capf."
     (when-let (keywords (cape--keyword-list))
       (let ((bounds (cape--bounds 'symbol)))
         `(,(car bounds) ,(cdr bounds)
-          ,(cape--table-with-properties keywords :category 'cape-keyword)
+          ,(cape--properties-table keywords :category 'cape-keyword)
           ,@cape--keyword-properties)))))
 
 (provide 'cape-keyword)

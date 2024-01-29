@@ -1,2 +1,0 @@
-;; Generated package description from cape.el  -*- no-byte-compile: t -*-
-(define-package "cape" "0.17" "Completion At Point Extensions" '((emacs "27.1") (compat "29.1.4.2")) :commit "7bec22b26be62bc0dab0c2a1ba6bc4b33fcabba1" :authors '(("Daniel Mendler" . "mail@daniel-mendler.de")) :maintainer '("Daniel Mendler" . "mail@daniel-mendler.de") :keywords '("abbrev" "convenience" "matching" "completion" "wp") :url "https://github.com/minad/cape")
