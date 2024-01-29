@@ -4,7 +4,7 @@
 
 ;; Author: Alvaro Ramirez https://xenodium.com
 ;; URL: https://github.com/xenodium/chatgpt-shell
-;; Version: 0.42.1
+;; Version: 0.49.1
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This package is free software; you can redistribute it and/or modify
@@ -44,7 +44,9 @@
 
 (defcustom shell-maker-display-function #'pop-to-buffer-same-window
   "Function to display the shell.  Set to `display-buffer' or custom function."
-  :type 'function
+  :type '(choice (function-item :tag "Pop to Buffer" pop-to-buffer-same-window)
+                 (function-item :tag "Display Buffer" display-buffer)
+                 function)
   :group 'shell-maker)
 
 (defcustom shell-maker-read-string-function (lambda (prompt history)
@@ -63,6 +65,11 @@ To use `completing-read', it can be done with something like:
   "Logging disabled by default (slows things down).
 
 Enable it for troubleshooting issues."
+  :type 'boolean
+  :group 'shell-maker)
+
+(defcustom shell-maker-prompt-before-killing-buffer t
+  "If t, confirm killing buffer without saving."
   :type 'boolean
   :group 'shell-maker)
 
@@ -249,6 +256,7 @@ Set BUFFER-NAME to override the buffer name."
   ;; Prevents fontifying streamed response as prompt.
   (setq comint-prompt-regexp
         (shell-maker-prompt-regexp config))
+  (add-to-list 'kill-buffer-query-functions #'shell-maker-kill-buffer-query)
   (setq-local paragraph-separate "\\'")
   (setq-local paragraph-start comint-prompt-regexp)
   (setq comint-input-sender 'shell-maker--input-sender)
@@ -282,7 +290,8 @@ Set BUFFER-NAME to override the buffer name."
     (set-marker comint-last-input-start (shell-maker--pm))
     (set-process-filter (get-buffer-process
                          (shell-maker-buffer config))
-                        'shell-maker--output-filter)))
+                        'shell-maker--output-filter)
+    (set-buffer-modified-p nil)))
 
 (defun shell-maker--write-reply (reply &optional failed)
   "Write REPLY to prompt.  Set FAILED to record failure."
@@ -555,7 +564,8 @@ NO-ANNOUNCEMENT skips announcing response when in background."
        ((string-equal "clear" (string-trim input-string))
         (call-interactively #'comint-clear-buffer)
         (shell-maker--output-filter (shell-maker--process) (shell-maker-prompt shell-maker--config))
-        (setq shell-maker--busy nil))
+        (setq shell-maker--busy nil)
+        (set-buffer-modified-p nil))
        ((string-equal "config" (string-trim input-string))
         (shell-maker--write-reply (shell-maker--dump-config shell-maker--config))
         (setq shell-maker--busy nil))
@@ -613,8 +623,8 @@ NO-ANNOUNCEMENT skips announcing response when in background."
                                       input-string response nil t))
                            (funcall (shell-maker-config-on-command-finished shell-maker--config)
                                     input-string
-                                    (shell-maker-last-output))
-                           (goto-char (point-max))))
+                                    (shell-maker-last-output)))
+                         (goto-char (point-max)))
                      (shell-maker--write-reply "Error: that's all is known" t) ;; comeback
                      (setq shell-maker--busy nil)
                      (unless no-announcement
@@ -652,8 +662,6 @@ NO-ANNOUNCEMENT skips announcing response when in background."
   "Run shell COMMAND asynchronously.
 Set STREAMING to enable it.  Calls RESPONSE-EXTRACTOR to extract the
 response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
-  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
-    (user-error "Not in a shell"))
   (let* ((buffer (shell-maker-buffer shell-maker--config))
          (request-id (shell-maker--increment-request-id))
          (output-buffer (generate-new-buffer " *temp*"))
@@ -678,56 +686,60 @@ response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
       (when streaming
         (set-process-filter
          request-process
-         (lambda (_process output)
-           (when (and (eq request-id (with-current-buffer buffer
-                                      (shell-maker--current-request-id)))
-                      (buffer-live-p buffer))
-             (shell-maker--write-output-to-log-buffer
-              (format "// Filter output\n\n%s\n\n" output) config)
-             (setq remaining-text (concat remaining-text output))
-             (setq preparsed (shell-maker--preparse-json remaining-text))
-             (if (car preparsed)
-                 (mapc (lambda (obj)
-                         (with-current-buffer buffer
-                           (funcall callback (funcall response-extractor obj) t)))
-                       (car preparsed))
-               (with-current-buffer buffer
-                 (let ((curl-exit-code (shell-maker--curl-exit-status-from-error-string (cdr preparsed))))
-                   (cond ((eq 0 curl-exit-code)
-                          (funcall callback (cdr preparsed) t))
-                         ((numberp curl-exit-code)
-                          (funcall error-callback (string-trim (cdr preparsed))))
-                         (t
-                          (funcall callback (cdr preparsed) t))))))
-             (setq remaining-text (cdr preparsed))))))
+         (lambda (process output)
+           (condition-case nil
+               (when (and (eq request-id (with-current-buffer buffer
+                                           (shell-maker--current-request-id)))
+                          (buffer-live-p buffer))
+                 (shell-maker--write-output-to-log-buffer
+                  (format "// Filter output\n\n%s\n\n" output) config)
+                 (setq remaining-text (concat remaining-text output))
+                 (setq preparsed (shell-maker--preparse-json remaining-text))
+                 (if (car preparsed)
+                     (mapc (lambda (obj)
+                             (with-current-buffer buffer
+                               (funcall callback (funcall response-extractor obj) t)))
+                           (car preparsed))
+                   (with-current-buffer buffer
+                     (let ((curl-exit-code (shell-maker--curl-exit-status-from-error-string (cdr preparsed))))
+                       (cond ((eq 0 curl-exit-code)
+                              (funcall callback (cdr preparsed) t))
+                             ((numberp curl-exit-code)
+                              (funcall error-callback (string-trim (cdr preparsed))))
+                             (t
+                              (funcall callback (cdr preparsed) t))))))
+                 (setq remaining-text (cdr preparsed)))
+             (error (delete-process process))))))
       (set-process-sentinel
        request-process
        (lambda (process _event)
-         (let ((active (and (eq request-id (with-current-buffer buffer
-                                               (shell-maker--current-request-id)))
-                            (buffer-live-p buffer)))
-               (output (with-current-buffer (process-buffer process)
-                         (buffer-string)))
-               (exit-status (process-exit-status process)))
-           (shell-maker--write-output-to-log-buffer
-            (format "// Response (%s)\n\n" (if active "active" "inactive")) config)
-           (shell-maker--write-output-to-log-buffer
-            (format "Exit status: %d\n\n" exit-status) config)
-           (shell-maker--write-output-to-log-buffer output config)
-           (shell-maker--write-output-to-log-buffer "\n\n" config)
-           (with-current-buffer buffer
-             (if (and active (= exit-status 0))
-                 (funcall callback
-                          (if (string-empty-p (string-trim output))
-                              output
-                            (funcall response-extractor output))
-                          nil)
-               (if-let ((error (if (string-empty-p (string-trim output))
-                                   output
-                                 (funcall response-extractor output))))
-                   (funcall error-callback error)
-                 (funcall error-callback output)))))
-         (kill-buffer output-buffer))))))
+         (condition-case nil
+             (let ((active (and (eq request-id (with-current-buffer buffer
+                                                 (shell-maker--current-request-id)))
+                                (buffer-live-p buffer)))
+                   (output (with-current-buffer (process-buffer process)
+                             (buffer-string)))
+                   (exit-status (process-exit-status process)))
+               (shell-maker--write-output-to-log-buffer
+                (format "// Response (%s)\n\n" (if active "active" "inactive")) config)
+               (shell-maker--write-output-to-log-buffer
+                (format "Exit status: %d\n\n" exit-status) config)
+               (shell-maker--write-output-to-log-buffer output config)
+               (shell-maker--write-output-to-log-buffer "\n\n" config)
+               (with-current-buffer buffer
+                 (if (= exit-status 0)
+                     (funcall callback
+                              (if (string-empty-p (string-trim output))
+                                  output
+                                (funcall response-extractor output))
+                              nil)
+                   (if-let ((error (if (string-empty-p (string-trim output))
+                                       output
+                                     (funcall response-extractor output))))
+                       (funcall error-callback error)
+                     (funcall error-callback output)))))
+           (kill-buffer output-buffer)
+           (error (delete-process process))))))))
 
 (defun shell-maker--json-parse-string-filtering (json regexp)
   "Attempt to parse JSON.  If unsuccessful, attempt after removing REGEXP."
@@ -753,9 +765,10 @@ response and feeds it to CALLBACK or ERROR-CALLBACK accordingly."
 
 (defun shell-maker--current-request-id ()
   "Access variable `shell-maker--current-request-id' with right mode ensured."
-  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
-    (error "Not in a shell"))
-  shell-maker--current-request-id)
+  (if (or (boundp 'shell-maker--current-request-id)
+          (eq major-mode (shell-maker-major-mode shell-maker--config)))
+      shell-maker--current-request-id
+    (error "Not in a shell")))
 
 (defun shell-maker--set-pm (pos)
   "Set the process mark in the current buffer to POS."
@@ -894,7 +907,8 @@ Very much EXPERIMENTAL."
             (path shell-maker--file))
         (with-temp-buffer
           (insert content)
-          (write-file path nil)))
+          (write-file path nil))
+        (set-buffer-modified-p nil))
     (when-let ((path (read-file-name "Write file: "
 				     (when shell-maker-transcript-default-path
                                        (file-name-as-directory shell-maker-transcript-default-path))
@@ -903,7 +917,8 @@ Very much EXPERIMENTAL."
       (with-temp-buffer
         (insert content)
         (write-file path t))
-      (setq shell-maker--file path))))
+      (setq shell-maker--file path)
+      (set-buffer-modified-p nil))))
 
 (defun shell-maker--extract-history (text prompt-regexp)
   "Extract all commands and respective output in TEXT with PROMPT-REGEXP.
@@ -1142,6 +1157,15 @@ Type %s and press %s to clear all content.
                         ((string= (nth 0 a) "") nil)
                         ((string= (nth 0 b) "") t)
                         (t (string> (nth 0 a) (nth 0 b)))))) 3))))))
+
+(defun shell-maker-kill-buffer-query ()
+  "Added to `kill-buffer-query-functions' to prevent losing unsaved transcripts."
+  (when (and shell-maker-prompt-before-killing-buffer
+             shell-maker--config
+             (buffer-modified-p)
+             (y-or-n-p (format "Save transcript for %s?" (buffer-name))))
+    (shell-maker-save-session-transcript))
+  t)
 
 (defun shell-maker-echo (text &optional keep-in-history)
   "Echo TEXT to shell.
