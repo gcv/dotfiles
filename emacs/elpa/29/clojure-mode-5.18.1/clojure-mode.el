@@ -12,7 +12,7 @@
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/clojure-emacs/clojure-mode
 ;; Keywords: languages clojure clojurescript lisp
-;; Version: 5.18.0
+;; Version: 5.18.1
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is not part of GNU Emacs.
@@ -1072,12 +1072,13 @@ any number of matches of `clojure--sym-forbidden-rest-chars'."))
       ;; keywords: {:oneword/ve/yCom|pLex.stu-ff 0}
       (,(concat "\\(:\\{1,2\\}\\)\\(" clojure--keyword-sym-regexp "?\\)\\(/\\)"
                 "\\(" clojure--keyword-sym-regexp "\\)")
+       ;; with ns
        (1 'clojure-keyword-face)
        (2 font-lock-type-face)
-       ;; (2 'clojure-keyword-face)
        (3 'default)
        (4 'clojure-keyword-face))
-      (,(concat "\\(:\\{1,2\\}\\)\\(" clojure--keyword-sym-regexp "\\)")
+      (,(concat "\\<\\(:\\{1,2\\}\\)\\(" clojure--keyword-sym-regexp "\\)")
+       ;; without ns
        (1 'clojure-keyword-face)
        (2 'clojure-keyword-face))
 
@@ -3129,7 +3130,7 @@ Assumes cursor is at beginning of function."
   "Add an arity to a function.
 
 Assumes cursor is at beginning of function."
-  (let ((beg-line (what-line))
+  (let ((beg-line (line-number-at-pos))
         (end (save-excursion (forward-sexp)
                              (point))))
     (down-list 2)
@@ -3141,7 +3142,7 @@ Assumes cursor is at beginning of function."
       (insert "[")
       (save-excursion (insert "])\n(")))
      ((looking-back "\\[" 1)  ;; single-arity fn
-      (let* ((same-line (string= beg-line (what-line)))
+      (let* ((same-line (= beg-line (line-number-at-pos)))
              (new-arity-text (concat (when same-line "\n") "([")))
         (save-excursion
           (goto-char end)
