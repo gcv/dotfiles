@@ -57,6 +57,10 @@ if external addressbook-bookmark package is installed." t)
 
 ;;; Generated autoloads from helm-buffers.el
 
+(autoload 'helm-buffers-quit-and-find-file-fn "helm-buffers" "\
+
+
+(fn SOURCE)")
 (autoload 'helm-buffers-list "helm-buffers" "\
 Preconfigured `helm' to list buffers." t)
 (autoload 'helm-mini "helm-buffers" "\
@@ -113,10 +117,6 @@ Preconfigured Helm to complete file name at point.
 
 (fn &optional FORCE)" t)
 (autoload 'helm-lisp-indent "helm-elisp" nil t)
-(autoload 'helm-lisp-completion-or-file-name-at-point "helm-elisp" "\
-Preconfigured Helm to complete Lisp symbol or filename at point.
-Filename completion happens if string start after or between a
-double quote." t)
 (autoload 'helm-apropos "helm-elisp" "\
 Preconfigured Helm to describe commands, functions, variables and faces.
 In non interactives calls DEFAULT argument should be provided as
@@ -126,7 +126,23 @@ a string, i.e. the `symbol-name' of any existing symbol.
 (autoload 'helm-manage-advice "helm-elisp" "\
 Preconfigured `helm' to disable/enable function advices." t)
 (autoload 'helm-locate-library "helm-elisp" "\
-Preconfigured helm to locate elisp libraries." t)
+Preconfigured helm to locate elisp libraries.
+
+When `completions-detailed' or `helm-completions-detailed' is non
+nil, a description of libraries is provided. The libraries are
+partially cached in the variables
+`helm--locate-library-doc-cache' and
+`helm--locate-library-cache'.  TIP: You can make these vars
+persistent for faster start with the psession package, using M-x
+psession-make-persistent-variable.  NOTE: The caches affect as
+well `find-libray' and `locate-library' when `helm-mode' is
+enabled and `completions-detailed' is non nil.  There is no need
+to refresh the caches, they will be updated automatically if some
+new libraries are found, however when a library update its
+headers and the description change you can reset the caches with
+a prefix arg.
+
+(fn &optional ARG)" t)
 (autoload 'helm-timers "helm-elisp" "\
 Preconfigured `helm' for timers." t)
 (autoload 'helm-complex-command-history "helm-elisp" "\
@@ -247,9 +263,9 @@ Cleanup `image-dired-dir' directory.
 Delete all thumb files that are no more associated with an existing
 image file in `helm-ff-image-dired-thumbnails-cache'." t)
 (autoload 'helm-projects-history "helm-files" "\
+Jump to project already visisted with `helm-browse-project'.
 
-
-(fn ARG)" t)
+(fn &optional ARG)" t)
 (autoload 'helm-browse-project "helm-files" "\
 Preconfigured helm to browse projects.
 Browse files and see status of project with its VCS.

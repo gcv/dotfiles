@@ -160,7 +160,7 @@ algorithm."
                                                " " 'display
                                                (propertize local-key 'face 'helm-M-x-key)))
                                       'match-part disp))
-                         ((string-match "^M-x" key)
+                         ((and (string-match "^M-x" key) (not (string= key "M-x")))
                           (propertize (format "%s%s%s"
                                               disp
                                               (if doc (make-string (+ 1 (- max-len (length cand))) ? ) "")
@@ -265,17 +265,11 @@ algorithm."
 (defun helm-M-x-read-extended-command (collection &optional predicate history)
   "Read or execute action on command name in COLLECTION or HISTORY.
 
-When `helm-M-x-use-completion-styles' is used, Emacs
-`completion-styles' mechanism is used, otherwise standard helm
-completion and helm fuzzy matching are used together.
+Helm completion is not provided when executing or defining kbd macros.
 
-Helm completion is not provided when executing or defining kbd
-macros.
-
-Arg COLLECTION should be an `obarray' but can be any object
-suitable for `try-completion'.  Arg PREDICATE is a function that
-default to `commandp' see also `try-completion'.  Arg HISTORY
-default to `extended-command-history'."
+Arg COLLECTION should be an `obarray'.
+Arg PREDICATE is a function that default to `commandp'.
+Arg HISTORY default to `extended-command-history'."
   (setq helm--mode-line-display-prefarg t)
   (let* ((pred (or predicate #'commandp))
          (helm-fuzzy-sort-fn (lambda (candidates _source)
