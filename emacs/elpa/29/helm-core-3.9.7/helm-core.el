@@ -4,7 +4,7 @@
 
 ;; Author: Thierry Volpiatto <thievol@posteo.net>
 ;; URL: https://emacs-helm.github.io/helm/
-;; Version: 3.9.5
+;; Version: 3.9.7
 ;; Package-Requires: ((emacs "25.1") (async "1.9.7"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -229,7 +229,7 @@ executing the first function on the next hit."
   "Define NAME as a multi-key command running FUNS.
 After DELAY seconds, the FUNS list is reinitialized.
 See `helm-define-multi-key'."
-  (declare (indent 2))
+  (declare (indent 2) (doc-string 2))
   (setq docstring (if docstring (concat docstring "\n\n")
                     "This is a helm-ish multi-key command."))
   `(defalias (quote ,name) (helm-make-multi-command ,funs ,delay) ,docstring))
@@ -240,7 +240,7 @@ Run each function in the FUNCTIONS list in turn when called within
 DELAY seconds."
   (declare (indent 1))
   (let ((funs functions)
-        (iter (list nil))
+        (iter (list nil)) ; ref-cell[1].
         (timeout delay))
     (lambda ()
       (interactive)
@@ -251,6 +251,8 @@ DELAY seconds."
               (cl-loop for count from 1 to (length functions)
                        collect count)))
         next)
+    ;; By passing a list containing a single 'nil' element [1] as ITERATOR we
+    ;; avoid using a global var.
     (unless (and (car iterator)
                  ;; Reset iterator when another key is pressed.
                  (eq this-command real-last-command))
@@ -427,6 +429,7 @@ i.e. the loop is not entered after running COMMAND."
     (define-key map (kbd "M-(")        #'helm-prev-visible-mark)
     (define-key map (kbd "M-)")        #'helm-next-visible-mark)
     (define-key map (kbd "C-k")        #'helm-delete-minibuffer-contents)
+    (define-key map (kbd "DEL")        #'helm-delete-char-backward)
     (define-key map (kbd "C-x C-f")    #'helm-quit-and-find-file)
     (define-key map (kbd "M-m")        #'helm-toggle-all-marks)
     (define-key map (kbd "M-a")        #'helm-mark-all)
@@ -791,7 +794,7 @@ handle this."
   :group 'helm
   :type 'boolean)
 
-(defcustom helm-always-two-windows nil
+(defcustom helm-always-two-windows t
   "When non-nil Helm uses two windows in this frame.
 
 I.e. `helm-buffer' in one window and `helm-current-buffer'
@@ -893,7 +896,7 @@ save or remove source name in this variable."
   :group 'helm
   :type 'boolean)
 
-(defcustom helm-allow-mouse nil
+(defcustom helm-allow-mouse t
   "Allow mouse usage during the Helm session when non-nil.
 
 Note that this also allows moving out of minibuffer when clicking
@@ -902,7 +905,7 @@ by clicking back in `helm-buffer' or minibuffer."
   :group 'helm
   :type 'boolean)
 
-(defcustom helm-move-to-line-cycle-in-source nil
+(defcustom helm-move-to-line-cycle-in-source t
   "Cycle to the beginning or end of the list after reaching the bottom or top.
 This applies when using `helm-next/previous-line'."
   :group 'helm
@@ -1015,7 +1018,7 @@ Only async sources than use a sentinel calling
   :type 'integer
   :group 'helm)
 
-(defcustom helm-show-action-window-other-window nil
+(defcustom helm-show-action-window-other-window 'left
   "Show action buffer beside `helm-buffer' when non-nil.
 
 If nil don't split and replace helm-buffer by the action buffer
@@ -4024,6 +4027,17 @@ Update is reenabled when idle 1s."
          (helm-force-update))))))
 (put 'helm-delete-backward-no-update 'helm-only t)
 
+(defun helm-delete-char-backward (arg)
+  "Delete char backward and update when reaching prompt."
+  (interactive "p")
+  (condition-case _err
+      (delete-char (- arg))
+    (buffer-read-only
+     (progn
+       (helm-update)
+       (helm-reset-yank-point)))))
+(put 'helm-delete-char-backward 'helm-only t)
+
 (defun helm--suspend-read-passwd (old--fn &rest args)
   "Suspend Helm while reading password.
 This is used to advice `tramp-read-passwd', `ange-ftp-get-passwd'
@@ -6609,7 +6623,15 @@ To customize `helm-candidates-in-buffer' behaviour, use `search',
          #'buffer-substring-no-properties)
      (or (assoc-default 'search src)
          '(helm-candidates-in-buffer-search-default-fn))
-     (helm-candidate-number-limit src)
+     ;; When candidate-transformer is specified in source ALL candidates should
+     ;; be computed with the candidate-transformer function (in contrast with
+     ;; filtered-candidate-transformer).  This to be consistent with what sync
+     ;; sources do. The car of the cons is used for initial fetching of
+     ;; candidates whereas the cdr is used after when searching (in this case
+     ;; the candidate number limit is used).
+     (if (helm-get-attr 'candidate-transformer src)
+         (cons 99999999 (helm-candidate-number-limit src))
+       (helm-candidate-number-limit src))
      (helm-get-attr 'match-part)
      src)))
 
@@ -6631,9 +6653,10 @@ To customize `helm-candidates-in-buffer' behaviour, use `search',
         (goto-char start-point)
         (if (string= pattern "")
             (helm-initial-candidates-from-candidate-buffer
-             get-line-fn limit)
+             get-line-fn (if (consp limit) (car limit) limit))
           (helm-search-from-candidate-buffer
-           pattern get-line-fn search-fns limit
+           pattern get-line-fn search-fns
+           (if (consp limit) (cdr limit) limit)
            start-point match-part-fn source))))))
 
 
@@ -6875,6 +6898,18 @@ It is useful to align extra informations after candidates in `helm-buffer'.")
        'helm-candidate-buffer-longest-len
        (get-buffer it))
     0))
+
+(defun helm-make-separator (cand &optional longest)
+  "Create a separator to align candidates.
+Longest candidate should have been calculated at initialization
+of `helm-source-in-buffer' by `helm-init-candidates-in-buffer' , otherwise
+LONGEST can be used to specify longest candidate."
+  (let ((lgst (or longest (helm-in-buffer-get-longest-candidate)))
+        (len  (length cand)))
+    (make-string (1+ (if (>= lgst len)
+                         (- lgst len)
+                       0))
+                 ? )))
 
 (defun helm-init-candidates-in-buffer (buffer-spec data &optional force-longest)
   "Register BUFFER-SPEC with DATA for a helm candidates-in-buffer session.
