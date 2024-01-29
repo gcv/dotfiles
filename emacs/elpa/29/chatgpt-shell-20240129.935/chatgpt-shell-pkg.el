@@ -1,7 +1,7 @@
-(define-package "chatgpt-shell" "20231024.1151" "ChatGPT shell + buffer insert commands"
+(define-package "chatgpt-shell" "20240129.935" "ChatGPT shell + buffer insert commands"
   '((emacs "27.1")
-    (shell-maker "0.42.1"))
-  :commit "311d732593d0b128a8bf69a8a70dc51b76731707" :authors
+    (shell-maker "0.49.1"))
+  :commit "e2073d9499a2072c16d669ec86d7dda0db4a0f4f" :authors
   '(("Alvaro Ramirez https://xenodium.com"))
   :maintainers
   '(("Alvaro Ramirez https://xenodium.com"))
