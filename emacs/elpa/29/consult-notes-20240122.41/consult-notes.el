@@ -59,10 +59,10 @@
   "Directories of files for searching with `consult-notes'.
 Each source entry is a list.
 There are three elements in the list. The first is a title
-string. The second is a narrowing key, and the third is a
-directory path (string) containing note files."
+string. The second is a narrowing key (character), and the third
+is a directory path (string) containing note files."
   :group 'consult-notes
-  :type '(list string key string))
+  :type '(repeat (list string character string)))
 
 (defcustom consult-notes-file-dir-annotate-function #'consult-notes--file-dir-annotate
   "Function to call for annotations of file note directories in `consult-notes'.
@@ -295,19 +295,20 @@ whether the mode should be enabled or disabled."
   "Search in all notes using `grep' or `ripgrep'.
 Which search function is used depends on the value of `consult-notes-use-rg'."
   (interactive)
-  (let ((sources (flatten-list
-                  (append
-                   ;; dir sources
-                   (mapcar #'cddr consult-notes-file-dir-sources)
-                   ;; org roam
-                   (when (bound-and-true-p consult-notes-org-roam-mode)
-                     (list (expand-file-name org-roam-directory)))
-                   ;; denote
-                   (when (bound-and-true-p consult-notes-denote-mode)
-                     (list (expand-file-name denote-directory)))
-                   ;; org agenda files
-                   (when (bound-and-true-p consult-notes-org-headings-mode)
-                     (mapcar #'expand-file-name consult-notes-org-headings-files))))))
+  (let ((sources (delete-dups
+                  (flatten-list
+                   (append
+                    ;; dir sources
+                    (mapcar #'cddr consult-notes-file-dir-sources)
+                    ;; org roam
+                    (when (bound-and-true-p consult-notes-org-roam-mode)
+                      (list (expand-file-name org-roam-directory)))
+                    ;; denote
+                    (when (bound-and-true-p consult-notes-denote-mode)
+                      (list (expand-file-name denote-directory)))
+                    ;; org agenda files
+                    (when (bound-and-true-p consult-notes-org-headings-mode)
+                      (mapcar #'expand-file-name consult-notes-org-headings-files)))))))
     (if consult-notes-use-rg
         (consult-ripgrep sources)
       (consult-grep sources))))
@@ -323,7 +324,8 @@ Which search function is used depends on the value of `consult-notes-use-rg'."
                   :require-match
                   (confirm-nonexistent-file-or-buffer)
                   :prompt "Notes: "
-                  :history 'consult-notes-history))
+                  :history 'consult-notes-history
+                  :add-history (seq-some #'thing-at-point '(region symbol))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Provide Consult Notes
