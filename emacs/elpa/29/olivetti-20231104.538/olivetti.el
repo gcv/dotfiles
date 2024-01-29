@@ -4,7 +4,7 @@
 
 ;; Author: Paul W. Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 2.0.4
+;; Version: 2.0.5
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/olivetti
 
@@ -130,7 +130,7 @@
 (require 'fringe)
 
 (defgroup olivetti ()
-  "Minor mode for a nice writing environment"
+  "Minor mode for a nice writing environment."
   :prefix "olivetti-"
   :group 'text)
 
@@ -148,13 +148,11 @@
 
 (defvar-local olivetti--split-window-preferred-function
   nil
-  "Value of `split-window-preferred-function' when when
-  `olivetti-mode' is enabled.")
+  "Value of `split-window-preferred-function' at initialization.")
 
 (defvar-local olivetti--face-remap
   nil
-  "Saved cookie from `face-remap-add-relative' when
-`olivetti-mode' is enabled.")
+  "Saved cookie from `face-remap-add-relative' at initialization.")
 
 
 ;;; Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -238,7 +236,7 @@ will fall back to margins on console."
 (defcustom olivetti-margin-width
   10
   "Width in columns of margin between text body and fringes.
-Only has any effect when `olivetti-style' is set to 'fancy."
+Only has any effect when `olivetti-style' is set to `fancy'."
   :type '(choice (const :tag "None" nil)
                  (integer :tag "Columns" 10))
   :safe 'integerp
@@ -439,6 +437,8 @@ If prefixed with ARG, incrementally increase."
 
 
 ;;; Mode Definition ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'face-remap)
 
 ;;;###autoload
 (define-minor-mode olivetti-mode
