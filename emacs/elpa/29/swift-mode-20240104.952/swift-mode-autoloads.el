@@ -23,7 +23,8 @@ Major mode for editing Swift code.
 \\{swift-mode-map}
 
 (fn)" t)
- (add-to-list 'auto-mode-alist '("\\.swift\\(interface\\)?\\'" . swift-mode))
+ (add-to-list 'auto-mode-alist
+             '("\\.swift\\(interface\\)?\\'" . swift-mode))
  (swift-mode:add-supported-extension-for-speedbar)
 (register-definition-prefixes "swift-mode" '("swift-mode"))
 
