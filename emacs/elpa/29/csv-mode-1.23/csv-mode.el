@@ -4,7 +4,7 @@
 
 ;; Author: "Francis J. Wright" <F.J.Wright@qmul.ac.uk>
 ;; Maintainer: emacs-devel@gnu.org
-;; Version: 1.22
+;; Version: 1.23
 ;; Package-Requires: ((emacs "27.1") (cl-lib "0.5"))
 ;; Keywords: convenience
 
@@ -110,6 +110,7 @@
 ;; Since 1.21:
 ;; - New command `csv-insert-column'.
 ;; - New config var `csv-align-min-width' for `csv-align-mode'.
+;; - New option `csv-confirm-region'.
 
 ;; Since 1.9:
 ;; - `csv-align-mode' auto-aligns columns dynamically (on screen).
@@ -269,6 +270,10 @@ after separators."
 
 (defcustom csv-invisibility-default t
   "If non-nil, make separators in aligned records invisible."
+  :type 'boolean)
+
+(defcustom csv-confirm-region t
+  "If non-nil, confirm that region is OK in interactive commands."
   :type 'boolean)
 
 (defface csv-separator-face
@@ -557,9 +562,10 @@ The default field when read interactively is the current field."
 		    (exchange-point-and-mark)
 		    (sit-for 1)
 		    (exchange-point-and-mark))
-		  (or (y-or-n-p "Region OK? ")
-		      (error "Action aborted by user"))
-		  (message nil)		; clear y-or-n-p message
+                  (when csv-confirm-region
+                    (or (y-or-n-p "Region OK? ")
+                        (error "Action aborted by user"))
+                    (message nil))      ; clear y-or-n-p message
 		  (list (region-beginning) (region-end))))
 	    ;; Use region set by user:
 	    (list (region-beginning) (region-end)))))
