@@ -194,6 +194,7 @@ the first target at point." t)
 ;;; Generated autoloads from embark-org.el
 
 (register-definition-prefixes "embark-org" '("embark-org-"))
+
 
 ;;; End of scraped data
 
