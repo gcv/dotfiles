@@ -1,12 +1,12 @@
 ;;; vertico.el --- VERTical Interactive COmpletion -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.4
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
+;; Version: 1.7
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4"))
 ;; Homepage: https://github.com/minad/vertico
 ;; Keywords: convenience, files, matching, completion
 
@@ -140,8 +140,8 @@ The value should lie between 0 and vertico-count/2."
   "M-RET" #'vertico-exit-input
   "TAB" #'vertico-insert)
 
-(defvar-local vertico--highlight #'identity
-  "Deferred candidate highlighting function.")
+(defvar-local vertico--hilit #'identity
+  "Lazy candidate highlighting function.")
 
 (defvar-local vertico--history-hash nil
   "History hash table and corresponding base string.")
@@ -233,7 +233,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
        (dolist (% candidates)
          ;; Find recent candidate in history or fill bucket
          (,@(if (not (eq (car by) 'history)) `(progn)
-              `(if-let (idx (gethash % hhash)) (push (cons idx %) hcands)))
+              `(if-let ((idx (gethash % hhash))) (push (cons idx %) hcands)))
           (let ((idx (min ,(1- bsize) ,bindex)))
             (aset buckets idx (cons % (aref buckets idx))))))
        (nconc ,@(and (eq (car by) 'history) '((vertico--sort-decorated hcands)))
@@ -249,63 +249,58 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--affixate (cands)
   "Annotate CANDS with annotation function."
-  (if-let (aff (or (vertico--metadata-get 'affixation-function)
-                   (plist-get completion-extra-properties :affixation-function)))
+  (if-let ((aff (or (vertico--metadata-get 'affixation-function)
+                    (plist-get completion-extra-properties :affixation-function))))
       (funcall aff cands)
-    (if-let (ann (or (vertico--metadata-get 'annotation-function)
-                     (plist-get completion-extra-properties :annotation-function)))
+    (if-let ((ann (or (vertico--metadata-get 'annotation-function)
+                      (plist-get completion-extra-properties :annotation-function))))
         (cl-loop for cand in cands collect
-                 (let ((suffix (or (funcall ann cand) "")))
+                 (let ((suff (or (funcall ann cand) "")))
                    ;; The default completion UI adds the `completions-annotations'
                    ;; face if no other faces are present.
-                   (unless (text-property-not-all 0 (length suffix) 'face nil suffix)
-                     (setq suffix (propertize suffix 'face 'completions-annotations)))
-                   (list cand "" suffix)))
+                   (unless (text-property-not-all 0 (length suff) 'face nil suff)
+                     (setq suff (propertize suff 'face 'completions-annotations)))
+                   (list cand "" suff)))
       (cl-loop for cand in cands collect (list cand "" "")))))
 
 (defun vertico--move-to-front (elem list)
   "Move ELEM to front of LIST."
-  (if-let (found (member elem list))
+  (if-let ((found (member elem list))) ;; No duplicates, compare with Corfu.
       (nconc (list (car found)) (delq (setcar found nil) list))
     list))
 
-;; bug#47711: Deferred highlighting for `completion-all-completions'
-;; XXX There is one complication: `completion--twq-all' already adds
-;; `completions-common-part'.  See below `vertico--candidate'.
-(defun vertico--all-completions (&rest args)
-  "Compute all completions for ARGS with deferred highlighting."
-  (cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
-             (orig-flex (symbol-function #'completion-flex-all-completions))
-             ((symbol-function #'completion-flex-all-completions)
-              (lambda (&rest args)
-                ;; Unfortunately for flex we have to undo the deferred highlighting, since flex uses
-                ;; the completion-score for sorting, which is applied during highlighting.
-                (cl-letf (((symbol-function #'completion-pcm--hilit-commonality) orig-pcm))
-                  (apply orig-flex args))))
-             ;; Defer the following highlighting functions
-             (hl #'identity)
+(defun vertico--filter-completions (&rest args)
+  "Compute all completions for ARGS with lazy highlighting."
+  (defvar completion-lazy-hilit)
+  (defvar completion-lazy-hilit-fn)
+  (cl-letf* ((completion-lazy-hilit t)
+             (completion-lazy-hilit-fn nil)
              ((symbol-function #'completion-hilit-commonality)
               (lambda (cands prefix &optional base)
-                (setq hl (lambda (x) (nconc (completion-hilit-commonality x prefix base) nil)))
-                (and cands (nconc cands base))))
-             ((symbol-function #'completion-pcm--hilit-commonality)
-              (lambda (pattern cands)
-                (setq hl (lambda (x)
-                           ;; `completion-pcm--hilit-commonality' sometimes throws an internal error
-                           ;; for example when entering "/sudo:://u".
-                           (condition-case nil
-                               (completion-pcm--hilit-commonality pattern x)
-                             (t x))))
-                cands)))
-    ;; Only advise orderless after it has been loaded to avoid load order issues
-    (if (and (fboundp 'orderless-highlight-matches) (fboundp 'orderless-pattern-compiler))
-        (cl-letf (((symbol-function 'orderless-highlight-matches)
-                   (lambda (pattern cands)
-                     (let ((regexps (orderless-pattern-compiler pattern)))
-                       (setq hl (lambda (x) (orderless-highlight-matches regexps x))))
-                     cands)))
-          (cons (apply #'completion-all-completions args) hl))
-      (cons (apply #'completion-all-completions args) hl))))
+                (setq completion-lazy-hilit-fn
+                      (lambda (x) (car (completion-hilit-commonality (list x) prefix base))))
+                (and cands (nconc cands base)))))
+    (if (eval-when-compile (>= emacs-major-version 30))
+        (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)
+      (cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
+                 (orig-flex (symbol-function #'completion-flex-all-completions))
+                 ((symbol-function #'completion-flex-all-completions)
+                  (lambda (&rest args)
+                    ;; Unfortunately for flex we have to undo the lazy highlighting, since flex uses
+                    ;; the completion-score for sorting, which is applied during highlighting.
+                    (cl-letf (((symbol-function #'completion-pcm--hilit-commonality) orig-pcm))
+                      (apply orig-flex args))))
+                 ((symbol-function #'completion-pcm--hilit-commonality)
+                  (lambda (pattern cands)
+                    (setq completion-lazy-hilit-fn
+                          (lambda (x)
+                            ;; `completion-pcm--hilit-commonality' sometimes throws an internal error
+                            ;; for example when entering "/sudo:://u".
+                            (condition-case nil
+                                (car (completion-pcm--hilit-commonality pattern (list x)))
+                              (t x))))
+                    cands)))
+        (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)))))
 
 (defun vertico--metadata-get (prop)
   "Return PROP from completion metadata."
@@ -325,15 +320,15 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
                (after (substring content pt))
                ;; bug#47678: `completion-boundaries' fails for `partial-completion'
                ;; if the cursor is moved between the slashes of "~//".
-               ;; See also marginalia.el which has the same issue.
-               (bounds (or (condition-case nil
-                               (completion-boundaries before table pred after)
-                             (t (cons 0 (length after))))))
+               ;; See also corfu.el which has the same issue.
+               (bounds (condition-case nil
+                           (completion-boundaries before table pred after)
+                         (t (cons 0 (length after)))))
                (field (substring content (car bounds) (+ pt (cdr bounds))))
                ;; `minibuffer-completing-file-name' has been obsoleted by the completion category
                (completing-file (eq 'file (vertico--metadata-get 'category)))
-               (`(,all . ,hl) (vertico--all-completions content table pred pt vertico--metadata))
-               (base (or (when-let (z (last all)) (prog1 (cdr z) (setcdr z nil))) 0))
+               (`(,all . ,hl) (vertico--filter-completions content table pred pt vertico--metadata))
+               (base (or (when-let ((z (last all))) (prog1 (cdr z) (setcdr z nil))) 0))
                (vertico--base (substring content 0 base))
                (def (or (car-safe minibuffer-default) minibuffer-default))
                (groups) (def-missing) (lock))
@@ -349,8 +344,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
     (when (and completing-file (not (string-suffix-p "/" field)))
       (setq all (vertico--move-to-front (concat field "/") all)))
     (setq all (vertico--move-to-front field all))
-    (when-let (group-fun (and all (vertico--metadata-get 'group-function)))
-      (setq groups (vertico--group-by group-fun all) all (car groups)))
+    (when-let ((fun (and all (vertico--metadata-get 'group-function))))
+      (setq groups (vertico--group-by fun all) all (car groups)))
     (setq def-missing (and def (equal content "") (not (member def all)))
           lock (and vertico--lock-candidate ;; Locked position of old candidate.
                     (if (< vertico--index 0) -1
@@ -359,7 +354,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
       (vertico--metadata . ,vertico--metadata)
       (vertico--candidates . ,all)
       (vertico--total . ,(length all))
-      (vertico--highlight . ,hl)
+      (vertico--hilit . ,(or hl #'identity))
       (vertico--allow-prompt . ,(or def-missing (eq vertico-preselect 'prompt)
                                     (memq minibuffer--require-match
                                           '(nil confirm confirm-after-completion))))
@@ -381,19 +376,17 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Group ELEMS by FUN."
   (let ((ht (make-hash-table :test #'equal)) titles groups)
     ;; Build hash table of groups
-    (while elems
-      (let* ((title (funcall fun (car elems) nil))
-             (group (gethash title ht)))
-        (if group
-            (setcdr group (setcdr (cdr group) elems)) ;; Append to tail of group
-          (puthash title (cons elems elems) ht) ;; New group element (head . tail)
-          (push title titles))
-        (pop elems)))
+    (cl-loop for elem on elems
+             for title = (funcall fun (car elem) nil) do
+             (if-let ((group (gethash title ht)))
+                 (setcdr group (setcdr (cdr group) elem)) ;; Append to tail of group
+               (puthash title (cons elem elem) ht) ;; New group element (head . tail)
+               (push title titles)))
     (setq titles (nreverse titles))
     ;; Cycle groups if `vertico--lock-groups' is set
-    (when-let (group (and vertico--lock-groups
-                          (seq-find (lambda (group) (gethash group ht))
-                                    vertico--all-groups)))
+    (when-let ((vertico--lock-groups)
+               (group (seq-find (lambda (group) (gethash group ht))
+                                vertico--all-groups)))
       (setq titles (vertico--cycle titles (seq-position titles group))))
     ;; Build group list
     (dolist (title titles)
@@ -423,15 +416,17 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
          (input (cons content pt)))
     (unless (or (and interruptible (input-pending-p)) (equal vertico--input input))
       ;; Redisplay to make input immediately visible before expensive candidate
-      ;; recomputation (#89).  No redisplay during init because of flicker.
+      ;; recomputation (gh:minad/vertico#89).  No redisplay during init because
+      ;; of flicker.
       (when (and interruptible (consp vertico--input))
         ;; Prevent recursive exhibit from timer (`consult-vertico--refresh').
         (cl-letf (((symbol-function #'vertico--exhibit) #'ignore)) (redisplay)))
       (pcase (let ((vertico--metadata (completion-metadata (substring content 0 pt)
                                                            minibuffer-completion-table
                                                            minibuffer-completion-predicate)))
-               ;; If Tramp is used, do not compute the candidates in an interruptible fashion,
-               ;; since this will break the Tramp password and user name prompts (See #23).
+               ;; If Tramp is used, do not compute the candidates in an
+               ;; interruptible fashion, since this will break the Tramp
+               ;; password and user name prompts (See gh:minad/vertico#23).
                (if (or (not interruptible)
                        (and (eq 'file (vertico--metadata-get 'category))
                             (or (vertico--remote-p content) (vertico--remote-p default-directory))))
@@ -466,14 +461,15 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Return minimum width of windows, which display the minibuffer."
   (cl-loop for win in (get-buffer-window-list) minimize (window-width win)))
 
-(defun vertico--truncate-multiline (cand max-width)
-  "Truncate multiline CAND to MAX-WIDTH."
-  (truncate-string-to-width
-   (thread-last cand
-     (replace-regexp-in-string "[\t ]+" " ")
-     (replace-regexp-in-string "[\t\n ]*\n[\t\n ]*" (car vertico-multiline))
-     (replace-regexp-in-string "\\`[\t\n ]+\\|[\t\n ]+\\'" ""))
-   max-width 0 nil (cdr vertico-multiline)))
+(defun vertico--truncate-multiline (str max)
+  "Truncate multiline STR to MAX."
+  (let ((pos 0) (res ""))
+    (while (and (< (length res) (* 2 max)) (string-match "\\(\\S-+\\)\\|\\s-+" str pos))
+      (setq res (concat res (if (match-end 1) (match-string 0 str)
+                              (if (string-search "\n" (match-string 0 str))
+                                  (car vertico-multiline) " ")))
+            pos (match-end 0)))
+    (truncate-string-to-width (string-trim res) max 0 nil (cdr vertico-multiline))))
 
 (defun vertico--compute-scroll ()
   "Compute new scroll position."
@@ -487,9 +483,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Format group TITLE given the current CAND."
   (when (string-prefix-p title cand)
     ;; Highlight title if title is a prefix of the candidate
-    (setq title (substring (car (funcall vertico--highlight
-                                         (list (propertize cand 'face 'vertico-group-title))))
-                           0 (length title)))
+    (setq cand (propertize cand 'face 'vertico-group-title)
+          title (substring (funcall vertico--hilit cand) 0 (length title)))
     (vertico--remove-face 0 (length title) 'completions-first-difference title))
   (format (concat vertico-group-format "\n") title))
 
@@ -519,7 +514,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Remove FACE between BEG and END from OBJ."
   (while (< beg end)
     (let ((next (next-single-property-change beg 'face obj end)))
-      (when-let (val (get-text-property beg 'face obj))
+      (when-let ((val (get-text-property beg 'face obj)))
         (put-text-property beg next 'face (remq face (ensure-list val)) obj))
       (setq beg next))))
 
@@ -546,10 +541,9 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
       (let ((cand (substring (nth vertico--index vertico--candidates))))
         ;; XXX Drop the completions-common-part face which is added by the
         ;; `completion--twq-all' hack.  This should better be fixed in Emacs
-        ;; itself, the corresponding code is already marked with a FIXME.
+        ;; itself, the corresponding code is already marked as fixme.
         (vertico--remove-face 0 (length cand) 'completions-common-part cand)
-        (concat vertico--base
-                (if hl (car (funcall vertico--highlight (list cand))) cand))))
+        (concat vertico--base (if hl (funcall vertico--hilit cand) cand))))
      ((and (equal content "") (or (car-safe minibuffer-default) minibuffer-default)))
      (t content))))
 
@@ -578,12 +572,11 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
     (let* (title (index vertico--scroll)
            (group-fun (and vertico-group-format (vertico--metadata-get 'group-function)))
            (candidates
-            (thread-last (seq-subseq vertico--candidates index
-                                     (min (+ index vertico-count) vertico--total))
-              (funcall vertico--highlight)
-              (vertico--affixate))))
+            (vertico--affixate
+             (cl-loop repeat vertico-count for c in (nthcdr index vertico--candidates)
+                      collect (funcall vertico--hilit (substring c))))))
       (pcase-dolist ((and cand `(,str . ,_)) candidates)
-        (when-let (new-title (and group-fun (funcall group-fun str nil)))
+        (when-let ((new-title (and group-fun (funcall group-fun str nil))))
           (unless (equal title new-title)
             (setq title new-title)
             (push (vertico--format-group-title title str) lines))
@@ -621,6 +614,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   (setq-local truncate-lines (< (point) (* 0.8 (vertico--window-width)))
               resize-mini-windows 'grow-only
               max-mini-window-height 1.0)
+  (unless truncate-lines (set-window-hscroll nil 0))
   (unless (frame-root-window-p (active-minibuffer-window))
     (unless vertico-resize (setq height (max height vertico-count)))
     (let ((dp (- (max (cdr (window-text-pixel-size))

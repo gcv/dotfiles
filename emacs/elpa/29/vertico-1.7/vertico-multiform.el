@@ -1,12 +1,12 @@
 ;;; vertico-multiform.el --- Configure Vertico in different forms per command -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.4"))
+;; Version: 1.7
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (vertico "1.7"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -49,11 +49,12 @@
 ;; Temporary toggling between the different display modes is possible.
 ;; The following keys are bound in the `vertico-multiform-map'.
 ;;
-;;   M-V -> `vertico-multiform-vertical'
-;;   M-G -> `vertico-multiform-grid'
+;;   M-B -> `vertico-multiform-buffer'
 ;;   M-F -> `vertico-multiform-flat'
+;;   M-G -> `vertico-multiform-grid'
 ;;   M-R -> `vertico-multiform-reverse'
 ;;   M-U -> `vertico-multiform-unobtrusive'
+;;   M-V -> `vertico-multiform-vertical'
 ;;
 ;;; Code:
 
@@ -106,11 +107,11 @@ The keys in LIST can be symbols or regexps."
 (defun vertico-multiform--setup ()
   "Enable modes at minibuffer setup."
   (let ((cat (completion-metadata-get
-              (completion-metadata
-               (buffer-substring (minibuffer-prompt-end)
-                                 (max (minibuffer-prompt-end) (point)))
-               minibuffer-completion-table
-               minibuffer-completion-predicate)
+              (completion-metadata (buffer-substring-no-properties
+                                    (minibuffer-prompt-end)
+                                    (max (minibuffer-prompt-end) (point)))
+                                   minibuffer-completion-table
+                                   minibuffer-completion-predicate)
               'category))
         (exit (make-symbol "vertico-multiform--exit"))
         (depth (recursion-depth))
@@ -138,12 +139,7 @@ The keys in LIST can be symbols or regexps."
     (vertico--setup)))
 
 (defvar-keymap vertico-multiform-map
-  :doc "Additional keymap activated in multiform mode."
-  "M-V" #'vertico-multiform-vertical
-  "M-G" #'vertico-multiform-grid
-  "M-F" #'vertico-multiform-flat
-  "M-R" #'vertico-multiform-reverse
-  "M-U" #'vertico-multiform-unobtrusive)
+  :doc "Additional keymap activated in multiform mode.")
 
 ;;;###autoload
 (define-minor-mode vertico-multiform-mode
@@ -154,9 +150,9 @@ The keys in LIST can be symbols or regexps."
   (when vertico-multiform--stack
     (warn "vertico-multiform state is inconsistent")
     (setq vertico-multiform--stack nil))
-  (if vertico-multiform-mode
-      (add-to-list 'minor-mode-map-alist `(vertico--input . ,vertico-multiform-map))
-    (setq minor-mode-map-alist (delete `(vertico--input . ,vertico-multiform-map) minor-mode-map-alist))))
+  (cl-callf2 rassq-delete-all vertico-multiform-map minor-mode-map-alist)
+  (when vertico-multiform-mode
+    (push `(vertico--input . ,vertico-multiform-map) minor-mode-map-alist)))
 
 (cl-defmethod vertico--advice (&context (vertico-multiform-mode (eql t)) &rest app)
   (unwind-protect
@@ -187,9 +183,7 @@ ARG can be nil, t, -1, 1 or toggle."
           (setcar vertico-multiform--stack (remove mode modes))
         (push not-mode (car vertico-multiform--stack))))))
 
-(defvar vertico-multiform--display-modes
-  '(vertico-unobtrusive-mode vertico-flat-mode
-    vertico-grid-mode vertico-reverse-mode))
+(defvar vertico-multiform--display-modes nil)
 (defvar-local vertico-multiform--display-last nil)
 
 (defun vertico-multiform-vertical (&optional mode)
@@ -207,21 +201,21 @@ MODE defaults to the vertical display."
       (vertico-multiform--temporary-mode mode 1))
     (setq vertico-multiform--display-last last)))
 
-(defmacro vertico-multiform--define-display-toggle (name)
-  "Define toggle for display mode NAME."
-  `(defun ,(intern (format "vertico-multiform-%s" name)) ()
-     ,(format "Toggle the %s display." name)
-     (interactive)
-     (vertico-multiform-vertical ',(intern (format "vertico-%s-mode" name)))))
-
-(vertico-multiform--define-display-toggle grid)
-(vertico-multiform--define-display-toggle flat)
-(vertico-multiform--define-display-toggle reverse)
-(vertico-multiform--define-display-toggle unobtrusive)
-
-;; Emacs 28: Do not show display toggles in M-X
-(map-keymap (lambda (_ x) (put x 'completion-predicate #'vertico--command-p))
-            (keymap-lookup vertico-multiform-map "ESC"))
+(pcase-dolist (`(,key ,name) '(("M-B" buffer)
+                               ("M-F" flat)
+                               ("M-G" grid)
+                               ("M-R" reverse)
+                               ("M-U" unobtrusive) ;; must come after flat
+                               ("M-V" vertical)))
+  (let ((toggle (intern (format "vertico-multiform-%s" name))))
+    (unless (eq name 'vertical)
+      (let ((mode (intern (format "vertico-%s-mode" name))))
+        (defalias toggle
+          (lambda () (interactive) (vertico-multiform-vertical mode))
+          (format "Toggle the %s display." name))
+        (push mode vertico-multiform--display-modes)))
+    (put toggle 'completion-predicate #'vertico--command-p)
+    (keymap-set vertico-multiform-map key toggle)))
 
 (provide 'vertico-multiform)
 ;;; vertico-multiform.el ends here

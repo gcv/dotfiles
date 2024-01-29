@@ -1,12 +1,12 @@
 ;;; vertico-flat.el --- Flat, horizontal display for Vertico -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.4"))
+;; Version: 1.7
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (vertico "1.7"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -40,6 +40,7 @@
 ;;; Code:
 
 (require 'vertico)
+(eval-when-compile (require 'cl-lib))
 
 (defcustom vertico-flat-max-lines 1
   "Maximal number of lines to use."
@@ -75,12 +76,12 @@
   "Flat, horizontal display for Vertico."
   :global t :group 'vertico
   ;; Shrink current minibuffer window
-  (when-let (win (active-minibuffer-window))
+  (when-let ((win (active-minibuffer-window)))
     (unless (frame-root-window-p win)
       (window-resize win (- (window-pixel-height win)) nil nil 'pixelwise)))
-  (if vertico-flat-mode
-      (add-to-list 'minor-mode-map-alist `(vertico--input . ,vertico-flat-map))
-    (setq minor-mode-map-alist (delete `(vertico--input . ,vertico-flat-map) minor-mode-map-alist))))
+  (cl-callf2 rassq-delete-all vertico-flat-map minor-mode-map-alist)
+  (when vertico-flat-mode
+    (push `(vertico--input . ,vertico-flat-map) minor-mode-map-alist)))
 
 (cl-defmethod vertico--display-candidates (candidates &context (vertico-flat-mode (eql t)))
   (setq-local truncate-lines nil
@@ -92,7 +93,7 @@
            (cond
             ((and (not candidates) (plist-get vertico-flat-format :no-match)))
             ((and (= vertico--total 1) (= vertico--index 0)
-                  (when-let (fmt (plist-get vertico-flat-format :single))
+                  (when-let ((fmt (plist-get vertico-flat-format :single)))
                     (format fmt (substring-no-properties (car candidates))))))
             (t (format (plist-get vertico-flat-format (if (< vertico--index 0) :prompt :multiple))
                        (string-join candidates (plist-get vertico-flat-format :separator))))))))
@@ -110,18 +111,17 @@
     (while (and candidates (not (eq wrapped (car candidates)))
                 (> width 0) (> count 0))
       (let ((cand (pop candidates)) (prefix "") (suffix ""))
-        (setq cand (funcall vertico--highlight (list cand)))
-        (pcase (and vertico-flat-annotate (vertico--affixate cand))
-          (`((,c ,p ,s)) (setq cand c prefix p suffix s))
-          (_ (setq cand (car cand))))
+        (setq cand (funcall vertico--hilit (substring cand)))
+        (pcase (and vertico-flat-annotate (vertico--affixate (list cand)))
+          (`((,c ,p ,s)) (setq cand c prefix p suffix s)))
         (when (string-search "\n" cand)
           (setq cand (vertico--truncate-multiline cand width)))
         (setq cand (string-trim
                     (replace-regexp-in-string
                      "[ \t]+"
                      (lambda (x) (apply #'propertize " " (text-properties-at 0 x)))
-                     (vertico--format-candidate cand prefix suffix index vertico--index))))
-        (setq index (1+ index)
+                     (vertico--format-candidate cand prefix suffix index vertico--index)))
+              index (1+ index)
               count (1- count)
               width (- width (string-width cand) (length (plist-get vertico-flat-format :separator))))
         (when (or (not result) (> width 0))

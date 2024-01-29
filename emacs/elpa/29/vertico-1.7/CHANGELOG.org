@@ -2,6 +2,36 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 1.7 (2024-01-23)
+
+- =vertico-buffer-mode=: Simplify mode line format.
+- =vertico-buffer-mode=: Reduce vscroll value when =vertico-buffer-hide-prompt= is
+  non-nil to avoid redisplay performance issues.
+
+* Version 1.6 (2023-12-27)
+
+- ~vertico-multiform-buffer~: New display toggle command.
+- ~vertico-buffer-mode~: Support toggling during an active minibuffer session.
+- ~vertico-buffer-mode~: Highlight active region.
+- ~vertico-suspend~: Support the setting ~read-minibuffer-restore-windows=nil~.
+
+* Version 1.5 (2023-12-01)
+
+- =vertico-suspend=: New extension to suspend and resume the current Vertico
+  completion session.
+- =vertico-directory-enter=: Exit with input if prefix argument is given. Mirrors
+  the behavior of =vertico-exit=.
+- =vertico-mouse-map=: New keymap.
+- =vertico-repeat-select=: Do not display selected candidate.
+- =vertico-repeat=: Store active display mode if the mode was temporarily toggled
+  via =vertico-multiform-mode=.
+- =vertico-repeat-previous=, =vertico-repeat-next=: New commands to step over input
+  history during an active Vertico completion session.
+- =vertico-repeat-last=: Deprecated in favor of =vertico-repeat-previous=.
+- Optimize truncation of multi-line candidates (=vertico--truncate-multiline=).
+  This affects commands like =yank-from-kill-ring=.
+- =vertico-quick=: Use a slightly different scheme to support more candidates.
+
 * Version 1.4 (2023-07-02)
 
 - =vertico-grid-annotate=: Fix width computation.

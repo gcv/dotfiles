@@ -1,12 +1,12 @@
 ;;; vertico-indexed.el --- Select indexed candidates -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (vertico "1.4"))
+;; Version: 1.7
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (vertico "1.7"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.

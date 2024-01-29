@@ -45,10 +45,13 @@ it is disabled.
 (defvar vertico-buffer-mode nil "\
 Non-nil if Vertico-Buffer mode is enabled.
 See the `vertico-buffer-mode' command
-for a description of this minor mode.")
+for a description of this minor mode.
+Setting this variable directly does not take effect;
+either customize it (see the info node `Easy Customization')
+or call the function `vertico-buffer-mode'.")
 (custom-autoload 'vertico-buffer-mode "vertico-buffer" nil)
 (autoload 'vertico-buffer-mode "vertico-buffer" "\
-Display Vertico in a buffer instead of the minibuffer.
+Display Vertico like a regular buffer in a large window.
 
 This is a global minor mode.  If called interactively, toggle the
 `Vertico-Buffer mode' mode.  If the prefix argument is positive,
@@ -71,7 +74,10 @@ it is disabled.
 ;;; Generated autoloads from vertico-directory.el
 
 (autoload 'vertico-directory-enter "vertico-directory" "\
-Enter directory or exit completion with current candidate." t)
+Enter directory or exit completion with current candidate.
+Exit with current input if prefix ARG is given.
+
+(fn &optional ARG)" t)
 (autoload 'vertico-directory-up "vertico-directory" "\
 Delete N names before point.
 
@@ -203,7 +209,7 @@ The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
 (fn &optional ARG)" t)
-(register-definition-prefixes "vertico-mouse" '("vertico-mouse--"))
+(register-definition-prefixes "vertico-mouse" '("vertico-mouse-"))
 
 
 ;;; Generated autoloads from vertico-multiform.el
@@ -254,13 +260,18 @@ Insert candidate using quick keys." t)
 (autoload 'vertico-repeat-save "vertico-repeat" "\
 Save Vertico session for `vertico-repeat'.
 This function must be registered as `minibuffer-setup-hook'.")
-(autoload 'vertico-repeat-last "vertico-repeat" "\
-Repeat last Vertico completion SESSION.
-If called interactively from an existing Vertico session,
-`vertico-repeat-last' will restore the last input and
-last selected candidate for the current command.
+(autoload 'vertico-repeat-next "vertico-repeat" "\
+Repeat Nth next Vertico completion session.
+This command must be called from an existing Vertico session
+after `vertico-repeat-previous'.
 
-(fn &optional SESSION)" t)
+(fn N)" t)
+(autoload 'vertico-repeat-previous "vertico-repeat" "\
+Repeat Nth previous Vertico completion session.
+If called from an existing Vertico session, restore the input and
+selected candidate for the current command.
+
+(fn N)" t)
 (autoload 'vertico-repeat-select "vertico-repeat" "\
 Select a Vertico session from the session history and repeat it.
 If called from an existing Vertico session, you can select among
@@ -304,6 +315,17 @@ it is disabled.
 (register-definition-prefixes "vertico-reverse" '("vertico-reverse-map"))
 
 
+;;; Generated autoloads from vertico-suspend.el
+
+(autoload 'vertico-suspend "vertico-suspend" "\
+Suspend the current completion session.
+If the command is invoked from within the Vertico minibuffer, the
+current session is suspended.  If the command is invoked from
+outside the minibuffer, the active minibuffer is either selected
+or the latest completion session is restored." t)
+(register-definition-prefixes "vertico-suspend" '("vertico-suspend--"))
+
+
 ;;; Generated autoloads from vertico-unobtrusive.el
 
 (defvar vertico-unobtrusive-mode nil "\
@@ -333,7 +355,7 @@ The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
 (fn &optional ARG)" t)
-(register-definition-prefixes "vertico-unobtrusive" '("vertico-unobtrusive--orig-count"))
+(register-definition-prefixes "vertico-unobtrusive" '("vertico-unobtrusive--restore"))
 
 ;;; End of scraped data
 
