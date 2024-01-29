@@ -1,4 +1,4 @@
-;;; ob-restclient.el --- org-babel functions for restclient-mode
+;;; ob-restclient.el --- org-babel functions for restclient-mode -*- lexical-binding: t -*-
 
 ;; Copyright (C) Alf Lervåg
 
@@ -37,6 +37,7 @@
 (require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
+(require 'org-table)
 (require 'restclient)
 
 (defvar org-babel-default-header-args:restclient
@@ -58,6 +59,8 @@ This function is called by `org-babel-execute-src-block'"
           (restclient-same-buffer-response t)
           (restclient-response-body-only (org-babel-restclient--should-hide-headers-p params))
           (restclient-same-buffer-response-name (buffer-name))
+	  (raw-only (org-babel-restclient--raw-payload-p params))
+	  (suppress-response-buffer (fboundp #'restclient-http-send-current-suppress-response-buffer))
           (display-buffer-alist
            (cons
             '("\\*temp\\*" display-buffer-no-window (allow-no-window . t))
@@ -72,11 +75,7 @@ This function is called by `org-babel-execute-src-block'"
         (goto-char (point-min))
         (delete-trailing-whitespace)
         (goto-char (point-min))
-        (if (fboundp #'restclient-http-send-current-suppress-response-buffer)
-            (restclient-http-parse-current-and-do
-             'restclient-http-do (org-babel-restclient--raw-payload-p params) t t)
-          (restclient-http-parse-current-and-do
-           'restclient-http-do (org-babel-restclient--raw-payload-p params) t)))
+        (restclient-http-parse-current-and-do 'restclient-http-do raw-only t suppress-response-buffer))
 
       (while restclient-within-call
         (sleep-for 0.05))
@@ -94,7 +93,7 @@ This function is called by `org-babel-execute-src-block'"
          (format "%s %s--args %s" org-babel-restclient--jq-path
 		 (if (assq :jq-args params) (format "%s " jq-args) "")
                  (shell-quote-argument (cdr jq-header)))
-         (current-buffer)
+         results-buffer
          t))
 
       ;; widen if jq but not pure payload
@@ -104,8 +103,7 @@ This function is called by `org-babel-execute-src-block'"
         (widen))
 
       (if (member "table" (cdr (assoc :result-params params)))
-          (let* ((pmax (point-max))
-	         (separator '(4))
+          (let* ((separator '(4))
 	         (result
 	          (condition-case err
 		      (let ((pmax (point-max)))
@@ -138,8 +136,11 @@ This function is called by `org-babel-execute-src-block'"
   (mapcar
    (lambda (pair)
      (let ((name (car pair))
-           (value (cdr pair)))
-       (format ":%s = %s" name value)))
+           (value (cdr pair))
+	   (format-string ":%s = %s\n"))
+       (when (string-match-p "\n" value)
+	 (setq format-string ":%s = <<\n%s\n#\n"))
+       (format format-string name value)))
    (org-babel--get-vars params)))
 
 (defun org-babel-restclient--wrap-result ()
@@ -147,6 +148,8 @@ This function is called by `org-babel-execute-src-block'"
   (let ((mode-name (substring (symbol-name major-mode) 0 -5)))
     (insert (format "#+BEGIN_SRC %s\n" mode-name))
     (goto-char (point-max))
+    (unless (and (bolp) (eolp))
+      (insert "\n"))
     (insert "#+END_SRC\n")))
 
 (defun org-babel-restclient--should-hide-headers-p (params)
@@ -169,7 +172,8 @@ This function is called by `org-babel-execute-src-block'"
   "Return t if the `:results' key in PARAMS contain `file'."
   (let ((result-type (cdr (assoc :results params))))
     (when result-type
-      (string-match "file" result-type))))
+      (and (not (org-babel-restclient--should-hide-headers-p params))
+           (string-match "file" result-type)))))
 
 (provide 'ob-restclient)
 ;;; ob-restclient.el ends here
