@@ -1,4 +1,4 @@
-This is docHRiSHK.info, produced by makeinfo version 6.7 from
+This is doc5nyIuM.info, produced by makeinfo version 6.8 from
 marginalia.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docHRiSHK.info,  Node: Top,  Next: Configuration,  Up: (dir)
+File: doc5nyIuM.info,  Node: Top,  Next: Configuration,  Up: (dir)
 
 marginalia.el - Marginalia in the minibuffer
 ********************************************
@@ -38,7 +38,7 @@ annotators or even disable the annotator with command
 * Contributions::
 
 
-File: docHRiSHK.info,  Node: Configuration,  Next: Information shown by the annotators,  Prev: Top,  Up: Top
+File: doc5nyIuM.info,  Node: Configuration,  Next: Information shown by the annotators,  Prev: Top,  Up: Top
 
 1 Configuration
 ***************
@@ -63,13 +63,13 @@ commands.
        ;; The :init section is always executed.
        :init
 
-       ;; Marginalia must be actived in the :init section of use-package such that
+       ;; Marginalia must be activated in the :init section of use-package such that
        ;; the mode gets enabled right away. Note that this forces loading the
        ;; package.
        (marginalia-mode))
 
 
-File: docHRiSHK.info,  Node: Information shown by the annotators,  Next: Adding custom annotators or classifiers,  Prev: Configuration,  Up: Top
+File: doc5nyIuM.info,  Node: Information shown by the annotators,  Next: Adding custom annotators or classifiers,  Prev: Configuration,  Up: Top
 
 2 Information shown by the annotators
 *************************************
@@ -84,7 +84,7 @@ more information on what the different classifications mean, see the
 docstring of ‘marginalia--symbol-class’.
 
 
-File: docHRiSHK.info,  Node: Adding custom annotators or classifiers,  Next: Disabling annotators builtin or lightweight annotators,  Prev: Information shown by the annotators,  Up: Top
+File: doc5nyIuM.info,  Node: Adding custom annotators or classifiers,  Next: Disabling annotators builtin or lightweight annotators,  Prev: Information shown by the annotators,  Up: Top
 
 3 Adding custom annotators or classifiers
 *****************************************
@@ -175,7 +175,7 @@ this setting, after invoking ‘M-x describe-face RET’ you can cycle
 between all of these annotators using ‘marginalia-cycle’.
 
 
-File: docHRiSHK.info,  Node: Disabling annotators builtin or lightweight annotators,  Next: Icons in the minibuffer,  Prev: Adding custom annotators or classifiers,  Up: Top
+File: doc5nyIuM.info,  Node: Disabling annotators builtin or lightweight annotators,  Next: Icons in the minibuffer,  Prev: Adding custom annotators or classifiers,  Up: Top
 
 4 Disabling annotators, builtin or lightweight annotators
 *********************************************************
@@ -227,7 +227,7 @@ from the registry.
            (assq-delete-all 'file marginalia-annotator-registry))
 
 
-File: docHRiSHK.info,  Node: Icons in the minibuffer,  Next: Contributions,  Prev: Disabling annotators builtin or lightweight annotators,  Up: Top
+File: doc5nyIuM.info,  Node: Icons in the minibuffer,  Next: Contributions,  Prev: Disabling annotators builtin or lightweight annotators,  Up: Top
 
 5 Icons in the minibuffer
 *************************
@@ -248,7 +248,7 @@ Dired, Ibuffer and other modes with icons consistently.
      terminal where only a single font can be used.
 
 
-File: docHRiSHK.info,  Node: Contributions,  Prev: Icons in the minibuffer,  Up: Top
+File: doc5nyIuM.info,  Node: Contributions,  Prev: Icons in the minibuffer,  Up: Top
 
 6 Contributions
 ***************
@@ -262,11 +262,11 @@ copyright assignment to the FSF.
 Tag Table:
 Node: Top216
 Node: Configuration1478
-Node: Information shown by the annotators2704
-Node: Adding custom annotators or classifiers3416
-Node: Disabling annotators builtin or lightweight annotators8332
-Node: Icons in the minibuffer10383
-Node: Contributions11342
+Node: Information shown by the annotators2706
+Node: Adding custom annotators or classifiers3418
+Node: Disabling annotators builtin or lightweight annotators8334
+Node: Icons in the minibuffer10385
+Node: Contributions11344
 
 End Tag Table
 
