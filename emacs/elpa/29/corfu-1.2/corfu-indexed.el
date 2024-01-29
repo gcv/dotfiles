@@ -1,12 +1,12 @@
 ;;; corfu-indexed.el --- Select indexed candidates -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2022-2024 Free Software Foundation, Inc.
 
 ;; Author: Luis Henriquez-Perez <luis@luishp.xyz>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.38"))
+;; Version: 1.2
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (corfu "1.2"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.

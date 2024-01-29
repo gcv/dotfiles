@@ -1,12 +1,12 @@
 ;;; corfu-history.el --- Sorting by history for Corfu -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2022-2024 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.38"))
+;; Version: 1.2
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (corfu "1.2"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -55,8 +55,8 @@ or the property `history-length' of `corfu-history'.")
       (and (= (cdr x) (cdr y))
            (corfu--length-string< (car x) (car y)))))
 
-(defun corfu-history--sort (candidates)
-  "Sort CANDIDATES by history."
+(defun corfu-history--sort (cands)
+  "Sort CANDS by history."
   (unless corfu-history--hash
     (setq corfu-history--hash (make-hash-table :test #'equal :size (length corfu-history)))
     (cl-loop for elem in corfu-history for index from 0 do
@@ -65,13 +65,13 @@ or the property `history-length' of `corfu-history'.")
   ;; Decorate each candidate with (index<<13) + length. This way we sort first by index and then by
   ;; length. We assume that the candidates are shorter than 2**13 characters and that the history is
   ;; shorter than 2**16 entries.
-  (cl-loop for cand on candidates do
+  (cl-loop for cand on cands do
            (setcar cand (cons (car cand)
                               (+ (ash (gethash (car cand) corfu-history--hash #xFFFF) 13)
                                  (length (car cand))))))
-  (setq candidates (sort candidates #'corfu-history--sort-predicate))
-  (cl-loop for cand on candidates do (setcar cand (caar cand)))
-  candidates)
+  (setq cands (sort cands #'corfu-history--sort-predicate))
+  (cl-loop for cand on cands do (setcar cand (caar cand)))
+  cands)
 
 ;;;###autoload
 (define-minor-mode corfu-history-mode

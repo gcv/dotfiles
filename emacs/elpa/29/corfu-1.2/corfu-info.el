@@ -1,12 +1,12 @@
 ;;; corfu-info.el --- Show candidate information in separate buffer -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2022-2024 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.38"))
+;; Version: 1.2
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (corfu "1.2"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -74,7 +74,8 @@ If called with a prefix ARG, the buffer is persistent."
   (when (< corfu--index 0)
     (user-error "No candidate selected"))
   (let ((cand (nth corfu--index corfu--candidates)))
-    (if-let ((fun (plist-get corfu--extra :company-doc-buffer))
+    (if-let ((extra (nth 4 completion-in-region--data))
+             (fun (plist-get extra :company-doc-buffer))
              (res (funcall fun cand)))
         (set-window-start (corfu-info--display-buffer
                            (get-buffer (or (car-safe res) res))
@@ -91,18 +92,18 @@ If called with a prefix ARG, the buffer is persistent."
   (when (< corfu--index 0)
     (user-error "No candidate selected"))
   (let ((cand (nth corfu--index corfu--candidates)))
-    ;; BUG: company-location may throw errors if location is not found
-    (if-let ((fun (ignore-errors (plist-get corfu--extra :company-location)))
-             (loc (funcall fun cand)))
+    (if-let ((extra (nth 4 completion-in-region--data))
+             (fun (plist-get extra :company-location))
+             ;; BUG: company-location may throw errors if location is not found
+             (loc (ignore-errors (funcall fun cand))))
         (with-selected-window
             (corfu-info--display-buffer
              (or (and (bufferp (car loc)) (car loc))
                  (find-file-noselect (car loc) t))
              (and arg (format "*corfu loc: %s*" cand)))
-          (save-restriction
-            (widen)
+          (without-restriction
             (goto-char (point-min))
-            (when-let (pos (cdr loc))
+            (when-let ((pos (cdr loc)))
               (if (bufferp (car loc))
                   (goto-char pos)
                 (forward-line (1- pos))))

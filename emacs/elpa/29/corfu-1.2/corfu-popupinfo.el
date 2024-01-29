@@ -1,12 +1,12 @@
 ;;; corfu-popupinfo.el --- Candidate information popup for Corfu -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
 ;; Author: Yuwei Tian <fishtai0@gmail.com>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (corfu "0.38"))
+;; Version: 1.2
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (corfu "1.2"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -60,9 +60,9 @@ preselected candidate.  Otherwise the popup can be requested
 manually via `corfu-popupinfo-toggle',
 `corfu-popupinfo-documentation' and `corfu-popupinfo-location'.
 
-It is *not recommended* to use a very small delay, since this
-will create high load for Emacs since retrieving the
-documentation is usually expensive."
+It is *not recommended* to use a short delay or even 0, since
+this will create high load for Emacs.  Retrieving the
+documentation from the backend is usually expensive."
   :type '(choice (const :tag "Never" nil)
                  (number :tag "Delay in seconds")
                  (cons :tag "Two Delays"
@@ -111,7 +111,6 @@ documentation is usually expensive."
            (const vertical)
            (const force-left)
            (const force-right)
-           (const force-horizontal)
            (const force-vertical)))
   :group 'corfu)
 
@@ -134,38 +133,40 @@ documentation is usually expensive."
     (fringe-indicator-alist (continuation)))
   "Buffer parameters.")
 
-(defvar-local corfu-popupinfo--toggle 'init
-  "Local toggle state.")
-
-(defvar-local corfu-popupinfo--function
-  #'corfu-popupinfo--get-documentation
-  "Function called to obtain documentation string.")
-
 (defvar corfu-popupinfo--frame nil
   "Info popup child frame.")
 
 (defvar corfu-popupinfo--timer nil
   "Corfu info popup auto display timer.")
 
-(defvar-local corfu-popupinfo--candidate nil
+(defvar corfu-popupinfo--toggle 'init
+  "Toggle state.")
+
+(defvar corfu-popupinfo--function
+  #'corfu-popupinfo--get-documentation
+  "Function called to obtain documentation string.")
+
+(defvar corfu-popupinfo--candidate nil
   "Completion candidate for the info popup.")
 
-(defvar-local corfu-popupinfo--coordinates nil
+(defvar corfu-popupinfo--coordinates nil
   "Coordinates of the candidate popup.
 The coordinates list has the form (LEFT TOP RIGHT BOTTOM) where
 all values are in pixels relative to the origin.  See
 `frame-edges' for details.")
 
-(defvar-local corfu-popupinfo--lock-dir nil
+(defvar corfu-popupinfo--lock-dir nil
   "Locked position direction of the info popup.")
 
-(defconst corfu-popupinfo--state-vars
-  '(corfu-popupinfo--candidate
-    corfu-popupinfo--coordinates
-    corfu-popupinfo--lock-dir
-    corfu-popupinfo--toggle
-    corfu-popupinfo--function)
-  "Buffer-local state variables used by corfu-popupinfo.")
+(defconst corfu-popupinfo--initial-state
+  (mapcar
+   (lambda (k) (cons k (symbol-value k)))
+   '(corfu-popupinfo--candidate
+     corfu-popupinfo--coordinates
+     corfu-popupinfo--lock-dir
+     corfu-popupinfo--toggle
+     corfu-popupinfo--function))
+  "Initial state of `corfu-popupinfo-mode'.")
 
 (defun corfu-popupinfo--visible-p (&optional frame)
   "Return non-nil if FRAME is visible."
@@ -178,13 +179,15 @@ all values are in pixels relative to the origin.  See
     (let ((old-buffers (buffer-list)) (buffer nil))
       (unwind-protect
           (when-let
-              ((fun (plist-get corfu--extra :company-location))
+              ((extra (nth 4 completion-in-region--data))
+               (fun (plist-get extra :company-location))
                ;; BUG: company-location may throw errors if location is not found
                (loc (ignore-errors (funcall fun candidate)))
                ((setq buffer
                       (or (and (bufferp (car loc)) (car loc))
                           (get-file-buffer (car loc))
                           (let ((inhibit-message t)
+                                (message-log-max nil)
                                 (inhibit-redisplay t)
                                 (enable-dir-local-variables nil)
                                 (enable-local-variables :safe)
@@ -194,10 +197,9 @@ all values are in pixels relative to the origin.  See
                             (find-file-noselect (car loc) t))))))
             (with-current-buffer buffer
               (save-excursion
-                (save-restriction
-                  (widen)
+                (without-restriction
                   (goto-char (point-min))
-                  (when-let (pos (cdr loc))
+                  (when-let ((pos (cdr loc)))
                     (if (bufferp (car loc))
                         (goto-char pos)
                       (forward-line (1- pos))))
@@ -213,11 +215,12 @@ all values are in pixels relative to the origin.  See
 
 (defun corfu-popupinfo--get-documentation (candidate)
   "Get the documentation for CANDIDATE."
-  (when-let ((fun (plist-get corfu--extra :company-doc-buffer))
+  (when-let ((extra (nth 4 completion-in-region--data))
+             (fun (plist-get extra :company-doc-buffer))
              (res (save-excursion
                     (let ((inhibit-message t)
-                          (inhibit-redisplay t)
                           (message-log-max nil)
+                          (inhibit-redisplay t)
                           ;; Reduce print length for elisp backend (#249)
                           (print-level 3)
                           (print-length (* corfu-popupinfo-max-width
@@ -289,7 +292,7 @@ form (X Y WIDTH HEIGHT DIR)."
   (pcase-let*
       ((cw (default-font-width))
        (lh (default-line-height))
-       (border (alist-get 'child-frame-border-width corfu--frame-parameters))
+       (border (alist-get 'internal-border-width corfu--frame-parameters))
        (`(,_pfx ,_pfy ,pfw ,pfh)
         (corfu-popupinfo--frame-geometry (frame-parent corfu--frame)))
        (`(,cfx ,cfy ,cfw ,cfh) (corfu-popupinfo--frame-geometry corfu--frame))
@@ -346,7 +349,7 @@ form (X Y WIDTH HEIGHT DIR)."
            (new-coords (frame-edges corfu--frame 'inner-edges))
            (coords-changed (not (equal new-coords corfu-popupinfo--coordinates))))
       (when cand-changed
-        (if-let (content (funcall corfu-popupinfo--function candidate))
+        (if-let ((content (funcall corfu-popupinfo--function candidate)))
             (with-current-buffer (corfu--make-buffer " *corfu-popupinfo*")
               (with-silent-modifications
                 (erase-buffer)
@@ -356,14 +359,10 @@ form (X Y WIDTH HEIGHT DIR)."
                 (set (make-local-variable (car var)) (cdr var)))
               (when-let ((m (memq 'corfu-default (alist-get 'default face-remapping-alist))))
                 (setcar m 'corfu-popupinfo)))
-          (unless (eq corfu-popupinfo--toggle 'init)
-            (message "No %s available for `%s'"
-                     (car (last (split-string (symbol-name corfu-popupinfo--function) "-+")))
-                     candidate))
           (corfu-popupinfo--hide)
           (setq cand-changed nil coords-changed nil)))
       (when (or cand-changed coords-changed)
-        (pcase-let* ((border (alist-get 'child-frame-border-width corfu--frame-parameters))
+        (pcase-let* ((border (alist-get 'internal-border-width corfu--frame-parameters))
                      (`(,area-x ,area-y ,area-w ,area-h ,area-d)
                       (corfu-popupinfo--area
                        (if cand-changed
@@ -445,7 +444,12 @@ See `corfu-popupinfo-scroll-up' for more details."
       (corfu-popupinfo--hide)
     (setq corfu-popupinfo--function fun
           corfu-popupinfo--candidate nil)
-    (corfu-popupinfo--show (nth corfu--index corfu--candidates))))
+    (let ((cand (nth corfu--index corfu--candidates)))
+      (corfu-popupinfo--show cand)
+      (unless (corfu-popupinfo--visible-p)
+        (user-error "No %s available for `%s'"
+                    (car (last (split-string (symbol-name fun) "-+")))
+                    cand)))))
 
 (defun corfu-popupinfo-documentation ()
   "Show or hide documentation in popup.
@@ -481,16 +485,16 @@ not be displayed until this command is called again, even if
       (cancel-timer corfu-popupinfo--timer)
       (setq corfu-popupinfo--timer nil))
     (if (and (>= corfu--index 0) (corfu-popupinfo--visible-p corfu--frame))
-        (let ((candidate (nth corfu--index corfu--candidates)))
+        (let ((cand (nth corfu--index corfu--candidates)))
           (if-let ((delay (if (consp corfu-popupinfo-delay)
                               (funcall (if (eq corfu-popupinfo--toggle 'init) #'car #'cdr)
                                        corfu-popupinfo-delay)
                             corfu-popupinfo-delay))
                    (corfu-popupinfo--toggle))
               (if (or (<= delay 0)
-                      (and (equal candidate corfu-popupinfo--candidate)
+                      (and (equal cand corfu-popupinfo--candidate)
                            (corfu-popupinfo--visible-p)))
-                  (corfu-popupinfo--show candidate)
+                  (corfu-popupinfo--show cand)
                 (when (corfu-popupinfo--visible-p)
                   (cond
                    (corfu-popupinfo-hide
@@ -498,17 +502,15 @@ not be displayed until this command is called again, even if
                    (corfu-popupinfo--candidate
                     (corfu-popupinfo--show corfu-popupinfo--candidate))))
                 (setq corfu-popupinfo--timer
-                    (run-at-time delay nil #'corfu-popupinfo--show candidate)))
-            (unless (equal candidate corfu-popupinfo--candidate)
+                    (run-at-time delay nil #'corfu-popupinfo--show cand)))
+            (unless (equal cand corfu-popupinfo--candidate)
               (corfu-popupinfo--hide))))
       (corfu-popupinfo--hide))))
 
-(cl-defmethod corfu--teardown :before (&context (corfu-popupinfo-mode (eql t)))
+(cl-defmethod corfu--teardown :before (_buf &context (corfu-popupinfo-mode (eql t)))
   (corfu-popupinfo--hide)
-  (mapc #'kill-local-variable corfu-popupinfo--state-vars)
-  (setq minor-mode-overriding-map-alist
-        (assq-delete-all #'corfu-popupinfo-mode
-                         minor-mode-overriding-map-alist)))
+  (cl-loop for (k . v) in corfu-popupinfo--initial-state do (set k v))
+  (cl-callf2 assq-delete-all #'corfu-popupinfo-mode minor-mode-overriding-map-alist))
 
 ;; Emacs 28: Do not show Corfu commands with M-X
 (dolist (sym '(corfu-popupinfo-scroll-down corfu-popupinfo-scroll-up
