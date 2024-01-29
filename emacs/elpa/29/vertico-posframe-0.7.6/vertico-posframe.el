@@ -5,7 +5,7 @@
 ;; Author: Feng Shu <tumashu@163.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/vertico-posframe
-;; Version: 0.7.3
+;; Version: 0.7.6
 ;; Keywords: abbrev, convenience, matching, vertico
 ;; Package-Requires: ((emacs "26.0") (posframe "1.4.0") (vertico "1.1"))
 
@@ -186,27 +186,44 @@ minibuffer will not be hided by minibuffer-cover."
 (define-minor-mode vertico-posframe-mode
   "Display Vertico in posframe instead of the minibuffer."
   :global t
-  (cond
-   (vertico-posframe-mode
-    (when (not (posframe-workable-p))
-      (funcall (buffer-local-value 'vertico-posframe-fallback-mode (current-buffer)) 1)))
-   (t
-    (if (not (posframe-workable-p))
-        (funcall (buffer-local-value 'vertico-posframe-fallback-mode (current-buffer)) -1)
-      ;; When vertico-posframe-mode is disabled, hide posframe and let
-      ;; the contents of minibuffer show again, this approach let
-      ;; vertico-posframe works with vertico multiform toggle.
-      (set-window-vscroll (active-minibuffer-window) 0)
-      (posframe-hide vertico-posframe--buffer)))))
+  (if vertico-posframe-mode
+      (unless (posframe-workable-p)
+        (funcall (buffer-local-value 'vertico-posframe-fallback-mode (current-buffer)) 1))
+    (if (posframe-workable-p)
+        (vertico-posframe--multiform-function)
+      (funcall (buffer-local-value 'vertico-posframe-fallback-mode (current-buffer)) -1))))
+
+(defun vertico-posframe--multiform-function ()
+  "Function work with `'vertico-multiform-mode'.
+When `vertico-posframe-mode' is disabled, hide posframe and let
+the contents of minibuffer show again, this approach let
+vertico-posframe works with vertico multiform toggle."
+  (set-window-vscroll (active-minibuffer-window) 0)
+  (posframe-hide vertico-posframe--buffer))
 
 ;; Support vertico-multiform
-(cl-pushnew 'vertico-posframe-mode vertico-multiform--display-modes)
-(vertico-multiform--define-display-toggle posframe)
-(define-key vertico-multiform-map (kbd "M-P") #'vertico-multiform-posframe)
+(let* ((name 'posframe)
+       (key (kbd "M-p"))
+       (mode (intern (format "vertico-%s-mode" name)))
+       (toggle (intern (format "vertico-multiform-%s" name))))
+  (defalias toggle
+    (lambda ()
+      (interactive)
+      (vertico-multiform-vertical mode))
+    (format "Toggle the %s display." name))
+  (push mode vertico-multiform--display-modes)
+  (put toggle 'completion-predicate #'vertico--command-p)
+  (define-key vertico-multiform-map key #'vertico-multiform-posframe))
 
-(cl-defmethod vertico--setup :after (&context (vertico-posframe-mode (eql t)))
+(cl-defmethod vertico--setup
+  :after (&context ((vertico-posframe-mode-workable-p) (eql t)))
   "Setup minibuffer overlay, which pushes the minibuffer content down."
   (add-hook 'minibuffer-exit-hook #'vertico-posframe--minibuffer-exit-hook nil 'local))
+
+(defun vertico-posframe-mode-workable-p ()
+  "Test `vertico-posframe-mode' is actived and can work or not."
+  (and vertico-posframe-mode
+       (posframe-workable-p)))
 
 (defun vertico-posframe--minibuffer-exit-hook ()
   "The function used by `minibuffer-exit-hook'."
@@ -215,9 +232,11 @@ minibuffer will not be hided by minibuffer-cover."
   (setq-local max-mini-window-height 1.0)
   (posframe-hide vertico-posframe--buffer))
 
-(cl-defmethod vertico--resize-window (_height &context (vertico-posframe-mode (eql t))))
+(cl-defmethod vertico--resize-window
+  (_height &context ((vertico-posframe-mode-workable-p) (eql t))))
 
-(cl-defmethod vertico--display-candidates :after (_candidates &context (vertico-posframe-mode (eql t)))
+(cl-defmethod vertico--display-candidates
+  :after (_candidates &context ((vertico-posframe-mode-workable-p) (eql t)))
   "Display candidates in posframe.
 
 1. Let minibuffer-window's height = 1
