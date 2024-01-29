@@ -1,3 +1,27 @@
+2023-12-15  Akib Azmain Turja  <akib@disroot.org>
+
+	Don't let automatic scrolling mess up the display
+
+	* eat.el (eat-mode, eat--eshell-local-mode): Set both
+	'scroll-margin' and 'hscroll-margin' to zero.
+
+2023-10-26  Akib Azmain Turja  <akib@disroot.org>
+
+	Don't queue input
+
+	* eat.el (eat--pending-input-chunks)
+	(eat--defer-input-processing, eat--process-input-queue-timer):
+	Remove.
+	All references updated.
+	* eat.el (eat--send-input): Send the input immediately.
+	* eat.el (eat--process-input-queue): Remove.
+	* eat.el (eat--eshell-process-output-queue)
+	(eat--process-output-queue): Loop while output queue isn't
+	empty, set 'eat--output-queue-first-chunk-time' to 't' in the
+	loop.
+	* eat.el (eat--filter, eat--eshell-filter): Don't start a timer
+	if 'eat--output-queue-first-chunk-time' is 't'.
+
 2023-10-19  Akib Azmain Turja  <akib@disroot.org>
 
 	* eat.ti (eat-mono): Remove unused capability 'Ed'

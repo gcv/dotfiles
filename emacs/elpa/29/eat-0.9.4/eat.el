@@ -4,7 +4,7 @@
 
 ;; Author: Akib Azmain Turja <akib@disroot.org>
 ;; Created: 2022-08-15
-;; Version: 0.9.3
+;; Version: 0.9.4
 ;; Package-Requires: ((emacs "26.1") (compat "29.1"))
 ;; Keywords: terminals processes
 ;; Homepage: https://codeberg.org/akib/emacs-eat
@@ -6582,6 +6582,8 @@ END if it's safe to do so."
           glyphless-char-display
           cursor-type
           track-mouse
+          scroll-margin
+          hscroll-margin
           eat-terminal
           eat--synchronize-scroll-function
           eat--mouse-grabbing-type
@@ -6604,6 +6606,8 @@ END if it's safe to do so."
           eat--shell-prompt-annotation-correction-timer))
   ;; This is intended; input methods don't work on read-only buffers.
   (setq buffer-read-only nil)
+  (setq scroll-margin 0)
+  (setq hscroll-margin 0)
   (setq eat--synchronize-scroll-function #'eat--synchronize-scroll)
   (setq filter-buffer-substring-function
         #'eat--filter-buffer-substring)
@@ -7553,6 +7557,8 @@ symbol `buffer', in which case the point of current buffer is set."
   :interactive nil
   (let ((locals '(cursor-type
                   glyphless-char-display
+                  scroll-margin
+                  hscroll-margin
                   track-mouse
                   filter-buffer-substring-function
                   eat-terminal
@@ -7565,6 +7571,8 @@ symbol `buffer', in which case the point of current buffer is set."
     (cond
      (eat--eshell-local-mode
       (mapc #'make-local-variable locals)
+      (setq scroll-margin 0)
+      (setq hscroll-margin 0)
       (setq eat--synchronize-scroll-function
             #'eat--eshell-synchronize-scroll)
       (setq filter-buffer-substring-function

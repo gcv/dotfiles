@@ -1,6 +1,6 @@
-This is docOZzgsp.info, produced by makeinfo version 6.8 from eat.texi.
+This is docQL52HQ.info, produced by makeinfo version 6.8 from eat.texi.
 
-This manual is for Eat (version 0.9.3, 19 October 2023), a terminal
+This manual is for Eat (version 0.9.4, 15 December 2023), a terminal
 emulator for Emacs.
 
    Copyright © 2022, 2023 Akib Azmain Turja.
@@ -17,12 +17,12 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docOZzgsp.info,  Node: Top,  Next: Intro,  Up: (dir)
+File: docQL52HQ.info,  Node: Top,  Next: Intro,  Up: (dir)
 
 Eat Manual
 **********
 
-This manual is for Eat (version 0.9.3, 19 October 2023), a terminal
+This manual is for Eat (version 0.9.4, 15 December 2023), a terminal
 emulator for Emacs.
 
    Copyright © 2022, 2023 Akib Azmain Turja.
@@ -73,7 +73,7 @@ Appendices
 * Index::               A list of various things.
 
 
-File: docOZzgsp.info,  Node: Intro,  Next: Hello Terminal,  Prev: Top,  Up: Top
+File: docQL52HQ.info,  Node: Intro,  Next: Hello Terminal,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -95,7 +95,7 @@ both graphical display and text display, while still allowing you to run
 full screen programs like Emacs within the terminal.
 
 
-File: docOZzgsp.info,  Node: Hello Terminal,  Next: Project-local Terminal,  Prev: Intro,  Up: Top
+File: docQL52HQ.info,  Node: Hello Terminal,  Next: Project-local Terminal,  Prev: Intro,  Up: Top
 
 2 Hello Terminal
 ****************
@@ -121,7 +121,7 @@ you’ll be prompted for the program or shell command to run, and it’ll be
 run in a newly created terminal.
 
 
-File: docOZzgsp.info,  Node: Project-local Terminal,  Next: Eshell Terminal,  Prev: Hello Terminal,  Up: Top
+File: docQL52HQ.info,  Node: Project-local Terminal,  Next: Eshell Terminal,  Prev: Hello Terminal,  Up: Top
 
 3 Project-local Terminal
 ************************
@@ -133,7 +133,7 @@ or switches to a already existing project terminal.  It too accepts
 prefix argument, just like the ordinary ‘eat’ command.
 
 
-File: docOZzgsp.info,  Node: Eshell Terminal,  Next: Keyboard,  Prev: Project-local Terminal,  Up: Top
+File: docQL52HQ.info,  Node: Eshell Terminal,  Next: Keyboard,  Prev: Project-local Terminal,  Up: Top
 
 4 Eshell Terminal Emulation
 ***************************
@@ -161,7 +161,7 @@ nil, since they’ll work in Eshell when ‘eat-eshell-mode’ is enabled.
 the global minor mode ‘eat-eshell-visual-command-mode’.
 
 
-File: docOZzgsp.info,  Node: Keyboard,  Next: Mouse,  Prev: Eshell Terminal,  Up: Top
+File: docQL52HQ.info,  Node: Keyboard,  Next: Mouse,  Prev: Eshell Terminal,  Up: Top
 
 5 Keyboard
 **********
@@ -184,7 +184,7 @@ example, to input ‘M-:’, use the key sequence ‘C-q M-:’.
 Char Mode::.
 
 
-File: docOZzgsp.info,  Node: Mouse,  Next: Input Modes,  Prev: Keyboard,  Up: Top
+File: docQL52HQ.info,  Node: Mouse,  Next: Input Modes,  Prev: Keyboard,  Up: Top
 
 6 Mouse
 *******
@@ -197,7 +197,7 @@ supports it.
    *Note Mouse Tracking:: to configure mouse tracking.
 
 
-File: docOZzgsp.info,  Node: Input Modes,  Next: Password Input,  Prev: Mouse,  Up: Top
+File: docQL52HQ.info,  Node: Input Modes,  Next: Password Input,  Prev: Mouse,  Up: Top
 
 7 Input Modes
 *************
@@ -342,7 +342,7 @@ search the input history.
 *Note Line Mode Integration::.
 
 
-File: docOZzgsp.info,  Node: Password Input,  Next: Shell Integration,  Prev: Input Modes,  Up: Top
+File: docQL52HQ.info,  Node: Password Input,  Next: Shell Integration,  Prev: Input Modes,  Up: Top
 
 8 Password Input
 ****************
@@ -359,7 +359,7 @@ password from the minibuffer and send it.  Since the password is read
 from the minibuffer, it’s not recorded.
 
 
-File: docOZzgsp.info,  Node: Shell Integration,  Next: Querying Before Kill,  Prev: Password Input,  Up: Top
+File: docQL52HQ.info,  Node: Shell Integration,  Next: Querying Before Kill,  Prev: Password Input,  Up: Top
 
 9 Shell Integration
 *******************
@@ -419,7 +419,7 @@ feature if you want.
      non-‘nil’, Eat annotates shell prompts to indicate the status of
      the command entered in that prompt.
 
-   Eat uses the marginal area (*note (emacs)Display Margins::) on the
+   Eat uses the marginal area (*note (elisp)Display Margins::) on the
 left side to display the annotation.  You also use the right margin.
 
  -- User Option: eat-shell-prompt-annotation-position
@@ -485,7 +485,7 @@ for you when the shell prompt appears.
      appears.
 
 
-File: docOZzgsp.info,  Node: Querying Before Kill,  Next: Display,  Prev: Shell Integration,  Up: Top
+File: docQL52HQ.info,  Node: Querying Before Kill,  Next: Display,  Prev: Shell Integration,  Up: Top
 
 10 Querying Before Kill
 ***********************
@@ -506,7 +506,7 @@ this.
      essentially same as ‘t’, and Eat will always query.
 
 
-File: docOZzgsp.info,  Node: Display,  Next: Scrollback,  Prev: Querying Before Kill,  Up: Top
+File: docQL52HQ.info,  Node: Display,  Next: Scrollback,  Prev: Querying Before Kill,  Up: Top
 
 11 Display
 **********
@@ -522,7 +522,7 @@ display size is controlled by the Emacs user option
 Buffers:: for the possible values of the user option.
 
 
-File: docOZzgsp.info,  Node: Scrollback,  Next: Cursor Types,  Prev: Display,  Up: Top
+File: docQL52HQ.info,  Node: Scrollback,  Next: Cursor Types,  Prev: Display,  Up: Top
 
 12 Scrollback
 *************
@@ -545,7 +545,7 @@ much memory.  You can change the limit, or remove it altogether.
      scrollback region is unlimited.
 
 
-File: docOZzgsp.info,  Node: Cursor Types,  Next: Mouse Tracking,  Prev: Scrollback,  Up: Top
+File: docQL52HQ.info,  Node: Cursor Types,  Next: Mouse Tracking,  Prev: Scrollback,  Up: Top
 
 13 Cursor Types
 ***************
@@ -598,7 +598,7 @@ as CURSOR-ON.  The blinking cursor switches between CURSOR-ON and
 CURSOR-OFF cursor shape.
 
 
-File: docOZzgsp.info,  Node: Mouse Tracking,  Next: Clipboard,  Prev: Cursor Types,  Up: Top
+File: docQL52HQ.info,  Node: Mouse Tracking,  Next: Clipboard,  Prev: Cursor Types,  Up: Top
 
 14 Mouse Tracking
 *****************
@@ -613,7 +613,7 @@ mouse at all.  So mouse tracking can be toggled.
      tracking.  This is enabled by default.
 
 
-File: docOZzgsp.info,  Node: Clipboard,  Next: Colors,  Prev: Mouse Tracking,  Up: Top
+File: docQL52HQ.info,  Node: Clipboard,  Next: Colors,  Prev: Mouse Tracking,  Up: Top
 
 15 Clipboard
 ************
@@ -644,7 +644,7 @@ the following user option to configure this:
      disabled by default for security reasons.
 
 
-File: docOZzgsp.info,  Node: Colors,  Next: Fonts,  Prev: Clipboard,  Up: Top
+File: docQL52HQ.info,  Node: Colors,  Next: Fonts,  Prev: Clipboard,  Up: Top
 
 16 Colors
 *********
@@ -699,7 +699,7 @@ following user option:
      for the behavior described above.
 
 
-File: docOZzgsp.info,  Node: Fonts,  Next: Sixel,  Prev: Colors,  Up: Top
+File: docQL52HQ.info,  Node: Fonts,  Next: Sixel,  Prev: Colors,  Up: Top
 
 17 Fonts
 ********
@@ -715,7 +715,7 @@ normal.  Bold text uses the face ‘eat-term-bold’.
 normal.  Faint text uses the face ‘eat-term-faint’.
 
    Programs may request the terminal to show italic text too.  Italic
-text uses the customizable face ‘eat-term-faint’.
+text uses the customizable face ‘eat-term-italic’.
 
    The number of available fonts is ten.  Most of the programs doesn’t
 change the font.  Following many other terminal emulator, Eat actually
@@ -728,7 +728,7 @@ number between 0 and 9 (inclusive).  For example, the font 6 is can be
 changed by customizing ‘eat-term-font-6’.  Font 0 is the default font.
 
 
-File: docOZzgsp.info,  Node: Sixel,  Next: Blinking Text,  Prev: Fonts,  Up: Top
+File: docQL52HQ.info,  Node: Sixel,  Next: Blinking Text,  Prev: Fonts,  Up: Top
 
 18 Sixel
 ********
@@ -764,7 +764,7 @@ customizing the ‘eat-sixel-render-formats’ user option.
      area.
 
 
-File: docOZzgsp.info,  Node: Blinking Text,  Next: Performance Tuning,  Prev: Sixel,  Up: Top
+File: docQL52HQ.info,  Node: Blinking Text,  Next: Performance Tuning,  Prev: Sixel,  Up: Top
 
 19 Blinking Text
 ****************
@@ -809,7 +809,7 @@ the rate of blinking:
      second.
 
 
-File: docOZzgsp.info,  Node: Performance Tuning,  Next: Common Problems,  Prev: Blinking Text,  Up: Top
+File: docQL52HQ.info,  Node: Performance Tuning,  Next: Common Problems,  Prev: Blinking Text,  Up: Top
 
 20 Performance Tuning
 *********************
@@ -901,7 +901,7 @@ enough (unless the buffer is narrowed).  So Eat defers the correction.
 values, but the default values may change anytime.
 
 
-File: docOZzgsp.info,  Node: Common Problems,  Next: Reporting Bugs,  Prev: Performance Tuning,  Up: Top
+File: docQL52HQ.info,  Node: Common Problems,  Next: Reporting Bugs,  Prev: Performance Tuning,  Up: Top
 
 21 Common Problems
 ******************
@@ -919,7 +919,7 @@ Eat does something unexpected, such as hangs, garbled text, etc.
 * Bugs in Manual::      What if there are problems in this manual?
 
 
-File: docOZzgsp.info,  Node: Not Recognized,  Next: Garbled Text,  Up: Common Problems
+File: docQL52HQ.info,  Node: Not Recognized,  Next: Garbled Text,  Up: Common Problems
 
 21.1 Terminal Not Recognized
 ============================
@@ -954,7 +954,7 @@ the directory where to put the Terminfo databases.  Then invoke the
 command ‘eat-compile-terminfo’ to compile the Terminfo databases.
 
 
-File: docOZzgsp.info,  Node: Garbled Text,  Next: Input Invisible,  Prev: Not Recognized,  Up: Common Problems
+File: docQL52HQ.info,  Node: Garbled Text,  Next: Input Invisible,  Prev: Not Recognized,  Up: Common Problems
 
 21.2 Garbled Text on Terminal
 =============================
@@ -983,7 +983,7 @@ instructions on sending bug reports or feature request.
 definitely a bug, so please report it.
 
 
-File: docOZzgsp.info,  Node: Input Invisible,  Next: Not Responding,  Prev: Garbled Text,  Up: Common Problems
+File: docQL52HQ.info,  Node: Input Invisible,  Next: Not Responding,  Prev: Garbled Text,  Up: Common Problems
 
 21.3 Input Invisible
 ====================
@@ -999,7 +999,7 @@ automatically fallback to bare Eshell when ‘stty’ is not available,
 ‘nil’ to do nothing, and ‘ask’ to ask interactively.
 
 
-File: docOZzgsp.info,  Node: Not Responding,  Next: Signaled an Error,  Prev: Input Invisible,  Up: Common Problems
+File: docQL52HQ.info,  Node: Not Responding,  Next: Signaled an Error,  Prev: Input Invisible,  Up: Common Problems
 
 21.4 Emacs or Eat Not Responding
 ================================
@@ -1015,7 +1015,7 @@ those programs in faster terminals like bare Eshell (i.e.  without
 Eat-Eshell), Comint, or external terminal emulators.
 
 
-File: docOZzgsp.info,  Node: Signaled an Error,  Next: Bugs in Manual,  Prev: Not Responding,  Up: Common Problems
+File: docQL52HQ.info,  Node: Signaled an Error,  Next: Bugs in Manual,  Prev: Not Responding,  Up: Common Problems
 
 21.5 Eat Signaled an Error
 ==========================
@@ -1035,7 +1035,7 @@ work with.  However, it mayn’t work if you’re really unlucky, in that
 case deleting the terminal and starting a new one is your only option.
 
 
-File: docOZzgsp.info,  Node: Bugs in Manual,  Prev: Signaled an Error,  Up: Common Problems
+File: docQL52HQ.info,  Node: Bugs in Manual,  Prev: Signaled an Error,  Up: Common Problems
 
 21.6 Bugs in Manual
 ===================
@@ -1062,7 +1062,7 @@ them must be wrong, and that’s a bug.
 instruction on how to report it.
 
 
-File: docOZzgsp.info,  Node: Reporting Bugs,  Next: Tracing the Terminal,  Prev: Common Problems,  Up: Top
+File: docQL52HQ.info,  Node: Reporting Bugs,  Next: Tracing the Terminal,  Prev: Common Problems,  Up: Top
 
 22 Reporting Bugs
 *****************
@@ -1124,7 +1124,7 @@ anything that reproduces the bug will suffice.  (Of course, if you like
 doing experiments, the smaller the example, the better.)
 
 
-File: docOZzgsp.info,  Node: Tracing the Terminal,  Next: GNU General Public License,  Prev: Reporting Bugs,  Up: Top
+File: docQL52HQ.info,  Node: Tracing the Terminal,  Next: GNU General Public License,  Prev: Reporting Bugs,  Up: Top
 
 23 Tracing the Terminal
 ***********************
@@ -1157,7 +1157,7 @@ ordinary users, it’s documented here only to help you debug Eat.  You
 mustn’t rely on the behavior of this functionality to do anything else.
 
 
-File: docOZzgsp.info,  Node: GNU General Public License,  Next: GNU Free Documentation License,  Prev: Tracing the Terminal,  Up: Top
+File: docQL52HQ.info,  Node: GNU General Public License,  Next: GNU Free Documentation License,  Prev: Tracing the Terminal,  Up: Top
 
 Appendix A GNU General Public License
 *************************************
@@ -1873,7 +1873,7 @@ GNU Lesser General Public License instead of this License.  But first,
 please read <https://www.gnu.org/licenses/why-not-lgpl.html>.
 
 
-File: docOZzgsp.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: GNU General Public License,  Up: Top
+File: docQL52HQ.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: GNU General Public License,  Up: Top
 
 Appendix B GNU Free Documentation License
 *****************************************
@@ -2355,7 +2355,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docOZzgsp.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: docQL52HQ.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
 
 Appendix C Index
 ****************
@@ -2705,48 +2705,48 @@ Appendix C Index
 
 
 Tag Table:
-Node: Top720
-Node: Intro2981
-Node: Hello Terminal3827
-Node: Project-local Terminal4959
-Node: Eshell Terminal5467
-Node: Keyboard6662
-Node: Mouse7660
-Node: Input Modes8044
-Ref: Semi-char Mode8743
-Ref: Char Mode10494
-Ref: Emacs Mode11340
-Ref: Line Mode12016
-Node: Password Input14722
-Node: Shell Integration15431
-Ref: Directory tracking16173
-Ref: Shell Prompt Navigation16733
-Ref: Shell Prompt Annotation17278
-Ref: Message Passing19111
-Ref: Line Mode Integration20410
-Node: Querying Before Kill20850
-Node: Display21851
-Node: Scrollback22477
-Node: Cursor Types23416
-Node: Mouse Tracking25878
-Node: Clipboard26427
-Node: Colors27772
-Node: Fonts30500
-Node: Sixel31660
-Node: Blinking Text33102
-Node: Performance Tuning35114
-Node: Common Problems39777
-Node: Not Recognized40427
-Node: Garbled Text42202
-Node: Input Invisible43473
-Node: Not Responding44193
-Node: Signaled an Error44924
-Node: Bugs in Manual45938
-Node: Reporting Bugs46763
-Node: Tracing the Terminal49483
-Node: GNU General Public License50965
-Node: GNU Free Documentation License88784
-Node: Index114153
+Node: Top721
+Node: Intro2983
+Node: Hello Terminal3829
+Node: Project-local Terminal4961
+Node: Eshell Terminal5469
+Node: Keyboard6664
+Node: Mouse7662
+Node: Input Modes8046
+Ref: Semi-char Mode8745
+Ref: Char Mode10496
+Ref: Emacs Mode11342
+Ref: Line Mode12018
+Node: Password Input14724
+Node: Shell Integration15433
+Ref: Directory tracking16175
+Ref: Shell Prompt Navigation16735
+Ref: Shell Prompt Annotation17280
+Ref: Message Passing19113
+Ref: Line Mode Integration20412
+Node: Querying Before Kill20852
+Node: Display21853
+Node: Scrollback22479
+Node: Cursor Types23418
+Node: Mouse Tracking25880
+Node: Clipboard26429
+Node: Colors27774
+Node: Fonts30502
+Node: Sixel31663
+Node: Blinking Text33105
+Node: Performance Tuning35117
+Node: Common Problems39780
+Node: Not Recognized40430
+Node: Garbled Text42205
+Node: Input Invisible43476
+Node: Not Responding44196
+Node: Signaled an Error44927
+Node: Bugs in Manual45941
+Node: Reporting Bugs46766
+Node: Tracing the Terminal49486
+Node: GNU General Public License50968
+Node: GNU Free Documentation License88787
+Node: Index114156
 
 End Tag Table
 

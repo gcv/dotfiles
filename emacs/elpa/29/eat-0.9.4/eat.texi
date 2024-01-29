@@ -2,8 +2,8 @@
 
 @comment %**start of header
 @setfilename eat.info
-@set UPDATED 19 October 2023
-@set VERSION 0.9.3
+@set UPDATED 15 December 2023
+@set VERSION 0.9.4
 @documentencoding UTF-8
 @codequotebacktick on
 @codequoteundirected on
@@ -567,8 +567,9 @@ the command entered in that prompt.
 @end defopt
 
 Eat uses the marginal area
-(@pxref{Display Margins,,, emacs, GNU Emacs Manual}) on the left side
-to display the annotation.  You also use the right margin.
+(@pxref{Display Margins,,, elisp, GNU Emacs Lisp Reference Manual}) on
+the left side to display the annotation.  You also use the right
+margin.
 
 @vindex eat-shell-prompt-annotation-position
 @defopt eat-shell-prompt-annotation-position
@@ -943,7 +944,7 @@ normal.  Faint text uses the face @code{eat-term-faint}.
 @cindex text, slant
 @vindex eat-term-italic
 Programs may request the terminal to show italic text too.  Italic
-text uses the customizable face @code{eat-term-faint}.
+text uses the customizable face @code{eat-term-italic}.
 
 @cindex font family
 @cindex text, font family
