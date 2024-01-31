@@ -13,7 +13,7 @@ set edit:insert:binding[Ctrl-N] = $edit:navigation:start~
 
 if (not (has-env NIX_PATH)) {
   if (path:is-dir ~/.nix-defexpr) {
-    set-env NIX_PATH "nixpkgs="(get-env HOME)"/.nix-defexpr/channels/nixpkgs123"
+    set-env NIX_PATH "nixpkgs="(get-env HOME)"/.nix-defexpr/channels/nixpkgs"
     if (path:is-regular /etc/ssl/certs/ca-certificates.crt) { # NixOS, Ubuntu, Debian, Gentoo, Arch
       set-env NIX_SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt
     } elif (path:is-regular /etc/pki/tls/certs/ca-bundle.crt) { # Fedora, CentOS
