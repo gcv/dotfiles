@@ -44,6 +44,18 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 
+### 24-bit terminal color handling
+
+case $TERM in
+    linux | screen*)
+        unset COLORTERM
+        ;;
+    *)
+        export COLORTERM=truecolor
+        ;;
+esac
+
+
 ### path setup
 
 path_add () {

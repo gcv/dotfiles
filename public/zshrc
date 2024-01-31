@@ -258,6 +258,16 @@ zstyle ':completion:*:*:kill:*' menu yes select
 
 
 ### colors
+
+case $TERM in
+    linux | screen*)
+        unset COLORTERM
+        ;;
+    *)
+        export COLORTERM=truecolor
+        ;;
+esac
+
 if [[ "$terminfo[colors]" -ge 8 ]]; then
     colors
 fi
