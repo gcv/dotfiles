@@ -453,6 +453,22 @@ function rgfzf() {
 }
 
 
+# A little helpful fd and fzf integration.
+function fdfzf() {
+    local target=$(fd . "${*:-}" |
+                       fzf --ansi \
+                           --color "hl:-1:underline,hl+:-1:underline:reverse")
+    if [ -d "${target}" ]; then
+        chdir "${target}"
+    else
+        # insert file path into the command line
+        if [[ ! -z "${target}" ]]; then
+            print -z "\"${target}\""
+        fi
+    fi
+}
+
+
 
 ### Find Homebrew formula dependencies.
 function brewdeps() {
