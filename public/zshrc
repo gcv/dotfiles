@@ -62,8 +62,12 @@ path_prepend PATH /usr/local/sbin
 path_prepend PATH /usr/local/bin
 path_prepend PATH /opt/brew/sbin
 path_prepend PATH /opt/brew/bin
+path_prepend PATH /opt/homebrew/sbin
+path_prepend PATH /opt/homebrew/bin
 path_prepend PATH ~/.linuxbrew/sbin
 path_prepend PATH ~/.linuxbrew/bin
+path_prepend PATH /home/linuxbrew/.linuxbrew/sbin
+path_prepend PATH /home/linuxbrew/.linuxbrew/bin
 path_prepend PATH /run/current-system/sw/bin
 path_prepend PATH /run/wrappers/bin
 path_prepend PATH ~/.nix-profile/sbin
@@ -74,10 +78,14 @@ typeset -U path                 # dedup
 
 path_prepend MANPATH ~/.nix-profile/share/man
 path_prepend MANPATH /opt/brew/share/man
+path_prepend MANPATH /opt/homebrew/share/man
+path_prepend MANPATH /home/linuxbrew/.linuxbrew/share/man
 path_prepend MANPATH ~/.local/share/man
 typeset -U manpath              # dedup
 
 path_prepend FPATH /opt/brew/share/zsh/site-functions
+path_prepend FPATH /opt/homebrew/share/zsh/site-functions
+path_prepend FPATH /home/linuxbrew/.linuxbrew/share/zsh/site-functions
 typeset -U fpath                # dedup
 
 
