@@ -90,10 +90,10 @@ typeset -U fpath                # dedup
 
 
 ### aliases
-if [[ $(ls --color 2>/dev/null) ]]; then
+if [[ $(ls --color --sort=version 2>/dev/null) ]]; then
     # GNU ls probably available
     alias ls='ls --color --sort=version'
-elif command_exists gls && [[ $(gls --color 2>/dev/null) ]]; then
+elif command_exists gls && [[ $(gls --color --sort=version 2>/dev/null) ]]; then
     alias ls='gls --color --sort=version'
 fi
 alias v="ls -lahF"
