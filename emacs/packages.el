@@ -328,6 +328,7 @@
   (dirvish-mode-line-format
    '(:left (sort " " file-time " " file-size symlink)
      :right (omit yank index)))
+  (dirvish-attributes '(file-time file-size))
   ;;(dirvish-attributes '(all-the-icons file-size collapse subtree-state vc-state git-msg))
   ;;(dirvish-all-the-icons-height 0.8)  ; fix icon sizes?
   ;;(dirvish-hide-details nil)
