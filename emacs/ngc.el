@@ -214,6 +214,9 @@ targets."
          ("M-f" . vertico-multiform-flat)
          ("M-R" . vertico-multiform-reverse)
          ("M-u" . vertico-multiform-unobtrusive)
+         ;; pgup and pgdn keys
+         ("<prior>" . vertico-scroll-down)
+         ("<next>" . vertico-scroll-up)
          ;; emulate ido-mode directory navigation
          ("RET" . vertico-directory-enter)
          ("DEL" . vertico-directory-delete-char)

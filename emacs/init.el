@@ -825,6 +825,11 @@ See `eshell-prompt-regexp'."
 (add-hook 'abbrev-mode-hook #'/abbrev-mode-hook)
 
 
+;;; ansi-color
+(use-feature ansi-color
+  :hook (compilation-filter . ansi-color-compilation-filter))
+
+
 ;;; eldoc
 (use-feature eldoc
   :custom
