@@ -222,8 +222,10 @@ targets."
          ("DEL" . vertico-directory-delete-char)
          ("M-DEL" . vertico-directory-delete-word)
          ;; consult
-         ("C-M-r" . consult-history)
-         ))
+         ("C-M-r" . consult-history))
+   (:map vertico-multiform-map
+         ;; prevent vertico-posframe from turning M-p a posframe toggle
+         ("M-p" . nil)))
 
   ;; tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
