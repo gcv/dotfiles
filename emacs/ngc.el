@@ -242,6 +242,7 @@ targets."
         '((consult-imenu buffer indexed)
           (imenu-cr buffer indexed)
           (project-find-file buffer indexed)
+          (tab-switch flat)
           ("persp-.*" flat)
           ("cider-.*" flat)
           ))
