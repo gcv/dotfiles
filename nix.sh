@@ -66,7 +66,8 @@ packages=(
     httpie             # HTTP client, alternative to curl
     httrack            # web scraper, more stable than wget
     hyperfine          # benchmarking tool
-    jq
+    jnv                # interactive JSON viewer with jq query preview
+    jq                 # JSON query utility
     #julia
     lazydocker         # Docker UI
     lazygit            # Git UI
