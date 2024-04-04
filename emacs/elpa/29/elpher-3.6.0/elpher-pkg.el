@@ -1,6 +1,6 @@
-(define-package "elpher" "3.5.0" "A friendly gopher and gemini client"
+(define-package "elpher" "3.6.0" "A friendly gopher and gemini client"
   '((emacs "27.1"))
-  :commit "81f2883614c303184116449ec3583ef5c136ec2f" :authors
+  :commit "56bc74e224d9835c41b6e6b68c9705b60e6dbbe2" :authors
   '(("Tim Vaughan" . "plugd@thelambdalab.xyz"))
   :maintainer
   '("Tim Vaughan" . "plugd@thelambdalab.xyz")

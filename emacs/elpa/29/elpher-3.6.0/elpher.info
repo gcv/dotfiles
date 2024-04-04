@@ -83,6 +83,7 @@ Gemini support
 
 News
 
+* v3.6.0::
 * v3.5.0::
 * v3.4.0::
 * v3.3.0::
@@ -312,7 +313,7 @@ File: elpher.info,  Node: Between-page navigation,  Next: History and Caching,  
 Moving to a different page can be accomplished in several ways,
 described by the following command:
 
-<RET>, <mouse-1> ('elpher-follow-link')
+<RET>, <mouse-1> ('elpher-follow-current-link')
      Follow the menu item or link at point (or selected with the mouse).
 
      Exactly what is meant by "follow" depends on the kind of item
@@ -343,6 +344,10 @@ described by the following command:
 
      Once a text, menu or query response page has been displayed, its
      contents are cached for the duration of the Emacs session.
+
+S-<RET>, S-<mouse-1> ('elpher-follow-current-link-new-buffer')
+     Create a new Elpher buffer and follow the menu item or link at
+     point in the new buffer.
 
 <g> ('elpher-go')
      Open a particular page by specifying either its full URL or just
@@ -851,7 +856,7 @@ Command Index
 
 * bookmark-bmenu-list:                   Bookmarks.            (line 29)
 * elpher-back:                           Between-page navigation.
-                                                               (line 62)
+                                                               (line 66)
 * elpher-bookmark-current:               Bookmarks.            (line 14)
 * elpher-bookmark-link:                  Bookmarks.            (line 10)
 * elpher-copy-current-url:               Within-page navigation.
@@ -862,14 +867,16 @@ Command Index
                                                                (line 42)
 * elpher-download-current:               Within-page navigation.
                                                                (line 48)
-* elpher-follow-link:                    Between-page navigation.
+* elpher-follow-current-link:            Between-page navigation.
                                                                (line 10)
+* elpher-follow-current-link-new-buffer: Between-page navigation.
+                                                               (line 42)
 * elpher-forget-certificate:             Client Certificates for Gemini.
                                                                (line 62)
 * elpher-go:                             Between-page navigation.
-                                                               (line 42)
+                                                               (line 46)
 * elpher-go-current:                     Between-page navigation.
-                                                               (line 51)
+                                                               (line 55)
 * elpher-info-current:                   Within-page navigation.
                                                                (line 31)
 * elpher-info-link:                      Within-page navigation.
@@ -882,7 +889,7 @@ Command Index
 * elpher-prev-link:                      Within-page navigation.
                                                                (line 17)
 * elpher-root-dir:                       Between-page navigation.
-                                                               (line 59)
+                                                               (line 63)
 * elpher-set-coding-system:              Gopher character encodings.
                                                                (line 29)
 * elpher-show-history:                   History and Caching.  (line 34)
@@ -900,6 +907,7 @@ This chapter documents the major changes introduced by Elpher releases.
 
 * Menu:
 
+* v3.6.0::
 * v3.5.0::
 * v3.4.0::
 * v3.3.0::
@@ -908,12 +916,26 @@ This chapter documents the major changes introduced by Elpher releases.
 * v3.0.0::
 
 
-File: elpher.info,  Node: v3.5.0,  Next: v3.4.0,  Prev: News,  Up: News
+File: elpher.info,  Node: v3.6.0,  Next: v3.5.0,  Prev: News,  Up: News
 
-14.1 v3.5.0
+14.1 v3.6.0
 ===========
 
-14.1.1 Automatic activation of client certificates in gemini
+14.1.1 Easily open links in new buffer
+--------------------------------------
+
+This version includes the ability to open all link types in Elpher
+documents in a new buffer.  By default, this is bound to S-<RET> and
+S-<mouse-1>, but this can be modified by adding adjusting the bindings
+in 'elpher-link-keymap'.
+
+
+File: elpher.info,  Node: v3.5.0,  Next: v3.4.0,  Prev: v3.6.0,  Up: News
+
+14.2 v3.5.0
+===========
+
+14.2.1 Automatic activation of client certificates in gemini
 ------------------------------------------------------------
 
 This version introduces a new customization variable
@@ -926,10 +948,10 @@ them.
 
 File: elpher.info,  Node: v3.4.0,  Next: v3.3.0,  Prev: v3.5.0,  Up: News
 
-14.2 v3.4.0
+14.3 v3.4.0
 ===========
 
-14.2.1 Toggling preformatted text visibility
+14.3.1 Toggling preformatted text visibility
 --------------------------------------------
 
 This version introduces the ability to hide preformatted text in
@@ -944,19 +966,19 @@ readers to read text/gemini documents.
 
 File: elpher.info,  Node: v3.3.0,  Next: v3.2.0,  Prev: v3.4.0,  Up: News
 
-14.3 v3.3.0
+14.4 v3.3.0
 ===========
 
 This version includes lots of bug fixes, as well as a couple of new
 features.
 
-14.3.1 Local gophermaps
+14.4.1 Local gophermaps
 -----------------------
 
 Local gophermaps can now be displayed using 'file:'.  To render
 correctly, they must have the suffix '.gopher' or '.gophermap'.
 
-14.3.2 IRI support
+14.4.2 IRI support
 ------------------
 
 Internationalized Resource Identifiers (IRI) are an extension of URLs
@@ -971,13 +993,13 @@ and the URI when they differ.)
 
 File: elpher.info,  Node: v3.2.0,  Next: v3.1.0,  Prev: v3.3.0,  Up: News
 
-14.4 v3.2.0
+14.5 v3.2.0
 ===========
 
 This version introduces several minor changes which, together, make it
 possible to set up alternative start pages configured to your liking.
 
-14.4.1 About pages
+14.5.1 About pages
 ------------------
 
 Special elpher pages such as the welcome page (previously "start" page),
@@ -985,14 +1007,14 @@ the bookmarks page, the browsing history stack and list of visited pages
 are now addressable via 'about:' URLs.  For instance, the standard
 welcome page has the address 'about:welcome'.
 
-14.4.2 Local files
+14.5.2 Local files
 ------------------
 
 Local files can now be opened in elpher using 'file:' URLs.  For
 example, 'g 'file:~/my-start.gmi'' will open '~/my-start.gmi' as a
 text/gemini document.  *note Local files:: for details.
 
-14.4.3 Customizable start pages
+14.5.3 Customizable start pages
 -------------------------------
 
 The new customization variable 'elpher-start-page-url' contains the URL
@@ -1003,10 +1025,10 @@ is set to 'about:welcome', but any elpher-accessible URL is valid.
 
 File: elpher.info,  Node: v3.1.0,  Next: v3.0.0,  Prev: v3.2.0,  Up: News
 
-14.5 v3.1.0
+14.6 v3.1.0
 ===========
 
-14.5.1 Bookmarks system
+14.6.1 Bookmarks system
 -----------------------
 
 While Elpher bookmarks are still handled by the Emacs bookmark system,
@@ -1030,10 +1052,10 @@ release.
 
 File: elpher.info,  Node: v3.0.0,  Prev: v3.1.0,  Up: News
 
-14.6 v3.0.0
+14.7 v3.0.0
 ===========
 
-14.6.1 Bookmarks system
+14.7.1 Bookmarks system
 -----------------------
 
 Bookmarks are now handled by Emacs' own bookmark management system,
@@ -1052,7 +1074,7 @@ Elpher's old menu, but is much more functional.  Bookmarks can be
 renamed, deleted in groups, and much more.  (Use 'C-h m' with the menu
 open to see the complete list.)
 
-14.6.2 History
+14.7.2 History
 --------------
 
 Browsing history can now be accessed via new bindings to <s> and <S>.
@@ -1060,19 +1082,19 @@ The former shows the current history "stack" (pages accessible with the
 <u> key), while the latter shows a list of all pages which have been
 visited in the current session.
 
-14.6.3 Socks connections
+14.7.3 Socks connections
 ------------------------
 
 Elpher can now use socks connections to browse via TOR.
 
-14.6.4 browse-url, Org and mu4e integration
+14.7.4 browse-url, Org and mu4e integration
 -------------------------------------------
 
 These integrations provide support for elpher-handling of gemini, gopher
 and finger URLs using 'browse-url', in Org documents, and the mu4e mail
 system.
 
-14.6.5 imenu integration
+14.7.5 imenu integration
 ------------------------
 
 Gemini document headers are now navigable via imenu.  For details, *Note
@@ -1112,36 +1134,37 @@ provided assistance and/or patches:
 
 Tag Table:
 Node: Top953
-Node: Introduction3463
-Node: Installation4652
-Node: Installing from ELPA or MELPA4926
-Node: Installing by hand5810
-Node: Quick Start6282
-Node: Navigation8370
-Node: Within-page navigation9245
-Node: Between-page navigation11346
-Node: History and Caching14163
-Ref: History and Caching-Footnote-115846
-Node: Bookmarks16225
-Node: Gopher character encodings18127
-Node: Encrypted gopher connections20027
-Node: Gemini support21177
-Node: Client Certificates for Gemini24433
-Node: Hiding preformatted text in text/gemini documents28110
-Node: Finger support29187
-Node: Local files30241
-Node: About pages31472
-Node: ANSI support32032
-Node: Customization33089
-Node: Command Index34528
-Node: News37468
-Node: v3.5.037721
-Node: v3.4.038207
-Node: v3.3.038864
-Node: v3.2.039786
-Node: v3.1.040873
-Node: v3.0.041897
-Node: Contributors43702
+Node: Introduction3474
+Node: Installation4663
+Node: Installing from ELPA or MELPA4937
+Node: Installing by hand5821
+Node: Quick Start6293
+Node: Navigation8381
+Node: Within-page navigation9256
+Node: Between-page navigation11357
+Node: History and Caching14344
+Ref: History and Caching-Footnote-116027
+Node: Bookmarks16406
+Node: Gopher character encodings18308
+Node: Encrypted gopher connections20208
+Node: Gemini support21358
+Node: Client Certificates for Gemini24614
+Node: Hiding preformatted text in text/gemini documents28291
+Node: Finger support29368
+Node: Local files30422
+Node: About pages31653
+Node: ANSI support32213
+Node: Customization33270
+Node: Command Index34709
+Node: News37788
+Node: v3.6.038052
+Node: v3.5.038464
+Node: v3.4.038952
+Node: v3.3.039609
+Node: v3.2.040531
+Node: v3.1.041618
+Node: v3.0.042642
+Node: Contributors44447
 
 End Tag Table
 
