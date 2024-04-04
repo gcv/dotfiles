@@ -1,12 +1,12 @@
 ;;; crux.el --- A Collection of Ridiculously Useful eXtensions -*- lexical-binding: t -*-
 ;;
-;; Copyright © 2015-2021 Bozhidar Batsov
+;; Copyright © 2015-2024 Bozhidar Batsov
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/bbatsov/crux
-;; Version: 0.4.0
+;; Version: 0.5.0
 ;; Keywords: convenience
-;; Package-Requires: ((seq "1.11"))
+;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -452,7 +452,7 @@ there's a region, all lines that region covers will be duplicated."
 
 ;;;###autoload
 (defun crux-copy-file-preserve-attributes (visit)
-    "Copy the current file-visiting buffer's file to a destination.
+  "Copy the current file-visiting buffer's file to a destination.
 
 This function prompts for the new file's location and copies it
 similar to cp -p. If the new location is a directory, and the
@@ -468,35 +468,31 @@ to not created it, nothing will be done.
 
 When invoke with C-u, the newly created file will be visited.
 "
-    (interactive "p")
-    (let ((current-file (buffer-file-name)))
-      (when current-file
-        (let* ((new-file (read-file-name "Copy file to: "))
-               (abs-path (expand-file-name new-file))
-               (create-dir-prompt "%s is a non-existent directory, create it? ")
-               (is-dir? (string-match "/" abs-path (1- (length abs-path))))
-               (dir-missing? (and is-dir? (not (file-exists-p abs-path))))
-               (create-dir? (and is-dir?
-                                 dir-missing?
-                                 (y-or-n-p
-                                  (format create-dir-prompt new-file))))
-               (destination (concat (file-name-directory abs-path)
-                                    (file-name-nondirectory current-file))))
-          (unless (and is-dir? dir-missing? (not create-dir?))
-            (when (and is-dir? dir-missing? create-dir?)
-              (make-directory abs-path))
-            (condition-case nil
-                (progn
-                  (copy-file current-file abs-path nil t t t)
-                  (message "Wrote %s" destination)
-                  (when visit
-                    (find-file-other-window destination)))
-              (file-already-exists
-               (when (y-or-n-p (format "%s already exists, overwrite? " destination))
-                 (copy-file current-file abs-path t t t t)
-                 (message "Wrote %s" destination)
-                 (when visit
-                   (find-file-other-window destination))))))))))
+  (interactive "P")
+  (when-let ((current-file (buffer-file-name)))
+    (let* ((input-dest (expand-file-name (read-file-name "Copy file to: ")))
+           (input-dest-is-dir? (or (file-directory-p input-dest)
+                                   (string-match "/" input-dest (1- (length input-dest)))))
+           (dest-file (if input-dest-is-dir?
+                          (expand-file-name (file-name-nondirectory current-file) input-dest)
+                        input-dest))
+           (dest-dir (file-name-directory dest-file))
+           (dest-dir-missing? (not (file-directory-p dest-dir)))
+           (create-dir? (and dest-dir-missing?
+                             (y-or-n-p
+                              (format "%s is a non-existent directory, create it? " dest-dir))))
+           (dest-file-exists? (file-regular-p dest-file))
+           (overwrite-dest-file? (and dest-file-exists?
+                                      (y-or-n-p
+                                       (format "%s already exists, overwrite? " dest-file)))))
+      (unless (or (and dest-dir-missing? (not create-dir?))
+                  (and dest-file-exists? (not overwrite-dest-file?)))
+        (when (and dest-dir-missing? create-dir?)
+          (make-directory dest-dir t))
+        (copy-file current-file dest-file overwrite-dest-file? t t t)
+        (message "Wrote %s" dest-file)
+        (when visit
+          (find-file-other-window dest-file))))))
 
 ;;;###autoload
 (defun crux-view-url ()
@@ -563,8 +559,8 @@ See `file-attributes' for more info."
         (remote-localname (file-remote-p filename 'localname)))
     (find-alternate-file (format "/%s:root@%s:%s"
                                  (or remote-method (if (executable-find "doas")
-						       "doas"
-						     "sudo"))
+                                                       "doas"
+                                                     "sudo"))
                                  (or remote-host "localhost")
                                  (or remote-localname filename)))))
 
@@ -582,8 +578,8 @@ buffer is not visiting a file."
             (remote-localname (file-remote-p default-directory 'localname)))
         (find-file (format "/%s:root@%s:%s"
                            (or remote-method (if (executable-find "doas")
-						       "doas"
-						     "sudo"))
+                                                 "doas"
+                                               "sudo"))
                            (or remote-host "localhost")
                            (or remote-localname
                                (read-file-name "Find file (as root): ")))))
@@ -713,10 +709,10 @@ Doesn't mess with special buffers."
 ;;;###autoload
 (defun crux-find-user-custom-file ()
   "Edit the `custom-file', in another window."
-    (interactive)
-    (if custom-file
-        (find-file-other-window custom-file)
-      (message "No custom file found.")))
+  (interactive)
+  (if custom-file
+      (find-file-other-window custom-file)
+    (message "No custom file found.")))
 
 ;;;###autoload
 (defun crux-find-shell-init-file ()
