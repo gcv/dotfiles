@@ -4,9 +4,9 @@
 #+language: en
 #+options: ':t toc:nil author:t email:t num:t
 #+startup: content
-#+macro: stable-version 2.2.0
-#+macro: release-date 2023-12-10
-#+macro: development-version 2.3.0-dev
+#+macro: stable-version 2.3.0
+#+macro: release-date 2024-03-24
+#+macro: development-version 3.0.0-dev
 #+export_file_name: denote.texi
 #+texinfo_filename: denote.info
 #+texinfo_dir_category: Emacs misc features
@@ -33,11 +33,9 @@ Current development target is {{{development-version}}}.
 + Package name (GNU ELPA): ~denote~
 + Official manual: <https://protesilaos.com/emacs/denote>
 + Change log: <https://protesilaos.com/emacs/denote-changelog>
-+ Git repo on SourceHut: <https://git.sr.ht/~protesilaos/denote>
-  - Mirrors:
-    + GitHub: <https://github.com/protesilaos/denote>
-    + GitLab: <https://gitlab.com/protesilaos/denote>
-+ Mailing list: <https://lists.sr.ht/~protesilaos/denote>
++ Git repositories:
+  + GitHub: <https://github.com/protesilaos/denote>
+  + GitLab: <https://gitlab.com/protesilaos/denote>
 + Video demo: <https://protesilaos.com/codelog/2022-06-18-denote-demo/>
 + Backronyms: Denote Everything Neatly; Omit The Excesses.  Don't Ever
   Note Only The Epiphenomenal.
@@ -53,7 +51,7 @@ the GNU ELPA machinery automatically generates an Info manual out of it.
 :CUSTOM_ID: h:40b18bb2-4dc1-4202-bd0b-6fab535b2a0f
 :END:
 
-Copyright (C) 2022-2023  Free Software Foundation, Inc.
+Copyright (C) 2022-2024  Free Software Foundation, Inc.
 
 #+begin_quote
 Permission is granted to copy, distribute and/or modify this document
@@ -214,9 +212,18 @@ alias ~denote-create-note~.
 The user option ~denote-prompts~ determines how the ~denote~ command
 will behave interactively ([[#h:6a92a8b5-d766-42cc-8e5b-8dc255466a23][Standard note creation]]).
 
-The value is a list of symbols, which includes any of the following:
+Commands that prompt for user input to construct a Denote file name
+include, but are not limited to: ~denote~, ~denote-signature~,
+~denote-type~, ~denote-date~, ~denote-subdirectory~,
+~denote-rename-file~, ~denote-dired-rename-files~.
 
-- =title=: Prompt for the title of the new note.
+- [[#h:887bdced-9686-4e80-906f-789e407f2e8f][Convenience commands for note creation]].
+- [[#h:532e8e2a-9b7d-41c0-8f4b-3c5cbb7d4dca][Renaming files]].
+
+The value of this user option is a list of symbols, which includes any
+of the following:
+
+- =title=: Prompt for the title of the new note ([[#h:403422a7-7578-494b-8f33-813874c12da3][The ~denote-history-completion-in-prompts~ option]]).
 
 - =keywords=: Prompts with completion for the keywords of the new note.
   Available candidates are those specified in the user option
@@ -224,7 +231,7 @@ The value is a list of symbols, which includes any of the following:
   is non-nil, keywords in existing note file names are included in the
   list of candidates.  The =keywords= prompt uses
   ~completing-read-multiple~, meaning that it can accept multiple
-  keywords separated by a comma (or whatever the value of ~crm-sepator~
+  keywords separated by a comma (or whatever the value of ~crm-separator~
   is).
 
 - =file-type=: Prompts with completion for the file type of the new
@@ -280,12 +287,43 @@ those permutations:
 When in doubt, always include the =title= and =keywords= prompts.
 
 Finally, this user option only affects the interactive use of the
-~denote~ command (advanced users can call it from Lisp).  For ad-hoc
-interactive actions that do not change the default behaviour of the
-~denote~ command, users can invoke these convenience commands:
-~denote-type~, ~denote-subdirectory~, ~denote-date~,
-~denote-signature~.  They are described in the subsequent section
-([[#h:887bdced-9686-4e80-906f-789e407f2e8f][Convenience commands for note creation]]).
+~denote~ or other relevant commands (advanced users can call it from
+Lisp). In Lisp usage, the behaviour is always what the caller
+specifies, based on the supplied arguments.
+
+*** The ~denote-history-completion-in-prompts~ option
+:PROPERTIES:
+:CUSTOM_ID: h:403422a7-7578-494b-8f33-813874c12da3
+:END:
+
+#+vindex: denote-history-completion-in-prompts
+The user option ~denote-history-completion-in-prompts~ toggles history
+completion in all ~denote-prompts-with-history-as-completion~.
+
+When this user option is set to a non-nil value, Denote will use
+minibuffer history entries as completion candidates in all of the
+~denote-prompts-with-history-as-completion~. Those will show previous
+inputs from their respective history as possible values to select,
+either to (i) re-insert them verbatim or (ii) with the intent to edit
+them further (depending on the minibuffer user interface, one can
+select a candidate with =TAB= without exiting the minibuffer, as
+opposed to what =RET= normally does by selecting and exiting).
+
+When this user option is set to a nil value, all of the
+~denote-prompts-with-history-as-completion~ will not use minibuffer
+completion: they will just prompt for a string of characters. Their
+history is still available through all the standard ways of retrieving
+minibuffer history, such as with the command ~previous-history-element~.
+
+History completion still allows arbitrary values to be provided as
+input: they do not have to match the available minibuffer completion
+candidates.
+
+Note that some prompts, like ~denote-keywords-prompt~, always use
+minibuffer completion, due to the specifics of their data.
+
+[ Consider enabling the built-in ~savehist-mode~ to persist minibuffer
+  histories between sessions.]
 
 *** The ~denote-templates~ option
 :PROPERTIES:
@@ -363,16 +401,17 @@ this can be achieved globally by changing the ~denote-prompts~ user
 option, there are cases where an ad-hoc method is the appropriate one
 ([[#h:f9204f1f-fcee-49b1-8081-16a08a338099][The denote-prompts option]]).
 
-To this end, Denote provides the following convenience interactive
-commands for note creation:
+To this end, Denote provides the following interactive convenience
+commands for note creation. They all work by appending a new prompt to
+the existing ~denote-prompts~.
 
 + Create note by specifying file type :: The ~denote-type~ command
   creates a note while prompting for a file type.
 
-  This is the equivalent to calling ~denote~ when ~denote-prompts~ is
-  set to ='(file-type title keywords)=.  In practical terms, this lets
-  you produce, say, a note in Markdown even though you normally write in
-  Org ([[#h:6a92a8b5-d766-42cc-8e5b-8dc255466a23][Standard note creation]]).
+  This is the equivalent of calling ~denote~ when ~denote-prompts~ has
+  the =file-type= prompt appended to its existing prompts. In practical
+  terms, this lets you produce, say, a note in Markdown even though
+  you normally write in Org ([[#h:6a92a8b5-d766-42cc-8e5b-8dc255466a23][Standard note creation]]).
 
   #+findex: denote-create-note-using-type
   The ~denote-create-note-using-type~ is an alias of ~denote-type~.
@@ -388,8 +427,8 @@ commands for note creation:
 
   [[#h:e7ef08d6-af1b-4ab3-bb00-494a653e6d63][The denote-date-prompt-use-org-read-date option]].
 
-  This is the equivalent to calling ~denote~ when ~denote-prompts~ is
-  set to ='(date title keywords)=.
+  This is the equivalent of calling ~denote~ when ~denote-prompts~ has
+  the =date= prompt appended to its existing prompts.
 
   #+findex: denote-create-note-using-date
   The ~denote-create-note-using-date~ is an alias of ~denote-date~.
@@ -399,8 +438,8 @@ commands for note creation:
   candidates include the value of the variable ~denote-directory~ and
   any subdirectory thereof (Denote does not create subdirectories).
 
-  This is equivalent to calling ~denote~ when ~denote-prompts~ is set to
-  ='(subdirectory title keywords)=.
+  This is the equivalent of calling ~denote~ when ~denote-prompts~ has
+  the =subdirectory= prompt appended to its existing prompts.
 
   #+findex: denote-create-note-in-subdirectory
   The ~denote-create-note-in-subdirectory~ is a more descriptive alias
@@ -411,8 +450,8 @@ commands for note creation:
   matter ([[#h:f635a490-d29e-4608-9372-7bd13b34d56c][The denote-templates option]]).  Available candidates for
   templates are specified in the user option ~denote-templates~.
 
-  This is equivalent to calling ~denote~ when ~denote-prompts~ is
-  set to ='(template title keywords)=.
+  This is the equivalent of calling ~denote~ when ~denote-prompts~ has
+  the =template= prompt appended to its existing prompts.
 
   #+findex: denote-create-note-with-template
   The ~denote-create-note-with-template~ is an alias of the command
@@ -424,6 +463,9 @@ commands for note creation:
   Signatures are arbitrary strings of alphanumeric characters which
   can be used to establish sequential relations between file at the
   level of their file name (e.g. 1, 1a, 1b, 1b1, 1b2, ...).
+
+  This is the equivalent of calling ~denote~ when ~denote-prompts~ has
+  the =signature= prompt appended to its existing prompts.
 
   The ~denote-create-note-using-signature~ is an alias of the command
   ~denote-signature~ intended to make the functionality more
@@ -490,8 +532,28 @@ set to '(template subdirectory title keywords)."
 #+end_src
 
 The tweaks to ~denote-prompts~ determine how the command will behave
-([[#h:f9204f1f-fcee-49b1-8081-16a08a338099][The denote-prompts option]]).  Use this paradigm to write your own
-variants which you can then assign to keys or invoke with =M-x=.
+([[#h:f9204f1f-fcee-49b1-8081-16a08a338099][The denote-prompts option]]). Use this paradigm to write your own
+variants which you can then assign to keys, invoke with =M-x=, or add
+to the list of commands available at the ~denote-command-prompt~
+([[#h:98c732ac-da0e-4ebd-a0e3-5c47f9075e51][Choose which commands to prompt for]]).
+
+*** The ~denote-save-buffer-after-creation~ option
+:PROPERTIES:
+:CUSTOM_ID: h:bf80f4cd-6f56-4f7c-a991-8573161e4511
+:END:
+
+#+vindex: denote-save-buffer-after-creation
+The user option ~denote-save-buffer-after-creation~ controls whether
+commands that creeate new notes save their buffer outright.
+
+The default behaviour of commands such as ~denote~ (or related) is to
+not save the buffer they create ([[#h:17896c8c-d97a-4faa-abf6-31df99746ca6][Points of entry]]). This gives the user
+the chance to review the text before writing it to a file. The user
+may choose to delete the unsaved buffer, thus not creating a new note
+([[#h:bf80f4cd-6f56-4f7c-a991-8573161e4511][The ~denote-save-buffer-after-creation~ option]]).
+
+If ~denote-save-buffer-after-creation~ is set to a non-nil value, such
+buffers are saved automatically.
 
 *** The ~denote-date-prompt-use-org-read-date~ option
 :PROPERTIES:
@@ -508,24 +570,55 @@ Users who want to benefit from the more advanced date selection method
 that is common in interactions with Org mode, can set the user option
 ~denote-date-prompt-use-org-read-date~ to a non-nil value.
 
-*** Add or remove keywords interactively
+** Create a note from the current Org subtree
 :PROPERTIES:
-:CUSTOM_ID: h:ad4dde4a-8e88-470a-97ae-e7b9d4b41fb4
+:CUSTOM_ID: h:d0c7cb79-21e5-4176-a6af-f4f68578c8dd
 :END:
 
-#+findex: denote-keywords-add
-#+findex: denote-keywords-remove
-The commands ~denote-keywords-add~ and ~denote-keywords-remove~
-streamline the process of interactively updating a file's keywords in
-the front matter and renaming it accordingly.
+In Org parlance, an entry with all its subheadings and other contents
+is a "subtree". Denote can operate on the subtree to extract it from
+the current file and create a new file out of it. One such workflow is
+to collect thoughts in a single document and produce longer standalone
+notes out of them upon review.
 
-The ~denote-keywords-add~ asks for keywords using the familiar
-minibuffer prompt ([[#h:6a92a8b5-d766-42cc-8e5b-8dc255466a23][Standard note creation]]).  It then renames the file
-([[#h:3ab08ff4-81fa-4d24-99cb-79f97c13a373][Rename a single file based on its front matter]]).
+#+findex: denote-org-extras-extract-org-subtree
+The command ~denote-org-extras-extract-org-subtree~ (part of the
+optional =denote-org-extras.el= extension) is used for this purpose.
+It creates a new Denote note using the current Org subtree. In doing
+so, it removes the subtree from its current file and moves its
+contents into a new file.
 
-Similarly, the ~denote-keywords-remove~ removes one or more keywords
-from the list of existing keywords and then renames the file
-accordingly.
+The text of the subtree's heading becomes the =#+title= of the new
+note. Everything else is inserted as-is.
+
+If the heading has any tags, they are used as the keywords of the new
+note. If the Org file has any =#+filetags= they are taken as well
+(Org's =#+filetags= are inherited by the headings). If none of these
+are true and the user option ~denote-prompts~ includes an entry for
+keywords, then ~denote-org-extras-extract-org-subtree~ prompts for
+keywords. Else the new note has no keywords ([[#h:ad4dde4a-8e88-470a-97ae-e7b9d4b41fb4][Add or remove keywords interactively]]).
+
+If the heading has a =PROPERTIES= drawer, it is retained for further
+review.
+
+If the heading's =PROPERTIES= drawer includes a =DATE= or =CREATED=
+property, or there exists a =CLOSED= statement with a timestamp value,
+use that to derive the date (or date and time) of the new note (if
+there is only a date, the time is taken as 00:00). If more than one of
+these is present, the order of preference is =DATE=, then =CREATED=,
+then =CLOSED=. If none of these is present, the current time is used.
+If the ~denote-prompts~ includes an entry for a date, then the command
+prompts for a date at this stage (also see ~denote-date-prompt-use-org-read-date~).
+
+For the rest, it consults the value of the user option
+~denote-prompts~ in the following scenaria:
+
+- To optionally prompt for a subdirectory, otherwise it produces the
+  new note in the ~denote-directory~.
+- To optionally prompt for a file signature, otherwise to not use any.
+
+The new note is an Org file regardless of the user option
+~denote-file-type~.
 
 ** Create note using Org capture
 :PROPERTIES:
@@ -665,6 +758,48 @@ treated the same as =:title= or ~t~).
                :jump-to-captured t))
 #+end_src
 
+** Create a note with the region's contents
+:PROPERTIES:
+:CUSTOM_ID: h:2f8090f1-50af-4965-9771-d5a91a0a87bd
+:END:
+
+#+findex: denote-region
+The command ~denote-region~ takes the contents of the active region
+and then calls the ~denote~ command.  Once a new note is created, it
+inserts the contents of the region therein.  This is useful to
+quickly elaborate on some snippet of text or capture it for future
+reference.
+
+#+vindex: denote-region-after-new-note-functions
+When the ~denote-region~ command is called with an active region, it
+finalises its work by calling ~denote-region-after-new-note-functions~.
+This is an abnormal hook, meaning that the functions added to it are
+called with arguments.  The arguments are two, representing the
+beginning and end positions of the newly inserted text.
+
+A common use-case for Org mode users is to call the command
+~org-insert-structure-template~ after a region is inserted.  Emacs
+will thus prompt for a structure template, such as the one
+corresponding to a source block.  In this case the function added to
+~denote-region-after-new-note-functions~ does not actually need
+aforementioned arguments: it can simply declare those as ignored by
+prefixing the argument names with an underscore (an underscore is
+enough, but it is better to include a name for clarity).  For example,
+the following will prompt for a structure template as soon as
+~denote-region~ is done:
+
+#+begin_src emacs-lisp
+(defun my-denote-region-org-structure-template (_beg _end)
+  (when (derived-mode-p 'org-mode)
+    (activate-mark)
+    (call-interactively 'org-insert-structure-template)))
+
+(add-hook 'denote-region-after-new-note-functions #'my-denote-region-org-structure-template)
+#+end_src
+
+Remember that ~denote-region-after-new-note-functions~ are not called
+if ~denote-region~ is used without an active region.
+
 ** Open an existing note or create it if missing
 :PROPERTIES:
 :CUSTOM_ID: h:ad91ca39-cf10-4e16-b224-fdf78f093883
@@ -731,7 +866,7 @@ file, with the following contents:
 ;;;
 ;;;     (info "(emacs) Directory Variables")
 
-((nil . ((denote-directory . default-directory))))
+((nil . ((denote-directory . "/path/to/silo/"))))
 #+end_src
 
 When inside the directory that contains this =.dir-locals.el= file, all
@@ -777,7 +912,7 @@ silo-specific value.  For example, this one changes the
 ;;;
 ;;;     (info "(emacs) Directory Variables")
 
-((nil . ((denote-directory . default-directory)
+((nil . ((denote-directory . "/path/to/silo/")
          (denote-known-keywords . ("food" "drink")))))
 #+end_src
 
@@ -788,7 +923,7 @@ This one is like the above, but also disables ~denote-infer-keywords~:
 ;;;
 ;;;     (info "(emacs) Directory Variables")
 
-((nil . ((denote-directory . default-directory)
+((nil . ((denote-directory . "/path/to/silo/")
          (denote-known-keywords . ("food" "drink"))
          (denote-infer-keywords . nil))))
 #+end_src
@@ -801,30 +936,12 @@ modes, we can do something like this:
 ;;;
 ;;;     (info "(emacs) Directory Variables")
 
-((nil . ((denote-directory . default-directory)
+((nil . ((denote-directory . "/path/to/silo/")
          (denote-known-keywords . ("food" "drink"))
          (denote-infer-keywords . nil)))
  (org-mode . ((org-hide-emphasis-markers . t)
               (org-hide-macro-markers . t)
               (org-hide-leading-stars . t))))
-#+end_src
-
-IMPORTANT If your silo contains sub-directories of notes, you
-should replace ~default-directory~ in the above examples with an
-absolute path to your silo directory, otherwise links from files
-within the sub-directories cannot be made to files in the parent
-directory. For example:
-
-#+begin_src emacs-lisp
-;;; Directory Local Variables.  For more information evaluate:
-;;;
-;;;     (info "(emacs) Directory Variables")
-  ((nil . ((denote-directory . "~/my-silo")
-           (denote-known-keywords . ("food" "drink"))
-           (denote-infer-keywords . nil)))
-   (org-mode . ((org-hide-emphasis-markers . t)
-                (org-hide-macro-markers . t)
-                (org-hide-leading-stars . t))))
 #+end_src
 
 As not all user options have a "safe" local value, Emacs will ask the
@@ -861,7 +978,6 @@ read the video's path when called from there (e.g. by using Emacs'
 
 [[#h:15719799-a5ff-4e9a-9f10-4ca03ef8f6c5][Maintain separate directory silos for notes]].
 
-#+vindex: denote-user-enforced-denote-directory
 There are cases where the user (i) wants to maintain multiple silos
 and (ii) prefers an interactive way to switch between them without
 going through Dired.  Since this is specific to the user's workflow,
@@ -898,7 +1014,7 @@ added to the user's Denote configuration:
          (intern (completing-read
                   "Run command in silo: "
                   my-denote-commands-for-silos nil t))))
-  (let ((denote-user-enforced-denote-directory silo))
+  (let ((denote-directory silo))
     (call-interactively command)))
 #+end_src
 
@@ -906,15 +1022,12 @@ With this in place, =M-x my-denote-pick-silo-then-command= will use
 minibuffer completion to select a silo among the predefined options
 and then ask for the command to run in that context.
 
-Note the use of the variable ~user-enforced-denote-directory~. This
-variable is specially meant for custom commands to select silos. When
-it is set, it overrides the global default value of ~denote-directory~
-as well as the value provided by the =.dir-locals.el= file. Use it
-only when writing wrapper functions like
-~my-denote-pick-silo-then-command~.
+Note that =let= binding ~denote-directory~ can be used in custom
+commands and other wrapper functions to override the global default
+value of ~denote-directory~ to select silos.
 
-To see another example of a wrapper function that uses
-~user-enforced-denote-directory~, see:
+To see another example of a wrapper function that =let= binds
+~denote-directory~, see:
 
 [[#h:d0c7cb79-21e5-4176-a6af-f4f68578c8dd][Extending Denote: Split an Org subtree into its own note]].
 
@@ -1001,6 +1114,10 @@ the entry called "Denote".  From there they can use their pointer to
 select a command.  For a sample of how this looks, read the
 development log: <https://protesilaos.com/codelog/2023-03-31-emacs-denote-menu/>.
 
+#+findex: denote-menu-bar-mode
+The command ~denote-menu-bar-mode~ toggles the presentation of the
+menu. It is enabled by default.
+
 Emacs also provides support for operations through a context menu.
 This is typically the set of actions that are made available via a
 right mouse click.  Users who enable ~context-menu-mode~ can register
@@ -1035,6 +1152,10 @@ part of the user's longer-term storage.  While Denote does not manage
 such files (e.g. doesn't create links to them), it already has all the
 mechanisms to facilitate the task of renaming them.
 
+#+vindex: denote-after-rename-file-hook
+All renaming commands run the ~denote-after-rename-file-hook~ after a
+succesful operation.
+
 Apart from renaming files, Denote can also rename only the buffer.
 The idea is that the underlying file name is correct but it can be
 easier to use shorter buffer names when displaying them on the mode
@@ -1052,110 +1173,134 @@ The ~denote-rename-file~ command renames a file and updates existing
 front matter if appropriate. It is possible to do the same with
 multiple files ([[#h:1b6b2c78-42f0-45b8-9ef0-6de21a8b2cde][Rename multiple files interactively]]).
 
-If in Dired, consider =FILE= to be the one at point, else prompt with
-minibuffer completion for one. When called from Lisp, =FILE= is a
-filesystem path represented as a string.
+It always renames the file where it is located in the file system:
+it never moves it to another directory.
 
-If =FILE= has a Denote-compliant identifier, retain it while updating
-the =TITLE=, =KEYWORDS=, and =SIGNATURE= components of the file name.
+If in Dired, it considers =FILE= to be the one at point, else it
+prompts with minibuffer completion for one. When called from Lisp,
+=FILE= is a file system path represented as a string.
 
-Else create an identifier based on the following conditions:
+If =FILE= has a Denote-compliant identifier, it retains it while
+updating components of the file name referenced by the user option
+~denote-prompts~ ([[#h:f9204f1f-fcee-49b1-8081-16a08a338099][The ~denote-prompts~ option]]). By default, these are
+the =TITLE= and =KEYWORDS=. The =SIGNATURE= is another one. When
+called from Lisp, =TITLE= and =SIGNATURE= are strings, while
+=KEYWORDS= is a list of strings.
 
-1. If optional =ASK-DATE= is non-nil (such as with a prefix argument),
-   prompt for a date and use it to derive the identifier.
+If there is no identifier, ~denote-rename-file~ creates an identifier
+based on the following conditions:
 
-2. If optional =ASK-DATE= is nil (this is the case without a prefix
-   argument), use the file attributes to determine the last modified
-   date and format it as an identifier.
+1. If the ~denote-prompts~ includes an entry for date prompts, then it
+   prompts for =DATE= and takes its input to produce a new identifier. For
+   use in Lisp, =DATE= must conform with ~denote-valid-date-p~.
 
-3. As a fallback, derive an identifier from the current time.
+2. If =DATE= is nil (e.g. when ~denote-prompts~ does not include a
+   date entry), it uses the file attributes to determine the last
+   modified date of =FILE= and formats it as an identifier.
 
-4. If the resulting identifier is not unique among the files in the
-   variable ~denote-directory~, increment it such that it becomes
-   unique.
+3. As a fallback, it derives an identifier from the current date and
+   time.
 
-Add =TITLE= to =FILE=. In interactive use, prompt for user input and
-retrieve the default =TITLE= value from a line starting with a title
-field in the file's contents, depending on the given file type ([[#h:13218826-56a5-482a-9b91-5b6de4f14261][Front matter]]).
-Else, use the file name as a default value at the minibuffer prompt.
-When called from Lisp, =TITLE= is a string.
+4. At any rate, if the resulting identifier is not unique among the
+   files in the variable ~denote-directory~, it increments it such
+   that it becomes unique.
 
-If =TITLE= is nil or an empty string, do not add it to a newly renamed
-file or remove it from an existing file.
+In interactive use, and assuming ~denote-prompts~ includes a title
+entry, the ~denote-rename-file~ makes the =TITLE= prompt have
+prefilled text in the minibuffer that consists of the current title of
+=FILE=. The current title is either retrieved from the front matter
+(such as the =#+title= in Org) or from the file name.
 
-Add =SIGNATURE= to =FILE=. In interactive use, prompt for =SIGNATURE=,
-using an existing one as the default value at the minibuffer prompt.
-When called from Lisp, =SIGNATURE= is a string.
+The command does the same for the =SIGNATURE= prompt, subject to
+~denote-prompts~, by prefilling the minibuffer with the current
+signature of =FILE=, if any.
 
-If =SIGNATURE= is nil or an empty string, do not add it to a newly
-renamed file or remove it from an existing file.
+Same principle for the =KEYWORDS= prompt: it converts the keywords in
+the file name into a comma-separated string and prefills the minibuffer
+with it (the =KEYWORDS= prompt accepts more than one keywords, each
+separated by a comma, else the ~crm-separator~).
 
-Add =KEYWORDS= to =FILE=. In interactive use, prompt for =KEYWORDS=.
-More than one keyword can be inserted when separated by the
-`crm-sepator' (normally a comma). When called from Lisp, =KEYWORDS= is
-a list of strings.
+For all prompts, the ~denote-rename-file~ interprets an empty input as
+an instruction to remove that file name component. For example, if a
+=TITLE= prompt is available and =FILE= is =20240211T093531--some-title__keyword1.org=
+then it renames =FILE= to =20240211T093531__keyword1.org=. If a file
+name component is present, but there is no entry for it in
+~denote-prompts~, keep it as-is.
 
-If =KEYWORDS= is nil or an empty string, do not add it to a newly
-renamed file or remove it from an existing file.
+[ NOTE: Please check with your minibuffer user interface how to
+  provide an empty input. The Emacs default setup accepts the empty
+  minibuffer contents as they are, though popular packages like
+  ~vertico~ use the first available completion candidate instead. For
+  ~vertico~, the user must either move one up to select the prompt and
+  then type =RET= there with empty contents, or use the command
+  ~vertico-exit-input~ with empty contents. That Vertico command is
+  bound to =M-RET= as of this writing on 2024-02-13 08:08 +0200. ]
 
-Read the file type extension (like =.txt=) from the underlying file
-and preserve it through the renaming process. Files that have no
-extension are left without one.
+When renaming =FILE=, the command reads its file type extension (like
+=.org=) and preserves it through the renaming process. Files that have
+no extension are left without one.
 
-Renaming only occurs relative to the current directory. Files are not
-moved between directories.
+As a final step, it asks for confirmation, showing the difference
+between old and new file names. It does not ask for confirmation if
+the user option ~denote-rename-no-confirm~ is set to a non-nil value
+([[#h:a2ae9090-c49e-4b32-bcf5-eb8944241fd7][The ~denote-rename-no-confirm~ option]]).
 
-As a final step after the =FILE=, =TITLE=, =KEYWORDS=, and =SIGNATURE=
-are collected, ask for confirmation, showing the difference between
-old and new file names.
-
-Do not ask for confirmation if the ~denote-rename-no-confirm~ option
-is set to a non-nil value ([[#h:a2ae9090-c49e-4b32-bcf5-eb8944241fd7][The ~denote-rename-no-confirm~ option]]).
-
-If the =FILE= has Denote-style front matter for the =TITLE= and
-=KEYWORDS=, ask to rewrite their values in order to reflect the new
-input (this step always requires confirmation and the underlying
-buffer is not saved, so consider invoking ~diff-buffer-with-file~ to
-double-check the effect). The rewrite of the =TITLE= and =KEYWORDS= in
+If =FILE= has front matter for =TITLE= and =KEYWORDS=,
+~denote-rename-file~ asks to rewrite their values in order to reflect
+the new input, unless ~denote-rename-no-confirm~ is non-nil. When the
+~denote-rename-no-confirm~ is nil (the default), the underlying buffer
+is not saved, giving the user the change to invoking ~diff-buffer-with-file~ to
+double-check the effect. The rewrite of the =TITLE= and =KEYWORDS= in
 the front matter should not affect the rest of the front matter.
 
 If the file does not have front matter but is among the supported file
-types (per ~denote-file-type~), add front matter at the top of it and
-leave the buffer unsaved for further inspection.
+types (per ~denote-file-type~), the ~denote-rename-file~ adds front
+matter to the top of it and leaves the buffer unsaved for further
+inspection. It actually saves the buffer if ~denote-rename-no-confirm~
+is non-nil ([[#h:13218826-56a5-482a-9b91-5b6de4f14261][Front matter]]).
 
-For the front matter of each file type, refer to the variables:
-
-- ~denote-org-front-matter~
-- ~denote-text-front-matter~
-- ~denote-toml-front-matter~
-- ~denote-yaml-front-matter~
-
-This command is intended to (i) rename existing Denote notes while
-updating their title and keywords in the front matter, (ii) convert
+This command is intended to (i) rename Denote files, (ii) convert
 existing supported file types to Denote notes, and (ii) rename
-non-note files (e.g. PDF) that can benefit from Denote's file-naming
+non-note files (e.g. =PDF=) that can benefit from Denote's file-naming
 scheme.
+
+For a version of this command that works with multiple files
+one-by-one, use ~denote-dired-rename-files~ ([[#h:1b6b2c78-42f0-45b8-9ef0-6de21a8b2cde][Rename multiple files interactively]]).
 
 *** The ~denote-rename-no-confirm~ option
 :PROPERTIES:
 :CUSTOM_ID: h:a2ae9090-c49e-4b32-bcf5-eb8944241fd7
 :END:
 
-The default behaviour of the ~denote-rename-file~ command is to ask
-for an affirmative answer as a final step before changing the file
-name and, where relevant, inserting or updating the corresponding
-front matter ([[#h:7cc9e000-806a-48da-945c-711bbc7426b0][Rename a single file]]).
+#+vindex: denote-rename-no-confirm
+The user option ~denote-rename-no-confirm~ makes all commands that
+rename files not prompt for confirmation and save buffers outright ([[#h:532e8e2a-9b7d-41c0-8f4b-3c5cbb7d4dca][Renaming files]]).
 
-Remember that ~denote-rename-file~ does not save the underlying buffer
-it modifies. It leaves it unsaved so that the user can review what
-happened, such as by invoking the command ~diff-buffer-with-file~.
+This affects the behaviour of the commands ~denote-rename-file~,
+~denote-dired-rename-files~, ~denote-rename-file-using-front-matter~,
+~denote-dired-rename-marked-files-with-keywords~,
+~denote-dired-rename-marked-files-using-front-matter~,
+~denote-keywords-add~, ~denote-keywords-remove~, and any other command
+that builds on top of them.
 
-Specialised commands that build on top of ~denote-rename-file~ may
-internally bind this user option to a non-nil value in order to
-perform their operation (e.g. ~denote-dired-rename-files~ goes through
-each marked Dired file, prompting for the information to use, but
-carries out the renaming without asking for confirmation (buffers
-remain unsaved)).
+The default behaviour of the ~denote-rename-file~ command (and others
+like it) is to ask for an affirmative answer as a final step before
+changing the file name and, where relevant, inserting or updating the
+corresponding front matter. It also does not save the affected file's
+buffer to let the user inspect and confirm the changes (such as by
+invoking the command ~diff-buffer-with-file~).
+
+With this user option bound to a non-nil value, buffers are saved as
+well. The assumption is that the user who opts in to this feature is
+familiar with the ~denote-rename-file~ (or related) operation and
+knows it is reliable.
+
+Specialised commands that build on top of ~denote-rename-file~ (or
+related) may internally bind this user option to a non-nil value in
+order to perform their operation (e.g. ~denote-dired-rename-files~
+goes through each marked Dired file, prompting for the information to
+use, but carries out the renaming without asking for confirmation
+([[#h:1b6b2c78-42f0-45b8-9ef0-6de21a8b2cde][Rename multiple files interactively]])).
 
 ** Rename a single file based on its front matter
 :PROPERTIES:
@@ -1204,8 +1349,17 @@ The renaming is subject to a "yes or no" prompt that shows the old and
 new names, just so the user is certain about the change.
 
 If called interactively with a prefix argument (=C-u= by default) or
-from Lisp with a non-nil =AUTO-CONFIRM= argument, this "yes or no"
-prompt is skipped.
+from Lisp with a non-nil =NO-CONFIRM= argument, this "yes or no"
+prompt is skipped and the renaming is done outright.
+
+If called interactively with a double prefix argument (=C-u C-u= by
+default) or from Lisp with a non-nil =SAVE-BUFFER= argument, the
+buffer is saved after the front matter is updated and the file is
+renamed.
+
+If the user option ~denote-rename-no-confirm~ is non-nil, it is
+interpreted the same way as a combination of =NO-CONFIRM= and
+=SAVE-BUFFER= ([[#h:a2ae9090-c49e-4b32-bcf5-eb8944241fd7][The ~denote-rename-no-confirm~ option]]).
 
 The identifier of the file, if any, is never modified even if it is
 edited in the front matter: Denote considers the file name to be the
@@ -1218,7 +1372,9 @@ the like.
 :END:
 
 #+findex: denote-dired-rename-files
-The command ~denote-dired-rename-files~ renames the files that are
+#+findex: denote-dired-rename-marked-files
+The command ~denote-dired-rename-files~ (alias
+~denote-dired-rename-marked-files~) renames the files that are
 marked in a Dired buffer. Its behaviour is similar to the
 ~denote-rename-file~ in that it prompts for a title, keywords, and
 signature ([[#h:7cc9e000-806a-48da-945c-711bbc7426b0][Rename a single file]]). It does so over each marked file,
@@ -1247,7 +1403,7 @@ so by writing keywords to them. Specifically, it does the following:
   Denote's file-naming scheme;
 
 - sluggifies the =TITLE= and adjusts its letter casing, according to
-  our conventions ([[*Contol the letter casing of file names][Contol the letter casing of file names]]);
+  our conventions;
 
 - prepends an identifier to the =TITLE=, if one is missing;
 
@@ -1262,11 +1418,12 @@ so by writing keywords to them. Specifically, it does the following:
   is recognized as a Denote note (per the ~denote-file-type~ user
   option), such that it includes the new keywords.
 
-[ Note that the affected buffers are not saved. Users can thus check
-  them to confirm that the new front matter does not cause any
-  problems (e.g. with the ~diff-buffer-with-file~ command). Multiple
-  buffers can be saved in one go with ~save-some-buffers~ (read its
-  doc string). ]
+[ Note that the affected buffers are not saved, unless the user option
+  ~denote-rename-no-confirm~ is non-nil. Users can thus check them to
+  confirm that the new front matter does not cause any problems (e.g.
+  with the ~diff-buffer-with-file~ command). Multiple buffers can be
+  saved in one go with the command ~save-some-buffers~ (read its doc
+  string). ]
 
 ** Rename multiple files based on their front matter
 :PROPERTIES:
@@ -1313,6 +1470,64 @@ field in the file's front matter, depending on the previous file type
 As a final step, the command asks for confirmation, showing the
 difference between old and new file names.
 
+** Rename a file by adding or removing keywords interactively
+:PROPERTIES:
+:CUSTOM_ID: h:ad4dde4a-8e88-470a-97ae-e7b9d4b41fb4
+:END:
+
+#+findex: denote-keywords-add
+#+findex: denote-keywords-remove
+The commands ~denote-keywords-add~ and ~denote-keywords-remove~
+streamline the process of interactively updating a file's keywords in
+the front matter and renaming it accordingly.
+
+The ~denote-keywords-add~ asks for keywords using the familiar
+minibuffer prompt ([[#h:6a92a8b5-d766-42cc-8e5b-8dc255466a23][Standard note creation]]).  It then renames the file
+([[#h:3ab08ff4-81fa-4d24-99cb-79f97c13a373][Rename a single file based on its front matter]]).
+
+Similarly, the ~denote-keywords-remove~ removes one or more keywords
+from the list of existing keywords and then renames the file
+accordingly.
+
+Both commands accept an optional prefix argument to automatically save
+the buffer. Similarly, they both interpret a non-nil value for the
+user option ~denote-rename-no-confirm~ the same as the prefix argument
+([[#h:a2ae9090-c49e-4b32-bcf5-eb8944241fd7][The ~denote-rename-no-confirm~ option]]).
+
+Furthermore, both commands call the ~denote-after-rename-file-hook~ as
+a final step after carrying out their task.
+
+#+findex: denote-rename-add-keywords
+#+findex: denote-rename-remove-keywords
+Aliases for these commands are: ~denote-rename-add-keywords~ and
+~denote-rename-remove-keywords~.
+
+** Rename a file by adding or removing a signature interactively
+:PROPERTIES:
+:CUSTOM_ID: h:b08a350f-b269-47ed-8c2a-b8ecf1b63c7f
+:END:
+
+#+findex: denote-rename-add-signature
+#+findex: denote-rename-remove-signature
+The commands ~denote-rename-add-signature~ and
+~denote-rename-remove-signature~ streamline the process of
+interactively adding or removing a signature from a given file ([[#h:4e9c7512-84dc-4dfb-9fa9-e15d51178e5d][The file-naming scheme]]).
+
+The ~denote-rename-add-signature~ prompts for a file and a signature. The
+default value for the file prompt is the file of the currently open
+buffer or the file-at-point in a Dired buffer. The signature is an
+ordinary string, defaulting to the selected file's signature, if any.
+
+The ~denote-rename-remove-signature~ uses the same file prompt as
+above. It performs its action only if the selected file has a
+signature. Otherwise, it does nothing.
+
+Both commands ask for confirmation before carrying out their action.
+They do so unless the user option ~denote-rename-no-confirm~ is set to
+a non-nil value ([[#h:a2ae9090-c49e-4b32-bcf5-eb8944241fd7][The ~denote-rename-no-confirm~ option]]). They also
+both take care to reload any Dired buffers and run the
+~denote-after-rename-file-hook~ as a final step.
+
 ** Faces used by rename commands
 :PROPERTIES:
 :CUSTOM_ID: h:ab3f355a-f763-43ae-a4c9-179d2d9265a5
@@ -1342,7 +1557,7 @@ directories.
 Every note produced by Denote follows this pattern by default
 ([[#h:17896c8c-d97a-4faa-abf6-31df99746ca6][Points of entry]]):
 
-: DATE--TITLE__KEYWORDS.EXTENSION
+: DATE==SIGNATURE--TITLE__KEYWORDS.EXTENSION
 
 The =DATE= field represents the date in year-month-day format followed
 by the capital letter =T= (for "time") and the current time in
@@ -1350,9 +1565,19 @@ hour-minute-second notation.  The presentation is compact:
 =20220531T091625=.  The =DATE= serves as the unique identifier of each
 note and, as such, is also known as the file's ID or identifier.
 
+File names can include a string of alphanumeric characters in the
+=SIGNATURE= field. Signatures have no clearly defined purpose and are up
+to the user to define. One use-case is to use them to establish
+sequential relations between files (e.g. 1, 1a, 1b, 1b1, 1b2, ...).
+
+Signatures are an optional extension to Denote's file-naming scheme.
+They can be added to newly created files on demand, with the command
+~denote-signature~, or by modifying the value of the user option
+~denote-prompts~.
+
 The =TITLE= field is the title of the note, as provided by the user.
 It automatically gets downcased by default and is also hyphenated
-([[#h:6ae1ab8c-5e36-4216-8e93-f37f4447582c][Contol the letter casing of file names]]).  An entry about "Economics
+([[#h:ae8b19a1-7f67-4258-96b3-370a72c43f4e][Sluggification of file name components]]).  An entry about "Economics
 in the Euro Area" produces an =economics-in-the-euro-area= string for
 the =TITLE= of the file name.
 
@@ -1361,12 +1586,12 @@ underscore (the separator is inserted automatically).  Each keyword is
 a string provided by the user at the relevant prompt which broadly
 describes the contents of the entry.
 
-Each of the keywords is a single word, with multiple keywords
-providing the multi-dimensionality needed for advanced searches
-through Denote files.  Users who need to compose a keyword out of
-multiple words are encouraged to apply a letter casing convention such
-as camelCase/CamelCase and set the ~denote-file-name-letter-casing~
-user option accordingly ([[#h:6ae1ab8c-5e36-4216-8e93-f37f4447582c][Contol the letter casing of file names]]).
+Each of the keywords is a single word, with multiple keywords providing
+the multi-dimensionality needed for advanced searches through Denote
+files.  Users who need to compose a keyword out of multiple words such
+as camelCase/CamelCase and are encouraged to use the
+~denote-file-name-slug-functions~ user option accordingly
+([[#h:ae8b19a1-7f67-4258-96b3-370a72c43f4e][Sluggification of file name components]]).
 
 #+vindex: denote-file-type
 The =EXTENSION= is the file type.  By default, it is =.org= (~org-mode~)
@@ -1392,23 +1617,6 @@ invoking =M-x re-builder=).
 
 [[#h:1a953736-86c2-420b-b566-fb22c97df197][Features of the file-naming scheme for searching or filtering]].
 
-As an optional extension to the above, file names can include a string
-of alphanumeric characters in the =SIGNATURE= field.  Signatures have
-no clearly defined purpose and are up to the user to define.  One
-use-case is to use them to establish sequential relations between
-files (e.g. 1, 1a, 1b, 1b1, 1b2, ...).  A full file name with a
-signature looks like this:
-
-: DATE==SIGNATURE--TITLE__KEYWORDS.EXTENSION
-
-The =SIGNATURE= field is anchored by the equals sign and thus retains
-the aforementioned searching/anchoring feature of =--= and =__=.
-
-Signatures are an optional extension to Denote's file-naming scheme.
-They can be added to newly created files on demand, with the command
-~denote-signature~, or by modifying the value of the user option
-~denote-prompts~.
-
 The ~denote-prompts~ can be configured in such ways to yield the
 following file name permutations:
 
@@ -1428,90 +1636,143 @@ scheme we apply guarantees that a listing is readable in a variety of
 contexts.  The Denote file-naming scheme is, in essence, an effective,
 low-tech invention.
 
-** Sluggified title, keywords, and signature
+** Sluggification of file name components
 :PROPERTIES:
 :CUSTOM_ID: h:ae8b19a1-7f67-4258-96b3-370a72c43f4e
 :END:
 
-Denote has to be highly opinionated about which characters can be used
-in file names and the file's front matter in order to enforce its
-file-naming scheme.  The variable ~denote-excluded-punctuation-regexp~
-holds the relevant value.  In simple terms:
+Files names can contain any character that the file system
+permits. Denote imposes a few additional restrictions:
 
-+ What we count as "illegal characters" are converted into hyphens.
++ The tokens "==", =__= and =--= are interpreted by Denote and should
+  appear only once.
+
++ The dot character is not allowed in a note's file name, except to
+  indicate the file type extension. Denote recognises two extensions
+  for encrypted files, like =.txt.gpg=.
+
+By default, Denote enforces other rules to file names through the user
+option ~denote-file-name-slug-functions~. These rules are applied to
+file names by default:
+
++ What we count as "illegal characters" are removed.  The constant
+  ~denote-excluded-punctuation-regexp~ holds the relevant value.
 
 + Input for a file title is hyphenated.  The original value is
   preserved in the note's contents ([[#h:13218826-56a5-482a-9b91-5b6de4f14261][Front matter]]).
 
-+ Keywords should not have spaces or other delimiters. If they do,
-  they are removed, meaning that =hello-world= becomes =helloworld=.
-  This is because hyphens in keywords do not work everywhere, such as
-  in Org.
++ Spaces or other delimiters are removed from keywords, meaning that
+  =hello-world= becomes =helloworld=.  This is because hyphens in
+  keywords do not work everywhere, such as in Org. Plus, hyphens are
+  word separators in the title and we want to keep distinct separators
+  for each component to make search easier and semantic
+  ([[#h:1a953736-86c2-420b-b566-fb22c97df197][Features of the file-naming scheme for searching or filtering]]).
 
 + Signatures are like the above, but use the equals sign instead of
-  hyphens.
+  hyphens as a word separator.
 
-All file name components are downcases by default, though users can
-configure this behaviour ([[#h:6ae1ab8c-5e36-4216-8e93-f37f4447582c][Contol the letter casing of file names]]).
-Consider a =helloWorld= or =HelloWorld= convention for those cases
-where you would want to have a hyphen between consistuent words of a
-keyword.
++ All file name components are downcased. Further down we document how
+  to deviate from these rules, such as to accept input of the form
+  =helloWorld= or =HelloWorld= verbatim.
 
-** Contol the letter casing of file names
+Denote imposes these restrictions to enforce uniformity, which is
+helpful long-term as it keeps all files with the same predictable
+pattern. Too many permutations make searches more difficult to express
+accurately and be confident that the matches cover all files.
+Nevertheless, one of the principles of Denote is its flexibility or
+hackability and so users can deviate from the aforementioned
+([[#h:d375c6d2-92c7-425f-9d9d-219ff47ed2a3][User-defined sluggification of file name components]]).
+
+** User-defined sluggification of file name components
 :PROPERTIES:
-:CUSTOM_ID: h:6ae1ab8c-5e36-4216-8e93-f37f4447582c
+:CUSTOM_ID: h:d375c6d2-92c7-425f-9d9d-219ff47ed2a3
 :END:
 
-#+vindex: denote-file-name-letter-casing
-The user option ~denote-file-name-letter-casing~ controls the letter
-casing of the individual components of file names ([[#h:4e9c7512-84dc-4dfb-9fa9-e15d51178e5d][The file-naming scheme]]).
-The default method is to downcase everything.
+#+vindex: denote-file-name-slug-functions
+The user option ~denote-file-name-slug-functions~ controls the
+sluggification of file name components ([[#h:ae8b19a1-7f67-4258-96b3-370a72c43f4e][Sluggification of file name components]]).
+The default method is outlined above and in the previous section
+([[#h:4e9c7512-84dc-4dfb-9fa9-e15d51178e5d][The file-naming scheme]]).
 
 The value of this user option is an alist where each element is a cons
-cell of the form =(COMPONENT . METHOD)=.  For example, here is the
+cell of the form =(COMPONENT . METHOD)=. For example, here is the
 default value:
 
 #+begin_example emacs-lisp
-'((title . downcase)
-  (signature . downcase)
-  (keywords . downcase)
-  (t . downcase))
+'((title . denote-sluggify-title)
+  (signature . denote-sluggify-signature)
+  (keyword . denote-sluggify-keyword))
 #+end_example
 
-What these cons cells of =(COMPONENT . METHOD)= are:
-
 - The =COMPONENT= is an unquoted symbol among =title=, =signature=,
-  =keywords=, which refers to the corresponding component of the file
-  name.  The special ~t~ =COMPONENT= is a fallback value in case the
-  others are not specified.
+  =keyword=, which refers to the corresponding component of the file
+  name.
 
-- The =METHOD= is the letter casing scheme, which is an unquoted
-  symbol of either =downcase= or =verbatim=.  A nil value has the same
-  meaning as =downcase=.  Other non-nil =METHOD= types are reserved
-  for possible future use.
+- The =METHOD= is a function to format the given component. This
+  function must take a string as its parameter and return the string
+  formatted for the file name. Note that even in the case of the
+  =keyword= component, the function receives one string representing a
+  single keyword and returns it formatted for the file name. Joining
+  the keywords together is handled internally by Denote.
 
-  The =downcase= =METHOD= converts user input for the given
-  =COMPONENT= into lower case.  The benefit of this approach (which is
-  the default behaviour) is that file names remain consistent over the
-  long-term.  The user never needs to account for varying letter
-  casing while working with them.
-
-  The =verbatim= =METHOD= means that Denote will not affect the letter
-  casing of user input when generating the given file name =COMPONENT=.
-  Conventions like CamelCase or camelCase are respected.  The user
-  thus assumes responsibility to keep file names in a good state over
-  the long term.
-
-As an example, we can downcase the title, but preserve the letter
-casing of the signature and keyword components with this:
+One commonly requested deviation from the sluggification rules is to
+not sluggify individual keywords, such that the user's input is taken
+as-is. This can be done as follows:
 
 #+begin_src emacs-lisp
-(setq denote-file-name-letter-casing
-      '((title . downcase)
-        (signature . verbatim)
-        (keywords . verbatim)
-        (t . downcase)))
+(setq denote-file-name-slug-functions
+      '((title . denote-sluggify-title)
+        (keyword . identity)
+        (signature . denote-sluggify-signature)))
 #+end_src
+
+The ~identity~ function simply returns the string it receives, thus
+not altering it in any way.
+
+Another approach is to keep the sluggification but not downcase the
+string. We can do this by modifying the original functions used by
+Denote. For example, we have this:
+
+#+begin_src emacs-lisp
+;; The original function for reference
+(defun denote-sluggify-title (str)
+  "Make STR an appropriate slug for title."
+  (downcase (denote--slug-hyphenate (denote--slug-no-punct str))))
+
+;; Our variant of the above, which does the same thing except from
+;; downcasing the string.
+(defun my-denote-sluggify-title (str)
+  "Make STR an appropriate slug for title."
+  (denote--slug-hyphenate (denote--slug-no-punct str)))
+
+;; Now we use our function to sluggify titles without affecting their
+;; letter casing.
+(setq denote-file-name-slug-functions
+      '((title . my-denote-sluggify-title) ; our function here
+        (signature . denote-sluggify-signature)
+        (keyword . denote-sluggify-keyword)))
+#+end_src
+
+Follow this principle for all the sluggification functions.
+
+To access the source code, use either of the following built-in
+methods:
+
+1. Call the command ~find-library~ and search for ~denote~. Then
+   navigate to the symbol you are searching for.
+
+2. Invoke the command ~describe-symbol~, search for the symbol you are
+   interested in, and from the resulting Help buffer either click on
+   the first link or do =M-x help-view-source= (bound to =s= in Help
+   buffers, by default).
+
+Remember that deviating from the default file-naming scheme of Denote
+will make things harder to use in the future, as files can/will have
+permutations that create uncertainty. The sluggification scheme and
+concomitant restrictions we impose by default are there for a very
+good reason: they are the distillation of years of experience. Here we
+give you what you wish, but bear in mind it may not be what you need.
+You have been warned.
 
 ** Features of the file-naming scheme for searching or filtering
 :PROPERTIES:
@@ -1746,11 +2007,9 @@ front matter.
 
 Denote offers several commands for linking between notes.
 
-All links target files which are Denote notes.  This means that they
-have our file-naming scheme, are writable/regular (not directory, named
-pipe, etc.), and use the appropriate file type extension (per
-~denote-file-type~).  Furthermore, the files need to be inside the
-~denote-directory~ or one of its subdirectories.  No other file is
+All links target files which are Denote files. This means that they
+have our file-naming scheme. Files need to be inside the
+~denote-directory~ or one of its subdirectories. No other file is
 recognised.
 
 The following sections delve into the details.
@@ -1762,20 +2021,22 @@ The following sections delve into the details.
 
 #+findex: denote-link
 The ~denote-link~ command inserts a link at point to a file specified
-at the minibuffer prompt.  Links are formatted depending on the file
-type of the current note.  In Org and plain text buffers, links are
-formatted thus: =[[denote:IDENTIFIER][TITLE]]=.  While in Markdown
-they are expressed as =[TITLE](denote:IDENTIFIER)=.
+at the minibuffer prompt ([[#h:d99de1fb-b1b7-4a74-8667-575636a4d6a4][The ~denote-org-store-link-to-heading~ user option]]).
+Links are formatted depending on the file type of the current note. In
+Org and plain text buffers, links are formatted thus:
+=[[denote:IDENTIFIER][DESCRIPTION]]=. While in Markdown they are expressed
+as =[DESCRIPTION](denote:IDENTIFIER)=.
 
 When ~denote-link~ is called with a prefix argument (=C-u= by
 default), it formats links like =[[denote:IDENTIFIER]]=.  The user
 might prefer its simplicity.
 
-The description of the link is taken from the target file's front
-matter or, if that is not available, from the file name.  If the
-region is active, its text is used as the link's description instead.
-If the active region has no text, the inserted link uses just the
-identifier, as with the =C-u= prefix mentioned above.
+By default, the description of the link is taken from the signature of
+the file, if present, and the target file's front matter's title or, if
+that is not available, from the file name.  If the region is active, its
+text is used as the link's description instead.  If the active region
+has no text, the inserted link uses just the identifier, as with the
+=C-u= prefix mentioned above.
 
 Inserted links are automatically buttonized and remain active for as
 long as the buffer is available.  In Org this is handled by the major
@@ -1801,6 +2062,88 @@ Links are styled with the ~denote-faces-link~ face, which looks exactly
 like an ordinary link by default.  This is just a convenience for the
 user/theme in case they want =denote:= links to remain distinct from
 other links.
+
+#+findex: denote-link-markdown-follow
+In files whose major mode is ~markdown-mode~, the default key binding
+=C-c C-o= (which calls the command ~markdown-follow-thing-at-point~)
+correctly resolves =denote:= links. This method works in addition to
+the =RET= key, which is made available by the aforementioned
+buttonization. Interested users can refer to the function
+~denote-link-markdown-follow~ for the implementation details.
+
+** The ~denote-org-store-link-to-heading~ user option
+:PROPERTIES:
+:CUSTOM_ID: h:d99de1fb-b1b7-4a74-8667-575636a4d6a4
+:END:
+
+#+vindex: denote-org-store-link-to-heading
+The user option ~denote-org-store-link-to-heading~ determines whether
+~org-store-link~ links to the current Org heading (such links are
+merely "stored" and need to be inserted afterwards with the command
+~org-insert-link~). Note that the ~org-capture~ command uses the
+~org-link~ internally if it has to store a link.
+
+When its value is non-nil, ~org-store-link~ stores a link to the
+current Org heading inside the Denote Org file. If the heading does
+not have a =CUSTOM_ID=, it creates it and includes it in the heading's
+=PROPERTIES= drawer. If a =CUSTOM_ID= exists, ~org-store-link~ use it
+as-is.
+
+This makes the resulting link a combination of the =denote:= link type,
+pointing to the identifier of the current file, plus the value of the
+heading's =CUSTOM_ID=, such as:
+
+- =[[denote:20240118T060608][Some test]]=
+- =[[denote:20240118T060608::#h:eed0fb8e-4cc7-478f-acb6-f0aa1a8bffcd][Some test::Heading text]]=
+
+Both lead to the same Denote file, but the latter jumps to the heading
+with the given =CUSTOM_ID=. Notice that the link to the heading also
+has a different description, which includes the heading text.
+
+The value of the =CUSTOM_ID= is determined by the Org user option
+~org-id-method~. The sample shown above uses the default UUID
+infrastructure.
+
+If ~denote-org-store-link-to-heading~ is set to a nil value, the
+command ~org-store-link~ only stores links to the Denote file (using
+its identifier), but not to the given heading. This is what Denote was
+doing in versions prior to =2.3.0=.
+
+Note that the optional extension =denote-org-extras.el= defines the command
+~denote-org-extras-link-to-heading~, which always links to a file+heading
+regardless of the aforementioned user option ([[#h:fc1ad245-ec08-41be-8d1e-7153d99daf02][Insert link to an Org file with a further pointer to a heading]]).
+
+[ This feature only works in Org mode files, as other file types do
+  not have a linking mechanism that handles unique identifiers for
+  headings or other patterns to jump to. If ~org-store-link~ is
+  invoked in one such file, it captures only the Denote identifier of
+  the file, even if this user option is set to a non-nil value. ]
+
+** Insert link to an Org file with a further pointer to a heading
+:PROPERTIES:
+:CUSTOM_ID: h:fc1ad245-ec08-41be-8d1e-7153d99daf02
+:END:
+
+#+findex: denote-org-extras-link-to-heading
+As part of the optional =denote-org-extras.el= extension, the command
+~denote-org-extras-link-to-heading~ prompts for a link to an Org file
+and then asks for a heading therein, using minibuffer completion. Once
+the user provides input at the two prompts, the command inserts a link
+at point which has the following pattern: =[[denote:IDENTIFIER::#ORG-HEADING-CUSTOM-ID]][Description::Heading text]]=.
+
+Because only Org files can have links to individual headings, the
+command ~denote-org-extras-link-to-heading~ prompts only for Org files
+(i.e. files which include the =.org= extension). Remember that Denote
+works with many file types ([[#h:4e9c7512-84dc-4dfb-9fa9-e15d51178e5d][The file-naming scheme]]).
+
+This feature is similar to the concept of the user option ~denote-org-store-link-to-heading~
+([[#h:d99de1fb-b1b7-4a74-8667-575636a4d6a4][The ~denote-org-store-link-to-heading~ user option]]). It is, however,
+interactive and differs in the directionality of the action. With that
+user option, the command ~org-store-link~ will generate a =CUSTOM_ID=
+for the current heading (or capture the value of one as-is), giving
+the user the option to then call ~org-insert-link~ wherever they see
+fit. By contrast, the command ~denote-org-extras-link-to-heading~
+prompts for a file, then a heading, and inserts the link at point.
 
 ** Insert links matching a regexp
 :PROPERTIES:
@@ -1913,7 +2256,7 @@ for our purposes ([[#h:fc913d54-26c8-4c41-be86-999839e8ad31][Linking notes]]).
 
 ** Link to an existing note or create a new one
 :PROPERTIES:
-:CUSTOM_ID: h:9e41e7df-2aac-4835-94c5-659b6111e6de
+:CUSTOM_ID: h:b6056e6b-93df-4e6b-a778-eebd105bac46
 :END:
 
 In one's note-taking workflow, there may come a point where they are
@@ -1938,13 +2281,14 @@ this end, Denote provides two convenience commands:
   ~denote-link~ ([[#h:5e5e3370-12ab-454f-ba09-88ff44214324][Adding a single link]]).
 
   IMPORTANT NOTE: Normally, ~denote~ does not save the buffer it
-  produces for the new note.  This is a safety precaution to not write
-  to disk unless the user wants it (e.g. the user may choose to kill the
-  buffer, thus cancelling the creation of the note).  However, for this
-  command the creation of the note happens in the background and the
-  user may miss the step of saving their buffer.  We thus have to save
-  the buffer in order to (i) establish valid links, and (ii) retrieve
-  whatever front matter from the target file.
+  produces for the new note ([[#h:bf80f4cd-6f56-4f7c-a991-8573161e4511][The ~denote-save-buffer-after-creation~ option]]). 
+  This is a safety precaution to not write to disk unless the user
+  wants it (e.g. the user may choose to kill the buffer, thus
+  cancelling the creation of the note). However, for this command the
+  creation of the note happens in the background and the user may miss
+  the step of saving their buffer. We thus have to save the buffer in
+  order to (i) establish valid links, and (ii) retrieve whatever front
+  matter from the target file.
 
 #+findex: denote-link-after-creating-with-command
 + ~denote-link-after-creating-with-command~ :: This command is like
@@ -1973,6 +2317,20 @@ this end, Denote provides two convenience commands:
 
   This command has the alias ~denote-link-to-existing-or-new-note~,
   which helps with discoverability.
+
+#+findex: denote-link-or-create-with-command
++ ~denote-link-or-create-with-command~ :: This is like the above,
+  except when it is about to create the new note it first prompts for
+  the specific file-creating command to use ([[#h:17896c8c-d97a-4faa-abf6-31df99746ca6][Points of entry]]). For
+  example, the user may want to specify a signature for this new file,
+  so they can select the ~denote-signature~ command.
+
+In all of the above, an optional prefix argument (=C-u= by default)
+creates a link that consists of just the identifier.  This has the
+same meaning as in the regular ~denote-link~ command.
+
+Denote provides similar functionality for opening an existing note or
+creating a new one ([[#h:ad91ca39-cf10-4e16-b224-fdf78f093883][Open an existing note or create it if missing]]).
 
 ** The backlinks' buffer
 :PROPERTIES:
@@ -2119,67 +2477,43 @@ To visit backlinks to the current note via the minibuffer, use
 ~denote-find-backlink~.  This is an alternative to placing backlinks
 in a dedicated buffer ([[#h:c73f1f68-e214-49d5-b369-e694f6a5d708][The backlinks' buffer]]).
 
-** Link to a note or create it if missing
+** Convert =denote:= links to =file:= links
 :PROPERTIES:
-:CUSTOM_ID: h:b6056e6b-93df-4e6b-a778-eebd105bac46
+:CUSTOM_ID: h:ed220cac-7dcb-4bb7-9243-1bb85e452e5f
 :END:
 
-#+findex: denote-link-after-creating
-#+findex: denote-link-after-creating-with-command
-#+findex: denote-link-or-create
-#+findex: denote-link-or-create-with-command
-During a writing session, it is possible that a thought occurs which
-does not require immediate attention but nonetheless must be linked to
-from the current context.  Denote can be used in this case to
-establish a link to an existing note or, if that is missing, to create
-it.  The commands are ~denote-link-after-creating~, its more flexible
-variant ~denote-link-after-creating-with-command~, the
-~denote-link-or-create~, and ~denote-link-or-create-with-command~.
+Sometimes the user needs to translate all =denote:= link types to
+their =file:= equivalent. This may be because some other tool does not
+recognise =denote:= links (or other custom links types---which are a
+standard feature of Org, by the way). The user thus needs to (i)
+either make a copy of their Denote note or edit the existing one, and
+(ii) convert all links to the generic =file:= link type that
+external/other programs understand.
 
-The command ~denote-link-or-create~ prompts for an existing file in
-the ~denote-directory~ in order to link to it ([[#h:fc913d54-26c8-4c41-be86-999839e8ad31][Linking notes]]).  At
-this point, the user must type in search terms that match a file name.
-If the input does not return any matches and the user confirms their
-choice to proceed (usually by typing RET twice, depending on the
-minibuffer settings), ~denote-link-or-create~ will call the ~denote~
-command interactively to create a new note.  It will then use whatever
-prompts ~denote~ normally has, per the user option ~denote-prompts~
-([[#h:6a92a8b5-d766-42cc-8e5b-8dc255466a23][Standard note creation]]).  If the title prompt is involved (the default
-behaviour), the ~denote-link-or-create~ sets up this prompt to have
-the previous input as the default title of the note to-be-created.
-This means that the user can type RET at the empty prompt to re-use
-what they typed in previously.  Commands to use previous inputs from
-the history are also available (=M-p= or =M-n= in the minibuffer,
-which call ~previous-history-element~ and ~next-history-element~ by
-default).  Accessing the history is helpful to, for example, make
-further edits to the available text.
+The optional extension =denote-org-extras.el= contains two commands
+that are relevant for this use-case:
 
-In the case where a file is created, the process happens in the
-background, meaning that the new file is not displayed.  It is simply
-linked to from the current context.
+#+findex: denote-org-extras-convert-links-to-file-type
++ Convert =denote:= links to =file:= links :: The command ~denote-org-extras-convert-links-to-file-type~
+  goes through the buffer to find all =denote:= links. It gets the
+  identifier of the link and resolves it to the actual file system
+  path. It then replaces the match so that the link is written with
+  the =file:= type and then the file system path. The optional search
+  terms and/or link description are preserved ([[#h:fc1ad245-ec08-41be-8d1e-7153d99daf02][Insert link to an Org file with a further pointer to a heading]]).
 
-The ~denote-link-or-create-with-command~ is like the above, except
-when it is about to create the new note it first prompts for the
-specific file-creating command to use ([[#h:17896c8c-d97a-4faa-abf6-31df99746ca6][Points of entry]]).  For example,
-the user may want to specify a signature for this new file, so they
-can select the ~denote-signature~ command.
-
-The commands ~denote-link-after-creating~ and ~denote-link-or-create-with-command~
-are conceptually the same as above except they do not have the "or
-create" logic: they always create a new file in the backgroun (in
-fact, the aforementioned use those two to perform the linking, which
-is consistent with the composability and hackability of Denote).
-
-In all of the above, an optional prefix argument (=C-u= by default)
-creates a link that consists of just the identifier.  This has the
-same meaning as in the regular ~denote-link~ command.
-
-Denote provides similar functionality for opening an existing note or
-creating a new one ([[#h:ad91ca39-cf10-4e16-b224-fdf78f093883][Open an existing note or create it if missing]]).
+#+findex: denote-org-extras-convert-links-to-denote-type
++ Convert =file:= links to =denote:= links :: The command ~denote-org-extras-convert-links-to-denote-type~
+  behaves like the one above. The difference is that it finds the file
+  system path and converts it into its identifier.
 
 ** Miscellaneous information about links
 :PROPERTIES:
 :CUSTOM_ID: h:dd8f2231-8d77-49b9-acc4-af525c68b271
+:END:
+
+*** Aliases for the linking commands
+:PROPERTIES:
+:CUSTOM_ID: h:078856d9-f608-43a8-be84-f2cad4c27d0e
 :END:
 
 #+findex: denote-insert-link
@@ -2191,6 +2525,20 @@ For convenience, the ~denote-link~ command has an alias called
 aliased ~denote-link-insert-links-matching-regexp~.  The purpose of
 these aliases is to offer alternative, more descriptive names of
 select commands.
+
+*** The ~denote-link-description-function~ to format links
+:PROPERTIES:
+:CUSTOM_ID: h:f634427c-b451-40e2-993e-e00ac627af68
+:END:
+
+#+vindex: denote-link-description-function
+The user option ~denote-link-description-function~ takes as its value
+the symbol of a function. This is used to format the text of the link.
+The default function inserts the title. If the file has a signature,
+it includes that as well, prepending it to the title.
+
+The function specified accepts a single =FILE= argument and returns
+the description as a string.
 
 * Choose which commands to prompt for
 :PROPERTIES:
@@ -2269,6 +2617,21 @@ The faces we define for this purpose are:
 + ~denote-faces-subdirectory~
 + ~denote-faces-time~
 + ~denote-faces-title~
+
+For more control, we also provide these:
+
+#+vindex denote-faces-year
+#+vindex denote-faces-month
+#+vindex denote-faces-day
+#+vindex denote-faces-hour
+#+vindex denote-faces-minute
+#+vindex denote-faces-second
++ ~denote-faces-year~
++ ~denote-faces-month~
++ ~denote-faces-day~
++ ~denote-faces-hour~
++ ~denote-faces-minute~
++ ~denote-faces-second~
 
 For the time being, the =diredfl= package is not compatible with this
 facility.
@@ -2367,6 +2730,15 @@ own function and assigning it to the ~denote-rename-buffer-function~.
 :CUSTOM_ID: h:8b542c50-dcc9-4bca-8037-a36599b22779
 :END:
 
+[ As part of version 2.3.0, all dynamic blocks are defined in the file
+  =denote-org-extras.el=. The file which was once called
+  =denote-org-dblock.el= contains aliases for the new function names
+  and dipslays a warning about its deprecation. There is no need to
+  ~require~ the ~denote-org-extras~ feature because all of Denote's
+  Org dynamic blocks are autoloaded (meaning that they work as soon as
+  they are used). For backward compatibility, all dynamic blocks
+  retain their original names as an alias for the newer one. ]
+
 Denote can optionally integrate with Org mode's "dynamic blocks"
 facility. This means that it can use special blocks that are evaluated
 with =C-c C-x C-u= (~org-dblock-update~) to generate their contents.
@@ -2375,12 +2747,6 @@ provided by Denote.
 
 - [[#h:50160fae-6515-4d7d-9737-995ad925e64b][Org dynamic blocks to insert links or backlinks]]
 - [[#h:f15fa143-5036-416f-9bff-1bcabbb03456][Org dynamic block to insert file contents]]
-
-Start by loading the relevant extension:
-
-#+begin_src emacs-lisp
-(require 'denote-org-dblock)
-#+end_src
 
 A dynamic block gets its contents by evaluating a function that
 corresponds to the type of block. The block type and its parameters
@@ -2404,9 +2770,18 @@ Evaluate:
 :CUSTOM_ID: h:50160fae-6515-4d7d-9737-995ad925e64b
 :END:
 
-#+findex: denote-org-dblock-insert-links
+[ As part of version 2.3.0, all dynamic blocks are defined in the file
+  =denote-org-extras.el=. The file which was once called
+  =denote-org-dblock.el= contains aliases for the new function names
+  and dipslays a warning about its deprecation. There is no need to
+  ~require~ the ~denote-org-extras~ feature because all of Denote's
+  Org dynamic blocks are autoloaded (meaning that they work as soon as
+  they are used). For backward compatibility, all dynamic blocks
+  retain their original names as an alias for the newer one. ]
+
+#+findex: denote-org-extras-dblock-insert-links
 The =denote-links= block can be inserted at point with the command
-~denote-org-dblock-insert-links~ or by manually including the
+~denote-org-extras-dblock-insert-links~ or by manually including the
 following in an Org file:
 
 : #+BEGIN: denote-links :regexp "YOUR REGEXP HERE" :sort-by-component nil :reverse-sort nil :id-only nil
@@ -2434,7 +2809,7 @@ line to update the block.
 - The =:sort-by-component= parameter is optional. It sorts the files
   by the given Denote file name component. The value it accepts is an
   unquoted symbol among =title=, =keywords=, =signature=, =identifier=.
-  When using the command ~denote-org-dblock-insert-files~, this
+  When using the command ~denote-org-extras-dblock-insert-files~, this
   parameter is automatically inserted together with the (=:regexp=
   parameter) and the user is prompted for a file name component.
 
@@ -2453,13 +2828,24 @@ line to update the block.
   processing using Org facilities (a feature that is outside Denote's
   purview).
 
-#+findex: denote-org-dblock-insert-backlinks
+#+findex: denote-org-extras-dblock-insert-backlinks
 The same as above except for the =:regexp= parameter are true for the
 =denote-backlinks= block. The block can be inserted at point with the
-command ~denote-org-dblock-insert-backlinks~ or by manually writing
+command ~denote-org-extras-dblock-insert-backlinks~ or by manually writing
 this in an Org file:
 
 : #+BEGIN: denote-backlinks :sort-by-component nil :reverse-sort nil :id-only nil
+:
+: #+END:
+
+#+findex: denote-org-extras-dblock-insert-missing-links
+Finally, the =denote-missing-links= block is available with the
+command ~denote-org-extras-dblock-insert-missing-links~. It is like
+the aforementioned =denote-links= block, except it only lists links to
+files that are not present in the current buffer. The parameters are
+otherwise the same:
+
+: #+BEGIN: denote-missing-links :regexp "YOUR REGEXP HERE" :sort-by-component nil :reverse-sort nil :id-only nil
 :
 : #+END:
 
@@ -2471,6 +2857,15 @@ Remember to type =C-c C-x C-u= (~org-dblock-update~) with point on the
 :CUSTOM_ID: h:f15fa143-5036-416f-9bff-1bcabbb03456
 :END:
 
+[ As part of version 2.3.0, all dynamic blocks are defined in the file
+  =denote-org-extras.el=. The file which was once called
+  =denote-org-dblock.el= contains aliases for the new function names
+  and dipslays a warning about its deprecation. There is no need to
+  ~require~ the ~denote-org-extras~ feature because all of Denote's
+  Org dynamic blocks are autoloaded (meaning that they work as soon as
+  they are used). For backward compatibility, all dynamic blocks
+  retain their original names as an alias for the newer one. ]
+
 Denote can optionally use Org's dynamic blocks facility to produce a
 section that lists entire file contents ([[#h:8b542c50-dcc9-4bca-8037-a36599b22779][Use Org dynamic blocks]]).
 This works by instructing Org to match a regular expression of Denote
@@ -2481,8 +2876,8 @@ list of scattered thoughts on a given topic, like =^2023.*_emacs= for
 a long entry that incorporates all the notes written in 2023 with the
 keyword =emacs=.
 
-#+findex: denote-org-dblock-insert-files
-To produce such a block, call the command ~denote-org-dblock-insert-files~
+#+findex: denote-org-extras-dblock-insert-files
+To produce such a block, call the command ~denote-org-extras-dblock-insert-files~
 or manually write the following block in an Org file and then type
  =C-c C-x C-u= (~org-dblock-update~) on the =#+BEGIN= line to run it
 (do it again to recalculate the block):
@@ -2509,7 +2904,7 @@ parameters, which are described further below:
 - The =:sort-by-component= parameter is optional. It sorts the files
   by the given Denote file name component. The value it accepts is an
   unquoted symbol among =title=, =keywords=, =signature=, =identifier=.
-  When using the command ~denote-org-dblock-insert-files~, this
+  When using the command ~denote-org-extras-dblock-insert-files~, this
   parameter is automatically inserted together with the (=:regexp=
   parameter) and the user is prompted for a file name component.
 
@@ -2518,10 +2913,10 @@ parameters, which are described further below:
   of the parameter =:sort-by-component=, though it also combines with
   it.
 
-#+vindex: denote-org-dblock-file-contents-separator
+#+vindex: denote-org-extras-dblock-file-contents-separator
 - The =:file-separator= parameter is optional. If it is omitted, then
   Denote will use no separator between the files it inserts. If the
-  value is ~t~ the ~denote-org-dblock-file-contents-separator~ is
+  value is ~t~ the ~denote-org-extras-dblock-file-contents-separator~ is
   applied at the end of each file: it introduces some empty lines and
   a horizontal rule between them to visually distinguish individual
   files. If the =:file-separator= value is a string, it is used as the
@@ -2594,40 +2989,7 @@ seems useful. I am happy to help but do not want to roll this feature
 everywhere before eliciting relevant feedback: once we add it, we are
 not going back.
 
-* Minibuffer histories
-:PROPERTIES:
-:CUSTOM_ID: h:82dc1203-d689-44b2-9a6c-b37776209651
-:END:
-
-Denote has a dedicated minibuffer history for each one of its prompts.
-This practically means that using =M-p= (~previous-history-element~) and
-=M-n= (~next-history-element~) will only cycle through the relevant
-record of inputs, such as your latest titles in the =TITLE= prompt, and
-keywords in the =KEYWORDS= prompt.
-
-The built-in =savehist= library saves minibuffer histories.  Sample
-configuration:
-
-#+begin_src emacs-lisp
-(require 'savehist)
-(setq savehist-file (locate-user-emacs-file "savehist"))
-(setq history-length 500)
-(setq history-delete-duplicates t)
-(setq savehist-save-minibuffer-history t)
-(add-hook 'after-init-hook #'savehist-mode)
-#+end_src
-
-* Extending Denote
-:PROPERTIES:
-:CUSTOM_ID: h:8ed2bb6f-b5be-4711-82e9-8bee5bb06ece
-:END:
-
-Denote is a tool with a narrow scope: create notes and link between
-them, based on the aforementioned file-naming scheme.  For other common
-operations the user is advised to rely on standard Emacs facilities or
-specialised third-party packages.  This section covers the details.
-
-** Keep a journal or diary
+* Keep a journal or diary
 :PROPERTIES:
 :CUSTOM_ID: h:4a6d92dd-19eb-4fcc-a7b5-05ce04da3a92
 :END:
@@ -2711,7 +3073,18 @@ for one among them using minibuffer completion.  If there is only one,
 it visits it outright.  If there is no journal entry, it creates one
 by calling ~denote-journal-extra-new-entry~ (as described above).
 
-*** Journaling with a timer
+#+findex: denote-journal-extras-link-or-create-entry
+The command ~denote-journal-extras-link-or-create-entry~ links to the
+journal entry for today or creates it in the background, if missing,
+and then links to it from the current file. If there are multiple
+journal entries for the same day, it prompts to select one among them
+and then links to it. When called with an optional prefix argument
+(such as =C-u= with default key bindings), the command prompts for a
+date and then performs the aforementioned. With a double prefix
+argument (=C-u C-u=), it also produces a link whose description
+includes just the file's identifier.
+
+** Journaling with a timer
 :PROPERTIES:
 :CUSTOM_ID: h:4af1f81e-e93a-43cc-b344-960032a16d42
 :END:
@@ -2779,105 +3152,63 @@ Sources for ~tmr~:
     + GitLab: <https://gitlab.com/protesilaos/tmr>
 + Mailing list: <https://lists.sr.ht/~protesilaos/tmr>
 
-** Create a note with the region's contents
+* Minibuffer histories
 :PROPERTIES:
-:CUSTOM_ID: h:2f8090f1-50af-4965-9771-d5a91a0a87bd
+:CUSTOM_ID: h:82dc1203-d689-44b2-9a6c-b37776209651
 :END:
 
-#+findex: denote-region
-The command ~denote-region~ takes the contents of the active region
-and then prompts for a title and keywords.  Once a new note is
-created, it inserts the contents of the region therein.  This is
-useful to quickly elaborate on some snippet of text or capture it for
-future reference.
+Denote has a dedicated minibuffer history for each one of its prompts.
+This practically means that using =M-p= (~previous-history-element~) and
+=M-n= (~next-history-element~) will only cycle through the relevant
+record of inputs, such as your latest titles in the =TITLE= prompt, and
+keywords in the =KEYWORDS= prompt.
 
-If there is no active region, ~denote-region~ simply calls the
-~denote~ command which will behave the way it does ordinarily.
-
-#+vindex: denote-region-after-new-note-functions
-When the ~denote-region~ command is called with an active region, it
-finalises its work by calling ~denote-region-after-new-note-functions~.
-This is an abnormal hook, meaning that the functions added to it are
-called with arguments.  The arguments are two, representing the
-beginning and end positions of the newly inserted text.
-
-A common use-case for Org mode users is to call the command
-~org-insert-structure-template~ after a region is inserted.  Emacs
-will thus prompt for a structure template, such as the one
-corresponding to a source block.  In this case the function added to
-~denote-region-after-new-note-functions~ does not actually need
-aforementioned arguments: it can simply declare those as ignored by
-prefixing the argument names with an underscore (an underscore is
-enough, but it is better to include a name for clarity).  For example,
-the following will prompt for a structure template as soon as
-~denote-region~ is done:
+The built-in =savehist= library saves minibuffer histories.  Sample
+configuration:
 
 #+begin_src emacs-lisp
-(defun my-denote-region-org-structure-template (_beg _end)
-  (when (derived-mode-p 'org-mode)
-    (activate-mark)
-    (call-interactively 'org-insert-structure-template)))
-
-(add-hook 'denote-region-after-new-note-functions #'my-denote-region-org-structure-template)
+(require 'savehist)
+(setq savehist-file (locate-user-emacs-file "savehist"))
+(setq history-length 500)
+(setq history-delete-duplicates t)
+(setq savehist-save-minibuffer-history t)
+(add-hook 'after-init-hook #'savehist-mode)
 #+end_src
 
-Remember that ~denote-region-after-new-note-functions~ are not called
-if ~denote-region~ is used without an active region.
-
-** Split an Org subtree into its own note
+* Extending Denote
 :PROPERTIES:
-:CUSTOM_ID: h:d0c7cb79-21e5-4176-a6af-f4f68578c8dd
+:CUSTOM_ID: h:8ed2bb6f-b5be-4711-82e9-8bee5bb06ece
 :END:
 
-With Org files in particular, it is common to have nested headings
-which could be split off into their own standalone notes.  In Org
-parlance, an entry with all its subheadings is a "subtree".  With the
-following code, the user places the point inside the heading they want
-to split off and invokes the command ~my-denote-org-extract-subtree~.
-It will create a note using the heading's text and tags for the new
-file.  The contents of the subtree become the contents of the new note
-and are removed from the old one.
+Denote is a tool with a narrow scope: create notes and link between
+them, based on the aforementioned file-naming scheme.  For other common
+operations the user is advised to rely on standard Emacs facilities or
+specialised third-party packages.  This section covers the details.
+
+** Create a new note in any directory
+:PROPERTIES:
+:CUSTOM_ID: h:c9d7c157-85a6-4bb7-bd21-d00bccf5e799
+:END:
+
+The commands that create new files are designed to write to the
+~denote-directory~. The idea is that the linking mechanism can find
+any file by its identifier if it is in the ~denote-directory~
+(searching the entire file system would be cumbersome).
+
+However, these are cases where the user needs to create a new note in
+an arbitrary directory. The following command can do this. Put the
+code in your configuration file and evaluate it. Then call the command
+by its name with =M-x=.
 
 #+begin_src emacs-lisp
-(defun my-denote-org-extract-subtree (&optional silo)
-  "Create new Denote note using current Org subtree.
-Make the new note use the Org file type, regardless of the value
-of `denote-file-type'.
-
-With an optional SILO argument as a prefix (\\[universal-argument]),
-ask user to select a SILO from `my-denote-silo-directories'.
-
-Use the subtree title as the note's title.  If available, use the
-tags of the heading are used as note keywords.
-
-Delete the original subtree."
-  (interactive
-   (list (when current-prefix-arg
-           (completing-read "Select a silo: " my-denote-silo-directories nil t))))
-  (if-let ((text (org-get-entry))
-           (heading (org-get-heading :no-tags :no-todo :no-priority :no-comment)))
-      (let ((element (org-element-at-point))
-            (tags (org-get-tags))
-            (denote-user-enforced-denote-directory silo))
-        (delete-region (org-entry-beginning-position)
-                       (save-excursion (org-end-of-subtree t) (point)))
-        (denote heading
-                tags
-                'org
-                nil
-                (or
-                 ;; Check PROPERTIES drawer for :created: or :date:
-                 (org-element-property :CREATED element)
-                 (org-element-property :DATE element)
-                 ;; Check the subtree for CLOSED
-                 (org-element-property :raw-value
-                                       (org-element-property :closed element))))
-        (insert text))
-    (user-error "No subtree to extract; aborting")))
+(defun my-denote-create-note-in-any-directory ()
+  "Create new Denote note in any directory.
+Prompt for the directory using minibuffer completion."
+  (declare (interactive-only t))
+  (interactive)
+  (let ((denote-directory (read-directory-name "New note in: " nil nil :must-match)))
+    (call-interactively 'denote)))
 #+end_src
-
-Have a different workflow?  Feel welcome to discuss it in any of our
-official channels ([[#h:1ebe4865-c001-4747-a6f2-0fe45aad71cd][Contributing]]).
 
 ** Narrow the list of files in Dired
 :PROPERTIES:
@@ -3126,6 +3457,22 @@ Each of those types can be narrowed to with a prefix key.  The package
 =consult-dir= is an extension to =consult= which provides useful extras
 for working with directories, including bookmarks.
 
+** Use the ~denote-explore~ package to explore your notes
+:PROPERTIES:
+:CUSTOM_ID: h:110ae3a4-5fc6-45da-b9bb-0e294bd12981
+:END:
+
+Peter Prevos has developed the ~denote-explore~ package which provides
+four groups of Emacs commands to explore your Denote files:
+
+- Summary statistics :: Count notes, attachments and keywords.
+- Random walks :: Generate new ideas using serendipity.
+- Janitor :: Manage your denote collection.
+- Visualisations :: Visualise your Denote network.
+
+The package's documentation covers the details:
+<https://lucidmanager.org/productivity/denote-explore/>.
+
 ** Use the ~citar-denote~ package for bibliography notes
 :PROPERTIES:
 :CUSTOM_ID: h:226d66e4-b7de-4617-87e2-a7f2d6f007dd
@@ -3141,7 +3488,7 @@ retrieve them with the various Denote methods.
 With ~citar-denote~, the user leverages standard minibuffer completion
 mechanisms (e.g. with the help of the ~vertico~ and ~embark~ packages)
 to manage bibliographic notes and access those notes with ease.  The
-package's documentation covers the details: <https://github.com/pprevos/citar-denote/>.
+package's documentation covers the details: <https://lucidmanager.org/productivity/bibliographic-notes-in-emacs-with-citar-denote/>.
 
 ** Use the ~consult-notes~ package
 :PROPERTIES:
@@ -3297,10 +3644,10 @@ invoke this command."
   (image-dired--with-marked
    (when-let* ((file (image-dired-original-file-name))
                (dir (file-name-directory file))
-               (id (denote-retrieve-filename-identifier file))
+               (id (or (denote-retrieve-filename-identifier file) ""))
                (file-type (denote-filetype-heuristics file))
                (title (denote--retrieve-title-or-filename file file-type))
-               (signature (denote-retrieve-filename-signature file))
+               (signature (or (denote-retrieve-filename-signature file) "")
                (extension (file-name-extension file t))
                (new-name (denote-format-file-name dir id keywords title extension signature))
                (default-directory dir))
@@ -3411,6 +3758,10 @@ basis: [[#h:887bdced-9686-4e80-906f-789e407f2e8f][Convenience commands for note 
 Org Mode has a built-in configurable export engine.  You can prevent
 duplicate identifiers when exporting manually for each exported file
 or by advising the Org export function.
+
+Denote also provides commands to convert =denote:= links to their
+=file:= equivalent, in case this is a required pre-processing step for
+export purposes ([[#h:ed220cac-7dcb-4bb7-9243-1bb85e452e5f][Convert =denote:= links to =file:= links]]).
 
 **** Manually configure Org export
 :PROPERTIES:
@@ -3586,6 +3937,7 @@ Everything is in place to set up the package.
 
 ;; Remember to check the doc strings of those variables.
 (setq denote-directory (expand-file-name "~/Documents/notes/"))
+(setq denote-save-buffer-after-creation nil)
 (setq denote-known-keywords '("emacs" "philosophy" "politics" "economics"))
 (setq denote-infer-keywords t)
 (setq denote-sort-keywords t)
@@ -3593,6 +3945,7 @@ Everything is in place to set up the package.
 (setq denote-prompts '(title keywords))
 (setq denote-excluded-directories-regexp nil)
 (setq denote-excluded-keywords-regexp nil)
+(setq denote-rename-no-confirm nil) ; Set to t if you are familiar with `denote-rename-file'
 
 ;; Pick dates, where relevant, with Org's advanced interface:
 (setq denote-date-prompt-use-org-read-date t)
@@ -3795,6 +4148,13 @@ might change them without further notice.
   ~denote-known-keywords~.  Else use only the latter set of keywords
   ([[#h:6a92a8b5-d766-42cc-8e5b-8dc255466a23][Standard note creation]]).
 
+#+findex: denote-convert-file-name-keywords-to-crm
++ Function ~denote-convert-file-name-keywords-to-crm~ :: Make =STRING=
+  with keywords readable by ~completing-read-multiple~. =STRING=
+  consists of underscore-separated words, as those appear in the
+  keywords component of a Denote file name. =STRING= is the same as
+  the return value of ~denote-retrieve-filename-keywords~.
+
 #+findex: denote-keywords-sort
 + Function ~denote-keywords-sort~ :: Sort =KEYWORDS= if
   ~denote-sort-keywords~ is non-nil.  =KEYWORDS= is a list of strings,
@@ -3805,12 +4165,24 @@ might change them without further notice.
   strings into a single string. Keywords are separated by the
   underscore character, per the Denote file-naming scheme.
 
+#+findex: denote-valid-date-p
++ Function ~denote-valid-date-p~ :: Return =DATE= as a valid date. A
+  valid =DATE= is a value that can be parsed by either ~decode-time~
+  or ~date-to-time~ .Those functions signal an error if =DATE= is a
+  value they do not recognise. If =DATE= is nil, return nil.
+
+#+findex: denote-parse-date
++ Function ~denote-parse-date~ :: Return =DATE= as an appropriate
+  value for the ~denote~ command. Pass =DATE= through
+  ~denote-valid-date-p~ and use its return value. If either that or
+  =DATE= is nil, return ~current-time~.
+
 #+findex: denote-directory
 + Function ~denote-directory~ :: Return path of the variable
   ~denote-directory~ as a proper directory, also because it accepts a
   directory-local value for what we internally refer to as "silos"
   ([[#h:15719799-a5ff-4e9a-9f10-4ca03ef8f6c5][Maintain separate directories for notes]]).  Custom Lisp code can
-  ~let~ bind the value of the variable ~denote-user-enforced-denote-directory~
+  ~let~ bind the value of the variable ~denote-directory~
   to override what this function returns.
 
 #+findex: denote-directory-files
@@ -3849,41 +4221,37 @@ might change them without further notice.
 
 #+findex: denote-sluggify
 + Function ~denote-sluggify~ :: Make =STR= an appropriate slug for
-  file names and related ([[#h:ae8b19a1-7f67-4258-96b3-370a72c43f4e][Sluggified title and keywords]]).
+  file names and related ([[#h:ae8b19a1-7f67-4258-96b3-370a72c43f4e][Sluggification of file name components]]).
 
-#+findex: denote-sluggify-and-join
-+ Function ~denote-sluggify-and-join~ :: Sluggify =STR= while joining
+#+findex: denote-sluggify-keyword
++ Function ~denote-sluggify-keyword~ :: Sluggify =STR= while joining
   separate words.
-
-#+findex: denote-desluggify
-+ Function ~denote-desluggify~ :: Upcase first char in =STR= and
-  dehyphenate =STR=, inverting ~denote-sluggify~.  Basically, convert
-  =this-is-a-test= to =This is a test=.
 
 #+findex: denote-sluggify-signature
 + Function ~denote-sluggify-signature~ :: Make =STR= an appropriate
-  slug for signatures ([[#h:6ae1ab8c-5e36-4216-8e93-f37f4447582c][Contol the letter casing of file names]]).
+  slug for signatures ([[#h:ae8b19a1-7f67-4258-96b3-370a72c43f4e][Sluggification of file name components]]).
 
 #+findex: denote-sluggify-keywords
 + Function ~denote-sluggify-keywords~ :: Sluggify =KEYWORDS=, which is
-  a list of strings ([[#h:ae8b19a1-7f67-4258-96b3-370a72c43f4e][Sluggified title and keywords]]).
+  a list of strings ([[#h:ae8b19a1-7f67-4258-96b3-370a72c43f4e][Sluggification of file name components]]).
 
 #+findex: denote-filetype-heuristics
 + Function ~denote-filetype-heuristics~ :: Return likely file type of
-  =FILE=.  Use the file extension to detect the file type of the file.
+  =FILE=. If in the process of ~org-capture~, consider the file type to
+  be that of Org. Otherwise, use the file extension to detect the file
+  type of =FILE=.
 
-  If more than one file type correspond to this file extension, use the
-  first file type for which the key-title-kegexp matches in the file or,
-  if none matches, use the first type with this file extension in
-  ~denote-file-type~.
+  If more than one file type correspond to this file extension, use
+  the first file type for which the :title-key-regexp in
+  ~denote-file-types~ matches in the file.
 
-  If no file types in ~denote-file-types~ has the file extension, the
-  file type is assumed to be the first of ~denote-file-types~.
+  If no file type in ~denote-file-types~ has the file extension, the
+  file type is assumed to be the first one in ~denote-file-types~.
 
 #+findex: denote-format-file-name
 + Function ~denote-format-file-name~ :: Format file name. =DIR-PATH=,
-  =ID=, =KEYWORDS=, =TITLE-SLUG=, =EXTENSION= and =SIGNATURE-SLUG= are
-  expected to be supplied by ~denote~ or equivalent command.
+  =ID=, =KEYWORDS=, =TITLE=, =EXTENSION= and =SIGNATURE= are expected to
+  be supplied by ~denote~ or equivalent command.
 
   =DIR-PATH= is a string pointing to a directory. It ends with a
   forward slash (the function ~denote-directory~ makes sure this is
@@ -3896,15 +4264,13 @@ might change them without further notice.
   =DIR-PATH= and =ID= form the base file name.
 
   =KEYWORDS= is a list of strings that is reduced to a single string
-  by ~denote-keywords-combine~. =KEYWORDS= can be an empty string or a
+  by ~denote-keywords-combine~. =KEYWORDS= can be an empty list or a
   nil value, in which case the relevant file name component is not
   added to the base file name.
 
-  =TITLE-SLUG= and =SIGNATURE-SLUG= are strings which, in principle,
-  are sluggified before passed as arguments here (per
-  ~denote-sluggify~ and ~denote-sluggify-signature~). They can be an
-  empty string or a nil value, in which case their respective file
-  name component is not added to the base file name.
+  =TITLE= and =SIGNATURE= are strings. They can be an empty string, in
+  which case their respective file name component is not added to the
+  base file name.
 
   =EXTENSION= is a string that contains a dot followed by the file
   type extension. It can be an empty string or a nil value, in which
@@ -3923,25 +4289,33 @@ might change them without further notice.
 
 #+findex: denote-retrieve-filename-identifier
 + Function ~denote-retrieve-filename-identifier~ :: Extract identifier
-  from =FILE= name.  To create a new one, refer to the
+  from =FILE= name, if present, else return nil.  To create a new one, refer to the
   ~denote-create-unique-file-identifier~ function.
 
 #+findex: denote-retrieve-filename-title
 + Function ~denote-retrieve-filename-title~ ::  Extract Denote title
-  component from =FILE= name, else return an empty string. With
-  optional =FILE-NAME-BASE-FALLBACK= return ~file-name-base~ if no
-  Denote title component exists. If the extraction is succcessful
-  (when no ~file-name-base~ is involved) run ~denote-desluggify~ on
-  the title.
+  component from =FILE= name, if present, else return nil.
 
 #+findex: denote-retrieve-filename-keywords
 + Function ~denote-retrieve-filename-keywords~ ::  Extract keywords
-  from =FILE= name, if present, else return an empty string. Return
+  from =FILE= name, if present, else return nil. Return
   matched keywords as a single string.
 
 #+findex: denote-retrieve-filename-signature
 + Function ~denote-retrieve-filename-signature~ :: Extract signature
-  from =FILE= name, if present, else return an empty string.
+  from =FILE= name, if present, else return nil.
+
+#+findex: denote-retrieve-title-or-filename
++ Function ~denote-retrieve-title-or-filename~ :: Return appropriate
+  title for =FILE= given its =TYPE=. Try to find the value of the
+  title in the front matter of FILE, otherwise use its file name. This
+  is a wrapper for ~denote-retrieve-front-matter-title-value~ and
+  =denote-retrieve-filename-title=.
+
+#+findex: denote-get-identifier
++ Function ~denote-get-identifier~ :: Convert =DATE= into a Denote
+  identifier using ~denote-id-format~. =DATE= is parsed by
+  ~denote-valid-date-p~. If =DATE= is nil, use the current time.
 
 #+findex: denote-create-unique-file-identifier
 + Function ~denote-create-unique-file-identifier~ :: Create a new unique
@@ -3961,61 +4335,61 @@ might change them without further notice.
   To only return an existing identifier, refer to the function
   ~denote-retrieve-filename-identifier~.
 
-#+findex: denote-retrieve-title-value
-+ Function ~denote-retrieve-title-value~ :: Return title value from
+#+findex: denote-retrieve-front-matter-title-value
++ Function ~denote-retrieve-front-matter-title-value~ :: Return title value from
   =FILE= front matter per =FILE-TYPE=.
 
-#+findex: denote-retrieve-title-line
-+ Function ~denote-retrieve-title-line~ :: Return title line from
+#+findex: denote-retrieve-front-matter-title-line
++ Function ~denote-retrieve-front-matter-title-line~ :: Return title line from
   =FILE= front matter per =FILE-TYPE=.
 
-#+findex: denote-retrieve-keywords-value
-+ Function ~denote-retrieve-keywords-value~ :: Return keywords value
+#+findex: denote-retrieve-front-matter-keywords-value
++ Function ~denote-retrieve-front-matter-keywords-value~ :: Return keywords value
   from =FILE= front matter per =FILE-TYPE=. The return value is a list
   of strings. To get a combined string the way it would appear in a
-  Denote file name, use ~denote-retrieve-keywords-value-as-string~.
+  Denote file name, use ~denote-retrieve-front-matter-keywords-value-as-string~.
 
-#+findex: denote-retrieve-keywords-value-as-string
-+ Function ~denote-retrieve-keywords-value-as-string~ :: Return
+#+findex: denote-retrieve-front-matter-keywords-value-as-string
++ Function ~denote-retrieve-front-matter-keywords-value-as-string~ :: Return
   keywords value from =FILE= front matter per =FILE-TYPE=. The return
   value is a string, with the underscrore as a separator between
   individual keywords. To get a list of strings instead, use
-  ~denote-retrieve-keywords-value~ (the current function uses that
+  ~denote-retrieve-front-matter-keywords-value~ (the current function uses that
   internally).
 
-#+findex: denote-retrieve-keywords-line
-+ Function ~denote-retrieve-keywords-line~ :: Return keywords line
+#+findex: denote-retrieve-front-matter-keywords-line
++ Function ~denote-retrieve-front-matter-keywords-line~ :: Return keywords line
   from =FILE= front matter per =FILE-TYPE=.
 
 #+findex: denote-signature-prompt
 + Function ~denote-signature-prompt~ :: Prompt for signature string.
-  With optional =DEFAULT-SIGNATURE= use it as the initial minibuffer
+  With optional =INITIAL-SIGNATURE= use it as the initial minibuffer
   text. With optional =PROMPT-TEXT= use it in the minibuffer instead
   of the default prompt. Previous inputs at this prompt are available
-  for minibuffer completion. Consider ~savehist-mode~ to persist
-  minibuffer histories between sessions.
+  for minibuffer completion if the user option ~denote-history-completion-in-prompts~
+  is set to a non-nil value ([[#h:403422a7-7578-494b-8f33-813874c12da3][The ~denote-history-completion-in-prompts~ option]]).
 
 #+findex: denote-file-prompt
 + Function ~denote-file-prompt~ :: Prompt for file with identifier in
-  variable ~denote-directory~.  With optional =FILES-MATCHING-REGEXP=,
-  filter the candidates per the given regular expression.
+  variable ~denote-directory~. With optional =FILES-MATCHING-REGEXP=,
+  filter the candidates per the given regular expression. With
+  optional =PROMPT-TEXT=, use it instead of the default "Select NOTE".
 
 #+findex: denote-keywords-prompt
-+ Function ~denote-keywords-prompt~ :: Prompt for one or more
-  keywords. Read entries as separate when they are demarcated by the
++ Function ~denote-keywords-prompt~ :: Prompt for one or more keywords.
+  Read entries as separate when they are demarcated by the
   ~crm-separator~, which typically is a comma. With optional
   =PROMPT-TEXT=, use it to prompt the user for keywords. Else use a
-  generic prompt. Process the return value with ~denote-keywords-sort~
-  and sort with ~string-collate-lessp~ if the user option
-  ~denote-sort-keywords~ is non-nil.
+  generic prompt. With optional =INITIAL-KEYWORDS= use them as the
+  initial minibuffer text.
 
 #+findex: denote-title-prompt
 + Function ~denote-title-prompt~ :: Prompt for title string. With
-  optional =DEFAULT-TITLE= use it as the initial minibuffer text. With
+  optional =INITIAL-TITLE= use it as the initial minibuffer text. With
   optional =PROMPT-TEXT= use it in the minibuffer instead of the
-  default prompt. Previous inputs at this prompt are available for
-  minibuffer completion. Consider ~savehist-mode~ to persist
-  minibuffer histories between sessions.
+  default prompt. Previous inputs at this prompt are available
+  for minibuffer completion if the user option ~denote-history-completion-in-prompts~
+  is set to a non-nil value ([[#h:403422a7-7578-494b-8f33-813874c12da3][The ~denote-history-completion-in-prompts~ option]]).
 
 #+vindex: denote-title-prompt-current-default
 + Variable ~denote-title-prompt-current-default~ :: Currently bound
@@ -4040,6 +4414,15 @@ might change them without further notice.
 #+findex: denote-command-prompt
 + Function ~denote-command-prompt~ ::  Prompt for command among
   ~denote-commands-for-new-notes~ ([[#h:17896c8c-d97a-4faa-abf6-31df99746ca6][Points of entry]]).
+
+#+vindex: denote-prompts-with-history-as-completion
++ Variable ~denote-prompts-with-history-as-completion~ :: Prompts that
+  conditionally perform completion against their history. These are
+  minibuffer prompts that ordinarily accept a free form string input,
+  as opposed to matching against a predefined set. These prompts can
+  optionally perform completion against their own minibuffer history
+  when the user option ~denote-history-completion-in-prompts~ is set
+  to a non-nil value ([[#h:403422a7-7578-494b-8f33-813874c12da3][The ~denote-history-completion-in-prompts~ option]]).
 
 #+findex: denote-files-matching-regexp-prompt
 + Function ~denote-files-matching-regexp-prompt~ ::  Prompt for
@@ -4073,23 +4456,27 @@ might change them without further notice.
   note after ~denote-rename-file~ (or related) The =FILE=, =TITLE=,
   =KEYWORDS=, and =FILE-TYPE= arguments are given by the renaming
   command and are used to construct new front matter values if
-  appropriate. With optional =NO-CONFIRM=, do not prompt to confirm the
-  rewriting of the front matter. Otherwise produce a ~y-or-n-p~ prompt
-  to that effect.
+  appropriate. With optional =NO-CONFIRM=, do not prompt to confirm
+  the rewriting of the front matter. Otherwise produce a ~y-or-n-p~
+  prompt to that effect. With optional =NO-CONFIRM=, save the buffer
+  after performing the rewrite. Otherwise leave it unsaved for
+  furthter review by the user.
 
 #+findex: denote-rewrite-keywords
 + Function ~denote-rewrite-keywords~ :: Rewrite =KEYWORDS= in =FILE=
-  outright according to =FILE-TYPE=.  Do the same as
+  outright according to =FILE-TYPE=. Do the same as
   ~denote-rewrite-front-matter~ for keywords, but do not ask for
-  confirmation.  This is for use in ~denote-keywords-add~,
-  ~denote-keywords-remove~, ~denote-dired-rename-marked-files-with-keywords~,
-  or related.
+  confirmation. With optional =SAVE-BUFFER=, save the buffer
+  corresponding to =FILE=. This function is for use in the commands
+  ~denote-keywords-add~, ~denote-keywords-remove~,
+  ~denote-dired-rename-files~, or related.
 
 #+findex: denote-update-dired-buffers
 + Function ~denote-update-dired-buffers~ :: Update Dired buffers of
-  variable ~denote-directory~.  Note that the ~denote-directory~
-  accepts a directory-local value for what we internally refer to as
-  "silos" ([[#h:15719799-a5ff-4e9a-9f10-4ca03ef8f6c5][Maintain separate directories for notes]]).
+  variable ~denote-directory~. Also revert the current Dired buffer
+  even if it is not inside the ~denote-directory~. Note that the
+  ~denote-directory~ accepts a directory-local value for what we
+  internally refer to as "silos" ([[#h:15719799-a5ff-4e9a-9f10-4ca03ef8f6c5][Maintain separate directories for notes]]).
 
 #+vindex: denote-file-types
 + Variable ~denote-file-types~ :: Alist of ~denote-file-type~ and
@@ -4199,11 +4586,6 @@ might change them without further notice.
   an identifier-only link in its context.  The format of such links is
   ~denote-id-only-link-format~.
 
-#+findex: denote-surround-with-quotes
-+ Function ~denote-surround-with-quotes~ :: Surround string =S= with
-  quotes.  This can be used in ~denote-file-types~ to format front
-  mattter.
-
 #+findex: denote-date-org-timestamp
 + Function ~denote-date-org-timestamp~ :: Format =DATE= using the Org
   inactive timestamp notation.
@@ -4225,6 +4607,17 @@ might change them without further notice.
 + Function ~denote-trim-whitespace-then-quotes~ :: Trim whitespace
   then quotes around string =S=.  This can be used in
   ~denote-file-types~ to format front mattter.
+
+#+findex: denote-format-string-for-org-front-matter
++ Function ~denote-format-string-for-org-front-matter~ :: Return
+  string =S= as-is for Org or plain text front matter. If =S= is not a
+  string, return an empty string.
+
+#+findex: denote-format-string-for-md-front-matter
++ Function ~denote-format-string-for-md-front-matter~ :: Surround
+  string =S= with quotes. If =S= is not a string, return a literal
+  emptry string. This can be used in ~denote-file-types~ to format
+  front mattter.
 
 #+findex: denote-format-keywords-for-md-front-matter
 + Function ~denote-format-keywords-for-md-front-matter~ :: Format
@@ -4254,6 +4647,29 @@ might change them without further notice.
 #+findex: denote-link-return-backlinks
 + Function ~denote-link-return-backlinks~ :: Return list of backlinks
   in current or optional =FILE=.  Also see ~denote-link-return-links~.
+
+#+vindex: denote-link-signature-format
++ Variable ~denote-link-signature-format~ :: Format of link
+  description for ~denote-link-with-signature~.
+
+#+findex: denote-link-description-with-signature-and-title
++ Function ~denote-link-description-with-signature-and-title~ :: Return
+  link description for =FILE=.  Produce a description as follows:
+
+- If the region is active, use it as the description.
+
+- If =FILE= as a signature, then use the
+  ~denote-link-signature-format~.  By default, this looks like
+  "signature title".
+
+- If =FILE= does not have a signature, then use its title as the
+  description.
+
+#+vindex: denote-link-description-function
++ Variable ~denote-link-description-function~ :: Function to use to
+  create the description of links. The function specified should take
+  a =FILE= argument and should return the description as a string. By
+  default, the title of the file is returned as the description.
 
 * Troubleshoot Denote in a pristine environment
 :PROPERTIES:
@@ -4306,38 +4722,36 @@ us get a better sense of the specifics.
 :CUSTOM_ID: h:1ebe4865-c001-4747-a6f2-0fe45aad71cd
 :END:
 
-Denote is a GNU ELPA package.  As such, any significant change to the
-code requires copyright assignment to the Free Software Foundation (more
-below).
+Denote is a GNU ELPA package. As such, any significant change to the
+code requires copyright assignment to the Free Software Foundation
+(more below).
 
 You do not need to be a programmer to contribute to this package.
 Sharing an idea or describing a workflow is equally helpful, as it
 teaches us something we may not know and might be able to cover either
-by extending Denote or expanding this manual ([[#h:044a6a0f-e382-4013-8279-8bf4e64e73c0][Things to do]]).  If you
-prefer to write a blog post, make sure you share it with us: we can add
-a section herein referencing all such articles.  Everyone gets
-acknowledged ([[#h:f8126820-3b59-49fa-bcc2-73bd60132bb9][Acknowledgements]]).  There is no such thing as an
-"insignificant contribution"---they all matter.
+by extending Denote or expanding this manual. If you prefer to write a
+blog post, make sure you share it with us: we can add a section herein
+referencing all such articles. Everyone gets acknowledged
+([[#h:f8126820-3b59-49fa-bcc2-73bd60132bb9][Acknowledgements]]). There is no such thing as an "insignificant
+contribution"---they all matter.
 
-+ Package name (GNU ELPA): =denote=
++ Package name (GNU ELPA): ~denote~
 + Official manual: <https://protesilaos.com/emacs/denote>
 + Change log: <https://protesilaos.com/emacs/denote-changelog>
-+ Git repo on SourceHut: <https://git.sr.ht/~protesilaos/denote>
-  - Mirrors:
-    + GitHub: <https://github.com/protesilaos/denote>
-    + GitLab: <https://gitlab.com/protesilaos/denote>
-+ Mailing list: <https://lists.sr.ht/~protesilaos/denote>
++ Git repositories:
+  + GitHub: <https://github.com/protesilaos/denote>
+  + GitLab: <https://gitlab.com/protesilaos/denote>
 
 If our public media are not suitable, you are welcome to contact me
 (Protesilaos) in private: <https://protesilaos.com/contact>.
 
-Copyright assignment is a prerequisite to sharing code.  It is a simple
-process.  Check the request form below (please adapt it accordingly).
+Copyright assignment is a prerequisite to sharing code. It is a simple
+process. Check the request form below (please adapt it accordingly).
 You must write an email to the address mentioned in the form and then
-wait for the FSF to send you a legal agreement.  Sign the document and
-file it back to them.  This could all happen via email and take about a
-week.  You are encouraged to go through this process.  You only need to
-do it once.  It will allow you to make contributions to Emacs in
+wait for the FSF to send you a legal agreement. Sign the document and
+file it back to them. This could all happen via email and take about a
+week. You are encouraged to go through this process. You only need to
+do it once. It will allow you to make contributions to Emacs in
 general.
 
 #+begin_example text
@@ -4384,41 +4798,67 @@ so far?]
 
 #+end_example
 
-* Things to do
+** Wishlist of what we can do to extend Denote
 :PROPERTIES:
 :CUSTOM_ID: h:044a6a0f-e382-4013-8279-8bf4e64e73c0
 :END:
 
-Denote should work well for what is described in this manual.  Though we
-can always do better.  This is a non-exhaustive list with some
-low-priority ideas you may want to help with ([[#h:1ebe4865-c001-4747-a6f2-0fe45aad71cd][Contributing]]).
+These are various ideas to extend Denote. Whether they should be in
+the core package or a separate extension is something we can discuss.
+I, Protesilaos, am happy to help anyone who wants to do any of this.
 
-- Support mutually-exclusive sets of tags.  For example, a =home=
-  keyword would preclude =work=.  Personally, I am not a fan of such
-  arrangements as there may be a case where something applies to both
-  ends of this prefigured binary.  Though we can think about it.
+- denote-consult.el :: This can be a separate package that enhances or
+  replaces the various prompts we have for files (and maybe more) by
+  using the ~consult~ package. Consult provides the preview mechanism
+  and can probably be used for more things, such as to define a source
+  for Denote-only buffers in the ~consult-buffer~ command. If we need
+  to tweak things in =denote.el=, I am happy to do it. For example, we
+  could have a ~denote-file-prompt-function~ variable, which would
+  default to ~denote-file-prompt~ (what we currently have) and would
+  also such a hypothetical package to easily plug into what we have.
 
-- Add command that expands the identifier in links to a full file name.
-  This would be useful for some sort of "export" operation where the
-  absolute file path is necessary and where the Denote linking mechanism
-  is not available.  Though this could be handled by the exporter, by
-  doing something like what ~denote-find-link~ does.
+- denote-embark.el :: Provide integration with the ~embark~ package.
+  This can be for doing something with the identifier/link at point.
+  For example, it could provide an action to produce backlinks for the
+  identifier/file we are linking to, not just the current one.
 
-- Add command that rewrites full names in links, if they are invalid.
-  This would complement the renaming mechanism.  Personally, I think old
-  titles in links are not a problem, because they show you what was true
-  at the time and are usually relevant to their context.  Again though,
-  it is an option worth exploring.
+- denote-transient.el :: The ~transient~ package is built into Emacs
+  29 (Denote supports Emacs 28 though). We can use it to define an
+  alternative to what we have for the menu bar. Perhaps this interface
+  can used to toggle various options, such as to call ~denote~ with a
+  different set of prompts.
 
-- Ensure integration between =denote:= links and the =embark= package.
-  The idea is to allow Embark to understand the Denote buttons are links
-  to files and correctly infer the absolute path.  I am not sure what a
-  user would want to do with this, but maybe there are some interesting
-  possibilities.
+- A ~denote-directories~ user option :: This can be either an
+  extension of the ~denote-directory~ (accept a list of file paths
+  value) or a new variable. The idea is to let the user define
+  separate Denote directories which do know about the presence of each
+  other (unlike silos). This way, a user can have an entry in
+  =~/Documents/notes/= link to something =~/Git/projects/= and
+  everything work as if the ~denote-directory~ is set to the =~/=
+  (with the status quo as of 2024-02-18 08:27 +0200).
 
-You are welcome to suggest more ideas.  If they do not broaden the scope
-of Denote, they can be added to denote.el.  Otherwise we might think of
-extensions to the core package.
+- Signatures before identifiers :: This is probably going to increase
+  the complixity of =denote.el= and may not be worth pursuing. But
+  just to explore the idea: we could have an option to rearrange file
+  names such that the signature appears before the identifier. If we
+  can do this in a smart way, we can probably extend the principle for
+  all file name components. Again though, this may be too complex and
+  not worth doing.
+
+- Encode the day in the identifier :: The idea is to use some coded
+  reference for Monday, Tuesday, etc. instead of having the generic
+  =T= in the identifier. For example, Monday is =A= so the identifier
+  for it is something like =20240219A101522= instead of what we now
+  have as =20240219T101522=. The old method should still be supported.
+  Apart from changing a few regular expressions, this does not seem
+  too complex to me. We would need a user option to opt in to such a
+  feature. Then tweak the relevant parts. The tricky issue is to
+  define a mapping of day names to letters/symbols that works for
+  everyone. Do all countries have a seven-day week, for example? We
+  need something universally applicable here.
+
+Anything else? You are welcome to discuss these and/or add to the
+list.
 
 * Publications about Denote
 :PROPERTIES:
@@ -4460,6 +4900,7 @@ Denote, feel welcome to tell us about it ([[#h:1ebe4865-c001-4747-a6f2-0fe45aad7
 
 + Peter Prevos: /Emacs Writing Studio/, 2023-10-19. A configuration for authors, using Denote for taking notes, literature reviews and manage collections of images:
   - <https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/>
+  - <https://lucidmanager.org/productivity/denote-explore/>
   - <https://lucidmanager.org/productivity/bibliographic-notes-in-emacs-with-citar-denote/>
   - <https://lucidmanager.org/productivity/using-emacs-image-dired/>
 
@@ -4865,6 +5306,20 @@ code (adjust the git's installation path if necessary):
   (setenv "PATH" (concat (getenv "PATH") ";" "C:\\Program Files\\Git\\usr\\bin"))
 #+end_src
 
+** Why do I get a double =#+title= in Doom Emacs?
+:PROPERTIES:
+:CUSTOM_ID: h:0f737b7d-40e6-46a7-b1db-117c0ffcbfef
+:END:
+
+Doom Emacs provides a set of bespoke templates for Org. One of those
+prefills any new Org file with a =#+title= field. So when Denote
+creates a new Org file and inserts front matter to it, it inevitably
+adds an extra title to the existing one.
+
+This is not a Denote problem. We can only expect a new file to be
+empty by default. Check how to disable the relevant module in your
+Doom Emacs configuration file.
+
 * Acknowledgements
 :PROPERTIES:
 :CUSTOM_ID: h:f8126820-3b59-49fa-bcc2-73bd60132bb9
@@ -4876,29 +5331,33 @@ Denote is meant to be a collective effort.  Every bit of help matters.
 + Author/maintainer :: Protesilaos Stavrou.
 
 + Contributions to code or the manual :: Abin Simon, Adam Růžička,
-  Alan Schmitt, Benjamin Kästner, Bruno Boal, Charanjit Singh, Clemens
-  Radermacher, Colin McLear, Damien Cassou, Eduardo Grajeda, Elias
-  Storms, Eshel Yaron, Florian, Graham Marlow, Hilde Rhyne, Ivan
-  Sokolov, Jack Baty, Jean-Charles Bagneris, Jean-Philippe Gagné Guay,
-  Jürgen Hötzel, Kaushal Modi, Kai von Fintel, Kostas Andreadis, Kyle
-  Meyer, Marc Fargas, Matthew Lemon, Noboru Ota (nobiot), Norwid
-  Behrnd, Peter Prevos, Philip Kaludercic, Quiliro Ordóñez, Stefan
-  Monnier, Stefan Thesing, Thibaut Benjamin, Tomasz Hołubowicz, Vedang
-  Manerikar, ezchi, leinfink (Henrik), mentalisttraceur, relict007.
+  Alan Schmitt, Ashton Wiersdorf, Benjamin Kästner, Bruno Boal,
+  Charanjit Singh, Clemens Radermacher, Colin McLear, Damien Cassou,
+  Eduardo Grajeda, Elias Storms, Eshel Yaron, Florian, Glenna D.,
+  Graham Marlow, Hilde Rhyne, Ivan Sokolov, Jack Baty, Jean-Charles
+  Bagneris, Jean-Philippe Gagné Guay, Joseph Turner, Jürgen Hötzel,
+  Kaushal Modi, Kai von Fintel, Kostas Andreadis, Kristoffer
+  Balintona, Kyle Meyer, Marc Fargas, Matthew Lemon, Noboru Ota
+  (nobiot), Norwid Behrnd, Peter Prevos, Philip Kaludercic, Quiliro
+  Ordóñez, Stephen R. Kifer, Stefan Monnier, Stefan Thesing, Thibaut
+  Benjamin, Tomasz Hołubowicz, Vedang Manerikar, Wesley Harvey, Zhenxu
+  Xu, arsaber101, ezchi, jarofromel, leinfink (Henrik), l-o-l-h
+  (Lincoln), mattyonweb, maxbrieiev, mentalisttraceur, pmenair,
+  relict007.
 
 + Ideas and/or user feedback :: Abin Simon, Aditya Yadav, Alan
-  Schmitt, Aleksandr Vityazev, Alfredo Borrás, Ashton Wiersdorf,
-  Benjamin Kästner, Claudiu Tănăselia, Colin McLear, Damien Cassou,
-  Elias Storms, Federico Stilman, Florian, Frédéric Willem Frank
-  Ehmsen, Glenna D., Guo Yong, Hanspeter Gisler, Jack Baty, Jay
+  Schmitt, Aleksandr Vityazev, Alex Hirschfeld, Alfredo Borrás, Ashton
+  Wiersdorf, Benjamin Kästner, Claudiu Tănăselia, Colin McLear, Damien
+  Cassou, Elias Storms, Federico Stilman, Florian, Frédéric Willem
+  Frank Ehmsen, Glenna D., Guo Yong, Hanspeter Gisler, Jack Baty, Jay
   Rajput, Jean-Charles Bagneris, Jens Östlund, Jeremy Friesen,
   Jonathan Sahar, Johan Bolmsjö, Jousimies, Juanjo Presa, Kai von
   Fintel, Kaushal Modi, M. Hadi Timachi, Mark Olson, Mirko Hernandez,
   Niall Dooley, Paul van Gelder, Peter Prevos, Peter Smith, Suhail
   Singh, Shreyas Ragavan, Stefan Thesing, Summer Emacs, Sven Seebeck,
-  Taoufik, TJ Stankus, Viktor Haag, Wade Mealing, Yi Liu, Ypot,
-  atanasj, babusri, doolio, drcxd, hpgisler, pRot0ta1p, rbenit68,
-  relict007, sienic, sundar bp.
+  Taoufik, TJ Stankus, Vick (VicZz), Viktor Haag, Wade Mealing, Yi
+  Liu, Ypot, atanasj, babusri, doolio, drcxd, fingerknight, hpgisler,
+  mentalisttraceur, pRot0ta1p, rbenit68, relict007, sienic, sundar bp.
 
 Special thanks to Peter Povinec who helped refine the file-naming
 scheme, which is the cornerstone of this project.

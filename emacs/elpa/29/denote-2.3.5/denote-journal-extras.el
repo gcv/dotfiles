@@ -1,11 +1,10 @@
 ;;; denote-journal-extras.el --- Convenience functions for daily journaling  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023  Free Software Foundation, Inc.
+;; Copyright (C) 2023-2024  Free Software Foundation, Inc.
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
-;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
-;; URL: https://git.sr.ht/~protesilaos/denote
-;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
+;; Maintainer: Protesilaos Stavrou <info@protesilaos.com>
+;; URL: https://github.com/protesilaos/denote
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -102,11 +101,13 @@ journal entry (refer to the `tmr' package on GNU ELPA)."
 
 (defun denote-journal-extras-directory ()
   "Make the variable `denote-journal-extras-directory' and its parents."
-  (when-let (((stringp denote-journal-extras-directory))
-             (directory (file-name-as-directory (expand-file-name denote-journal-extras-directory))))
-    (when (not (file-directory-p denote-journal-extras-directory))
-      (make-directory directory :parents))
-    directory))
+  (if-let (((stringp denote-journal-extras-directory))
+           (directory (file-name-as-directory (expand-file-name denote-journal-extras-directory))))
+      (progn
+        (when (not (file-directory-p denote-journal-extras-directory))
+          (make-directory directory :parents))
+        directory)
+    (denote-directory)))
 
 (defun denote-journal-extras-daily--title-format (&optional date)
   "Return present date in `denote-journal-extras-title-format' or prompt for title.
@@ -136,15 +137,6 @@ Also see `denote-journal-extras-new-entry'."
     (when denote-templates
       (denote-template-prompt))))
 
-(defun denote-journal-extras--get-date (date)
-  "Return a valid DATE for `format-time-string'.
-If DATE is a list, return it as-is.  If it is a string, parse it
-with `denote--valid-date'.  Else return the `current-time'."
-  (cond
-   ((listp date) date)
-   ((stringp date) (denote--valid-date date))
-   (t (current-time))))
-
 ;;;###autoload
 (defun denote-journal-extras-new-entry (&optional date)
   "Create a new journal entry in variable `denote-journal-extras-directory'.
@@ -158,10 +150,10 @@ date selection module.
 
 When called from Lisp DATE is a string and has the same format as
 that covered in the documentation of the `denote' function.  It
-is internally processed by `denote-journal-extras--get-date'."
+is internally processed by `denote-parse-date'."
   (interactive (list (when current-prefix-arg (denote-date-prompt))))
-  (let ((internal-date (denote-journal-extras--get-date date))
-        (denote-user-enforced-denote-directory (denote-journal-extras-directory)))
+  (let ((internal-date (denote-parse-date date))
+        (denote-directory (denote-journal-extras-directory)))
     (denote
      (denote-journal-extras-daily--title-format internal-date)
      `(,denote-journal-extras-keyword)
@@ -171,7 +163,7 @@ is internally processed by `denote-journal-extras--get-date'."
 
 (defun denote-journal-extras--entry-today (&optional date)
   "Return list of files matching a journal for today or optional DATE.
-DATE has the same format as that returned by `denote-journal-extras--get-date'."
+DATE has the same format as that returned by `denote-parse-date'."
   (denote-directory-files
    (format "%sT[0-9]\\{6\\}.*_%s"
            (format-time-string "%Y%m%d" date)
@@ -194,12 +186,12 @@ date selection module.
 
 When called from Lisp, DATE is a string and has the same format
 as that covered in the documentation of the `denote' function.
-It is internally processed by `denote-journal-extras--get-date'."
+It is internally processed by `denote-parse-date'."
   (interactive
    (list
     (when current-prefix-arg
       (denote-date-prompt))))
-  (let* ((internal-date (denote-journal-extras--get-date date))
+  (let* ((internal-date (denote-parse-date date))
          (files (denote-journal-extras--entry-today internal-date)))
     (cond
      ((length> files 1)
@@ -208,6 +200,50 @@ It is internally processed by `denote-journal-extras--get-date'."
       (find-file (car files)))
      (t
       (denote-journal-extras-new-entry date)))))
+
+;;;###autoload
+(defun denote-journal-extras-link-or-create-entry (&optional date id-only)
+  "Use `denote-link' on journal entry, creating it if necessary.
+A journal entry is one that has `denote-journal-extras-keyword' as
+part of its file name.
+
+If there are multiple journal entries for the current date,
+prompt for one using minibuffer completion.  If there is only
+one, link to it outright.  If there is no journal entry, create one
+by calling `denote-journal-extra-new-entry' and link to it.
+
+With optional DATE as a prefix argument, prompt for a date.  If
+`denote-date-prompt-use-org-read-date' is non-nil, use the Org
+date selection module.
+
+When called from Lisp, DATE is a string and has the same format
+as that covered in the documentation of the `denote' function.
+It is internally processed by `denote-parse-date'.
+
+With optional ID-ONLY as a prefix argument create a link that
+consists of just the identifier.  Else try to also include the
+file's title.  This has the same meaning as in `denote-link'."
+  (interactive
+   (pcase current-prefix-arg
+     ('(16) (list (denote-date-prompt) :id-only))
+     ('(4) (list (denote-date-prompt)))))
+  (let* ((internal-date (denote-parse-date date))
+         (files (denote-journal-extras--entry-today internal-date))
+         (path))
+    (cond
+     ((length> files 1)
+      (setq path (completing-read "Select journal entry: " files nil :require-match)))
+     (files
+      (setq path (car files)))
+     (t
+      (save-window-excursion
+        (denote-journal-extras-new-entry date)
+        (save-buffer)
+        (setq path (buffer-file-name)))))
+    (denote-link path
+                 (denote-filetype-heuristics (buffer-file-name))
+                 (denote--link-get-description path)
+                 id-only)))
 
 (provide 'denote-journal-extras)
 ;;; denote-journal-extras.el ends here

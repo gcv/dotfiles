@@ -1,11 +1,10 @@
 ;;; denote-rename-buffer.el --- Rename Denote buffers to be shorter and easier to read -*- lexical-binding: t -*-
 
-;; Copyright (C) 2023  Free Software Foundation, Inc.
+;; Copyright (C) 2023-2024  Free Software Foundation, Inc.
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
-;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
-;; URL: https://git.sr.ht/~protesilaos/denote
-;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
+;; Maintainer: Protesilaos Stavrou <info@protesilaos.com>
+;; URL: https://github.com/protesilaos/denote
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -94,11 +93,16 @@ buffer will be used, if available."
              (type (denote-filetype-heuristics file)))
     (string-trim
      (format-spec denote-rename-buffer-format
-                  (list (cons ?t (denote-retrieve-title-value file type))
-                        (cons ?i (denote-retrieve-filename-identifier file))
-                        (cons ?d (denote-retrieve-filename-identifier file))
-                        (cons ?s (denote-retrieve-filename-signature file))
-                        (cons ?k (denote-retrieve-keywords-value-as-string file type))
+                  (list (cons ?t (cond
+                                  ((denote-retrieve-front-matter-title-value file type))
+                                  ((denote-retrieve-filename-title file))
+                                  (t  "")))
+                        (cons ?i (or (denote-retrieve-filename-identifier file) ""))
+                        (cons ?d (or (denote-retrieve-filename-identifier file) ""))
+                        (cons ?s (or (denote-retrieve-filename-signature file) ""))
+                        (cons ?k (if-let ((kws (denote-retrieve-front-matter-keywords-value file type)))
+                                     (denote-keywords-combine kws)
+                                   (or (denote-retrieve-filename-keywords file) "")))
                         (cons ?% "%"))
                   'delete))))
 
@@ -107,7 +111,8 @@ buffer will be used, if available."
 The symbol of this function is the default value of the user
 option `denote-rename-buffer-function' and is thus used by the
 `denote-rename-buffer-mode'."
-  (when-let (((denote-file-has-identifier-p (buffer-file-name buffer)))
+  (when-let ((file (buffer-file-name buffer))
+             ((denote-file-has-identifier-p file))
              (new-name (denote-rename-buffer--format (or buffer (current-buffer))))
              ((not (string-blank-p new-name))))
     (rename-buffer new-name :unique)))
@@ -144,8 +149,10 @@ visited again in a new buffer (files are visited with the command
   (if denote-rename-buffer-mode
       (progn
         (add-hook 'denote-after-new-note-hook #'denote-rename-buffer-rename-function-or-fallback)
+        (add-hook 'denote-after-rename-file-hook #'denote-rename-buffer-rename-function-or-fallback)
         (add-hook 'find-file-hook #'denote-rename-buffer-rename-function-or-fallback))
     (remove-hook 'denote-after-new-note-hook #'denote-rename-buffer-rename-function-or-fallback)
+    (remove-hook 'denote-after-rename-file-hook #'denote-rename-buffer-rename-function-or-fallback)
     (remove-hook 'find-file-hook #'denote-rename-buffer-rename-function-or-fallback)))
 
 (provide 'denote-rename-buffer)

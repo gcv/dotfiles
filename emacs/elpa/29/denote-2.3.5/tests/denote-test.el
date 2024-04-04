@@ -31,16 +31,6 @@
 (require 'ert)
 (require 'denote)
 
-;; TODO 2023-05-22: Incorporate an actual silo in this test directory
-;; and modify the test accordingly.
-(ert-deftest denote-test-denote--default-directory-is-silo-p ()
-  "Test that `denote--default-directory-is-silo-p' returns a path."
-  (let ((path (denote--default-directory-is-silo-p)))
-    (should (or (null path)
-                (and (stringp path)
-                     (file-exists-p path)
-                     (file-directory-p path))))))
-
 (ert-deftest denote-test--denote--make-denote-directory ()
   "Test that `denote--make-denote-directory' creates the directory."
   (should (null (denote--make-denote-directory))))
@@ -69,7 +59,7 @@ leading and trailing hyphen."
 (ert-deftest denote-test--denote-sluggify ()
   "Test that `denote-sluggify' sluggifies the string.
 To sluggify is to (i) downcase, (ii) hyphenate, (iii) de-punctuate, and (iv) remove spaces from the string."
-  (should (equal (denote-sluggify " ___ !~!!$%^ This iS a tEsT ++ ?? ")
+  (should (equal (denote-sluggify 'title " ___ !~!!$%^ This iS a tEsT ++ ?? ")
                  "this-is-a-test")))
 
 (ert-deftest denote-test--denote--slug-put-equals ()
@@ -89,13 +79,13 @@ accounts for what we describe in `denote-test--denote--slug-put-equals'."
   (should (equal (denote-sluggify-signature "--- ___ !~!!$%^ This -iS- a tEsT ++ ?? ")
                  "this=is=a=test")))
 
-(ert-deftest denote-test--denote-sluggify-and-join ()
-  "Test that `denote-sluggify-and-join' sluggifies the string while joining words.
+(ert-deftest denote-test--denote-sluggify-keyword ()
+  "Test that `denote-sluggify-keyword' sluggifies the string while joining words.
 In this context, to join words is to elimitate any space or
 delimiter between them.
 
 Otherwise, this is like `denote-test--denote-sluggify'."
-  (should (equal (denote-sluggify-and-join "--- ___ !~!!$%^ This iS a - tEsT ++ ?? ")
+  (should (equal (denote-sluggify-keyword "--- ___ !~!!$%^ This iS a - tEsT ++ ?? ")
                  "thisisatest")))
 
 (ert-deftest denote-test--denote-sluggify-keywords ()
@@ -105,11 +95,6 @@ The function also account for the value of the user option
   (should
    (equal (denote-sluggify-keywords '("one !@# --- one" "   two" "__  three  __"))
           '("oneone" "two" "three"))))
-
-(ert-deftest denote-test--denote-desluggify ()
-  "Test that `denote-desluggify' upcases first character and de-hyphenates string."
-  (should (equal (denote-desluggify "this-is-a-test") "This is a test"))
-  (should (null (equal (denote-desluggify "this=is=a=test") "This is a test"))))
 
 (ert-deftest denote-test--denote--file-empty-p ()
   "Test that `denote--file-empty-p' returns non-nil on empty file."
@@ -181,6 +166,14 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
                 (member ".md.age" extensions)
                 (member ".org.age" extensions)
                 (member ".txt.age" extensions)))))
+
+(ert-deftest denote-test--denote-surround-with-quotes ()
+  "Test that `denote-surround-with-quotes' returns a string in quotes."
+  (should (and (equal (denote-surround-with-quotes "test") "\"test\"")
+               (equal (denote-surround-with-quotes "") "\"\"")
+               (equal (denote-surround-with-quotes nil) "\"\"")
+               (equal (denote-surround-with-quotes 'wrong) "\"\"")
+               (equal (denote-surround-with-quotes '(wrong)) "\"\""))))
 
 (ert-deftest denote-test--denote--format-front-matter ()
   "Test that `denote--format-front-matter' formats front matter correctly."
@@ -279,62 +272,62 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
 (ert-deftest denote-test--denote-format-file-name ()
   "Test that `denote-format-file-name' returns all expected paths."
   (let* ((title "Some test")
-         (id (format-time-string denote-id-format (denote--valid-date "2023-11-28 05:53:11")))
+         (id (format-time-string denote-id-format (denote-valid-date-p "2023-11-28 05:53:11")))
          (denote-directory "/tmp/test-denote")
          (kws '("one" "two")))
     (should-error (denote-format-file-name
                     nil
                     id
-                    (denote-sluggify-keywords kws)
-                    (denote-sluggify title)
+                    kws
+                    title
                     (denote--file-extension 'org)
                     ""))
 
     (should-error (denote-format-file-name
                     ""
                     id
-                    (denote-sluggify-keywords kws)
-                    (denote-sluggify title)
+                    kws
+                    title
                     (denote--file-extension 'org)
                     ""))
 
     (should-error (denote-format-file-name
                    denote-directory ; notice this is the `let' bound value without the suffix
                    id
-                   (denote-sluggify-keywords kws)
-                   (denote-sluggify title)
+                   kws
+                   title
                    (denote--file-extension 'org)
                    ""))
 
     (should-error (denote-format-file-name
                    (denote-directory)
                    nil
-                   (denote-sluggify-keywords kws)
-                   (denote-sluggify title)
+                   kws
+                   title
                    (denote--file-extension 'org)
                    ""))
 
     (should-error (denote-format-file-name
                    (denote-directory)
                    ""
-                   (denote-sluggify-keywords kws)
-                   (denote-sluggify title)
+                   kws
+                   title
                    (denote--file-extension 'org)
                    ""))
 
     (should-error (denote-format-file-name
                    (denote-directory)
                    "0123456"
-                   (denote-sluggify-keywords kws)
-                   (denote-sluggify title)
+                   kws
+                   title
                    (denote--file-extension 'org)
                    ""))
 
     (should (equal (denote-format-file-name
                     (denote-directory)
                     id
-                    (denote-sluggify-keywords kws)
-                    (denote-sluggify title)
+                    kws
+                    title
                     (denote--file-extension 'org)
                     "")
                    "/tmp/test-denote/20231128T055311--some-test__one_two.org"))
@@ -342,7 +335,7 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
     (should (equal (denote-format-file-name
                     (denote-directory)
                     id
-                    ""
+                    nil
                     ""
                     (denote--file-extension 'org)
                     "")
@@ -354,16 +347,16 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
                     nil
                     nil
                     (denote--file-extension 'org)
-                    "")
+                    nil)
                    "/tmp/test-denote/20231128T055311.org"))
 
     (should (equal (denote-format-file-name
                     (denote-directory)
                     id
-                    (denote-sluggify-keywords kws)
-                    (denote-sluggify title)
+                    kws
+                    title
                     (denote--file-extension 'org)
-                    (denote-sluggify-signature "sig"))
+                    "sig")
                    "/tmp/test-denote/20231128T055311==sig--some-test__one_two.org"))))
 
 (ert-deftest denote-test--denote-get-file-extension ()
@@ -397,6 +390,21 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.md") 'markdown-yaml)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.md.gpg") 'markdown-yaml)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.md.age") 'markdown-yaml))))
+
+(ert-deftest denote-test--denote-convert-file-name-keywords-to-crm ()
+  "Ensure that `denote-convert-file-name-keywords-to-crm' returns words as comma-separated string."
+  (should
+   (and (equal (denote-convert-file-name-keywords-to-crm "_denote_keywords_testing") "denote,keywords,testing")
+        (equal (denote-convert-file-name-keywords-to-crm "_denote") "denote")
+        (equal (denote-convert-file-name-keywords-to-crm "") ""))))
+
+(ert-deftest denote-test--denote-get-identifier ()
+  "Test that `denote-get-identifier' returns an identifier."
+  (should (and (equal (denote-get-identifier) (format-time-string denote-id-format (current-time)))
+               (equal (denote-get-identifier "2024-02-01 10:34") "20240201T103400")
+               (equal (denote-get-identifier 1705644188) "20240119T080308")
+               (equal (denote-get-identifier '(26026 4251)) "20240119T080307")))
+  (should-error (denote-get-identifier "Invalid date")))
 
 ;;;; denote-journal-extras.el
 

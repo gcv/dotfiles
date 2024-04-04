@@ -1,11 +1,10 @@
 ;;; denote-sort.el ---  Sort Denote files based on a file name component -*- lexical-binding: t -*-
 
-;; Copyright (C) 2023  Free Software Foundation, Inc.
+;; Copyright (C) 2023-2024  Free Software Foundation, Inc.
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
-;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
-;; URL: https://git.sr.ht/~protesilaos/denote
-;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
+;; Maintainer: Protesilaos Stavrou <info@protesilaos.com>
+;; URL: https://github.com/protesilaos/denote
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -58,8 +57,8 @@ two title values."
          component)
        (let* ((one (,retrieve-fn file1))
               (two (,retrieve-fn file2))
-              (one-empty-p (string-empty-p one))
-              (two-empty-p (string-empty-p two)))
+              (one-empty-p (or (null one) (string-empty-p one)))
+              (two-empty-p (or (null two) (string-empty-p two))))
          (cond
           (one-empty-p nil)
           ((and (not one-empty-p) two-empty-p) one)
@@ -137,17 +136,20 @@ With optional REVERSE as a non-nil value, reverse the sort order."
    current-file-type
    id-only))
 
-(defvar denote-sort--component-hist nil
+(defvar denote-sort-component-history nil
   "Minibuffer history of `denote-sort-component-prompt'.")
+
+(defalias 'denote-sort--component-hist 'denote-sort-component-history
+  "Compatibility alias for `denote-sort-component-history'.")
 
 (defun denote-sort-component-prompt ()
   "Prompt `denote-sort-files' for sorting key among `denote-sort-components'."
-  (let ((default (car denote-sort--component-hist)))
+  (let ((default (car denote-sort-component-history)))
     (intern
      (completing-read
       (format-prompt "Sort by file name component" default)
       denote-sort-components nil :require-match
-      nil 'denote-sort--component-hist default))))
+      nil 'denote-sort-component-history default))))
 
 (defvar-local denote-sort--dired-buffer nil
   "Buffer object of current `denote-sort-dired'.")
