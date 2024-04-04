@@ -147,6 +147,11 @@ A discussion of the information provided by a Racket language:
 (register-definition-prefixes "racket-keywords-and-builtins" '("racket-"))
 
 
+;;; Generated autoloads from racket-lisp-mode.el
+
+(register-definition-prefixes "racket-lisp-mode" '("racket-"))
+
+
 ;;; Generated autoloads from racket-logger.el
 
 (register-definition-prefixes "racket-logger" '("racket-"))
