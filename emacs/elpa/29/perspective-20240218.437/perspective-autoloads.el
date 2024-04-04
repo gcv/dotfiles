@@ -39,6 +39,8 @@ evaluate `(default-value \\='persp-mode)'.
 The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
+\\{persp-mode-map}
+
 (fn &optional ARG)" t)
 (autoload 'persp-switch-to-buffer* "perspective" "\
 Like `switch-to-buffer', restricted to the current perspective.
