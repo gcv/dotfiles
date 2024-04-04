@@ -35,15 +35,31 @@
 
 (defcustom ledger-accounts-file nil
   "The path to an optional file in which all accounts are used or declared.
-This file will then be used as a source for account name completions."
-  :type 'file
-  :group 'ledger)
+This file will then be used as a source for account name
+completions instead of the current file.
+See ledger's
+\"account\" directive."
+  :type '(choice (const :tag "Use current buffer for completion" nil)
+                 file)
+  :group 'ledger
+  :safe #'string-or-null-p)
+
+(defcustom ledger-payees-file nil
+  "The path to an optional file in which all payees are used or declared.
+This file will then be used as a source for payee name
+completions instead of the current file.
+See ledger's \"payee\" directive."
+  :type '(choice (const :tag "Use current buffer for completion" nil)
+                 file)
+  :group 'ledger
+  :safe #'string-or-null-p)
 
 (defcustom ledger-accounts-exclude-function nil
   "Function to exclude accounts from completion.
 Should be a predicate function that accepts one argument, an
 element of `ledger-accounts-list-in-buffer'."
-  :type 'function
+  :type '(choice (const :tag "Do not exclude any accounts from completion" nil)
+                 function)
   :group 'ledger
   :package-version '(ledger-mode . "2019-08-14"))
 
@@ -91,14 +107,23 @@ If nil, full account names are offered for completion."
         payees-list)
     (save-excursion
       (goto-char (point-min))
-      (while (re-search-forward
-              ledger-payee-any-status-regex nil t)  ;; matches first line
+      (while (re-search-forward ledger-payee-name-or-directive-regex nil t)
         (unless (and (>= origin (match-beginning 0))
                      (< origin (match-end 0)))
-          (setq payees-list (cons (match-string-no-properties 3)
-                                  payees-list)))))  ;; add the payee
+          (push (or (match-string-no-properties 1) (match-string-no-properties 2))
+                payees-list))))
     ;; to the list
     (sort (delete-dups payees-list) #'string-lessp)))
+
+(defun ledger-payees-list ()
+  "Return a list of all known account names as strings.
+Looks in `ledger-payees-file' if set, otherwise the current buffer."
+  (if ledger-payees-file
+      (let ((f ledger-payees-file))
+        (with-temp-buffer
+          (insert-file-contents f)
+          (ledger-payees-in-buffer)))
+    (ledger-payees-in-buffer)))
 
 (defun ledger-accounts-in-buffer ()
   "Return an alist of accounts in the current buffer.
@@ -150,7 +175,7 @@ Then one of the elements this function returns will be
          (lambda (_pos _date _state _payee)
            (let ((end (save-excursion (ledger-navigate-end-of-xact))))
              (forward-line)
-             (while (re-search-forward ledger-account-name-or-directive-regex end t)
+             (while (re-search-forward ledger-account-any-status-regex end t)
                (let ((account (match-string-no-properties 1)))
                  (unless (gethash account seen)
                    (puthash account t seen)
@@ -178,14 +203,11 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
 
 (defun ledger-find-accounts-in-buffer ()
   (let ((account-tree (list t))
-        (account-elements nil)
-        (prefix ""))
+        (account-elements nil))
     (save-excursion
       (goto-char (point-min))
 
-      (dolist (account
-               (cl-remove-if-not (lambda (c) (string-prefix-p prefix c))
-                                 (ledger-accounts-list)))
+      (dolist (account (ledger-accounts-list))
         (let ((root account-tree))
           (setq account-elements
                 (split-string
@@ -297,7 +319,7 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
           (;; Payees
            (eq (save-excursion (ledger-thing-at-point)) 'transaction)
            (setq start (save-excursion (backward-word) (point)))
-           (setq collection #'ledger-payees-in-buffer))
+           (setq collection #'ledger-payees-list))
           (;; Accounts
            (save-excursion
              (back-to-indentation)

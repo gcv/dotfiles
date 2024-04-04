@@ -38,10 +38,8 @@
   (require 'rx)
   (require 'subr-x))
 
-(defvar ledger-buf)
-
 (defgroup ledger-report nil
-  "Customization option for the Report buffer"
+  "Customization option for the Report buffer."
   :group 'ledger)
 
 (defcustom ledger-reports
@@ -153,20 +151,21 @@ Calls `shrink-window-if-larger-than-buffer'."
 
 (defvar ledger-report-buffer-name "*Ledger Report*")
 
-(defvar ledger-report-name nil)
-(defvar ledger-report-cmd nil)
-(defvar ledger-report-name-prompt-history nil)
-(defvar ledger-report-cmd-prompt-history nil)
-(defvar ledger-report-saved nil)
-(defvar ledger-minibuffer-history nil)
-(defvar ledger-report-mode-abbrev-table)
-(defvar ledger-report-current-month nil)
-
-(defvar ledger-report-is-reversed nil)
-(defvar ledger-report-cursor-line-number nil)
+(defvar-local ledger-report-name nil)
+(defvar-local ledger-report-cmd nil)
+(defvar-local ledger-report-saved nil)
+(defvar-local ledger-report-current-month nil)
+(defvar-local ledger-report-is-reversed nil)
+(defvar-local ledger-report-cursor-line-number nil)
+(defvar-local ledger-report-ledger-buf nil)
 (defvar-local ledger-master-file nil
   "The master file for the current buffer.
 See documentation for the function `ledger-master-file'")
+
+(defvar ledger-report-name-prompt-history nil)
+(defvar ledger-report-cmd-prompt-history nil)
+(defvar ledger-minibuffer-history nil)
+(defvar ledger-report-mode-abbrev-table)
 
 (defun ledger-report-reverse-report ()
   "Reverse the order of the report."
@@ -191,20 +190,17 @@ See documentation for the function `ledger-master-file'")
 
 (defvar ledger-report-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [?r] #'ledger-report-redo)
-    (define-key map [(shift ?r)] #'ledger-report-reverse-report)
-    (define-key map [?s] #'ledger-report-save)
-    (define-key map [(shift ?s)] #'ledger-report)
-    (define-key map [?e] #'ledger-report-edit-report)
-    (define-key map [( shift ?e)] #'ledger-report-edit-reports)
-    (define-key map [?q] #'ledger-report-quit)
-    (define-key map [(control ?c) (control ?l) (control ?r)]
-      #'ledger-report-redo)
-    (define-key map [(control ?c) (control ?l) (control ?S)]
-      #'ledger-report-save)
-    (define-key map [(control ?c) (control ?l) (control ?e)]
-      #'ledger-report-edit-report)
-    (define-key map [(control ?c) (control ?o) (control ?r)] #'ledger-report)
+    (define-key map (kbd "r") #'ledger-report-redo)
+    (define-key map (kbd "R") #'ledger-report-reverse-report)
+    (define-key map (kbd "s") #'ledger-report-save)
+    (define-key map (kbd "S") #'ledger-report)
+    (define-key map (kbd "e") #'ledger-report-edit-report)
+    (define-key map (kbd "E") #'ledger-report-edit-reports)
+    (define-key map (kbd "q") #'ledger-report-quit)
+    (define-key map (kbd "C-c C-l C-r") #'ledger-report-redo)
+    (define-key map (kbd "C-c C-l C-S-s") #'ledger-report-save)
+    (define-key map (kbd "C-c C-l C-e") #'ledger-report-edit-report)
+    (define-key map (kbd "C-c C-o C-r") #'ledger-report)
     (define-key map (kbd "M-p") #'ledger-report-previous-month)
     (define-key map (kbd "M-n") #'ledger-report-next-month)
     (define-key map (kbd "$") #'ledger-report-toggle-default-commodity)
@@ -212,7 +208,7 @@ See documentation for the function `ledger-master-file'")
   "Keymap for `ledger-report-mode'.")
 
 (easy-menu-define ledger-report-mode-menu ledger-report-mode-map
-  "Ledger report menu"
+  "Ledger report menu."
   '("Reports"
     ["Select Report" ledger-report]
     ["Save Report" ledger-report-save]
@@ -245,13 +241,13 @@ See documentation for the function `ledger-master-file'")
   "Return a valid meta-data tag name."
   ;; It is intended completion should be available on existing tag
   ;; names, but it remains to be implemented.
-  (ledger-read-string-with-default "Tag Name: " nil))
+  (ledger-read-string-with-default "Tag Name" nil))
 
 (defun ledger-report-tagvalue-format-specifier ()
   "Return a valid meta-data tag name."
   ;; It is intended completion should be available on existing tag
   ;; values, but it remains to be implemented.
-  (ledger-read-string-with-default "Tag Value: " nil))
+  (ledger-read-string-with-default "Tag Value" nil))
 
 (defun ledger-report-read-name ()
   "Read the name of a ledger report to use, with completion.
@@ -291,12 +287,12 @@ used to generate the buffer, navigating the buffer, etc."
       (with-silent-modifications
         (erase-buffer)
         (ledger-report-mode)
-        (set (make-local-variable 'ledger-report-saved) nil)
-        (set (make-local-variable 'ledger-buf) buf)
-        (set (make-local-variable 'ledger-report-name) report-name)
-        (set (make-local-variable 'ledger-report-is-reversed) nil)
-        (set (make-local-variable 'ledger-report-current-month) nil)
-        (set 'ledger-master-file file)
+        (setq ledger-report-saved nil)
+        (setq ledger-report-ledger-buf buf)
+        (setq ledger-report-name report-name)
+        (setq ledger-report-is-reversed nil)
+        (setq ledger-report-current-month nil)
+        (setq ledger-master-file file)
         (ledger-do-report (ledger-report-cmd report-name edit)))
       (ledger-report-maybe-shrink-window)
       (run-hooks 'ledger-report-after-report-hook)
@@ -310,19 +306,15 @@ used to generate the buffer, navigating the buffer, etc."
   "Compute the string to be used as the header in the `ledger-report' buffer."
   (format "Ledger Report: %s -- Buffer: %s -- Command: %s"
           (propertize ledger-report-name 'face 'font-lock-constant-face)
-          (propertize (buffer-name ledger-buf) 'face 'font-lock-string-face)
+          (propertize (buffer-name ledger-report-ledger-buf) 'face 'font-lock-string-face)
           (propertize ledger-report-cmd 'face 'font-lock-comment-face)))
-
-(defun ledger-report-string-empty-p (s)
-  "Check S for the empty string."
-  (string-equal "" s))
 
 (defun ledger-report-name-exists (name)
   "Check to see if the given report NAME exists.
 
-   If name exists, returns the object naming the report,
-   otherwise returns nil."
-  (unless (ledger-report-string-empty-p name)
+If exists, returns the object naming the report, otherwise
+returns nil."
+  (unless (string-empty-p name)
     (car (assoc name ledger-reports))))
 
 (defun ledger-reports-add (name cmd)
@@ -342,10 +334,10 @@ used to generate the buffer, navigating the buffer, etc."
 (defun ledger-report-ledger-file-format-specifier ()
   "Substitute the full path to master or current ledger file.
 
-   The master file name is determined by the variable `ledger-master-file'
-   buffer-local variable which can be set using file variables.
-   If it is set, it is used, otherwise the current buffer file is
-   used."
+The master file name is determined by the function
+`ledger-master-file', which depends on the variable of the same
+name.  If it is non-nil, it is used, otherwise the current
+buffer's file is used."
   (ledger-master-file))
 
 ;; General helper functions
@@ -353,10 +345,11 @@ used to generate the buffer, navigating the buffer, etc."
 (defun ledger-master-file ()
   "Return the master file for a ledger file.
 
-   The master file is either the file for the current ledger buffer or the
-   file specified by the buffer-local variable `ledger-master-file'.  Typically
-   this variable would be set in a file local variable comment block at the
-   end of a ledger file which is included in some other file."
+The master file is either the file for the current ledger buffer
+or the file specified by the buffer-local variable
+`ledger-master-file'.  Typically this variable would be set in a
+file local variable comment block at the end of a ledger file
+which is included in some other file."
   (if ledger-master-file
       (expand-file-name ledger-master-file)
     (buffer-file-name)))
@@ -364,9 +357,9 @@ used to generate the buffer, navigating the buffer, etc."
 (defun ledger-report-payee-format-specifier ()
   "Substitute a payee name.
 
-   The user is prompted to enter a payee and that is substituted.  If
-   point is in an xact, the payee for that xact is used as the
-   default."
+The user is prompted to enter a payee and that is substituted.
+If point is in an xact, the payee for that xact is used as the
+default."
   ;; It is intended completion should be available on existing
   ;; payees, but the list of possible completions needs to be
   ;; developed to allow this.
@@ -377,10 +370,10 @@ used to generate the buffer, navigating the buffer, etc."
 (defun ledger-report-account-format-specifier ()
   "Substitute an account name.
 
-   The user is prompted to enter an account name, which can be any
-   regular expression identifying an account.  If point is on an account
-   posting line for an xact, the full account name on that line is
-   the default."
+The user is prompted to enter an account name, which can be any
+regular expression identifying an account.  If point is on an
+account posting line for an xact, the full account name on that
+line is the default."
   (ledger-read-account-with-prompt "Account"))
 
 (defun ledger-report--current-month ()
@@ -436,11 +429,12 @@ MONTH is of the form (YEAR . INDEX) where INDEX ranges from
                (f (cdr (assoc specifier ledger-report-format-specifiers))))
           (if f
               (let* ((arg (save-match-data
-                            (with-current-buffer ledger-buf
+                            (with-current-buffer ledger-report-ledger-buf
                               (funcall f))))
                      (quoted (if (listp arg)
                                  (mapconcat #'identity arg " ")
-                               (shell-quote-argument arg))))
+                               (save-match-data
+                                 (shell-quote-argument arg)))))
                 (setq expanded-cmd (replace-match quoted t t expanded-cmd))))))
       expanded-cmd)))
 
@@ -472,8 +466,8 @@ Optionally EDIT the command."
       (setq report-cmd (ledger-report-read-command report-cmd))
       (setq ledger-report-saved nil)) ;; this is a new report, or edited report
     (setq report-cmd (ledger-report-expand-format-specifiers report-cmd))
-    (set (make-local-variable 'ledger-report-cmd) report-cmd)
-    (or (ledger-report-string-empty-p report-name)
+    (setq ledger-report-cmd report-cmd)
+    (or (string-empty-p report-name)
         (ledger-report-name-exists report-name)
         (progn
           (ledger-reports-add report-name report-cmd)
@@ -489,7 +483,7 @@ Optionally EDIT the command."
   "Rebuild report with transactions from current month + SHIFT."
   (let* ((current-month (or ledger-report-current-month (ledger-report--current-month)))
          (previous-month (ledger-report--shift-month current-month shift)))
-    (set (make-local-variable 'ledger-report-current-month) previous-month)
+    (setq ledger-report-current-month previous-month)
     (ledger-report-cmd ledger-report-name nil)
     (ledger-report-redo)))
 
@@ -616,7 +610,7 @@ IGNORE-AUTO and NOCONFIRM are for compatibility with
 (defun ledger-report-read-new-name ()
   "Read the name for a new report from the minibuffer."
   (let ((name ""))
-    (while (ledger-report-string-empty-p name)
+    (while (string-empty-p name)
       (setq name (read-from-minibuffer "Report name: " nil nil nil
                                        'ledger-report-name-prompt-history)))
     name))
@@ -625,27 +619,24 @@ IGNORE-AUTO and NOCONFIRM are for compatibility with
   "Save the current report command line as a named report."
   (interactive)
   (ledger-report-goto)
-  (let (existing-name)
-    (when (ledger-report-string-empty-p ledger-report-name)
-      (setq ledger-report-name (ledger-report-read-new-name)))
+  (when (string-empty-p ledger-report-name)
+    (setq ledger-report-name (ledger-report-read-new-name)))
 
-    (if (setq existing-name (ledger-report-name-exists ledger-report-name))
-        (cond ((y-or-n-p (format "Overwrite existing report named '%s'? "
-                                 ledger-report-name))
-               (if (string-equal
-                    ledger-report-cmd
-                    (car (cdr (assq existing-name ledger-reports))))
-                   (message "Nothing to save. Current command is identical to existing saved one")
-                 (progn
-                   (setq ledger-reports
-                         (assq-delete-all existing-name ledger-reports))
-                   (ledger-reports-add ledger-report-name ledger-report-cmd)
-                   (ledger-reports-custom-save))))
-              (t
-               (progn
-                 (setq ledger-report-name (ledger-report-read-new-name))
-                 (ledger-reports-add ledger-report-name ledger-report-cmd)
-                 (ledger-reports-custom-save)))))))
+  (when-let ((existing-name (ledger-report-name-exists ledger-report-name)))
+    (cond ((y-or-n-p (format "Overwrite existing report named '%s'? "
+                             ledger-report-name))
+           (if (string-equal
+                ledger-report-cmd
+                (car (cdr (assq existing-name ledger-reports))))
+               (message "Nothing to save. Current command is identical to existing saved one")
+             (setq ledger-reports
+                   (assq-delete-all existing-name ledger-reports))
+             (ledger-reports-add ledger-report-name ledger-report-cmd)
+             (ledger-reports-custom-save)))
+          (t
+           (setq ledger-report-name (ledger-report-read-new-name))
+           (ledger-reports-add ledger-report-name ledger-report-cmd)
+           (ledger-reports-custom-save)))))
 
 (defun ledger-report-previous-month ()
   "Rebuild report with transactions from the previous month."

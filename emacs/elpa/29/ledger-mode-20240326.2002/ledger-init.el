@@ -28,14 +28,19 @@
 
 (defcustom ledger-init-file-name "~/.ledgerrc"
   "Location of the ledger initialization file.  nil if you don't have one."
-  :type 'file
+  :type '(choice (const :tag "Do not read ledger initialization file" nil)
+                 file)
   :group 'ledger-exec)
 
 (defvar ledger-environment-alist nil
   "Variable to hold details about ledger-mode's environment.
 
 Adding the dotted pair (\"decimal-comma\" . t) will tell ledger
-to treat commas as decimal separator.")
+to treat commas as decimal separator.
+
+This variable is automatically populated by
+`ledger-init-load-init-file', which is called in the body of
+`ledger-mode'.")
 
 (defconst ledger-iso-date-format "%Y-%m-%d"
   "The format for ISO 8601 dates.")
@@ -62,36 +67,30 @@ Returns the current date if DATE is nil or not supplied."
   (with-current-buffer buffer
     (let (environment-alist)
       (goto-char (point-min))
-      (while (re-search-forward ledger-init-string-regex nil t )
+      (while (re-search-forward ledger-init-string-regex nil t)
         (let ((matchb (match-beginning 0)) ;; save the match data, string-match stamp on it
               (matche (match-end 0)))
           (end-of-line)
-          (setq environment-alist
-                (append environment-alist
-                        (list (cons (let ((flag (buffer-substring-no-properties (+ 2 matchb) matche)))
-                                      (if (string-match "[ \t\n\r]+\\'" flag)
-                                          (replace-match "" t t flag)
-                                        flag))
-                                    (let ((value (buffer-substring-no-properties  matche (point) )))
-                                      (if (> (length value) 0)
-                                          value
-                                        t))))))))
-      environment-alist)))
+          (push (cons (let ((flag (buffer-substring-no-properties (+ 2 matchb) matche)))
+                        (if (string-match "[ \t\n\r]+\\'" flag)
+                            (replace-match "" t t flag)
+                          flag))
+                      (let ((value (buffer-substring-no-properties matche (point))))
+                        (if (> (length value) 0)
+                            value
+                          t)))
+                environment-alist)))
+      (nreverse environment-alist))))
 
 (defun ledger-init-load-init-file ()
-  "Load and parse the .ledgerrc file."
+  "Load and parse the .ledgerrc file into `ledger-environment-alist'."
   (interactive)
-  (when ledger-init-file-name
-    (let ((init-base-name (file-name-nondirectory ledger-init-file-name)))
-      (if (get-buffer init-base-name) ;; init file already loaded, parse it and leave it
-          (setq ledger-environment-alist
-                (ledger-init-parse-initialization init-base-name))
-        (when (and (file-exists-p ledger-init-file-name)
-                   (file-readable-p ledger-init-file-name))
-          (let ((init-buffer (find-file-noselect ledger-init-file-name)))
-            (setq ledger-environment-alist
-                  (ledger-init-parse-initialization init-buffer))
-            (kill-buffer init-buffer)))))))
+  (when (and ledger-init-file-name
+             (file-readable-p ledger-init-file-name))
+    (with-temp-buffer
+      (insert-file-contents ledger-init-file-name)
+      (setq ledger-environment-alist
+            (ledger-init-parse-initialization (current-buffer))))))
 
 (provide 'ledger-init)
 

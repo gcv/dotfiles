@@ -137,11 +137,10 @@ the balance into that."
                         (buffer-substring-no-properties (point-min) (1- (point-max)))
                       (concat account " is empty.")))))
     (when balance
-      (message balance))))
+      (display-message-or-buffer balance))))
 
 (defun ledger-display-ledger-stats ()
-  "Display the cleared-or-pending balance.
-And calculate the target-delta of the account being reconciled."
+  "Display some summary statistics about the current ledger file."
   (interactive)
   (let* ((buffer (find-file-noselect (ledger-master-file)))
          (balance (with-temp-buffer
@@ -218,10 +217,7 @@ With a prefix argument, remove the effective date."
   (let ((start (point-min-marker))
         (end (point-max-marker))
         (distance-in-xact (- (point) (ledger-navigate-beginning-of-xact))))
-    (beginning-of-line)
-    (let ((target (buffer-substring (point) (progn
-                                              (end-of-line)
-                                              (point)))))
+    (let ((target (buffer-substring (line-beginning-position) (line-end-position))))
       (goto-char start)
       (untabify start end)
       (ledger-sort-buffer)
