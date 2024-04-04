@@ -255,7 +255,8 @@ the Capf transformers with =defalias= to a function symbol.
 - ~cape-capf-accept-all~, ~cape-wrap-accept-all~: Create a Capf which accepts every input as valid.
 - ~cape-capf-case-fold~, ~cape-wrap-case-fold~: Create a Capf which is case insensitive.
 - ~cape-capf-debug~, ~cape-wrap-debug~: Create a Capf which prints debugging messages.
-- ~cape-capf-inside-comment~, ~cape-wrap-inside-comment~: Ensure that Capf triggers only inside comment.
+- ~cape-capf-inside-code~, ~cape-wrap-inside-code~: Ensure that Capf triggers only inside code.
+- ~cape-capf-inside-comment~, ~cape-wrap-inside-comment~: Ensure that Capf triggers only inside comments.
 - ~cape-capf-inside-faces~, ~cape-wrap-inside-faces~: Ensure that Capf triggers only inside text with certain faces.
 - ~cape-capf-inside-string~, ~cape-wrap-inside-string~: Ensure that Capf triggers only inside a string literal.
 - ~cape-capf-interactive~, ~cape-interactive~: Create a Capf which can be called interactively.
@@ -266,7 +267,7 @@ the Capf transformers with =defalias= to a function symbol.
 - ~cape-capf-prefix-length~, ~cape-wrap-prefix-length~: Enforce a minimal prefix length.
 - ~cape-capf-properties~, ~cape-wrap-properties~: Add completion properties to a Capf.
 - ~cape-capf-purify~, ~cape-wrap-purify~: Purify a broken Capf and ensure that it does not modify the buffer.
-- ~cape-capf-silent~, ~cape-wrap-silent~: Wrap a chatty Capf and silence it.
+- ~cape-capf-silent~, ~cape-wrap-silent~: Silence Capf messages and errors.
 - ~cape-capf-super~, ~cape-wrap-super~: Merge multiple Capfs into a Super-Capf.
 
 In the following we show a few example configurations, which have come up on the

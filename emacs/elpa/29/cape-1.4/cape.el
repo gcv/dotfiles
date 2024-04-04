@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.2
+;; Version: 1.4
 ;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4"))
 ;; Homepage: https://github.com/minad/cape
 ;; Keywords: abbrev, convenience, matching, completion, text
@@ -125,6 +125,7 @@ The buffers are scanned for completion candidates by `cape-line'."
     (markdown-mode ?` ?`)
     (rst-mode "``" "``")
     (log-edit-mode "`" "'")
+    (change-log-mode "`" "'")
     (message-mode "`" "'")
     (rcirc-mode "`" "'"))
   "Wrapper characters for symbols."
@@ -492,28 +493,33 @@ If INTERACTIVE is nil the function acts like a Capf."
 (declare-function org-element-context "org-element")
 (declare-function markdown-code-block-lang "ext:markdown-mode")
 
+(defun cape--inside-block-p (&rest langs)
+  "Return non-nil if inside LANGS code block."
+  (when-let ((face (get-text-property (point) 'face))
+             (lang (or (and (if (listp face)
+                                (memq 'org-block face)
+                              (eq 'org-block face))
+                            (plist-get (cadr (org-element-context)) :language))
+                       (and (if (listp face)
+                                (memq 'markdown-code-face face)
+                              (eq 'markdown-code-face face))
+                            (save-excursion
+                              (markdown-code-block-lang))))))
+    (member lang langs)))
+
 ;;;###autoload
 (defun cape-elisp-block (&optional interactive)
   "Complete Elisp in Org or Markdown code block.
 This Capf is particularly useful for literate Emacs configurations.
 If INTERACTIVE is nil the function acts like a Capf."
   (interactive (list t))
-  (if interactive
-      ;; No code block check. Always complete Elisp when the command was
-      ;; explicitly invoked interactively.
-      (cape-interactive #'elisp-completion-at-point)
-    (when-let ((face (get-text-property (point) 'face))
-               (lang (or (and (if (listp face)
-                                  (memq 'org-block face)
-                                (eq 'org-block face))
-                              (plist-get (cadr (org-element-context)) :language))
-                         (and (if (listp face)
-                                  (memq 'markdown-code-face face)
-                                (eq 'markdown-code-face face))
-                              (save-excursion
-                                (markdown-code-block-lang)))))
-               ((member lang '("elisp" "emacs-lisp"))))
-      (elisp-completion-at-point))))
+  (cond
+   (interactive
+    ;; No code block check. Always complete Elisp when command was
+    ;; explicitly invoked interactively.
+    (cape-interactive #'elisp-completion-at-point))
+   ((cape--inside-block-p "elisp" "emacs-lisp")
+    (elisp-completion-at-point))))
 
 ;;;;; cape-dabbrev
 
@@ -602,10 +608,16 @@ See the user options `cape-dabbrev-min-length' and
   (unless (equal input "")
      (let* ((inhibit-message t)
             (message-log-max nil)
-            (files (ensure-list
-                    (if (functionp cape-dict-file)
-                        (funcall cape-dict-file)
-                      cape-dict-file)))
+            (default-directory
+             (if (and (not (file-remote-p default-directory))
+                      (file-directory-p default-directory))
+                 default-directory
+               user-emacs-directory))
+            (files (mapcar #'expand-file-name
+                           (ensure-list
+                            (if (functionp cape-dict-file)
+                                (funcall cape-dict-file)
+                              cape-dict-file))))
             (words
              (apply #'process-lines-ignore-status
                     "grep"
@@ -1109,11 +1121,19 @@ If the prefix is long enough, enforce auto completion."
 (defun cape-wrap-inside-faces (capf &rest faces)
   "Call CAPF only if inside FACES.
 This function can be used as an advice around an existing Capf."
-  (when-let ((fs (get-text-property (point) 'face))
+  (when-let (((> (point) (point-min)))
+             (fs (get-text-property (1- (point)) 'face))
              ((if (listp fs)
                   (cl-loop for f in fs thereis (memq f faces))
                 (memq fs faces))))
     (funcall capf)))
+
+;;;###autoload
+(defun cape-wrap-inside-code (capf)
+  "Call CAPF only if inside code, not inside a comment or string.
+This function can be used as an advice around an existing Capf."
+  (let ((s (syntax-ppss)))
+    (and (not (nth 3 s)) (not (nth 4 s)) (funcall capf))))
 
 ;;;###autoload
 (defun cape-wrap-inside-comment (capf)
@@ -1161,6 +1181,7 @@ This function can be used as an advice around an existing Capf."
 ;;;###autoload (autoload 'cape-capf-buster "cape")
 ;;;###autoload (autoload 'cape-capf-case-fold "cape")
 ;;;###autoload (autoload 'cape-capf-debug "cape")
+;;;###autoload (autoload 'cape-capf-inside-code "cape")
 ;;;###autoload (autoload 'cape-capf-inside-comment "cape")
 ;;;###autoload (autoload 'cape-capf-inside-faces "cape")
 ;;;###autoload (autoload 'cape-capf-inside-string "cape")
@@ -1176,12 +1197,12 @@ This function can be used as an advice around an existing Capf."
 
 (dolist (wrapper (list #'cape-wrap-accept-all #'cape-wrap-buster
                        #'cape-wrap-case-fold #'cape-wrap-debug
-                       #'cape-wrap-inside-comment #'cape-wrap-inside-faces
-                       #'cape-wrap-inside-string #'cape-wrap-nonexclusive
-                       #'cape-wrap-noninterruptible #'cape-wrap-passthrough
-                       #'cape-wrap-predicate #'cape-wrap-prefix-length
-                       #'cape-wrap-properties #'cape-wrap-purify
-                       #'cape-wrap-silent #'cape-wrap-super))
+                       #'cape-wrap-inside-code #'cape-wrap-inside-comment
+                       #'cape-wrap-inside-faces #'cape-wrap-inside-string
+                       #'cape-wrap-nonexclusive #'cape-wrap-noninterruptible
+                       #'cape-wrap-passthrough #'cape-wrap-predicate
+                       #'cape-wrap-prefix-length #'cape-wrap-properties
+                       #'cape-wrap-purify #'cape-wrap-silent #'cape-wrap-super))
   (let ((name (string-remove-prefix "cape-wrap-" (symbol-name wrapper))))
     (defalias (intern (format "cape-capf-%s" name))
       (lambda (capf &rest args) (lambda () (apply wrapper capf args)))

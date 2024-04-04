@@ -147,6 +147,11 @@ Call CAPF only if inside FACES.
 This function can be used as an advice around an existing Capf.
 
 (fn CAPF &rest FACES)")
+(autoload 'cape-wrap-inside-code "cape" "\
+Call CAPF only if inside code, not inside a comment or string.
+This function can be used as an advice around an existing Capf.
+
+(fn CAPF)")
 (autoload 'cape-wrap-inside-comment "cape" "\
 Call CAPF only if inside comment.
 This function can be used as an advice around an existing Capf.
@@ -173,6 +178,7 @@ This function can be used as an advice around an existing Capf.
  (autoload 'cape-capf-buster "cape")
  (autoload 'cape-capf-case-fold "cape")
  (autoload 'cape-capf-debug "cape")
+ (autoload 'cape-capf-inside-code "cape")
  (autoload 'cape-capf-inside-comment "cape")
  (autoload 'cape-capf-inside-faces "cape")
  (autoload 'cape-capf-inside-string "cape")
