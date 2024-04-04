@@ -611,7 +611,9 @@ This is dependent on `dired-subtree-cycle'."
              (dirs (when (cadr (split-string name root))
                      (split-string (cadr (split-string name root)) "/"))))
         (dolist (dir dirs)
-          (let ((path-regex (concat "^.*[[:space:]]" (regexp-quote dir))))
+          ;; Trailing `$' is essential to avoid matching the modification date
+          ;; fields of the underlying `ls' process
+          (let ((path-regex (concat "^.*[[:space:]]" (regexp-quote dir) "$")))
             (setq path (concat path dir))
             (if (file-regular-p path)
                 ;; Try to use `dired-goto-file' to go to the correct
@@ -880,9 +882,8 @@ the relevant file-directory clicked on by the mouse."
 
 Set font to a variable width (proportional) in the current buffer."
   (interactive)
-  (require 'face-remap)
-  (setq-local buffer-face-mode-face 'dired-sidebar-face)
-  (buffer-face-mode-invoke 'variable-pitch t))
+  (setq-local buffer-face-mode-face dired-sidebar-face)
+  (buffer-face-mode))
 
 (defun dired-sidebar-set-mode-line ()
   "Customize modeline in `dired-sidebar'."

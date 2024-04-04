@@ -1,7 +1,7 @@
-(define-package "dired-sidebar" "20230623.1655" "Tree browser leveraging dired"
+(define-package "dired-sidebar" "20240320.1952" "Tree browser leveraging dired"
   '((emacs "25.1")
     (dired-subtree "0.0.1"))
-  :commit "85ec4fffc2607d38ec2e3b8577320aceb8e652dd" :authors
+  :commit "573658021fd6e6cf032d789de29aca4e5dd258fd" :authors
   '(("James Nguyen" . "james@jojojames.com"))
   :maintainers
   '(("James Nguyen" . "james@jojojames.com"))
