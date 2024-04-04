@@ -16,10 +16,10 @@ File: fountain-mode.info,  Node: Top,  Next: Overview,  Up: (dir)
 Fountain Mode
 *************
 
-Fountain Mode is a screenwriting (and playwrighting) program for
-GNU Emacs version 24.4 or later.  The Fountain markup format is a
-plain-text format designed to be easily readable and editable, portable
-and future-proof, and to look as much like a script as possible.
+Fountain Mode is a screenwriting (and playwriting) program for GNU Emacs
+version 24.4 or later.  The Fountain markup format is a plain-text
+format designed to be easily readable and editable, portable and
+future-proof, and to look as much like a script as possible.
 
    This is the Fountain Mode Manual updated for version 3.7.
 
@@ -929,8 +929,8 @@ request, you can email the maintainer Paul W. Rankin directly at
 
    You can also try the '#emacs' IRC channel on Libera.chat
 (https://libera.chat) where Fountain Mode's maintainer uses the nickname
-'pwr', but please note that most other users on the channel are unlikely
-to be screenwriters.
+'rnkn', but please note that most other users on the channel are
+unlikely to be screenwriters.
 
    Financial reward is not a consideration in maintaining Fountain Mode,
 but if you would like to support development, donations are graciously
@@ -1065,42 +1065,42 @@ Index of User Options
 
 Tag Table:
 Node: Top345
-Node: Overview1644
-Node: Installation3063
-Node: Requirements4063
-Node: Advanced Installation4651
-Node: Script Elements5211
-Node: Metadata6394
-Node: Section Headings7990
-Node: Scene Headings8414
-Node: Action9853
-Node: Characters10566
-Node: Dialogue11629
-Node: Parentheticals11955
-Node: Transitions12306
-Node: Notes12754
-Node: Synopses13713
-Node: Center Text14102
-Node: Comments14363
-Node: Outlining14995
-Node: Navigation16182
-Node: Syntax Highlighting17995
-Node: Element Aligning19105
-Node: Text Emphasis19762
-Node: Do What I Mean20222
-Node: Autocompletion21671
-Node: Scene Heading Completion22298
-Node: Character Name Completion22815
-Node: Scene Numbering24868
-Node: Pagination25585
-Node: Exporting27060
-Node: External Programs29027
-Ref: External Programs-Footnote-130625
-Node: Contact30696
-Node: Indexes31524
-Node: Key Index31683
-Node: Index of Commands33845
-Node: Index of User Options36283
+Node: Overview1642
+Node: Installation3061
+Node: Requirements4061
+Node: Advanced Installation4649
+Node: Script Elements5209
+Node: Metadata6392
+Node: Section Headings7988
+Node: Scene Headings8412
+Node: Action9851
+Node: Characters10564
+Node: Dialogue11627
+Node: Parentheticals11953
+Node: Transitions12304
+Node: Notes12752
+Node: Synopses13711
+Node: Center Text14100
+Node: Comments14361
+Node: Outlining14993
+Node: Navigation16180
+Node: Syntax Highlighting17993
+Node: Element Aligning19103
+Node: Text Emphasis19760
+Node: Do What I Mean20220
+Node: Autocompletion21669
+Node: Scene Heading Completion22296
+Node: Character Name Completion22813
+Node: Scene Numbering24866
+Node: Pagination25583
+Node: Exporting27058
+Node: External Programs29025
+Ref: External Programs-Footnote-130623
+Node: Contact30694
+Node: Indexes31523
+Node: Key Index31682
+Node: Index of Commands33844
+Node: Index of User Options36282
 
 End Tag Table
 
