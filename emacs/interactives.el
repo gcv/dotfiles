@@ -14,7 +14,7 @@
 ;;; note about fontsets:
 ;;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Modifying-Fontsets.html
 ;;; shows how to use a specific font for a different codepoint range
-(defun set-font (font-family height emoji-factor)
+(defun set-font-old (font-family height emoji-factor)
   (interactive "sFont family: \nnHeight: ")
   (set-face-attribute 'default nil :family font-family :height height)
   (if (member font-family (list "Consolas" "Inconsolata" "Anonymous Pro"))
@@ -31,6 +31,14 @@
   (set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
   (set-fontset-font t 'symbol "Segoe UI Emoji" nil 'append)
   (set-fontset-font t 'symbol "Symbola" nil 'append))
+
+(defun set-font (font-family size)
+  (interactive)
+  (set-frame-font
+   (format "%s:pixelsize=%s:weight=medium:slant=normal:width=normal:spacing=100" font-family size)
+   t ;; keep-size: do not resize the frame when changing font size
+   t ;; frames: apply to all frames
+   ))
 
 
 (cl-defun toggle-header-line (&optional (header-on t header-given))
@@ -82,37 +90,43 @@
 
 (defun m150 ()
   (interactive)
-  (set-font "Menlo" 150 13.5)
+  ;;(set-font-old "Menlo" 150 13.5)
+  (set-font "Menlo" 15)
   (toggle-header-line header-line-format))
 
 
 (defun m120 ()
   (interactive)
-  (set-font "Menlo" 120 15.0)
+  ;;(set-font-old "Menlo" 120 15.0)
+  (set-font "Menlo" 12)
   (toggle-header-line header-line-format))
 
 
 (defun m100 ()
   (interactive)
-  (set-font "Menlo" 100 15.5)
+  ;;(set-font-old "Menlo" 100 15.5)
+  (set-font "Menlo" 10)
   (toggle-header-line header-line-format))
 
 
 (defun j100 ()
   (interactive)
-  (set-font "JuliaMono" 100 15.5)
+  ;;(set-font-old "JuliaMono" 100 15.5)
+  (set-font "JuliaMono" 10)
   (toggle-header-line header-line-format))
 
 
 (defun j120 ()
   (interactive)
-  (set-font "JuliaMono" 120 15.0)
+  ;;(set-font-old "JuliaMono" 120 15.0)
+  (set-font "JuliaMono" 12)
   (toggle-header-line header-line-format))
 
 
 (defun j150 ()
   (interactive)
-  (set-font "JuliaMono" 150 15.0)
+  ;;(set-font-old "JuliaMono" 150 15.0)
+  (set-font "JuliaMono" 15)
   (toggle-header-line header-line-format))
 
 
