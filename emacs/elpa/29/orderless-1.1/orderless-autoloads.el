@@ -11,11 +11,6 @@
 
 ;;; Generated autoloads from orderless.el
 
-(autoload 'orderless-filter "orderless" "\
-Split STRING into components and find entries TABLE matching all.
-The predicate PRED is used to constrain the entries in TABLE.
-
-(fn STRING TABLE &optional PRED)")
 (autoload 'orderless-all-completions "orderless" "\
 Split STRING into components and find entries TABLE matching all.
 The predicate PRED is used to constrain the entries in TABLE.  The
@@ -41,6 +36,15 @@ a value in `ivy-re-builders-alist'.
 
 (fn STR)")
 (register-definition-prefixes "orderless" '("orderless-"))
+
+
+;;; Generated autoloads from orderless-kwd.el
+
+(autoload 'orderless-kwd-dispatch "orderless-kwd" "\
+Match COMPONENT against the keywords in `orderless-kwd-alist'.
+
+(fn COMPONENT INDEX TOTAL)")
+(register-definition-prefixes "orderless-kwd" '("orderless-kwd-"))
 
 ;;; End of scraped data
 

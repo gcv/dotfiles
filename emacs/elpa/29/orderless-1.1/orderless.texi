@@ -44,13 +44,13 @@ Customization
 
 Component matching styles
 
+* Style modifiers::
 * Style dispatchers::
 
 Integration with other completion UIs
 
 * Ivy::
 * Helm::
-* Selectrum::
 * Company::
 
 Related packages
@@ -79,8 +79,7 @@ tab completion), with the built-in Icomplete package (which is similar
 to the more well-known Ido Mode), the icomplete-vertical variant from
 Emacs 28 (see the external @uref{https://github.com/oantolin/icomplete-vertical, icomplete-vertical} package to get that
 functionality on earlier versions of Emacs), or with some third party
-minibuffer completion frameworks such as @uref{https://gitlab.com/protesilaos/mct, Mct}, @uref{https://github.com/minad/vertico, Vertico}, or @uref{https://github.com/raxod502/selectrum, Selectrum}
-(in its default configuration).
+minibuffer completion frameworks such as @uref{https://gitlab.com/protesilaos/mct, Mct} or @uref{https://github.com/minad/vertico, Vertico}.
 
 All the completion UIs just mentioned are for minibuffer completion,
 used when Emacs commands prompt the user in the minibuffer for some
@@ -153,9 +152,11 @@ Bug reports are highly welcome and appreciated!
 @section Component matching styles
 
 Each component of a pattern can match in any of several matching
-styles. A matching style is simply a function from strings to strings
-that maps a component to a regexp to match against, so it is easy to
-define new matching styles. The predefined ones are:
+styles. A matching style is a function from strings to regexps or
+predicates, so it is easy to define new matching styles. The value
+returned by a matching style can be either a regexp as a string, an
+s-expression in @samp{rx} syntax or a predicate function. The predefined
+matching styles are:
 
 @table @asis
 @item orderless-regexp
@@ -168,16 +169,9 @@ If the component is not a valid regexp, it is ignored.
 the component is treated as a literal string
 that must occur in the candidate.
 
-This is just @samp{regexp-quote}.
-
-@item @strong{orderless-without-literal}
-the component is a treated as a literal
-string that must @strong{not} occur in the candidate.
-
-Note that nothing is highlighted for this matching style. You
-probably don't want to use this style directly in
-@samp{orderless-matching-styles} but with a style dispatcher instead. There
-is an example in the section on style dispatchers.
+@item orderless-literal-prefix
+the component is treated as a literal
+string that must occur as a prefix of a candidate.
 
 @item orderless-prefixes
 the component is split at word endings and
@@ -199,6 +193,14 @@ the characters of the component should appear in
 that order in the candidate, but not necessarily consecutively.
 
 This maps @samp{abc} to @samp{a.*b.*c}.
+
+@item @strong{orderless-without-literal}
+the component is a treated as a literal
+string that must @strong{not} occur in the candidate.
+
+Nothing is highlighted by this style. This style should not be used
+directly in @samp{orderless-matching-styles} but with a style dispatcher
+instead. See also the more general style modifier @samp{orderless-not}.
 @end table
 
 The variable @samp{orderless-matching-styles} can be set to a list of the
@@ -206,15 +208,68 @@ desired matching styles to use. By default it enables the literal and
 regexp styles.
 
 @menu
+* Style modifiers::
 * Style dispatchers::
 @end menu
+
+@node Style modifiers
+@subsection Style modifiers
+
+Style modifiers are functions which take a predicate function and a
+regular expression as a string and return a new predicate function.
+Style modifiers should not be used directly in
+@samp{orderless-matching-styles} but with a style dispatcher instead.
+
+@table @asis
+@item orderless-annotation
+this style modifier matches the pattern
+against the annotation string of the candidate, instead of against
+the candidate string.
+
+@item orderless-not
+this style modifier inverts the pattern, such that
+candidates pass which do not match the pattern.
+@end table
 
 @node Style dispatchers
 @subsection Style dispatchers
 
 For more fine-grained control on which matching styles to use for
 each component of the input string, you can customize the variable
-@samp{orderless-style-dispatchers}.
+@samp{orderless-style-dispatchers}. You can use this feature to define your
+own ``query syntax''. For example, the default value of
+@samp{orderless-style-dispatchers} lists a single dispatcher called
+@samp{orderless-affix-dispatch} which enables a simple syntax based on
+special characters used as either a prefix or suffix:
+
+@itemize
+@item
+! modifies the component with @samp{orderless-not}. Both @samp{!bad} and
+@samp{bad!} will match strings that do @emph{not} contain the pattern @samp{bad}.
+@item
+& modifies the component with @samp{orderless-annotation}. The pattern
+will match against the candidate's annotation (cheesy mnemonic:
+andnotation!).
+@item
+, uses @samp{orderless-initialism}.
+@item
+= uses @samp{orderless-literal}.
+@item
+^ uses @samp{orderless-literal-prefix}.
+@item
+~ uses @samp{orderless-flex}.
+@item
+% makes the string match ignoring diacritics and similar
+inflections on characters (it uses the function
+@samp{char-fold-to-regexp} to do this).
+@end itemize
+
+You can add, remove or change this mapping between affix characters
+and matching styles by customizing the user option
+@samp{orderless-affix-dispatch-alist}. Most users will probably find this
+type of customization sufficient for their query syntax needs, but
+for those desiring further control the rest of this section explains
+how to implement your own style dispatchers.
 
 Style dispatchers are functions which take a component, its index in
 the list of components (starting from 0), and the total number of
@@ -224,10 +279,11 @@ that specific component, overriding the default matching styles.
 A style dispatcher can either decline to handle the input string or
 component, or it can return which matching styles to use. It can
 also, if desired, additionally return a new string to use in place of
-the given one. Consult the documentation of @samp{orderless-dispatch} for
+the given one. Consult the documentation of @samp{orderless--dispatch} for
 full details.
 
-As an example, say you wanted the following setup:
+As an example of writing your own dispatchers, say you wanted the
+following setup:
 
 @itemize
 @item
@@ -241,7 +297,8 @@ later components ending in @samp{~} should match (the characters
 other than the final @samp{~}) in the flex style, and
 @item
 later components starting with @samp{!} should indicate the rest of the
-component is a literal string not contained in the candidate.
+component is a literal string not contained in the candidate (this
+is part of the functionality of the default configuration).
 @end itemize
 
 You can achieve this with the following configuration:
@@ -254,17 +311,17 @@ You can achieve this with the following configuration:
 (defun first-initialism (pattern index _total)
   (if (= index 0) 'orderless-initialism))
 
-(defun without-if-bang (pattern _index _total)
+(defun not-if-bang (pattern _index _total)
   (cond
    ((equal "!" pattern)
-    '(orderless-literal . ""))
+    #'ignore)
    ((string-prefix-p "!" pattern)
-    `(orderless-without-literal . ,(substring pattern 1)))))
+    `(orderless-not . ,(substring pattern 1)))))
 
 (setq orderless-matching-styles '(orderless-regexp)
       orderless-style-dispatchers '(first-initialism
                                     flex-if-twiddle
-                                    without-if-bang))
+                                    not-if-bang))
 @end lisp
 
 @node Component separator regexp
@@ -342,12 +399,11 @@ completion is the one that ends up being used, of course.
 @node Pattern compiler
 @section Pattern compiler
 
-The default mechanism for turning an input string into a list of regexps to
-match against, configured using @samp{orderless-matching-styles}, is probably
-flexible enough for the vast majority of users. The patterns are compiled by the
-@samp{orderless-pattern-compiler}. Under special circumstances it may be useful to
-implement a custom pattern compiler by advising the
-@samp{orderless-pattern-compiler}.
+The default mechanism for turning an input string into a predicate and a list of
+regexps to match against, configured using @samp{orderless-matching-styles}, is
+probably flexible enough for the vast majority of users. The patterns are
+compiled by @samp{orderless-compile}. Under special circumstances it may be useful to
+implement a custom pattern compiler by advising @samp{orderless-compile}.
 
 @node Interactively changing the configuration
 @section Interactively changing the configuration
@@ -396,7 +452,6 @@ integration.
 @menu
 * Ivy::
 * Helm::
-* Selectrum::
 * Company::
 @end menu
 
@@ -414,30 +469,12 @@ To use @samp{orderless} from Ivy add this to your Ivy configuration:
 @section Helm
 
 To use @samp{orderless} from Helm, simply configure @samp{orderless} as you would
-for completion UIs that use Emacs completion stlyes and add this to
+for completion UIs that use Emacs completion styles and add this to
 your Helm configuration:
 
 @lisp
 (setq helm-completion-style 'emacs)
 @end lisp
-
-@node Selectrum
-@section Selectrum
-
-Recent versions of Selectrum default to using whatever completion
-styles you have configured. If you stick with that default
-configuration you can use @samp{orderless} just by adding it to
-@samp{completion-styles}. Alternatively, you can use this configuration:
-
-@lisp
-(setq selectrum-refine-candidates-function #'orderless-filter)
-(setq selectrum-highlight-candidates-function #'orderless-highlight-matches)
-@end lisp
-
-If you use the above configuration, only the visible candidates are
-highlighted, which is a litte more efficient.
-
-Note that Selectrum has been deprecated in favor of Vertico.
 
 @node Company
 @section Company
@@ -455,13 +492,11 @@ Pressing SPC takes you out of completion, so with the default
 separator you are limited to one component, which is no fun. To fix
 this add a separator that is allowed to occur in identifiers, for
 example, for Emacs Lisp code you could use an ampersand:
-@end enumerate
 
 @lisp
 (setq orderless-component-separator "[ &]")
 @end lisp
 
-@enumerate
 @item
 The matching portions of candidates aren't highlighted. That's
 because @samp{company-capf} is hard-coded to look for the
@@ -471,7 +506,6 @@ because @samp{company-capf} is hard-coded to look for the
 So, while you can't get different faces for different components,
 you can at least get the matches highlighted in the sole available
 face with this configuration:
-@end enumerate
 
 @lisp
 (defun just-one-face (fn &rest args)
@@ -482,9 +516,10 @@ face with this configuration:
 @end lisp
 
 (Aren't dynamically scoped variables and the advice system nifty?)
+@end enumerate
 
-If you would like to use different @samp{completion-styles} with @samp{company-capf} instead, you 
-can add this to your config: 
+If you would like to use different @samp{completion-styles} with @samp{company-capf} instead, you
+can add this to your configuration:
 
 @lisp
 ;; We follow a suggestion by company maintainer u/hvis:
@@ -520,10 +555,10 @@ their own completion UI (and many other cool features!).
 
 It is worth pointing out that Helm does provide its multi pattern
 matching as a completion style which could be used with default tab
-completion, Icomplete, Selectrum or other UIs supporting completion
-styles! (Ivy does not provide a completion style to my knowledge.) So,
-for example, Icomplete users could, instead of using this package,
-install Helm and configure Icomplete to use it as follows:
+completion, Icomplete or other UIs supporting completion styles! (Ivy
+does not provide a completion style to my knowledge.) So, for example,
+Icomplete users could, instead of using this package, install Helm and
+configure Icomplete to use it as follows:
 
 @lisp
 (require 'helm)
@@ -537,14 +572,15 @@ install Helm and configure Icomplete to use it as follows:
 @node Prescient
 @section Prescient
 
-The @uref{https://github.com/raxod502/prescient.el, prescient.el} library also provides matching of space-separated components in
-any order. It offers a completion-style that can be used with Emacs' default
-completion UI, Mct, Vertico or with Icomplete. Furthermore Selectrum and Ivy are
-supported. The components can be matched literally, as regexps, as initialisms
-or in the flex style (called ``fuzzy'' in prescient). Prescient does not offer the
-same flexibility as Orderless with its style dispatchers. However in addition to
-matching, Prescient supports sorting of candidates, while Orderless leaves that
-up to the candidate source and the completion UI@.
+The @uref{https://github.com/radian-software/prescient.el, prescient.el} library also provides matching of space-separated
+components in any order. It offers a completion-style that can be used
+with Emacs' default completion UI, Mct, Vertico or with Icomplete.
+Furthermore Ivy is supported. The components can be matched literally,
+as regexps, as initialisms or in the flex style (called ``fuzzy'' in
+prescient). Prescient does not offer the same flexibility as Orderless
+with its style dispatchers. However in addition to matching, Prescient
+supports sorting of candidates, while Orderless leaves that up to the
+candidate source and the completion UI@.
 
 @node Restricting to current matches in Icicles Ido and Ivy
 @section Restricting to current matches in Icicles, Ido and Ivy
