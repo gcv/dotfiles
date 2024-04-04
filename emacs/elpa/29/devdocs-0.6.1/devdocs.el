@@ -1,12 +1,12 @@
 ;;; devdocs.el --- Emacs viewer for DevDocs -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021  Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024  Free Software Foundation, Inc.
 
 ;; Author: Augusto Stoffel <arstoffel@gmail.com>
 ;; Keywords: help
 ;; URL: https://github.com/astoff/devdocs.el
 ;; Package-Requires: ((emacs "27.1"))
-;; Version: 0.5
+;; Version: 0.6.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -38,7 +38,8 @@
 (require 'shr)
 (require 'url-expand)
 (eval-when-compile
-  (require 'let-alist))
+  (require 'let-alist)
+  (require 'subr-x))
 
 (unless (libxml-available-p)
   (display-warning 'devdocs "This package requires Emacs to be compiled with libxml2"))
@@ -81,12 +82,16 @@ name and a count."
   :type '(choice (const :tag "Count in parentheses, italicized"
                         #("%s (%s)" 3 7 (face italic)))
                  (const :tag "Invisible cookie"
-                        #("%s (%s)" 2 7 (invisible t)))
+                        #("%s#%s" 2 5 (invisible t)))
                  string))
 
 (defcustom devdocs-fontify-code-blocks t
   "Whether to fontify code snippets inside pre tags.
 Fontification is done using the `org-src' library, which see."
+  :type 'boolean)
+
+(defcustom devdocs-window-select nil
+  "Whether to select the DevDocs window for viewing."
   :type 'boolean)
 
 (defface devdocs-code-block '((t nil))
@@ -125,6 +130,12 @@ its return value; take the necessary precautions."
 
 ;;; Documentation management
 
+(defalias 'devdocs--json-parse-buffer
+  (if (json-available-p)
+      (lambda () (json-parse-buffer :object-type 'alist))
+    (require 'json)
+    #'json-read))
+
 (defun devdocs--doc-metadata (slug)
   "Return the metadata of an installed document named SLUG."
   (let ((file (expand-file-name (concat slug "/metadata") devdocs-data-dir)))
@@ -152,7 +163,7 @@ If necessary, download data from `devdocs-site-url'."
    (with-temp-buffer
      (url-insert-file-contents
       (format "%s/docs.json" devdocs-site-url))
-     (json-read))))
+     (devdocs--json-parse-buffer))))
 
 (defun devdocs--doc-title (doc)
   "Title of document DOC.
@@ -195,9 +206,14 @@ DOC is a document metadata alist."
 ;;;###autoload
 (defun devdocs-install (doc)
   "Download and install DevDocs documentation.
-DOC is a document metadata alist."
+DOC is a document slug or metadata alist.  If the document is
+already installed, reinstall it."
   (interactive (list (devdocs--read-document "Install documentation: " nil t)))
   (make-directory devdocs-data-dir t)
+  (unless (listp doc)
+    (setq doc (or (seq-find (lambda (it) (string= doc (alist-get 'slug it)))
+                            (devdocs--available-docs))
+                  (user-error "No such document: %s" doc))))
   (let* ((slug (alist-get 'slug doc))
          (mtime (alist-get 'mtime doc))
          (temp (make-temp-file "devdocs-" t))
@@ -205,16 +221,15 @@ DOC is a document metadata alist."
     (with-temp-buffer
       (url-insert-file-contents (format "%s/%s/db.json?%s" devdocs-cdn-url slug mtime))
       (dolist-with-progress-reporter
-          (entry (let ((json-key-type 'string))
-                   (json-read)))
+          (entry (devdocs--json-parse-buffer))
           "Installing documentation..."
         (with-temp-file (expand-file-name
                          (url-hexify-string (format "%s.html" (car entry))) temp)
-          (push (car entry) pages)
+          (push (symbol-name (car entry)) pages)
           (insert (cdr entry)))))
     (with-temp-buffer
       (url-insert-file-contents (format "%s/%s/index.json?%s" devdocs-cdn-url slug mtime))
-      (let ((index (json-read)))
+      (let ((index (devdocs--json-parse-buffer)))
         (push `(pages . ,(vconcat (nreverse pages))) index)
         (with-temp-file (expand-file-name "index" temp)
           (prin1 index (current-buffer)))))
@@ -282,18 +297,29 @@ DOC is a document metadata alist."
 (define-derived-mode devdocs-mode special-mode "DevDocs"
   "Major mode for viewing DevDocs documents."
   :interactive nil
+  (if (boundp 'browse-url-handlers) ;; Emacs ≥ 28
+      (setq-local browse-url-handlers
+                  `((devdocs--internal-url-p . devdocs--internal-url-handler)
+                    ,@browse-url-handlers))
+    (setq-local browse-url-browser-function
+                `(("\\`[^:]+\\'" . devdocs--internal-url-handler)
+                  ,@(if (functionp browse-url-browser-function)
+                        `(("" . ,browse-url-browser-function))
+                      browse-url-browser-function))))
   (setq-local
-   browse-url-browser-function 'devdocs--browse-url
    buffer-undo-list t
    header-line-format devdocs-header-line
-   revert-buffer-function 'devdocs--revert-buffer
+   revert-buffer-function #'devdocs--revert-buffer
    truncate-lines t))
 
 (defun devdocs-goto-target ()
   "Go to the original position in a DevDocs buffer."
   (interactive)
   (goto-char (point-min))
-  (when-let ((pred (if (fboundp 'shr--set-target-ids) #'member t)) ;; shr change in Emacs 29
+  (when-let ((frag (let-alist (car devdocs--stack)
+                     (or .fragment (devdocs--path-fragment .path))))
+             (shr-target-id (url-unhex-string frag))
+             (pred (if (fboundp 'shr--set-target-ids) #'member t)) ;; shr change in Emacs 29
              (match (text-property-search-forward 'shr-target-id shr-target-id pred)))
     (goto-char (prop-match-beginning match))))
 
@@ -324,7 +350,7 @@ with the order of appearance in the text."
            (current (seq-position entries nil pred)))
       (unless current (user-error "No current entry"))
       (devdocs--render
-       (or (ignore-error 'args-out-of-range (elt entries (+ count current)))
+       (or (ignore-error args-out-of-range (elt entries (+ count current)))
            (user-error "No %s entry" (if (< count 0) "previous" "next")))))))
 
 (defun devdocs-previous-entry (count)
@@ -419,7 +445,8 @@ Interactively, read a page name with completion."
   (pcase (string-to-char path)
     ('?/ path)
     ('?# (concat (devdocs--path-file base) path))
-    (_ (seq-rest ;; drop leading slash
+    (_ (string-remove-prefix
+        "/"
         (url-expander-remove-relative-links ;; undocumented function!
          (concat (file-name-directory base) path))))))
 
@@ -461,7 +488,6 @@ fragment part of ENTRY.path."
                                             (url-hexify-string (devdocs--path-file .path)))
                                     devdocs-data-dir)))
         (erase-buffer)
-        (setq-local shr-target-id (or .fragment (devdocs--path-fragment .path)))
         ;; TODO: cl-progv here for shr settings?
         (shr-insert-document
          (with-temp-buffer
@@ -470,7 +496,9 @@ fragment part of ENTRY.path."
       (set-buffer-modified-p nil)
       (setq-local devdocs-current-docs (list .doc.slug))
       (push entry devdocs--stack)
-      (setq-local list-buffers-directory (format-mode-line devdocs-header-line nil nil (current-buffer)))
+      (setq-local list-buffers-directory (format-mode-line devdocs-header-line
+                                                           nil nil
+                                                           (current-buffer)))
       (devdocs-goto-target)
       (current-buffer))))
 
@@ -478,25 +506,24 @@ fragment part of ENTRY.path."
   "Refresh DevDocs buffer."
   (devdocs--render (pop devdocs--stack)))
 
-(defun devdocs--browse-url (url &rest args)
-  "A suitable `browse-url-browser-function' for `devdocs-mode'.
-URL can be an internal link in a DevDocs document.
-ARGS is passed as is to `browse-url'."
-  (if (string-match-p ":" url)
-      (let ((browse-url-browser-function (default-value 'browse-url-browser-function)))
-        (apply #'browse-url url args))
-    (let-alist (car devdocs--stack)
-      (let* ((dest (devdocs--path-expand url .path))
-             (file (devdocs--path-file dest))
-             (frag (devdocs--path-fragment dest))
-             (entry (seq-find (lambda (it)
-                                (let-alist it
-                                  (or (string= .path dest)
-                                      (string= .path file))))
-                              (devdocs--index .doc 'entries))))
-        (unless entry (error "Can't find `%s'" dest))
-        (when frag (push `(fragment . ,frag) entry))
-        (devdocs--render entry)))))
+(defun devdocs--internal-url-p (url)
+  "Return t if URL seems to be an internal DevDocs link."
+  (not (string-match-p "\\`[a-z]+:" url)))
+
+(defun devdocs--internal-url-handler (url &rest _)
+  "Open URL of an internal link in a DevDocs document."
+  (let-alist (car devdocs--stack)
+    (let* ((dest (devdocs--path-expand url .path))
+           (file (devdocs--path-file dest))
+           (frag (devdocs--path-fragment dest))
+           (entry (seq-find (lambda (it)
+                              (let-alist it
+                                (or (string= .path dest)
+                                    (string= .path file))))
+                            (devdocs--index .doc 'entries))))
+      (unless entry (error "Can't find `%s'" dest))
+      (when frag (push `(fragment . ,frag) entry))
+      (devdocs--render entry))))
 
 ;;; Lookup commands
 
@@ -558,7 +585,8 @@ INITIAL-INPUT is passed to `completing-read'"
          (cand (completing-read prompt coll nil t initial-input
                                 'devdocs-history
                                 (thing-at-point 'symbol))))
-    (devdocs--get-data (car (member cand cands)))))
+    (devdocs--get-data (or (car (member cand cands))
+                           (user-error "Not an entry!")))))
 
 ;;;###autoload
 (defun devdocs-lookup (&optional ask-docs initial-input)
@@ -574,10 +602,14 @@ If INITIAL-INPUT is not nil, insert it into the minibuffer."
   (let* ((entry (devdocs--read-entry "Go to documentation: "
                                      (devdocs--relevant-docs ask-docs)
                                      initial-input))
-         (buffer (devdocs--render entry)))
-    (with-selected-window (display-buffer buffer)
-      (devdocs-goto-target)
-      (recenter 0))))
+         (buffer (devdocs--render entry))
+         (window (display-buffer buffer)))
+    (when window
+      (with-selected-window window
+        (devdocs-goto-target)
+        (recenter 0))
+      (when devdocs-window-select
+        (select-window window)))))
 
 ;;;###autoload
 (defun devdocs-peruse (doc)

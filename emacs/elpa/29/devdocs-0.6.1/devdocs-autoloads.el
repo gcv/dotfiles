@@ -18,7 +18,8 @@ DOC is a document metadata alist.
 (fn DOC)" t)
 (autoload 'devdocs-install "devdocs" "\
 Download and install DevDocs documentation.
-DOC is a document metadata alist.
+DOC is a document slug or metadata alist.  If the document is
+already installed, reinstall it.
 
 (fn DOC)" t)
 (autoload 'devdocs-update-all "devdocs" "\
