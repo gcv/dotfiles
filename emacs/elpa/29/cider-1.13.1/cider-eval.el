@@ -567,7 +567,10 @@ It delegates the actual error content to the eval or op handler."
 ;; old and the new format, by utilizing a combination of two different regular
 ;; expressions.
 
-(defconst cider-clojure-1.10--location `("at ("
+(defconst cider-clojure-1.10--location `((or "at ("
+                                             (sequence "at "
+                                                       (minimal-match (one-or-more anything)) ;; the fully-qualified name of the function that triggered the error
+                                                       " ("))
                                          (group-n 2 (minimal-match (zero-or-more anything)))
                                          ":"
                                          (group-n 3 (one-or-more digit))
@@ -612,6 +615,8 @@ It delegates the actual error content to the eval or op handler."
                                   (optional ":" (group-n 4 (one-or-more digit)))
                                   " - "))
 
+;; Please keep this in sync with `cider-clojure-compilation-error-regexp',
+;; which is a subset of these regexes.
 (defconst cider-clojure-compilation-regexp
   (eval
    `(rx bol (or ,cider-clojure-1.9-error
@@ -625,6 +630,49 @@ It delegates the actual error content to the eval or op handler."
 lol in this context, compiling:(/foo/core.clj:10:1)\"
 \"Syntax error compiling at (src/workspace_service.clj:227:3).\"
 \"Unexpected error (ClassCastException) macroexpanding defmulti at (src/haystack/parser.cljc:21:1).\"")
+
+(defconst cider-clojure-compilation-error-regexp
+  (eval
+   `(rx bol (or ,cider-clojure-1.9-error
+                ,cider-clojure-1.10-error
+                ,cider-clojure-unexpected-error))
+   t)
+  "Like `cider-clojure-compilation-regexp',
+but excluding warnings such as reflection warnings.
+
+A few example values that will match:
+\"CompilerException java.lang.RuntimeException: Unable to resolve symbol: \\
+lol in this context, compiling:(/foo/core.clj:10:1)\"
+\"Syntax error compiling at (src/workspace_service.clj:227:3).\"
+\"Unexpected error (ClassCastException) macroexpanding defmulti at (src/haystack/parser.cljc:21:1).\"")
+
+(defconst cider--clojure-execution-error-regexp
+  (append `(sequence
+            "Execution error "
+            (or (sequence "("
+                          (minimal-match (one-or-more anything))
+                          ")")
+                (minimal-match (zero-or-more anything))))
+          cider-clojure-1.10--location))
+
+(defconst cider--clojure-spec-execution-error-regexp
+  (append `(sequence
+            "Execution error - invalid arguments to "
+            (minimal-match (one-or-more anything))
+            " ")
+          cider-clojure-1.10--location))
+
+(defconst cider-clojure-runtime-error-regexp
+  (eval
+   `(rx bol (or ,cider--clojure-execution-error-regexp
+                ,cider--clojure-spec-execution-error-regexp))
+   t)
+  "Matches runtime errors, as oppsed to compile-time/macroexpansion-time errors.
+
+A few example values that will match:
+
+\"Execution error (ArithmeticException) at foo/foo (src/haystack/parser.cljc:4).\"
+\"Execution error - invalid arguments to foo/bar at (src/haystack/parser.cljc:4).\"")
 
 (defconst cider-module-info-regexp
   (rx " ("
@@ -764,7 +812,8 @@ and ON-SUCCESS-CALLBACK an optional callback.
 The handler simply inserts the result value in BUFFER."
   (let ((eval-buffer (current-buffer))
         (res "")
-        (failed nil))
+        (failed nil)
+        (error-phase-requested nil)) ;; avoid requesting the phase more than once - can happen if there are errors during the phase nrepl sync request.
     (nrepl-make-response-handler (or buffer eval-buffer)
                                  ;; value handler:
                                  (lambda (_buffer value)
@@ -781,7 +830,10 @@ The handler simply inserts the result value in BUFFER."
                                    (when (and source-buffer
                                               (listp bounds)) ;; if it's a list, it represents bounds, otherwise it's a string (code) and we can't display the overlay
                                      (with-current-buffer source-buffer
-                                       (let* ((phase (cider--error-phase-of-last-exception buffer))
+                                       (let* ((phase (if error-phase-requested
+                                                         nil
+                                                       (setq error-phase-requested t)
+                                                       (cider--error-phase-of-last-exception buffer)))
                                               (end (or (car-safe (cdr-safe bounds)) bounds))
                                               (end (when end
                                                      (copy-marker end))))
@@ -845,12 +897,15 @@ REPL buffer.  This is controlled via
     (when-let ((conn (with-current-buffer buffer
                        (cider-current-repl))))
       (when (cider-nrepl-op-supported-p "analyze-last-stacktrace" conn)
-        (when-let* ((result (nrepl-send-sync-request (thread-last (map-merge 'list
-                                                                             '(("op" "analyze-last-stacktrace"))
-                                                                             (cider--nrepl-print-request-map fill-column))
-                                                                  (seq-mapcat #'identity))
-                                                     conn)))
-          (nrepl-dict-get result "phase"))))))
+        (let ((nrepl-sync-request-timeout 4)) ;; ensure that this feature cannot possibly create an overly laggy UX
+          (when-let* ((result (nrepl-send-sync-request (thread-last (map-merge 'list
+                                                                               '(("op" "analyze-last-stacktrace"))
+                                                                               (cider--nrepl-print-request-map fill-column))
+                                                                    (seq-mapcat #'identity))
+                                                       conn
+                                                       'abort-on-input ;; favor responsiveness over this feature, in case something went wrong.
+                                                       )))
+            (nrepl-dict-get result "phase")))))))
 
 (defcustom cider-inline-error-message-function #'cider--shorten-error-message
   "A function that will shorten a given error message,
@@ -875,13 +930,16 @@ and the suffix matched by `cider-module-info-regexp'."
 (defun cider--maybe-display-error-as-overlay (phase err end)
   "Possibly display ERR as an overlay honoring END,
 depending on the PHASE."
-  (when (or
-         ;; if we won't show *cider-error*, because of configuration, the overlay is adequate because it compensates for the lack of info in a compact manner:
-         (not cider-show-error-buffer)
-         (not (cider-connection-has-capability-p 'jvm-compilation-errors))
-         ;; if we won't show *cider-error*, because of an ignored phase, the overlay is adequate:
-         (and cider-show-error-buffer
-              (member phase (cider-clojure-compilation-error-phases))))
+  (when (and (or
+              ;; if we won't show *cider-error*, because of configuration, the overlay is adequate because it compensates for the lack of info in a compact manner:
+              (not cider-show-error-buffer)
+              (not (cider-connection-has-capability-p 'jvm-compilation-errors))
+              ;; if we won't show *cider-error*, because of an ignored phase, the overlay is adequate:
+              (and cider-show-error-buffer
+                   (member phase (cider-clojure-compilation-error-phases))))
+             ;; Only show overlays for things that do look like an exception (#3587):
+             (or (string-match-p cider-clojure-runtime-error-regexp err)
+                 (string-match-p cider-clojure-compilation-error-regexp err)))
     ;; Display errors as temporary overlays
     (let ((cider-result-use-clojure-font-lock nil)
           (trimmed-err (funcall cider-inline-error-message-function err)))
@@ -905,17 +963,24 @@ when `cider-auto-inspect-after-eval' is non-nil."
          (beg (when beg (copy-marker beg)))
          (end (when end (copy-marker end)))
          (fringed nil)
-         (res ""))
+         (res "")
+         (error-phase-requested nil)) ;; avoid requesting the phase more than once - can happen if there are errors during the phase nrepl sync request.
     (nrepl-make-response-handler (or buffer eval-buffer)
+                                 ;; value handler:
                                  (lambda (_buffer value)
                                    (setq res (concat res value))
                                    (cider--display-interactive-eval-result res 'value end))
+                                 ;; stdout handler:
                                  (lambda (_buffer out)
                                    (cider-emit-interactive-eval-output out))
+                                 ;; stderr handler:
                                  (lambda (buffer err)
                                    (cider-emit-interactive-eval-err-output err)
 
-                                   (let ((phase (cider--error-phase-of-last-exception buffer)))
+                                   (let ((phase (if error-phase-requested
+                                                    nil
+                                                  (setq error-phase-requested t)
+                                                  (cider--error-phase-of-last-exception buffer))))
 
                                      (cider--maybe-display-error-as-overlay phase err end)
 
@@ -927,6 +992,7 @@ when `cider-auto-inspect-after-eval' is non-nil."
                                                                       ;; the error is 'right there' in the current line
                                                                       ;; and needs no jumping:
                                                                       phase)))
+                                 ;; done handler:
                                  (lambda (buffer)
                                    (if beg
                                        (unless fringed
@@ -946,7 +1012,8 @@ when `cider-auto-inspect-after-eval' is non-nil."
   "Make a load file handler for BUFFER.
 Optional argument DONE-HANDLER lambda will be run once load is complete."
   (let ((eval-buffer (current-buffer))
-        (res ""))
+        (res "")
+        (error-phase-requested nil)) ;; avoid requesting the phase more than once - can happen if there are errors during the phase nrepl sync request.
     (nrepl-make-response-handler (or buffer eval-buffer)
                                  (lambda (buffer value)
                                    (cider--display-interactive-eval-result value 'value)
@@ -963,7 +1030,10 @@ Optional argument DONE-HANDLER lambda will be run once load is complete."
                                    ;; 1.- Jump to the error line:
                                    (cider-handle-compilation-errors err eval-buffer)
                                    (with-current-buffer eval-buffer
-                                     (let* ((phase (cider--error-phase-of-last-exception buffer))
+                                     (let* ((phase (if error-phase-requested
+                                                       nil
+                                                     (setq error-phase-requested t)
+                                                     (cider--error-phase-of-last-exception buffer)))
                                             ;; 2.- Calculate the overlay position, which is the point (per the previous jump),
                                             ;;     and then end-of-line (for ensuring the overlay will be rendered properly):
                                             (end (save-excursion
@@ -1072,7 +1142,8 @@ and SOURCE-BUFFER the original buffer
 This is used by pretty-printing commands."
   ;; NOTE: cider-eval-register behavior is not implemented here for performance reasons.
   ;; See https://github.com/clojure-emacs/cider/pull/3162
-  (let ((chosen-buffer (or buffer (current-buffer))))
+  (let ((chosen-buffer (or buffer (current-buffer)))
+        (error-phase-requested nil)) ;; avoid requesting the phase more than once - can happen if there are errors during the phase nrepl sync request.
     (nrepl-make-response-handler
      chosen-buffer
      ;; value handler:
@@ -1087,7 +1158,10 @@ This is used by pretty-printing commands."
        (when (and source-buffer
                   (listp bounds)) ;; if it's a list, it represents bounds, otherwise it's a string (code) and we can't display the overlay
          (with-current-buffer source-buffer
-           (let* ((phase (cider--error-phase-of-last-exception buffer))
+           (let* ((phase (if error-phase-requested
+                             nil
+                           (setq error-phase-requested t)
+                           (cider--error-phase-of-last-exception buffer)))
                   (end (or (car-safe (cdr-safe bounds)) bounds))
                   (end (when end
                          (copy-marker end))))
