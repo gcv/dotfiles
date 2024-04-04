@@ -4,8 +4,8 @@
 
 ;; Author: Alvaro Ramirez https://xenodium.com
 ;; URL: https://github.com/xenodium/chatgpt-shell
-;; Version: 1.0.3
-;; Package-Requires: ((emacs "27.1") (shell-maker "0.49.1"))
+;; Version: 1.0.8
+;; Package-Requires: ((emacs "27.1") (shell-maker "0.50.1"))
 
 ;; This package is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -36,9 +36,11 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'dired)
 (require 'esh-mode)
 (require 'eshell)
 (require 'find-func)
+(require 'flymake)
 (require 'ielm)
 (require 'shell-maker)
 
@@ -154,7 +156,7 @@ For example:
 
 (defvaralias 'chatgpt-shell-logging 'shell-maker-logging)
 
-(defvaralias 'chatgpt-shell-history-path 'shell-maker-history-path)
+(defvaralias 'chatgpt-shell-root-path 'shell-maker-root-path)
 
 (defalias 'chatgpt-shell-save-session-transcript #'shell-maker-save-session-transcript)
 
@@ -257,35 +259,22 @@ for details."
 
 (defun chatgpt-shell--append-system-info (text)
   "Append system info to TEXT."
-  (cond ((eq system-type 'darwin)
-         (concat text
-                 "\n# System info\n"
-                 "\n## OS details\n"
-                 (string-trim (shell-command-to-string "sw_vers"))
-                 "\n## Editor\n"
-                 (emacs-version)))
-        ((or (eq system-type 'gnu/linux)
-             (eq system-type 'gnu/kfreebsd))
-         (concat text
-                 "\n# System info\n"
-                 "\n## OS details\n"
-                 (string-trim (shell-command-to-string "uname -a"))
-                 "\n## Editor\n"
-                 (emacs-version)))
-        ((eq system-type 'windows-nt)
-         (concat text
-                 "\n# System info\n"
-                 "\n## OS details\n"
-                 (string-trim (shell-command-to-string "ver"))
-                 "\n## Editor\n"
-                 (emacs-version)))
-        (t
-         (concat text
-                 "\n# System info\n"
-                 "\n## OS details\n"
-                 (format "%s" system-type)
-                 "\n## Editor\n"
-                 (emacs-version)))))
+  (cl-labels ((chatgpt-shell--get-system-info-command
+               ()
+               (cond ((eq system-type 'darwin) "sw_vers")
+                     ((or (eq system-type 'gnu/linux)
+                          (eq system-type 'gnu/kfreebsd)) "uname -a")
+                     ((eq system-type 'windows-nt) "ver")
+                     (t (format "%s" system-type)))))
+    (let ((system-info (string-trim
+                        (shell-command-to-string
+                         (chatgpt-shell--get-system-info-command)))))
+      (concat text
+              "\n# System info\n"
+              "\n## OS details\n"
+              system-info
+              "\n## Editor\n"
+              (emacs-version)))))
 
 (defcustom chatgpt-shell-system-prompts
   `(("tl;dr" . "Be as succint but informative as possible and respond in tl;dr form to my queries")
@@ -549,6 +538,8 @@ or
 
 With NEW-SESSION, start a new session."
   (interactive "P")
+  (when (boundp 'chatgpt-shell-history-path)
+    (error "chatgpt-shell-history-path no longer exists. Please migrate to chatgpt-shell-root-path and then (makunbound 'chatgpt-shell-history-path)"))
   (chatgpt-shell-start nil new-session))
 
 (defun chatgpt-shell-start (&optional no-focus new-session)
@@ -609,10 +600,10 @@ Set NEW-SESSION to start a separate new session."
 (defun chatgpt-shell--shrink-system-prompt (prompt)
   "Shrink PROMPT."
   (if (consp prompt)
-      (car prompt)
-    (if (> (length (string-trim prompt)) 6)
+      (chatgpt-shell--shrink-system-prompt (car prompt))
+    (if (> (length (string-trim prompt)) 15)
         (format "%s..."
-                (substring (string-trim prompt) 0 15))
+                (substring (string-trim prompt) 0 12))
       (string-trim prompt))))
 
 (defun chatgpt-shell--shell-info ()
@@ -1120,7 +1111,7 @@ If region is active, append to prompt."
 With PREFIX, clear existing history (wipe asociated shell history).
 
 Whenever `chatgpt-shell-prompt-compose' is invoked, appends any active
-region to compose buffer.
+region (or flymake issue at point) to compose buffer.
 
 The compose buffer always shows the latest interaction, but it's
 backed by the shell history. You can always switch to the shell buffer
@@ -1165,11 +1156,13 @@ enables additional key bindings.
          (buffer-name (concat (chatgpt-shell--minibuffer-prompt)
                               "compose"))
          (buffer (get-buffer-create buffer-name))
-         (region (when-let ((region-active (region-active-p))
-                            (region (buffer-substring (region-beginning)
-                                                      (region-end))))
-                   (deactivate-mark)
-                   region))
+         (region (or (when-let ((region-active (region-active-p))
+                                (region (buffer-substring (region-beginning)
+                                                          (region-end))))
+                       (deactivate-mark)
+                       region)
+                     (when-let ((diagnostic (flymake-diagnostics (point))))
+                       (mapconcat #'flymake-diagnostic-text diagnostic "\n"))))
          (instructions (concat "Type "
                                (propertize "C-c C-c" 'face 'help-key-binding)
                                " to send prompt. "
@@ -1416,11 +1409,8 @@ enables additional key bindings.
   "Send text with HEADER from region using ChatGPT."
   (unless (region-active-p)
     (user-error "No region active"))
-  (chatgpt-shell-send-to-buffer
-   (concat header
-           "\n\n"
-           (buffer-substring (region-beginning) (region-end)))
-   nil))
+  (let ((question (concat header "\n\n" (buffer-substring (region-beginning) (region-end)))))
+    (chatgpt-shell-send-to-buffer question nil)))
 
 (defun chatgpt-shell-refactor-code ()
   "Refactor code from region using ChatGPT."
@@ -1470,11 +1460,12 @@ With prefix REVIEW prompt before sending to ChatGPT."
   (interactive "P")
   (unless (region-active-p)
     (user-error "No region active"))
-  (let ((chatgpt-shell-prompt-query-response-style 'shell))
+  (let ((chatgpt-shell-prompt-query-response-style 'shell)
+        (region-text (buffer-substring (region-beginning) (region-end))))
     (chatgpt-shell-send-to-buffer
      (if review
-         (concat "\n\n" (buffer-substring (region-beginning) (region-end)))
-       (buffer-substring (region-beginning) (region-end))) review)))
+         (concat "\n\n" region-text)
+       region-text) review)))
 
 (defun chatgpt-shell-send-and-review-region ()
   "Send region to ChatGPT, review before submitting."
@@ -1741,7 +1732,9 @@ Set SAVE-EXCURSION to prevent point from moving."
     request-data))
 
 (defun chatgpt-shell-post-messages (messages response-extractor &optional version callback error-callback temperature other-params)
-  "Make a single ChatGPT request with MESSAGES.
+  "Make a single ChatGPT request with MESSAGES and RESPONSE-EXTRACTOR.
+
+`chatgpt-shell--extract-chatgpt-response' typically used as extractor.
 
 Optionally pass model VERSION, CALLBACK, ERROR-CALLBACK, TEMPERATURE
 and OTHER-PARAMS.
@@ -1840,7 +1833,15 @@ If in a `dired' buffer, use selection (single image only for now)."
   "Make a vision request using PROMPT and URL-PATH.
 
 PROMPT can be somethign like: \"Describe the image in detail\".
-URL-PATH can be either a local file path or an http:// URL."
+URL-PATH can be either a local file path or an http:// URL.
+
+Optionally pass ON-SUCCESS and ON-FAILURE, like:
+
+\(lambda (response)
+  (message response))
+
+\(lambda (error)
+  (message error))"
   (let* ((url (if (string-prefix-p "http" url-path)
                   url-path
                 (unless (file-exists-p url-path)
@@ -1875,8 +1876,10 @@ URL-PATH can be either a local file path or an http:// URL."
 
 (defun chatgpt-shell-post-prompt (prompt &optional response-extractor version callback error-callback temperature other-params)
   "Make a single ChatGPT request with PROMPT.
-Optioally pass model VERSION, CALLBACK, ERROR-CALLBACK, TEMPERATURE,
-and OTHER-PARAMS.
+Optionally pass model RESPONSE-EXTRACTOR, VERSION, CALLBACK,
+ERROR-CALLBACK, TEMPERATURE, and OTHER-PARAMS.
+
+`chatgpt-shell--extract-chatgpt-response' typically used as extractor.
 
 If CALLBACK or ERROR-CALLBACK are missing, execute synchronously.
 
@@ -1891,7 +1894,7 @@ For example:
  (lambda (response more-pending)
    (message \"%s\" response))
  (lambda (error)
-   (message \"%s\" error)))"
+   (message \"%s\" error)))."
   (chatgpt-shell-post-messages `(((role . "user")
                                   (content . ,prompt)))
                                (or response-extractor #'chatgpt-shell--extract-chatgpt-response)
@@ -1920,16 +1923,26 @@ For example:
    `chatgpt-shell--api-url-base' + `chatgpt-shell--api-url-path'"
   (concat chatgpt-shell-api-url-base chatgpt-shell-api-url-path))
 
+(defun chatgpt-shell--json-request-file ()
+  "JSON request written to this file prior to sending."
+  (concat
+   (file-name-as-directory
+    (shell-maker-files-path shell-maker--config))
+   "request.json"))
+
 (defun chatgpt-shell--make-curl-request-command-list (request-data)
   "Build ChatGPT curl command list using REQUEST-DATA."
-  (append (list "curl" (chatgpt-shell--api-url))
-          chatgpt-shell-additional-curl-options
-          (list "--fail-with-body"
-                "--no-progress-meter"
-                "-m" (number-to-string chatgpt-shell-request-timeout)
-                "-H" "Content-Type: application/json; charset=utf-8"
-                "-H" (funcall chatgpt-shell-auth-header)
-                "-d" (shell-maker--json-encode request-data))))
+  (let ((json-path (chatgpt-shell--json-request-file)))
+    (with-temp-file json-path
+      (insert (shell-maker--json-encode request-data)))
+    (append (list "curl" (chatgpt-shell--api-url))
+            chatgpt-shell-additional-curl-options
+            (list "--fail-with-body"
+                  "--no-progress-meter"
+                  "-m" (number-to-string chatgpt-shell-request-timeout)
+                  "-H" "Content-Type: application/json; charset=utf-8"
+                  "-H" (funcall chatgpt-shell-auth-header)
+                  "-d" (format "@%s" json-path)))))
 
 (defun chatgpt-shell--make-payload (history)
   "Create the request payload from HISTORY."
@@ -2027,7 +2040,9 @@ Very much EXPERIMENTAL."
   (interactive)
   (unless (eq major-mode 'chatgpt-shell-mode)
     (user-error "Not in a shell"))
-  (let* ((path (read-file-name "Restore from: " nil nil t))
+  (let* ((dir (when shell-maker-transcript-default-path
+                (file-name-as-directory shell-maker-transcript-default-path)))
+         (path (read-file-name "Restore from: " dir nil t))
          (prompt-regexp (shell-maker-prompt-regexp shell-maker--config))
          (history (with-temp-buffer
                     (insert-file-contents path)
