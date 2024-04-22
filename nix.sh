@@ -39,6 +39,7 @@ packages=(
     broot              # file browser / file manager 2
     btop               # top replacement 3 (C++)
     cacert             # SSL certificates
+    chafa              # terminal image viewer
     cmake
     coreutils
     croc               # peer-to-peer file transfer, directory capable (cf magic-wormhole)
