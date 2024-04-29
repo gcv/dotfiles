@@ -165,6 +165,17 @@
   )
 
 
+(use-package colorful-mode
+  :pin gnu
+
+  :custom
+  (colorful-use-prefix nil) ;; cute if t
+
+  :config
+  (global-colorful-mode 1)
+  )
+
+
 (use-package crux
   :pin melpa
 
@@ -1081,12 +1092,13 @@
   )
 
 
+;; Maybe deprecated in favor of colorful-mode?
 (use-package rainbow-mode
   :pin gnu
   :diminish ""
 
   :config
-  (rainbow-mode 1)
+  ;;(rainbow-mode 1)
   (setq rainbow-ansi-colors t)
   (setq rainbow-html-colors t)
   (setq rainbow-latex-colors t)
