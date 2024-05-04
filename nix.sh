@@ -89,6 +89,7 @@ packages=(
     pass               # password manager
     pastel             # color utility
     pop                # mail sender
+    pinentry-tty       # GPG passphrase entry program for terminal
     pv                 # pipe viewer
     rclone
     restic             # backup utility
