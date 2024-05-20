@@ -2161,6 +2161,8 @@
 	<true/>
 	<key>UseLionStyleFullscreen</key>
 	<true/>
+	<key>UseMetal</key>
+	<true/>
 	<key>VisualIndicatorForEsc</key>
 	<false/>
 	<key>WebKitDefaultFontSize</key>
