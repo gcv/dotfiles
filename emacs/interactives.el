@@ -219,6 +219,35 @@
 (global-set-key (kbd "C-o") 'flip-windows)
 
 
+(defun pivot-window-split ()
+  "Convert a vertical window split to a horizontal split and vice versa.
+Written by ChatGPT 4o."
+  (interactive)
+  (when (not (= (count-windows) 2))
+    (error "Cannot pivot with current window configuration"))
+  (let* ((this-win-buffer (window-buffer))
+         (next-win-buffer (window-buffer (next-window)))
+         (this-win-edges (window-edges (selected-window)))
+         (next-win-edges (window-edges (next-window)))
+         (this-win-2nd (not (and (<= (car this-win-edges)
+                                     (car next-win-edges))
+                                 (<= (cadr this-win-edges)
+                                     (cadr next-win-edges)))))
+         (splitter
+          (if (= (car this-win-edges)
+                 (car (window-edges (next-window))))
+              'split-window-horizontally
+            'split-window-vertically)))
+    (delete-other-windows)
+    (let ((first-win (selected-window)))
+      (funcall splitter)
+      (if this-win-2nd (other-window 1))
+      (set-window-buffer (selected-window) this-win-buffer)
+      (set-window-buffer (next-window) next-win-buffer)
+      (select-window first-win)
+      (if this-win-2nd (other-window 1)))))
+
+
 (defun split-window-3-right ()
   (interactive)
   (split-window-right)
