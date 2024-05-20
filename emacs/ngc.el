@@ -37,6 +37,10 @@
   )
 
 
+(use-package consult-denote
+  :pin gnu)
+
+
 (use-package consult-notes
   :pin melpa
   :after (vertico)
