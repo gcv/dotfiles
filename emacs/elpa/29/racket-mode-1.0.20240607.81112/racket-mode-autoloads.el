@@ -306,7 +306,7 @@ Unless it already has a value, set the buffer-local value of
 the variable `racket-repl-buffer-name' according to the user's
 customization.")
 (autoload 'racket-repl-buffer-name-shared "racket-repl-buffer-name" "\
-All `racket-mode' edit buffers share one `racket-repl-mode' buffer per back end.
+Share one `racket-repl-mode' buffer per back end.
 
 A value for the variable `racket-repl-buffer-name-function'." t)
 (autoload 'racket-repl-buffer-name-unique "racket-repl-buffer-name" "\
@@ -314,7 +314,7 @@ Each `racket-mode' edit buffer gets its own `racket-repl-mode' buffer.
 
 A value for the variable `racket-repl-buffer-name-function'." t)
 (autoload 'racket-repl-buffer-name-project "racket-repl-buffer-name" "\
-All `racket-mode' buffers in a project share a `racket-repl-mode' buffer.
+Share a `racket-repl-mode' buffer per back end and per project.
 
 A value for the variable `racket-repl-buffer-name-function'.
 

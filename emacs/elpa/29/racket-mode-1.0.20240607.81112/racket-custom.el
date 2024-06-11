@@ -11,15 +11,12 @@
 ;;; All `defcustom's and `defface's go here.
 ;;; This makes it easier to provide a consistent UI.
 
-;; NOTE: `:prefix` is disabled as of Emacs 24.3, so I'm using explicit
-;; `:tag`s. But also note that options are sorted (by default; user
-;; can turn that off) based on the identifier name not the `:tag`. As
-;; a result, I'm defining `:tag`s AS IF `:prefix "racket-"` did work.
-;; In other words defcustom of racket-foo-bar has a :tag "Foo Bar".
-
 (require 'rx)
 (require 'sh-script) ;for sh-heredoc face
 (require 'comint) ;for comint-simple-send in racket-shell-or-terminal
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; racket group
 
 (defgroup racket nil
   "Modes for the Racket language."
@@ -40,10 +37,8 @@
 Note that a back end configuration can override this with a
 non-nil `racket-program` property list value. See
 `racket-add-back-end'."
-  :tag "Racket Program"
   :type '(file :must-match t)
-  :risky t
-  :group 'racket)
+  :risky t)
 
 (make-obsolete-variable 'racket-command-port nil "2020-04-25")
 
@@ -56,10 +51,8 @@ Note: This is mostly obsolete, fortunately, because it applies
 only to commands that must block the Emacs UI until they get a
 response. Instead most Racket Mode commands these days receive
 their response asychronously."
-  :tag "Command Timeout"
   :type 'integer
-  :risky t
-  :group 'racket)
+  :risky t)
 
 (make-obsolete-variable 'racket-path-from-emacs-to-racket-function nil "2020-08-26")
 
@@ -73,10 +66,8 @@ their response asychronously."
 
 Defaults to `racket-browse-url-using-temporary-file' on macOS and
 `browse-url' on other platforms."
-  :tag "Browse URL Function"
   :type 'function
-  :risky t
-  :group 'racket)
+  :risky t)
 
 (defcustom racket-documentation-search-location
   "https://docs.racket-lang.org/search/index.html?q=%s"
@@ -91,11 +82,9 @@ and `racket-repl-documentation' should look for the search page.
   \"%s\" at the point at which to insert the user's search text
   after applying `url-hexify-string'. Apart from \"%s\", the
   string should be a properly encoded URL."
-  :tag "Documentation Search Location"
   :type '(choice (string :tag "URL")
                  (const :tag "Local" local))
-  :safe (lambda (val) (or (stringp val) (eq val 'local)))
-  :group 'racket)
+  :safe (lambda (val) (or (stringp val) (eq val 'local))))
 
 (defcustom racket-shell-or-terminal-function 'racket-shell
   "How `racket-racket' and `racket-raco-test' run commands.
@@ -106,51 +95,43 @@ send a newline or enter.
 
 Predefined choices include `racket-shell', `racket-term',
 `racket-ansi-term', and `racket-vterm'."
-  :tag "Shell or Terminal"
   :type 'function
   :options '(racket-shell
              racket-term
              racket-ansi-term
              racket-vterm)
-  :risky t
-  :group 'racket)
+  :risky t)
 
-;;; Xp Mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; racket-xp group
 
 (defgroup racket-xp nil
   "`racket-xp-mode' options"
-  :tag "Xp Mode"
   :group 'racket)
 
 (defcustom racket-xp-after-change-refresh-delay 1
   "Seconds to wait before refreshing `racket-xp-mode' annotations.
 
 Set to nil to disable automatic refresh and manually use `racket-xp-annotate'."
-  :tag "Racket XP Mode After Change Refresh Delay"
   :type '(choice (integer :tag "Seconds")
                  (const :tag "Off" nil))
-  :safe #'integerp
-  :group 'racket-xp)
+  :safe #'integerp)
 
 (defcustom racket-xp-mode-lighter
   '(:eval (racket--xp-mode-lighter))
   "Mode line lighter for `racket-xp-mode'.
 
 Set to nil to disable the mode line completely."
-  :tag "Racket Xp Mode Lighter"
   :type 'sexp
-  :risky t
-  :group 'racket-xp)
+  :risky t)
 
 (defcustom racket-xp-highlight-unused-regexp "^[^_]"
   "Only give `racket-xp-unused-face' to unused bindings that match this regexp.
 
 The default is to highlight identifiers that do not start with
 an underline, which is a common convention."
-  :tag "Racket Xp Mode Do Not Highlight Unused Regexp"
   :type 'regexp
-  :safe #'stringp
-  :group 'racket-xp)
+  :safe #'stringp)
 
 (defcustom racket-xp-add-binding-faces nil
   "Have `racket-xp-mode' fontify binding identifier sites.
@@ -168,16 +149,14 @@ A \\='font-lock-face property is added for bindings from:
 
 This has a visible effect only when there is /not/ also a
 \\='face property applied by the major mode's fontification."
-  :tag "Racket Xp Mode Binding Font Lock Face Modes"
   :type '(repeat symbol)
-  :safe #'listp
-  :group 'racket-xp)
+  :safe #'listp)
 
-;;; Hash Lang
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; racket-hash-lang group
 
 (defgroup racket-hash-lang nil
   "`racket-hash-lang-mode' options"
-  :tag "Hash Lang"
   :group 'racket)
 
 (defcustom racket-hash-lang-token-face-alist
@@ -212,12 +191,11 @@ sometimes blended with other faces. Parenthesis tokens use the
 face `parenthesis' if defined, as by the paren-face package.
 String tokens use `font-lock-string-face'. Text tokens, e.g.
 Scribble text, use the face `default'"
-  :tag "Hash Lang Token Face Association List"
   :type '(alist :key-type symbol :value-type face)
-  :safe #'listp
-  :group 'racket-hash-lang)
+  :safe #'listp)
 
-;;; REPL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; racket-repl group
 
 (defgroup racket-repl nil
   "`racket-repl-mode' options"
@@ -243,13 +221,11 @@ Any such function takes no arguments, should look at the variable
 `racket-repl-mode' buffer name. As a result, `racket-run'
 commands will use a buffer of that name, creating it if
 necessary."
-  :tag "REPL Buffer Name Function"
   :type '(choice (const :tag "One REPL buffer for all edit buffers" nil)
                  (const :tag "One REPL buffer for all project edit buffers" racket-repl-buffer-name-project)
                  (const :tag "One REPL buffer for each edit buffer" racket-repl-buffer-name-unique)
                  (function :tag "Other function"))
-  :risky t
-  :group 'racket-repl)
+  :risky t)
 
 (defcustom racket-submodules-to-run '((test) (main))
   "Extra submodules to run.
@@ -269,10 +245,8 @@ It is NOT used by commands that run one specific module, such as:
  - `racket-run-module-at-point' \\[racket-run-module-at-point]
  - `racket-test' \\[racket-test]
  - `racket-profile'"
-  :tag "Submodules to Run"
   :type '(repeat (repeat :tag "Module path" symbol))
-  :safe #'listp
-  :group 'racket-repl)
+  :safe #'listp)
 
 (defcustom racket-memory-limit 2048
   "Terminate the Racket process if memory use exceeds this value in MB.
@@ -284,10 +258,8 @@ Caveat: This uses Racket's `custodian-limit-memory`, which does
 not enforce the limit exactly. Instead, the program will be
 terminated upon the first garbage collection where memory exceeds
 the limit (maybe by a significant amount)."
-  :tag "Memory Limit"
   :type 'integer
-  :safe #'integerp
-  :group 'racket-repl)
+  :safe #'integerp)
 
 (defcustom racket-error-context 'medium
   "The amount of context for error messages.
@@ -311,36 +283,28 @@ for a specific `racket-run' or `racket-run-module-at-point' by
 using \\[universal-argument]. This lets you normally run with a
 lower, faster setting, and re-run when desired to get a
 more-helpful error message."
-  :tag "Error Context"
   :type '(radio (const :tag "Low" low)
                 (const :tag "Medium (better context but slower)" medium)
                 (const :tag "High (best context but slowest)" high))
-  :risky t
-  :group 'racket-repl)
+  :risky t)
 
 (make-obsolete-variable 'racket-retry-as-skeleton nil "2020-02-26")
 
 (defcustom racket-repl-history-directory
   (locate-user-emacs-file (file-name-as-directory "racket-mode"))
   "Directory for `racket-repl-mode' history files."
-  :tag "REPL History Directory"
-  :type 'file
-  :group 'racket-repl)
+  :type 'file)
 
 (defcustom racket-history-filter-regexp "\\`\\s *\\'"
   "Input matching this regexp are NOT saved on the history list.
 Default value is a regexp to ignore input that is all whitespace."
-  :tag "History Filter Regexp"
   :type 'regexp
-  :safe #'stringp
-  :group 'racket-repl)
+  :safe #'stringp)
 
 (defcustom racket-images-inline t
   "Whether to display inline images in the REPL."
-  :tag "Images Inline"
   :type 'boolean
-  :safe #'booleanp
-  :group 'racket-repl)
+  :safe #'booleanp)
 
 (defcustom racket-imagemagick-props nil
   "Use ImageMagick with these properties for REPL images.
@@ -352,7 +316,6 @@ ImageMagick support -- then `create-image' is called with
 
 For example, to scale images whose width is larger than 500
 pixels, supply (:max-width 500)."
-  :tag "ImageMagick Props"
   :type '(plist :key-type symbol
                 :value-type (choice number string))
   :options '((:max-width integer)
@@ -361,31 +324,33 @@ pixels, supply (:max-width 500)."
              (:width integer)
              (:height integer)
              (:rotation float))
-  :risky t
-  :group 'racket-repl)
+  :risky t)
 
 (defcustom racket-images-keep-last 100
   "How many images to keep in the image cache."
-  :tag "Images Keep Last"
   :type 'integer
-  :safe #'integerp
-  :group 'racket-repl)
+  :safe #'integerp)
 
 (defcustom racket-images-system-viewer (if (eq system-type 'darwin)
                                            "open"
                                          "display")
   "The image viewer program to use for `racket-view-image'."
-  :tag "Images System Viewer"
   :type 'string
-  :risky t
-  :group 'racket-repl)
+  :risky t)
+
+(defcustom racket-images-do-not-use-svg nil
+  "Do not use SVG to render images?
+
+Note: This value is used only when starting a back end -- /not/
+for each run. If you change this, for it to take effect you must
+restart by using `racket-start-back-end'."
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom racket-pretty-print t
   "Use pretty-print instead of print in REPL?"
-  :tag "Pretty Print"
   :type 'boolean
-  :safe #'booleanp
-  :group 'racket-repl)
+  :safe #'booleanp)
 
 (defcustom racket-use-repl-submit-predicate nil
   "Should `racket-repl-submit' use a drracket:submit-predicate?
@@ -393,10 +358,8 @@ pixels, supply (:max-width 500)."
 A language can provide such a predicate, for example when the
 language syntax is not s-expressions. When t `racket-repl-submit'
 will use this to decide whether to submit your input, yet."
-  :tag "Use REPL Submit Predicate"
   :type 'boolean
-  :safe #'booleanp
-  :group 'racket-repl)
+  :safe #'booleanp)
 
 (defcustom racket-before-run-hook nil
   "Normal hook done before various Racket Mode run commands.
@@ -408,10 +371,8 @@ When hook functions are called, `current-buffer' is that of the
 edit buffer when the run command was issued. If a hook function
 instead needs the `racket-repl-mode' buffer, it should get that
 from the variable `racket-repl-buffer-name'."
-  :tag "Before Run Hook"
   :type 'hook
-  :risky t
-  :group 'racket-repl)
+  :risky t)
 
 (defcustom racket-after-run-hook nil
   "Normal hook done after various Racket Mode run commands.
@@ -423,24 +384,20 @@ When hook functions are called, `current-buffer' is that of the
 buffer when the run command was issued. If a hook function
 instead needs the `racket-repl-mode' buffer, it should get that
 from the variable `racket-repl-buffer-name'."
-  :tag "After Run Hook"
   :type 'hook
-  :risky t
-  :group 'racket-repl)
+  :risky t)
 
 (defcustom racket-repl-command-file
   (expand-file-name "repl.rkt"
                     (locate-user-emacs-file (file-name-as-directory "racket-mode")))
   "Name of the file used by `racket-repl'."
-  :tag "REPL Command File"
-  :type 'file
-  :group 'racket-repl)
+  :type 'file)
 
-;;; Other
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; racket-other group
 
 (defgroup racket-other nil
   "Other Options"
-  :tag "Other"
   :group 'racket)
 
 (defcustom racket-indent-curly-as-sequence t
@@ -448,10 +405,8 @@ from the variable `racket-repl-buffer-name'."
 
 This is indirectly disabled if `racket-indent-sequence-depth' is 0.
 This is safe to set as a file-local variable."
-  :tag "Indent Curly As Sequence"
   :type 'boolean
-  :safe #'booleanp
-  :group 'racket-other)
+  :safe #'booleanp)
 
 (defcustom racket-indent-sequence-depth 0
   "To what depth should `racket-indent-line' search.
@@ -463,20 +418,16 @@ normal indent behavior of DrRacket or Emacs `lisp-mode' derived
 modes like `scheme-mode'. Setting this to a high value can make
 indentation noticeably slower. This is safe to set as a
 file-local variable."
-  :tag "Indent Sequence Depth"
   :type 'integer
-  :safe #'integerp
-  :group 'racket-other)
+  :safe #'integerp)
 
 (defcustom racket-pretty-lambda nil
   "Display lambda keywords using λ. This is DEPRECATED.
 
 Instead use `prettify-symbols-mode' in newer verisons of Emacs,
 or, use `racket-insert-lambda' to insert actual λ characters."
-  :tag "Pretty Lambda"
   :type 'boolean
-  :safe #'booleanp
-  :group 'racket-other)
+  :safe #'booleanp)
 
 (defcustom racket-smart-open-bracket-enable nil
   "This variable is obsolete and has no effect.
@@ -484,10 +435,8 @@ or, use `racket-insert-lambda' to insert actual λ characters."
 Instead of using this variable, you may bind the `[` key to the
 `racket-smart-open-bracket' command in the `racket-mode-map'
 and/or `racket-repl-mode-map' keymaps."
-  :tag "Smart Open Bracket Enable"
   :type 'boolean
-  :safe #'booleanp
-  :group 'racket-other)
+  :safe #'booleanp)
 
 (defcustom racket-module-forms
   (rx (syntax ?\()
@@ -497,10 +446,8 @@ and/or `racket-repl-mode-map' keymaps."
 
 Affects what `beginning-of-defun' will move to. This is safe to
 set as a file-local variable."
-  :tag "Top Level Forms"
   :type 'string
-  :safe #'stringp
-  :group 'racket-other)
+  :safe #'stringp)
 
 (defcustom racket-logger-config
   '((cm-accomplice           . warning)
@@ -526,7 +473,6 @@ For more information see:
 The default value sets some known \"noisy\" topics to be one
 level quieter. That way you can set the \"*\" topic to a level
 like \"debug\" and not get overhwelmed by these noisy topics."
-  :tag "Logger Configuration"
   :type '(alist :key-type symbol :value-type symbol)
   :safe (lambda (xs)
           (cl-every (lambda (x)
@@ -537,8 +483,7 @@ like \"debug\" and not get overhwelmed by these noisy topics."
   :set (lambda (var val)
          (set-default var val)
          (when (fboundp 'racket--logger-activate-config)
-           (racket--logger-activate-config)))
-  :group 'racket-other)
+           (racket--logger-activate-config))))
 
 (defcustom racket-show-functions
   (list 'racket-show-pseudo-tooltip)
@@ -569,18 +514,15 @@ the span, i.e. below and/or right of POS. Examples:
 A function that shows STR in a fixed location may of course
 ignore POS. Examples: `racket-show-echo-area' and
 `racket-show-header-line'"
-  :tag "Racket Show Functions"
   :type '(repeat function)
   :options '(racket-show-pseudo-tooltip
              racket-show-echo-area
              racket-show-header-line
              racket-show-pos-tip)
-  :risky t
-  :group 'racket-other)
+  :risky t)
 
 (defcustom racket-expand-hiding 'standard
   "The macro hiding policy for commands like `racket-expand-file'."
-  :tag "Racket Expand Hiding"
   :type '(choice
           (const :tag "Disable" disable)
           (const :tag "Standard" standard)
@@ -614,105 +556,89 @@ ignore POS. Examples: `racket-show-echo-area' and
                                (list :tag "phase>=?"
                                      (const phase>=?)
                                      (natnum :tag "natural number"))
-                               (sexp :tag "sexp"))))))
-  :group 'racket-other)
+                               (sexp :tag "sexp")))))))
 
-;;; Faces
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; racket-faces group
 
 (defgroup racket-faces nil
   "Racket Faces"
-  :tag "Racket Faces"
   :group 'faces
   :group 'racket)
 
-(defmacro defface-racket (id facespec docstr tag)
+(defmacro defface-racket (id facespec docstr)
   `(progn
      (defconst ,id ',id)
      (defface ,id
        ,facespec
-       ,docstr
-       :tag ,tag
-       :group 'racket-faces)))
+       ,docstr)))
 
 (defface-racket racket-xp-def-face
   '((t (:inherit match :underline (:style line))))
-  "Face `racket-xp-mode' uses when point is on a definition."
-  "Definition Face")
+  "Face `racket-xp-mode' uses when point is on a definition.")
 
 (defface-racket racket-xp-use-face
   '((t (:inherit match)))
-  "Face `racket-xp-mode' uses when point is on a use."
-  "Use Face")
+  "Face `racket-xp-mode' uses when point is on a use.")
 
 (defface-racket racket-xp-binding-lang-face
   '((t (:inherit font-lock-doc-face)))
   "Face `racket-xp-mode' gives to the module language name.
 
-See the variable `racket-xp-binding-font-lock-face-modes'."
-  "Binding Lang Face")
+See the variable `racket-xp-binding-font-lock-face-modes'.")
 
 (defface-racket racket-xp-binding-lang-use-face
   '((t (:inherit font-lock-keyword-face)))
   "Face `racket-xp-mode' gives uses of bindings imported from the module language.
 
-See the variable `racket-xp-binding-font-lock-face-modes'."
-  "Binding Lang Use Face")
+See the variable `racket-xp-binding-font-lock-face-modes'.")
 
 (defface-racket racket-xp-binding-import-face
   '((t (:inherit default)))
   "Face `racket-xp-mode' gives to imported module names.
 
-See the variable `racket-xp-binding-font-lock-face-modes'."
-  "Binding Import Face")
+See the variable `racket-xp-binding-font-lock-face-modes'.")
 
 (defface-racket racket-xp-binding-import-use-face
   '((t (:inherit font-lock-keyword-face)))
   "Face `racket-xp-mode' gives uses of imported bindings.
 
-See the variable `racket-xp-binding-font-lock-face-modes'."
-  "Binding Import Use Face")
+See the variable `racket-xp-binding-font-lock-face-modes'.")
 
 (defface-racket racket-xp-binding-local-face
   '((t (:inherit font-lock-variable-name-face)))
   "Face `racket-xp-mode' gives to local definitions.
 
-See the variable `racket-xp-binding-font-lock-face-modes'."
-  "Binding Local Face")
+See the variable `racket-xp-binding-font-lock-face-modes'.")
 
 (defface-racket racket-xp-binding-local-use-face
   '((t (:inherit default)))
   "Face `racket-xp-mode' gives to uses of local definitions.
 
-See the variable `racket-xp-binding-font-lock-face-modes'."
-  "Binding Local Use Face")
+See the variable `racket-xp-binding-font-lock-face-modes'.")
 
 (defface-racket racket-xp-error-face
   '((t (:underline (:color "red" :style wave))))
-  "Face `racket-xp-mode' uses to highlight errors."
-  "Error Face")
+  "Face `racket-xp-mode' uses to highlight errors.")
 
 (defface-racket racket-xp-unused-face
   '((t (:strike-through t)))
-  "Face `racket-xp-mode' uses to highlight unused requires or definitions."
-  "Unused Face")
+  "Face `racket-xp-mode' uses to highlight unused requires or definitions.")
 
 (defface-racket racket-xp-tail-target-face
   '((t (:inherit match :underline (:style wave))))
-  "Face `racket-xp-mode' uses to highlight targets of a tail position."
-  "Tail Target Face")
+  "Face `racket-xp-mode' uses to highlight targets of a tail position.")
 
 (defface-racket racket-xp-tail-position-face
   '((t (:inherit match)))
-  "Face `racket-xp-mode' uses to highlight expressions in a tail position."
-  "Tail Position Face")
+  "Face `racket-xp-mode' uses to highlight expressions in a tail position.")
 
 (defface-racket racket-keyword-argument-face
   '((((background dark))
      (:foreground "IndianRed"))
     (((background light))
      (:foreground "Red3")))
-  "Face for `#:keyword` arguments."
-  "Keyword Argument Face")
+  "Face for `#:keyword` arguments.")
 
 ;; Note: Don't use `define-obsolete-face-alias'; see issue #583.
 (defface racket-paren-face nil
@@ -734,8 +660,7 @@ Instead customize the face `font-lock-constant-face'.")
 This face is given only to symbols directly quoted using the
 reader shorthands \\=' or \\=`. All other directly quoted values,
 including symbols quoted using \"quote\" or \"quasiquote\", get
-the face `font-lock-constant-face'."
-  "Reader Quoted Symbol Face")
+the face `font-lock-constant-face'.")
 
 (defface-racket racket-reader-syntax-quoted-symbol-face
   '((t (:inherit default)))
@@ -744,132 +669,107 @@ the face `font-lock-constant-face'."
 This face is given only to symbols directly quoted using the
 reader shorthands #\\=' or #\\=`. All other directly quoted
 values, including symbols quoted using \"syntax\" or
-\"quasisyntax\", get the face `font-lock-constant-face'."
-  "Reader Syntax Quoted Symbol Face")
+\"quasisyntax\", get the face `font-lock-constant-face'.")
 
 (defface-racket racket-here-string-face
   '((t (:inherit sh-heredoc)))
-  "Face for here strings."
-  "Here String Face")
+  "Face for here strings.")
 
 (defface-racket racket-logger-config-face
   '((t (:inherit font-lock-comment-face :slant italic)))
-  "Face for `racket-logger-mode' configuration."
-  "Racket Logger Config Face")
+  "Face for `racket-logger-mode' configuration.")
 
 (defface-racket racket-logger-topic-face
   '((t (:inherit font-lock-function-name-face :slant italic)))
-  "Face for `racket-logger-mode' topics."
-  "Racket Logger Config Face")
+  "Face for `racket-logger-mode' topics.")
 
 (defface-racket racket-logger-fatal-face
   '((t (:inherit error :weight bold)))
-  "Face for `racket-logger-mode' fatal level."
-  "Racket Logger Fatal Face")
+  "Face for `racket-logger-mode' fatal level.")
 
 (defface-racket racket-logger-error-face
   '((t (:inherit error)))
-  "Face for `racket-logger-mode' error level."
-  "Racket Logger Error Face")
+  "Face for `racket-logger-mode' error level.")
 
 (defface-racket racket-logger-warning-face
   '((t (:inherit warning)))
-  "Face for `racket-logger-mode' warning level."
-  "Racket Logger Warning Face")
+  "Face for `racket-logger-mode' warning level.")
 
 (defface-racket racket-logger-info-face
   '((t (:inherit font-lock-string-face)))
-  "Face for `racket-logger-mode' info level."
-  "Racket Logger Info Face")
+  "Face for `racket-logger-mode' info level.")
 
 (defface-racket racket-logger-debug-face
   '((t (:inherit font-lock-constant-face)))
-  "Face for `racket-logger-mode' debug level."
-  "Racket Logger Debug Face")
+  "Face for `racket-logger-mode' debug level.")
 
 (defface-racket racket-debug-break-face
   '((t (:background "red")))
-  "Face for `racket-debug-mode' break position."
-  "Racket Debug Break Face")
+  "Face for `racket-debug-mode' break position.")
 
 (defface-racket racket-debug-breakpoint-face
   '((t (:foreground "red" :weight bold)))
-  "Face for `racket-debug-mode' breakpoint overlays."
-  "Racket Debug Breakpoint Face")
+  "Face for `racket-debug-mode' breakpoint overlays.")
 
 (defface-racket racket-debug-locals-face
   '((t (:inherit font-lock-constant-face :box (:line-width -1) :slant italic)))
-  "Face for `racket-debug-mode' local variables."
-  "Racket Debug Locals Face")
+  "Face for `racket-debug-mode' local variables.")
 
 (defface-racket racket-debug-result-face
   '((t (:inherit font-lock-constant-face :box (:line-width -1) :slant italic :weight bold)))
-  "Face for `racket-debug-mode' result values."
-  "Racket Debug Result Face")
+  "Face for `racket-debug-mode' result values.")
 
 (defface-racket racket-doc-link-face
   '((t (:underline (:color "gray" :style line))))
   "Face `racket-describe-mode' uses for links within documentation.
 Note: When some special face is already specified by the
 documentation, then to avoid visual clutter this face is NOT also
-added."
-  "Racket Doc Link Face")
+added.")
 
 (defface-racket racket-ext-link-face
   '((t (:underline (:style wave) :slant italic :weight bold)))
   "Face `racket-describe-mode' uses for external links.
-See the variable `racket-browse-url-function'."
-  "Racket Ext Link Face")
+See the variable `racket-browse-url-function'.")
 
 (defface-racket racket-doc-output-face
   '((t (:inherit fixed-pitch-serif)))
-  "Face `racket-describe-mode' uses for Scribble @example or @interactions output."
-  "Racket Doc Output Face")
+  "Face `racket-describe-mode' uses for Scribble @example or @interactions output.")
 
 (defface-racket racket-doc-litchar-face
   '((t (:foreground "dark red" :background "gray")))
-  "Face `racket-describe-mode' uses for Scribble @litchar."
-  "Racket Doc Litchar Face")
+  "Face `racket-describe-mode' uses for Scribble @litchar.")
 
 (defface-racket racket-repl-message
   '((t (:inherit font-lock-comment-face :slant italic)))
-  "Face `racket-repl-mode' uses for messages from the back end."
-  "Racket REPL Message")
+  "Face `racket-repl-mode' uses for messages from the back end.")
 
 (defface-racket racket-repl-prompt
   '((t (:inherit bold)))
-  "Face `racket-repl-mode' uses for prompts."
-  "Racket REPL Prompt")
+  "Face `racket-repl-mode' uses for prompts.")
 
 (defface-racket racket-repl-value
   '((t (:inherit font-lock-constant-face)))
-  "Face `racket-repl-mode' uses for values output by current-print."
-  "Racket REPL Value")
+  "Face `racket-repl-mode' uses for values output by current-print.")
 
 (defface-racket racket-repl-error-message
   '((t (:inherit error)))
-  "Face `racket-repl-mode' uses for error messages."
-  "Racket REPL Error Message")
+  "Face `racket-repl-mode' uses for error messages.")
 
 (defface-racket racket-repl-error-location
   '((t (:inherit underline)))
-  "Face `racket-repl-mode' uses for error locations."
-  "Racket REPL Error Location")
+  "Face `racket-repl-mode' uses for error locations.")
 
 (defface-racket racket-repl-error-label
   '((t (:inherit font-lock-variable-name-face)))
-  "Face `racket-repl-mode' uses for error labels."
-  "Racket REPL Error Label")
+  "Face `racket-repl-mode' uses for error labels.")
 
 (defface-racket racket-repl-stdout
   '((t (:inherit default)))
-  "Face `racket-repl-mode' uses for output to current-output-port."
-  "Racket REPL Stdout")
+  "Face `racket-repl-mode' uses for output to current-output-port.")
 
 (defface-racket racket-repl-stderr
   '((t (:inherit error)))
-  "Face `racket-repl-mode' uses for output to current-error-port."
-  "Racket REPL Stderr")
+  "Face `racket-repl-mode' uses for output to current-error-port.")
 
 (provide 'racket-custom)
 

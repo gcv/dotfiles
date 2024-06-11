@@ -226,6 +226,7 @@ REPL variables
 * racket-imagemagick-props::
 * racket-images-keep-last::
 * racket-images-system-viewer::
+* racket-images-do-not-use-svg::
 * racket-pretty-print::
 * racket-repl-command-file::
 
@@ -868,11 +869,13 @@ In the common case there is only one back end, on the same local host as Emacs, 
 
 @image{scenario-0,,, Emacs front end and one local back end. Command I/O via pipe (local) or ssh (remote). Each back end provides zero or more REPLs.,.svg}
 
-However you can configure using any number of back ends on any number of local or remote hosts.
+However you can configure using any number of back ends on any number of local or remote host paths.
 
 As one example, you can have multiple back ends on the local host. One back end is used for a project under a specific subdirectory, and the other back end for all others. (Perhaps one project needs Racket built from source, and everything else uses an installed, older version of Racket. By using different back ends, not only will @code{racket-run} use the desired version of Racket for a file, so will commands for documentation or visiting definitions.)
 
 @image{scenario-1,,, Emacs front end and two local back ends --- one for a project path. Command I/O via pipe (local) or ssh (remote). Each back end provides zero or more REPLs.,.svg}
+
+(Note: If you use various versions of Racket via @uref{https://direnv.net/, @code{direnv}} combined with the @uref{https://github.com/purcell/envrc, @code{envrc} Emacs package}, you still need a distinct back end for each project. To arrange this, add or modify a @code{.dir-locals.el} file next to each @code{.envrc} file; @xref{racket-add-back-end}.)
 
 Furthermore, you could work with a project located on a remote host, whose files you edit using TRAMP@. You also want the back end to run there. For a remote host, Racket Mode copies its back end source files to the remote when necessary, and runs the back end using ssh.
 
@@ -3092,6 +3095,9 @@ The following values will @emph{not} work:
 
 Function to call to browse a URL@.
 
+Defaults to @ref{racket-browse-url-using-temporary-file} on macOS and
+@code{browse-url} on other platforms.
+
 @node racket-xp-after-change-refresh-delay
 @subsection racket-xp-after-change-refresh-delay
 
@@ -3314,6 +3320,7 @@ Use some of the regexp search-based fontification from classic
 * racket-imagemagick-props::
 * racket-images-keep-last::
 * racket-images-system-viewer::
+* racket-images-do-not-use-svg::
 * racket-pretty-print::
 * racket-repl-command-file::
 @end menu
@@ -3407,6 +3414,15 @@ How many images to keep in the image cache.
 @subsection racket-images-system-viewer
 
 The image viewer program to use for @code{racket-view-image}.
+
+@node racket-images-do-not-use-svg
+@subsection racket-images-do-not-use-svg
+
+Do not use SVG to render images?
+
+Note: This value is used only when starting a back end -- @emph{not}
+for each run. If you change this, for it to take effect you must
+restart by using @code{racket-start-back-end}.
 
 @node racket-pretty-print
 @subsection racket-pretty-print
@@ -3713,7 +3729,7 @@ A value for the variable @ref{racket-show-functions}.
 @code{(racket-repl-buffer-name-shared)}
 
 
-All @ref{racket-mode} edit buffers share one @ref{racket-repl-mode} buffer per back end.
+Share one @ref{racket-repl-mode} buffer per back end.
 
 A value for the variable @ref{racket-repl-buffer-name-function}.
 
@@ -3733,7 +3749,7 @@ A value for the variable @ref{racket-repl-buffer-name-function}.
 @code{(racket-repl-buffer-name-project)}
 
 
-All @ref{racket-mode} buffers in a project share a @ref{racket-repl-mode} buffer.
+Share a @ref{racket-repl-mode} buffer per back end and per project.
 
 A value for the variable @ref{racket-repl-buffer-name-function}.
 
@@ -3930,6 +3946,17 @@ are a few examples.
     ;; to be "xvfb-run racket".
     (racket-add-back-end "/ssh:headless:~/gui-project/"
                          :racket-program "xvfb-run racket")
+@end lisp
+
+If you use various versions of Racket by setting PATH values via
+direnv, .envrc files and @code{envrc-global-mode}, then you need a
+distinct back end for each such project subdirectory. One
+approach is to use @ref{racket-add-back-end} for each project in your
+Emacs init file. Another way to is to have a .dir-locals.el file
+alongside each .envrc file:
+
+@lisp
+    ((nil . ((eval . (racket-add-back-end default-directory)))))
 @end lisp
 
 @node Running racket and raco commands in a shell or terminal (1)
