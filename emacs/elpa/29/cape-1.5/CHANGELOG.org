@@ -2,6 +2,25 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 1.5 (2024-04-12)
+
+- ~cape-file-prefix~: New variable to customize file name completion prefix. If
+  the input matches one of the configured prefixes, file completion is started.
+- ~cape-capf-super~: Support Capfs which return different prefix lengths. This
+  change improves compatibility with Company.
+- ~cape-capf-super~: Add support for the ~:with~ keyword. See the docstring of
+  ~cape-wrap-super~ for details. This change improves compatibility with Company.
+- ~cape-capf-super~: The resulting Capf is exclusive if one of the main Capfs (the
+  Capfs listed before the ~:with~ keyword) is exclusive.
+- ~cape-capf-super~: If the resulting Capf is non-exclusive, one of the main Capfs
+  must have returned candidates, in order for the resulting Capf to return
+  candidates.
+- ~cape-capf-super~: Normalize plists which are attached to candidates. This helps
+  with deduplication, such that only candidates with different annotations or
+  icons appear twice.
+- ~cape-dabbrev-check-other-buffers~: Support function as customization value. The
+  function should return the exact list of buffers to search.
+
 * Version 1.4 (2024-03-08)
 
 - =cape-char=: Look back from point, instead of using the match at point. This

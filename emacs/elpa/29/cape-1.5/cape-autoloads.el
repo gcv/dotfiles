@@ -81,7 +81,20 @@ Create interactive completion function from CAPF.
 (fn CAPF)")
 (autoload 'cape-wrap-super "cape" "\
 Call CAPFS and return merged completion result.
-The functions `cape-wrap-super' and `cape-capf-super' are experimental.
+The CAPFS list can contain the keyword `:with' to mark the Capfs
+afterwards as auxiliary One of the non-auxiliary Capfs before
+`:with' must return non-nil for the super Capf to set in and
+return a non-nil result.  Such behavior is useful when listing
+multiple super Capfs in the `completion-at-point-functions':
+
+  (setq completion-at-point-functions
+        (list (cape-capf-super \\='eglot-completion-at-point
+                               :with \\='tempel-complete)
+              (cape-capf-super \\='cape-dabbrev
+                               :with \\='tempel-complete)))
+
+The functions `cape-wrap-super' and `cape-capf-super' are
+experimental.
 
 (fn &rest CAPFS)")
 (autoload 'cape-wrap-debug "cape" "\

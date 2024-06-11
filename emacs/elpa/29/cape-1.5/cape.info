@@ -1,4 +1,4 @@
-This is dockwEroG.info, produced by makeinfo version 6.8 from cape.texi.
+This is docFzyaue.info, produced by makeinfo version 6.8 from cape.texi.
 
 INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: dockwEroG.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
+File: docFzyaue.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
 
 cape.el - Let your completions fly!
 ***********************************
@@ -52,7 +52,7 @@ CAPF adapters and transformers
 
 
 
-File: dockwEroG.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
+File: docFzyaue.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
 
 1 Available Capfs
 *****************
@@ -75,7 +75,7 @@ File: dockwEroG.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top, 
    • ‘cape-tex’: Complete Unicode char from TeX command, e.g.  ‘\hbar’.
 
 
-File: dockwEroG.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
+File: docFzyaue.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
 
 2 Configuration
 ***************
@@ -153,7 +153,7 @@ information.
      )
 
 
-File: dockwEroG.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
+File: docFzyaue.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
 
 3 CAPF adapters and transformers
 ********************************
@@ -166,7 +166,7 @@ File: dockwEroG.info,  Node: CAPF adapters and transformers,  Next: Contribution
 * Capf transformers::
 
 
-File: dockwEroG.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
+File: docFzyaue.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.1 Company adapter
 ===================
@@ -232,7 +232,7 @@ Company backend, which can then be used as a Capf via
                               '(company-dabbrev company-elisp)))))
 
 
-File: dockwEroG.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
+File: docFzyaue.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
 
 3.2 Super-Capf - Merging multiple Capfs
 =======================================
@@ -275,7 +275,7 @@ multi-step completions like ‘cape-file’.
 Company, which allows you to merge multiple Company backends.
 
 
-File: dockwEroG.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
+File: docFzyaue.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.3 Capf-Buster - Cache busting
 ===============================
@@ -295,7 +295,7 @@ similarly refreshing strategy.
                  (list (cape-capf-buster #'some-caching-capf)))
 
 
-File: dockwEroG.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
+File: docFzyaue.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
 
 3.4 Capf transformers
 =====================
@@ -387,7 +387,7 @@ personal configuration.
                                             #'ignore-elisp-keywords)))
 
 
-File: dockwEroG.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
+File: docFzyaue.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
 
 4 Contributions
 ***************
