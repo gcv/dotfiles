@@ -39,14 +39,15 @@ it is disabled.
 Expand the macro form following point by one step.
 
 Enters `macrostep-mode' if it is not already active, making the
-buffer temporarily read-only.  If `macrostep-mode' is active and the
-form following point is not a macro form, search forward in the
-buffer and expand the next macro form found, if any.
+buffer temporarily read-only.  If `macrostep-mode' is active and
+the form following point is not a macro form, search forward in
+the buffer and expand the next macro form found, if any.
 
-With a prefix argument, the expansion is displayed in a separate
-buffer instead of inline in the current buffer.  Setting
-`macrostep-expand-in-separate-buffer' to non-nil swaps these two
-behaviors.
+If optional argument TOGGLE-SEPARATE-BUFFER is non-nil (or set
+ with a prefix argument), the expansion is displayed in a
+ separate buffer instead of inline in the current buffer.
+ Setting `macrostep-expand-in-separate-buffer' to non-nil swaps
+ these two behaviors.
 
 (fn &optional TOGGLE-SEPARATE-BUFFER)" t)
 (register-definition-prefixes "macrostep" '("macrostep-"))

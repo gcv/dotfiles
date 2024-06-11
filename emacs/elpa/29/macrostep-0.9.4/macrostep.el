@@ -1,14 +1,14 @@
 ;;; macrostep.el --- Interactive macro expander  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2015 Jon Oddie
-;; Copyright (C) 2020-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2020-2024 Free Software Foundation, Inc.
 
 ;; Author: Jon Oddie <j.j.oddie@gmail.com>
 ;; Url: https://github.com/emacsorphanage/macrostep
 ;; Keywords: lisp, languages, macro, debugging
 
-;; Package-Version: 0.9.2
-;; Package-Requires: ((cl-lib "0.5"))
+;; Package-Version: 0.9.4
+;; Package-Requires: ((cl-lib "0.5") (compat "29"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -235,8 +235,7 @@
 ;;   http://dorophone.blogspot.co.uk/2011/05/monadic-parser-combinators-in-elisp.html
 
 
-;; 8 Changelog
-;; ===========
+;;; News:
 
 ;;   - v0.9.2, 2023-05-12:
 ;;     - name the keymap macrostep-mode-map, fixing a regression in v0.9.1
@@ -259,43 +258,38 @@
 
 ;;; Code:
 
+(require 'compat)
+
 (require 'pp)
 (require 'ring)
 (require 'cl-lib)
 
 
 ;;; Constants and dynamically bound variables
-(defvar macrostep-overlays nil
+(defvar-local macrostep-overlays nil
   "List of all macro stepper overlays in the current buffer.")
-(make-variable-buffer-local 'macrostep-overlays)
 
-(defvar macrostep-gensym-depth nil
+(defvar-local macrostep-gensym-depth nil
   "Number of macro expansion levels that have introduced gensyms so far.")
-(make-variable-buffer-local 'macrostep-gensym-depth)
 
-(defvar macrostep-gensyms-this-level nil
-  "t if gensyms have been encountered during current level of macro expansion.")
-(make-variable-buffer-local 'macrostep-gensyms-this-level)
+(defvar-local macrostep-gensyms-this-level nil
+  "Non-nil if gensyms have been encountered during current level of macro expansion.")
 
-(defvar macrostep-saved-undo-list nil
+(defvar-local macrostep-saved-undo-list nil
   "Saved value of `buffer-undo-list' upon entering macrostep mode.")
-(make-variable-buffer-local 'macrostep-saved-undo-list)
 
-(defvar macrostep-saved-read-only nil
+(defvar-local macrostep-saved-read-only nil
   "Saved value of `buffer-read-only' upon entering macrostep mode.")
-(make-variable-buffer-local 'macrostep-saved-read-only)
 
-(defvar macrostep-expansion-buffer nil
+(defvar-local macrostep-expansion-buffer nil
   "Non-nil if the current buffer is a macro-expansion buffer.")
-(make-variable-buffer-local 'macrostep-expansion-buffer)
 
-(defvar macrostep-outer-environment nil
+(defvar-local macrostep-outer-environment nil
   "Outermost macro-expansion environment to use in macro-expansion buffers.
 
 This variable is used to save information about any enclosing
 `cl-macrolet' context when a macro form is expanded in a separate
 buffer.")
-(make-variable-buffer-local 'macrostep-outer-environment)
 
 ;;; Customization options and faces
 (defgroup macrostep nil
@@ -303,37 +297,42 @@ buffer.")
   :group 'lisp
   :link '(emacs-commentary-link :tag "commentary" "macrostep.el")
   :link '(emacs-library-link :tag "lisp file" "macrostep.el")
-  :link '(url-link :tag "web page" "https://github.com/joddie/macrostep"))
+  :link '(url-link :tag "web page" "https://github.com/emacsorphanage/macrostep"))
 
 (defface macrostep-gensym-1
   '((((min-colors 16581375)) :foreground "#8080c0" :box t :bold t)
     (((min-colors 8)) :background "cyan")
     (t :inverse-video t))
-  "Face for gensyms created in the first level of macro expansion.")
+  "Face for gensyms created in the first level of macro expansion."
+  :version "1.0")
 
 (defface macrostep-gensym-2
   '((((min-colors 16581375)) :foreground "#8fbc8f" :box t :bold t)
     (((min-colors 8)) :background "#00cd00")
     (t :inverse-video t))
-  "Face for gensyms created in the second level of macro expansion.")
+  "Face for gensyms created in the second level of macro expansion."
+  :version "1.0")
 
 (defface macrostep-gensym-3
   '((((min-colors 16581375)) :foreground "#daa520" :box t :bold t)
     (((min-colors 8)) :background "yellow")
     (t :inverse-video t))
-  "Face for gensyms created in the third level of macro expansion.")
+  "Face for gensyms created in the third level of macro expansion."
+  :version "1.0")
 
 (defface macrostep-gensym-4
   '((((min-colors 16581375)) :foreground "#cd5c5c" :box t :bold t)
     (((min-colors 8)) :background "red")
     (t :inverse-video t))
-  "Face for gensyms created in the fourth level of macro expansion.")
+  "Face for gensyms created in the fourth level of macro expansion."
+  :version "1.0")
 
 (defface macrostep-gensym-5
   '((((min-colors 16581375)) :foreground "#da70d6" :box t :bold t)
     (((min-colors 8)) :background "magenta")
     (t :inverse-video t))
-  "Face for gensyms created in the fifth level of macro expansion.")
+  "Face for gensyms created in the fifth level of macro expansion."
+  :version "1.0")
 
 (defface macrostep-expansion-highlight-face
   `((((min-colors 16581375) (background light))
@@ -342,35 +341,33 @@ buffer.")
     (((min-colors 16581375) (background dark))
      ,@(and (>= emacs-major-version 27) '(:extend t))
      :background "#222222"))
-  "Face for macro-expansion highlight.")
+  "Face for macro-expansion highlight."
+  :version "1.0")
 
 (defface macrostep-macro-face
   '((t :underline t))
-  "Face for macros in macro-expanded code.")
+  "Face for macros in macro-expanded code."
+  :version "1.0")
 
 (defface macrostep-compiler-macro-face
   '((t :slant italic))
-  "Face for compiler macros in macro-expanded code.")
+  "Face for compiler macros in macro-expanded code."
+  :version "1.0")
 
 (defcustom macrostep-expand-in-separate-buffer nil
   "When non-nil, show expansions in a separate buffer instead of inline."
-  :type 'boolean)
+  :type 'boolean
+  :version "1.0")
 
 (defcustom macrostep-expand-compiler-macros t
   "When non-nil, also expand compiler macros."
-  :type 'boolean)
-
-;; Need the following for making the ring of faces
-(defun macrostep-make-ring (&rest items)
-  "Make a ring containing all of ITEMS with no empty slots."
-  (let ((ring (make-ring (length items))))
-    (mapc (lambda (item) (ring-insert ring item)) (reverse items))
-    ring))
+  :type 'boolean
+  :version "1.0")
 
 (defvar macrostep-gensym-faces
-  (macrostep-make-ring
-   'macrostep-gensym-1 'macrostep-gensym-2 'macrostep-gensym-3
-   'macrostep-gensym-4 'macrostep-gensym-5)
+  (ring-convert-sequence-to-ring
+   (list 'macrostep-gensym-1 'macrostep-gensym-2 'macrostep-gensym-3
+	 'macrostep-gensym-4 'macrostep-gensym-5))
   "Ring of all macrostepper faces for fontifying gensyms.")
 
 ;; Other modes can enable macrostep by redefining these functions to
@@ -464,25 +461,23 @@ The default value, `macrostep-macro-form-p', is specific to Emacs Lisp.")
 ;;; Define keymap and minor mode
 (define-obsolete-variable-alias 'macrostep-mode-keymap 'macrostep-mode-map "2023")
 (define-obsolete-variable-alias 'macrostep-keymap 'macrostep-mode-map "2022")
-(defvar macrostep-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "RET") #'macrostep-expand)
-    (define-key map "=" #'macrostep-expand)
-    (define-key map "e" #'macrostep-expand)
+(defvar-keymap macrostep-mode-map
+  :doc "Keymap for `macrostep-mode'."
+  "RET"     #'macrostep-expand
+  "="       #'macrostep-expand
+  "e"       #'macrostep-expand
 
-    (define-key map (kbd "DEL") #'macrostep-collapse)
-    (define-key map "u" #'macrostep-collapse)
-    (define-key map "c" #'macrostep-collapse)
+  "DEL"     #'macrostep-collapse
+  "u"       #'macrostep-collapse
+  "c"       #'macrostep-collapse
 
-    (define-key map (kbd "TAB") #'macrostep-next-macro)
-    (define-key map "n" #'macrostep-next-macro)
-    (define-key map (kbd "M-TAB") #'macrostep-prev-macro)
-    (define-key map "p" #'macrostep-prev-macro)
-
-    (define-key map "q" #'macrostep-collapse-all)
-    (define-key map (kbd "C-c C-c") #'macrostep-collapse-all)
-    map)
-  "Keymap for `macrostep-mode'.")
+  "TAB"     #'macrostep-next-macro
+  "n"       #'macrostep-next-macro
+  "M-TAB"   #'macrostep-prev-macro
+  "p"       #'macrostep-prev-macro
+  
+  "q"       #'macrostep-collapse-all
+  "C-c C-c" #'macrostep-collapse-all)
 
 ;;;###autoload
 (define-minor-mode macrostep-mode
@@ -525,9 +520,10 @@ Use \\[macrostep-expand] to expand, \\[macrostep-collapse] to collapse, \
       ;; Remove our post-command hook
       (remove-hook 'post-command-hook #'macrostep-command-hook t))))
 
-;; Post-command hook: bail out of macrostep-mode if the user types C-x
-;; C-q to make the buffer writable again.
 (defun macrostep-command-hook ()
+  "Hook function for use by `post-command hook'.
+Bail out of `macrostep-mode' if the user types
+`\\[read-only-mode]' to make the buffer writable again."
   (if (not buffer-read-only)
       (macrostep-mode 0)))
 
@@ -538,14 +534,15 @@ Use \\[macrostep-expand] to expand, \\[macrostep-collapse] to collapse, \
   "Expand the macro form following point by one step.
 
 Enters `macrostep-mode' if it is not already active, making the
-buffer temporarily read-only.  If `macrostep-mode' is active and the
-form following point is not a macro form, search forward in the
-buffer and expand the next macro form found, if any.
+buffer temporarily read-only.  If `macrostep-mode' is active and
+the form following point is not a macro form, search forward in
+the buffer and expand the next macro form found, if any.
 
-With a prefix argument, the expansion is displayed in a separate
-buffer instead of inline in the current buffer.  Setting
-`macrostep-expand-in-separate-buffer' to non-nil swaps these two
-behaviors."
+If optional argument TOGGLE-SEPARATE-BUFFER is non-nil (or set
+ with a prefix argument), the expansion is displayed in a
+ separate buffer instead of inline in the current buffer.
+ Setting `macrostep-expand-in-separate-buffer' to non-nil swaps
+ these two behaviors."
   (interactive "P")
   (cl-destructuring-bind (start . end)
       (funcall macrostep-sexp-bounds-function)
@@ -581,14 +578,13 @@ behaviors."
             (macrostep-gensym-depth macrostep-gensym-depth)
             (macrostep-gensyms-this-level nil)
             priority)
-        (if existing-overlay
-            (progn        ; Expanding part of a previous macro-expansion
-              (setq priority (1+ (overlay-get existing-overlay 'priority)))
-              (setq macrostep-gensym-depth
-                    (overlay-get existing-overlay 'macrostep-gensym-depth)))
+        (if existing-overlay  ; Expanding part of a previous macro-expansion
+            (setq priority (1+ (overlay-get existing-overlay 'priority))
+		  macrostep-gensym-depth
+		  (overlay-get existing-overlay 'macrostep-gensym-depth))
           ;; Expanding source buffer text
-          (setq priority 1)
-          (setq macrostep-gensym-depth -1))
+          (setq priority 1
+		macrostep-gensym-depth -1))
 
         (with-silent-modifications
           (atomic-change-group
@@ -629,8 +625,8 @@ If no more macro expansions are visible after this, exit
       (with-silent-modifications
         (atomic-change-group
           (macrostep-collapse-overlay overlay)))))
-  (if (not macrostep-overlays)
-      (macrostep-mode 0)))
+  (unless macrostep-overlays
+    (macrostep-mode 0)))
 
 (defun macrostep-collapse-all ()
   "Collapse all visible macro expansions and exit `macrostep-mode'."
@@ -681,7 +677,7 @@ If no more macro expansions are visible after this, exit
   (cdr (get-char-property-and-overlay (point) 'macrostep-original-text)))
 
 (defun macrostep-collapse-overlay (overlay &optional no-restore-p)
-  "Collapse a macro-expansion overlay and restore the unexpanded source text.
+  "Collapse macro-expansion buffer OVERLAY and restore the unexpanded source text.
 
 As a minor optimization, does not restore the original source
 text if NO-RESTORE-P is non-nil.  This is safe to do when
@@ -764,6 +760,7 @@ expansion, so that they can be fontified consistently.  (See
 
 (defun macrostep-macro-form-p (form environment)
   "Return non-nil if FORM would be evaluated via macro expansion.
+This is considered within ENVIRONMENT.
 
 If FORM is an invocation of a macro defined by `defmacro' or an
 enclosing `cl-macrolet' form, return the symbol `macro'.
@@ -828,7 +825,9 @@ value of DEFINITION in the result will be nil."
               (void-function nil))))))))
 
 (defun macrostep-expand-1 (form environment)
-  "Return result of macro-expanding the top level of FORM by exactly one step.
+  "Return result of macro-expanding by exactly one step the top level of FORM.
+This is done within ENVIRONMENT.
+
 Unlike `macroexpand', this function does not continue macro
 expansion until a non-macro-call results."
   (cl-destructuring-bind (type . definition)
@@ -942,28 +941,36 @@ corresponding local environments are collected for these.
 Forms and environments are extracted from FORM by instrumenting
 Emacs's builtin `macroexpand' function and calling
 `macroexpand-all'."
-  (let ((real-macroexpand (indirect-function #'macroexpand))
-        (macro-form-alist '())
-        (compiler-macro-forms '()))
-    (cl-letf
-        (((symbol-function #'macroexpand)
-          (lambda (form environment &rest args)
-            (let ((expansion
-                   (apply real-macroexpand form environment args)))
-              (cond ((not (eq expansion form))
-                     (setq macro-form-alist
-                           (cons (cons form environment)
-                                 macro-form-alist)))
-                    ((and (consp form)
-                          (symbolp (car form))
-                          macrostep-expand-compiler-macros
-                          (not (eq form
-                                   (cl-compiler-macroexpand form))))
-                     (setq compiler-macro-forms
-                           (cons form compiler-macro-forms))))
-              expansion))))
-      (ignore-errors
-        (macroexpand-all form environment)))
+  (let* ((macro-form-alist '())
+         (compiler-macro-forms '())
+         (override (lambda (real-macroexpand form environment &rest args)
+                     (let ((expansion
+                            (apply real-macroexpand form environment args)))
+                       (cond ((not (eq expansion form))
+                              (setq macro-form-alist
+                                    (cons (cons form environment)
+                                          macro-form-alist)))
+                             ((and (consp form)
+                                   (symbolp (car form))
+                                   macrostep-expand-compiler-macros
+                                   (not (eq form
+                                            (cl-compiler-macroexpand form))))
+                              (setq compiler-macro-forms
+                                    (cons form compiler-macro-forms))))
+                       expansion))))
+    (cl-macrolet ((with-override (fn &rest body)
+                    `(cl-letf (((symbol-function ,fn)
+                                (apply-partially override (indirect-function ,fn))))
+                       ,@body))
+                  (with-macroexpand-1 (&rest body)
+                    (if (< emacs-major-version 30)
+                        `(progn ,@body) `(with-override #'macroexpand-1 ,@body)))
+                  (with-macroexpand (&rest body)
+                    `(with-override #'macroexpand ,@body)))
+      (with-macroexpand-1
+       (with-macroexpand
+        (ignore-errors
+          (macroexpand-all form environment)))))
     (list macro-form-alist compiler-macro-forms)))
 
 (defvar macrostep-collected-macro-form-alist nil
@@ -974,10 +981,11 @@ Controls the printing of sub-forms in `macrostep-print-sexp'.")
   "A list of compiler-macro forms to be highlighted in `macrostep-print-sexp'.")
 
 (defun macrostep-pp (sexp environment)
-  "Pretty-print SEXP, fontifying macro forms and uninterned symbols."
+  "Pretty-print SEXP, fontifying macro forms and uninterned symbols.
+This is done within ENVIRONMENT."
   (cl-destructuring-bind
-        (macrostep-collected-macro-form-alist
-         macrostep-collected-compiler-macro-forms)
+      (macrostep-collected-macro-form-alist
+       macrostep-collected-compiler-macro-forms)
       (macrostep-collect-macro-forms sexp environment)
     (let ((print-quoted t))
       (macrostep-print-sexp sexp)
@@ -1119,7 +1127,4 @@ fontified using the same face (modulo the number of faces; see
 
 
 (provide 'macrostep)
-;; Local Variables:
-;; indent-tabs-mode: nil
-;; End:
 ;;; macrostep.el ends here
