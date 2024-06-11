@@ -2,6 +2,11 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 1.8 (2024-04-24)
+
+- =vertico-preselect=: Add =no-prompt= configuration choice to entirely disallow the
+  selection of the prompt.
+
 * Version 1.7 (2024-01-23)
 
 - =vertico-buffer-mode=: Simplify mode line format.
@@ -31,6 +36,7 @@
 - Optimize truncation of multi-line candidates (=vertico--truncate-multiline=).
   This affects commands like =yank-from-kill-ring=.
 - =vertico-quick=: Use a slightly different scheme to support more candidates.
+- Support =completion-lazy-hilit=.
 
 * Version 1.4 (2023-07-02)
 

@@ -1,4 +1,4 @@
-This is docvbzsWD.info, produced by makeinfo version 6.8 from
+This is docOP7Vo9.info, produced by makeinfo version 6.8 from
 vertico.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docvbzsWD.info,  Node: Top,  Next: Features,  Up: (dir)
+File: docOP7Vo9.info,  Node: Top,  Next: Features,  Up: (dir)
 
 vertico.el - VERTical Interactive COmpletion
 ********************************************
@@ -27,6 +27,7 @@ space and comments.
 * Menu:
 
 * Features::
+* Installation::
 * Key bindings::
 * Configuration::
 * Extensions::
@@ -61,7 +62,7 @@ Problematic completion commands
 
 
 
-File: docvbzsWD.info,  Node: Features,  Next: Key bindings,  Prev: Top,  Up: Top
+File: docOP7Vo9.info,  Node: Features,  Next: Installation,  Prev: Top,  Up: Top
 
 1 Features
 **********
@@ -85,9 +86,20 @@ File: docvbzsWD.info,  Node: Features,  Next: Key bindings,  Prev: Top,  Up: Top
    <https://github.com/minad/vertico/blob/screenshots/vertico-mx.png?raw=true>
 
 
-File: docvbzsWD.info,  Node: Key bindings,  Next: Configuration,  Prev: Features,  Up: Top
+File: docOP7Vo9.info,  Node: Installation,  Next: Key bindings,  Prev: Features,  Up: Top
 
-2 Key bindings
+2 Installation
+**************
+
+Vertico is available from GNU ELPA
+(https://elpa.gnu.org/packages/vertico.html).  You can install it
+directly via ‘M-x package-install RET vertico RET’.  After installation,
+activate the global minor mode with ‘M-x vertico-mode RET’.
+
+
+File: docOP7Vo9.info,  Node: Key bindings,  Next: Configuration,  Prev: Installation,  Up: Top
+
+3 Key bindings
 **************
 
 Vertico defines its own local keymap in the minibuffer which is derived
@@ -95,43 +107,41 @@ from ‘minibuffer-local-map’.  The keymap keeps most of the
 ‘fundamental-mode’ keybindings intact and remaps and binds only a
 handful of commands.
 
-   • ‘beginning-of-buffer’, ‘minibuffer-beginning-of-buffer’ ->
-     ‘vertico-first’
-   • ‘end-of-buffer’ -> ‘vertico-last’
-   • ‘scroll-down-command’ -> ‘vertico-scroll-down’
-   • ‘scroll-up-command’ -> ‘vertico-scroll-up’
-   • ‘next-line’, ‘next-line-or-history-element’ -> ‘vertico-next’
-   • ‘previous-line’, ‘previous-line-or-history-element’ ->
-     ‘vertico-previous’
-   • ‘forward-paragraph’ -> ‘vertico-next-group’
-   • ‘backward-paragraph’ -> ‘vertico-previous-group’
-   • ‘exit-minibuffer’ -> ‘vertico-exit’
-   • ‘kill-ring-save’ -> ‘vertico-save’
-   • ‘M-RET’ -> ‘vertico-exit-input’
-   • ‘TAB’ -> ‘vertico-insert’
+Binding/Remapping                                         Vertico command
+-------------------------------------------------------------------------------------
+‘beginning-of-buffer’, ‘minibuffer-beginning-of-buffer’   ‘vertico-first’
+‘end-of-buffer’                                           ‘vertico-last’
+‘scroll-down-command’                                     ‘vertico-scroll-down’
+‘scroll-up-command’                                       ‘vertico-scroll-up’
+‘next-line’, ‘next-line-or-history-element’               ‘vertico-next’
+‘previous-line’, ‘previous-line-or-history-element’       ‘vertico-previous’
+‘forward-paragraph’                                       ‘vertico-next-group’
+‘backward-paragraph’                                      ‘vertico-previous-group’
+‘exit-minibuffer’                                         ‘vertico-exit’
+‘kill-ring-save’                                          ‘vertico-save’
+‘M-RET’                                                   ‘vertico-exit-input’
+‘TAB’                                                     ‘vertico-insert’
 
    Note in particular the binding of ‘TAB’ to ‘vertico-insert’, which
 inserts the currently selected candidate, and the binding of ‘RET’ and
 ‘M-RET’ to ‘vertico-exit’ and ‘vertico-exit-input’ respectively.
-‘vertico-exit’ exits with the currently selected candidate, while
-‘vertico-exit-input’ exits with the minibuffer input instead.  You
-should exit with the current input for example when you want to create a
-new buffer or a new file with ‘find-file’ or ‘switch-to-buffer’.  As an
-alternative to pressing ‘M-RET’, move the selection first to the input
-prompt and then press ‘RET’.
+
+   ‘vertico-exit’ exits with the currently selected candidate, while
+‘vertico-exit-input’ exits with the minibuffer input instead.  Exiting
+with the current input is needed when you want to create a new buffer or
+a new file with ‘find-file’ or ‘switch-to-buffer’.  As an alternative to
+pressing ‘M-RET’, move the selection up to the input prompt by pressing
+the ‘up’ arrow key and then press ‘RET’.
 
 
-File: docvbzsWD.info,  Node: Configuration,  Next: Extensions,  Prev: Key bindings,  Up: Top
+File: docOP7Vo9.info,  Node: Configuration,  Next: Extensions,  Prev: Key bindings,  Up: Top
 
-3 Configuration
+4 Configuration
 ***************
 
-Vertico is available from GNU ELPA
-(https://elpa.gnu.org/packages/vertico.html).  You can install it
-directly via ‘package-install’.  After installation, you can activate
-the global minor mode with ‘M-x vertico-mode’.  In order to configure
-Vertico and other packages in your init.el, you may want to take
-advantage of ‘use-package’.  Here is an example configuration:
+In order to configure Vertico and other packages in your init.el, you
+may want to take advantage of ‘use-package’.  Here is an example
+configuration:
 
      ;; Enable vertico
      (use-package vertico
@@ -175,13 +185,13 @@ advantage of ‘use-package’.  Here is an example configuration:
              '(read-only t cursor-intangible t face minibuffer-prompt))
        (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 
-       ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-       ;; Vertico commands are hidden in normal buffers.
-       ;; (setq read-extended-command-predicate
-       ;;       #'command-completion-default-include-p)
+       ;; Support opening new minibuffers from inside existing minibuffers.
+       (setq enable-recursive-minibuffers t)
 
-       ;; Enable recursive minibuffers
-       (setq enable-recursive-minibuffers t))
+       ;; Emacs 28 and newer: Hide commands in M-x which do not work in the current
+       ;; mode.  Vertico commands are hidden in normal buffers. This setting is
+       ;; useful beyond Vertico.
+       (setq read-extended-command-predicate #'command-completion-default-include-p))
 
    I recommend to give Orderless completion a try, which is different
 from the prefix TAB completion used by the basic default completion
@@ -223,9 +233,9 @@ documentation about completion in the Elisp manual
 * Completion-at-point and completion-in-region::
 
 
-File: docvbzsWD.info,  Node: Completion styles and TAB completion,  Next: Completion-at-point and completion-in-region,  Up: Configuration
+File: docOP7Vo9.info,  Node: Completion styles and TAB completion,  Next: Completion-at-point and completion-in-region,  Up: Configuration
 
-3.1 Completion styles and TAB completion
+4.1 Completion styles and TAB completion
 ========================================
 
 The bindings of the ‘minibuffer-local-completion-map’ are not available
@@ -275,9 +285,9 @@ completion styles are used instead of ‘orderless’:
            completion-ignore-case t)
 
 
-File: docvbzsWD.info,  Node: Completion-at-point and completion-in-region,  Prev: Completion styles and TAB completion,  Up: Configuration
+File: docOP7Vo9.info,  Node: Completion-at-point and completion-in-region,  Prev: Completion styles and TAB completion,  Up: Configuration
 
-3.2 Completion-at-point and completion-in-region
+4.2 Completion-at-point and completion-in-region
 ================================================
 
 The tab completion command ‘completion-at-point’ command is usually
@@ -303,9 +313,9 @@ Corfu is a narrowly focused package and developed in the same spirit as
 Vertico.  You can even use Corfu in the minibuffer.
 
 
-File: docvbzsWD.info,  Node: Extensions,  Next: Complementary packages,  Prev: Configuration,  Up: Top
+File: docOP7Vo9.info,  Node: Extensions,  Next: Complementary packages,  Prev: Configuration,  Up: Top
 
-4 Extensions
+5 Extensions
 ************
 
 We maintain small extension packages to Vertico in this repository in
@@ -386,9 +396,9 @@ according to the buffer height.
 * Configure Vertico per command or completion category::
 
 
-File: docvbzsWD.info,  Node: Configure Vertico per command or completion category,  Up: Extensions
+File: docOP7Vo9.info,  Node: Configure Vertico per command or completion category,  Up: Extensions
 
-4.1 Configure Vertico per command or completion category
+5.1 Configure Vertico per command or completion category
 ========================================================
 
 <https://github.com/minad/vertico/blob/screenshots/vertico-ripgrep.png?raw=true>
@@ -488,9 +498,9 @@ when they scroll off-screen to the left.
            '((buffer flat (vertico-cycle . t))))
 
 
-File: docvbzsWD.info,  Node: Complementary packages,  Next: Child frames and Popups,  Prev: Extensions,  Up: Top
+File: docOP7Vo9.info,  Node: Complementary packages,  Next: Child frames and Popups,  Prev: Extensions,  Up: Top
 
-5 Complementary packages
+6 Complementary packages
 ************************
 
 Vertico integrates well with complementary packages, which enrich the
@@ -535,9 +545,9 @@ functionality not present in Emacs already (e.g., ‘consult-line’) and
 some are substitutes (e.g., ‘consult-buffer’ for ‘switch-to-buffer’).
 
 
-File: docvbzsWD.info,  Node: Child frames and Popups,  Next: Alternatives,  Prev: Complementary packages,  Up: Top
+File: docOP7Vo9.info,  Node: Child frames and Popups,  Next: Alternatives,  Prev: Complementary packages,  Up: Top
 
-6 Child frames and Popups
+7 Child frames and Popups
 *************************
 
 An often requested feature is the ability to display the completions in
@@ -562,9 +572,9 @@ a try and judge for yourself.
      posframe library.
 
 
-File: docvbzsWD.info,  Node: Alternatives,  Next: Resources,  Prev: Child frames and Popups,  Up: Top
+File: docOP7Vo9.info,  Node: Alternatives,  Next: Resources,  Prev: Child frames and Popups,  Up: Top
 
-7 Alternatives
+8 Alternatives
 **************
 
 There are many alternative completion UIs, each UI with its own
@@ -617,54 +627,57 @@ philosophy:
      flexibility thanks to its *note extensions: Extensions.
 
 
-File: docvbzsWD.info,  Node: Resources,  Next: Contributions,  Prev: Alternatives,  Up: Top
+File: docOP7Vo9.info,  Node: Resources,  Next: Contributions,  Prev: Alternatives,  Up: Top
 
-8 Resources
+9 Resources
 ***********
 
 If you want to learn more about Vertico and minibuffer completion, check
 out the following resources:
 
-   • Doom Emacs Vertico Module
-     (https://github.com/doomemacs/doomemacs/tree/master/modules/completion/vertico):
-     Vertico is Doom’s default completion system.
-   • Crafted Emacs Completion Module
-     (https://github.com/SystemCrafters/crafted-emacs/blob/master/modules/crafted-completion.el):
-     Vertico and Corfu are used for completion.
-   • Prot’s Emacs configuration
-     (https://git.sr.ht/~protesilaos/dotfiles/tree/master/item/emacs/.emacs.d/):
-     Vertico and Corfu are used for completion.
-   • Emacs Completion Explained
-     (https://www.youtube.com/watch?v=fnE0lXoe7Y0) (2022-07-19) by
-     Andrew Tropin.
-   • Emacs Minibuffer Completions
-     (https://www.youtube.com/watch?v=w9hHMDyF9V4) (2022-02-12) by Greg
-     Yut.
-   • Vertico Extensions for Emacs
-     (https://www.youtube.com/watch?v=hPwDbx--Waw) (2022-01-08) by
-     Karthik Chikmagalur.
-   • Marginalia, Consult and Embark (2021-10-26) by Mike Zamansky.
-   • System Crafters Live!  - Replacing Ivy and Counsel with Vertico and
-     Consult (https://www.youtube.com/watch?v=UtqE-lR2HCA) (2021-05-21)
-     by David Wilson.
-   • Streamline Your Emacs Completions with Vertico
-     (https://www.youtube.com/watch?v=J0OaRy85MOo) (2021-05-17) by David
-     Wilson.
+   • Configurations which use Vertico and Corfu for completion:
+        • Doom Emacs Vertico Module
+          (https://github.com/doomemacs/doomemacs/tree/master/modules/completion/vertico)
+        • Crafted Emacs Completion Module
+          (https://github.com/SystemCrafters/crafted-emacs/blob/master/modules/crafted-completion.el)
+        • Prot’s Emacs configuration
+          (https://git.sr.ht/~protesilaos/dotfiles/tree/master/item/emacs/.emacs.d/)
+   • Videos:
+        • Emacs Completion Explained
+          (https://www.youtube.com/watch?v=fnE0lXoe7Y0) (2022-07-19) by
+          Andrew Tropin.
+        • Emacs Minibuffer Completions
+          (https://www.youtube.com/watch?v=w9hHMDyF9V4) (2022-02-12) by
+          Greg Yut.
+        • Vertico Extensions for Emacs
+          (https://www.youtube.com/watch?v=hPwDbx--Waw) (2022-01-08) by
+          Karthik Chikmagalur.
+        • Marginalia, Consult and Embark (2021-10-26) by Mike Zamansky.
+        • System Crafters Live!  - Replacing Ivy and Counsel with
+          Vertico and Consult
+          (https://www.youtube.com/watch?v=UtqE-lR2HCA) (2021-05-21) by
+          David Wilson.
+        • Streamline Your Emacs Completions with Vertico
+          (https://www.youtube.com/watch?v=J0OaRy85MOo) (2021-05-17) by
+          David Wilson.
+        • Modern Emacs: all those new tools that make Emacs better and
+          faster (https://www.youtube.com/watch?v=SOxlQ7ogplA&t=1952s)
+          (2024-03-06) by Marie-Hélène Burle.
 
 
-File: docvbzsWD.info,  Node: Contributions,  Next: Debugging Vertico,  Prev: Resources,  Up: Top
+File: docOP7Vo9.info,  Node: Contributions,  Next: Debugging Vertico,  Prev: Resources,  Up: Top
 
-9 Contributions
-***************
+10 Contributions
+****************
 
 Since this package is part of GNU ELPA
 (https://elpa.gnu.org/packages/vertico.html) contributions require a
 copyright assignment to the FSF.
 
 
-File: docvbzsWD.info,  Node: Debugging Vertico,  Next: Problematic completion commands,  Prev: Contributions,  Up: Top
+File: docOP7Vo9.info,  Node: Debugging Vertico,  Next: Problematic completion commands,  Prev: Contributions,  Up: Top
 
-10 Debugging Vertico
+11 Debugging Vertico
 ********************
 
 When you observe an error in the ‘vertico--exhibit’ post command hook,
@@ -684,9 +697,9 @@ that the hooks are executed after every command.
      (advice-add #'vertico--exhibit :around #'force-debug)
 
 
-File: docvbzsWD.info,  Node: Problematic completion commands,  Prev: Debugging Vertico,  Up: Top
+File: docOP7Vo9.info,  Node: Problematic completion commands,  Prev: Debugging Vertico,  Up: Top
 
-11 Problematic completion commands
+12 Problematic completion commands
 **********************************
 
 Vertico is robust in most scenarios.  However some completion commands
@@ -705,9 +718,9 @@ require minor workarounds.
 * Tramp hostname and username completion::
 
 
-File: docvbzsWD.info,  Node: org-refile,  Next: org-agenda-filter and org-tags-view,  Up: Problematic completion commands
+File: docOP7Vo9.info,  Node: org-refile,  Next: org-agenda-filter and org-tags-view,  Up: Problematic completion commands
 
-11.1 ‘org-refile’
+12.1 ‘org-refile’
 =================
 
 ‘org-refile’ uses ‘org-olpath-completing-read’ to complete the outline
@@ -725,9 +738,9 @@ In your user configuration you can prioritize ‘basic’ before
      (setq org-refile-use-outline-path 'file
            org-outline-path-complete-in-steps t)
 
-     (advice-add #'org-olpath-completing-read :around #'org-enforce-basic-completion)
+     (advice-add #'org-olpath-completing-read :around #'vertico-enforce-basic-completion)
 
-     (defun org-enforce-basic-completion (&rest args)
+     (defun vertico-enforce-basic-completion (&rest args)
        (minibuffer-with-setup-hook
            (:append
             (lambda ()
@@ -749,9 +762,9 @@ much more cluttered.
            org-outline-path-complete-in-steps nil)
 
 
-File: docvbzsWD.info,  Node: org-agenda-filter and org-tags-view,  Next: tmm-menubar,  Prev: org-refile,  Up: Problematic completion commands
+File: docOP7Vo9.info,  Node: org-agenda-filter and org-tags-view,  Next: tmm-menubar,  Prev: org-refile,  Up: Problematic completion commands
 
-11.2 ‘org-agenda-filter’ and ‘org-tags-view’
+12.2 ‘org-agenda-filter’ and ‘org-tags-view’
 ============================================
 
 Similar to ‘org-refile’, the commands ‘org-agenda-filter’ and
@@ -767,13 +780,13 @@ would be ‘+tag<0:10’.  Completion boundaries are used for example by
 file completion, where each part of the path can be completed
 separately.  Ideally this issue would be fixed in Org.
 
-     (advice-add #'org-make-tags-matcher :around #'org-enforce-basic-completion)
-     (advice-add #'org-agenda-filter :around #'org-enforce-basic-completion)
+     (advice-add #'org-make-tags-matcher :around #'vertico-enforce-basic-completion)
+     (advice-add #'org-agenda-filter :around #'vertico-enforce-basic-completion)
 
 
-File: docvbzsWD.info,  Node: tmm-menubar,  Next: ffap-menu,  Prev: org-agenda-filter and org-tags-view,  Up: Problematic completion commands
+File: docOP7Vo9.info,  Node: tmm-menubar,  Next: ffap-menu,  Prev: org-agenda-filter and org-tags-view,  Up: Problematic completion commands
 
-11.3 ‘tmm-menubar’
+12.3 ‘tmm-menubar’
 ==================
 
 The text menu bar works well with Vertico but always shows a
@@ -786,9 +799,9 @@ overwrite the default F10 keybinding.
      (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
 
 
-File: docvbzsWD.info,  Node: ffap-menu,  Next: completion-table-dynamic,  Prev: tmm-menubar,  Up: Problematic completion commands
+File: docOP7Vo9.info,  Node: ffap-menu,  Next: completion-table-dynamic,  Prev: tmm-menubar,  Up: Problematic completion commands
 
-11.4 ‘ffap-menu’
+12.4 ‘ffap-menu’
 ================
 
 The command ‘ffap-menu’ shows the ‘*Completions*’ buffer by default like
@@ -802,9 +815,9 @@ buffer can be disabled as follows.
                      (apply args))))
 
 
-File: docvbzsWD.info,  Node: completion-table-dynamic,  Next: Submitting the empty string,  Prev: ffap-menu,  Up: Problematic completion commands
+File: docOP7Vo9.info,  Node: completion-table-dynamic,  Next: Submitting the empty string,  Prev: ffap-menu,  Up: Problematic completion commands
 
-11.5 ‘completion-table-dynamic’
+12.5 ‘completion-table-dynamic’
 ===============================
 
 Dynamic completion tables (‘completion-table-dynamic’,
@@ -827,9 +840,9 @@ Orderless documentation because of ‘completion-table-dynamic’.
                                (concat str "3")))))
 
 
-File: docvbzsWD.info,  Node: Submitting the empty string,  Next: Tramp hostname and username completion,  Prev: completion-table-dynamic,  Up: Problematic completion commands
+File: docOP7Vo9.info,  Node: Submitting the empty string,  Next: Tramp hostname and username completion,  Prev: completion-table-dynamic,  Up: Problematic completion commands
 
-11.6 Submitting the empty string
+12.6 Submitting the empty string
 ================================
 
 The commands ‘multi-occur’, ‘auto-insert’, ‘bbdb-create’ read multiple
@@ -854,9 +867,9 @@ and Vertico preselects the prompt, such that exiting with the empty
 string is possible by pressing ‘RET’ only.
 
 
-File: docvbzsWD.info,  Node: Tramp hostname and username completion,  Prev: Submitting the empty string,  Up: Problematic completion commands
+File: docOP7Vo9.info,  Node: Tramp hostname and username completion,  Prev: Submitting the empty string,  Up: Problematic completion commands
 
-11.7 Tramp hostname and username completion
+12.7 Tramp hostname and username completion
 ===========================================
 
 *NOTE:* On upcoming Emacs 29.2 and Tramp 2.6.1.5 the workarounds
@@ -898,27 +911,28 @@ preferred style for non-remote files.
 
 Tag Table:
 Node: Top212
-Node: Features1755
-Node: Key bindings2779
-Node: Configuration4524
-Node: Completion styles and TAB completion8762
-Node: Completion-at-point and completion-in-region11347
-Node: Extensions12685
-Node: Configure Vertico per command or completion category16604
-Node: Complementary packages21194
-Node: Child frames and Popups23451
-Node: Alternatives24828
-Node: Resources27704
-Node: Contributions29195
-Node: Debugging Vertico29470
-Node: Problematic completion commands30282
-Node: org-refile30895
-Node: org-agenda-filter and org-tags-view32830
-Node: tmm-menubar34086
-Node: ffap-menu34710
-Node: completion-table-dynamic35305
-Node: Submitting the empty string36512
-Node: Tramp hostname and username completion37969
+Node: Features1772
+Node: Installation2796
+Node: Key bindings3163
+Node: Configuration5364
+Node: Completion styles and TAB completion9453
+Node: Completion-at-point and completion-in-region12038
+Node: Extensions13376
+Node: Configure Vertico per command or completion category17295
+Node: Complementary packages21885
+Node: Child frames and Popups24142
+Node: Alternatives25519
+Node: Resources28395
+Node: Contributions30128
+Node: Debugging Vertico30405
+Node: Problematic completion commands31217
+Node: org-refile31830
+Node: org-agenda-filter and org-tags-view33773
+Node: tmm-menubar35037
+Node: ffap-menu35661
+Node: completion-table-dynamic36256
+Node: Submitting the empty string37463
+Node: Tramp hostname and username completion38920
 
 End Tag Table
 
