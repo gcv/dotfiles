@@ -5,7 +5,7 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: convenience
-;; Version: 1.0
+;; Version: 1.1
 ;; Homepage: https://github.com/oantolin/embark
 ;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0") (embark "1.0") (consult "1.0"))
 
@@ -103,11 +103,13 @@
 (setf (alist-get 'consult-location embark-default-action-overrides)
       #'embark-consult-goto-location)
 
-(defun embark-consult-export-occur (lines)
+(defun embark-consult-export-location-occur (lines)
   "Create an occur mode buffer listing LINES.
-The elements of LINES are assumed to be values of category `consult-line'."
+The elements of LINES should be completion candidates with
+category `consult-line'."
   (let ((buf (generate-new-buffer "*Embark Export Occur*"))
         (mouse-msg "mouse-2: go to this occurrence")
+        (inhibit-read-only t)
         last-buf)
     (with-current-buffer buf
       (dolist (line lines)
@@ -115,31 +117,79 @@ The elements of LINES are assumed to be values of category `consult-line'."
             ((`(,loc . ,num) (consult--get-location line))
              ;; the text properties added to the following strings are
              ;; taken from occur-engine
-             (lineno (propertize (format "%7d:" num)
-                                 'occur-prefix t
-                                 ;; Allow insertion of text at the end
-                                 ;; of the prefix (for Occur Edit mode).
-                                 'front-sticky t
-                                 'rear-nonsticky t
-                                 'occur-target loc
-                                 'follow-link t
-                                 'help-echo mouse-msg))
+             (lineno (propertize
+                      (format "%7d:" num)
+                      'occur-prefix t
+                      ;; Allow insertion of text at the end
+                      ;; of the prefix (for Occur Edit mode).
+                      'front-sticky t
+                      'rear-nonsticky t
+                      'read-only t
+                      'occur-target loc
+                      'follow-link t
+                      'help-echo mouse-msg
+                      'font-lock-face list-matching-lines-prefix-face
+                      'mouse-face 'highlight))
              (contents (propertize (embark-consult--strip line)
                                    'occur-target loc
                                    'occur-match t
                                    'follow-link t
-                                   'help-echo mouse-msg))
+                                   'help-echo mouse-msg
+                                   'mouse-face 'highlight))
              (nl (propertize "\n" 'occur-target loc))
              (this-buf (marker-buffer loc)))
           (unless (eq this-buf last-buf)
             (insert (propertize
                      (format "lines from buffer: %s\n" this-buf)
-                     'face list-matching-lines-buffer-name-face))
+                     'face list-matching-lines-buffer-name-face
+                     'read-only t))
             (setq last-buf this-buf))
-          (insert (concat lineno contents nl))))
+          (insert lineno contents nl)))
       (goto-char (point-min))
       (occur-mode))
     (pop-to-buffer buf)))
+
+(defun embark-consult-export-location-grep (lines)
+  "Create a grep mode buffer listing LINES.
+Any LINES that come from a buffer which is not visiting a file
+will be excluded from the grep buffer, since grep mode only works
+with files.  The elements of LINES should be completion
+candidates with category `consult-location'.  No matches will be
+highlighted in the exported buffer, since the `consult-location'
+candidates do not carry that information."
+  (let (non-file-buffers)
+    (embark-consult--export-grep
+     :header "Exported line search results (file-backed buffers only):\n\n"
+     :lines lines
+     :insert
+     (lambda (lines)
+       (let ((count 0))
+         (dolist (line lines)
+           (pcase-let* ((`(,loc . ,num) (consult--get-location line))
+                        (lineno (format "%d" num))
+                        (contents (embark-consult--strip line))
+                        (buffer (marker-buffer loc))
+                        (file (buffer-file-name buffer)))
+             (if (null file)
+                 (cl-pushnew buffer non-file-buffers)
+               (insert (file-relative-name file) ":" lineno ":" contents "\n")
+               (cl-incf count))))
+         count))
+     :footer
+     (lambda ()
+       (when non-file-buffers
+         (let ((start (goto-char (point-max))))
+           (insert "\nSome results were in buffers with no associated file"
+                   " and are missing\nfrom the exported result:\n")
+           (dolist (buf non-file-buffers)
+             (insert "- " (buffer-name buf) "\n"))
+           (insert "\nEither save the buffers or use the"
+                   " `embark-consult-export-location-occur'\nexporter.")
+           (message "This exporter does not support non-file buffers: %s"
+                    non-file-buffers)
+           (add-text-properties
+            start (point-max)
+            '(read-only t wgrep-footer t front-sticky t))))))))
 
 (defun embark-consult--upgrade-markers ()
   "Upgrade consult-location cheap markers to real markers.
@@ -149,8 +199,11 @@ This function is meant to be added to `embark-collect-mode-hook'."
       (when (car entry)
         (consult--get-location (car entry))))))
 
+;; Set default `occur-mode' based exporter for consult-line,
+;; consult-line-multi, consult-outline and alike Another option is
+;; using grep-mode by using `embark-consult-export-location-grep'
 (setf (alist-get 'consult-location embark-exporters-alist)
-      #'embark-consult-export-occur)
+      #'embark-consult-export-location-occur)
 (cl-pushnew #'embark-consult--upgrade-markers embark-collect-mode-hook)
 
 ;;; Support for consult-grep
@@ -159,37 +212,24 @@ This function is meant to be added to `embark-collect-mode-hook'."
 (defvar grep-num-matches-found)
 (declare-function wgrep-setup "ext:wgrep")
 
-(defvar-keymap embark-consult-revert-map
-  :doc "A keymap with a binding for revert-buffer."
+(defvar-keymap embark-consult-rerun-map
+  :doc "A keymap with a binding for `embark-rerun-collect-or-export'."
   :parent nil
-  "g" #'revert-buffer)
+  "g" #'embark-rerun-collect-or-export)
 
-(defun embark-consult--wgrep-prepare ()
-  "Mark header as read-only."
-  (goto-char (point-min))
-  (forward-line 2)
-  (add-text-properties (point-min) (point)
-                       '(read-only t wgrep-header t front-sticky t)))
-
-(defun embark-consult-export-grep (lines)
-  "Create a grep mode buffer listing LINES."
-  (let ((buf (generate-new-buffer "*Embark Export Grep*"))
-        (count 0)
-        prop)
+(cl-defun embark-consult--export-grep (&key header lines insert footer)
+  "Create a grep mode buffer listing LINES.
+The HEADER string is inserted at the top of the buffer.  The
+function INSERT is called to insert the LINES and should return a
+count of the matches (there may be more than one match per line).
+The function FOOTER is called to insert a footer."
+  (let ((buf (generate-new-buffer "*Embark Export Grep*")))
     (with-current-buffer buf
-      (insert (propertize "Exported grep results:\n\n" 'wgrep-header t))
-      (dolist (line lines) (insert line "\n"))
-      (goto-char (point-min))
-      (while (setq prop (text-property-search-forward
-                         'face 'consult-highlight-match t))
-        (cl-incf count)
-        (put-text-property (prop-match-beginning prop)
-                           (prop-match-end prop)
-                           'font-lock-face
-                           'match))
-      (goto-char (point-min))
-      (grep-mode)
-      (when (> count 0)
+      (insert (propertize header 'wgrep-header t 'front-sticky t))
+      (let ((count (funcall insert lines)))
+        (funcall footer)
+        (goto-char (point-min))
+        (grep-mode)
         (setq-local grep-num-matches-found count
                     mode-line-process grep-mode-line-matches))
       ;; Make this buffer current for next/previous-error
@@ -197,16 +237,38 @@ This function is meant to be added to `embark-collect-mode-hook'."
       ;; Set up keymap before possible wgrep-setup, so that wgrep
       ;; restores our binding too when the user finishes editing.
       (use-local-map (make-composed-keymap
-                      embark-consult-revert-map
+                      embark-consult-rerun-map
                       (current-local-map)))
       ;; TODO Wgrep 3.0 and development versions use different names for the
       ;; parser variable.
       (defvar wgrep-header/footer-parser)
       (defvar wgrep-header&footer-parser)
-      (setq-local wgrep-header/footer-parser #'embark-consult--wgrep-prepare
-                  wgrep-header&footer-parser #'embark-consult--wgrep-prepare)
+      (setq-local wgrep-header/footer-parser #'ignore
+                  wgrep-header&footer-parser #'ignore)
       (when (fboundp 'wgrep-setup) (wgrep-setup)))
     (pop-to-buffer buf)))
+
+(defun embark-consult-export-grep (lines)
+  "Create a grep mode buffer listing LINES.
+The elements of LINES should be completion candidates with
+category `consult-grep'."
+  (embark-consult--export-grep
+   :header "Exported grep results:\n\n"
+   :lines lines
+   :insert
+   (lambda (lines)
+     (dolist (line lines) (insert line "\n"))
+     (goto-char (point-min))
+     (let ((count 0) prop)
+       (while (setq prop (text-property-search-forward
+                          'face 'consult-highlight-match t))
+         (cl-incf count)
+         (put-text-property (prop-match-beginning prop)
+                            (prop-match-end prop)
+                            'font-lock-face
+                            'match))
+       count))
+   :footer #'ignore))
 
 (defun embark-consult-goto-grep (location)
   "Go to LOCATION, which should be a string with a grep match."
@@ -246,12 +308,12 @@ This function is meant to be added to `embark-collect-mode-hook'."
                        'minibuffer-exit-hook
                        (lambda ()
                          (throw 'xref-items
-                           (xref-items
-                            (or
-                             (plist-get
-                              (embark--maybe-transform-candidates)
-                              :candidates)
-                             (user-error "No candidates for export")))))
+                                (xref-items
+                                 (or
+                                  (plist-get
+                                   (embark--maybe-transform-candidates)
+                                   :candidates)
+                                  (user-error "No candidates for export")))))
                        nil t))
                   (consult-xref fetcher))))))
         `((fetched-xrefs . ,(xref-items items))
