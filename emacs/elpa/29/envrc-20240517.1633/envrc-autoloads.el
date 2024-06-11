@@ -47,8 +47,9 @@ If called from Lisp, toggle the mode if ARG is `toggle'.
 Enable the mode if ARG is nil, omitted, or is a positive number.
 Disable the mode if ARG is a negative number.
 
-Envrc mode is enabled in all buffers where `(lambda nil (unless (or
-(minibufferp) (file-remote-p default-directory)) (envrc-mode 1)))' would do it.
+Envrc mode is enabled in all buffers where `(lambda nil (when (and (not
+(minibufferp)) (not (file-remote-p default-directory)) (executable-find
+envrc-direnv-executable)) (envrc-mode 1)))' would do it.
 
 See `envrc-mode' for more information on Envrc mode.
 

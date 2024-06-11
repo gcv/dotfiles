@@ -5,8 +5,8 @@
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;; Keywords: processes, tools
 ;; Homepage: https://github.com/purcell/envrc
-;; Package-Requires: ((seq "2") (emacs "25.1") (inheritenv "0.1"))
-;; Package-Version: 0.6
+;; Package-Requires: ((emacs "26.1") (inheritenv "0.1"))
+;; Package-Version: 0.11
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -79,6 +79,11 @@ Messages are written into the *envrc-debug* buffer."
   "Whether envrc will update environment when changing directory in eshell."
   :type 'boolean)
 
+(defcustom envrc-show-summary-in-minibuffer t
+  "When non-nil, show a summary of the changes made by direnv in the minibuffer."
+  :group 'envrc
+  :type 'boolean)
+
 (defcustom envrc-direnv-executable "direnv"
   "The direnv executable used by envrc."
   :type 'string)
@@ -112,14 +117,14 @@ You can set this to nil to disable the lighter."
     map)
   "Keymap for commands in `envrc-mode'.
 See `envrc-mode-map' for how to assign a prefix binding to these."
-  :type 'keymap)
+  :type '(restricted-sexp :match-alternatives (keymapp)))
 (fset 'envrc-command-map envrc-command-map)
 
 (defcustom envrc-mode-map (make-sparse-keymap)
   "Keymap for `envrc-mode'.
 To access `envrc-command-map' from this map, give it a prefix keybinding,
 e.g. (define-key envrc-mode-map (kbd \"C-c e\") \\='envrc-command-map)"
-  :type 'keymap)
+  :type '(restricted-sexp :match-alternatives (keymapp)))
 
 ;;;###autoload
 (define-minor-mode envrc-mode
@@ -137,7 +142,8 @@ e.g. (define-key envrc-mode-map (kbd \"C-c e\") \\='envrc-command-map)"
 
 ;;;###autoload
 (define-globalized-minor-mode envrc-global-mode envrc-mode
-  (lambda () (unless (or (minibufferp) (file-remote-p default-directory))
+  (lambda () (when (and (not (minibufferp)) (not (file-remote-p default-directory))
+                        (executable-find envrc-direnv-executable))
                (envrc-mode 1))))
 
 (defface envrc-mode-line-on-face '((t :inherit success))
@@ -232,6 +238,32 @@ MSG and ARGS are as for that function."
       (insert (apply 'format msg args))
       (newline))))
 
+(defun envrc--summarise-changes (items)
+  "Create a summary string for ITEMS."
+  (if items
+      (cl-loop for (name . val) in items
+               if (not (string-prefix-p "DIRENV_" name))
+               collect (cons name
+                             (if val
+                                 (if (let ((process-environment (default-value 'process-environment)))
+                                       (getenv name))
+                                     '("~" diff-changed)
+                                   '("+" diff-added))
+                               '("-" diff-removed)))
+               into entries
+               finally return (cl-loop for (name prefix face) in (seq-sort-by 'car 'string< entries)
+                                       collect (propertize (concat prefix name) 'face face) into strings
+                                       finally return (string-join strings " ")))
+    "no changes"))
+
+(defun envrc--show-summary (result directory)
+  "Summarise successful RESULT in the minibuffer.
+DIRECTORY is the directory in which the environment changes."
+  (message "direnv: %s %s"
+           (envrc--summarise-changes result)
+           (propertize (concat "(" (abbreviate-file-name (directory-file-name directory)) ")")
+                       'face 'font-lock-comment-face)))
+
 (defun envrc--export (env-dir)
   "Export the env vars for ENV-DIR using direnv.
 Return value is either \\='error, \\='none, or an alist of environment
@@ -255,13 +287,15 @@ variable names and values."
                               (insert-file-contents stderr-file)
                               (buffer-string))
                             (buffer-string))
-              (if (zerop exit-code)
+              (if (eq 0 exit-code) ;; zerop is not an option, as exit-code may sometimes be a symbol
                   (progn
-                    (message "Direnv succeeded in %s" env-dir)
                     (if (zerop (buffer-size))
                         (setq result 'none)
                       (goto-char (point-min))
-                      (setq result (let ((json-key-type 'string)) (json-read-object)))))
+                      (prog1
+                          (setq result (let ((json-key-type 'string)) (json-read-object)))
+                        (when envrc-show-summary-in-minibuffer
+                          (envrc--show-summary result env-dir)))))
                 (message "Direnv failed in %s" env-dir)
                 (setq result 'error))
               (envrc--at-end-of-special-buffer "*envrc*"
