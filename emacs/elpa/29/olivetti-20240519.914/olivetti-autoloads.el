@@ -31,6 +31,8 @@ evaluate `olivetti-mode'.
 The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
+\\{olivetti-mode-map}
+
 (fn &optional ARG)" t)
 (register-definition-prefixes "olivetti" '("olivetti-"))
 
