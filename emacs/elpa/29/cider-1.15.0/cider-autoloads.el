@@ -108,7 +108,12 @@ For example, to jack in to leiningen which is assigned to prefix arg 2 type
 M-2 \\[cider-jack-in-universal].
 
 (fn ARG)" t)
-(with-eval-after-load 'clojure-mode (define-key clojure-mode-map (kbd "C-c M-x") #'cider) (define-key clojure-mode-map (kbd "C-c M-j") #'cider-jack-in-clj) (define-key clojure-mode-map (kbd "C-c M-J") #'cider-jack-in-cljs) (define-key clojure-mode-map (kbd "C-c M-c") #'cider-connect-clj) (define-key clojure-mode-map (kbd "C-c M-C") #'cider-connect-cljs) (define-key clojure-mode-map (kbd "C-c C-x") 'cider-start-map) (define-key clojure-mode-map (kbd "C-c C-s") 'sesman-map) (require 'sesman) (sesman-install-menu clojure-mode-map) (add-hook 'clojure-mode-hook (lambda nil (setq-local sesman-system 'CIDER))))
+(autoload 'cider--setup-clojure-major-mode "cider" "\
+Setup Cider key bindings on a Clojure mode's MODE-MAP and hooks in MODE-HOOK.
+
+(fn MODE-MAP MODE-HOOK)")
+(with-eval-after-load 'clojure-mode (cider--setup-clojure-major-mode clojure-mode-map 'clojure-mode-hook))
+(with-eval-after-load 'clojure-ts-mode (cider--setup-clojure-major-mode (with-suppressed-warnings ((free-vars clojure-ts-mode-map)) clojure-ts-mode-map) 'clojure-ts-mode-hook))
 (register-definition-prefixes "cider" '("cider-"))
 
 
@@ -169,10 +174,14 @@ No filter applied if the regexp is the empty string.
 
 ;;; Generated autoloads from cider-cheatsheet.el
 
-(autoload 'cider-cheatsheet "cider-cheatsheet" "\
-Navigate `cider-cheatsheet-hierarchy' with `completing-read'.
+(autoload 'cider-cheatsheet-select "cider-cheatsheet" "\
+Navigate cheatsheet sections and show documentation for selected var.
 
-When you make it to a Clojure var its doc buffer gets displayed." t)
+With a prefix argument FLAT, represent each candidate as a full path to var.
+
+(fn &optional FLAT)" t)
+(autoload 'cider-cheatsheet "cider-cheatsheet" "\
+Display cheatsheet in a popup buffer." t)
 (register-definition-prefixes "cider-cheatsheet" '("cider-cheatsheet-"))
 
 
@@ -427,8 +436,15 @@ Customize this variable to change how cider mode displays its status in the
 mode line.  The default value displays the current connection.  Set this
 variable to nil to disable the mode line entirely.")
 (custom-autoload 'cider-mode-line "cider-mode" t)
-(with-eval-after-load 'clojure-mode (easy-menu-define cider-clojure-mode-menu-open clojure-mode-map "Menu for Clojure mode.
-  This is displayed in `clojure-mode' buffers, if `cider-mode' is not active." `("CIDER" :visible (not cider-mode) ["Start a Clojure REPL" cider-jack-in-clj :help "Starts an nREPL server and connects a Clojure REPL to it."] ["Connect to a Clojure REPL" cider-connect-clj :help "Connects to a REPL that's already running."] ["Start a ClojureScript REPL" cider-jack-in-cljs :help "Starts an nREPL server and connects a ClojureScript REPL to it."] ["Connect to a ClojureScript REPL" cider-connect-cljs :help "Connects to a ClojureScript REPL that's already running."] ["Start a Clojure REPL, and a ClojureScript REPL" cider-jack-in-clj&cljs :help "Starts an nREPL server, connects a Clojure REPL to it, and then a ClojureScript REPL."] "--" ["View user manual" cider-view-manual])))
+(autoload 'cider--setup-menu-for-clojure-major-mode "cider-mode" "\
+Setup a Cider menu for a Clojure major mode's MODE-MAP.
+
+This menu works as an easy entry-point into CIDER.  Even if cider.el isn't
+loaded yet, this will be shown in Clojure buffers next to the Clojure menu.
+
+(fn MODE-MAP)")
+(with-eval-after-load 'clojure-mode (cider--setup-menu-for-clojure-major-mode clojure-mode-map))
+(with-eval-after-load 'clojure-ts-mode (cider--setup-menu-for-clojure-major-mode (with-suppressed-warnings ((free-vars clojure-ts-mode-map)) clojure-ts-mode-map)))
 (autoload 'cider-mode "cider-mode" "\
 Minor mode for REPL interaction from a Clojure buffer.
 
@@ -476,10 +492,11 @@ indirectly load via require\".
 
 (fn &optional PROMPT)" t)
 (autoload 'cider-ns-refresh "cider-ns" "\
-Reload modified and unloaded namespaces on the classpath.
+Reload modified and unloaded namespaces, using the Reloaded Workflow.
+Uses the configured 'refresh dirs' (defaults to the classpath dirs).
 
 With a single prefix argument, or if MODE is `refresh-all', reload all
-namespaces on the classpath unconditionally.
+namespaces on the classpath dirs unconditionally.
 
 With a double prefix argument, or if MODE is `clear', clear the state of
 the namespace tracker before reloading.  This is useful for recovering from

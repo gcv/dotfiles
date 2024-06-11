@@ -11,8 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://www.github.com/clojure-emacs/cider
-;; Version: 1.13.1
-;; Package-Requires: ((emacs "26") (clojure-mode "5.18.1") (parseedn "1.2.1") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2") (transient "0.4.1"))
+;; Version: 1.15.0
+;; Package-Requires: ((emacs "26") (clojure-mode "5.19") (parseedn "1.2.1") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2") (transient "0.4.1"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -93,10 +93,10 @@
 (require 'sesman)
 (require 'package)
 
-(defconst cider-version "1.13.1"
+(defconst cider-version "1.15.0"
   "The current version of CIDER.")
 
-(defconst cider-codename "Santiago"
+(defconst cider-codename "Cogne"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -141,7 +141,7 @@
            (null (executable-find "clojure")))
       "powershell"
     "clojure")
-  "The command used to execute clojure with tools.deps (requires Clojure 1.9+).
+  "The command used to execute clojure with tools.deps.
 Don't use clj here, as it doesn't work when spawned from Emacs due to it
 using rlwrap.  If on Windows and no \"clojure\" executable is found we
 default to \"powershell\"."
@@ -172,6 +172,18 @@ then concatenated into the \"-M[your-aliases]:cider/nrepl\" form."
   :type 'string
   :safe #'stringp
   :package-version '(cider . "1.1"))
+
+(defcustom cider-clojure-cli-global-aliases
+  nil
+  "Global aliases to include when jacking in with the clojure CLI.
+This value should be a string of the form \":foo:bar\", and
+will be prepended to the value of `cider-clojure-cli-aliases'.
+Alias names should be of the form \":foo:bar\".
+Leading \"-A\" \"-M\" \"-T\" or \"-X\" are stripped from aliases
+then concatenated into the \"-M[your-aliases]:cider/nrepl\" form."
+  :type 'string
+  :safe #'stringp
+  :package-version '(cider . "1.14"))
 
 (defcustom cider-shadow-cljs-command
   "npx shadow-cljs"
@@ -259,6 +271,23 @@ By default we favor the project-specific shadow-cljs over the system-wide."
   :safe #'stringp
   :package-version '(cider . "1.6.0"))
 
+(defcustom cider-basilisp-command
+  "basilisp"
+  "The command used to execute Basilisp.
+
+   If Basilisp is installed in a virtual environment, update this to the
+   full path of the Basilisp executable within that virtual environment."
+  :type 'string
+  :safe #'stringp
+  :package-version '(cider . "1.14.0"))
+
+(defcustom cider-basilisp-parameters
+  "nrepl-server"
+  "Params passed to Basilisp to start an nREPL server via `cider-jack-in'."
+  :type 'string
+  :safe #'stringp
+  :package-version '(cider . "1.14.0"))
+
 (make-obsolete-variable 'cider-lein-global-options 'cider-lein-parameters "1.8.0")
 (make-obsolete-variable 'cider-boot-global-options 'cider-boot-parameters "1.8.0")
 (make-obsolete-variable 'cider-clojure-cli-global-options 'cider-clojure-cli-parameters "1.8.0")
@@ -282,7 +311,8 @@ to Leiningen."
                  (const shadow-cljs)
                  (const gradle)
                  (const babashka)
-                 (const nbb))
+                 (const nbb)
+                 (const basilisp))
   :safe #'symbolp
   :package-version '(cider . "0.9.0"))
 
@@ -302,6 +332,7 @@ command when there is no ambiguity."
                  (const gradle)
                  (const babashka)
                  (const nbb)
+                 (const basilisp)
                  (const :tag "Always ask" nil))
   :safe #'symbolp
   :package-version '(cider . "0.13.0"))
@@ -343,6 +374,14 @@ The repl dependendcies are most likely to be nREPL middlewares."
   :safe #'booleanp
   :version '(cider . "0.11.0"))
 
+(defcustom cider-enable-nrepl-jvmti-agent nil
+  "When t, add `-Djdk.attach.allowAttachSelf' to the command line arguments.
+This allows nREPL JVMTI agent to be loaded.  It is needed for evaluation
+interruption to properly work on Java 21 and above."
+  :type 'boolean
+  :safe #'booleanp
+  :version '(cider . "1.15.0"))
+
 (defcustom cider-offer-to-open-cljs-app-in-browser t
   "When nil, do not offer to open ClojureScript apps in a browser on connect."
   :type 'boolean
@@ -366,7 +405,8 @@ Sub-match 1 must be the project path.")
   '((clojure-cli (:prefix-arg 1 :cmd (:jack-in-type clj  :project-type clojure-cli :edit-project-dir t)))
     (lein        (:prefix-arg 2 :cmd (:jack-in-type clj  :project-type lein :edit-project-dir t)))
     (babashka    (:prefix-arg 3 :cmd (:jack-in-type clj  :project-type babashka :edit-project-dir t)))
-    (nbb         (:prefix-arg 4 :cmd (:jack-in-type cljs :project-type nbb :cljs-repl-type nbb :edit-project-dir t))))
+    (nbb         (:prefix-arg 4 :cmd (:jack-in-type cljs :project-type nbb :cljs-repl-type nbb :edit-project-dir t)))
+    (basilisp    (:prefix-arg 5 :cmd (:jack-in-type clj  :project-type basilisp :edit-project-dir t))))
   "The list of project tools that are supported by the universal jack in command.
 
 Each item in the list consists of the tool name and its plist options.
@@ -398,6 +438,7 @@ The plist supports the following keys
     ('shadow-cljs cider-shadow-cljs-command)
     ('gradle      cider-gradle-command)
     ('nbb         cider-nbb-command)
+    ('basilisp    cider-basilisp-command)
     (_            (user-error "Unsupported project type `%S'" project-type))))
 
 (defcustom cider-enrich-classpath nil
@@ -462,6 +503,7 @@ Throws an error if PROJECT-TYPE is unknown."
     ;; relative path like "./gradlew" use locate file instead of checking
     ;; the exec-path
     ('gradle (cider--resolve-project-command cider-gradle-command))
+    ('basilisp (cider--resolve-command cider-basilisp-command))
     (_ (user-error "Unsupported project type `%S'" project-type))))
 
 (defun cider-jack-in-global-options (project-type)
@@ -474,6 +516,7 @@ Throws an error if PROJECT-TYPE is unknown."
     ('shadow-cljs cider-shadow-cljs-global-options)
     ('gradle      cider-gradle-global-options)
     ('nbb         cider-nbb-global-options)
+    ('basilisp    nil)
     (_            (user-error "Unsupported project type `%S'" project-type))))
 
 (defun cider-jack-in-params (project-type)
@@ -490,6 +533,7 @@ Throws an error if PROJECT-TYPE is unknown."
     ('shadow-cljs cider-shadow-cljs-parameters)
     ('gradle      cider-gradle-parameters)
     ('nbb         cider-nbb-parameters)
+    ('basilisp    cider-basilisp-parameters)
     (_            (user-error "Unsupported project type `%S'" project-type))))
 
 
@@ -498,7 +542,7 @@ Throws an error if PROJECT-TYPE is unknown."
   "List of dependencies where elements are lists of artifact name and version.")
 (put 'cider-jack-in-dependencies 'risky-local-variable t)
 
-(defcustom cider-injected-nrepl-version "1.0.0"
+(defcustom cider-injected-nrepl-version "1.2.0-beta2"
   "The version of nREPL injected on jack-in.
 We inject the newest known version of nREPL just in case
 your version of Boot or Leiningen is bundling an older one."
@@ -521,13 +565,15 @@ the artifact.")
 (defconst cider-clojure-artifact-id "org.clojure/clojure"
   "Artifact identifier for Clojure.")
 
-(defconst cider-minimum-clojure-version "1.8.0"
+(defconst cider-minimum-clojure-version "1.10.0"
   "Minimum supported version of Clojure.")
 
-(defconst cider-latest-clojure-version "1.10.1"
-  "Latest supported version of Clojure.")
+(defconst cider-latest-clojure-version "1.11.3"
+  "Latest (newest) version of Clojure.
 
-(defconst cider-required-middleware-version "0.45.0"
+Used when `cider-jack-in-auto-inject-clojure' is set to `latest'.")
+
+(defconst cider-required-middleware-version "0.49.0"
   "The CIDER nREPL version that's known to work properly with CIDER.")
 
 (defcustom cider-injected-middleware-version cider-required-middleware-version
@@ -598,7 +644,7 @@ returned by this function does not include keyword arguments."
   (let ((plugins (if cider-enrich-classpath
                      (append cider-jack-in-lein-plugins
                              `(("cider/cider-nrepl" ,cider-injected-middleware-version)
-                               ("mx.cider/lein-enrich-classpath" "1.19.0")))
+                               ("mx.cider/lein-enrich-classpath" "1.19.3")))
                    (append cider-jack-in-lein-plugins
                            `(("cider/cider-nrepl" ,cider-injected-middleware-version))))))
     (thread-last plugins
@@ -722,6 +768,8 @@ group:artifact:version notation and MIDDLEWARES are
 prepared as arguments to Clojurephant's ClojureNRepl task."
   (concat global-opts
           (unless (seq-empty-p global-opts) " ")
+          (when cider-enable-nrepl-jvmti-agent
+            "-Pjdk.attach.allowAttachSelf ")
           (cider--gradle-jack-in-property (append (cider--jack-in-required-dependencies) dependencies))
           " "
           params
@@ -773,7 +821,9 @@ removed, LEIN-PLUGINS, LEIN-MIDDLEWARES and finally PARAMS."
                       (seq-map (lambda (middleware)
                                  (concat "update-in :middleware conj "
                                          middleware))
-                               lein-middlewares))
+                               lein-middlewares)
+                      (when cider-enable-nrepl-jvmti-agent
+                        `(,(concat "update-in :jvm-opts conj -Djdk.attach.allowAttachSelf"))))
               " -- ")
    " -- "
    (if (not cider-enrich-classpath)
@@ -817,6 +867,23 @@ rules to quote it."
          (utf-16le-command (encode-coding-string command 'utf-16le)))
     (format "-encodedCommand %s" (base64-encode-string utf-16le-command t))))
 
+
+(defun cider--combined-aliases ()
+  "Creates the combined ailases as stringe separated by ':'."
+  (let ((final-cider-clojure-cli-aliases
+         (cond ((and cider-clojure-cli-global-aliases cider-clojure-cli-aliases)
+                (concat cider-clojure-cli-global-aliases ":" cider-clojure-cli-aliases))
+               (cider-clojure-cli-global-aliases cider-clojure-cli-global-aliases)
+               (t cider-clojure-cli-aliases))))
+    (if final-cider-clojure-cli-aliases
+        ;; remove exec-opts flags -A -M -T or -X from cider-clojure-cli-aliases
+        ;; concatenated with :cider/nrepl to ensure :cider/nrepl comes last
+        (let ((aliases (format "%s" (replace-regexp-in-string "^-\\(A\\|M\\|T\\|X\\)" "" final-cider-clojure-cli-aliases))))
+          (if (string-prefix-p ":" aliases)
+              aliases
+            (concat ":" aliases)))
+      "")))
+
 (defun cider-clojure-cli-jack-in-dependencies (global-options params dependencies &optional command)
   "Create Clojure tools.deps jack-in dependencies.
 Does so by concatenating DEPENDENCIES, PARAMS and GLOBAL-OPTIONS into a
@@ -843,21 +910,18 @@ your aliases contain any mains, the cider/nrepl one will be the one used."
                       (cider-jack-in-normalized-nrepl-middlewares)
                       ","))
          (main-opts (format "\"-m\" \"nrepl.cmdline\" \"--middleware\" \"[%s]\"" middleware))
-         (deps (format "{:deps {%s} :aliases {:cider/nrepl {:main-opts [%s]}}}"
-                       (string-join all-deps " ") main-opts))
+         (deps (format "{:deps {%s} :aliases {:cider/nrepl {%s:main-opts [%s]}}}"
+                       (string-join all-deps " ")
+                       (if cider-enable-nrepl-jvmti-agent
+                           ":jvm-opts [\"-Djdk.attach.allowAttachSelf\"], "
+                         "")
+                       main-opts))
          (deps-quoted (cider--shell-quote-argument deps command)))
     (format "%s-Sdeps %s -M%s:cider/nrepl%s"
             ;; TODO: global-options are deprecated and should be removed in CIDER 2.0
             (if global-options (format "%s " global-options) "")
             deps-quoted
-            (if cider-clojure-cli-aliases
-                ;; remove exec-opts flags -A -M -T or -X from cider-clojure-cli-aliases
-                ;; concatenated with :cider/nrepl to ensure :cider/nrepl comes last
-                (let ((aliases (format "%s" (replace-regexp-in-string "^-\\(A\\|M\\|T\\|X\\)" "" cider-clojure-cli-aliases))))
-                  (if (string-prefix-p ":" aliases)
-                      aliases
-                    (concat ":" aliases)))
-              "")
+            (cider--combined-aliases)
             (if params (format " %s" params) ""))))
 
 (defun cider-shadow-cljs-jack-in-dependencies (global-opts params dependencies)
@@ -937,6 +1001,7 @@ middleware and dependencies."
            global-opts
            (unless (seq-empty-p global-opts) " ")
            params))
+    ('basilisp params)
     (_ (error "Unsupported project type `%S'" project-type))))
 
 
@@ -1206,7 +1271,7 @@ It's intended to be used in your Emacs config."
 (defcustom cider-default-cljs-repl nil
   "The default ClojureScript REPL to start.
 This affects commands like `cider-jack-in-cljs'.  Generally it's
-intended to be set via .dir-locals.el for individual projects, as its
+intended to be set via .dir-locals.el for individual projects, as it's
 relatively unlikely you'd like to use the same type of REPL in each project
 you're working on."
   :type '(choice (const :tag "Figwheel" figwheel)
@@ -1219,13 +1284,10 @@ you're working on."
                  (const :tag "Shadow w/o Server" shadow-select)
                  (const :tag "Krell"    krell)
                  (const :tag "Nbb"      nbb)
+                 (const :tag "Basilisp" basilisp)
                  (const :tag "Custom"   custom))
   :safe #'symbolp
   :package-version '(cider . "0.17.0"))
-
-(make-obsolete-variable 'cider-cljs-lein-repl 'cider-default-cljs-repl "0.17")
-(make-obsolete-variable 'cider-cljs-boot-repl 'cider-default-cljs-repl "0.17")
-(make-obsolete-variable 'cider-cljs-gradle-repl 'cider-default-cljs-repl "0.17")
 
 (defvar cider--select-cljs-repl-history nil)
 (defun cider-select-cljs-repl (&optional default)
@@ -2016,7 +2078,8 @@ PROJECT-DIR defaults to current project."
                         (shadow-cljs . "shadow-cljs.edn")
                         (gradle      . "build.gradle")
                         (gradle      . "build.gradle.kts")
-                        (nbb         . "nbb.edn"))))
+                        (nbb         . "nbb.edn")
+                        (basilisp    . "basilisp.edn"))))
     (delq nil
           (mapcar (lambda (candidate)
                     (when (file-exists-p (cdr candidate))
@@ -2136,17 +2199,29 @@ alternative to the default is `cider-random-tip'."
 (add-hook 'cider-connected-hook #'cider--maybe-inspire-on-connect)
 
 ;;;###autoload
-(with-eval-after-load 'clojure-mode
-  (define-key clojure-mode-map (kbd "C-c M-x") #'cider)
-  (define-key clojure-mode-map (kbd "C-c M-j") #'cider-jack-in-clj)
-  (define-key clojure-mode-map (kbd "C-c M-J") #'cider-jack-in-cljs)
-  (define-key clojure-mode-map (kbd "C-c M-c") #'cider-connect-clj)
-  (define-key clojure-mode-map (kbd "C-c M-C") #'cider-connect-cljs)
-  (define-key clojure-mode-map (kbd "C-c C-x") 'cider-start-map)
-  (define-key clojure-mode-map (kbd "C-c C-s") 'sesman-map)
+(defun cider--setup-clojure-major-mode (mode-map mode-hook)
+  "Setup Cider key bindings on a Clojure mode's MODE-MAP and hooks in MODE-HOOK."
+  (define-key mode-map (kbd "C-c M-x") #'cider)
+  (define-key mode-map (kbd "C-c M-j") #'cider-jack-in-clj)
+  (define-key mode-map (kbd "C-c M-J") #'cider-jack-in-cljs)
+  (define-key mode-map (kbd "C-c M-c") #'cider-connect-clj)
+  (define-key mode-map (kbd "C-c M-C") #'cider-connect-cljs)
+  (define-key mode-map (kbd "C-c C-x") 'cider-start-map)
+  (define-key mode-map (kbd "C-c C-s") 'sesman-map)
   (require 'sesman)
-  (sesman-install-menu clojure-mode-map)
-  (add-hook 'clojure-mode-hook (lambda () (setq-local sesman-system 'CIDER))))
+  (sesman-install-menu mode-map)
+  (add-hook mode-hook (lambda () (setq-local sesman-system 'CIDER))))
+
+;;;###autoload
+(with-eval-after-load 'clojure-mode
+  (cider--setup-clojure-major-mode clojure-mode-map 'clojure-mode-hook))
+
+;;;###autoload
+(with-eval-after-load 'clojure-ts-mode
+  (cider--setup-clojure-major-mode
+   (with-suppressed-warnings ((free-vars clojure-ts-mode-map))
+     clojure-ts-mode-map)
+   'clojure-ts-mode-hook))
 
 (provide 'cider)
 
