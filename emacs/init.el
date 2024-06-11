@@ -545,6 +545,9 @@
 (when window-system (global-unset-key (kbd "C-z")))
 (global-set-key (kbd "M-h") 'ns-do-hide-emacs)
 
+(global-set-key (kbd "C-z") 'undo-only)
+(global-set-key (kbd "C-S-z") 'redo-only)
+
 (global-set-key (kbd "M-`") 'other-frame)
 (global-set-key (kbd "M-~") (lambda () (interactive) (other-frame -1)))
 (global-set-key (kbd "M-o") 'other-window)

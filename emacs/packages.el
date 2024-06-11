@@ -1219,17 +1219,6 @@
 (use-package terraform-mode)
 
 
-;;; TODO: Review when Emacs 28 comes out. Maybe just add C-z as a binding for
-;;; undo-only and C-S-z for undo-redo.
-(use-package undo-fu
-  :pin melpa
-
-  :bind
-  (("C-z" . undo-fu-only-undo)
-   ("C-S-z" . undo-fu-only-redo))
-  )
-
-
 (use-package vterm
   :pin melpa
 
