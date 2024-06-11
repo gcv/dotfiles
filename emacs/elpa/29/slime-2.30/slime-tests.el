@@ -26,8 +26,7 @@
 
 ;;;; Tests
 (require 'slime)
-(require 'ert nil t)
-(require 'ert "lib/ert" t) ;; look for bundled version for Emacs 23
+(require 'ert)
 (require 'cl-lib)
 (require 'bytecomp) ; byte-compile-current-file
 
@@ -1179,6 +1178,9 @@ on *DEBUGGER-HOOK*."
     "Signalling END-OF-FILE should invoke the debugger."
     '(((cl:error 'cl:end-of-file :stream cl:*standard-input*))
       ((cl:read-from-string "")))
+  (when (and noninteractive
+             (equal (slime-lisp-implementation-name) "ccl"))
+    (slime-skip-test "potential deadlocks"))
   (let ((value (slime-eval
                 `(cl:let ((condition nil))
                          (cl:with-simple-restart

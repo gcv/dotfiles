@@ -1311,7 +1311,7 @@ event was found."
 
 ;; FIXME: belongs to swank-repl.lisp
 (defun force-user-output ()
-  (force-output (connection.user-io *emacs-connection*)))
+  (really-finish-output (connection.user-io *emacs-connection*)))
 
 (add-hook *pre-reply-hook* 'force-user-output)
 
@@ -1427,7 +1427,7 @@ FEATURES: a list of keywords
 PACKAGE: a list (&key NAME PROMPT)
 VERSION: the protocol version"
   (let ((c *emacs-connection*))
-    (setq *slime-features* *features*)
+    (setq *slime-features* (augment-features))
     `(:pid ,(getpid) :style ,(connection.communication-style c)
       :encoding (:coding-systems
                  ,(loop for cs in '("utf-8-unix" "iso-latin-1-unix")
@@ -2575,49 +2575,58 @@ the filename of the module (or nil if the file doesn't exist).")
     (*print-level* . nil)
     (*print-length* . nil)))
 
-(defun apply-macro-expander (expander string)
+(defun apply-macro-expander (expander string &optional environment)
   (with-buffer-syntax ()
     (with-bindings *macroexpand-printer-bindings*
-      (prin1-to-string (funcall expander (from-string string))))))
+      (prin1-to-string (funcall expander (from-string string) environment)))))
 
-(defslimefun swank-macroexpand-1 (string)
-  (apply-macro-expander #'macroexpand-1 string))
+(defslimefun swank-macroexpand-1 (string &optional environment)
+  (apply-macro-expander #'macroexpand-1 string environment))
 
-(defslimefun swank-macroexpand (string)
-  (apply-macro-expander #'macroexpand string))
+(defslimefun swank-macroexpand (string &optional environment)
+  (apply-macro-expander #'macroexpand string environment))
 
-(defslimefun swank-macroexpand-all (string)
-  (apply-macro-expander #'macroexpand-all string))
+(defslimefun swank-macroexpand-all (string &optional environment)
+  (apply-macro-expander #'macroexpand-all string environment))
 
-(defslimefun swank-compiler-macroexpand-1 (string)
-  (apply-macro-expander #'compiler-macroexpand-1 string))
+(defslimefun swank-compiler-macroexpand-1 (string &optional environment)
+  (apply-macro-expander #'compiler-macroexpand-1 string environment))
 
-(defslimefun swank-compiler-macroexpand (string)
-  (apply-macro-expander #'compiler-macroexpand string))
+(defslimefun swank-compiler-macroexpand (string &optional environment)
+  (apply-macro-expander #'compiler-macroexpand string environment))
 
-(defslimefun swank-expand-1 (string)
-  (apply-macro-expander #'expand-1 string))
+(defslimefun swank-expand-1 (string &optional environment)
+  (apply-macro-expander #'expand-1 string environment))
 
-(defslimefun swank-expand (string)
-  (apply-macro-expander #'expand string))
+(defslimefun swank-expand (string &optional environment)
+  (apply-macro-expander #'expand string environment))
 
-(defun expand-1 (form)
-  (multiple-value-bind (expansion expanded?) (macroexpand-1 form)
+(defmacro current-environment (&environment env)
+  env)
+
+(defslimefun swank-macrolet-expand (macrolets expander string)
+  (with-buffer-syntax ()
+    (let ((macrolet-forms
+            '(current-environment)))
+      (loop for macrolet in macrolets
+            do (setf macrolet-forms
+                     `(macrolet ,(from-string macrolet) ,macrolet-forms )))
+      (funcall expander string (eval macrolet-forms)))))
+
+(defun expand-1 (form &optional environment)
+  (multiple-value-bind (expansion expanded?) (macroexpand-1 form environment)
     (if expanded?
         (values expansion t)
         (compiler-macroexpand-1 form))))
 
-(defun expand (form)
-  (expand-repeatedly #'expand-1 form))
-
-(defun expand-repeatedly (expander form)
+(defun expand (form &optional environment)
   (loop
-    (multiple-value-bind (expansion expanded?) (funcall expander form)
-      (unless expanded? (return expansion))
-      (setq form expansion))))
+   (multiple-value-bind (expansion expanded?) (expand-1 form environment)
+     (unless expanded? (return expansion))
+     (setq form expansion))))
 
-(defslimefun swank-format-string-expand (string)
-  (apply-macro-expander #'format-string-expand string))
+(defslimefun swank-format-string-expand (string &optional environment)
+  (apply-macro-expander #'format-string-expand string environment))
 
 (defslimefun disassemble-form (form)
   (with-buffer-syntax ()
@@ -3132,7 +3141,7 @@ DSPEC is a string and LOCATION a source location. NAME is a string."
                                   (symbol (find-class spec))
                                   ((cons (eql eql))
                                    (make-instance 'swank-mop:eql-specializer
-                                                  :object (second spec)))))
+                                                  :object (eval (second spec))))))
                               specializers))))
       (t
        (eval sexp)))))
@@ -3142,7 +3151,7 @@ DSPEC is a string and LOCATION a source location. NAME is a string."
     (with-retry-restart (:msg "Retry SLIME inspection request.")
       (reset-inspector)
       (inspect-object (if definition
-                          (find-definition string)
+                          (find-definition definition)
                           (eval (read-from-string string)))))))
 
 (defun ensure-istate-metadata (o indicator default)
@@ -3591,9 +3600,10 @@ The server port is written to PORT-FILE-NAME."
 (defun sync-features-to-emacs ()
   "Update Emacs if any relevant Lisp state has changed."
   ;; FIXME: *slime-features* should be connection-local
-  (unless (eq *slime-features* *features*)
-    (setq *slime-features* *features*)
-    (send-to-emacs (list :new-features (features-for-emacs)))))
+  (let ((features (augment-features)))
+    (unless (equal *slime-features* features)
+      (setq *slime-features* features)
+      (send-to-emacs (list :new-features (features-for-emacs))))))
 
 (defun features-for-emacs ()
   "Return `*slime-features*' in a format suitable to send it to Emacs."
