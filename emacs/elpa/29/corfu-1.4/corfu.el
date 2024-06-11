@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.2
+;; Version: 1.4
 ;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4"))
 ;; Homepage: https://github.com/minad/corfu
 ;; Keywords: abbrev, convenience, matching, completion, text
@@ -179,7 +179,7 @@ the completion backend is costly."
   :type 'float)
 
 (defcustom corfu-auto-commands
-  '("self-insert-command\\'"
+  '("self-insert-command\\'" "delete-backward-char\\'" "\\`backward-delete-char"
     c-electric-colon c-electric-lt-gt c-electric-slash c-scope-operator)
   "Commands which initiate auto completion.
 The list can container either command symbols or regular expressions."
@@ -258,6 +258,7 @@ See also the settings `corfu-auto-delay', `corfu-auto-prefix' and
   "C-g" #'corfu-quit
   "RET" #'corfu-insert
   "TAB" #'corfu-complete
+  "M-TAB" #'corfu-expand
   "M-g" 'corfu-info-location
   "M-h" 'corfu-info-documentation
   "M-SPC" #'corfu-insert-separator)
@@ -425,17 +426,16 @@ length override, set to t for manual completion."
 (defvar x-gtk-resize-child-frames) ;; Not present on non-gtk builds
 (defvar corfu--gtk-resize-child-frames
   (let ((case-fold-search t))
-    (and
      ;; XXX HACK to fix resizing on gtk3/gnome taken from posframe.el
      ;; More information:
      ;; * https://github.com/minad/corfu/issues/17
      ;; * https://gitlab.gnome.org/GNOME/mutter/-/issues/840
      ;; * https://lists.gnu.org/archive/html/emacs-devel/2020-02/msg00001.html
-     (string-match-p "gtk3" system-configuration-features)
-     (string-match-p "gnome\\|cinnamon"
-                     (or (getenv "XDG_CURRENT_DESKTOP")
-                         (getenv "DESKTOP_SESSION") ""))
-     'resize-mode)))
+    (and (string-match-p "gtk3" system-configuration-features)
+         (string-match-p "gnome\\|cinnamon"
+                         (or (getenv "XDG_CURRENT_DESKTOP")
+                             (getenv "DESKTOP_SESSION") ""))
+         'resize-mode)))
 
 ;; Function adapted from posframe.el by tumashu
 (defun corfu--make-frame (frame x y width height buffer)
@@ -534,15 +534,7 @@ FRAME is the existing frame."
 
 (defun corfu--filter-completions (&rest args)
   "Compute all completions for ARGS with lazy highlighting."
-  (defvar completion-lazy-hilit)
-  (defvar completion-lazy-hilit-fn)
-  (cl-letf* ((completion-lazy-hilit t)
-             (completion-lazy-hilit-fn nil)
-             ((symbol-function #'completion-hilit-commonality)
-              (lambda (cands prefix &optional base)
-                (setq completion-lazy-hilit-fn
-                      (lambda (x) (car (completion-hilit-commonality (list x) prefix base))))
-                (and cands (nconc cands base)))))
+  (dlet ((completion-lazy-hilit t) (completion-lazy-hilit-fn nil))
     (if (eval-when-compile (>= emacs-major-version 30))
         (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)
       (cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
@@ -562,7 +554,12 @@ FRAME is the existing frame."
                             (condition-case nil
                                 (car (completion-pcm--hilit-commonality pattern (list x)))
                               (t x))))
-                    cands)))
+                    cands))
+                 ((symbol-function #'completion-hilit-commonality)
+                  (lambda (cands prefix &optional base)
+                    (setq completion-lazy-hilit-fn
+                          (lambda (x) (car (completion-hilit-commonality (list x) prefix base))))
+                    (and cands (nconc cands base)))))
         (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)))))
 
 (defsubst corfu--length-string< (x y)
@@ -644,7 +641,8 @@ FRAME is the existing frame."
                (completing-file (eq (corfu--metadata-get 'category) 'file))
                (`(,all . ,hl) (corfu--filter-completions str table pred pt corfu--metadata))
                (base (or (when-let ((z (last all))) (prog1 (cdr z) (setcdr z nil))) 0))
-               (corfu--base (substring str 0 base)))
+               (corfu--base (substring str 0 base))
+               (pre nil))
     ;; Filter the ignored file extensions. We cannot use modified predicate for
     ;; this filtering, since this breaks the special casing in the
     ;; `completion-file-name-table' for `file-exists-p' and `file-directory-p'.
@@ -662,21 +660,25 @@ FRAME is the existing frame."
           all (corfu--move-prefix-candidates-to-front field all))
     (when (and completing-file (not (string-suffix-p "/" field)))
       (setq all (corfu--move-to-front (concat field "/") all)))
-    (setq all (corfu--move-to-front field all))
+    (setq all (corfu--move-to-front field all)
+          pre (if (or (eq corfu-preselect 'prompt) (not all)
+                      (and completing-file (eq corfu-preselect 'directory)
+                           (= (length corfu--base) (length str))
+                           (test-completion str table pred))
+                      (and (eq corfu-preselect 'valid)
+                           (not (equal field (car all)))
+                           (not (and completing-file (equal (concat field "/") (car all))))
+                           (test-completion str table pred)))
+                  -1 0))
     `((corfu--base . ,corfu--base)
       (corfu--metadata . ,corfu--metadata)
       (corfu--candidates . ,all)
       (corfu--total . ,(length all))
       (corfu--hilit . ,(or hl #'identity))
-      (corfu--preselect . ,(if (or (eq corfu-preselect 'prompt) (not all)
-                                   (and completing-file (eq corfu-preselect 'directory)
-                                        (= (length corfu--base) (length str))
-                                        (test-completion str table pred))
-                                   (and (eq corfu-preselect 'valid)
-                                        (not (equal field (car all)))
-                                        (not (and completing-file (equal (concat field "/") (car all))))
-                                        (test-completion str table pred)))
-                               -1 0)))))
+      (corfu--preselect . ,pre)
+      (corfu--index . ,(or (and (>= corfu--index 0) (/= corfu--index corfu--preselect)
+                                (seq-position all (nth corfu--index corfu--candidates)))
+                           pre)))))
 
 (defun corfu--update (&optional interruptible)
   "Update state, optionally INTERRUPTIBLE."
@@ -703,19 +705,17 @@ FRAME is the existing frame."
                   t)))
         ('nil (keyboard-quit))
         ((and state (pred consp))
-         (dolist (s state) (set (car s) (cdr s)))
-         (setq corfu--input input
-               corfu--index corfu--preselect))))
+         (setq corfu--input input)
+         (dolist (s state) (set (car s) (cdr s))))))
     input))
 
 (defun corfu--match-symbol-p (pattern sym)
   "Return non-nil if SYM is matching an element of the PATTERN list."
-  (and (symbolp sym)
-       (cl-loop with case-fold-search = nil
-                for x in pattern
-                thereis (if (symbolp x)
-                            (eq sym x)
-                          (string-match-p x (symbol-name sym))))))
+  (cl-loop with case-fold-search = nil
+           for x in (and (symbolp sym) pattern)
+           thereis (if (symbolp x)
+                       (eq sym x)
+                     (string-match-p x (symbol-name sym)))))
 
 (defun corfu--metadata-get (prop)
   "Return PROP from completion metadata."
@@ -745,15 +745,14 @@ FRAME is the existing frame."
     (list pw width
           (cl-loop for (cand prefix suffix) in cands collect
                    (truncate-string-to-width
-                    (concat prefix
-                            (make-string (max 0 (- pw (string-width prefix))) ?\s)
-                            cand
-                            (when (/= sw 0)
-                              (make-string
-                               (+ (max 0 (- cw (string-width cand)))
-                                  (max 0 (- sw (string-width suffix))))
-                               ?\s))
-                            suffix)
+                    (concat
+                     prefix (make-string (max 0 (- pw (string-width prefix))) ?\s)
+                     cand
+                     (when (/= sw 0)
+                       (make-string (+ (max 0 (- cw (string-width cand)))
+                                       (max 0 (- sw (string-width suffix))))
+                                    ?\s))
+                     suffix)
                     width)))))
 
 (defun corfu--compute-scroll ()
@@ -785,29 +784,15 @@ FRAME is the existing frame."
     (corfu--popup-show pos pw width fcands (- corfu--index corfu--scroll)
                        (and (> corfu--total corfu-count) lo) bar)))
 
-(defun corfu--preview-current (beg end)
-  "Show current candidate as overlay given BEG and END."
-  (when-let ((cand (and corfu-preview-current (>= corfu--index 0)
-                        (/= corfu--index corfu--preselect)
-                        (nth corfu--index corfu--candidates))))
-    (setq beg (+ beg (length corfu--base))
-          corfu--preview-ov (make-overlay beg end nil))
-    (overlay-put corfu--preview-ov 'priority 1000)
-    (overlay-put corfu--preview-ov 'window (selected-window))
-    (overlay-put corfu--preview-ov (if (= beg end) 'after-string 'display) cand)))
-
 (defun corfu--range-valid-p ()
   "Check the completion range, return non-nil if valid."
   (pcase-let ((buf (current-buffer))
               (pt (point))
               (`(,beg ,end . ,_) completion-in-region--data))
     (and beg end
-         (eq buf (marker-buffer beg))
-         (eq buf (window-buffer))
+         (eq buf (marker-buffer beg)) (eq buf (window-buffer))
          (<= beg pt end)
-         (save-excursion
-           (goto-char beg)
-           (<= (pos-bol) pt (pos-eol))))))
+         (save-excursion (goto-char beg) (<= (pos-bol) pt (pos-eol))))))
 
 (defun corfu--continue-p ()
   "Check if completion should continue after a command.
@@ -832,6 +817,20 @@ the last command must be listed in `corfu-continue-commands'."
                                ;; with separator, any further chars allowed
                                (seq-contains-p (car corfu--input) corfu-separator)))
                       (funcall completion-in-region-mode--predicate)))))))
+
+(defun corfu--preview-current-p ()
+  "Return t if the selected candidate is previewed."
+  (and corfu-preview-current (>= corfu--index 0) (/= corfu--index corfu--preselect)))
+
+(defun corfu--preview-current (beg end)
+  "Show current candidate as overlay given BEG and END."
+  (when (corfu--preview-current-p)
+    (setq beg (+ beg (length corfu--base))
+          corfu--preview-ov (make-overlay beg end nil))
+    (overlay-put corfu--preview-ov 'priority 1000)
+    (overlay-put corfu--preview-ov 'window (selected-window))
+    (overlay-put corfu--preview-ov (if (= beg end) 'after-string 'display)
+                 (nth corfu--index corfu--candidates))))
 
 (defun corfu--window-change (_)
   "Window and buffer change hook which quits Corfu."
@@ -1122,12 +1121,11 @@ A scroll bar is displayed from LO to LO+BAR."
   ;; currently selected candidate and bail out of completion. This way you can
   ;; continue typing after selecting a candidate. The candidate will be inserted
   ;; and your new input will be appended.
-  (when (and (eq corfu-preview-current 'insert)
-             (/= corfu--index corfu--preselect)
-             ;; See the comment about `overriding-local-map' in `corfu--post-command'.
-             (not (or overriding-terminal-local-map
-                      (corfu--match-symbol-p corfu-continue-commands this-command))))
-    (corfu--insert 'exact)))
+  (and (corfu--preview-current-p) (eq corfu-preview-current 'insert)
+       ;; See the comment about `overriding-local-map' in `corfu--post-command'.
+       (not (or overriding-terminal-local-map
+                (corfu--match-symbol-p corfu-continue-commands this-command)))
+       (corfu--insert 'exact)))
 
 (cl-defgeneric corfu--exhibit (&optional auto)
   "Exhibit Corfu UI.
@@ -1150,7 +1148,7 @@ AUTO is non-nil when initializing auto completion."
       (let ((pos (posn-at-point (+ beg (length corfu--base)))))
         (corfu--preview-current beg end)
         (corfu--candidates-popup pos)))
-     ;; 3) No candidates & corfu-quit-no-match & initialized => Confirmation popup.
+     ;; 3) No candidates & `corfu-quit-no-match' & initialized => Confirmation popup.
      ((pcase-exhaustive corfu-quit-no-match
         ('t nil)
         ('nil corfu--input)
@@ -1270,42 +1268,56 @@ first."
       (goto-char end))))
 
 (defun corfu-complete ()
-  "Try to complete current input.
-If a candidate is selected, insert it."
+  "Complete current input.
+If a candidate is selected, insert it.  Otherwise invoke
+`corfu-expand'.  Return non-nil if the input has been expanded."
   (interactive)
-  (pcase-let ((`(,beg ,end ,table ,pred . ,_) completion-in-region--data))
-    (if (>= corfu--index 0)
-        ;; Continue completion with selected candidate.  Exit with status
-        ;; 'finished if input is a valid match and no further completion is
-        ;; possible. Furthermore treat the completion as finished if we are at
-        ;; the end of a boundary, even if other longer candidates would still
-        ;; match, since the user invoked `corfu-complete' with an explicitly
-        ;; selected candidate!
-        (let ((newstr (corfu--insert nil)))
-          (when (and (test-completion newstr table pred)
-                     (or (not (consp (completion-try-completion
-                                      newstr table pred (length newstr)
-                                      (completion-metadata newstr table pred))))
-                         (equal (completion-boundaries newstr table pred "") '(0 . 0))))
-            (corfu--done newstr 'finished nil)))
-      ;; Try to complete the current input string
-      (let* ((pt (max 0 (- (point) beg)))
-             (str (buffer-substring-no-properties beg end))
-             (metadata (completion-metadata (substring str 0 pt) table pred)))
-        (pcase (completion-try-completion str table pred pt metadata)
-          ('t
-           (goto-char end)
-           (corfu--done str 'finished corfu--candidates))
-          (`(,newstr . ,newpt)
-           (corfu--replace beg end newstr)
-           (goto-char (+ beg newpt))
-           ;; Exit with status 'finished if input is a valid match
-           ;; and no further completion is possible.
-           (when (and (test-completion newstr table pred)
-                      (not (consp (completion-try-completion
-                                   newstr table pred newpt
-                                   (completion-metadata (substring newstr 0 newpt) table pred)))))
-             (corfu--done newstr 'finished corfu--candidates))))))))
+  (if (< corfu--index 0)
+      (corfu-expand)
+    ;; Continue completion with selected candidate.  Exit with status 'finished
+    ;; if input is a valid match and no further completion is
+    ;; possible. Additionally treat completion as finished if at the end of a
+    ;; boundary, even if other longer candidates would still match, since the
+    ;; user invoked `corfu-complete' with an explicitly selected candidate!
+    (pcase-let ((`(,_beg ,_end ,table ,pred . ,_) completion-in-region--data)
+                (newstr (corfu--insert nil)))
+      (and (test-completion newstr table pred)
+           (or (not (consp (completion-try-completion
+                            newstr table pred (length newstr)
+                            (completion-metadata newstr table pred))))
+               (equal (completion-boundaries newstr table pred "") '(0 . 0)))
+           (corfu--done newstr 'finished nil))
+      t)))
+
+(defun corfu-expand ()
+  "Expands the common prefix of all candidates.
+If the currently selected candidate is previewed, invoke
+`corfu-complete' instead.  Expansion relies on the completion
+styles via `completion-try-completion'.  Return non-nil if the
+input has been expanded."
+  (interactive)
+  (if (corfu--preview-current-p)
+      (corfu-complete)
+    (pcase-let* ((`(,beg ,end ,table ,pred . ,_) completion-in-region--data)
+                 (pt (max 0 (- (point) beg)))
+                 (str (buffer-substring-no-properties beg end))
+                 (metadata (completion-metadata (substring str 0 pt) table pred)))
+      (pcase (completion-try-completion str table pred pt metadata)
+        ('t
+         (goto-char end)
+         (corfu--done str 'finished corfu--candidates)
+         t)
+        ((and `(,newstr . ,newpt) (guard (not (and (= pt newpt) (equal newstr str)))))
+         (corfu--replace beg end newstr)
+         (goto-char (+ beg newpt))
+         ;; Exit with status 'finished if input is a valid match
+         ;; and no further completion is possible.
+         (and (test-completion newstr table pred)
+              (not (consp (completion-try-completion
+                           newstr table pred newpt
+                           (completion-metadata (substring newstr 0 newpt) table pred))))
+              (corfu--done newstr 'finished corfu--candidates))
+         t)))))
 
 (defun corfu-insert ()
   "Insert current candidate.
@@ -1370,9 +1382,8 @@ The ORIG function takes the FUN and WHICH arguments."
   (not (and corfu-mode completion-in-region-mode)))
 
 ;; Install advice which fixes `completion--capf-wrapper', such that it respects
-;; the completion styles for non-exclusive Capfs. See the fixme comment in the
-;; `completion--capf-wrapper' function in minibuffer.el, where the issue has
-;; been mentioned.
+;; the completion styles for non-exclusive Capfs. See also the fixme comment in
+;; the `completion--capf-wrapper' function in minibuffer.el.
 (advice-add #'completion--capf-wrapper :around #'corfu--capf-wrapper-advice)
 
 ;; Register Corfu with ElDoc
