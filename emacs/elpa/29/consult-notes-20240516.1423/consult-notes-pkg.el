@@ -1,9 +1,9 @@
-(define-package "consult-notes" "20240306.1529" "Manage notes with consult"
+(define-package "consult-notes" "20240516.1423" "Manage notes with consult"
   '((emacs "27.1")
     (consult "0.17")
     (s "1.12.0")
     (dash "2.19"))
-  :commit "652d0281b81becac643efe96386facf23e1dee01" :authors
+  :commit "c97420c8e91aaae214be7de897eb7eb9b7843520" :authors
   '(("Colin McLear" . "mclear@fastmail.com"))
   :maintainers
   '(("Colin McLear"))
