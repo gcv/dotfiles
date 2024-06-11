@@ -1,7 +1,7 @@
-(define-package "perspective" "20240218.437" "switch between named \"perspectives\" of the editor"
+(define-package "perspective" "20240414.359" "switch between named \"perspectives\" of the editor"
   '((emacs "24.4")
     (cl-lib "0.5"))
-  :commit "460311b6e76f33de947908da74b6cbf66118d487" :authors
+  :commit "ec48cb3bdda8c5ea12da89a12aa925ed1905a0b7" :authors
   '(("Natalie Weizenbaum" . "nex342@gmail.com"))
   :maintainers
   '(("Natalie Weizenbaum" . "nex342@gmail.com"))

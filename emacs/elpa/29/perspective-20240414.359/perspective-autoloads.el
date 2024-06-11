@@ -56,6 +56,9 @@ buffer filtering to ido-mode already (see use of
 PERSP-SET-IDO-BUFFERS).
 
 (fn BUFFER-OR-NAME)" t)
+(autoload 'persp-kill-other-buffers "perspective" "\
+Kill all buffers in the current perspective other than the current one.
+Also excludes the perspective's scratch buffer." t)
 (autoload 'persp-buffer-menu "perspective" "\
 Like the default C-x C-b, but filters for the current perspective's buffers.
 
