@@ -5,7 +5,7 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>
 ;; Keywords: convenience
-;; Version: 1.0
+;; Version: 1.1
 ;; Homepage: https://github.com/oantolin/embark
 ;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
 
@@ -1279,7 +1279,8 @@ UPDATE is the indicator update function."
                   minibuffer-scroll-window)))
          (ignore-errors (command-execute cmd)))
        (embark-keymap-prompter keymap update))
-      ((or 'scroll-bar-toolkit-scroll 'mwheel-scroll 'mac-mwheel-scroll)
+      ((or 'scroll-bar-toolkit-scroll 'mwheel-scroll
+           'mac-mwheel-scroll 'pixel-scroll-precision)
        (funcall cmd last-command-event)
        (embark-keymap-prompter keymap update))
       ('execute-extended-command
@@ -2106,7 +2107,12 @@ minibuffer before executing the action."
 
 (defun embark--refine-multi-category (_type target)
   "Refine `multi-category' TARGET to its actual type."
-  (or (get-text-property 0 'multi-category target)
+  (or (let ((mc (get-text-property 0 'multi-category target)))
+        (cond
+         ;; The `cdr' of the `multi-category' property can be a buffer object.
+         ((and (eq (car mc) 'buffer) (buffer-live-p (cdr mc)))
+          (cons 'buffer (buffer-name (cdr mc))))
+         ((stringp (cdr mc)) mc)))
       (cons 'general target)))
 
 (defun embark--simplify-path (_type target)
@@ -3364,7 +3370,7 @@ PRED is a predicate function used to filter the items."
                                  files)))))
     (with-current-buffer buf
       ;; Unadvertise to prevent the new buffer from being reused.
-      (dired-unadvertise (car dired-directory))
+      (dired-unadvertise default-directory)
       (rename-buffer (format "*Embark Export Dired %s*" default-directory)))
     (pop-to-buffer buf)))
 
@@ -3650,7 +3656,8 @@ its own."
                   (if multiline (maybe-newline) (maybe-space)))
                 (ins-string ()
                   (let ((start (point)))
-                    (insert (string-join strings separator))
+                    (insert
+                     (mapconcat #'substring-no-properties strings separator))
                     (save-excursion (goto-char start) (maybe-whitespace))
                     (when (looking-back "\n" 1) (delete-char -1))
                     (save-excursion (maybe-whitespace)))))
@@ -4370,6 +4377,7 @@ This simply calls RUN with the REST of its arguments inside
   "m" #'pp-macroexpand-expression
   "TAB" #'indent-region
   "r" #'raise-sexp
+  ";" #'comment-dwim
   "t" #'transpose-sexps
   "k" #'kill-region
   "u" #'backward-up-list

@@ -1,4 +1,4 @@
-This is docKihIip.info, produced by makeinfo version 6.8 from
+This is docytLD1w.info, produced by makeinfo version 6.8 from
 embark.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docKihIip.info,  Node: Top,  Next: Overview,  Up: (dir)
+File: docytLD1w.info,  Node: Top,  Next: Overview,  Up: (dir)
 
 Embark: Emacs Mini-Buffer Actions Rooted in Keymaps
 ***************************************************
@@ -48,6 +48,10 @@ Advanced configuration
 * Creating your own keymaps::
 * Defining actions for new categories of targets::
 
+Selecting commands via completions instead of key bindings
+
+* Selecting commands via completion outside of Embark::
+
 Defining actions for new categories of targets
 
 * New minibuffer target example - tab-bar tabs::
@@ -64,7 +68,7 @@ Embark, Marginalia and Consult
 
 
 
-File: docKihIip.info,  Node: Overview,  Next: Quick start,  Prev: Top,  Up: Top
+File: docytLD1w.info,  Node: Overview,  Next: Quick start,  Prev: Top,  Up: Top
 
 1 Overview
 **********
@@ -93,7 +97,7 @@ set of buffers, or customize for a set of variables.
 * Switching to a different command without losing what you've typed::
 
 
-File: docKihIip.info,  Node: Acting on targets,  Next: The default action on a target,  Up: Overview
+File: docytLD1w.info,  Node: Acting on targets,  Next: The default action on a target,  Up: Overview
 
 1.1 Acting on targets
 =====================
@@ -193,7 +197,7 @@ read about the default actions and their key bindings
 project wiki.
 
 
-File: docKihIip.info,  Node: The default action on a target,  Next: Working with sets of possible targets,  Prev: Acting on targets,  Up: Overview
+File: docytLD1w.info,  Node: The default action on a target,  Next: Working with sets of possible targets,  Prev: Acting on targets,  Up: Overview
 
 1.2 The default action on a target
 ==================================
@@ -233,7 +237,7 @@ Embark’s default configuration it will:
    • Find the file corresponding to an Emacs Lisp library at point.
 
 
-File: docKihIip.info,  Node: Working with sets of possible targets,  Next: Switching to a different command without losing what you've typed,  Prev: The default action on a target,  Up: Overview
+File: docytLD1w.info,  Node: Working with sets of possible targets,  Next: Switching to a different command without losing what you've typed,  Prev: The default action on a target,  Up: Overview
 
 1.3 Working with sets of possible targets
 =========================================
@@ -311,7 +315,7 @@ updated buffer.
 * embark-live a live-updating variant of embark-collect::
 
 
-File: docKihIip.info,  Node: Selecting some targets to make an ad hoc candidate set,  Next: embark-live a live-updating variant of embark-collect,  Up: Working with sets of possible targets
+File: docytLD1w.info,  Node: Selecting some targets to make an ad hoc candidate set,  Next: embark-live a live-updating variant of embark-collect,  Up: Working with sets of possible targets
 
 1.3.1 Selecting some targets to make an ad hoc candidate set
 ------------------------------------------------------------
@@ -371,7 +375,7 @@ option.
      finally delete all of them (from their original locations).
 
 
-File: docKihIip.info,  Node: embark-live a live-updating variant of embark-collect,  Prev: Selecting some targets to make an ad hoc candidate set,  Up: Working with sets of possible targets
+File: docytLD1w.info,  Node: embark-live a live-updating variant of embark-collect,  Prev: Selecting some targets to make an ad hoc candidate set,  Up: Working with sets of possible targets
 
 1.3.2 ‘embark-live’ a live-updating variant of ‘embark-collect’
 ---------------------------------------------------------------
@@ -399,7 +403,7 @@ as used by ‘outline-minor-mode’.  Those collectors really do give
 ‘embark-live’ a table-of-contents feel.
 
 
-File: docKihIip.info,  Node: Switching to a different command without losing what you've typed,  Prev: Working with sets of possible targets,  Up: Overview
+File: docytLD1w.info,  Node: Switching to a different command without losing what you've typed,  Prev: Working with sets of possible targets,  Up: Overview
 
 1.4 Switching to a different command without losing what you’ve typed
 =====================================================================
@@ -440,7 +444,7 @@ others that also contain a binding for ‘switch-to-buffer’).  The end
 result is that I can type ‘C-. B f’ to switch to ‘find-file’.
 
 
-File: docKihIip.info,  Node: Quick start,  Next: Advanced configuration,  Prev: Overview,  Up: Top
+File: docytLD1w.info,  Node: Quick start,  Next: Advanced configuration,  Prev: Overview,  Up: Top
 
 2 Quick start
 *************
@@ -471,9 +475,13 @@ configuration:
        ;; Optionally replace the key help with a completing-read interface
        (setq prefix-help-command #'embark-prefix-help-command)
 
-       ;; Show the Embark target at point via Eldoc.  You may adjust the Eldoc
-       ;; strategy, if you want to see the documentation from multiple providers.
-       (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+       ;; Show the Embark target at point via Eldoc. You may adjust the
+       ;; Eldoc strategy, if you want to see the documentation from
+       ;; multiple providers. Beware that using this can be a little
+       ;; jarring since the message shown in the minibuffer can be more
+       ;; than one line, causing the modeline to move up and down:
+
+       ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
        ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
 
        :config
@@ -537,7 +545,7 @@ minibuffer completion candidates.  (Embark does come with Ivy
 integration despite this.)
 
 
-File: docKihIip.info,  Node: Advanced configuration,  Next: How does Embark call the actions?,  Prev: Quick start,  Up: Top
+File: docytLD1w.info,  Node: Advanced configuration,  Next: How does Embark call the actions?,  Prev: Quick start,  Up: Top
 
 3 Advanced configuration
 ************************
@@ -553,7 +561,7 @@ File: docKihIip.info,  Node: Advanced configuration,  Next: How does Embark call
 * Defining actions for new categories of targets::
 
 
-File: docKihIip.info,  Node: Showing information about available targets and actions,  Next: Selecting commands via completions instead of key bindings,  Up: Advanced configuration
+File: docytLD1w.info,  Node: Showing information about available targets and actions,  Next: Selecting commands via completions instead of key bindings,  Up: Advanced configuration
 
 3.1 Showing information about available targets and actions
 ===========================================================
@@ -577,10 +585,10 @@ indicators.
 
    • ‘embark-minimal-indicator’: shows a messages in the echo area or
      minibuffer prompt showing the current target and the types of all
-     targets starting with the current one; this one is on by default.
+     targets starting with the current one.
 
-   • ‘embark-highlight-indicator’: highlights the target at point; also
-     on by default.
+   • ‘embark-highlight-indicator’: highlights the target at point; on by
+     default.
 
    • ‘embark-verbose-indicator’: displays a table of actions and their
      key bindings in a buffer; this is not on by default, in favor of
@@ -603,8 +611,13 @@ Just copy its definition from the wiki into your configuration and
 customize the ‘embark-indicators’ user option to exclude the mixed and
 verbose indicators and to include ‘embark-which-key-indicator’.
 
+   If you use Vertico (https://github.com/minad/vertico), there is an
+even easier way to get a ‘which-key’-like display that also lets you use
+completion to narrow down the list of alternatives, described at the end
+of the next section.
+
 
-File: docKihIip.info,  Node: Selecting commands via completions instead of key bindings,  Next: Quitting the minibuffer after an action,  Prev: Showing information about available targets and actions,  Up: Advanced configuration
+File: docytLD1w.info,  Node: Selecting commands via completions instead of key bindings,  Next: Quitting the minibuffer after an action,  Prev: Showing information about available targets and actions,  Up: Advanced configuration
 
 3.2 Selecting commands via completions instead of key bindings
 ==============================================================
@@ -626,12 +639,76 @@ select an action by name, but personally I find that typing a small
 portion of the action name to narrow down the list of candidates feels
 significantly faster than visually scanning the entire list of actions.
 
-   If you find you prefer entering actions that way, you can configure
+   If you find you prefer selecting actions that way, you can configure
 embark to always prompt you for actions by setting the variable
 ‘embark-prompter’ to ‘embark-completing-read-prompter’.
 
+   On the other hand, you may wish to continue using key bindings for
+the actions you perform most often, and to use completion only to
+explore what further actions are available or when you’ve forgotten a
+key binding.  In that case, you may prefer to use the minimal indicator,
+which does not pop-up an ‘*Embark Actions*’ buffer at all, and to use
+the ‘embark-help-key’ whenever you need help.  This unobtrusive setup is
+achieved with the following configuration:
+
+     (setq embark-indicators
+           '(embark-minimal-indicator  ; default is embark-mixed-indicator
+             embark-highlight-indicator
+             embark-isearch-highlight-indicator))
+
+   Vertico (https://github.com/minad/vertico) users may wish to
+configure a grid display for the actions and key-bindings, reminiscent
+of the popular package which-key
+(https://github.com/justbur/emacs-which-key), but, of course, enhanced
+by the use of completion to narrow the list of commands.  In order to
+get the grid display, put the following in your Vertico configuration:
+
+     (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
+     (vertico-multiform-mode)
+
+   This will make the available keys be shown in a compact grid like in
+‘which-key’.  The ‘vertico-multiform-mode’ also enables keys such as
+‘M-V’, ‘M-G’, ‘M-B’, and ‘M-U’ for manually switching between layouts in
+Vertico buffers.
+
+* Menu:
+
+* Selecting commands via completion outside of Embark::
+
 
-File: docKihIip.info,  Node: Quitting the minibuffer after an action,  Next: Running some setup after injecting the target,  Prev: Selecting commands via completions instead of key bindings,  Up: Advanced configuration
+File: docytLD1w.info,  Node: Selecting commands via completion outside of Embark,  Up: Selecting commands via completions instead of key bindings
+
+3.2.1 Selecting commands via completion outside of Embark
+---------------------------------------------------------
+
+If you like this completion interface for exploring key bindings for
+Embark actions, you may want to use it elsewhere in Emacs.  You can use
+Embark’s completion-based command prompter to list:
+
+   • key bindings under a prefix,
+   • local key bindings, or
+   • all key bindings.
+
+   To use it for key bindings under a prefix (you can use this to
+replace the ‘which-key’ package, for example), use this configuration:
+
+     (setq prefix-help-command #'embark-prefix-help-command)
+
+   Now, when you have started on a prefix sequence such as ‘C-x’ or
+‘C-c’, pressing ‘C-h’ will bring up the Embark version of the built-in
+‘prefix-help-command’, which will list the keys under that prefix and
+their bindings, and lets you select the one you wanted with completion,
+or by key binding if you press ‘embark-keymap-prompter-key’.
+
+   To list local or global key bindings, use the command
+‘embark-bindings’.  You can bind that to ‘C-h b’, which is the default
+key binding for the built-in ‘describe-bindings’ command, which this
+command can replace.  By default, ‘embark-bindings’ lists local key
+bindings, typically those bound in the major mode keymap; to get global
+bindings as well, call it with a ‘C-u’ prefix argument.
+
+
+File: docytLD1w.info,  Node: Quitting the minibuffer after an action,  Next: Running some setup after injecting the target,  Prev: Selecting commands via completions instead of key bindings,  Up: Advanced configuration
 
 3.3 Quitting the minibuffer after an action
 ===========================================
@@ -677,7 +754,7 @@ non-quitting version as follows:
          (embark-act)))
 
 
-File: docKihIip.info,  Node: Running some setup after injecting the target,  Next: Running hooks before after or around an action,  Prev: Quitting the minibuffer after an action,  Up: Advanced configuration
+File: docytLD1w.info,  Node: Running some setup after injecting the target,  Next: Running hooks before after or around an action,  Prev: Quitting the minibuffer after an action,  Up: Advanced configuration
 
 3.4 Running some setup after injecting the target
 =================================================
@@ -743,7 +820,7 @@ typically do _not_ want the target, that is the contents of the region,
 to be entered at that prompt!
 
 
-File: docKihIip.info,  Node: Running hooks before after or around an action,  Next: Creating your own keymaps,  Prev: Running some setup after injecting the target,  Up: Advanced configuration
+File: docytLD1w.info,  Node: Running hooks before after or around an action,  Next: Creating your own keymaps,  Prev: Running some setup after injecting the target,  Up: Advanced configuration
 
 3.5 Running hooks before, after or around an action
 ===================================================
@@ -840,7 +917,7 @@ used in the default values of ‘embark-pre-action-hooks’,
      configuration doesn’t use this but it is available for users.
 
 
-File: docKihIip.info,  Node: Creating your own keymaps,  Next: Defining actions for new categories of targets,  Prev: Running hooks before after or around an action,  Up: Advanced configuration
+File: docytLD1w.info,  Node: Creating your own keymaps,  Next: Defining actions for new categories of targets,  Prev: Running hooks before after or around an action,  Up: Advanced configuration
 
 3.6 Creating your own keymaps
 =============================
@@ -862,7 +939,7 @@ default Embark actions.  Note that ‘embark-collect’ and ‘embark-export’
 are also made available via ‘embark-general-map’.
 
 
-File: docKihIip.info,  Node: Defining actions for new categories of targets,  Prev: Creating your own keymaps,  Up: Advanced configuration
+File: docytLD1w.info,  Node: Defining actions for new categories of targets,  Prev: Creating your own keymaps,  Up: Advanced configuration
 
 3.7 Defining actions for new categories of targets
 ==================================================
@@ -880,7 +957,7 @@ situations where the easiest option is not available.
 * New target example in regular buffers - short Wikipedia links::
 
 
-File: docKihIip.info,  Node: New minibuffer target example - tab-bar tabs,  Next: New target example in regular buffers - short Wikipedia links,  Up: Defining actions for new categories of targets
+File: docytLD1w.info,  Node: New minibuffer target example - tab-bar tabs,  Next: New target example in regular buffers - short Wikipedia links,  Up: Defining actions for new categories of targets
 
 3.7.1 New minibuffer target example - tab-bar tabs
 --------------------------------------------------
@@ -993,7 +1070,7 @@ and configure Embark so it knows that’s the keymap you want.
           described in the previous section.
 
 
-File: docKihIip.info,  Node: New target example in regular buffers - short Wikipedia links,  Prev: New minibuffer target example - tab-bar tabs,  Up: Defining actions for new categories of targets
+File: docytLD1w.info,  Node: New target example in regular buffers - short Wikipedia links,  Prev: New minibuffer target example - tab-bar tabs,  Up: Defining actions for new categories of targets
 
 3.7.2 New target example in regular buffers - short Wikipedia links
 -------------------------------------------------------------------
@@ -1034,7 +1111,7 @@ documentation for ‘embark-target-finders’ for details.)
      (add-to-list 'embark-target-finders 'my-short-wikipedia-link)
 
 
-File: docKihIip.info,  Node: How does Embark call the actions?,  Next: Embark Marginalia and Consult,  Prev: Advanced configuration,  Up: Top
+File: docytLD1w.info,  Node: How does Embark call the actions?,  Next: Embark Marginalia and Consult,  Prev: Advanced configuration,  Up: Top
 
 4 How does Embark call the actions?
 ***********************************
@@ -1119,7 +1196,7 @@ in the default configuration, such as ‘embark-shell-command-on-buffer’.
 * Non-interactive functions as actions::
 
 
-File: docKihIip.info,  Node: Non-interactive functions as actions,  Up: How does Embark call the actions?
+File: docytLD1w.info,  Node: Non-interactive functions as actions,  Up: How does Embark call the actions?
 
 4.1 Non-interactive functions as actions
 ========================================
@@ -1151,7 +1228,7 @@ actions:
      non-string target.
 
 
-File: docKihIip.info,  Node: Embark Marginalia and Consult,  Next: Related Packages,  Prev: How does Embark call the actions?,  Up: Top
+File: docytLD1w.info,  Node: Embark Marginalia and Consult,  Next: Related Packages,  Prev: How does Embark call the actions?,  Up: Top
 
 5 Embark, Marginalia and Consult
 ********************************
@@ -1172,7 +1249,7 @@ does for Embark, and what Embark can do for Consult.
 * Consult::
 
 
-File: docKihIip.info,  Node: Marginalia,  Next: Consult,  Up: Embark Marginalia and Consult
+File: docytLD1w.info,  Node: Marginalia,  Next: Consult,  Up: Embark Marginalia and Consult
 
 5.1 Marginalia
 ==============
@@ -1204,7 +1281,7 @@ Embark collect buffer are also provided by the Marginalia package:
      characters in ‘C-x 8 RET’).
 
 
-File: docKihIip.info,  Node: Consult,  Prev: Marginalia,  Up: Embark Marginalia and Consult
+File: docytLD1w.info,  Node: Consult,  Prev: Marginalia,  Up: Embark Marginalia and Consult
 
 5.2 Consult
 ===========
@@ -1294,7 +1371,7 @@ integrations between Embark and Consult.  Some examples are:
      leave the minibuffer open so you can navigate among the matches.
 
 
-File: docKihIip.info,  Node: Related Packages,  Next: Resources,  Prev: Embark Marginalia and Consult,  Up: Top
+File: docytLD1w.info,  Node: Related Packages,  Next: Resources,  Prev: Embark Marginalia and Consult,  Up: Top
 
 6 Related Packages
 ******************
@@ -1318,7 +1395,7 @@ Collecting completion candidates into a buffer
      commands written using the Ivy API.
 
 
-File: docKihIip.info,  Node: Resources,  Next: Contributions,  Prev: Related Packages,  Up: Top
+File: docytLD1w.info,  Node: Resources,  Next: Contributions,  Prev: Related Packages,  Up: Top
 
 7 Resources
 ***********
@@ -1347,7 +1424,7 @@ some links to read:
    • Marginalia, Consult and Embark by Mike Zamansky.
 
 
-File: docKihIip.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Resources,  Up: Top
+File: docytLD1w.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Resources,  Up: Top
 
 8 Contributions
 ***************
@@ -1365,7 +1442,7 @@ GNU ELPA, copyright assignment to the FSF is required before you can
 contribute code.
 
 
-File: docKihIip.info,  Node: Acknowledgments,  Prev: Contributions,  Up: Top
+File: docytLD1w.info,  Node: Acknowledgments,  Prev: Contributions,  Up: Top
 
 9 Acknowledgments
 *****************
@@ -1411,35 +1488,36 @@ important features, and providing a lot of useful advice.
 
 Tag Table:
 Node: Top223
-Node: Overview1731
-Node: Acting on targets3040
-Node: The default action on a target8585
-Node: Working with sets of possible targets10495
-Node: Selecting some targets to make an ad hoc candidate set14774
-Node: embark-live a live-updating variant of embark-collect18230
-Node: Switching to a different command without losing what you've typed19928
-Node: Quick start22505
-Node: Advanced configuration27244
-Node: Showing information about available targets and actions27829
-Node: Selecting commands via completions instead of key bindings30441
-Node: Quitting the minibuffer after an action32048
-Node: Running some setup after injecting the target34504
-Node: Running hooks before after or around an action38122
-Node: Creating your own keymaps43001
-Node: Defining actions for new categories of targets43908
-Node: New minibuffer target example - tab-bar tabs44680
-Ref: Telling Embark about commands that prompt for tabs by name45586
-Ref: Defining and configuring a keymap for tab actions48449
-Node: New target example in regular buffers - short Wikipedia links50240
-Node: How does Embark call the actions?52503
-Node: Non-interactive functions as actions56846
-Node: Embark Marginalia and Consult58203
-Node: Marginalia58934
-Node: Consult60441
-Node: Related Packages65203
-Node: Resources66300
-Node: Contributions67434
-Node: Acknowledgments68147
+Node: Overview1848
+Node: Acting on targets3157
+Node: The default action on a target8702
+Node: Working with sets of possible targets10612
+Node: Selecting some targets to make an ad hoc candidate set14891
+Node: embark-live a live-updating variant of embark-collect18347
+Node: Switching to a different command without losing what you've typed20045
+Node: Quick start22622
+Node: Advanced configuration27552
+Node: Showing information about available targets and actions28137
+Node: Selecting commands via completions instead of key bindings30959
+Node: Selecting commands via completion outside of Embark34047
+Node: Quitting the minibuffer after an action35582
+Node: Running some setup after injecting the target38038
+Node: Running hooks before after or around an action41656
+Node: Creating your own keymaps46535
+Node: Defining actions for new categories of targets47442
+Node: New minibuffer target example - tab-bar tabs48214
+Ref: Telling Embark about commands that prompt for tabs by name49120
+Ref: Defining and configuring a keymap for tab actions51983
+Node: New target example in regular buffers - short Wikipedia links53774
+Node: How does Embark call the actions?56037
+Node: Non-interactive functions as actions60380
+Node: Embark Marginalia and Consult61737
+Node: Marginalia62468
+Node: Consult63975
+Node: Related Packages68737
+Node: Resources69834
+Node: Contributions70968
+Node: Acknowledgments71681
 
 End Tag Table
 

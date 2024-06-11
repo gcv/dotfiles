@@ -100,7 +100,7 @@
 
 (defun embark-org-target-element-context ()
   "Target all Org elements or objects around point."
-  (when (derived-mode-p 'org-mode 'org-agenda-mode)
+  (when (derived-mode-p 'org-mode)
     (cl-loop
      for elt = (org-element-lineage (org-element-context) embark-org--types t)
      then (org-element-lineage elt embark-org--types)
@@ -119,10 +119,10 @@
                end (1- end))
       collect `(,(intern (format "org-%s" (car elt))) ,target ,begin . ,end))))
 
-(if-let (((not (memq 'embark-org-target-element-context embark-target-finders)))
-         (tail (memq 'embark-target-active-region embark-target-finders)))
-    (push 'embark-org-target-element-context (cdr tail))
-  (push 'embark-org-target-element-context embark-target-finders))
+(unless (memq 'embark-org-target-element-context embark-target-finders)
+  (if-let ((tail (memq 'embark-target-active-region embark-target-finders)))
+      (push 'embark-org-target-element-context (cdr tail))
+    (push 'embark-org-target-element-context embark-target-finders)))
 
 ;;; Custom Org actions
 
