@@ -54,6 +54,11 @@
 (put 'ef-deuteranopia-light 'theme-properties (list :background-mode 'light :kind 'color-scheme :family 'ef))
 
 
+;;; Generated autoloads from ef-dream-theme.el
+
+(put 'ef-dream 'theme-properties (list :background-mode 'dark :kind 'color-scheme :family 'ef))
+
+
 ;;; Generated autoloads from ef-duo-dark-theme.el
 
 (put 'ef-duo-dark 'theme-properties (list :background-mode 'dark :kind 'color-scheme :family 'ef))
@@ -112,6 +117,11 @@
 ;;; Generated autoloads from ef-night-theme.el
 
 (put 'ef-night 'theme-properties (list :background-mode 'dark :kind 'color-scheme :family 'ef))
+
+
+;;; Generated autoloads from ef-reverie-theme.el
+
+(put 'ef-reverie 'theme-properties (list :background-mode 'light :kind 'color-scheme :family 'ef))
 
 
 ;;; Generated autoloads from ef-rosa-theme.el
