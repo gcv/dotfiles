@@ -1,5 +1,8 @@
 ;;; -*- lexical-binding: t; -*-
 
+;;; This configuration is superceded by Vertico, and retained here for
+;;; reference.
+
 (use-package helm
   :diminish ""
 
