@@ -2,6 +2,33 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 1.7 (2024-05-23)
+
+- Emacs 30 bug fix: Ensure that font locking is enabled when previewing files.
+- ~consult-preview-allowed-hooks~: Global minor modes, which should be enabled
+  during preview, can be added to this list. See the README for examples.
+- ~consult-xref~: Bug fix: Do not error when project root directory is nil.
+- ~consult-fd~: Bug fix: Avoid confusion of input pattern with options by
+  prefixing the input pattern with ~--and~.
+- ~consult--buffer-sort-visibility~: Bug fix: Only add current buffer to sorted
+  list, if already present in the original list.
+
+* Version 1.6 (2024-05-15)
+
+- ~consult-xref~: Compatibility with xref.el in Emacs 30.
+- ~consult-grep~ (and similar): Preserve files which are already open literally
+  and do not reopen them in normal mode.
+- ~consult-preview-allowed-hooks~: Run delayed mode hooks listed in this variable
+  during preview.
+- ~consult--buffer-query~: Add buffer-list keyword argument.
+
+* Version 1.5 (2024-04-19)
+
+- Bugfix ~consult-buffer~: Handle buffer renaming during minibuffer completion
+  gracefully, by attaching the actual buffer objects to the completion candidate
+  strings.
+- Bugfix ~consult-register~: Ignore marker registers pointing to dead buffers.
+
 * Version 1.4 (2024-03-08)
 
 - Bugfix: File preview: Ensure that binary files are not previewed partially.

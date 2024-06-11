@@ -475,15 +475,20 @@ action on the current candidate in comparison to a manually triggered preview.
 The main difference is that the files opened by manual preview are closed again
 after the completion session. During preview some functionality is disabled to
 improve the performance, see for example the customization variables
-=consult-preview-variables= and =consult-preview-allowed-hooks=. Only the hooks
-listed in =consult-preview-allowed-hooks= are executed when a file is opened
-(=find-file-hook=). In order to enable additional font locking during preview, add
-the corresponding hooks to the allow list. The following code demonstrates this
-for [[https://github.com/minad/org-modern][org-modern]] and [[https://github.com/tarsius/hl-todo][hl-todo]].
+=consult-preview-variables= and =consult-preview-allowed-hooks=. Only hooks listed
+in =consult-preview-allowed-hooks= are executed. This variable applies to
+=find-file-hook=, =change-major-mode-hook= and mode hooks, e.g., =prog-mode-hook=. In
+order to enable additional font locking during preview, add the corresponding
+hooks to the allow list. The following code demonstrates this for [[https://github.com/minad/org-modern][org-modern]] and
+[[https://github.com/tarsius/hl-todo][hl-todo]].
 
 #+begin_src emacs-lisp
-(add-to-list 'consult-preview-allowed-hooks 'global-org-modern-mode-check-buffers)
-(add-to-list 'consult-preview-allowed-hooks 'global-hl-todo-mode-check-buffers)
+;; local modes added to prog-mode hooks
+(add-to-list 'consult-preview-allowed-hooks 'hl-todo-mode)
+(add-to-list 'consult-preview-allowed-hooks 'elide-head-mode)
+;; enabled global modes
+(add-to-list 'consult-preview-allowed-hooks 'global-org-modern-mode)
+(add-to-list 'consult-preview-allowed-hooks 'global-hl-todo-mode)
 #+end_src
 
 Files larger than =consult-preview-partial-size= are previewed partially. Delaying
@@ -675,7 +680,7 @@ ones.
             (consult--buffer-action (current-buffer))))
         :items
         (lambda ()
-          (consult--buffer-query :mode 'org-mode :as #'buffer-name))))
+          (consult--buffer-query :mode 'org-mode :as #'consult--buffer-pair))))
 
 (add-to-list 'consult-buffer-sources 'org-source 'append)
 #+end_src
@@ -919,7 +924,7 @@ an overview of all Consult variables and functions with their descriptions.
 | consult-narrow-key               | Narrowing prefix key during completion              |
 | consult-point-placement          | Placement of the point when jumping to matches      |
 | consult-preview-key              | Keys which triggers preview                         |
-| consult-preview-allowed-hooks    | List of =find-file= hooks to enable during preview    |
+| consult-preview-allowed-hooks    | List of hooks to allow during preview               |
 | consult-preview-excluded-files   | Regexps matched against file names during preview   |
 | consult-preview-max-count        | Maximum number of files to keep open during preview |
 | consult-preview-partial-size     | Files larger than this size are previewed partially |
@@ -1053,11 +1058,11 @@ out the following steps:
    disabled.
 5. Ensure that the =completion-styles= variable is properly configured. Try to set
    =completion-styles= to a list including =substring= or =orderless=.
-6. Try to reproduce the issue by starting a bare bone Emacs instance with =emacs -Q=
-   on the command line. Execute the following minimal code snippets in the
-   scratch buffer. This way we can exclude side effects due to configuration
-   settings. If other packages are relevant to reproduce the issue, include them
-   in the minimal configuration snippet.
+6. Try to reproduce the issue with the newest stable Emacs version. Start a bare
+   bone Emacs instance with =emacs -Q= on the command line. Execute the following
+   minimal code snippets in the scratch buffer. This way we can exclude side
+   effects due to configuration settings. If other packages are relevant to
+   reproduce the issue, include them in the minimal configuration snippet.
 
 Minimal setup with Vertico for =emacs -Q=:
 #+begin_src emacs-lisp
@@ -1102,7 +1107,7 @@ Contributions are welcome, but you may want to discuss potential contributions
 first. Since this package is part of [[https://elpa.gnu.org/packages/consult.html][GNU ELPA]] contributions require a copyright
 assignment to the FSF.
 
-If you have a proposal, take a look at the [[https://github.com/consult/issues][Consult issue tracker]] and the [[https://github.com/minad/consult/issues/6][Consult
+If you have a proposal, take a look at the [[https://github.com/minad/consult/issues][Consult issue tracker]] and the [[https://github.com/minad/consult/issues/6][Consult
 wishlist]]. There have been many prior feature discussions. Please search through
 the issue tracker, maybe your issue or feature request has already been
 discussed. You can contribute to the [[https://github.com/minad/consult/wiki][Consult wiki]], in case you want to share
