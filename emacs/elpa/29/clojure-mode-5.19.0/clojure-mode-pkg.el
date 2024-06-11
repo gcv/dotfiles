@@ -1,6 +1,6 @@
-(define-package "clojure-mode" "5.18.1" "Major mode for Clojure code"
+(define-package "clojure-mode" "5.19.0" "Major mode for Clojure code"
   '((emacs "25.1"))
-  :commit "25d713a67d8e0209ee74bfc0153fdf677697b43f" :maintainers
+  :commit "4afdd3539036bbd6b1c01b2e00559676c4d40085" :maintainers
   '(("Bozhidar Batsov" . "bozhidar@batsov.dev"))
   :maintainer
   '("Bozhidar Batsov" . "bozhidar@batsov.dev")

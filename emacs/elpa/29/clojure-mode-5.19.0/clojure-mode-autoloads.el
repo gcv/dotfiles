@@ -95,7 +95,7 @@ Major mode for editing ClojureC code.
 \\{clojurec-mode-map}
 
 (fn)" t)
-(add-to-list 'auto-mode-alist '("\\.\\(clj\\|cljd\\|dtm\\|edn\\)\\'" . clojure-mode))
+(add-to-list 'auto-mode-alist '("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-mode))
 (add-to-list 'auto-mode-alist '("\\.cljc\\'" . clojurec-mode))
 (add-to-list 'auto-mode-alist '("\\.cljs\\'" . clojurescript-mode))
 (add-to-list 'auto-mode-alist '("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode))

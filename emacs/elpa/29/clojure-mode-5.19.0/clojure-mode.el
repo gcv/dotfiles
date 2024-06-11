@@ -1,7 +1,7 @@
 ;;; clojure-mode.el --- Major mode for Clojure code -*- lexical-binding: t; -*-
 
 ;; Copyright © 2007-2013 Jeffrey Chu, Lennart Staflin, Phil Hagelberg
-;; Copyright © 2013-2023 Bozhidar Batsov, Artur Malabarba, Magnar Sveen
+;; Copyright © 2013-2024 Bozhidar Batsov, Artur Malabarba, Magnar Sveen
 ;;
 ;; Authors: Jeffrey Chu <jochu0@gmail.com>
 ;;       Lennart Staflin <lenst@lysator.liu.se>
@@ -12,7 +12,7 @@
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/clojure-emacs/clojure-mode
 ;; Keywords: languages clojure clojurescript lisp
-;; Version: 5.18.1
+;; Version: 5.19.0
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is not part of GNU Emacs.
@@ -100,6 +100,8 @@
 
 (defcustom clojure-indent-style 'always-align
   "Indentation style to use for function forms and macro forms.
+For forms that start with a keyword see `clojure-indent-keyword-style'.
+
 There are two cases of interest configured by this variable.
 
 - Case (A) is when at least one function argument is on the same
@@ -147,6 +149,50 @@ to indent function forms.
                         align-arguments))
   :package-version '(clojure-mode . "5.2.0"))
 
+(defcustom clojure-indent-keyword-style 'always-align
+  "Indentation style to use for forms that start with a keyword.
+For function/macro forms, see `clojure-indent-style'.
+There are two cases of interest configured by this variable.
+
+- Case (A) is when at least one argument following the keyword is
+  on the same line as the keyword.
+- Case (B) is the opposite (no arguments are on the same line as
+  the keyword).
+
+The possible values for this variable are keywords indicating how
+to indent keyword invocation forms.
+
+    `always-align' - Follow the same rules as `lisp-mode'.  All
+    args are vertically aligned with the first arg in case (A),
+    and vertically aligned with the function name in case (B).
+    For instance:
+        (:require [foo.bar]
+                  [bar.baz])
+        (:require
+         [foo.bar]
+         [bar.baz])
+
+    `always-indent' - All args are indented like a macro body.
+        (:require [foo.bar]
+           [bar.baz])
+        (:x
+           location
+           0)
+
+    `align-arguments' - Case (A) is indented like `lisp', and
+    case (B) is indented like a macro body.
+        (:require [foo.bar]
+                  [bar.baz])
+        (:x
+           location
+           0)"
+  :safe #'symbolp
+  :type '(choice (const :tag "Same as `lisp-mode'" always-align)
+                 (const :tag "Indent like a macro body" always-indent)
+                 (const :tag "Indent like a macro body unless first arg is on the same line"
+                        align-arguments))
+  :package-version '(clojure-mode . "5.19.0"))
+
 (defcustom clojure-use-backtracking-indent t
   "When non-nil, enable context sensitive indentation."
   :type 'boolean
@@ -190,6 +236,7 @@ For example, \[ is allowed in :db/id[:db.part/user]."
     "shadow-cljs.edn"  ; shadow-cljs
     "bb.edn"           ; babashka
     "nbb.edn"          ; nbb
+    "basilisp.edn"     ; Basilisp (Python)
     )
   "A list of files, which identify a Clojure project's root.
 Out-of-the box `clojure-mode' understands lein, boot, gradle,
@@ -326,7 +373,8 @@ The prefixes are used to generate the correct namespace."
 (defvar clojure-mode-syntax-table
   (let ((table (make-syntax-table)))
     ;; Initialize ASCII charset as symbol syntax
-    (modify-syntax-entry '(0 . 127) "_" table)
+    ;; Control characters from 0-31 default to the punctuation syntax class
+    (modify-syntax-entry '(32 . 127) "_" table)
 
     ;; Word syntax
     (modify-syntax-entry '(?0 . ?9) "w" table)
@@ -338,6 +386,7 @@ The prefixes are used to generate the correct namespace."
     (modify-syntax-entry ?\xa0 " " table) ; non-breaking space
     (modify-syntax-entry ?\t " " table)
     (modify-syntax-entry ?\f " " table)
+    (modify-syntax-entry ?\r " " table)
     ;; Setting commas as whitespace makes functions like `delete-trailing-whitespace' behave unexpectedly (#561)
     (modify-syntax-entry ?, "." table)
 
@@ -1058,7 +1107,7 @@ any number of matches of `clojure--sym-forbidden-rest-chars'."))
        1 'clojure-character-face)
       ;; lambda arguments - %, %&, %1, %2, etc
       ;; must come after character literals for \% to be handled properly
-      ("\\<%[&1-9]?" (0 font-lock-variable-name-face))
+      ("\\<%[&1-9]*" (0 font-lock-variable-name-face))
       ;; namespace definitions: (ns foo.bar)
       (,(concat "(\\<ns\\>[ \r\n\t]*"
                 ;; Possibly metadata, shorthand and/or longhand
@@ -1233,7 +1282,7 @@ preceeded by a #."
                (clojure-string-start nil))))))
 
 (defun clojure-font-lock-escaped-chars (bound)
-  "Highlight \escaped chars in strings.
+  "Highlight \\escaped chars in strings.
 BOUND denotes a buffer position to limit the search."
   (let ((found nil))
     (while (and (not found)
@@ -1469,7 +1518,7 @@ When called from lisp code align everything between BEG and END."
             (cl-incf count)))
         ;; Pre-indent the region to avoid aligning to improperly indented
         ;; contents (#551). Also fixes #360.
-        (indent-region (point) sexp-end)
+        (indent-region (point) (marker-position sexp-end))
         (dotimes (_ count)
           (align-region (point) sexp-end nil
                         `((clojure-align (regexp . clojure--search-whitespace-after-next-sexp)
@@ -1653,6 +1702,15 @@ accepted by `clojure-indent-style'."
       ;; Car of form is not a symbol.
       (not (looking-at ".\\(?:\\sw\\|\\s_\\)"))))
 
+(defcustom clojure-enable-indent-specs t
+  "Control whether to honor indent specs.
+They can be either set via metadata on the function/macro, or via
+`define-clojure-indent'.  Set this to nil to get uniform
+formatting of all forms."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(clojure-mode . "5.19.0"))
+
 ;; Check the general context, and provide indentation for data structures and
 ;; special macros. If current form is a function (or non-special macro),
 ;; delegate indentation to `clojure--normal-indent'.
@@ -1686,7 +1744,8 @@ This function also returns nil meaning don't specify the indentation."
       (1+ (current-column))
     ;; Function or macro call.
     (forward-char 1)
-    (let ((method (clojure--find-indent-spec))
+    (let ((method (and clojure-enable-indent-specs
+                       (clojure--find-indent-spec)))
           (last-sexp calculate-lisp-indent-last-sexp)
           (containing-form-column (1- (current-column))))
       (pcase method
@@ -1723,7 +1782,7 @@ This function also returns nil meaning don't specify the indentation."
            (cond
             ;; Preserve useful alignment of :require (and friends) in `ns' forms.
             ((and function (string-match "^:" function))
-             (clojure--normal-indent last-sexp 'always-align))
+             (clojure--normal-indent last-sexp clojure-indent-keyword-style))
             ;; This should be identical to the :defn above.
             ((and function
                   (string-match "\\`\\(?:\\S +/\\)?\\(def[a-z]*\\|with-\\)"
@@ -3264,7 +3323,7 @@ With universal argument \\[universal-argument], act on the \"top-level\" form."
 ;;;###autoload
 (progn
   (add-to-list 'auto-mode-alist
-               '("\\.\\(clj\\|cljd\\|dtm\\|edn\\)\\'" . clojure-mode))
+               '("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-mode))
   (add-to-list 'auto-mode-alist '("\\.cljc\\'" . clojurec-mode))
   (add-to-list 'auto-mode-alist '("\\.cljs\\'" . clojurescript-mode))
   ;; boot build scripts are Clojure source files
