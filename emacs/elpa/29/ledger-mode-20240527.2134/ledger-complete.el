@@ -37,8 +37,7 @@
   "The path to an optional file in which all accounts are used or declared.
 This file will then be used as a source for account name
 completions instead of the current file.
-See ledger's
-\"account\" directive."
+See ledger's \"account\" directive."
   :type '(choice (const :tag "Use current buffer for completion" nil)
                  file)
   :group 'ledger
@@ -69,37 +68,6 @@ If nil, full account names are offered for completion."
   :type 'boolean
   :group 'ledger
   :package-version '(ledger-mode . "4.0.0"))
-
-(defun ledger-parse-arguments ()
-  "Parse whitespace separated arguments in the current region."
-  ;; FIXME: We don't use pcomplete anymore.
-  ;; This is more complex than it appears
-  ;; to need, so that it can work with pcomplete.  See
-  ;; pcomplete-parse-arguments-function for details
-  (let* ((begin (save-match-data
-                  (if (looking-back (concat "^\\(" ledger-iso-date-regexp "=\\|\\)"
-                                            ledger-incomplete-date-regexp) nil)
-                      (match-end 1)
-                    (save-excursion
-                      (ledger-thing-at-point) ;; leave point at beginning of thing under point
-                      (point)))))
-         (end (point))
-         begins args)
-    ;; to support end of line metadata
-    (save-excursion
-      (when (search-backward ";"
-                             (line-beginning-position) t)
-        (setq begin (match-beginning 0))))
-    (save-excursion
-      (goto-char begin)
-      (when (< (point) end)
-        (skip-chars-forward " \t\n")
-        (setq begins (cons (point) begins))
-        (setq args (cons (buffer-substring-no-properties
-                          (car begins) end)
-                         args)))
-      (cons (reverse args) (reverse begins)))))
-
 
 (defun ledger-payees-in-buffer ()
   "Scan buffer and return list of all payees."
@@ -201,32 +169,35 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
           (ledger-accounts-list-in-buffer)))
     (ledger-accounts-list-in-buffer)))
 
-(defun ledger-find-accounts-in-buffer ()
-  (let ((account-tree (list t))
-        (account-elements nil))
-    (save-excursion
-      (goto-char (point-min))
-
-      (dolist (account (ledger-accounts-list))
-        (let ((root account-tree))
-          (setq account-elements
-                (split-string
-                 account ":"))
-          (while account-elements
-            (let ((xact (assoc (car account-elements) root)))
-              (if xact
-                  (setq root (cdr xact))
-                (setq xact (cons (car account-elements) (list t)))
-                (nconc root (list xact))
-                (setq root (cdr xact))))
-            (setq account-elements (cdr account-elements))))))
-    account-tree))
-
 (defun ledger-accounts-tree ()
-  "Return a tree of all accounts in the buffer."
-  (let* ((current (caar (ledger-parse-arguments)))
+  "Return a tree of all accounts in the buffer.
+
+Each node in the tree is a list (t . CHILDREN), where CHILDREN is
+an alist (ACCOUNT-ELEMENT . NODE)."
+  (let ((account-tree (list t)))
+    (dolist (account (ledger-accounts-list) account-tree)
+      (let ((root account-tree)
+            (account-elements (split-string account ":")))
+        (dolist (element account-elements)
+          (let ((node (assoc element root)))
+            (unless node
+              (setq node (cons element (list t)))
+              (nconc root (list node)))
+            (setq root (cdr node))))))))
+
+(defun ledger-complete-account-next-steps ()
+  "Return a list of next steps for the account prefix at point."
+  ;; FIXME: This function is called from `ledger-complete-at-point' which
+  ;; already knows the bounds of the account name to complete.  Computing it
+  ;; again here is wasteful.
+  (let* ((current (buffer-substring
+                   (save-excursion
+                     (unless (eq 'posting (ledger-thing-at-point))
+                       (error "Not on a posting line"))
+                     (point))
+                   (point)))
          (elements (and current (split-string current ":")))
-         (root (ledger-find-accounts-in-buffer))
+         (root (ledger-accounts-tree))
          (prefix nil))
     (while (cdr elements)
       (let ((xact (assoc (car elements) root)))
@@ -317,8 +288,10 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
                              (match-string 2) (match-string 3) (match-string 4)
                              (match-string 5) (match-string 6))))
           (;; Payees
-           (eq (save-excursion (ledger-thing-at-point)) 'transaction)
-           (setq start (save-excursion (backward-word) (point)))
+           (eq 'transaction
+               (save-excursion
+                 (prog1 (ledger-thing-at-point)
+                   (setq start (point)))))
            (setq collection #'ledger-payees-list))
           (;; Accounts
            (save-excursion
@@ -330,7 +303,7 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
                                    (- (match-beginning 0) end)))
                  realign-after t
                  collection (if ledger-complete-in-steps
-                                #'ledger-accounts-tree
+                                #'ledger-complete-account-next-steps
                               #'ledger-accounts-list))))
     (when collection
       (let ((prefix (buffer-substring-no-properties start end)))
@@ -344,8 +317,7 @@ Looks in `ledger-accounts-file' if set, otherwise the current buffer."
                                (when delete-suffix
                                  (delete-char delete-suffix))
                                (when (and realign-after ledger-post-auto-align)
-                                 (ledger-post-align-postings (line-beginning-position) (line-end-position))))
-              'ignore)))))
+                                 (ledger-post-align-postings (line-beginning-position) (line-end-position)))))))))
 
 (defun ledger-trim-trailing-whitespace (str)
   (replace-regexp-in-string "[ \t]*$" "" str))
@@ -357,7 +329,13 @@ Interactively, if point is after a payee, complete the
 transaction with the details from the last transaction to that
 payee."
   (interactive)
-  (let* ((name (ledger-trim-trailing-whitespace (caar (ledger-parse-arguments))))
+  (let* ((name (ledger-trim-trailing-whitespace
+                (buffer-substring
+                 (save-excursion
+                   (unless (eq (ledger-thing-at-point) 'transaction)
+                     (user-error "Cannot fully complete xact here"))
+                   (point))
+                 (point))))
          (rest-of-name name)
          xacts)
     (save-excursion
@@ -366,7 +344,8 @@ payee."
         ;; Search backward for a matching payee
         (when (re-search-backward
                (concat "^[0-9/.=-]+\\(\\s-+\\*\\)?\\(\\s-+(.*?)\\)?\\s-+\\(.*"
-                       (regexp-quote name) ".*\\)" ) nil t)
+                       (regexp-quote name) ".*\\)")
+               nil t)
           (setq rest-of-name (match-string 3))
           ;; Start copying the postings
           (forward-line)
@@ -378,8 +357,9 @@ payee."
       (unless (looking-at-p "\n\n")
         (insert "\n")))
     (forward-line)
-    (goto-char (line-end-position))
-    (when (re-search-backward "\\(\t\\| [ \t]\\)" nil t)
+    (end-of-line)
+    ;; Move to amount on first posting line
+    (when (re-search-backward "\t\\| [ \t]" nil t)
       (goto-char (match-end 0)))))
 
 (provide 'ledger-complete)

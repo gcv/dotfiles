@@ -96,6 +96,13 @@
                                            (regexp-quote account))
                                          (ledger-accounts-list))))
 
+(defun ledger-read-payee-with-prompt (prompt)
+  "Read a payee from the minibuffer with PROMPT."
+  (ledger-completing-read-with-default prompt
+                                       (when-let ((payee (ledger-xact-payee)))
+                                         (regexp-quote payee))
+                                       (ledger-payees-list)))
+
 (defun ledger-read-date (prompt)
   "Return user-supplied date after `PROMPT', defaults to today.
 This uses `org-read-date', which see."
@@ -228,6 +235,32 @@ With a prefix argument, remove the effective date."
       (beginning-of-line)
       (forward-char distance-in-xact))))
 
+(defun ledger-rename-account (old new &optional toplevel-only)
+  "Rename account with name OLD to name NEW.
+
+Affects account names mentioned in postings as well as declared
+with the \"account\" directive.
+
+By default, child accounts of OLD are also renamed to
+corresponding child accounts of NEW.  With \\[universal-argument]
+prefix, child accounts are not renamed.  When called from Lisp,
+TOPLEVEL-ONLY has the same meaning."
+  (interactive "sOld name: \nsNew name: \nP")
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward ledger-account-name-or-directive-regex nil t)
+      (let ((account (match-string 1)))
+        (cond
+         ((string-equal account old)
+          (replace-match new 'fixedcase 'literal nil 1))
+         ((and (not toplevel-only)
+               (string-prefix-p (concat old ":") account))
+          (replace-match
+           (concat new (substring account (length old)))
+           'fixedcase 'literal nil 1))))))
+  (when ledger-post-auto-align
+    (ledger-post-align-postings (point-min) (point-max))))
+
 (defvar ledger-mode-syntax-table
   (let ((table (make-syntax-table text-mode-syntax-table)))
     (modify-syntax-entry ?\; "<" table)
@@ -323,6 +356,8 @@ With a prefix argument, remove the effective date."
   (add-hook 'after-save-hook 'ledger-report-redo nil t)
 
   (add-hook 'post-command-hook 'ledger-highlight-xact-under-point nil t)
+  (add-hook 'before-revert-hook 'ledger-highlight--before-revert nil t)
+  (add-hook 'after-revert-hook 'ledger-highlight-xact-under-point nil t)
 
   (ledger-init-load-init-file)
   (setq-local comment-start ";")

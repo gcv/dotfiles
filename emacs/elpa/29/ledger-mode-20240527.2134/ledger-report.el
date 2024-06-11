@@ -28,8 +28,10 @@
 (require 'ledger-xact)
 (require 'ledger-navigate)
 (require 'ledger-commodities)
+(require 'ledger-complete)
 (declare-function ledger-read-string-with-default "ledger-mode" (prompt default))
 (declare-function ledger-read-account-with-prompt "ledger-mode" (prompt))
+(declare-function ledger-read-payee-with-prompt "ledger-mode" (prompt))
 
 (require 'easymenu)
 (require 'ansi-color)
@@ -76,7 +78,8 @@ The function is called with no parameters and expected to return
 a string, or a list of strings, that should replace the format specifier.
 Single strings are quoted with `shell-quote-argument'; lists of strings are
 simply concatenated (no quoting)."
-  :type 'alist
+  :type '(alist :key-type string
+                :value-type function)
   :group 'ledger-report)
 
 (defcustom ledger-report-auto-refresh t
@@ -360,12 +363,7 @@ which is included in some other file."
 The user is prompted to enter a payee and that is substituted.
 If point is in an xact, the payee for that xact is used as the
 default."
-  ;; It is intended completion should be available on existing
-  ;; payees, but the list of possible completions needs to be
-  ;; developed to allow this.
-  (if-let ((payee (ledger-xact-payee)))
-      (ledger-read-string-with-default "Payee" (regexp-quote payee))
-    (ledger-read-string-with-default "Payee" nil)))
+  (ledger-read-payee-with-prompt "Payee"))
 
 (defun ledger-report-account-format-specifier ()
   "Substitute an account name.
@@ -417,26 +415,26 @@ MONTH is of the form (YEAR . INDEX) where INDEX ranges from
       (format "%s-%s" year month-index))))
 
 (defun ledger-report-expand-format-specifiers (report-cmd)
-  "Expand format specifiers in REPORT-CMD with thing under point."
-  (save-match-data
-    (let ((expanded-cmd report-cmd))
-      (set-match-data (list 0 0))
-      (while (string-match "%(\\([^)]*\\))" expanded-cmd
-                           (if (> (length expanded-cmd) (match-end 0))
-                               (match-end 0)
-                             (1- (length expanded-cmd))))
-        (let* ((specifier (match-string 1 expanded-cmd))
-               (f (cdr (assoc specifier ledger-report-format-specifiers))))
-          (if f
-              (let* ((arg (save-match-data
-                            (with-current-buffer ledger-report-ledger-buf
-                              (funcall f))))
-                     (quoted (if (listp arg)
-                                 (mapconcat #'identity arg " ")
-                               (save-match-data
-                                 (shell-quote-argument arg)))))
-                (setq expanded-cmd (replace-match quoted t t expanded-cmd))))))
-      expanded-cmd)))
+  "Expand format specifiers in REPORT-CMD.
+
+Format specifiers are defined in the
+`ledger-report-format-specifiers' alist.  The functions are
+called in the ledger buffer for which the report is being run."
+  (let ((ledger-buf ledger-report-ledger-buf))
+    (with-temp-buffer
+      (save-excursion (insert report-cmd))
+      (while (re-search-forward "%(\\([^)]*\\))" nil t)
+        (when-let ((specifier (match-string 1))
+                   (f (cdr (assoc specifier ledger-report-format-specifiers))))
+          (let* ((arg (save-match-data
+                        (with-current-buffer ledger-buf
+                          (funcall f))))
+                 (quoted (save-match-data
+                           (if (listp arg)
+                               (string-join arg " ")
+                             (shell-quote-argument arg)))))
+            (replace-match quoted 'fixedcase 'literal))))
+       (buffer-string))))
 
 (defun ledger-report--cmd-needs-links-p (cmd)
   "Check links should be added to the report produced by CMD."
