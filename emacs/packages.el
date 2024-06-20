@@ -1149,39 +1149,45 @@
 ;;   )
 
 
-(use-package slime
-  :config
-  (setq slime-net-coding-system 'utf-8-unix)
-  (setq inferior-lisp-program "sbcl")
-  ;; Alternatively:
-  ;;(setq slime-lisp-implementations
-  ;;      '((cmucl ("cmucl" "-quiet"))
-  ;;        (sbcl ("/opt/sbcl/bin/sbcl") :coding-system utf-8-unix)))
+;;; Deprecated in favor of Sly. Sigh. It's been many years. Keeping here for
+;;; nostalgic reasons.
+;; (use-package slime
+;;   :config
+;;   (setq slime-net-coding-system 'utf-8-unix)
+;;   (setq inferior-lisp-program "sbcl")
+;;   ;; Alternatively:
+;;   ;;(setq slime-lisp-implementations
+;;   ;;      '((cmucl ("cmucl" "-quiet"))
+;;   ;;        (sbcl ("/opt/sbcl/bin/sbcl") :coding-system utf-8-unix)))
+;;
+;;   (setq common-lisp-hyperspec-root "~/Files/Common Lisp/CL HyperSpec 7.0/HyperSpec")
+;;   (setq common-lisp-hyperspec-symbol-table
+;;         (concat common-lisp-hyperspec-root "/Data/Map_Sym.txt"))
+;;
+;;   (add-to-list 'slime-contribs 'slime-fancy)
+;;   (add-to-list 'slime-contribs 'slime-asdf)
+;;   (add-to-list 'slime-contribs 'slime-quicklisp)
+;;
+;;   ;;(defun /slime-mode-hook ()
+;;   ;;  (setq slime-truncate-lines nil))
+;;   ;;
+;;   ;;(add-hook 'slime-mode-hook #'/slime-mode-hook)
+;;
+;;   (defun /slime-repl-mode-hook ()
+;;     (paredit-mode 1)
+;;     (define-key slime-repl-mode-map (kbd "<backspace>") 'paredit-backward-delete)
+;;     (define-key slime-repl-mode-map (kbd "C-c C-z") 'flip-windows)
+;;     (define-key slime-repl-mode-map "[" 'paredit-open-square)
+;;     (define-key slime-repl-mode-map "]" 'paredit-close-square)
+;;     (define-key slime-repl-mode-map "{" 'paredit-open-curly)
+;;     (define-key slime-repl-mode-map "}" 'paredit-close-curly))
+;;
+;;   (add-hook 'slime-repl-mode-hook #'/slime-repl-mode-hook)
+;;   )
 
-  (setq common-lisp-hyperspec-root "~/Files/Common Lisp/CL HyperSpec 7.0/HyperSpec")
-  (setq common-lisp-hyperspec-symbol-table
-        (concat common-lisp-hyperspec-root "/Data/Map_Sym.txt"))
 
-  (add-to-list 'slime-contribs 'slime-fancy)
-  (add-to-list 'slime-contribs 'slime-asdf)
-  (add-to-list 'slime-contribs 'slime-quicklisp)
-
-  ;;(defun /slime-mode-hook ()
-  ;;  (setq slime-truncate-lines nil))
-  ;;
-  ;;(add-hook 'slime-mode-hook #'/slime-mode-hook)
-
-  (defun /slime-repl-mode-hook ()
-    (paredit-mode 1)
-    (define-key slime-repl-mode-map (kbd "<backspace>") 'paredit-backward-delete)
-    (define-key slime-repl-mode-map (kbd "C-c C-z") 'flip-windows)
-    (define-key slime-repl-mode-map "[" 'paredit-open-square)
-    (define-key slime-repl-mode-map "]" 'paredit-close-square)
-    (define-key slime-repl-mode-map "{" 'paredit-open-curly)
-    (define-key slime-repl-mode-map "}" 'paredit-close-curly))
-
-  (add-hook 'slime-repl-mode-hook #'/slime-repl-mode-hook)
-  )
+(use-package sly
+  :pin melpa)
 
 
 ;;; Deprecated in favor of newer completion systems, but keep here for reference.
