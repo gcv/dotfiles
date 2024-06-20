@@ -1187,7 +1187,8 @@
 
 
 (use-package sly
-  :pin melpa)
+  :pin melpa
+  :hook (sly-mrepl-mode . paredit-mode))
 
 
 ;;; Deprecated in favor of newer completion systems, but keep here for reference.
