@@ -164,13 +164,13 @@
 		<key>0x56-0x120000-0x9</key>
 		<dict>
 			<key>Action</key>
-			<integer>22</integer>
+			<integer>41</integer>
 			<key>Apply Mode</key>
 			<integer>0</integer>
 			<key>Escaping</key>
 			<integer>2</integer>
 			<key>Text</key>
-			<string></string>
+			<string>{"ConvertUnicodePunctuation":false,"WaitForPrompts":false,"Substitution":"","EscapeForShell":false,"Base64":false,"TabStopSize":4,"Delay":0.01,"RemoveNewlines":false,"Regex":"","ConvertNewlines":true,"TabTransform":0,"BracketAllowed":true,"UseRegexSubstitution":false,"ChunkSize":1024,"RemoveControls":true}</string>
 			<key>Version</key>
 			<integer>2</integer>
 		</dict>
