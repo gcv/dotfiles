@@ -43,6 +43,9 @@ fi
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# load private environment variables:
+[[ -f ~/.dotfiles/private/shell-profile-private ]] && . ~/.dotfiles/private/shell-profile-private
+
 
 ### 24-bit terminal color handling
 

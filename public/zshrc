@@ -32,6 +32,9 @@ export UNAME=$(uname)
 export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
 export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
 
+# load private environment variables:
+[[ -f ~/.dotfiles/private/shell-profile-private ]] && . ~/.dotfiles/private/shell-profile-private
+
 
 ### Nix: turn it on.
 ### The "correct" way is to source ~/.nix-profile/etc/profile.d/nix.sh, but

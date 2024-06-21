@@ -17,7 +17,7 @@ fi
 # The following are similar:
 # - croc and magic-wormhole
 # - bat and cat
-# - exa and ls
+# - eza and ls
 packages=(
     # spelling checkers
     aspell
@@ -103,18 +103,19 @@ packages=(
     starship           # fancy prompt, good with fish
     tectonic           # (La)TeX environment
     texinfo
+    tgpt               # terminal GPT client
     tmux
-    tree              # file lister, obsoleted by eza and broot
-    tree-sitter       # parser framework
+    tree               # file lister, obsoleted by eza and broot
+    tree-sitter        # parser framework
     unrar
-    viddy             # watch replacement
+    viddy              # watch replacement
     watch
-    wget              # weak web scraper (no restart support)
-    xcp               # cp replacement
+    wget               # weak web scraper (no restart support)
+    xcp                # cp replacement
     xz
-    yazi              # file browser / file manager 3 (Rust)
+    yazi               # file browser / file manager 3 (Rust)
     #youtube-dl        # outdated?
-    yt-dlp            # new youtube-dl
+    yt-dlp             # new youtube-dl
     zsh
 )
 
