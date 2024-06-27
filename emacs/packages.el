@@ -1191,22 +1191,29 @@
 
   :hook (sly-mrepl-mode . paredit-mode)
 
-  :bind
-  (:map sly-mrepl-mode-map ("C-c C-z" . /sly-mrepl-back))
-
   :config
-  (defun /sly-mrepl-back ()
-    "Traverse the buffer list and call `pop-to-buffer` to switch to the most recently visited buffer within the same perspective."
-    (interactive)
-    (let ((current-buffer (current-buffer))
-          (current-persp-buffers (persp-current-buffers)))
-      (cl-loop for buffer in (buffer-list)
-               when (and (not (eq buffer current-buffer))
-                         (member buffer current-persp-buffers)
-                         (buffer-live-p buffer))
-               do (progn
-                    (pop-to-buffer buffer)
-                    (cl-return)))))
+  ;; XXX: I want C-c C-z to flip between the REPL and the most recently edited
+  ;; Lisp file, but binding a proper "go back to the last Lisp file" function to
+  ;; sly-mrepl-mode-map does not work. There's something weird about the way
+  ;; keymaps are applied in sly-mrepl-mode, and the sly-mode-map binding of C-c
+  ;; C-z to sly-mrepl always executes. Workaround: advice that does something
+  ;; different in sly-mrepl-mode.
+  (defun /sly-mrepl (orig-fn &rest args)
+    (if (eql 'sly-mrepl-mode major-mode)
+        (let ((current-buffer (current-buffer))
+              (current-persp-buffers (persp-current-buffers)))
+          (cl-loop for buffer in (buffer-list)
+                   when (and (not (eq buffer current-buffer))
+                             (member buffer current-persp-buffers)
+                             (buffer-live-p buffer)
+                             (with-current-buffer buffer
+                               (derived-mode-p 'lisp-mode)))
+                   do (progn
+                        (pop-to-buffer buffer)
+                        (cl-return))))
+      (apply orig-fn args)))
+
+  (advice-add 'sly-mrepl :around #'/sly-mrepl)
   )
 
 
