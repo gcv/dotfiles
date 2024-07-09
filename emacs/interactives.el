@@ -798,3 +798,74 @@ instead, which does not save the deletion to the kill-ring."
 annoying to open. This function makes it easier."
   (interactive)
   (switch-to-buffer (get-buffer "*Messages*")))
+
+
+(defun unison ()
+  "Synchronize the current buffer's file using the best matching Unison profile.
+Written by ChatGPT 4o."
+  (interactive)
+  (let ((unison-bin (executable-find "unison"))
+        (unison-dir (expand-file-name "~/.unison"))
+        (current-file (buffer-file-name (current-buffer)))
+        best-match-profile best-match-path best-overlap-length)
+
+    ;; Check if the unison binary is available
+    (unless unison-bin
+      (error "Unison binary not found in exec-path"))
+
+    ;; Check if the ~/.unison directory exists
+    (unless (file-directory-p unison-dir)
+      (error "~/.unison directory does not exist"))
+
+    ;; Check if the current buffer is visiting a file
+    (unless current-file
+      (error "Current buffer is not visiting a file"))
+
+    ;; Function to find common prefix length
+    (cl-flet ((file-name-common-prefix (a b)
+                "Return the common prefix of the file names A and B."
+                (let ((a-dirs (split-string (file-name-directory a) "/"))
+                      (b-dirs (split-string (file-name-directory b) "/"))
+                      (common-dirs '()))
+                  (while (and a-dirs b-dirs (string= (car a-dirs) (car b-dirs)))
+                    (push (car a-dirs) common-dirs)
+                    (setq a-dirs (cdr a-dirs))
+                    (setq b-dirs (cdr b-dirs)))
+                  (string-join (nreverse common-dirs) "/"))))
+
+      ;; Find all .prf files in the ~/.unison directory
+      (dolist (prf-file (directory-files unison-dir t "\\.prf\\'"))
+        (with-temp-buffer
+          (insert-file-contents prf-file)
+          (goto-char (point-min))
+          ;; Skip files with existing `path =` entries
+          (unless (re-search-forward "^path = " nil t)
+            (goto-char (point-min))
+            ;; Parse `root = <some-path>` lines
+            (while (re-search-forward "^root = \\(.+\\)$" nil t)
+              (let* ((root-path (match-string 1))
+                     (common-prefix (file-name-common-prefix
+                                     (file-name-as-directory current-file)
+                                     (file-name-as-directory root-path)))
+                     (overlap-length (length common-prefix)))
+                (when (and (file-exists-p root-path)
+                           (string-prefix-p "/" common-prefix)
+                  (or (not best-overlap-length) (> overlap-length best-overlap-length)))
+                  (setq best-match-profile prf-file)
+                  (setq best-match-path root-path)
+                  (setq best-overlap-length overlap-length)))))))
+
+      ;; Error out if no matching profile was found
+      (unless best-match-profile
+        (error "No matching Unison profile found"))
+
+      ;; Construct and execute the Unison command
+      (let ((relative-file-path (file-relative-name current-file best-match-path))
+            (output-buffer (get-buffer-create "*Unison*")))
+        (start-process "unison" output-buffer unison-bin
+                       (file-name-base best-match-profile)
+                       "-path" relative-file-path
+                       "-color" "false"
+                       "-dumbtty"
+                       "-batch")
+        (pop-to-buffer output-buffer)))))
