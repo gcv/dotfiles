@@ -163,7 +163,7 @@ function gpgd_mount() {
     local tmpfile=$(mktemp XXXXX)
     rm -f "${tmpfile}"
     ln -s "${archive_file}" "${tmpfile}"
-    gpg -q --decrypt "${tmpfile}" | tar xzk
+    gpg -q --pinentry-mode=loopback --decrypt "${tmpfile}" | tar xzk
     rm -f "${tmpfile}"
     if [[ ! -d "${archive_filename_noext}" ]]; then
         # TODO: Deal with the problem of archive filenames differing from the root of the archive.
