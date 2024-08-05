@@ -62,6 +62,7 @@ packages=(
     gnupg
     gnutar
     helix              # modal text editor, alternative to (neo)vi(m)
+    hledger            # Haskell reimplementation of Ledger CLI (accounting)
     htmlq              # command line HTML parser and query tool (like jq)
     htop               # top replacement 1
     httpie             # HTTP client, alternative to curl
@@ -72,7 +73,7 @@ packages=(
     #julia
     lazydocker         # Docker UI
     lazygit            # Git UI
-    ledger
+    ledger             # Ledger CLI (accounting)
     libvterm-neovim
     magic-wormhole     # peer-to-peer file transfer (cf croc)
     mc                 # file browser / file manager 1 (Midnight Commander)
