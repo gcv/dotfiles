@@ -263,6 +263,19 @@ Preferences...</string>
 			<key>Version</key>
 			<integer>2</integer>
 		</dict>
+		<key>0x43-0x120000-0x8</key>
+		<dict>
+			<key>Action</key>
+			<integer>69</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string></string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
 		<key>0x43-0xa0000-0x8</key>
 		<dict>
 			<key>Action</key>
@@ -329,6 +342,19 @@ New Tab</string>
 			<key>Text</key>
 			<string>New Tab
 New Tab</string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
+		<key>0x56-0x120000-0x9</key>
+		<dict>
+			<key>Action</key>
+			<integer>70</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string></string>
 			<key>Version</key>
 			<integer>2</integer>
 		</dict>
@@ -435,19 +461,6 @@ Close</string>
 			<integer>2</integer>
 			<key>Text</key>
 			<string></string>
-			<key>Version</key>
-			<integer>2</integer>
-		</dict>
-		<key>0x7f-0x80000-0x33</key>
-		<dict>
-			<key>Action</key>
-			<integer>11</integer>
-			<key>Apply Mode</key>
-			<integer>0</integer>
-			<key>Escaping</key>
-			<integer>2</integer>
-			<key>Text</key>
-			<string>0x17</string>
 			<key>Version</key>
 			<integer>2</integer>
 		</dict>
