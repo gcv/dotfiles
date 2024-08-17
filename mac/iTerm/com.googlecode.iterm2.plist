@@ -53,6 +53,87 @@
 			<key>Text</key>
 			<string></string>
 		</dict>
+		<key>0x2c-0x100000-0x2b</key>
+		<dict>
+			<key>Action</key>
+			<integer>13</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string></string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
+		<key>0x3c-0x120000-0x2b</key>
+		<dict>
+			<key>Action</key>
+			<integer>25</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string>Preferences...
+Preferences...</string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
+		<key>0x54-0x120000-0x11</key>
+		<dict>
+			<key>Action</key>
+			<integer>25</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string>New Tab
+New Tab</string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
+		<key>0x57-0x120000-0xd</key>
+		<dict>
+			<key>Action</key>
+			<integer>25</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string>Close
+Close</string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
+		<key>0x74-0x100000-0x11</key>
+		<dict>
+			<key>Action</key>
+			<integer>13</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string></string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
+		<key>0x77-0x100000-0xd</key>
+		<dict>
+			<key>Action</key>
+			<integer>13</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string></string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
 		<key>0x9-0x40000</key>
 		<dict>
 			<key>Action</key>
@@ -1088,7 +1169,7 @@
 	<key>ShowBookmarkName</key>
 	<false/>
 	<key>ShowFullScreenTabBar</key>
-	<true/>
+	<false/>
 	<key>ShowNewOutputIndicator</key>
 	<false/>
 	<key>ShowPaneTitles</key>
