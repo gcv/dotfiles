@@ -276,6 +276,34 @@ Preferences...</string>
 			<key>Version</key>
 			<integer>2</integer>
 		</dict>
+		<key>0x4e-0x120000-0x2d</key>
+		<dict>
+			<key>Action</key>
+			<integer>25</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string>New Window
+New Window</string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
+		<key>0x4e-0xa0000-0x2d</key>
+		<dict>
+			<key>Action</key>
+			<integer>25</integer>
+			<key>Apply Mode</key>
+			<integer>0</integer>
+			<key>Escaping</key>
+			<integer>2</integer>
+			<key>Text</key>
+			<string>New Window
+New Window</string>
+			<key>Version</key>
+			<integer>2</integer>
+		</dict>
 		<key>0x54-0x120000-0x11</key>
 		<dict>
 			<key>Action</key>
