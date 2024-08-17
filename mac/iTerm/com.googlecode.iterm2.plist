@@ -42,6 +42,8 @@
 	<false/>
 	<key>FsTabDelay</key>
 	<real>1</real>
+	<key>FunctionKey</key>
+	<integer>10</integer>
 	<key>GlobalKeyMap</key>
 	<dict>
 		<key>0x19-0x60000</key>
@@ -50,206 +52,6 @@
 			<integer>39</integer>
 			<key>Text</key>
 			<string></string>
-		</dict>
-		<key>0x30-0x100000-0x1d</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x31-0x100000-0x12</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x32-0x100000-0x13</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x33-0x100000-0x14</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x34-0x100000-0x15</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x35-0x100000-0x17</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x36-0x100000-0x16</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x37-0x100000-0x1a</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x38-0x100000-0x1c</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x39-0x100000-0x19</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x56-0x120000-0x9</key>
-		<dict>
-			<key>Action</key>
-			<integer>41</integer>
-			<key>Apply Mode</key>
-			<integer>0</integer>
-			<key>Escaping</key>
-			<integer>2</integer>
-			<key>Text</key>
-			<string>{"ConvertUnicodePunctuation":false,"WaitForPrompts":false,"Substitution":"","EscapeForShell":false,"Base64":false,"TabStopSize":4,"Delay":0.01,"RemoveNewlines":false,"Regex":"","ConvertNewlines":true,"TabTransform":0,"BracketAllowed":true,"UseRegexSubstitution":false,"ChunkSize":1024,"RemoveControls":true}</string>
-			<key>Version</key>
-			<integer>2</integer>
-		</dict>
-		<key>0x60-0x100000-0x32</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x60-0x180000-0x32</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x66-0x140000</key>
-		<dict>
-			<key>Action</key>
-			<integer>23</integer>
-			<key>Text</key>
-			<string></string>
-		</dict>
-		<key>0x68-0x100000-0x4</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
-		<key>0x7b-0x120000-0x21</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Apply Mode</key>
-			<integer>0</integer>
-			<key>Escaping</key>
-			<integer>2</integer>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>2</integer>
-		</dict>
-		<key>0x7d-0x120000-0x1e</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Apply Mode</key>
-			<integer>0</integer>
-			<key>Escaping</key>
-			<integer>2</integer>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>2</integer>
-		</dict>
-		<key>0x9-0x100000-0x30</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
 		</dict>
 		<key>0x9-0x40000</key>
 		<dict>
@@ -286,17 +88,6 @@
 			<key>Text</key>
 			<string></string>
 		</dict>
-		<key>0xf702-0x340000-0x7b</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
-		</dict>
 		<key>0xf703-0x300000</key>
 		<dict>
 			<key>Action</key>
@@ -310,17 +101,6 @@
 			<integer>34</integer>
 			<key>Text</key>
 			<string></string>
-		</dict>
-		<key>0xf703-0x340000-0x7c</key>
-		<dict>
-			<key>Action</key>
-			<integer>22</integer>
-			<key>Label</key>
-			<string></string>
-			<key>Text</key>
-			<string></string>
-			<key>Version</key>
-			<integer>1</integer>
 		</dict>
 		<key>0xf729-0x100000</key>
 		<dict>
@@ -404,7 +184,9 @@
 	<key>JobName</key>
 	<true/>
 	<key>LeftCommand</key>
-	<integer>2</integer>
+	<integer>7</integer>
+	<key>LeftControl</key>
+	<integer>11</integer>
 	<key>LeftOption</key>
 	<integer>2</integer>
 	<key>MaxVertically</key>
@@ -2131,6 +1913,8 @@
 	<false/>
 	<key>RightCommand</key>
 	<integer>8</integer>
+	<key>RightControl</key>
+	<integer>12</integer>
 	<key>RightOption</key>
 	<integer>3</integer>
 	<key>SavePasteHistory</key>
