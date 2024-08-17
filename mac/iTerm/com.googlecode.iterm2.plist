@@ -236,20 +236,6 @@ Preferences...</string>
 			<key>Version</key>
 			<integer>2</integer>
 		</dict>
-		<key>0x3c-0xa0000-0x2b</key>
-		<dict>
-			<key>Action</key>
-			<integer>25</integer>
-			<key>Apply Mode</key>
-			<integer>0</integer>
-			<key>Escaping</key>
-			<integer>2</integer>
-			<key>Text</key>
-			<string>Preferences...
-Preferences...</string>
-			<key>Version</key>
-			<integer>2</integer>
-		</dict>
 		<key>0x3d-0x100000-0x18</key>
 		<dict>
 			<key>Action</key>
