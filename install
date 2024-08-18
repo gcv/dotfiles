@@ -56,6 +56,7 @@ parse_params() {
     link_sqlite=0
     link_starship=0
     link_tmux=0
+    link_wezterm=0
     link_zsh=0
 
     while :; do
@@ -76,6 +77,7 @@ parse_params() {
             --ssh) link_all=0; link_ssh=1 ;;
             --starship) link_all=0; link_starship=1 ;;
             --tmux) link_all=0; link_tmux=1 ;;
+            --wezterm) link_all=0; link_wezterm=1 ;;
             --zsh) link_all=0; link_zsh=1 ;;
             -?*) die "unknown option: $1" ;;
             *) break ;;
@@ -226,6 +228,10 @@ fi
 
 if [[ $link_all = "1" || $link_tmux = "1" ]]; then
     link "public/tmux.conf" ".tmux.conf"
+fi
+
+if [[ $link_all = "1" || $link_wezterm = "1" ]]; then
+    link "public/wezterm" ".config/wezterm"
 fi
 
 if [[ $link_all = "1" || $link_zsh = "1" ]]; then
