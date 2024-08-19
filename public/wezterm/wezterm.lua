@@ -3,30 +3,32 @@ local act = wezterm.action
 local conf = wezterm.config_builder()
 
 
+local meta
+if wezterm.target_triple:find("linux") or wezterm.target_triple:find("windows") then
+   font_size = 10
+   meta = "ALT"
+   conf.window_decorations = "RESIZE"
+elseif wezterm.target_triple:find("darwin") then
+   font_size = 14
+   meta = "CMD"
+   conf.window_decorations = "RESIZE|INTEGRATED_BUTTONS"
+end
+
+
 -- conf.color_scheme = "Tokyo Night"
 conf.audible_bell = "Disabled"
 conf.adjust_window_size_when_changing_font_size = false
 conf.window_background_opacity = 0.9
 conf.macos_window_background_blur = 30
 conf.font = wezterm.font("Hack Nerd Font")
-conf.font_size = 14
+conf.font_size = font_size
 conf.window_frame = {
   font = wezterm.font("SF Pro", { weight = "Bold" }),
-  font_size = 14,
+  font_size = font_size,
 }
 conf.colors = {
    cursor_bg = "#2F79A1"
 }
-
-
-local meta
-if wezterm.target_triple:find("linux") or wezterm.target_triple:find("windows") then
-  meta = "ALT"
-  conf.window_decorations = "RESIZE"
-elseif wezterm.target_triple:find("darwin") then
-  meta = "CMD"
-  conf.window_decorations = "RESIZE|INTEGRATED_BUTTONS"
-end
 
 
 conf.keys = {
