@@ -2,16 +2,22 @@ local wezterm = require "wezterm"
 local act = wezterm.action
 local conf = wezterm.config_builder()
 
--- conf.color_scheme = "Tokyo Night"
 
+-- conf.color_scheme = "Tokyo Night"
+conf.audible_bell = "Disabled"
+conf.adjust_window_size_when_changing_font_size = false
 conf.window_background_opacity = 0.9
 conf.macos_window_background_blur = 30
 conf.font = wezterm.font("Hack Nerd Font")
-conf.font_size = 10
+conf.font_size = 14
 conf.window_frame = {
   font = wezterm.font("SF Pro", { weight = "Bold" }),
-  font_size = 10,
+  font_size = 14,
 }
+conf.colors = {
+   cursor_bg = "#2F79A1"
+}
+
 
 local meta
 if wezterm.target_triple:find("linux") or wezterm.target_triple:find("windows") then
@@ -21,6 +27,7 @@ elseif wezterm.target_triple:find("darwin") then
   meta = "CMD"
   conf.window_decorations = "RESIZE|INTEGRATED_BUTTONS"
 end
+
 
 conf.keys = {
    { key = "n", mods = meta .. "|SHIFT", action = act.SpawnWindow },
@@ -52,16 +59,34 @@ conf.keys = {
    { key = "+", mods = "CTRL|SHIFT", action = act.DisableDefaultAssignment },
 }
 
--- if wezterm.target_triple:find("darwin") then
---    local meta_keys = { "x", "\\", "UpArrow", "DownArrow", "LeftArrow", "UpArrow" }
---    for _, key in ipairs(meta_keys) do
---       table.insert(conf.keys, {
---          key = key,
---          mods = meta,
---          action = act.SendKey { key = key, mods = "META" }
---       })
---    end
--- end
+
+if wezterm.target_triple:find("darwin") then
+   local meta_keys = {
+      -- exclude h
+      "q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
+      "a", "s", "d", "f", "g", "j", "k", "l",
+      "z", "x", "c", "v", "b", "n", "m",
+      "[", "]", "\\", ":", ";", "'", "\"", ",", "<", ".", ">", "?", "/",
+      "UpArrow", "DownArrow", "LeftArrow", "UpArrow"
+   }
+   local meta_shift_keys = {
+      -- exclude n, c, v, t, w
+      "q", "e", "r", "y", "u", "i", "o", "p",
+      "a", "s", "d", "f", "g", "h", "j", "k", "l",
+      "z", "x", "b", "m",
+      "[", "]", "\\", ":", ";", "'", "\"", ",", "<", ".", ">", "?", "/",
+      "UpArrow", "DownArrow", "LeftArrow", "UpArrow"
+   }
+   for _, key in ipairs(meta_keys) do
+      table.insert(conf.keys, { key = key, mods = meta, action = act.SendKey { key = key, mods = "META" }})
+      table.insert(conf.keys, { key = key, mods = meta .. "|CTRL", action = act.SendKey { key = key, mods = "META|CTRL" }})
+   end
+   for _, key in ipairs(meta_shift_keys) do
+      table.insert(conf.keys, { key = key, mods = meta .. "|SHIFT", action = act.SendKey { key = key, mods = "META|SHIFT" }})
+      table.insert(conf.keys, { key = key, mods = meta .. "|SHIFT|CTRL", action = act.SendKey { key = key, mods = "META|SHIFT|CTRL" }})
+   end
+end
+
 
 -- wezterm.on('update-status', function(window)
 --   local SOLID_LEFT_ARROW = utf8.char(0xe0b2)
@@ -71,7 +96,7 @@ conf.keys = {
 --   local color_scheme = window:effective_config().resolved_palette
 --   local bg = color_scheme.background
 --   local fg = color_scheme.foreground
-
+--
 --   window:set_right_status(wezterm.format({
 --     -- first, we draw the arrow...
 --     { Background = { Color = 'none' } },
@@ -83,5 +108,6 @@ conf.keys = {
 --     { Text = ' ' .. wezterm.hostname() .. ' ' },
 --   }))
 -- end)
+
 
 return conf
