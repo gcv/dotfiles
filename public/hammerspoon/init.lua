@@ -41,7 +41,7 @@ dofile("./windows.lua")
 dofile("./safari.lua")
 dofile("./itunes.lua")
 dofile("./emacs-and-term.lua")
-dofile("./ctrl-esc.lua")
+--dofile("./ctrl-esc.lua")
 
 --- Spoons:
 hs.loadSpoon("Action")
