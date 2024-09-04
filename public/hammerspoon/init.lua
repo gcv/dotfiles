@@ -44,7 +44,7 @@ dofile("./emacs-and-term.lua")
 --dofile("./ctrl-esc.lua")
 
 --- Spoons:
-hs.loadSpoon("Action")
+--hs.loadSpoon("Action")
 --hs.loadSpoon("GitSync")
 --hs.loadSpoon("Shade")
 
