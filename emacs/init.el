@@ -1164,6 +1164,14 @@ See `eshell-prompt-regexp'."
   (js-chain-indent t))
 
 
+;;; Tree-sitter TypeScript and TSX modes
+(use-feature typescript-ts-mode
+  :mode "\\.ts\\'")
+
+(use-feature tsx-ts-mode
+  :mode "\\.tsx\\'")
+
+
 ;;; sh-script (shell script)
 (use-feature sh-script
   :hook

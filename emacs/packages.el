@@ -1316,9 +1316,7 @@
 (use-package web-mode
   :mode
   (("\\.html?\\'" . web-mode)
-   ("\\.erb\\'" . web-mode)
-   ("\\.ts?\\'" . web-mode)
-   ("\\.tsx\\'" . web-mode))
+   ("\\.erb\\'" . web-mode))
 
   :config
   (setq web-mode-enable-current-element-highlight t
