@@ -869,3 +869,22 @@ Written by ChatGPT 4o."
                        "-dumbtty"
                        "-batch")
         (pop-to-buffer output-buffer)))))
+
+
+(defun remove-alist-entry (alist-var)
+  "Prompt for an alist variable ALIST-VAR and an entry to remove.
+Written by ChatGPT 4o, with fixes."
+  (interactive
+   (list (intern (completing-read "Alist variable: "
+                                  obarray
+                                  (lambda (v) (and (boundp v)
+                                                   (listp (eval v))))
+                                  t))))
+  (let* ((alist (eval alist-var))
+         (options (mapcar (lambda (pair)
+                            (format "%s: %s" (car pair) (cdr pair)))
+                          alist))
+         (choice (completing-read "Entry to remove: " options))
+         (key (car (split-string choice ": "))))
+    (set alist-var (assoc-delete-all key alist))
+    (message "Entry '%s' removed from %s" key alist-var)))
