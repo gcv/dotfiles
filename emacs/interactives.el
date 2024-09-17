@@ -109,6 +109,30 @@
   (toggle-header-line header-line-format))
 
 
+(defun n150 ()
+  (interactive)
+  (set-font "Hack Nerd Font Mono" 15)
+  (toggle-header-line header-line-format))
+
+
+(defun n140 ()
+  (interactive)
+  (set-font "Hack Nerd Font Mono" 14)
+  (toggle-header-line header-line-format))
+
+
+(defun n120 ()
+  (interactive)
+  (set-font "Hack Nerd Font Mono" 12)
+  (toggle-header-line header-line-format))
+
+
+(defun n100 ()
+  (interactive)
+  (set-font "Hack Nerd Font Mono" 10)
+  (toggle-header-line header-line-format))
+
+
 (defun j100 ()
   (interactive)
   ;;(set-font-old "JuliaMono" 100 15.5)

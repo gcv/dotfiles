@@ -1139,6 +1139,10 @@
   )
 
 
+(use-package show-font
+  :pin gnu)
+
+
 ;;; An alternative to .dir-locals.el for configuring projects.
 ;; (use-package sidecar-locals
 ;;   :pin melpa
