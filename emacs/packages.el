@@ -1256,6 +1256,16 @@
 (use-package terraform-mode)
 
 
+(use-package typst-ts-mode
+  :vc (typst-ts-mode :url "https://codeberg.org/meow_king/typst-ts-mode" :branch "main")
+  :config
+  (add-to-list 'consult-imenu-config
+               '(typst-ts-mode :toplevel "Headings" :types
+                               ((?h "Headings" typst-ts-markup-header-face)
+                                (?f "Functions" font-lock-function-name-face))))
+  (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
+
+
 (use-package vterm
   :pin melpa
 

@@ -801,6 +801,7 @@ See `eshell-prompt-regexp'."
                                    (toml "https://github.com/tree-sitter/tree-sitter-toml")
                                    (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
                                    (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+                                   (typst "https://github.com/uben0/tree-sitter-typst")
                                    (verilog "https://github.com/tree-sitter/tree-sitter-verilog")
                                    (vhdl "https://github.com/alemuller/tree-sitter-vhdl")
                                    (wgsl "https://github.com/mehmetoguzderin/tree-sitter-wgsl")
