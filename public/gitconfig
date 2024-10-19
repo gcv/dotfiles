@@ -1,5 +1,5 @@
 [include]
-        path = ~/Files/Systems/dotfiles/private/gitconfig
+        path = ~/.dotfiles/private/gitconfig
 [core]
         # checkStat = minimal and trustctime = false help reduce index churn
         # from different synced repository copies
