@@ -71,6 +71,7 @@ packages=(
     jnv                # interactive JSON viewer with jq query preview
     jq                 # JSON query utility
     #julia
+    keepassxc          # password manager
     lazydocker         # Docker UI
     lazygit            # Git UI
     ledger             # Ledger CLI (accounting)
@@ -87,7 +88,6 @@ packages=(
     notmuch            # mail indexer
     p7zip
     pandoc
-    pass               # password manager
     pastel             # color utility
     pop                # mail sender
     pinentry-tty       # GPG passphrase entry program for terminal
