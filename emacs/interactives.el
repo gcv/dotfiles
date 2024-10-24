@@ -912,3 +912,25 @@ Written by ChatGPT 4o, with fixes."
          (key (car (split-string choice ": "))))
     (set alist-var (assoc-delete-all key alist))
     (message "Entry '%s' removed from %s" key alist-var)))
+
+
+(defun org-link-to-markdown ()
+  "Convert Org-mode link at point to Markdown format.
+Written by ChatGPT 4o."
+  (interactive)
+  (save-excursion
+    (let (link-start link-end url desc)
+      ;; Search for the start of the link
+      (re-search-backward "\\[\\[" nil t)
+      (setq link-start (point))
+      ;; Check if we are looking at a valid Org-mode link
+      (if (looking-at "\\[\\[\\([^]]+\\)\\]\\[\\([^]]+\\)\\]\\]")
+          (progn
+            ;; Extract URL and description
+            (setq url (match-string 1))
+            (setq desc (match-string 2))
+            (setq link-end (match-end 0))
+            ;; Delete the Org-mode link and replace with Markdown link
+            (delete-region link-start link-end)
+            (insert (format "[%s](%s)" desc url)))
+        (message "No Org-mode link found at point")))))
