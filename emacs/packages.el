@@ -527,6 +527,12 @@
   )
 
 
+;;; LLM interaction package: https://github.com/karthink/gptel
+(use-package gptel
+  :custom
+  (gptel-display-buffer-action nil))
+
+
 (use-package haskell-mode
   :config
   ;; consider installing Intero if Haskell becomes relevant
