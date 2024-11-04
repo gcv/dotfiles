@@ -5,7 +5,8 @@
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
 ;; Keywords: help, lisp
-;; Version: 0.22
+;; Package-Version: 20240613.1523
+;; Package-Revision: 4ba24cac9fb1
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -1259,7 +1260,10 @@ If the source code cannot be found, return the sexp used."
                   ;; function.
                   (progn
                     (setq pos (line-beginning-position))
-                    (forward-list)
+                    ;; HACK Use the elisp syntax table even though the file is a
+                    ;; C file. This is a temporary workaround for issue #329.
+                    (with-syntax-table emacs-lisp-mode-syntax-table
+                      (forward-list))
                     (forward-char)
                     (narrow-to-region pos (point)))
                 ;; Narrow to the top-level definition.
