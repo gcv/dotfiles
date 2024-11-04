@@ -1,10 +1,11 @@
-;;; olivetti.el --- Minor mode for a nice writing environment -*- lexical-binding: t; -*-
+;;; olivetti.el --- Minor mode to automatically balance window margins -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2014-2023  Paul W. Rankin
+;; Copyright (c) 2014-2024  Paul W. Rankin
 
-;; Author: Paul W. Rankin <hello@paulwrankin.com>
+;; Author: Paul W. Rankin <rnkn@rnkn.xyz>
 ;; Keywords: wp, text
-;; Version: 2.0.5
+;; Package-Version: 20241030.542
+;; Package-Revision: 845eb7a95a3c
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/olivetti
 
@@ -104,17 +105,6 @@
 ;;     $ emacs -Q -l olivetti.el
 
 
-;; Hints
-;; -----
-
-;; To always use a different width for a specific file, set a File
-;; Variable:
-
-;;     M-x add-file-local-variable RET olivetti-body-width RET 66 RET
-
-;; See (info "(emacs) File Variables")
-
-
 ;; Alternatives
 ;; ------------
 
@@ -124,6 +114,15 @@
 
 ;; [1]: https://stable.melpa.org/#/olivetti
 ;; [2]: https://melpa.org/#/olivetti
+
+
+;; Donations
+;; ---------
+
+;; Donations are graciously accepted via [Github][3], or [Liberapay][4].
+
+;; [3]: https://github.com/sponsors/rnkn
+;; [4]: https://liberapay.com/rnkn/
 
 ;;; Code:
 
@@ -172,11 +171,12 @@
 
 (defcustom olivetti-body-width
   nil
-  "Text body width to which to adjust relative margin width.
+  "Width of text body width to adjust relative margins.
 If an integer, set text body width to that integer in columns; if
 a floating point between 0.0 and 1.0, set text body width to that
 fraction of the total window width. If nil (the default), use the
-value of `fill-column' + 2.
+value of `fill-column' + 2. The extra 2 columns are to prevent
+text files at `fill-colum ' from wrapping in the body widith.
 
 An integer is best if you want text body width to remain
 constant, while a floating point is best if you want text body
@@ -272,10 +272,10 @@ if it is an integer, and otherwise return WIDTH."
     (setq min-width-pix (* char-width
                            (+ olivetti-minimum-body-width
                               (% olivetti-minimum-body-width 2))))
-    (olivetti-scale-width
      (if (floatp width)
          (floor (max min-width-pix (* window-width-pix (min width 1.0))))
-       (max min-width-pix (min (* width char-width) window-width-pix))))))
+       (olivetti-scale-width
+        (max min-width-pix (min (* width char-width) window-width-pix))))))
 
 (defun olivetti-reset-window (window)
   "Remove Olivetti's parameters and margins from WINDOW."
