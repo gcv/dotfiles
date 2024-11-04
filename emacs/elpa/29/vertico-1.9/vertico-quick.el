@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.8
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (vertico "1.8"))
+;; Version: 1.9
+;; Package-Requires: ((emacs "27.1") (compat "30") (vertico "1.9"))
 ;; Homepage: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -139,10 +139,6 @@ TWO is non-nil if two keys should be displayed."
   (interactive)
   (when (vertico-quick-jump)
     (vertico-insert)))
-
-;; Emacs 28: Do not show Vertico commands in M-X
-(dolist (sym '(vertico-quick-jump vertico-quick-exit vertico-quick-insert))
-  (put sym 'completion-predicate #'vertico--command-p))
 
 (provide 'vertico-quick)
 ;;; vertico-quick.el ends here

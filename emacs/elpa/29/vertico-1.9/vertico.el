@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.8
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4"))
+;; Version: 1.9
+;; Package-Requires: ((emacs "27.1") (compat "30"))
 ;; Homepage: https://github.com/minad/vertico
 ;; Keywords: convenience, files, matching, completion
 
@@ -250,11 +250,9 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--affixate (cands)
   "Annotate CANDS with annotation function."
-  (if-let ((aff (or (vertico--metadata-get 'affixation-function)
-                    (plist-get completion-extra-properties :affixation-function))))
+  (if-let ((aff (vertico--metadata-get 'affixation-function)))
       (funcall aff cands)
-    (if-let ((ann (or (vertico--metadata-get 'annotation-function)
-                      (plist-get completion-extra-properties :annotation-function))))
+    (if-let ((ann (vertico--metadata-get 'annotation-function)))
         (cl-loop for cand in cands collect
                  (let ((suff (or (funcall ann cand) "")))
                    ;; The default completion UI adds the `completions-annotations'
@@ -273,7 +271,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 (defun vertico--filter-completions (&rest args)
   "Compute all completions for ARGS with lazy highlighting."
   (dlet ((completion-lazy-hilit t) (completion-lazy-hilit-fn nil))
-    (if (eval-when-compile (>= emacs-major-version 30))
+    (static-if (>= emacs-major-version 30)
         (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)
       (cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
                  (orig-flex (symbol-function #'completion-flex-all-completions))
@@ -302,7 +300,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (defun vertico--metadata-get (prop)
   "Return PROP from completion metadata."
-  (completion-metadata-get vertico--metadata prop))
+  (compat-call completion-metadata-get vertico--metadata prop))
 
 (defun vertico--sort-function ()
   "Return the sorting function."
@@ -752,7 +750,11 @@ When the prefix argument is 0, the group order is reset."
 ;; Emacs 28: Do not show Vertico commands in M-X
 (dolist (sym '(vertico-next vertico-next-group vertico-previous vertico-previous-group
                vertico-scroll-down vertico-scroll-up vertico-exit vertico-insert
-               vertico-exit-input vertico-save vertico-first vertico-last))
+               vertico-exit-input vertico-save vertico-first vertico-last
+               vertico-repeat-previous ;; autoloads in vertico-repeat.el
+               vertico-quick-jump vertico-quick-exit vertico-quick-insert ;; autoloads in vertico-quick.el
+               vertico-directory-up vertico-directory-enter ;; autoloads in vertico-directory.el
+               vertico-directory-delete-char vertico-directory-delete-word))
   (put sym 'completion-predicate #'vertico--command-p))
 
 (provide 'vertico)
