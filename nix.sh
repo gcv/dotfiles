@@ -115,7 +115,7 @@ packages=(
     xcp                # cp replacement
     xz
     yazi               # file browser / file manager 3 (Rust)
-    #youtube-dl        # outdated?
+    #youtube-dl        # outdated
     yt-dlp             # new youtube-dl
     zsh
 )
