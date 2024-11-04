@@ -5,7 +5,8 @@
 ;; Author: Joost Kremers <joostkremers@fastmail.fm>
 ;; Maintainer: Joost Kremers <joostkremers@fastmail.fm>
 ;; Created: 31 Oct 2009
-;; Version: 2.32
+;; Package-Version: 2.33
+;; Package-Revision: 3068a544fc2d
 ;; Keywords: text, pandoc
 ;; URL: http://joostkremers.github.io/pandoc-mode/
 ;; Package-Requires: ((hydra "0.10.0") (dash "2.10.0"))
@@ -106,7 +107,7 @@
   (if (= (count-lines (point) (point-max)) 2)
       (beep)
     (forward-line 2)
-    (move-overlay pandoc--@-overlay (point) (point-at-eol))))
+    (move-overlay pandoc--@-overlay (point) (line-end-position))))
 
 (defun pandoc-prev-@ ()
   "Highlight previous (@)-definition."
@@ -114,20 +115,20 @@
   (if (= (point) (point-min))
       (beep)
     (forward-line -2)
-    (move-overlay pandoc--@-overlay (point) (point-at-eol))))
+    (move-overlay pandoc--@-overlay (point) (line-end-position))))
 
 (defun pandoc-goto-first-@ ()
   "Highlight the first (@)-definition."
   (interactive)
   (goto-char (point-min))
-  (move-overlay pandoc--@-overlay (point) (point-at-eol)))
+  (move-overlay pandoc--@-overlay (point) (line-end-position)))
 
 (defun pandoc-goto-last-@ ()
   "Highlight the last (@)-definition."
   (interactive)
   (goto-char (point-max))
   (forward-line -2)
-  (move-overlay pandoc--@-overlay (point) (point-at-eol)))
+  (move-overlay pandoc--@-overlay (point) (line-end-position)))
 
 (defun pandoc-select-current-@ ()
   "Leave pandoc--@-select-buffer and insert selected (@)-label at point."
@@ -207,7 +208,7 @@ N is the index of the extension in `pandoc--extensions'."
 
 (defun pandoc--create-settings-filename (type filename output-format)
   "Create a settings filename.
-TYPE is the type of settings file, either 'local or 'project.
+TYPE is the type of settings file, either `local' or `project'.
 FILENAME is name of the file for which the settings file is to be
 created, OUTPUT-FORMAT the output format of the settings file,
 which is recorded in its name.  The return value is an absolute
@@ -283,15 +284,17 @@ is specified, one will be created."
         ;; Filters are handled separately, because they sometimes need to be
         ;; passed to `pandoc' before other options.
         (filters (pandoc--format-list-options 'filter (pandoc--get 'filter)))
+        (lua-filters (pandoc--format-list-options 'lua-filter (pandoc--get 'lua-filter)))
         (list-options (mapcar (lambda (option)
                                 (pandoc--format-list-options option (pandoc--get option)))
-                              (remove 'filter pandoc--list-options)))
+                              (remove 'lua-filter
+                                      (remove 'filter pandoc--list-options))))
         (alist-options (mapcar (lambda (option)
                                  (pandoc--format-alist-options option (pandoc--get option)))
                                pandoc--alist-options))
         (cli-options (pandoc--format-cli-options)))
     ;; Note: list-options and alist-options are both lists of lists, so we need to flatten them first.
-    (delq nil (append (list read write output) filters cli-options (apply #'append list-options) (apply #'append alist-options)))))
+    (delq nil (append (list read write output) filters lua-filters cli-options (apply #'append list-options) (apply #'append alist-options)))))
 
 (defun pandoc--format-extensions (extensions)
   "Create a string of extensions to be added to the Pandoc command line.
@@ -559,7 +562,7 @@ the buffer."
 
 (defvar-local pandoc--output-format-for-pdf nil
   "Output format used to for pdf conversion.
-  Set the first time the user converts to pdf.  Unset when the
+Set the first time the user converts to pdf.  Unset when the
 user changes output format.")
 
 (defun pandoc-convert-to-pdf (&optional prefix)
@@ -658,7 +661,7 @@ without asking."
         (let ((print-length nil)
               (print-level nil)
               (print-circle nil))
-          (insert ";; -*- mode: emacs-lisp -*-\n\n"
+          (insert ";; -*- mode: lisp-data -*-\n\n"
                   (format ";; pandoc-mode %s settings file%s\n"
                           type
                           (if (eq type 'local)
@@ -880,7 +883,7 @@ file exists, display the *Pandoc output* buffer."
               (insert (concat " " definition "\n\n")))
             definitions)
       (goto-char (point-min))
-      (setq pandoc--@-overlay (make-overlay (point-min) (point-at-eol)))
+      (setq pandoc--@-overlay (make-overlay (point-min) (line-end-position)))
       (overlay-put pandoc--@-overlay 'face 'highlight))
     (select-window (display-buffer pandoc--@-buffer))))
 
@@ -1017,7 +1020,7 @@ argument, the option is toggled."
                                                                          "set"
                                                                        "unset"))))
 
-(easy-menu-define pandoc-mode-menu pandoc-mode-map "Pandoc menu"
+(easy-menu-define pandoc-mode-menu pandoc-mode-map "Pandoc menu."
   `("Pandoc"
     ["Run Pandoc" pandoc-run-pandoc :active t]
     ["Create PDF" pandoc-convert-to-pdf :active t]
@@ -1487,7 +1490,7 @@ _M_: Use current file as master file
   :group 'pandoc)
 
 (defconst pandoc-regex-citation-key
-  "\\(-?@\\([[:alnum:]_][[:alnum:]_:.#$%&+?<>~/-]*\\)\\)"
+  "[^[:alnum:]]\\(-?@\\([[:alnum:]_][[:alnum:]_:.#$%&+?<>~/-]*\\)\\)"
   "Regular expression for a citation key.")
 
 (defconst pandoc-regex-strikethrough
