@@ -1,5 +1,7 @@
-;;; cmake-mode.el --- major-mode for editing CMake sources
+;;; cmake-mode.el --- major-mode for editing CMake sources -*- lexical-binding: t; -*-
 
+;; Package-Version: 3.30.5
+;; Package-Revision: v3.30.5-0-g9c4a0a9ff097
 ;; Package-Requires: ((emacs "24.1"))
 
 ; Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
@@ -279,7 +281,7 @@ Return t unless search stops due to end of buffer."
 
 ;------------------------------------------------------------------------------
 
-(defun cmake--syntax-propertize-until-bracket-close (syntax)
+(defun cmake--syntax-propertize-until-bracket-close (syntax end)
   ;; This function assumes that a previous search has matched the
   ;; beginning of a bracket_comment or bracket_argument and that the
   ;; second capture group has matched the equal signs between the two
@@ -307,10 +309,10 @@ Return t unless search stops due to end of buffer."
   (syntax-propertize-rules
    ("\\(#\\)\\[\\(=*\\)\\["
     (1
-     (prog1 "!" (cmake--syntax-propertize-until-bracket-close "!"))))
+     (prog1 "!" (cmake--syntax-propertize-until-bracket-close "!" end))))
    ("\\(\\[\\)\\(=*\\)\\["
     (1
-     (prog1 "|" (cmake--syntax-propertize-until-bracket-close "|"))))))
+     (prog1 "|" (cmake--syntax-propertize-until-bracket-close "|" end))))))
 
 ;; Syntax table for this mode.
 (defvar cmake-mode-syntax-table nil
@@ -480,7 +482,8 @@ and store the result as a list in LISTVAR."
 
 ;;;###autoload
 (defun cmake-help ()
-  "Queries for any of the four available help topics and prints out the appropriate page."
+  "Queries for any of the four available help topics and prints out the
+appropriate page."
   (interactive)
   (let* ((default-entry (cmake-symbol-at-point))
          (command-list (cmake-get-list "command"))
