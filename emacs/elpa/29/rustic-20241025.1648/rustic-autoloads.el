@@ -35,8 +35,9 @@ Start compilation process for 'cargo test' with optional TEST-ARGS.
 (autoload 'rustic-cargo-test "rustic-cargo" "\
 Run 'cargo test'.
 
-If ARG is not nil, use value as argument and store it in `rustic-test-arguments'.
-When calling this function from `rustic-popup-mode', always use the value of
+If ARG is not nil, use value as argument and store it in
+`rustic-test-arguments'.  When calling this function from
+`rustic-popup-mode', always use the value of
 `rustic-test-arguments'.
 
 (fn &optional ARG)" t)
@@ -207,15 +208,13 @@ when called with a prefix command \\[universal-argument].
 ;;; Generated autoloads from rustic-compile.el
 
 (autoload 'rustic-compile "rustic-compile" "\
-Compile rust project.
+Run COMMAND in the current Rust workspace root.
 
-If `compilation-read-command' is non-nil or if called with prefix
-argument ARG then read the command in the minibuffer.  Otherwise
-use `rustic-compile-command'.
+Interactively, prompts for the command if the variable
+`compilation-read-command' is non-nil; otherwise uses
+`rustic-compile-command'.
 
-In either store the used command in `compilation-arguments'.
-
-(fn &optional ARG)" t)
+(fn COMMAND)" t)
 (autoload 'rustic-recompile "rustic-compile" "\
 Re-compile the program using `compilation-arguments'." t)
 (register-definition-prefixes "rustic-compile" '("rust"))
@@ -347,13 +346,6 @@ Kill popup help buffer and switch to popup buffer." t)
 (register-definition-prefixes "rustic-popup" '("rustic-"))
 
 
-;;; Generated autoloads from rustic-racer.el
-
-(autoload 'rustic-racer-describe "rustic-racer" "\
-Show a *Racer Help* buffer for the function or type at point." t)
-(register-definition-prefixes "rustic-racer" '("racer-src-button" "rustic-racer-"))
-
-
 ;;; Generated autoloads from rustic-rustfix.el
 
 (autoload 'rustic-rustfix "rustic-rustfix" "\
@@ -383,7 +375,7 @@ Unlike `rustic-format-buffer' format file directly and revert the buffer.
 ;;; Generated autoloads from rustic-spellcheck.el
 
 (autoload 'rustic-cargo-spellcheck "rustic-spellcheck" "\
-Run 'cargo spellcheck'.
+Run `cargo spellcheck'.
 
 If ARG is not nil, use value as argument and store it in
 `rustic-spellcheck-arguments'.  When calling this function from
@@ -392,7 +384,7 @@ If ARG is not nil, use value as argument and store it in
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-spellcheck-rerun "rustic-spellcheck" "\
-Run 'cargo spellcheck' with `rustic-spellcheck-arguments'." t)
+Run `cargo spellcheck' with `rustic-spellcheck-arguments'." t)
 (register-definition-prefixes "rustic-spellcheck" '("rustic-"))
 
 ;;; End of scraped data

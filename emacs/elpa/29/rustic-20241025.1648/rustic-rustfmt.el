@@ -116,22 +116,23 @@ and it's `cdr' is a list of arguments."
           (command (or (plist-get args :command)
                        (rustic-compute-rustfmt-args)))
           (command (if (listp command) command (list command)))
-          (cur-buf (current-buffer)))
+          (cur-buf (current-buffer))
+          (rustfmt (rustic-rustfmt-bin)))
      (setq rustic-save-pos (set-marker (make-marker) (point) (current-buffer)))
      (rustic-compilation-setup-buffer err-buf dir 'rustic-format-mode t)
      (--each files
        (unless (file-exists-p it)
          (error (format "File %s does not exist." it))))
-     (with-current-buffer err-buf
-       (let* ((c `(,(rustic-rustfmt-bin)
-                   ,@(split-string rustic-rustfmt-args)
-                   ,@command "--" ,@files))
-              (proc (rustic-make-process :name rustic-format-process-name
-                                         :buffer err-buf
-                                         :command (remove "" c)
-                                         :filter #'rustic-compilation-filter
-                                         :sentinel sentinel
-                                         :file-handler t)))
+     (let* ((c `(,rustfmt
+                 ,@(split-string rustic-rustfmt-args)
+                 ,@command "--" ,@files))
+            (proc (rustic-make-process :name rustic-format-process-name
+                                       :buffer err-buf
+                                       :command (remove "" c)
+                                       :filter #'rustic-compilation-filter
+                                       :sentinel sentinel
+                                       :file-handler t)))
+       (with-current-buffer err-buf
          (setq next-error-last-buffer buffer)
          (when string
            (process-put proc 'command-buf cur-buf)
@@ -205,10 +206,12 @@ and it's `cdr' is a list of arguments."
     (let ((proc-buffer (process-buffer proc)))
       (with-current-buffer proc-buffer
         (if (string-match-p "^finished" output)
-            (and
-             (with-current-buffer next-error-last-buffer
-               (revert-buffer t t t))
-             (kill-buffer proc-buffer))
+            (progn
+              (with-current-buffer next-error-last-buffer
+                (revert-buffer t t t))
+              (-if-let (win (get-buffer-window proc-buffer))
+                  (quit-window t win)
+                (kill-buffer proc-buffer)))
           (sit-for 0.1)
           (with-current-buffer next-error-last-buffer
             (goto-char rustic-save-pos))
