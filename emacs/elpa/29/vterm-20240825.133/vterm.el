@@ -3,7 +3,8 @@
 ;; Copyright (C) 2017-2020 by Lukas Fürmetz & Contributors
 ;;
 ;; Author: Lukas Fürmetz <fuermetz@mailbox.org>
-;; Version: 0.0.2
+;; Package-Version: 20240825.133
+;; Package-Revision: 988279316fc8
 ;; URL: https://github.com/akermu/emacs-libvterm
 ;; Keywords: terminals
 ;; Package-Requires: ((emacs "25.1"))
@@ -872,7 +873,8 @@ it to the bookmarked directory if needed."
 `'compilation-shell-minor-mode' would change the value of local
 variable `next-error-function', so we should call this function in
 `compilation-shell-minor-mode-hook'."
-  (when (eq major-mode 'vterm-mode)
+  (when (or (eq major-mode 'vterm-mode)
+            (derived-mode-p 'vterm-mode))
     (setq next-error-function 'vterm-next-error-function)))
 
 (add-hook 'compilation-shell-minor-mode-hook #'vterm--compilation-setup)
@@ -928,7 +930,8 @@ A conventient way to exit `vterm-copy-mode' is with
   :group 'vterm
   :lighter " VTermCopy"
   :keymap vterm-copy-mode-map
-  (if (equal major-mode 'vterm-mode)
+  (if (or (equal major-mode 'vterm-mode)
+          (derived-mode-p 'vterm-mode))
       (if vterm-copy-mode
           (vterm--enter-copy-mode)
         (vterm--exit-copy-mode))
@@ -1522,7 +1525,7 @@ Then triggers a redraw from the module."
                                                       (- count 1 partial)))
                                   'eight-bit))
                     (cl-incf partial))
-                  (when (> count partial 0)
+                  (when (> (1+ count) partial 0)
                     (setq vterm--undecoded-bytes
                           (substring decoded-substring (- partial)))
                     (setq decoded-substring
@@ -1549,7 +1552,8 @@ Argument EVENT process event."
 (defun vterm--text-scale-mode (&optional _argv)
   "Fix `line-number' height for scaled text."
   (and text-scale-mode
-       (equal major-mode 'vterm-mode)
+       (or (equal major-mode 'vterm-mode)
+           (derived-mode-p 'vterm-mode))
        (boundp 'display-line-numbers)
        (let ((height (expt text-scale-mode-step
                            text-scale-mode-amount)))
