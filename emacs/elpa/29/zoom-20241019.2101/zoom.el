@@ -1,6 +1,6 @@
 ;;; zoom.el --- Fixed and automatic balanced window layout
 
-;; Copyright (c) 2022 Andrea Cardaci <cyrus.and@gmail.com>
+;; Copyright (c) 2024 Andrea Cardaci <cyrus.and@gmail.com>
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining a copy
 ;; of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,8 @@
 ;; SOFTWARE.
 
 ;; Author: Andrea Cardaci <cyrus.and@gmail.com>
-;; Version: 0.2.4
+;; Package-Version: 20241019.2101
+;; Package-Revision: f5f635e1fc5a
 ;; URL: https://github.com/cyrus-and/zoom
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: frames
@@ -65,7 +66,8 @@ above."
 (defcustom zoom-ignored-major-modes nil
   "List of ignored major modes.
 
-Selected windows using any of these major modes should not be
+Selected windows displaying a buffer with a major mode that is
+derived from any of these major modes should not be
 enlarged (only balanced)."
   :type '(repeat symbol)
   :group 'zoom)
@@ -228,8 +230,9 @@ Argument IGNORED is ignored."
    (frame-root-window-p (selected-window))
    ;; never attempt to zoom the minibuffer
    (window-minibuffer-p)
-   ;; check against the major mode
-   (member major-mode zoom-ignored-major-modes)
+   ;; check against the major mode (or its parents) (XXX this way of invoking
+   ;; `derived-mode-p' has been deprecated in Emacs 30 but it still works)
+   (apply 'derived-mode-p zoom-ignored-major-modes)
    ;; check against the buffer name
    (member (buffer-name) zoom-ignored-buffer-names)
    ;; check against the buffer name (using a regexp)
