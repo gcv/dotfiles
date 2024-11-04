@@ -5,7 +5,6 @@
 ;; Author: Fabrice Niessen <(concat "fniessen" at-sign "pirilampo.org")>
 ;; Contributor: Thibault Polge <(concat "thibault" at-sign "thb.lt")>
 ;; URL: https://github.com/fniessen/emacs-leuven-theme
-;; Version: 1.2.0
 ;; Last-Updated: 2022-10-04 01:15
 ;; Keywords: color theme
 
