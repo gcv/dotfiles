@@ -4,6 +4,8 @@
 
 ;; This file is not part of GNU Emacs.
 
+;; Package-Version: 20241007.1655
+;; Package-Revision: 9be25db0566d
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This is free software; you can redistribute it and/or modify it under
@@ -160,6 +162,10 @@ the balance into that."
 
 (defvar ledger-date-string-today (ledger-format-date))
 
+
+
+;;; Editing commands
+
 (defun ledger-remove-effective-date ()
   "Remove the effective date from a transaction or posting."
   (interactive)
@@ -245,7 +251,12 @@ By default, child accounts of OLD are also renamed to
 corresponding child accounts of NEW.  With \\[universal-argument]
 prefix, child accounts are not renamed.  When called from Lisp,
 TOPLEVEL-ONLY has the same meaning."
-  (interactive "sOld name: \nsNew name: \nP")
+  (interactive
+   (let* ((old-name
+           (ledger-read-account-with-prompt "Old name: "))
+          (new-name
+           (ledger-read-string-with-default "New name: " old-name)))
+     (list old-name new-name current-prefix-arg)))
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward ledger-account-name-or-directive-regex nil t)
@@ -260,6 +271,90 @@ TOPLEVEL-ONLY has the same meaning."
            'fixedcase 'literal nil 1))))))
   (when ledger-post-auto-align
     (ledger-post-align-postings (point-min) (point-max))))
+
+
+
+;;; Commands for changing dates
+
+;; These functions are adapted from the implementation of `org-timestamp-change'.
+
+(defun ledger--in-regexp (regexp)
+  "Return (BEG . END) if point is inside a match of REGEXP, or nil.
+
+Only check the current line for occurrences of REGEXP."
+  (catch :exit
+    (let ((pos (point))
+          (eol (line-end-position)))
+      (save-excursion
+        (beginning-of-line)
+        (while (and (re-search-forward regexp eol t)
+                    (<= (match-beginning 0) pos))
+          (let ((end (match-end 0)))
+            (when (>= end pos)
+              (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
+
+(defsubst ledger--pos-in-match-range (pos n)
+  "Return non-nil if POS is inside the range of group N in the match data."
+  (and (match-beginning n)
+       (<= (match-beginning n) pos)
+       (>= (match-end n) pos)))
+
+(defun ledger--at-date-p ()
+  "Return non-nil if point is inside a date.
+
+Specifically, return `year', `month', or `day', depending on
+which part of the date string point is in."
+  (let ((pos (point))
+        (boundaries (ledger--in-regexp ledger-iso-date-regexp)))
+    (cond ((null boundaries) nil)
+          ((ledger--pos-in-match-range pos 2) 'year)
+          ((ledger--pos-in-match-range pos 3) 'month)
+          ((ledger--pos-in-match-range pos 4) 'day))))
+
+(defun ledger--date-change (n)
+  "Change the date field at point by N (can be negative)."
+  (let ((date-cat (ledger--at-date-p))
+        (origin-pos (point))
+        date-separator
+        date-str time-old time-new)
+    (unless date-cat (user-error "Not at a date"))
+    (setq date-str (match-string 0))
+    (setq date-separator
+          (string (aref date-str 4)))
+    (save-match-data
+      (setq time-old (decode-time (ledger-parse-iso-date date-str)))
+      (setq time-new
+            ;; Do not pass DST or ZONE arguments here; it should be
+            ;; automatically inferred from the other arguments, since the
+            ;; appropriate DST value may differ from `time-old'.
+            (encode-time
+             0                          ; second
+             0                          ; minute
+             0                          ; hour
+             (+ (if (eq date-cat 'day)   n 0) (nth 3 time-old))
+             (+ (if (eq date-cat 'month) n 0) (nth 4 time-old))
+             (+ (if (eq date-cat 'year)  n 0) (nth 5 time-old)))))
+    (replace-match (format-time-string (concat "%Y" date-separator "%m" date-separator "%d")
+                                       time-new)
+                   'fixedcase
+                   'literal)
+    (goto-char origin-pos)))
+
+(defun ledger-date-up (&optional arg)
+  "Increment the date field at point by 1.
+With prefix ARG, increment by that many instead."
+  (interactive "p")
+  (ledger--date-change arg))
+
+(defun ledger-date-down (&optional arg)
+  "Decrement the date field at point by 1.
+With prefix ARG, decrement by that many instead."
+  (interactive "p")
+  (ledger--date-change (- arg)))
+
+
+
+;;; Major mode definition
 
 (defvar ledger-mode-syntax-table
   (let ((table (make-syntax-table text-mode-syntax-table)))
@@ -299,6 +394,9 @@ TOPLEVEL-ONLY has the same meaning."
     (define-key map (kbd "M-p") #'ledger-navigate-prev-xact-or-directive)
     (define-key map (kbd "M-n") #'ledger-navigate-next-xact-or-directive)
     (define-key map (kbd "M-q") #'ledger-post-align-dwim)
+
+    (define-key map (kbd "S-<up>") #'ledger-date-up)
+    (define-key map (kbd "S-<down>") #'ledger-date-down)
 
     ;; Reset the `text-mode' override of this standard binding
     (define-key map (kbd "C-M-i") 'completion-at-point)

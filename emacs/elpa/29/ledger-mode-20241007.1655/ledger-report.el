@@ -97,6 +97,13 @@ simply concatenated (no quoting)."
   :type 'boolean
   :group 'ledger-report)
 
+(defcustom ledger-report-links-beginning-of-xact t
+  "If nil, links in \"register\" reports visit the posting they correspond to.
+
+If non-nil, visit the beginning of the transaction instead."
+  :type 'boolean
+  :group 'ledger-report)
+
 (defcustom ledger-report-use-native-highlighting t
   "When non-nil, use ledger's native highlighting in reports."
   :type 'boolean
@@ -287,16 +294,17 @@ used to generate the buffer, navigating the buffer, etc."
          (buf (find-file-noselect file)))
     (with-current-buffer
         (pop-to-buffer (get-buffer-create ledger-report-buffer-name))
+      (ledger-report-mode)
+      (setq ledger-report-saved nil)
+      (setq ledger-report-ledger-buf buf)
+      (setq ledger-report-name report-name)
+      (setq ledger-report-is-reversed nil)
+      (setq ledger-report-current-month nil)
+      (setq ledger-master-file file)
+      (ledger-report-cmd report-name edit)
       (with-silent-modifications
         (erase-buffer)
-        (ledger-report-mode)
-        (setq ledger-report-saved nil)
-        (setq ledger-report-ledger-buf buf)
-        (setq ledger-report-name report-name)
-        (setq ledger-report-is-reversed nil)
-        (setq ledger-report-current-month nil)
-        (setq ledger-master-file file)
-        (ledger-do-report (ledger-report-cmd report-name edit)))
+        (ledger-do-report ledger-report-cmd))
       (ledger-report-maybe-shrink-window)
       (run-hooks 'ledger-report-after-report-hook)
       (message (substitute-command-keys (concat "\\[ledger-report-quit] to quit; "
@@ -538,7 +546,10 @@ arguments returned by `ledger-report--compute-extra-args'."
           (ledger-report--add-links))))))
 
 (defun ledger-report-visit-source ()
-  "Visit the transaction under point in the report window."
+  "Visit the transaction under point in the report window.
+
+If `ledger-report-links-beginning-of-xact' is nil, visit the
+specific posting at point instead."
   (interactive)
   (let* ((prop (get-text-property (point) 'ledger-source))
          (file (car prop))
@@ -548,7 +559,8 @@ arguments returned by `ledger-report--compute-extra-args'."
       (widen)
       (goto-char (point-min))
       (forward-line (1- line))
-      (ledger-navigate-beginning-of-xact))))
+      (when ledger-report-links-beginning-of-xact
+        (ledger-navigate-beginning-of-xact)))))
 
 (defun ledger-report-goto ()
   "Goto the ledger report buffer."
