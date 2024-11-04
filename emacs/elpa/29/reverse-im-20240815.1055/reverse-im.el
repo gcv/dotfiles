@@ -5,7 +5,8 @@
 ;; Package-Requires: ((emacs "25.1") (seq "2.23"))
 ;; Keywords: i18n
 ;; Homepage: https://github.com/a13/reverse-im.el
-;; Version: 0.0.8
+;; Package-Version: 20240815.1055
+;; Package-Revision: dfb169b08e09
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -92,6 +93,12 @@
   "List of regexes/commands to match `this-command' to include when using `reverse-im-read-char-include'."
   :group 'reverse-im
   :type `(repeat (choice regexp symbol)))
+
+(defcustom reverse-im-cache-file
+  nil
+  "File to cache translation keymap.  Don't cache if `nil'."
+  :group 'reverse-im
+  :type 'file)
 
 ;;; Storage vars
 (defvar reverse-im--default-parent
@@ -190,17 +197,37 @@
           (add-to-list 'reverse-im--keymaps-alist (cons input-method translation-keymap))
           translation-keymap))))
 
-;;; User-accessible functions
+;; https://stackoverflow.com/questions/2321904/elisp-how-to-save-data-in-a-file
+(defun reverse-im--print-to-file (filename data)
+  (with-temp-file filename
+    (prin1 data (current-buffer))))
 
+(defun reverse-im--read-from-file (filename)
+  (with-temp-buffer
+    (insert-file-contents filename)
+    (cl-assert (eq (point) (point-min)))
+    (read (current-buffer))))
+
+;;; User-accessible functions
 (defun reverse-im-activate (input-method)
   "Activate the reverse mapping for INPUT-METHOD (can be a list).
 Example usage: (reverse-im-activate \"ukrainian-computer\")"
+  (when (and reverse-im-cache-file
+             (file-exists-p reverse-im-cache-file))
+    (setq reverse-im--keymaps-alist
+          (reverse-im--read-from-file reverse-im-cache-file)))
+
   (let* ((input-methods (if (listp input-method)
                             input-method
                           (list input-method)))
          (new-parent (make-composed-keymap
                       (mapcar #'reverse-im--im-to-keymap input-methods)))
          (old-parent (keymap-parent function-key-map)))
+
+    (when (and reverse-im-cache-file
+               (not (file-exists-p reverse-im-cache-file)))
+      (reverse-im--print-to-file reverse-im-cache-file reverse-im--keymaps-alist))
+
     (unless (equal new-parent old-parent)
       (setq reverse-im--default-parent old-parent)
       (set-keymap-parent function-key-map new-parent))))
@@ -305,15 +332,15 @@ Translate all chars, unless `this-command' is not in `reverse-im-read-char-exclu
         (reverse-im-activate reverse-im-input-methods)
         (when (reverse-im--char-fold-p)
           (setq reverse-im--char-fold-include char-fold-include)
-          (customize-set-variable 'char-fold-include
-                                  (append char-fold-include
-                                          (reverse-im-char-fold-include))))
+          (setq char-fold-include
+                (append char-fold-include
+                        (reverse-im-char-fold-include))))
         (when reverse-im-read-char-advice-function
           (advice-add #'read-char :around reverse-im-read-char-advice-function)
           (advice-add #'read-char-exclusive :around reverse-im-read-char-advice-function)))
     (reverse-im-deactivate t)
     (when (reverse-im--char-fold-p)
-      (customize-set-variable 'char-fold-include reverse-im--char-fold-include))
+      (setq char-fold-include reverse-im--char-fold-include))
     (when reverse-im-read-char-advice-function
       (advice-remove 'read-char reverse-im-read-char-advice-function)
       (advice-remove 'read-char-exclusive reverse-im-read-char-advice-function))))
