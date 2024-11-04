@@ -7,7 +7,8 @@
 ;; Created: 08 Aug 2021
 ;; Keywords: convenience, lisp, tools
 ;; Homepage: https://github.com/AmaiKinono/puni
-;; Version: 0
+;; Package-Version: 20241007.1609
+;; Package-Revision: f430f5b0a14c
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -84,6 +85,13 @@ Nil means use `pulse-highlight-start-face'."
 (make-obsolete-variable 'puni-blink-for-slurp-barf
                         'puni-blink-for-sexp-manipulating
                         "Nov 11 2023")
+
+(defcustom puni-blink-pulse-delay pulse-delay
+  "The delay between changes in color when blinking.
+
+See `pulse-delay' and `puni-blink-for-sexp-manipulating'."
+  :type 'number
+  :group 'puni)
 
 ;;;; Internals
 
@@ -1580,12 +1588,20 @@ This respects the variable `delete-active-region'."
       (if (< n 0) (puni-forward-delete-char (- n))
         (dotimes (_ n)
           (or
+           ;; This branch will throw an error at the beginning of the buffer
+           ;; (by `backward-char'), so we don't have to check it later.
            (puni-soft-delete-by-move #'backward-char)
            ;; Try to delete a dangling delimiter.  We want to handle this
            ;; before the empty sexp case (see below), since if there's a
            ;; dangling delimiter, `puni-bounds-of-sexp-around-point' can be
            ;; laggy.
            (when (puni-dangling-delimiter-p (1- (point)))
+             (delete-char -1)
+             t)
+           ;; We allow uncommenting by deleting. Deleting the opening char of a
+           ;; single line comment will just uncomment it.
+           (when (save-excursion (backward-char)
+                                 (puni--begin-of-single-line-comment-p))
              (delete-char -1)
              t)
            ;; Maybe we are inside an empty sexp, so we delete it.
@@ -1621,6 +1637,9 @@ This respects the variable `delete-active-region'."
         (dotimes (_ n)
           (or (puni-soft-delete-by-move #'forward-char)
               (when (puni-dangling-delimiter-p)
+                (delete-char 1)
+                t)
+              (when (puni--begin-of-single-line-comment-p)
                 (delete-char 1)
                 t)
               (unless (or (puni-before-sexp-p)
@@ -2085,7 +2104,8 @@ line and the point, don't move and return nil."
   "Maybe blink the region between BEG and END.
 This depends on `puni-blink-for-sexp-manipulating'."
   (when puni-blink-for-sexp-manipulating
-    (pulse-momentary-highlight-region beg end puni-blink-region-face)))
+    (let ((pulse-delay puni-blink-pulse-delay))
+      (pulse-momentary-highlight-region beg end puni-blink-region-face))))
 
 (defun puni--beg-pos-of-sexps-around-point ()
   "Beginning position of consecutive delimiters after current list."
