@@ -5,7 +5,7 @@
 ;; Author: Mariano Montone <marianomontone@gmail.com>
 ;; URL: https://github.com/mmontone/emacs-inspector
 ;; Keywords: debugging, tool, lisp, development
-;; Version: 0.36
+;; Version: 0.38
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -192,6 +192,11 @@ The target width is given by the `pp-max-width' variable."
   :type 'boolean
   :group 'inspector)
 
+(defcustom inspector-switch-to-buffer t
+  "Use `switch-to-buffer-other-window' after an inspector buffer is opened."
+  :type 'boolean
+  :group 'inspector)
+
 (define-button-type 'inspector-button
   'follow-link t
   'face 'inspector-button-face
@@ -241,9 +246,10 @@ See: `inspector--with-inspector-temp-buffer'.")
 
 (defun inspector--get-inspector-temp-buffer ()
   "Return a (cached) inspector temporary buffer."
-  (or inspector--temp-buffer
-      (setq inspector--temp-buffer
-            (get-buffer-create "*inspector-temp*"))))
+  (unless (buffer-live-p inspector--temp-buffer)
+    (setq inspector--temp-buffer
+          (get-buffer-create "*inspector-temp*")))
+  inspector--temp-buffer)
 
 (defun inspector--print-truncated (object &optional limit)
   "Print OBJECT to a string, truncated.
@@ -826,7 +832,10 @@ is expected to be used.")
 When PRESERVE-HISTORY is T, inspector history is not cleared."
   (let ((current-inspected-object inspector-inspected-object)
         (buffer (inspector--basic-inspect object)))
-    (when (not preserve-history) (switch-to-buffer-other-window buffer))
+    (when (not preserve-history)
+      (if inspector-switch-to-buffer
+          (switch-to-buffer-other-window buffer)
+        (display-buffer buffer)))
     (with-current-buffer buffer
       (unless preserve-history
         (setq inspector-history nil))
@@ -920,7 +929,9 @@ When PRESERVE-HISTORY is T, inspector history is not cleared."
         (ignore pp-use-max-width pp-max-width)
         (pp object)
         ;; Jump to this buffer
-        (switch-to-buffer-other-window "*inspector pprint*")))))
+        (if inspector-switch-to-buffer
+            (switch-to-buffer-other-window "*inspector pprint*")
+          (display-buffer "*inspector pprint*"))))))
 
 ;;-- Inspection from Emacs debugger
 
