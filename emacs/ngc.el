@@ -37,19 +37,14 @@
   )
 
 
-(use-package consult-denote
-  :pin gnu)
-
-
 (use-package consult-notes
   :pin melpa
   :after (vertico)
   :commands (consult-notes consult-notes-search-in-all-notes)
   :config
-  (setq consult-notes-sources
-        '(("Denote" ?n "~/Files/Notes/Denote/")
-          ("Deft" ?f "~/Files/Notes/Deft/")
-          ("Computing"  ?c "~/Files/Notes/Deft/Computing/")))
+  ;; TODO: This does not seem to search recursively.
+  (setq consult-notes-file-dir-sources
+        '(("Obsidian" ?o "~/w/obsidian/Notes 2/")))
   (add-to-list 'vertico-multiform-commands '(consult-notes buffer))
   )
 

@@ -202,41 +202,6 @@
   (deadgrep-display-buffer-function 'switch-to-buffer))
 
 
-(use-package deft
-  :bind
-  (("C-c d" . deft))
-
-  :config
-  (setq deft-extensions '("org" "note" "txt" "tex")
-        deft-directory "~/Files/Notes/Deft/"
-        deft-recursive t
-        deft-text-mode 'org-mode)
-
-  (defun /deft-current-window-width (orig-fn &rest args)
-    (let ((res (apply orig-fn args)))
-      (- res 1)))
-
-  (advice-add 'deft-current-window-width :around #'/deft-current-window-width)
-
-  (defun /deft-complete ()
-    (kill-buffer deft-buffer))
-
-  (advice-add 'deft-complete :after #'/deft-complete)
-  )
-
-
-;;; A standardized note-tracking format system. Might be worth converting to.
-(use-package denote
-  :pin gnu
-
-  :custom
-  (denote-directory (expand-file-name "~/Files/Notes/Denote/"))
-  (denote-known-keywords '("emacs" "unix" "hacking" "media" "writing" "services"))
-  (denote-infer-keywords t)
-  (denote-sort-keywords t)
-  )
-
-
 (use-package devdocs
   :pin gnu)
 
@@ -444,6 +409,7 @@
   (envrc-on-lighter '(" ε"))
   )
 
+
 ;;; gopher and gemini client
 (use-package elpher)
 
@@ -629,9 +595,6 @@
   :custom
   (highlight-indent-guides-method 'character)
   )
-
-
-(use-package hydra)
 
 
 (use-package chatgpt-shell
@@ -867,20 +830,6 @@
   :pin melpa
   :custom
   (olivetti-body-width 0.9)
-
-  :config
-  (defhydra /hydra-olivetti (:color red)
-    "
-  _r_eset    _s_et width    _<left>_ shrink    _<right>_ expand   _<return>_ exit
-  "
-    ("r" olivetti-reset-width)
-    ("s" olivetti-set-width)
-    ("<left>" olivetti-shrink)
-    ("<right>" olivetti-expand)
-    ("<return>" keyboard-quit :color blue)
-    )
-
-  (define-key olivetti-mode-map (kbd "H-o") '/hydra-olivetti/body)
   )
 
 
@@ -891,39 +840,8 @@
 
 (use-package origami
   :pin melpa
-  :after (hydra)
-
-  :bind
-  (:map origami-mode-map
-        ("H-o" . /hydra-origami/body))
-
   :config
   (setq origami-show-fold-header t)
-
-  (defhydra /hydra-origami (:color red)
-    "
-  _o_pen node   _O_pen node rec    toggle _f_orward  _u_ndo
-  _c_lose node  _C_lose node rec   toggle _a_ll      _r_edo
-  _n_ext fold   _p_revious fold    _<tab>_ smart     _R_eset
-  "
-    ("<up>" previous-line)
-    ("<down>" next-line)
-    ("<left>" left-char)
-    ("<right>" right-char)
-    ("<tab>" origami-recursively-toggle-node)
-    ("S-<tab>" origami-show-only-node)
-    ("o" origami-open-node)
-    ("O" origami-open-node-recursively)
-    ("c" origami-close-node)
-    ("C" origami-close-node-recursively)
-    ("n" origami-next-fold)
-    ("p" origami-previous-fold)
-    ("f" origami-forward-toggle-node)
-    ("a" origami-toggle-all-nodes)
-    ("u" origami-undo)
-    ("r" origami-redo)
-    ("R" origami-reset)
-    )
   )
 
 
@@ -1063,15 +981,6 @@
       (format " [%s]" (projectile-project-name))))
 
   (setq projectile-mode-line-function '/projectile-mode-line)
-  )
-
-
-;;; paredit-like structural editing, generalized for modes with forward-sexp
-;;; https://github.com/AmaiKinono/puni
-(use-package puni
-  :pin melpa
-  :hook
-  ((sgml-mode nxml-mode tex-mode web-mode) . puni-mode)
   )
 
 

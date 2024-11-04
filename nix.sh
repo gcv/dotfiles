@@ -34,7 +34,6 @@ packages=(
     bandwhich          # network monitor
     bat                # cat replacement
     bashInteractive    # when needed
-    bitwarden-cli      # password manager
     bottom             # top replacement 2 (Rust)
     broot              # file browser / file manager 2
     btop               # top replacement 3 (C++)
