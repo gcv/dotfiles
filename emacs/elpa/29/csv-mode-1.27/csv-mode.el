@@ -4,7 +4,7 @@
 
 ;; Author: "Francis J. Wright" <F.J.Wright@qmul.ac.uk>
 ;; Maintainer: emacs-devel@gnu.org
-;; Version: 1.25
+;; Version: 1.27
 ;; Package-Requires: ((emacs "27.1") (cl-lib "0.5"))
 ;; Keywords: convenience
 
@@ -106,6 +106,14 @@
 ;;   "Major mode for editing comma-separated value files." t)
 
 ;;; News:
+
+;; Since 1.27:
+;; - `csv-end-of-field' no longer errors out in the presence of
+;;    unclosed quotes.
+
+;; Since 1.26:
+;; - `csv-guess-separator' will no longer guess the comment-start
+;;    character as a potential separator character.
 
 ;; Since 1.25:
 ;; - The ASCII control character 31 Unit Separator can now be
@@ -729,7 +737,7 @@ point or marker arguments, BEG and END, delimiting the region."
   (when (eq (char-syntax (following-char)) ?\")
     (forward-char)
     (let ((ended nil))
-      (while (not ended)
+      (while (and (not ended) (not (eolp)))
 	(cond ((not (eq (char-syntax (following-char)) ?\"))
 	       (forward-char 1))
 	      ;; According to RFC-4180 (sec 2.7), quotes inside quoted strings
@@ -1902,6 +1910,7 @@ When CUTOFF is passed, look only at the first CUTOFF number of characters."
                  (or (= c ?\t)
                      (= c ?\C-_)
                      (and (not (member c '(?. ?/ ?\" ?')))
+                          (not (= c (string-to-char csv-comment-start)))
                           (not (member (get-char-code-property c 'general-category)
                                        '(Lu Ll Lt Lm Lo Nd Nl No Ps Pe Cc Co))))))
         (puthash c t chars)))
