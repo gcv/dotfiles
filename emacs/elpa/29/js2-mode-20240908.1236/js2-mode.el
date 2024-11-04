@@ -7,7 +7,8 @@
 ;;         Dmitry Gutov <dmitry@gutov.dev>
 ;; URL:  https://github.com/mooz/js2-mode/
 ;;       http://code.google.com/p/js2-mode/
-;; Version: 20231224
+;; Package-Version: 20240908.1236
+;; Package-Revision: 62d6cb169ed4
 ;; Keywords: languages, javascript
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
 
@@ -8984,7 +8985,8 @@ consumes no tokens."
             (let ((name
                    (or
                     (and (js2-match-token js2-DEFAULT) "default")
-                    (and (js2-match-token js2-NAME) (js2-current-token-string)))))
+                    (and (js2-match-token js2-NAME) (js2-current-token-string))
+                    (and (js2-match-token js2-STRING) (js2-current-token-string)))))
               (if name
                   (let ((node (make-js2-export-binding-node
                                :pos beg
