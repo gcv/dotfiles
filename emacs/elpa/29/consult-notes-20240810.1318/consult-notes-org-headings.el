@@ -2,7 +2,6 @@
 
 ;; Author: Colin McLear <mclear@fastmail.com>
 ;; Maintainer: Colin McLear
-;; Version: 0.7
 ;; Homepage: https://github.com/mclear-tools/consult-notes
 
 ;; Copyright (C) 2022 Colin McLear

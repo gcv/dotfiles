@@ -2,7 +2,6 @@
 
 ;; Author: Colin McLear <mclear@fastmail.com>
 ;; Maintainer: Colin McLear
-;; Version: 0.7
 ;; Keywords: convenience
 ;; Homepage: https://github.com/mclear-tools/consult-notes
 
@@ -76,7 +75,7 @@
   "Show file size in annotations for org-roam notes in `consult-notes'.")
 
 (defcustom consult-notes-org-roam-blinks nil
-  "Shoe number of backlinks for org-roam note in `consult-notes'.")
+  "Show number of backlinks for org-roam note in `consult-notes'.")
 
 (defcustom consult-notes-org-roam-annotate-function #'consult-notes-org-roam-annotate
   "Function for annotations for org-roam nodes/refs in `consult-notes'.

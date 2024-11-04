@@ -2,7 +2,6 @@
 
 ;; Author: Colin McLear <mclear@fastmail.com>
 ;; Maintainer: Colin McLear
-;; Version: 0.7
 ;; Keywords: convenience
 ;; Homepage: https://github.com/mclear-tools/consult-notes
 
@@ -50,7 +49,7 @@
   :type 'boolean)
 
 (defcustom consult-notes-denote-files-function  #'denote-directory-files
-  "Fuction for listing denote files. If only text files are wanted use `denote-directory-text-only-files' instead."
+  "Fuction for listing denote files. If only text files are wanted see setup recommended in the README."
   :group 'consult-notes
   :type 'function)
 

@@ -18,7 +18,7 @@ Generate the notes source for each directory of files in `consult-notes-dir-sour
 NAME is the source name, CHAR is the narrowing character,
 and DIR is the directory to find notes.
 
-(fn NAME CHAR DIR)")
+(fn NAME CHAR DIR &rest ARGS)")
 (autoload 'consult-notes--file-dir-annotate "consult-notes" "\
 Annotate file CAND with its directory DIR, size, and modification time.
 
