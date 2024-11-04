@@ -1,4 +1,4 @@
-This is docUqgPks.info, produced by makeinfo version 6.8 from
+This is docKbRRN0.info, produced by makeinfo version 6.8 from
 consult.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docUqgPks.info,  Node: Top,  Next: Available commands,  Up: (dir)
+File: docKbRRN0.info,  Node: Top,  Next: Available commands,  Up: (dir)
 
 consult.el - Consulting completing-read
 ***************************************
@@ -93,6 +93,7 @@ Configuration
 
 * Use-package example::          Configuration example based on use-package
 * Custom variables::             Short description of all customization settings
+* Project support::              Project discovery support for search commands
 * Fine-tuning::                  Fine-grained configuration for special requirements
 
 Indices
@@ -102,7 +103,7 @@ Indices
 
 
 
-File: docUqgPks.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
+File: docKbRRN0.info,  Node: Available commands,  Next: Special features,  Prev: Top,  Up: Top
 
 1 Available commands
 ********************
@@ -135,7 +136,7 @@ their descriptions.
 * Miscellaneous::                Various other useful commands
 
 
-File: docUqgPks.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
+File: docKbRRN0.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available commands
 
 1.1 Virtual Buffers
 ===================
@@ -171,7 +172,7 @@ File: docUqgPks.info,  Node: Virtual Buffers,  Next: Editing,  Up: Available com
      ‘recentf-mode’ enables tracking of recent files.
 
 
-File: docUqgPks.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
+File: docKbRRN0.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  Up: Available commands
 
 1.2 Editing
 ===========
@@ -189,7 +190,7 @@ File: docUqgPks.info,  Node: Editing,  Next: Register,  Prev: Virtual Buffers,  
    • ‘consult-kmacro’: Select macro from the macro ring and execute it.
 
 
-File: docUqgPks.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
+File: docKbRRN0.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: Available commands
 
 1.3 Register
 ============
@@ -220,7 +221,7 @@ File: docUqgPks.info,  Node: Register,  Next: Navigation,  Prev: Editing,  Up: A
         • ‘C-u 100 M-' x’: Store number in register ‘x’.
 
 
-File: docUqgPks.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
+File: docKbRRN0.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Available commands
 
 1.4 Navigation
 ==============
@@ -244,7 +245,7 @@ File: docUqgPks.info,  Node: Navigation,  Next: Search,  Prev: Register,  Up: Av
      imenu-anywhere (https://github.com/vspinu/imenu-anywhere).
 
 
-File: docUqgPks.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
+File: docKbRRN0.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  Up: Available commands
 
 1.5 Search
 ==========
@@ -277,7 +278,7 @@ File: docUqgPks.info,  Node: Search,  Next: Grep and Find,  Prev: Navigation,  U
      region restricts the filtering.
 
 
-File: docUqgPks.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
+File: docKbRRN0.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  Up: Available commands
 
 1.6 Grep and Find
 =================
@@ -298,9 +299,9 @@ File: docUqgPks.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  
      ‘filter-string’ is passed to the _fast_ Emacs filtering to further
      narrow down the list of matches.  This is particularly useful if
      you are using an advanced completion style like orderless.
-     ‘consult-grep’ supports preview.  If the ‘consult-project-function’
-     returns non-nil, ‘consult-grep’ searches the current project
-     directory.  Otherwise the ‘default-directory’ is searched.  If
+     ‘consult-grep’ supports preview.  ‘consult-grep’ searches the
+     current *note project directory: Project support. if a project is
+     found.  Otherwise the ‘default-directory’ is searched.  If
      ‘consult-grep’ is invoked with prefix argument ‘C-u M-s g’, you can
      specify one or more comma-separated files and directories manually.
    • ‘consult-find’, ‘consult-fd’, ‘consult-locate’: Find file by
@@ -312,7 +313,7 @@ File: docUqgPks.info,  Node: Grep and Find,  Next: Compilation,  Prev: Search,  
      ‘consult-find’ work just like those for the consult grep commands.
 
 
-File: docUqgPks.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
+File: docKbRRN0.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find,  Up: Available commands
 
 1.7 Compilation
 ===============
@@ -327,7 +328,7 @@ File: docUqgPks.info,  Node: Compilation,  Next: Histories,  Prev: Grep and Find
      ‘xref-show-xrefs-function’ and ‘xref-show-definitions-function’.
 
 
-File: docUqgPks.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
+File: docKbRRN0.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: Available commands
 
 1.8 Histories
 =============
@@ -350,7 +351,7 @@ File: docUqgPks.info,  Node: Histories,  Next: Modes,  Prev: Compilation,  Up: A
      ‘isearch-edit-string’.
 
 
-File: docUqgPks.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
+File: docKbRRN0.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Available commands
 
 1.9 Modes
 =========
@@ -363,7 +364,7 @@ File: docUqgPks.info,  Node: Modes,  Next: Org Mode,  Prev: Histories,  Up: Avai
      local-minor/global-minor/major mode via the keys ‘l/g/m’.
 
 
-File: docUqgPks.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available commands
+File: docKbRRN0.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available commands
 
 1.10 Org Mode
 =============
@@ -378,7 +379,7 @@ File: docUqgPks.info,  Node: Org Mode,  Next: Help,  Prev: Modes,  Up: Available
      live preview and recursive editing.
 
 
-File: docUqgPks.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: Available commands
+File: docKbRRN0.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: Available commands
 
 1.11 Help
 =========
@@ -408,7 +409,7 @@ File: docUqgPks.info,  Node: Help,  Next: Miscellaneous,  Prev: Org Mode,  Up: A
                      "corfu" "cape" "tempel"))
 
 
-File: docUqgPks.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
+File: docKbRRN0.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
 
 1.12 Miscellaneous
 ==================
@@ -447,7 +448,7 @@ File: docUqgPks.info,  Node: Miscellaneous,  Prev: Help,  Up: Available commands
      place directly in the original buffer.
 
 
-File: docUqgPks.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
+File: docKbRRN0.info,  Node: Special features,  Next: Configuration,  Prev: Available commands,  Up: Top
 
 2 Special features
 ******************
@@ -471,7 +472,7 @@ advanced features.
 * Embark integration::           Actions, Grep/Occur-buffer export
 
 
-File: docUqgPks.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
+File: docKbRRN0.info,  Node: Live previews,  Next: Narrowing and grouping,  Up: Special features
 
 2.1 Live previews
 =================
@@ -552,7 +553,7 @@ experience.
                           :debounce 1 any))
 
 
-File: docUqgPks.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
+File: docKbRRN0.info,  Node: Narrowing and grouping,  Next: Asynchronous search,  Prev: Live previews,  Up: Special features
 
 2.2 Narrowing and grouping
 ==========================
@@ -587,7 +588,7 @@ keys are automatically shown in the which-key window after pressing the
 ‘consult-narrow-key’.
 
 
-File: docUqgPks.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
+File: docKbRRN0.info,  Node: Asynchronous search,  Next: Multiple sources,  Prev: Narrowing and grouping,  Up: Special features
 
 2.3 Asynchronous search
 =======================
@@ -653,7 +654,7 @@ status:
      provided.
 
 
-File: docUqgPks.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
+File: docKbRRN0.info,  Node: Multiple sources,  Next: Embark integration,  Prev: Asynchronous search,  Up: Special features
 
 2.4 Multiple sources
 ====================
@@ -751,7 +752,7 @@ the internal ‘consult--multi’ API.  The function ‘consult--multi’ can be
 used to create new multi-source commands.
 
 
-File: docUqgPks.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
+File: docKbRRN0.info,  Node: Embark integration,  Prev: Multiple sources,  Up: Special features
 
 2.5 Embark integration
 ======================
@@ -795,7 +796,7 @@ package is installed.  These three workflows are symmetric.
      ‘wdired-change-to-wdired-mode’ for editing.
 
 
-File: docUqgPks.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
+File: docKbRRN0.info,  Node: Configuration,  Next: Recommended packages,  Prev: Special features,  Up: Top
 
 3 Configuration
 ***************
@@ -818,10 +819,11 @@ lexical binding, since they use lambdas and closures.
 
 * Use-package example::          Configuration example based on use-package
 * Custom variables::             Short description of all customization settings
+* Project support::              Project discovery support for search commands
 * Fine-tuning::                  Fine-grained configuration for special requirements
 
 
-File: docUqgPks.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
+File: docKbRRN0.info,  Node: Use-package example,  Next: Custom variables,  Up: Configuration
 
 3.1 Use-package example
 =======================
@@ -841,7 +843,7 @@ additional configuration examples.
 
      ;; Example configuration for Consult
      (use-package consult
-       ;; Replace bindings. Lazily loaded due by `use-package'.
+       ;; Replace bindings. Lazily loaded by `use-package'.
        :bind (;; C-c bindings in `mode-specific-map'
               ("C-c M-x" . consult-mode-command)
               ("C-c h" . consult-history)
@@ -942,25 +944,11 @@ additional configuration examples.
 
        ;; Optionally make narrowing help available in the minibuffer.
        ;; You may want to use `embark-prefix-help-command' or which-key instead.
-       ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
-
-       ;; By default `consult-project-function' uses `project-root' from project.el.
-       ;; Optionally configure a different project root function.
-       ;;;; 1. project.el (the default)
-       ;; (setq consult-project-function #'consult--default-project--function)
-       ;;;; 2. vc.el (vc-root-dir)
-       ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-       ;;;; 3. locate-dominating-file
-       ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-       ;;;; 4. projectile.el (projectile-project-root)
-       ;; (autoload 'projectile-project-root "projectile")
-       ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
-       ;;;; 5. No project support
-       ;; (setq consult-project-function nil)
+       ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
      )
 
 
-File: docUqgPks.info,  Node: Custom variables,  Next: Fine-tuning,  Prev: Use-package example,  Up: Configuration
+File: docKbRRN0.info,  Node: Custom variables,  Next: Project support,  Prev: Use-package example,  Up: Configuration
 
 3.2 Custom variables
 ====================
@@ -1002,6 +990,7 @@ consult-narrow-key                 Narrowing prefix key during completion
 consult-point-placement            Placement of the point when jumping to matches
 consult-preview-key                Keys which triggers preview
 consult-preview-allowed-hooks      List of hooks to allow during preview
+consult-preview-excluded-buffers   Predicate to exclude buffers from preview
 consult-preview-excluded-files     Regexps matched against file names during preview
 consult-preview-max-count          Maximum number of files to keep open during preview
 consult-preview-partial-size       Files larger than this size are previewed partially
@@ -1016,9 +1005,36 @@ consult-widen-key                  Widening key during completion
 consult-yank-rotate                Rotate kill ring
 
 
-File: docUqgPks.info,  Node: Fine-tuning,  Prev: Custom variables,  Up: Configuration
+File: docKbRRN0.info,  Node: Project support,  Next: Fine-tuning,  Prev: Custom variables,  Up: Configuration
 
-3.3 Fine-tuning of individual commands
+3.3 Project support
+===================
+
+Multiple Consult search commands like ‘consult-grep’ try to discover the
+current project and search in the project top level directory by
+default, if a project is found.  Otherwise they fall back to the
+‘default-directory’.  By default, Consult uses the Emacs built-in
+project discovery support (‘project-current’ and ‘project-root’).  It is
+possible to configure alternative methods via the customization variable
+‘consult-project-function’.
+
+     ;; Optionally configure a different project root function.
+     ;; 1. project.el (the default)
+     (setq consult-project-function #'consult--default-project--function)
+     ;; 2. vc.el (vc-root-dir)
+     (setq consult-project-function (lambda (_) (vc-root-dir)))
+     ;; 3. locate-dominating-file
+     (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+     ;; 4. projectile.el (projectile-project-root)
+     (autoload 'projectile-project-root "projectile")
+     (setq consult-project-function (lambda (_) (projectile-project-root)))
+     ;; 5. Disable project support
+     (setq consult-project-function nil)
+
+
+File: docKbRRN0.info,  Node: Fine-tuning,  Prev: Project support,  Up: Configuration
+
+3.4 Fine-tuning of individual commands
 ======================================
 
 *NOTE:* Consult supports fine-grained customization of individual
@@ -1085,7 +1101,7 @@ by the following techniques:
   5. Write or propose a patch.
 
 
-File: docUqgPks.info,  Node: Recommended packages,  Next: Bug reports,  Prev: Configuration,  Up: Top
+File: docKbRRN0.info,  Node: Recommended packages,  Next: Bug reports,  Prev: Configuration,  Up: Top
 
 4 Recommended packages
 **********************
@@ -1130,7 +1146,7 @@ Consult wiki.  These packages integrate Consult with special programs or
 with other packages in the wider Emacs ecosystem.
 
 
-File: docUqgPks.info,  Node: Bug reports,  Next: Contributions,  Prev: Recommended packages,  Up: Top
+File: docKbRRN0.info,  Node: Bug reports,  Next: Contributions,  Prev: Recommended packages,  Up: Top
 
 5 Bug reports
 *************
@@ -1195,7 +1211,7 @@ lexical binding
 Consult often relies on lambdas and lexical closures.
 
 
-File: docUqgPks.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
+File: docKbRRN0.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Bug reports,  Up: Top
 
 6 Contributions
 ***************
@@ -1215,7 +1231,7 @@ contribute to the Consult wiki (https://github.com/minad/consult/wiki),
 in case you want to share small configuration or command snippets.
 
 
-File: docUqgPks.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
+File: docKbRRN0.info,  Node: Acknowledgments,  Next: Indices,  Prev: Contributions,  Up: Top
 
 7 Acknowledgments
 *****************
@@ -1266,7 +1282,7 @@ Manuel Uberti (https://github.com/manuel-uberti/), Stefan Monnier
 (https://protesilaos.com).
 
 
-File: docUqgPks.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
+File: docKbRRN0.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 
 8 Indices
 *********
@@ -1277,7 +1293,7 @@ File: docUqgPks.info,  Node: Indices,  Prev: Acknowledgments,  Up: Top
 * Concept index::                List of all Consult-specific concepts
 
 
-File: docUqgPks.info,  Node: Function index,  Next: Concept index,  Up: Indices
+File: docKbRRN0.info,  Node: Function index,  Next: Concept index,  Up: Indices
 
 8.1 Function index
 ==================
@@ -1335,7 +1351,7 @@ File: docUqgPks.info,  Node: Function index,  Next: Concept index,  Up: Indices
 * consult-yank-replace:                  Editing.               (line 6)
 
 
-File: docUqgPks.info,  Node: Concept index,  Prev: Function index,  Up: Indices
+File: docKbRRN0.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
 8.2 Concept index
 =================
@@ -1369,36 +1385,37 @@ File: docUqgPks.info,  Node: Concept index,  Prev: Function index,  Up: Indices
 
 Tag Table:
 Node: Top221
-Node: Available commands5040
-Node: Virtual Buffers6617
-Node: Editing8405
-Node: Register9261
-Node: Navigation10973
-Node: Search12216
-Node: Grep and Find14127
-Node: Compilation16276
-Node: Histories16952
-Node: Modes18172
-Node: Org Mode18652
-Node: Help19268
-Node: Miscellaneous20379
-Node: Special features22459
-Node: Live previews23588
-Node: Narrowing and grouping27717
-Node: Asynchronous search29720
-Node: Multiple sources32802
-Node: Embark integration37286
-Node: Configuration39481
-Node: Use-package example40552
-Node: Custom variables47787
-Node: Fine-tuning51557
-Node: Recommended packages54461
-Node: Bug reports56564
-Node: Contributions59651
-Node: Acknowledgments60567
-Node: Indices63117
-Node: Function index63355
-Node: Concept index67003
+Node: Available commands5119
+Node: Virtual Buffers6696
+Node: Editing8484
+Node: Register9340
+Node: Navigation11052
+Node: Search12295
+Node: Grep and Find14206
+Node: Compilation16346
+Node: Histories17022
+Node: Modes18242
+Node: Org Mode18722
+Node: Help19338
+Node: Miscellaneous20449
+Node: Special features22529
+Node: Live previews23658
+Node: Narrowing and grouping27787
+Node: Asynchronous search29790
+Node: Multiple sources32872
+Node: Embark integration37356
+Node: Configuration39551
+Node: Use-package example40701
+Node: Custom variables47153
+Node: Project support51004
+Node: Fine-tuning52269
+Node: Recommended packages55172
+Node: Bug reports57275
+Node: Contributions60362
+Node: Acknowledgments61278
+Node: Indices63828
+Node: Function index64066
+Node: Concept index67714
 
 End Tag Table
 
