@@ -13,8 +13,10 @@
 
 (autoload 'consult-denote-grep "consult-denote" "\
 Call `consult-denote-grep-command' in the variable `denote-directory'." t)
+(function-put 'consult-denote-grep 'interactive-only 't)
 (autoload 'consult-denote-find "consult-denote" "\
 Call `consult-denote-find-command' in the variable `denote-directory'." t)
+(function-put 'consult-denote-find 'interactive-only 't)
 (defvar consult-denote-mode nil "\
 Non-nil if Consult-Denote mode is enabled.
 See the `consult-denote-mode' command
