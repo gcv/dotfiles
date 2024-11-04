@@ -50,6 +50,8 @@ The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
 (fn &optional ARG)" t)
+(autoload 'turn-on-colorful-mode "colorful-mode" "\
+Turn on `colorful-mode' mode if the current buffer.")
 (put 'global-colorful-mode 'globalized-minor-mode t)
 (defvar global-colorful-mode nil "\
 Non-nil if Global Colorful mode is enabled.
@@ -68,7 +70,8 @@ If called from Lisp, toggle the mode if ARG is `toggle'.
 Enable the mode if ARG is nil, omitted, or is a positive number.
 Disable the mode if ARG is a negative number.
 
-Colorful mode is enabled in all buffers where `colorful--turn-on' would do it.
+Colorful mode is enabled in all buffers where `turn-on-colorful-mode' would do
+it.
 
 See `colorful-mode' for more information on Colorful mode.
 
