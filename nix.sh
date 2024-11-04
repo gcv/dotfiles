@@ -110,6 +110,7 @@ packages=(
     tmux
     tree               # file lister, obsoleted by eza and broot
     tree-sitter        # parser framework
+    typst              # TeX replacement
     unrar
     viddy              # watch replacement
     watch
