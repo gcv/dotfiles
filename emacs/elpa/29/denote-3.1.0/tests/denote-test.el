@@ -1,11 +1,10 @@
 ;;; denote-test.el --- Unit tests for Denote -*- lexical-binding: t -*-
 
-;; Copyright (C) 2023  Free Software Foundation, Inc.
+;; Copyright (C) 2023-2024  Free Software Foundation, Inc.
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
-;; Maintainer: Denote Development <~protesilaos/denote@lists.sr.ht>
-;; URL: https://git.sr.ht/~protesilaos/denote
-;; Mailing-List: https://lists.sr.ht/~protesilaos/denote
+;; Maintainer: Protesilaos Stavrou <info@protesilaos.com>
+;; URL: https://github.com/protesilaos/denote
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -24,7 +23,7 @@
 
 ;;; Commentary:
 
-;; WORK-IN-PROGRESS
+;; Tests for Denote.
 
 ;;; Code:
 
@@ -48,6 +47,12 @@ Concretely, replace with spaces anything that matches the
 `denote-excluded-punctuation-extra-regexp'."
   (should (equal (denote--slug-no-punct "This is !@# test")
                  "This is  test")))
+
+(ert-deftest denote-test--denote-slug-keep-only-ascii ()
+  "Test that `denote-slug-keep-only-ascii' removes non-ASCII characters."
+  (should (equal
+           (denote-slug-keep-only-ascii "There are no-ASCII ： characters ｜ here 😀")
+           "There are no-ASCII   characters   here  ")))
 
 (ert-deftest denote-test--denote--slug-hyphenate ()
   "Test that `denote--slug-hyphenate' hyphenates the string.
@@ -375,11 +380,10 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
 
 (ert-deftest denote-test--denote-filetype-heuristics ()
   "Test that `denote-filetype-heuristics' gets the correct file type."
-  (should (and (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing") (caar denote-file-types))
+  (should (and (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing") nil)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.org") 'org)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.org.gpg") 'org)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.org.age") 'org)
-               (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing") 'org)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.txt") 'text)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.txt.gpg") 'text)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.txt.age") 'text)
@@ -391,13 +395,6 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.md.gpg") 'markdown-yaml)
                (eq (denote-filetype-heuristics "20231010T105034--some-test-file__denote_testing.md.age") 'markdown-yaml))))
 
-(ert-deftest denote-test--denote-convert-file-name-keywords-to-crm ()
-  "Ensure that `denote-convert-file-name-keywords-to-crm' returns words as comma-separated string."
-  (should
-   (and (equal (denote-convert-file-name-keywords-to-crm "_denote_keywords_testing") "denote,keywords,testing")
-        (equal (denote-convert-file-name-keywords-to-crm "_denote") "denote")
-        (equal (denote-convert-file-name-keywords-to-crm "") ""))))
-
 (ert-deftest denote-test--denote-get-identifier ()
   "Test that `denote-get-identifier' returns an identifier."
   (should (and (equal (denote-get-identifier) (format-time-string denote-id-format (current-time)))
@@ -405,6 +402,105 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
                (equal (denote-get-identifier 1705644188) "20240119T080308")
                (equal (denote-get-identifier '(26026 4251)) "20240119T080307")))
   (should-error (denote-get-identifier "Invalid date")))
+
+(ert-deftest denote-test--denote-retrieve-filename-identifier ()
+  "Test that `denote-retrieve-filename-identifier' returns only the identifier."
+  (should (and (null
+                (denote-retrieve-filename-identifier "/path/to/testing/--this-is-a-test-reordered__denote_testing.org"))
+               (equal
+                (denote-retrieve-filename-identifier "/path/to/testing/20240610T194654--this-is-a-test-reordered__denote_testing.org")
+                "20240610T194654")
+               (equal
+                (denote-retrieve-filename-identifier "/path/to/testing/20240610T194654==signature--this-is-a-test-reordered__denote_testing.org")
+                "20240610T194654")
+               (equal
+                (denote-retrieve-filename-identifier "/path/to/testing/--this-is-a-test-reordered__denote_testing@@20240610T194654.org")
+                "20240610T194654")
+               (equal
+                (denote-retrieve-filename-identifier "/path/to/testing/__denote_testing--this-is-a-test-reordered@@20240610T194654.org")
+                "20240610T194654")
+               (equal
+                (denote-retrieve-filename-identifier "/path/to/testing/__denote_testing@@20240610T194654--this-is-a-test-reordered.org")
+                "20240610T194654")
+               (equal
+                (denote-retrieve-filename-identifier "/path/to/testing/==signature__denote_testing@@20240610T194654--this-is-a-test-reordered.org")
+                "20240610T194654"))))
+
+(ert-deftest denote-test--denote-retrieve-filename-title ()
+  "Test that `denote-retrieve-filename-title' returns only the title."
+  (should (and (null
+                (denote-retrieve-filename-title "/path/to/testing/20240610T194654__denote_testing.org"))
+               (equal
+                (denote-retrieve-filename-title "/path/to/testing/20240610T194654--this-is-a-test-reordered__denote_testing.org")
+                "this-is-a-test-reordered")
+               (equal
+                (denote-retrieve-filename-title "/path/to/testing/20240610T194654==signature--this-is-a-test-reordered__denote_testing.org")
+                "this-is-a-test-reordered")
+               (equal
+                (denote-retrieve-filename-title "/path/to/testing/--this-is-a-test-reordered__denote_testing@@20240610T194654.org")
+                "this-is-a-test-reordered")
+               (equal
+                (denote-retrieve-filename-title "/path/to/testing/__denote_testing--this-is-a-test-reordered@@20240610T194654.org")
+                "this-is-a-test-reordered")
+               (equal
+                (denote-retrieve-filename-title "/path/to/testing/__denote_testing@@20240610T194654--this-is-a-test-reordered.org")
+                "this-is-a-test-reordered")
+               (equal
+                (denote-retrieve-filename-title "/path/to/testing/==signature__denote_testing@@20240610T194654--this-is-a-test-reordered.org")
+                "this-is-a-test-reordered"))))
+
+(ert-deftest denote-test--denote-retrieve-filename-keywords ()
+  "Test that `denote-retrieve-filename-keywords' returns only the keywords."
+  (should (and (null
+                (denote-retrieve-filename-keywords "/path/to/testing/20240610T194654--this-is-a-test-reordered.org"))
+               (equal
+                (denote-retrieve-filename-keywords "/path/to/testing/20240610T194654--this-is-a-test-reordered__denote_testing.org")
+                "denote_testing")
+               (equal
+                (denote-retrieve-filename-keywords "/path/to/testing/20240610T194654==signature--this-is-a-test-reordered__denote_testing.org")
+                "denote_testing")
+               (equal
+                (denote-retrieve-filename-keywords "/path/to/testing/--this-is-a-test-reordered__denote_testing@@20240610T194654.org")
+                "denote_testing")
+               (equal
+                (denote-retrieve-filename-keywords "/path/to/testing/__denote_testing--this-is-a-test-reordered@@20240610T194654.org")
+                "denote_testing")
+               (equal
+                (denote-retrieve-filename-keywords "/path/to/testing/__denote_testing@@20240610T194654--this-is-a-test-reordered.org")
+                "denote_testing")
+               (equal
+                (denote-retrieve-filename-keywords "/path/to/testing/==signature__denote_testing@@20240610T194654--this-is-a-test-reordered.org")
+                "denote_testing"))))
+
+(ert-deftest denote-test--denote-retrieve-filename-signature ()
+  "Test that `denote-retrieve-filename-signature' returns only the signature."
+  (should (and (null
+                (denote-retrieve-filename-signature "/path/to/testing/20240610T194654--this-is-a-test-reordered__denote_testing.org"))
+               (equal
+                (denote-retrieve-filename-signature "/path/to/testing/20240610T194654==signature--this-is-a-test-reordered__denote_testing.org")
+                "signature")
+               (equal
+                (denote-retrieve-filename-signature "/path/to/testing/--this-is-a-test-reordered==signature__denote_testing@@20240610T194654.org")
+                "signature")
+               (equal
+                (denote-retrieve-filename-signature "/path/to/testing/__denote_testing--this-is-a-test-reordered==signature@@20240610T194654.org")
+                "signature")
+               (equal
+                (denote-retrieve-filename-signature "/path/to/testing/__denote_testing@@20240610T194654--this-is-a-test-reordered==signature.org")
+                "signature")
+               (equal
+                (denote-retrieve-filename-signature "/path/to/testing/==signature__denote_testing@@20240610T194654--this-is-a-test-reordered.org")
+                "signature"))))
+
+(ert-deftest denote-test--denote-identifier-p ()
+  "Test that `denote-identifier-p' works for Denote identifiers."
+  (should (and (denote-identifier-p "20240901T090910")
+               (null (denote-identifier-p "20240901T090910-not-identifier-format")))))
+
+(ert-deftest denote-test--denote--id-to-date ()
+  "Test that `denote--id-to-date' returns the date from an identifier."
+  (should (equal (denote--id-to-date "20240901T090910") "2024-09-01"))
+  (should-error (denote--id-to-date "20240901T090910-not-identifier-format")))
 
 ;;;; denote-journal-extras.el
 
@@ -414,7 +510,7 @@ Extend what we do in `denote-test--denote-file-type-extensions'."
   "Make sure that `denote-journal-extras-daily--title-format' yields the desired format."
   (should (and
            ;; These three should prompt, but I am here treating the
-           ;; prompt as if already returned a string.  The test for
+           ;; prompt as if it already returned a string.  The test for
            ;; the `denote-title-prompt' can be separate.
            (stringp
             (cl-letf (((symbol-function 'denote-title-prompt) #'identity)

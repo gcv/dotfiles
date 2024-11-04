@@ -38,7 +38,16 @@
   :link '(info-link "(denote) Top")
   :link '(url-link :tag "Homepage" "https://protesilaos.com/emacs/denote"))
 
-(defcustom denote-rename-buffer-format "%t"
+(defvaralias 'denote-buffer-has-backlinks-string 'denote-rename-buffer-backlinks-indicator
+  "Alias for `denote-rename-buffer-backlinks-indicator'.")
+
+(defcustom denote-rename-buffer-backlinks-indicator " <-->"
+  "A string used to indicate that a buffer has backlinks pointing to it."
+  :type 'string
+  :package-version '(denote . "3.1.0")
+  :group 'denote-rename-buffer)
+
+(defcustom denote-rename-buffer-format "[D] %t%b"
   "The format of the buffer name `denote-rename-buffer' should use.
 Thie value is a string that treats specially the following
 specifiers:
@@ -48,6 +57,7 @@ specifiers:
 - The %d is the same as %i (DATE mnemonic).
 - The %s is the Denote SIGNATURE of the file.
 - The %k is the Denote KEYWORDS of the file.
+- The %b inserts `denote-rename-buffer-backlinks-indicator'.
 - The %% is a literal percent sign.
 
 In addition, the following flags are available for each of the specifiers:
@@ -67,7 +77,7 @@ Any other string it taken as-is.  Users may want, for example, to
 include some text that makes Denote buffers stand out, such as
 a [D] prefix."
   :type 'string
-  :package-version '(denote . "2.1.0")
+  :package-version '(denote . "3.1.0")
   :group 'denote-rename-buffer)
 
 (defcustom denote-rename-buffer-function #'denote-rename-buffer
@@ -91,20 +101,24 @@ buffer will be used, if available."
   "Parse the BUFFER through the `denote-rename-buffer-format'."
   (when-let ((file (buffer-file-name buffer))
              (type (denote-filetype-heuristics file)))
-    (string-trim
-     (format-spec denote-rename-buffer-format
-                  (list (cons ?t (cond
-                                  ((denote-retrieve-front-matter-title-value file type))
-                                  ((denote-retrieve-filename-title file))
-                                  (t  "")))
-                        (cons ?i (or (denote-retrieve-filename-identifier file) ""))
-                        (cons ?d (or (denote-retrieve-filename-identifier file) ""))
-                        (cons ?s (or (denote-retrieve-filename-signature file) ""))
-                        (cons ?k (if-let ((kws (denote-retrieve-front-matter-keywords-value file type)))
-                                     (denote-keywords-combine kws)
-                                   (or (denote-retrieve-filename-keywords file) "")))
-                        (cons ?% "%"))
-                  'delete))))
+    (let ((should-show-backlink-indicator (and ; only do search if format contains "%b"
+                                           (string-match-p "%b" denote-rename-buffer-format)
+                                           (denote--file-has-backlinks-p file))))
+      (string-trim
+       (format-spec denote-rename-buffer-format
+                    (list (cons ?t (cond
+                                    ((denote-retrieve-front-matter-title-value file type))
+                                    ((denote-retrieve-filename-title file))
+                                    (t  "")))
+                          (cons ?b (if should-show-backlink-indicator denote-rename-buffer-backlinks-indicator ""))
+                          (cons ?i (or (denote-retrieve-filename-identifier file) ""))
+                          (cons ?d (or (denote-retrieve-filename-identifier file) ""))
+                          (cons ?s (or (denote-retrieve-filename-signature file) ""))
+                          (cons ?k (if-let ((kws (denote-retrieve-front-matter-keywords-value file type)))
+                                       (denote-keywords-combine kws)
+                                     (or (denote-retrieve-filename-keywords file) "")))
+                          (cons ?% "%"))
+                    'delete)))))
 
 (defun denote-rename-buffer (&optional buffer)
   "Rename current buffer or optional BUFFER with `denote-rename-buffer-format'.
