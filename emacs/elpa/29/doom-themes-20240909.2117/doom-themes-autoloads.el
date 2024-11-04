@@ -461,6 +461,16 @@ Enable flashing the mode-line on error.")
 (register-definition-prefixes "doom-wilmersdorf-theme" '("doom-wilmersdorf"))
 
 
+;;; Generated autoloads from doom-winter-is-coming-dark-blue-theme.el
+
+(register-definition-prefixes "doom-winter-is-coming-dark-blue-theme" '("doom-winter-is-coming-"))
+
+
+;;; Generated autoloads from doom-winter-is-coming-light-theme.el
+
+(register-definition-prefixes "doom-winter-is-coming-light-theme" '("doom-winter-is-coming-"))
+
+
 ;;; Generated autoloads from doom-xcode-theme.el
 
 (register-definition-prefixes "doom-xcode-theme" '("doom-xcode"))

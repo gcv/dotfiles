@@ -121,6 +121,7 @@
     (font-latex-bold-face         :inherit 'bold)
     (font-latex-italic-face       :inherit 'italic)
     (font-latex-math-face         :foreground blue)
+    (font-latex-sedate-face       :inherit 'font-lock-keyword-face)
     (font-latex-sectioning-0-face :foreground blue    :weight 'ultra-bold)
     (font-latex-sectioning-1-face :foreground magenta :weight 'semi-bold)
     (font-latex-sectioning-2-face :foreground violet  :weight 'semi-bold)
@@ -191,7 +192,12 @@
     (ansi-color-magenta        :foreground magenta :background magenta)
     (ansi-color-cyan           :foreground cyan    :background cyan)
     (ansi-color-white          :foreground fg      :background fg)
-    (ansi-color-bright-black   :foreground base0   :background base2)
+    ;; This color is used effectively as grayed out foreground text.
+    ;; base5 and up have too much contrast in light themes;
+    ;; base5 and lower have too little contrast in dark themes.
+    (ansi-color-bright-black
+     (&light :foreground base4 :background base4)
+     (&dark  :foreground base6 :background base6))
     (ansi-color-bright-red     :foreground (doom-lighten red 0.15)     :background (doom-lighten red 0.15))
     (ansi-color-bright-green   :foreground (doom-lighten green 0.15)   :background (doom-lighten green 0.15))
     (ansi-color-bright-yellow  :foreground (doom-lighten yellow 0.15)  :background (doom-lighten yellow 0.15))
@@ -368,7 +374,7 @@
     ;; (cider-repl-stderr-face :inherit 'font-lock-warning-face)
     ;; (cider-repl-input-face :weight 'bold)
     ;; (cider-repl-result-face )
-    (cider-result-overlay-face :background base3 :box `(:line-width -1 :color base5))
+    (cider-result-overlay-face :background base3 :box `(:line-width -1 :color ,base5))
     (cider-fringe-good-face    :foreground green)
     (cider-deprecated-face     :background (doom-blend bg yellow 0.8))
     (cider-instrumented-face   :background (doom-blend bg red 0.8))
@@ -742,9 +748,10 @@
     ;; (hi-black-b  :weight 'bold)
     ;; (hi-black-hb :inherit 'variable-pitch :weight 'bold :height 1.67)
     ;;;; hideshow <built-in>
-    (+fold-hideshow-folded-face :inherit 'font-lock-comment-face
-                                :weight 'light
-                                :background (doom-darken bg 0.125))
+    (+fold-hideshow-folded-face  ; this is defined in Doom Emacs, only
+     :inherit 'font-lock-comment-face
+     :weight 'light
+     :background (doom-darken bg 0.15))
     ;;;; highlight-numbers-mode
     (highlight-numbers-number :inherit 'bold :foreground numbers)
     ;;;; highlight-indentation-mode
@@ -1444,6 +1451,11 @@
     ;;;; treemacs-nerd-icons
     (treemacs-nerd-icons-file-face :foreground doc-comments)
     (treemacs-nerd-icons-root-face :inherit 'font-lock-string-face :weight 'bold :height 1.2)
+    ;;;; ts-fold
+    (ts-fold-fringe-face)
+    ((ts-fold-replacement-face &inherit +fold-hideshow-folded-face))
+    ((ts-fold-replacement-mouse-face &inherit +fold-hideshow-folded-face)
+     :box '(:line-width -1 :style released-button))
     ;;;; twittering-mode
     (twitter-divider  ; custom face in Doom Emacs
      (&light :underline `(:color ,(doom-lighten vertical-bar 0.2)))
@@ -1527,6 +1539,10 @@
     (window-divider :inherit 'vertical-border)
     (window-divider-first-pixel :inherit 'window-divider)
     (window-divider-last-pixel  :inherit 'window-divider)
+    ;;;; window-tool-bar
+    (window-tool-bar-button :background bg :foreground fg)
+    (window-tool-bar-button-hover :inherit 'highlight :distant-foreground bg)
+    (window-tool-bar-button-disabled :background bg-alt :foreground fg-alt)
     ;;;; winum
     (winum-face :inherit 'bold :foreground highlight)
     ;;;; woman <built-in>
