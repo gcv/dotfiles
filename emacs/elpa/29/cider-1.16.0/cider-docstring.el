@@ -148,14 +148,15 @@ Prioritize rendering as much as possible while staying within `cider-docstring-m
     (concat string (when (> (length lines) max-lines) "..."))))
 
 (defun cider-docstring--format (string)
-  "Return a nicely formatted STRING to be displayed to the user."
-  (let* ((string (replace-regexp-in-string "\\.  " ".\n\n" string)) ;; improve the formatting of e.g. clojure.core/reduce
-         (string (mapconcat (lambda (line)
-                              ;; Remove spaces at the beginning of each line, as it is common in many clojure.core defns:
-                              (replace-regexp-in-string "\\`[ ]+" "" line))
-                            (split-string string "\n")
-                            "\n")))
-    string))
+  "Return a nicely formatted STRING to be displayed to the user.
+
+We need to format the docstring before displaying it to the user
+because it is obtained from the source code.  For example, this means
+that it usually has two spaces before each line used for indentation
+\(see https://guide.clojure.style/#docstring-indentation).  While displaying
+the docstring to the user, we usually want to control indentation and
+other aspects of the presentation, so we format it before displaying."
+  (replace-regexp-in-string "\n  " "\n" string))
 
 (provide 'cider-docstring)
 ;;; cider-docstring.el ends here

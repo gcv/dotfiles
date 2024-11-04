@@ -809,7 +809,7 @@ with the given LIMIT."
                        ;; we catch that case too.
                        ;; FIXME: This matches values too, not just keys.
                        (when (seq-find (lambda (k) (and (stringp k)
-                                                        (string-match (rx "clojure.tools.trace/traced" eos) k)))
+                                                        (string-match (rx "orchard.trace/traced" eos) k)))
                                        meta)
                          (push sym traced))
                        (when (and do-deprecated (nrepl-dict-get meta "deprecated"))
@@ -1062,7 +1062,12 @@ property."
 
 
 ;;; Minor-mode definition
-(defvar x-gtk-use-system-tooltips)
+
+(if (and (> emacs-major-version 28)
+         (not (boundp 'x-gtk-use-system-tooltips)))
+    ;; The x-gtk prefix has been dropped in Emacs 29
+    (defvaralias 'x-gtk-use-system-tooltips 'use-system-tooltips)
+  (defvar x-gtk-use-system-tooltips))
 
 ;;;###autoload
 (define-minor-mode cider-mode

@@ -11,7 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://www.github.com/clojure-emacs/cider
-;; Version: 1.15.0
+;; Package-Version: 1.16.0
+;; Package-Revision: 76eac5aa634a
 ;; Package-Requires: ((emacs "26") (clojure-mode "5.19") (parseedn "1.2.1") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2") (transient "0.4.1"))
 ;; Keywords: languages, clojure, cider
 
@@ -93,10 +94,10 @@
 (require 'sesman)
 (require 'package)
 
-(defconst cider-version "1.15.0"
+(defconst cider-version "1.16.0"
   "The current version of CIDER.")
 
-(defconst cider-codename "Cogne"
+(defconst cider-codename "Kherson"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -542,7 +543,7 @@ Throws an error if PROJECT-TYPE is unknown."
   "List of dependencies where elements are lists of artifact name and version.")
 (put 'cider-jack-in-dependencies 'risky-local-variable t)
 
-(defcustom cider-injected-nrepl-version "1.2.0-beta2"
+(defcustom cider-injected-nrepl-version "1.3.0"
   "The version of nREPL injected on jack-in.
 We inject the newest known version of nREPL just in case
 your version of Boot or Leiningen is bundling an older one."
@@ -573,7 +574,7 @@ the artifact.")
 
 Used when `cider-jack-in-auto-inject-clojure' is set to `latest'.")
 
-(defconst cider-required-middleware-version "0.49.0"
+(defconst cider-required-middleware-version "0.50.2"
   "The CIDER nREPL version that's known to work properly with CIDER.")
 
 (defcustom cider-injected-middleware-version cider-required-middleware-version
@@ -823,7 +824,7 @@ removed, LEIN-PLUGINS, LEIN-MIDDLEWARES and finally PARAMS."
                                          middleware))
                                lein-middlewares)
                       (when cider-enable-nrepl-jvmti-agent
-                        `(,(concat "update-in :jvm-opts conj -Djdk.attach.allowAttachSelf"))))
+                        `(,(concat "update-in :jvm-opts conj '\"-Djdk.attach.allowAttachSelf\"'"))))
               " -- ")
    " -- "
    (if (not cider-enrich-classpath)
