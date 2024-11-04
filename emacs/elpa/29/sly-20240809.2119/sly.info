@@ -1,4 +1,4 @@
-This is sly.info, produced by makeinfo version 6.7 from sly.texi.
+This is sly.info, produced by makeinfo version 6.8 from sly.texi.
 
 Written for SLIME Luke Gorrie and others, rewritten by João Távora for
 SLY.
@@ -16,7 +16,7 @@ SLY
 ***
 
 SLY is a Common Lisp IDE for Emacs.  This is the manual for version
-1.0.42.  (Last updated June 20, 2024)
+1.0.42.  (Last updated November 4, 2024)
 
    Written for SLIME Luke Gorrie and others, rewritten by João Távora
 for SLY.
@@ -426,6 +426,7 @@ input.
  [image src="images/tutorial-1.png" ]
 
 
+
    Starting from the new REPL, let's showcase some of SLY’s features.
 Let’s pretend we want to hack an existing Lisp project.  We'll pick SLY
 itself, or rather its Lisp server, called Slynk.  Let's pretend we're
@@ -460,6 +461,7 @@ present all Lisp symbols matching your search pattern.
 
 
  [image src="images/tutorial-2.png" ]
+
 
 
    In the 'apropos' buffer, let’s grab the mouse and right-click the
@@ -506,6 +508,7 @@ in a call graph.
  [image src="images/tutorial-3.png" ]
 
 
+
    We can later learn more about this mode (*note Trace Dialog::), but
 for now let’s again pretend we expected the function 'FLEX-SCORE' to
 return a wildly different score for 'COMMON-LISP:DESTRUCTURING-BIND'.
@@ -529,6 +532,7 @@ confirmation 'RET', which will run the function call:
 
 
  [image src="images/tutorial-4.png" ]
+
 
 
    If those '#v...''s look odd, here’s what’s going on: to copy the call
@@ -588,6 +592,7 @@ should now look like a rainbow in blue.
  [image src="images/tutorial-5.png" ]
 
 
+
    Now we return to the SLY REPL, but this time let’s use 'C-c ~'
 (that’s 'C-c' followed by "tilde") to do so.  This syncs the REPL’s
 local package and local directory to the Lisp file that we’re visiting.
@@ -618,6 +623,7 @@ done in this window, we press 'q' to quit.
 
 
  [image src="images/tutorial-6.png" ]
+
 
 
    Finally, we declare that we’re finished debugging 'FLEX-MATCHES'.
@@ -2125,6 +2131,7 @@ that saving your file doesn't save your debug code along with it.
  [image src="images/stickers-1-placed-stickers.png" ]
 
 
+
    * Stickers are "armed" when a definition or a file is compiled with
      the familiar 'C-c C-c' ('M-x sly-compile-defun') or 'C-c C-k' ('M-x
      sly-compile-file') commands.  An armed sticker changes color from
@@ -2132,6 +2139,7 @@ that saving your file doesn't save your debug code along with it.
 
 
  [image src="images/stickers-2-armed-stickers.png" ]
+
 
 
    From this point on, when the Lisp code is executed, the results of
@@ -2144,6 +2152,7 @@ help you examine your program's behaviour in three ways:
 
 
  [image src="images/stickers-3-replay-stickers.png" ]
+
 
 
   2. To step through stickers as your code is executed, ensure that
@@ -2160,6 +2169,7 @@ help you examine your program's behaviour in three ways:
  [image src="images/stickers-4-breaking-stickers.png" ]
 
 
+
   3. 'C-c C-s S' ('M-x sly-stickers-fetch') populates the sticker
      overlay with the latest captured results, called "recordings".  If
      a sticker has captured any recordings, it will turn green,
@@ -2169,6 +2179,7 @@ help you examine your program's behaviour in three ways:
 
 
  [image src="images/stickers-5-fetch-recordings.png" ]
+
 
 
    At any point, stickers can be removed with the same
@@ -3448,92 +3459,92 @@ Variable and Concept Index
 
 Tag Table:
 Node: Top294
-Node: Introduction2277
-Node: Getting started4596
-Node: Platforms4907
-Node: Downloading6007
-Node: Basic setup7007
-Node: Running7940
-Node: Basic customization8804
-Node: Multiple Lisps10520
-Node: A SLY tour for SLIME users13015
-Node: Working with source files23901
-Node: Evaluation24629
-Node: Compilation26543
-Node: Autodoc29396
-Node: Semantic indentation30338
-Ref: Semantic indentation-Footnote-132445
-Node: Reader conditionals32540
-Node: Macro-expansion32916
-Node: Common functionality34548
-Node: Finding definitions35319
-Node: Cross-referencing37149
-Ref: Cross-referencing-Footnote-139541
-Node: Completion39769
-Node: Interactive objects42761
-Node: Documentation44677
-Node: Multiple connections46711
-Node: Disassembly49662
-Node: Recovery50194
-Node: Temporary buffers50817
-Node: Multi-threading52233
-Node: The REPL and other special buffers53801
-Node: REPL54074
-Node: REPL commands55926
-Node: REPL output57941
-Node: REPL backreferences62546
-Ref: REPL backreferences-Footnote-165698
-Node: Inspector65751
-Node: Debugger67697
-Node: Examining frames68354
-Node: Restarts69438
-Ref: sly-db-quit69644
-Node: Frame Navigation70063
-Node: Miscellaneous70747
-Node: Trace Dialog71656
-Node: Stickers75440
-Node: Customization79554
-Node: Emacs-side79757
-Node: Keybindings79949
-Ref: describe-key80751
-Ref: describe-bindings80878
-Ref: describe-mode81009
-Ref: view-lossage81181
-Ref: Emacs Init File81317
-Node: Keymaps81949
-Node: Defcustom variables84586
-Ref: sly-complete-symbol-function85275
-Ref: sly-net-coding-system85823
-Node: Hooks88182
-Ref: sly-connected-hook88530
-Node: Lisp-side customization88973
-Node: Communication style89371
-Node: Other configurables91898
-Ref: *SLY-DB-QUIT-RESTART*92605
-Node: Tips and Tricks98139
-Node: Connecting to a remote Lisp98413
-Node: Setting up the Lisp image99120
-Ref: Setting up the Lisp image-Footnote-1100907
-Ref: Setting up the Lisp image-Footnote-2101018
-Ref: Setting up the Lisp image-Footnote-3101192
-Node: Setting up Emacs101345
-Ref: Setting up Emacs-Footnote-1102299
-Node: Setting up pathname translations102469
-Node: Loading Slynk faster104046
-Ref: init-example105523
-Node: Auto-SLY105745
-Node: REPLs and game loops106226
-Node: Controlling SLY from outside Emacs108193
-Node: Extensions109438
-Node: Loading and unloading111485
-Node: More contribs112561
-Node: TRAMP Support112732
-Node: Scratch Buffer112975
-Ref: sly-scratch113101
-Node: Credits113734
-Node: Key Index117003
-Node: Command Index125622
-Node: Variable Index135718
+Node: Introduction2280
+Node: Getting started4599
+Node: Platforms4910
+Node: Downloading6010
+Node: Basic setup7010
+Node: Running7943
+Node: Basic customization8807
+Node: Multiple Lisps10523
+Node: A SLY tour for SLIME users13018
+Node: Working with source files23910
+Node: Evaluation24638
+Node: Compilation26552
+Node: Autodoc29405
+Node: Semantic indentation30347
+Ref: Semantic indentation-Footnote-132454
+Node: Reader conditionals32549
+Node: Macro-expansion32925
+Node: Common functionality34557
+Node: Finding definitions35328
+Node: Cross-referencing37158
+Ref: Cross-referencing-Footnote-139550
+Node: Completion39778
+Node: Interactive objects42770
+Node: Documentation44686
+Node: Multiple connections46720
+Node: Disassembly49671
+Node: Recovery50203
+Node: Temporary buffers50826
+Node: Multi-threading52242
+Node: The REPL and other special buffers53810
+Node: REPL54083
+Node: REPL commands55935
+Node: REPL output57950
+Node: REPL backreferences62555
+Ref: REPL backreferences-Footnote-165707
+Node: Inspector65760
+Node: Debugger67706
+Node: Examining frames68363
+Node: Restarts69447
+Ref: sly-db-quit69653
+Node: Frame Navigation70072
+Node: Miscellaneous70756
+Node: Trace Dialog71665
+Node: Stickers75449
+Node: Customization79568
+Node: Emacs-side79771
+Node: Keybindings79963
+Ref: describe-key80765
+Ref: describe-bindings80892
+Ref: describe-mode81023
+Ref: view-lossage81195
+Ref: Emacs Init File81331
+Node: Keymaps81963
+Node: Defcustom variables84600
+Ref: sly-complete-symbol-function85289
+Ref: sly-net-coding-system85837
+Node: Hooks88196
+Ref: sly-connected-hook88544
+Node: Lisp-side customization88987
+Node: Communication style89385
+Node: Other configurables91912
+Ref: *SLY-DB-QUIT-RESTART*92619
+Node: Tips and Tricks98153
+Node: Connecting to a remote Lisp98427
+Node: Setting up the Lisp image99134
+Ref: Setting up the Lisp image-Footnote-1100921
+Ref: Setting up the Lisp image-Footnote-2101032
+Ref: Setting up the Lisp image-Footnote-3101206
+Node: Setting up Emacs101359
+Ref: Setting up Emacs-Footnote-1102313
+Node: Setting up pathname translations102483
+Node: Loading Slynk faster104060
+Ref: init-example105537
+Node: Auto-SLY105759
+Node: REPLs and game loops106240
+Node: Controlling SLY from outside Emacs108207
+Node: Extensions109452
+Node: Loading and unloading111499
+Node: More contribs112575
+Node: TRAMP Support112746
+Node: Scratch Buffer112989
+Ref: sly-scratch113115
+Node: Credits113748
+Node: Key Index117017
+Node: Command Index125636
+Node: Variable Index135732
 
 End Tag Table
 
