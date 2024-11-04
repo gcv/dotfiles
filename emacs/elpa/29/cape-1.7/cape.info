@@ -1,4 +1,4 @@
-This is docFzyaue.info, produced by makeinfo version 6.8 from cape.texi.
+This is doc5HsHLa.info, produced by makeinfo version 6.8 from cape.texi.
 
 INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docFzyaue.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
+File: doc5HsHLa.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
 
 cape.el - Let your completions fly!
 ***********************************
@@ -52,7 +52,7 @@ CAPF adapters and transformers
 
 
 
-File: docFzyaue.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
+File: doc5HsHLa.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
 
 1 Available Capfs
 *****************
@@ -75,7 +75,7 @@ File: docFzyaue.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top, 
    • ‘cape-tex’: Complete Unicode char from TeX command, e.g.  ‘\hbar’.
 
 
-File: docFzyaue.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
+File: doc5HsHLa.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
 
 2 Configuration
 ***************
@@ -94,8 +94,8 @@ the ‘:bind’ specification below.
 the list since each of the Capfs adds a small runtime cost.  Note that
 the Capfs which occur earlier in the list take precedence, such that the
 first Capf returning a result will win and the later Capfs may not get a
-chance to run.  In order to merge Capfs you can try the experimental
-function ‘cape-capf-super’.
+chance to run.  In order to merge Capfs you can try the function
+‘cape-capf-super’.
 
    One must distinguish the buffer-local and the global value of the
 ‘completion-at-point-functions’ variable.  The buffer-local value of the
@@ -114,46 +114,28 @@ information.
 
      ;; Add extensions
      (use-package cape
-       ;; Bind dedicated completion commands
-       ;; Alternative prefix keys: C-c p, M-p, M-+, ...
-       :bind (("C-c p p" . completion-at-point) ;; capf
-              ("C-c p t" . complete-tag)        ;; etags
-              ("C-c p d" . cape-dabbrev)        ;; or dabbrev-completion
-              ("C-c p h" . cape-history)
-              ("C-c p f" . cape-file)
-              ("C-c p k" . cape-keyword)
-              ("C-c p s" . cape-elisp-symbol)
-              ("C-c p e" . cape-elisp-block)
-              ("C-c p a" . cape-abbrev)
-              ("C-c p l" . cape-line)
-              ("C-c p w" . cape-dict)
-              ("C-c p :" . cape-emoji)
-              ("C-c p \\" . cape-tex)
-              ("C-c p _" . cape-tex)
-              ("C-c p ^" . cape-tex)
-              ("C-c p &" . cape-sgml)
-              ("C-c p r" . cape-rfc1345))
+       ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+       ;; Press C-c p ? to for help.
+       :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
+       ;; Alternatively bind Cape commands individually.
+       ;; :bind (("C-c p d" . cape-dabbrev)
+       ;;        ("C-c p h" . cape-history)
+       ;;        ("C-c p f" . cape-file)
+       ;;        ...)
        :init
        ;; Add to the global default value of `completion-at-point-functions' which is
        ;; used by `completion-at-point'.  The order of the functions matters, the
        ;; first function returning a result wins.  Note that the list of buffer-local
        ;; completion functions takes precedence over the global list.
-       (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-       (add-to-list 'completion-at-point-functions #'cape-file)
-       (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-       ;;(add-to-list 'completion-at-point-functions #'cape-history)
-       ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
-       ;;(add-to-list 'completion-at-point-functions #'cape-tex)
-       ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
-       ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
-       ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
-       ;;(add-to-list 'completion-at-point-functions #'cape-dict)
-       ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
-       ;;(add-to-list 'completion-at-point-functions #'cape-line)
+       (add-hook 'completion-at-point-functions #'cape-dabbrev)
+       (add-hook 'completion-at-point-functions #'cape-file)
+       (add-hook 'completion-at-point-functions #'cape-elisp-block)
+       ;; (add-hook 'completion-at-point-functions #'cape-history)
+       ;; ...
      )
 
 
-File: docFzyaue.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
+File: doc5HsHLa.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
 
 3 CAPF adapters and transformers
 ********************************
@@ -166,7 +148,7 @@ File: docFzyaue.info,  Node: CAPF adapters and transformers,  Next: Contribution
 * Capf transformers::
 
 
-File: docFzyaue.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
+File: doc5HsHLa.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.1 Company adapter
 ===================
@@ -232,7 +214,7 @@ Company backend, which can then be used as a Capf via
                               '(company-dabbrev company-elisp)))))
 
 
-File: docFzyaue.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
+File: doc5HsHLa.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
 
 3.2 Super-Capf - Merging multiple Capfs
 =======================================
@@ -240,10 +222,9 @@ File: docFzyaue.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Bu
 _Throw multiple Capfs under the Cape and get a Super-Capf!_
 
    Cape supports merging multiple Capfs using the function
-‘cape-capf-super’.  This feature is *EXPERIMENTAL* and should only be
-used carefully in special scenarios.  Due to some technical details, not
-all Capfs can be merged successfully.  Merge Capfs one by one and make
-sure that you get the desired outcome.
+‘cape-capf-super’.  Due to some technical details, not all Capfs can be
+merged successfully.  Merge Capfs one by one and make sure that you get
+the desired outcome.
 
    Note that ‘cape-capf-super’ is not needed if multiple Capfs should
 betried one after the other, for example you can use ‘cape-file’
@@ -275,7 +256,7 @@ multi-step completions like ‘cape-file’.
 Company, which allows you to merge multiple Company backends.
 
 
-File: docFzyaue.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
+File: doc5HsHLa.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.3 Capf-Buster - Cache busting
 ===============================
@@ -295,7 +276,7 @@ similarly refreshing strategy.
                  (list (cape-capf-buster #'some-caching-capf)))
 
 
-File: docFzyaue.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
+File: doc5HsHLa.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
 
 3.4 Capf transformers
 =====================
@@ -372,7 +353,7 @@ personal configuration.
      ;; pressing RET.
      (defun my-cape-dabbrev-accept-all ()
        (cape-wrap-accept-all #'cape-dabbrev))
-     (add-to-list 'completion-at-point-functions #'my-cape-dabbrev-accept-all)
+     (add-hook 'completion-at-point-functions #'my-cape-dabbrev-accept-all)
 
      ;; Example 6: Define interactive Capf which can be bound to a key.  Here we wrap
      ;; the `elisp-completion-at-point' such that we can complete Elisp code
@@ -387,7 +368,7 @@ personal configuration.
                                             #'ignore-elisp-keywords)))
 
 
-File: docFzyaue.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
+File: doc5HsHLa.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
 
 4 Contributions
 ***************
@@ -402,12 +383,12 @@ Tag Table:
 Node: Top208
 Node: Available Capfs1948
 Node: Configuration3059
-Node: CAPF adapters and transformers6862
-Node: Company adapter7170
-Node: Super-Capf - Merging multiple Capfs9865
-Node: Capf-Buster - Cache busting12134
-Node: Capf transformers13073
-Node: Contributions17838
+Node: CAPF adapters and transformers5864
+Node: Company adapter6172
+Node: Super-Capf - Merging multiple Capfs8867
+Node: Capf-Buster - Cache busting11048
+Node: Capf transformers11987
+Node: Contributions16749
 
 End Tag Table
 

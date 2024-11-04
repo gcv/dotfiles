@@ -2,6 +2,19 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 1.7 (2024-08-26)
+
+- ~cape-elisp-symbol~: Add wrappers only if not yet there.
+- ~cape-elisp-symbol~: Add wrappers in ~emacs-lisp-mode~ inside strings/comments.
+
+* Version 1.6 (2024-07-23)
+
+- Add ~cape-prefix-map~ for simplified configuration.
+- ~cape-wrap-super~: Bugfix. Ensure that annotation functions are called with
+  candidates belonging to the originating Capf.
+- Disallow ~cape-company-to-capf~ if ~company-mode~ is enabled.
+- Bump Compat dependency to Compat 30.
+
 * Version 1.5 (2024-04-12)
 
 - ~cape-file-prefix~: New variable to customize file name completion prefix. If
