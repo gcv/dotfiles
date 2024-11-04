@@ -1,11 +1,11 @@
 ;;; elpher.el --- A friendly gopher and gemini client  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2019-2023 Tim Vaughan <plugd@thelambdalab.xyz>
-;; Copyright (C) 2020-2022 Elpher contributors (See info manual for full list)
+;; Copyright (C) 2019-2024 Elpher contributors (See info manual for full list)
 
 ;; Author: Tim Vaughan <plugd@thelambdalab.xyz>
 ;; Created: 11 April 2019
-;; Version: 3.6.0
+;; Package-Version: 3.6.4
+;; Package-Revision: a1c5fbf16b52
 ;; Keywords: comm gopher gemini
 ;; Homepage: https://thelambdalab.xyz/elpher
 ;; Package-Requires: ((emacs "27.1"))
@@ -71,7 +71,7 @@
 ;;; Global constants
 ;;
 
-(defconst elpher-version "3.6.0"
+(defconst elpher-version "3.6.4"
   "Current version of elpher.")
 
 (defconst elpher-margin-width 6
@@ -704,9 +704,9 @@ If LINE is non-nil, replace that line instead."
 
 (defvar elpher-link-keymap
   (let ((map (make-sparse-keymap)))
-    (keymap-set map "S-<down-mouse-1>" 'ignore) ;Prevent buffer face popup
-    (keymap-set map "S-<mouse-1>" #'elpher--open-link-new-buffer-mouse)
-    (keymap-set map "S-<return>" #'elpher--open-link-new-buffer)
+    (define-key map (kbd "S-<down-mouse-1>") 'ignore) ;Prevent buffer face popup
+    (define-key map (kbd "S-<mouse-1>") #'elpher--open-link-new-buffer-mouse)
+    (define-key map (kbd "S-<return>") #'elpher--open-link-new-buffer)
     (set-keymap-parent map button-map)
     map))
 
@@ -996,8 +996,13 @@ the host operating system and the local network capabilities.)"
                                     (error
                                      (elpher-network-error address the-error)))))
           (when socks
-            (if use-tls
-                (apply #'gnutls-negotiate :process proc gnutls-params))
+            (when use-tls
+              (apply #'gnutls-negotiate :process proc gnutls-params)
+              (unless (or (< emacs-major-version 31)
+                          (string-suffix-p ".onion" host))
+                ;; Bind this option to nil to suppress DNS lookups.
+                (let (nsm-trust-local-network)
+                  (nsm-verify-connection proc host port))))
             (funcall (process-sentinel proc) proc "open\n")))
       (error
        (elpher-process-cleanup)
@@ -1641,9 +1646,10 @@ treatment that a separate function is warranted."
         (cond
          ((string-prefix-p "/" (url-filename address))) ;do nothing for absolute case
          ((string-prefix-p "?" (url-filename address)) ;handle query-only links
-          (setf (url-filename address)
-                (concat (url-filename current-address)
-                        (url-filename address))))
+          (let* ((current-path (car (url-path-and-query current-address))))
+            (setf (url-filename address)
+                  (concat current-path  ;(url-filename current-address)
+                          (url-filename address)))))
          (t ;deal with relative links
           (setf (url-filename address)
                 (concat (file-name-directory (url-filename current-address))
@@ -1964,8 +1970,8 @@ Assumes UTF-8 encoding for all text files."
            "Alternatively, select a search engine and enter some search terms:\n")
    (elpher-insert-index-record "Gopher Search Engine (Veronica-2)"
                                (elpher-make-gopher-address ?7 "/v2/vs" "gopher.floodgap.com" 70))
-   (elpher-insert-index-record "Gemini Search Engine (geminispace.info)"
-                               (elpher-address-from-url "gemini://geminispace.info/search"))
+   (elpher-insert-index-record "Gemini Search Engine (auragem.letz.dev)"
+                               (elpher-address-from-url "gemini://auragem.letz.dev/search/s"))
    (insert "\n"
            "Your bookmarks are stored in your ")
    (insert-text-button "bookmark list"

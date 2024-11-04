@@ -1,4 +1,4 @@
-This is elpher.info, produced by makeinfo version 6.7 from elpher.texi.
+This is elpher.info, produced by makeinfo version 6.8 from elpher.texi.
 
 This manual documents Elpher, a gopher and gemini client for Emacs.
 
@@ -589,10 +589,6 @@ emacs systems, these faces are given different heights to distinguish
 among levels.  On terminal systems, the level is indicated by the number
 of preceding # symbols.
 
-   I should emphasize however that, while it is definitely functional,
-Elpher's gemini support is still experimental, and various aspects will
-change as the protocol develops further.
-
 * Menu:
 
 * Client Certificates for Gemini::  Accessing secure gemini pages
@@ -1148,23 +1144,23 @@ Node: Bookmarks16406
 Node: Gopher character encodings18308
 Node: Encrypted gopher connections20208
 Node: Gemini support21358
-Node: Client Certificates for Gemini24614
-Node: Hiding preformatted text in text/gemini documents28291
-Node: Finger support29368
-Node: Local files30422
-Node: About pages31653
-Node: ANSI support32213
-Node: Customization33270
-Node: Command Index34709
-Node: News37788
-Node: v3.6.038052
-Node: v3.5.038464
-Node: v3.4.038952
-Node: v3.3.039609
-Node: v3.2.040531
-Node: v3.1.041618
-Node: v3.0.042642
-Node: Contributors44447
+Node: Client Certificates for Gemini24429
+Node: Hiding preformatted text in text/gemini documents28106
+Node: Finger support29183
+Node: Local files30237
+Node: About pages31468
+Node: ANSI support32028
+Node: Customization33085
+Node: Command Index34524
+Node: News37603
+Node: v3.6.037867
+Node: v3.5.038279
+Node: v3.4.038767
+Node: v3.3.039424
+Node: v3.2.040346
+Node: v3.1.041433
+Node: v3.0.042457
+Node: Contributors44262
 
 End Tag Table
 
