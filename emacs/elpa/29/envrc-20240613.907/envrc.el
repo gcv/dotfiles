@@ -6,7 +6,8 @@
 ;; Keywords: processes, tools
 ;; Homepage: https://github.com/purcell/envrc
 ;; Package-Requires: ((emacs "26.1") (inheritenv "0.1"))
-;; Package-Version: 0.11
+;; Package-Version: 20240613.907
+;; Package-Revision: 2316e004c157
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -62,6 +63,7 @@
 (require 'subr-x)
 (require 'ansi-color)
 (require 'cl-lib)
+(require 'diff-mode) ; for its faces
 (require 'inheritenv)
 
 ;;; Custom vars and minor modes
