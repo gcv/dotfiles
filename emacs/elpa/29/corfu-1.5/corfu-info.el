@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 1.4
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (corfu "1.4"))
+;; Version: 1.5
+;; Package-Requires: ((emacs "27.1") (compat "30") (corfu "1.5"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -109,10 +109,6 @@ If called with a prefix ARG, the buffer is persistent."
                 (forward-line (1- pos))))
             (set-window-start nil (point))))
       (user-error "No location available for `%s'" cand))))
-
-;; Emacs 28: Do not show Corfu commands with M-X
-(put #'corfu-info-location 'completion-predicate #'ignore)
-(put #'corfu-info-documentation 'completion-predicate #'ignore)
 
 (provide 'corfu-info)
 ;;; corfu-info.el ends here

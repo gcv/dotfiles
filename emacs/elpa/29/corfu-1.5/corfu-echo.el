@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 1.4
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (corfu "1.4"))
+;; Version: 1.5
+;; Package-Requires: ((emacs "27.1") (compat "30") (corfu "1.5"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -81,7 +81,8 @@ subsequent delay."
   :global t :group 'corfu)
 
 (cl-defmethod corfu--exhibit :after (&context (corfu-echo-mode (eql t)) &optional _auto)
-  (if-let ((delay (if (consp corfu-echo-delay)
+  (if-let (((not (minibufferp)))
+           (delay (if (consp corfu-echo-delay)
                       (funcall (if corfu-echo--message #'cdr #'car)
                                corfu-echo-delay)
                     corfu-echo-delay))

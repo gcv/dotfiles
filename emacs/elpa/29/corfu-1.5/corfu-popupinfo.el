@@ -5,8 +5,8 @@
 ;; Author: Yuwei Tian <fishtai0@gmail.com>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 1.4
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (corfu "1.4"))
+;; Version: 1.5
+;; Package-Requires: ((emacs "27.1") (compat "30") (corfu "1.5"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -130,7 +130,8 @@ documentation from the backend is usually expensive."
     (left-margin-width . 1)
     (right-margin-width . 1)
     (word-wrap . t)
-    (fringe-indicator-alist (continuation)))
+    (fringe-indicator-alist (continuation))
+    (char-property-alias-alist (face font-lock-face)))
   "Buffer parameters.")
 
 (defvar corfu-popupinfo--frame nil
@@ -345,7 +346,8 @@ form (X Y WIDTH HEIGHT DIR)."
   (when (and (corfu-popupinfo--visible-p corfu--frame))
     (let* ((cand-changed
             (not (and (corfu-popupinfo--visible-p)
-                      (equal candidate corfu-popupinfo--candidate))))
+                      (corfu--equal-including-properties
+                       candidate corfu-popupinfo--candidate))))
            (new-coords (frame-edges corfu--frame 'inner-edges))
            (coords-changed (not (equal new-coords corfu-popupinfo--coordinates))))
       (when cand-changed

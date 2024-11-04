@@ -5,8 +5,8 @@
 ;; Author: Luis Henriquez-Perez <luis@luishp.xyz>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 1.4
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4") (corfu "1.4"))
+;; Version: 1.5
+;; Package-Requires: ((emacs "27.1") (compat "30") (corfu "1.5"))
 ;; Homepage: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
@@ -145,10 +145,6 @@ TWO is non-nil if two keys should be displayed."
   (interactive)
   (when (corfu-quick-jump)
     (corfu-complete)))
-
-;; Emacs 28: Do not show Corfu commands in M-X
-(dolist (sym '(corfu-quick-jump corfu-quick-insert corfu-quick-complete))
-  (put sym 'completion-predicate #'ignore))
 
 (provide 'corfu-quick)
 ;;; corfu-quick.el ends here

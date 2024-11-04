@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.4
-;; Package-Requires: ((emacs "27.1") (compat "29.1.4.4"))
+;; Version: 1.5
+;; Package-Requires: ((emacs "27.1") (compat "30"))
 ;; Homepage: https://github.com/minad/corfu
 ;; Keywords: abbrev, convenience, matching, completion, text
 
@@ -247,12 +247,6 @@ See also the settings `corfu-auto-delay', `corfu-auto-prefix' and
   "<remap> <keyboard-escape-quit>" #'corfu-reset
   "<down>" #'corfu-next
   "<up>" #'corfu-previous
-  ;; XXX C-a is bound because of Eshell.
-  ;; Ideally Eshell would remap move-beginning-of-line.
-  "C-a" #'corfu-prompt-beginning
-  ;; XXX [tab] is bound because of org-mode and orgtbl-mode.
-  ;; The binding should be removed from org-mode-map.
-  "<tab>" #'corfu-complete
   "M-n" #'corfu-next
   "M-p" #'corfu-previous
   "C-g" #'corfu-quit
@@ -535,7 +529,7 @@ FRAME is the existing frame."
 (defun corfu--filter-completions (&rest args)
   "Compute all completions for ARGS with lazy highlighting."
   (dlet ((completion-lazy-hilit t) (completion-lazy-hilit-fn nil))
-    (if (eval-when-compile (>= emacs-major-version 30))
+    (static-if (>= emacs-major-version 30)
         (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)
       (cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
                  (orig-flex (symbol-function #'completion-flex-all-completions))
@@ -596,6 +590,15 @@ FRAME is the existing frame."
           (eq t (compare-strings word 0 len it 0 len
                                  completion-ignore-case))))))
 
+;; bug#6581: `equal-including-properties' uses `eq' for properties until 29.1.
+;; Approximate by comparing `text-properties-at' position 0.
+(defalias 'corfu--equal-including-properties
+  (static-if (< emacs-major-version 29)
+      (lambda (x y)
+        (and (equal x y)
+             (equal (text-properties-at 0 x) (text-properties-at 0 y))))
+    #'equal-including-properties))
+
 (defun corfu--delete-dups (list)
   "Delete `equal-including-properties' consecutive duplicates from LIST."
   (let ((beg list))
@@ -608,13 +611,7 @@ FRAME is the existing frame."
         (while (not (eq beg end))
           (let ((dup beg))
             (while (not (eq (cdr dup) end))
-              ;; bug#6581: `equal-including-properties' uses `eq' to compare
-              ;; properties until 29.1.  Approximate by comparing
-              ;; `text-properties-at' position 0.
-              (if (if (eval-when-compile (< emacs-major-version 29))
-                      (equal (text-properties-at 0 (car beg))
-                             (text-properties-at 0 (cadr dup)))
-                    (equal-including-properties (car beg) (cadr dup)))
+              (if (corfu--equal-including-properties (car beg) (cadr dup))
                   (setcdr dup (cddr dup))
                 (pop dup))))
           (pop beg)))))
@@ -719,16 +716,18 @@ FRAME is the existing frame."
 
 (defun corfu--metadata-get (prop)
   "Return PROP from completion metadata."
-  ;; Note: Do not use `completion-metadata-get' in order to avoid Marginalia.
-  ;; The Marginalia annotators are too heavy for the Corfu popup!
-  (cdr (assq prop corfu--metadata)))
+  ;; Marginalia and various icon packages advise `completion-metadata-get' to
+  ;; inject their annotations, but are meant only for minibuffer completion.
+  ;; Therefore call `completion-metadata-get' without advices here.
+  (let ((completion-extra-properties (nth 4 completion-in-region--data)))
+    (funcall (advice--cd*r (symbol-function (compat-function completion-metadata-get)))
+             corfu--metadata prop)))
 
 (defun corfu--format-candidates (cands)
   "Format annotated CANDS."
-  (setq cands
-        (cl-loop for c in cands collect
-                 (cl-loop for s in c collect
-                          (replace-regexp-in-string "[ \t]*\n[ \t]*" " " s))))
+  (cl-loop for c in cands do
+           (cl-loop for s in-ref c do
+                    (setf s (replace-regexp-in-string "[ \t]*\n[ \t]*" " " s))))
   (let* ((cw (cl-loop for x in cands maximize (string-width (car x))))
          (pw (cl-loop for x in cands maximize (string-width (cadr x))))
          (sw (cl-loop for x in cands maximize (string-width (caddr x))))
@@ -1082,15 +1081,14 @@ A scroll bar is displayed from LO to LO+BAR."
 
 (cl-defgeneric corfu--affixate (cands)
   "Annotate CANDS with annotation function."
-  (let* ((completion-extra-properties (nth 4 completion-in-region--data))
-         (dep (plist-get completion-extra-properties :company-deprecated))
-         (mf (run-hook-with-args-until-success 'corfu-margin-formatters corfu--metadata)))
+  (let* ((extras (nth 4 completion-in-region--data))
+         (dep (plist-get extras :company-deprecated))
+         (mf (let ((completion-extra-properties extras))
+               (run-hook-with-args-until-success 'corfu-margin-formatters corfu--metadata))))
     (setq cands
-          (if-let ((aff (or (corfu--metadata-get 'affixation-function)
-                            (plist-get completion-extra-properties :affixation-function))))
+          (if-let ((aff (corfu--metadata-get 'affixation-function)))
               (funcall aff cands)
-            (if-let ((ann (or (corfu--metadata-get 'annotation-function)
-                              (plist-get completion-extra-properties :annotation-function))))
+            (if-let ((ann (corfu--metadata-get 'annotation-function)))
                 (cl-loop for cand in cands collect
                          (let ((suff (or (funcall ann cand) "")))
                            ;; The default completion UI adds the
@@ -1327,6 +1325,16 @@ Quit if no candidate is selected."
       (corfu--insert 'finished)
     (corfu-quit)))
 
+(defun corfu-send ()
+  "Insert current candidate and send it when inside comint or eshell."
+  (interactive)
+  (corfu-insert)
+  (cond
+   ((and (derived-mode-p 'eshell-mode) (fboundp 'eshell-send-input))
+    (eshell-send-input))
+   ((and (derived-mode-p 'comint-mode) (fboundp 'comint-send-input))
+    (comint-send-input))))
+
 ;;;###autoload
 (define-minor-mode corfu-mode
   "COmpletion in Region FUnction."
@@ -1340,7 +1348,7 @@ Quit if no candidate is selected."
     (kill-local-variable 'completion-in-region-function))))
 
 (defcustom global-corfu-modes t
-  "List of modes where Corfu should be enabled.
+  "List of modes where Corfu should be enabled by `global-corfu-mode'.
 The variable can either be t, nil or a list of t, nil, mode
 symbols or elements of the form (not modes).  Examples:
   - Enable everywhere, except in Org: ((not org-mode) t).
@@ -1348,28 +1356,45 @@ symbols or elements of the form (not modes).  Examples:
   - Enable only in text modes: (text-mode)."
   :type '(choice (const t) (repeat sexp)))
 
+(defcustom global-corfu-minibuffer t
+  "Corfu should be enabled in the minibuffer by `global-corfu-mode'.
+The variable can either be t, nil or a custom predicate function.  If
+the variable is set to t, Corfu is only enabled if the minibuffer has
+local `completion-at-point-functions'."
+  :type '(choice (const t) (const nil) function))
+
 ;;;###autoload
 (define-globalized-minor-mode global-corfu-mode
   corfu-mode corfu--on
-  :group 'corfu)
+  :group 'corfu
+  (remove-hook 'minibuffer-setup-hook #'corfu--on)
+  (when (and global-corfu-mode global-corfu-minibuffer)
+    (add-hook 'minibuffer-setup-hook #'corfu--on 100)))
 
 (defun corfu--on ()
-  "Turn `corfu-mode' on."
-  (when (and (not (or noninteractive (eq (aref (buffer-name) 0) ?\s)))
-             ;; TODO backport `easy-mmode--globalized-predicate-p'
-             (or (eq t global-corfu-modes)
-                 (eq t (cl-loop for p in global-corfu-modes thereis
-                                (pcase-exhaustive p
-                                  ('t t)
-                                  ('nil 0)
-                                  ((pred symbolp) (and (derived-mode-p p) t))
-                                  (`(not . ,m) (and (seq-some #'derived-mode-p m) 0)))))))
+  "Enable `corfu-mode' in the current buffer if conditions are satisfied.
+See `global-corfu-modes' and `global-corfu-minibuffer'."
+  (when (or (and (not noninteractive) (minibufferp) global-corfu-minibuffer
+                 (if (functionp global-corfu-minibuffer)
+                     (funcall global-corfu-minibuffer)
+                   (local-variable-p 'completion-at-point-functions)))
+            (and (not noninteractive) (not (eq (aref (buffer-name) 0) ?\s))
+                 ;; TODO backport `easy-mmode--globalized-predicate-p'
+                 (or (eq t global-corfu-modes)
+                     (eq t (cl-loop for p in global-corfu-modes thereis
+                                    (pcase-exhaustive p
+                                      ('t t)
+                                      ('nil 0)
+                                      ((pred symbolp) (and (derived-mode-p p) t))
+                                      (`(not . ,m) (and (seq-some #'derived-mode-p m) 0))))))))
     (corfu-mode 1)))
 
 ;; Emacs 28: Do not show Corfu commands with M-X
 (dolist (sym '(corfu-next corfu-previous corfu-first corfu-last corfu-quit corfu-reset
-               corfu-complete corfu-insert corfu-scroll-up corfu-scroll-down
-               corfu-insert-separator corfu-prompt-beginning corfu-prompt-end))
+               corfu-complete corfu-insert corfu-scroll-up corfu-scroll-down corfu-expand
+               corfu-send corfu-insert-separator corfu-prompt-beginning corfu-prompt-end
+               corfu-info-location corfu-info-documentation ;; autoloads in corfu-info.el
+               corfu-quick-jump corfu-quick-insert corfu-quick-complete)) ;; autoloads in corfu-quick.el
   (put sym 'completion-predicate #'ignore))
 
 (defun corfu--capf-wrapper-advice (orig fun which)
@@ -1389,7 +1414,7 @@ The ORIG function takes the FUN and WHICH arguments."
 ;; Register Corfu with ElDoc
 (advice-add #'eldoc-display-message-no-interference-p
             :before-while #'corfu--eldoc-advice)
-(eldoc-add-command #'corfu-complete #'corfu-insert)
+(eldoc-add-command #'corfu-complete #'corfu-insert #'corfu-expand #'corfu-send)
 
 (provide 'corfu)
 ;;; corfu.el ends here
