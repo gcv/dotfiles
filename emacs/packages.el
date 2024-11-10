@@ -1173,6 +1173,8 @@
 
 (use-package typst-ts-mode
   :vc (typst-ts-mode :url "https://codeberg.org/meow_king/typst-ts-mode" :branch "main")
+  :custom
+  (typst-ts-mode-indent-offset 2)
   :config
   (add-to-list 'consult-imenu-config
                '(typst-ts-mode :toplevel "Headings" :types
