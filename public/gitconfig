@@ -1,17 +1,18 @@
 [include]
-        path = ~/.dotfiles/private/gitconfig
+    path = ~/.dotfiles/private/gitconfig
 [core]
-        # checkStat = minimal and trustctime = false help reduce index churn
-        # from different synced repository copies
+    # checkStat = minimal and trustctime = false help reduce index churn
+    # from different synced repository copies
 	checkStat = minimal
-        trustctime = false
+    trustctime = false
 [color]
 	ui = auto
 [diff]
 	indentHeuristic = true
 [alias]
-        lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ar)%Creset' --abbrev-commit --date=relative
-        search = log -p -G
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ar)%Creset' --abbrev-commit --date=relative
+    search = log -p -G
+	difft = -c diff.external=difft diff
 [filter "media"]
 	required = true
 	clean = git media clean %f
