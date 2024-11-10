@@ -43,6 +43,9 @@ packages=(
     coreutils
     croc               # peer-to-peer file transfer, directory capable (cf magic-wormhole)
     ctags
+    delta              # nice diff, use with pipe from `git diff`
+    difftastic         # nice AST-aware diff
+    diffr              # nice diff, use with pipe from `git diff`
     direnv
     du-dust            # du replacement
     elvish             # good for shell scripting; as of v0.18 too raw for interactive use
