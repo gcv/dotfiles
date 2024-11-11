@@ -152,8 +152,10 @@ fi
 ### links
 
 if [[ $link_all = "1" || $link_bin = "1" ]]; then
+    link "public/bin/devbox" ".local/bin/devbox"
     link "public/bin/gpgd" ".local/bin/gpgd"
     link "public/bin/fzf-history-all" ".local/bin/fzf-history-all"
+    link "public/bin/imgcat" ".local/bin/imgcat"
     link "public/bin/mosh-server" ".local/bin/mosh-server"
     link "public/bin/sleeptil" ".local/bin/sleeptil"
 fi
