@@ -163,6 +163,7 @@ if [[ $link_all = "1" || $link_bin = "1" ]]; then
 fi
 
 if [[ $link_all = "1" || $link_devbox = "1" ]]; then
+    mkdir -p "${HOME}/.local/share/devbox/global/default/"
     link "public/devbox.json" ".local/share/devbox/global/default/devbox.json"
 fi
 
