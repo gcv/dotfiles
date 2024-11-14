@@ -9,24 +9,10 @@ set edit:insert:binding[Ctrl-L] = $edit:location:start~
 set edit:insert:binding[Ctrl-N] = $edit:navigation:start~
 
 
-### enable Nix (must happen early for correct path setup)
+### TODO: Deal with Nix (https://nixos.wiki/wiki/Elvish)
 
-if (not (has-env NIX_PATH)) {
-  if (path:is-dir ~/.nix-defexpr) {
-    set-env NIX_PATH "nixpkgs="(get-env HOME)"/.nix-defexpr/channels/nixpkgs"
-    if (path:is-regular /etc/ssl/certs/ca-certificates.crt) { # NixOS, Ubuntu, Debian, Gentoo, Arch
-      set-env NIX_SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt
-    } elif (path:is-regular /etc/pki/tls/certs/ca-bundle.crt) { # Fedora, CentOS
-      set-env NIX_SSL_CERT_FILE /etc/pki/tls/certs/ca-bundle.crt
-    } elif (path:is-dir (path:eval-symlinks (path:abs ~/.nix-profile))) {
-      set-env NIX_SSL_CERT_FILE (get-env HOME)/.nix-profile/etc/ssl/certs/ca-bundle.crt
-    }
-  }
-}
 
-if (path:is-dir "/nix/var/nix/profiles/per-user/"(get-env USER)) {
-  set-env NIX_USER_PROFILE_DIR "/nix/var/nix/profiles/per-user/"(get-env USER)
-}
+### TODO: Deal with Devbox (Nix)
 
 
 ### environment variables
