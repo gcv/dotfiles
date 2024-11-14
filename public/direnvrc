@@ -1,1 +1,1 @@
-source ~/.nix-profile/share/nix-direnv/direnvrc
+source ~/.local/share/devbox/global/default/.devbox/nix/profile/default/share/nix-direnv

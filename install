@@ -42,6 +42,7 @@ parse_params() {
     # default values of variables set from params
     link_all=1
     link_bin=0
+    link_devbox=0
     link_direnv=0
     link_elvish=0
     link_emacs=0
@@ -63,6 +64,7 @@ parse_params() {
         case "${1-}" in
             -a | --all) link_all=1 ;;
             --bin) link_all=0; link_bin=1 ;;
+            --devbox) link_all=0; link_devbox=1 ;;
             --direnv) link_all=0; link_direnv=1 ;;
             --emacs) link_all=0; link_emacs=1 ;;
             --elvish) link_all=0; link_elvish=1 ;;
@@ -158,6 +160,10 @@ if [[ $link_all = "1" || $link_bin = "1" ]]; then
     link "public/bin/imgcat" ".local/bin/imgcat"
     link "public/bin/mosh-server" ".local/bin/mosh-server"
     link "public/bin/sleeptil" ".local/bin/sleeptil"
+fi
+
+if [[ $link_all = "1" || $link_devbox = "1" ]]; then
+    link "public/devbox.json" ".local/share/devbox/global/default/devbox.json"
 fi
 
 if [[ $link_all = "1" || $link_direnv = "1" ]]; then

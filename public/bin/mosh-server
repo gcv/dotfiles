@@ -1,9 +1,12 @@
 #!/usr/bin/env sh
 
-if [ -e "${HOME}/.nix-profile/bin/mosh-server" ]; then
-    if [ -e /usr/lib/locale/locale-archive ]; then
-        export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
-    fi
+if [ -e /usr/lib/locale/locale-archive ]; then
+    export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
+fi
+
+if [ -e "${HOME}/.local/share/devbox/global/default/.devbox/nix/profile/default/bin/mosh-server" ]; then
+    exec "${HOME}/.local/share/devbox/global/default/.devbox/nix/profile/default/bin/mosh-server" "$@"
+elif [ -e "${HOME}/.nix-profile/bin/mosh-server" ]; then
     exec "${HOME}/.nix-profile/bin/mosh-server" "$@"
 else
     mosh_server=$(command -v mosh-server)
@@ -11,6 +14,5 @@ else
         echo "mosh-server not found" 1>&2
         exit 1
     fi
-    exec "${git}" "$@"
 fi
-    
+
