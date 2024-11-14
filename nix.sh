@@ -24,6 +24,37 @@ packages=(
     aspellDicts.en aspellDicts.en-computers aspellDicts.en-science aspellDicts.ru
     #nuspell
     #hunspellDicts.en_US hunspell.ru_RU
+    # shells and shell scripting utilities
+    bashInteractive    # when needed
+    elvish             # good for shell scripting; as of v0.18 too raw for interactive use
+    murex              # another shell with interesting scripting ideas and decent interactivity
+    shellcheck         # shell script linter
+    starship           # fancy prompt, good with fish
+    zsh
+    # file managers
+    broot              # file browser / file manager 2
+    mc                 # file browser / file manager 1 (Midnight Commander)
+    yazi               # file browser / file manager 3 (Rust)
+    # system monitors
+    bandwhich          # network monitor
+    bottom             # top replacement 2 (Rust)
+    btop               # top replacement 3 (C++)
+    htop               # top replacement 1
+    # utility replacements
+    bat                # cat replacement
+    coreutils
+    delta              # nice diff, use with pipe from `git diff`
+    diffr              # nice diff, use with pipe from `git diff`
+    difftastic         # nice AST-aware diff
+    du-dust            # du replacement
+    eza                # ls replacement
+    fd                 # find replacement
+    findutils
+    sd                 # a simpler sed for common cases
+    viddy              # watch replacement
+    watch
+    xcp                # cp replacement
+    xz
     # everything else:
     #ansible
     autoconf
@@ -31,32 +62,17 @@ packages=(
     automake
     awscli2
     #babashka
-    bandwhich          # network monitor
-    bat                # cat replacement
-    bashInteractive    # when needed
-    bottom             # top replacement 2 (Rust)
-    broot              # file browser / file manager 2
-    btop               # top replacement 3 (C++)
     cacert             # SSL certificates
     chafa              # terminal image viewer
     cmake
-    coreutils
     croc               # peer-to-peer file transfer, directory capable (cf magic-wormhole)
     ctags
-    delta              # nice diff, use with pipe from `git diff`
-    difftastic         # nice AST-aware diff
-    diffr              # nice diff, use with pipe from `git diff`
     direnv
-    du-dust            # du replacement
-    elvish             # good for shell scripting; as of v0.18 too raw for interactive use
     emacs-nox
     entr               # watch a file for changes and act on them
     exif
-    eza                # ls replacement
-    fd                 # find replacement
     fdupes
     ffmpeg
-    findutils
     fzf
     getopt             # enhanced option parser for shell scripts
     git
@@ -66,7 +82,6 @@ packages=(
     helix              # modal text editor, alternative to (neo)vi(m)
     hledger            # Haskell reimplementation of Ledger CLI (accounting)
     htmlq              # command line HTML parser and query tool (like jq)
-    htop               # top replacement 1
     httpie             # HTTP client, alternative to curl
     httrack            # web scraper, more stable than wget
     hyperfine          # benchmarking tool
@@ -79,11 +94,9 @@ packages=(
     ledger             # Ledger CLI (accounting)
     libvterm-neovim
     magic-wormhole     # peer-to-peer file transfer (cf croc)
-    mc                 # file browser / file manager 1 (Midnight Commander)
     mediainfo
     mosh               # since 1.4.0, should not need to be built from mosh-git.nix derivation
     miniserve          # HTTP server
-    murex              # another shell with interesting scripting ideas and decent interactivity
     ngrok              # expose local service over a secure tunnel
     nix-direnv
     nmap
@@ -99,11 +112,8 @@ packages=(
     ripgrep
     rlwrap
     rsync
-    sd                 # a simpler sed for common cases
-    shellcheck         # shell script linter
     silver-searcher    # ag
     sqlite
-    starship           # fancy prompt, good with fish
     tectonic           # (La)TeX environment
     texinfo
     tgpt               # terminal GPT client
@@ -112,15 +122,8 @@ packages=(
     tree-sitter        # parser framework
     typst              # TeX replacement
     unrar
-    viddy              # watch replacement
-    watch
     wget               # weak web scraper (no restart support)
-    xcp                # cp replacement
-    xz
-    yazi               # file browser / file manager 3 (Rust)
-    #youtube-dl        # outdated
     yt-dlp             # new youtube-dl
-    zsh
 )
 
 export NIXPKGS_ALLOW_UNFREE=1
