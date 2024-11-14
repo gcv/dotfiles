@@ -36,22 +36,6 @@ export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
 [[ -f ~/.dotfiles/private/shell-profile-private ]] && . ~/.dotfiles/private/shell-profile-private
 
 
-### Nix: turn it on.
-### The "correct" way is to source ~/.nix-profile/etc/profile.d/nix.sh, but
-### what's the fun in that?
-if [[ -z "${NIX_PATH}" ]]; then
-    [[ -e ~/.nix-defexpr ]] && export NIX_PATH=nixpkgs=${HOME}/.nix-defexpr/channels/nixpkgs
-    if [[ -e /etc/ssl/certs/ca-certificates.crt ]]; then # NixOS, Ubuntu, Debian, Gentoo, Arch
-        export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
-    elif [[ -e /etc/pki/tls/certs/ca-bundle.crt ]]; then # Fedora, CentOS
-        export NIX_SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
-    elif [[ -e ~/.nix-profile ]]; then
-        export NIX_SSL_CERT_FILE=${HOME}/.nix-profile/etc/ssl/certs/ca-bundle.crt
-    fi
-fi
-[[ -e "/nix/var/nix/profiles/per-user/${USER}" ]] && export NIX_USER_PROFILE_DIR=/nix/var/nix/profiles/per-user/${USER}
-
-
 ### Path wrangling:
 path_prepend() { [[ -d "$2" ]] && eval "${(L)1}[1,0]=\"$2\"" }
 path_append() { [[ -d "${2}" ]] && eval "${(L)1}+=(\"${2}\")" }
@@ -90,6 +74,11 @@ path_prepend FPATH /opt/brew/share/zsh/site-functions
 path_prepend FPATH /opt/homebrew/share/zsh/site-functions
 path_prepend FPATH /home/linuxbrew/.linuxbrew/share/zsh/site-functions
 typeset -U fpath                # dedup
+
+
+### Nix and Devbox:
+[[ -e ~/.nix-profile/etc/profile.d/nix.sh ]] && . ~/.nix-profile/etc/profile.d/nix.sh
+command_exists devbox && eval "$(devbox global shellenv --init-hook)"
 
 
 ### aliases

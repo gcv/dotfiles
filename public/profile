@@ -13,19 +13,34 @@
 command_exists () { command -v "$1" >/dev/null 2>&1; }
 
 
-### enable Nix (must happen early for correct path setup)
+### path setup
 
-if [[ -z "${NIX_PATH}" ]]; then
-    [[ -e ~/.nix-defexpr ]] && export NIX_PATH=nixpkgs=${HOME}/.nix-defexpr/channels/nixpkgs
-    if [[ -e /etc/ssl/certs/ca-certificates.crt ]]; then # NixOS, Ubuntu, Debian, Gentoo, Arch
-        export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
-    elif [[ -e /etc/pki/tls/certs/ca-bundle.crt ]]; then # Fedora, CentOS
-        export NIX_SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
-    elif [[ -e ~/.nix-profile ]]; then
-        export NIX_SSL_CERT_FILE=${HOME}/.nix-profile/etc/ssl/certs/ca-bundle.crt
+path_add () {
+    local _grep
+    if [ -e /bin/grep ]; then
+        _grep=/bin/grep
+    elif [ -e /usr/bin/grep ]; then
+        _grep=/usr/bin/grep
     fi
-fi
-[[ -e "/nix/var/nix/profiles/per-user/${USER}" ]] && export NIX_USER_PROFILE_DIR=/nix/var/nix/profiles/per-user/${USER}
+    if ! echo "$PATH" | "${_grep}" -Eq "(^|:)$1($|:)" ; then
+        if [ "$2" = "after" ] ; then
+            PATH="$PATH:$1"
+        else
+            PATH="$1:$PATH"
+        fi
+    fi
+}
+
+path_add "${HOME}/.nix-profile/sbin" before
+path_add "${HOME}/.nix-profile/bin" before
+path_add "${HOME}/.local/sbin" before
+path_add "${HOME}/.local/bin" before
+
+
+### enable Nix and Devbox (must happen early for correct path setup):
+
+[[ -e ~/.nix-profile/etc/profile.d/nix.sh ]] && . ~/.nix-profile/etc/profile.d/nix.sh
+command_exists devbox && eval "$(devbox global shellenv --init-hook)"
 
 
 ### environment variables
@@ -57,30 +72,6 @@ case $TERM in
         export COLORTERM=truecolor
         ;;
 esac
-
-
-### path setup
-
-path_add () {
-    local _grep
-    if [ -e /bin/grep ]; then
-        _grep=/bin/grep
-    elif [ -e /usr/bin/grep ]; then
-        _grep=/usr/bin/grep
-    fi
-    if ! echo "$PATH" | "${_grep}" -Eq "(^|:)$1($|:)" ; then
-        if [ "$2" = "after" ] ; then
-            PATH="$PATH:$1"
-        else
-            PATH="$1:$PATH"
-        fi
-    fi
-}
-
-path_add "${HOME}/.nix-profile/sbin" before
-path_add "${HOME}/.nix-profile/bin" before
-path_add "${HOME}/.local/sbin" before
-path_add "${HOME}/.local/bin" before
 
 
 ### deal with ssh-agent
