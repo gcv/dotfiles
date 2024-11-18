@@ -1183,65 +1183,66 @@
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
 
 
-(use-package vterm
-  :pin melpa
-
-  :init
-  ;; when the module has to be compiled, set some environment variables to help
-  ;; find the system libvterm:
-  (when (and (not (or (locate-library (concat "vterm-module" module-file-suffix))
-                      (locate-library "vterm-module.so")))
-             (file-exists-p "~/.nix-profile"))
-    (setenv "LIB" (format "%s/.nix-profile/lib" (getenv "HOME")))
-    (setenv "INCLUDE" (format "%s/.nix-profile/include" (getenv "HOME"))))
-
-  :config
-  ;; after the module is built, make it self-contained:
-  (let ((modfile (locate-library (concat "vterm-module" module-file-suffix))))
-    (when (and (eq 'darwin system-type)
-               modfile
-               (file-exists-p modfile))
-      (let* ((libfile "libvterm.0.dylib")
-             (moddir (file-name-directory modfile))
-             (libfiledir (concat moddir libfile))
-             (default-directory moddir))
-        (when (not (file-exists-p libfile))
-          (let ((underlying (s-trim (shell-command-to-string (format "otool -L %s | grep libvterm | awk '{print $1}'" modfile)))))
-            (copy-file underlying moddir t nil nil)
-            (set-file-modes libfiledir #o755)
-            (shell-command (format "install_name_tool -id \"%s\" \"%s\""
-                                   libfiledir
-                                   libfiledir))
-            (shell-command (format "install_name_tool -change \"%s\" \"%s\" \"%s\""
-                                   underlying
-                                   libfiledir
-                                   modfile)))))))
-
-  (setq vterm-max-scrollback 10000)
-  (setq vterm-min-window-width 20)
-
-  (setq vterm-keymap-exceptions
-        '("C-c" "C-x" "C-h" "M-x" "M-o" "C-o" "C-M-o" "C-v" "M-v" "C-y" "M-y"))
-
-  (defun /vterm-mode-hook ()
-    (local-set-key (kbd "C-c C-z") 'flip-windows)
-    (local-set-key (kbd "C-u") 'vterm--self-insert)
-    (local-set-key (kbd "C-g") 'vterm--self-insert)
-    (local-set-key (kbd "<prior>") 'scroll-down-command)  ; page up
-    (local-set-key (kbd "<next>") 'scroll-up-command)     ; page down
-    (local-set-key (kbd "C-<left>") (kbd "M-b"))
-    (local-set-key (kbd "C-<right>") (kbd "M-f"))
-    (local-set-key (kbd "C-<backspace>") 'vterm-send-meta-backspace)
-    (local-set-key (kbd "C-S-d") (lambda ()
-                                   (interactive)
-                                   (vterm--self-insert)
-                                   (let ((kill-buffer-query-functions nil))
-                                     (kill-buffer)
-                                     (delete-window))))
-    (setq truncate-lines t))
-
-  (add-hook 'vterm-mode-hook #'/vterm-mode-hook)
-  )
+;;; Deprecated in favor of Eat.
+;; (use-package vterm
+;;   :pin melpa
+;;
+;;   :init
+;;   ;; when the module has to be compiled, set some environment variables to help
+;;   ;; find the system libvterm:
+;;   (when (and (not (or (locate-library (concat "vterm-module" module-file-suffix))
+;;                       (locate-library "vterm-module.so")))
+;;              (file-exists-p "~/.nix-profile"))
+;;     (setenv "LIB" (format "%s/.nix-profile/lib" (getenv "HOME")))
+;;     (setenv "INCLUDE" (format "%s/.nix-profile/include" (getenv "HOME"))))
+;;
+;;   :config
+;;   ;; after the module is built, make it self-contained:
+;;   (let ((modfile (locate-library (concat "vterm-module" module-file-suffix))))
+;;     (when (and (eq 'darwin system-type)
+;;                modfile
+;;                (file-exists-p modfile))
+;;       (let* ((libfile "libvterm.0.dylib")
+;;              (moddir (file-name-directory modfile))
+;;              (libfiledir (concat moddir libfile))
+;;              (default-directory moddir))
+;;         (when (not (file-exists-p libfile))
+;;           (let ((underlying (s-trim (shell-command-to-string (format "otool -L %s | grep libvterm | awk '{print $1}'" modfile)))))
+;;             (copy-file underlying moddir t nil nil)
+;;             (set-file-modes libfiledir #o755)
+;;             (shell-command (format "install_name_tool -id \"%s\" \"%s\""
+;;                                    libfiledir
+;;                                    libfiledir))
+;;             (shell-command (format "install_name_tool -change \"%s\" \"%s\" \"%s\""
+;;                                    underlying
+;;                                    libfiledir
+;;                                    modfile)))))))
+;;
+;;   (setq vterm-max-scrollback 10000)
+;;   (setq vterm-min-window-width 20)
+;;
+;;   (setq vterm-keymap-exceptions
+;;         '("C-c" "C-x" "C-h" "M-x" "M-o" "C-o" "C-M-o" "C-v" "M-v" "C-y" "M-y"))
+;;
+;;   (defun /vterm-mode-hook ()
+;;     (local-set-key (kbd "C-c C-z") 'flip-windows)
+;;     (local-set-key (kbd "C-u") 'vterm--self-insert)
+;;     (local-set-key (kbd "C-g") 'vterm--self-insert)
+;;     (local-set-key (kbd "<prior>") 'scroll-down-command)  ; page up
+;;     (local-set-key (kbd "<next>") 'scroll-up-command)     ; page down
+;;     (local-set-key (kbd "C-<left>") (kbd "M-b"))
+;;     (local-set-key (kbd "C-<right>") (kbd "M-f"))
+;;     (local-set-key (kbd "C-<backspace>") 'vterm-send-meta-backspace)
+;;     (local-set-key (kbd "C-S-d") (lambda ()
+;;                                    (interactive)
+;;                                    (vterm--self-insert)
+;;                                    (let ((kill-buffer-query-functions nil))
+;;                                      (kill-buffer)
+;;                                      (delete-window))))
+;;     (setq truncate-lines t))
+;;
+;;   (add-hook 'vterm-mode-hook #'/vterm-mode-hook)
+;;   )
 
 
 (use-package web-mode
