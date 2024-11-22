@@ -1167,7 +1167,7 @@ See `eshell-prompt-regexp'."
   (define-key inferior-python-mode-map (kbd "C-c C-z") (lambda ()
                                                          (interactive)
                                                          (if (boundp '/python-prev-source-buf)
-                                                             (switch-to-buffer /python-prev-source-buf)
+                                                             (pop-to-buffer /python-prev-source-buf)
                                                            (message "No previous Python source buffer bound")))))
 
 (add-hook 'inferior-python-mode-hook #'/inferior-python-mode-hook)
