@@ -1146,7 +1146,12 @@ See `eshell-prompt-regexp'."
 
 (defun /python-mode-hook ()
   (setq show-trailing-whitespace t)
-  (define-key python-mode-map (kbd "C-c C-z") nil)
+  (define-key python-mode-map (kbd "C-c C-z") (lambda ()
+                                                (interactive)
+                                                (setq /python-prev-source-buf (current-buffer))
+                                                (if (python-shell-get-process)
+                                                    (python-shell-switch-to-shell)
+                                                  (run-python))))
   (define-key python-mode-map (kbd "C-c C-p") nil)
   (subword-mode)
   (defconst python-block-pairs
@@ -1157,6 +1162,15 @@ See `eshell-prompt-regexp'."
       ("finally" "try" "except"))))
 
 (add-hook 'python-mode-hook #'/python-mode-hook)
+
+(defun /inferior-python-mode-hook ()
+  (define-key inferior-python-mode-map (kbd "C-c C-z") (lambda ()
+                                                         (interactive)
+                                                         (if (boundp '/python-prev-source-buf)
+                                                             (switch-to-buffer /python-prev-source-buf)
+                                                           (message "No previous Python source buffer bound")))))
+
+(add-hook 'inferior-python-mode-hook #'/inferior-python-mode-hook)
 
 
 ;;; js-mode (JavaScript, separate configuration from js2-mode)
