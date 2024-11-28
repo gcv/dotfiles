@@ -1,6 +1,7 @@
 theme = "night_owl"
 
 [editor]
+soft-wrap = { enable = true }
 auto-pairs = false
 #auto-save = true
 bufferline = "never"
