@@ -530,7 +530,22 @@
 ;;; LLM interaction package: https://github.com/karthink/gptel
 (use-package gptel
   :custom
-  (gptel-display-buffer-action nil))
+  (gptel-display-buffer-action nil)
+  :config
+  (gptel-make-anthropic "Claude"
+    :stream t
+    :key (getenv "ANTHROPIC_API_KEY"))
+  (add-to-list
+   'gptel--anthropic-models
+   '(claude-3-5-sonnet-20241022
+     :description "Claude 3.5 Sonnet 2024-10-22"
+     :capabilities (media tool)
+     :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp")
+     :context-window 200
+     :input-cost 3
+     :output-cost 15
+     :cutoff-date "2024-10"))
+  )
 
 
 (use-package haskell-mode
