@@ -3,8 +3,8 @@
 ;; Copyright (C) 2023  Karthik Chikmagalur
 
 ;; Author: Karthik Chikmagalur <karthik.chikmagalur@gmail.com>
-;; Package-Version: 0.9.6
-;; Package-Revision: f24e5ad4740c
+;; Package-Version: 0.9.7
+;; Package-Revision: 5a5cddb93d61
 ;; Package-Requires: ((emacs "27.1") (transient "0.4.0") (compat "29.1.4.1"))
 ;; Keywords: convenience
 ;; URL: https://github.com/karthink/gptel
@@ -37,7 +37,7 @@
 ;;
 ;; - The services ChatGPT, Azure, Gemini, Anthropic AI, Anyscale, Together.ai,
 ;;   Perplexity, Anyscale, OpenRouter, Groq, PrivateGPT, DeepSeek, Cerebras,
-;;   Github Models and Kagi (FastGPT & Summarizer)
+;;   Github Models, xAI and Kagi (FastGPT & Summarizer)
 ;; - Local models via Ollama, Llama.cpp, Llamafiles or GPT4All
 ;;
 ;;  Additionally, any LLM service (local or remote) that provides an
@@ -110,7 +110,7 @@
 ;;   Use a prefix argument (`C-u C-c RET') to access a menu.  In this menu you
 ;;   can set chat parameters like the system directives, active backend or
 ;;   model, or choose to redirect the input or output elsewhere (such as to the
-;;   kill ring).
+;;   kill ring or the echo area).
 ;;
 ;; - You can save this buffer to a file.  When opening this file, turn on
 ;;   `gptel-mode' before editing it to restore the conversation state and
@@ -135,8 +135,8 @@
 ;; Rewrite/refactor interface
 ;;
 ;; In any buffer: with a region selected, you can rewrite prose, refactor code
-;; or fill in the region.  Use gptel's menu (C-u M-x `gptel-send') to access
-;; this feature.
+;; or fill in the region.  This is accessible via `gptel-rewrite', and also from
+;; the `gptel-send' menu.
 ;;
 ;; gptel in Org mode:
 ;;
@@ -177,8 +177,8 @@
   'gptel-set-topic 'gptel-org-set-topic "0.7.5")
 
 (eval-when-compile
-  (require 'subr-x)
-  (require 'cl-lib))
+  (require 'subr-x))
+(require 'cl-lib)
 (require 'compat nil t)
 (require 'url)
 (require 'map)
@@ -318,6 +318,14 @@ This hook is called in the buffer from which the prompt was sent
 to the LLM, and after a text insertion."
   :type 'hook)
 
+(defcustom gptel-save-state-hook nil
+  "Hook run before gptel saves model parameters to a file.
+
+You can use this hook to store additional conversation state or
+model parameters to the chat buffer, or to modify the buffer in
+some other way."
+  :type 'hook)
+
 (defcustom gptel-default-mode (if (fboundp 'markdown-mode)
 				  'markdown-mode
 				'text-mode)
@@ -390,24 +398,41 @@ transient menu interface provided by `gptel-menu'."
 
 ;; Model and interaction parameters
 (defcustom gptel-directives
-  '((default . "You are a large language model living in Emacs and a helpful assistant. Respond concisely.")
+  '((default     . "You are a large language model living in Emacs and a helpful assistant. Respond concisely.")
     (programming . "You are a large language model and a careful programmer. Provide code and only code as output without any additional text, prompt or note.")
-    (writing . "You are a large language model and a writing assistant. Respond concisely.")
-    (chat . "You are a large language model and a conversation partner. Respond concisely."))
-  "System prompts (directives) for the LLM.
-
-These are system instructions sent at the beginning of each
-request to the LLM.
+    (writing     . "You are a large language model and a writing assistant. Respond concisely.")
+    (chat        . "You are a large language model and a conversation partner. Respond concisely."))
+  "System prompts or directives for the LLM.
 
 Each entry in this alist maps a symbol naming the directive to
-the string that is sent.  To set the directive for a chat session
-interactively call `gptel-send' with a prefix argument."
+the directive itself.  By default, gptel uses the directive with
+the key \\+`default'.
+
+To set the directive for a chat session interactively call
+`gptel-send' with a prefix argument, or call `gptel-menu'.
+
+A \"directive\" is typically the system message (also called
+system prompt or system instruction) sent at the beginning of
+each request to the LLM.  It is used to set general instructions,
+expectations and the overall tone.
+
+gptel's idea of the directive is more general.  A directive in
+`gptel-directives' can be
+
+- A string, interpreted as the system message.
+
+- A list of strings, whose first (possibly nil) element is
+  interpreted as the system message, and the remaining elements
+  as (possibly nil) alternating user prompts and LLM responses.
+  This can be used to template the initial part of a conversation.
+
+- A function that returns a string or a list of strings,
+  interpreted as the above.  This can be used to dynamically
+  generate a system message and/or conversation template based on
+  the current context.  See the definition of
+  `gptel--rewrite-directive-default' for an example."
   :safe #'always
   :type '(alist :key-type symbol :value-type string))
-
-(defvar gptel--system-message (alist-get 'default gptel-directives)
-  "The system message used by gptel.")
-(put 'gptel--system-message 'safe-local-variable #'always)
 
 (defcustom gptel-max-tokens nil
   "Max tokens per response.
@@ -511,6 +536,22 @@ To set the temperature for a chat session interactively call
      :input-cost 10
      :output-cost 30
      :cutoff-date "2023-12")
+    (o1-preview
+     :description "Reasoning model designed to solve hard problems across domains"
+     :context-window 128
+     :input-cost 15
+     :output-cost 60
+     :cutoff-date "2023-10"
+     :capabilities (nosystem)
+     :request-params (:stream :json-false))
+    (o1-mini
+     :description "Faster and cheaper reasoning model good at coding, math, and science"
+     :context-window 128
+     :input-cost 3
+     :output-cost 12
+     :cutoff-date "2023-10"
+     :capabilities (nosystem)
+     :request-params (:stream :json-false))
     ;; limited information available
     (gpt-4-32k
      :input-cost 60
@@ -552,6 +593,9 @@ Keys:
 - `:output-cost': the output cost, in US dollars per million tokens.
 
 - `:cutoff-date': the knowledge cutoff date.
+
+- `:request-params': a plist of additional request parameters to
+  include when using this model.
 
 Information about the OpenAI models was obtained from the following
 sources:
@@ -725,11 +769,10 @@ and \"apikey\" as USER."
   "Get api key from KEY, or from `gptel-api-key'."
   (when-let ((key-sym (or key (gptel-backend-key gptel-backend))))
     (cl-typecase key-sym
-      (function (funcall key-sym))
-      (string key-sym)
+      (function (string-trim-right (funcall key-sym) "[\n\r]+"))
+      (string (string-trim-right key-sym "[\n\r]+"))
       (symbol (if-let ((val (symbol-value key-sym)))
-                  (gptel--get-api-key
-                   (symbol-value key-sym))
+                  (gptel--get-api-key val)
                 (error "`gptel-api-key' is not valid")))
       (t (error "`gptel-api-key' is not valid")))))
 
@@ -753,6 +796,19 @@ and \"apikey\" as USER."
     (symbol s)
     (string (intern s))))
 
+(defun gptel--merge-plists (&rest plists)
+  "Merge PLISTS, altering the first one.
+
+Later plists in the sequence take precedence over earlier ones."
+  (let (;; (rtn (copy-sequence (pop plists)))
+        (rtn (pop plists))
+        p v ls)
+    (while plists
+      (setq ls (pop plists))
+      (while ls
+        (setq p (pop ls) v (pop ls))
+        (setq rtn (plist-put rtn p v))))
+    rtn))
 (defun gptel-auto-scroll ()
   "Scroll window if LLM response continues below viewport.
 
@@ -863,6 +919,10 @@ in any way.")
   (car-safe (member mime (gptel--model-mimes
                         (or model gptel-model)))))
 
+(defsubst gptel--model-request-params (model)
+  "Get model-specific request parameters for MODEL."
+  (get model :request-params))
+
 ;;;; File handling
 (defun gptel--base64-encode (file)
   "Encode FILE as a base64 string.
@@ -930,9 +990,69 @@ MODE-SYM is typically a major-mode symbol."
                          (symbol-name mode-sym)
                          (string-remove-suffix "-mode")
                          (string-remove-suffix "-ts"))))
+        ;; NOTE: The advertised calling convention of provided-mode-derived-p
+        ;; has changed in Emacs 30, this needs to be updated eventually
         (if (provided-mode-derived-p
              mode-sym 'prog-mode 'text-mode 'tex-mode)
             mode-name ""))))
+
+;;;; Directive handling
+
+
+(defvar gptel--system-message (alist-get 'default gptel-directives)
+  "The system message used by gptel.")
+(put 'gptel--system-message 'safe-local-variable #'always)
+
+(defun gptel--describe-directive (directive width &optional replacement)
+  "Find description for DIRECTIVE, truncated  to WIDTH.
+
+DIRECTIVE is a gptel directive, and can be a string, a function
+or a list of strings.  See `gptel-directives'.
+
+The result is a string intended for display.  Newlines are
+replaced with REPLACEMENT."
+  (cl-typecase directive
+    (string
+     (concat
+      (string-replace "\n" (or replacement " ")
+                      (truncate-string-to-width
+                       directive width nil nil t))))
+    (function
+     (concat
+      "λ: "
+      (string-replace
+       "\n" (or replacement " ")
+       (truncate-string-to-width
+        (or (and-let* ((doc (documentation directive)))
+              (substring doc nil (string-match-p "\n" doc)))
+            "[Dynamically generated; no preview available]")
+        width nil nil t))))
+    (list (and-let* ((from-template (car directive)))
+            (gptel--describe-directive
+             from-template width)))
+    (t "")))
+
+(defun gptel--parse-directive (directive &optional raw)
+  "Parse DIRECTIVE into a backend-appropriate form.
+
+DIRECTIVE is a gptel directive: it can be a string, a list or a
+function that returns either, see `gptel-directives'.
+
+Return a cons cell consisting of the system message (a string)
+and a template consisting of alternating user/LLM
+records (a list of strings or nil).
+
+If RAW is non-nil, the user/LLM records are not processed and are
+returned as a list of strings."
+  (and directive
+       (cl-etypecase directive
+         (string   (list directive))
+         (function (gptel--parse-directive (funcall directive) raw))
+         (cons     (if raw directive
+                     (cons (car directive)
+                           (gptel--parse-list
+                            gptel-backend (cdr directive))))))))
+
 
 
 ;;; Logging
@@ -989,6 +1109,7 @@ Valid JSON unless NO-JSON is t."
 This saves chat metadata when writing the buffer to disk.  To
 restore a chat session, turn on `gptel-mode' after opening the
 file."
+  (run-hooks 'gptel-save-state-hook)
   (if (derived-mode-p 'org-mode)
       (progn
         (require 'gptel-org)
@@ -1001,9 +1122,11 @@ file."
                                    (gptel-backend-name gptel-backend))
           (unless (equal (default-value 'gptel-temperature) gptel-temperature)
             (add-file-local-variable 'gptel-temperature gptel-temperature))
-          (unless (string= (default-value 'gptel--system-message)
+          (unless (equal (default-value 'gptel--system-message)
                            gptel--system-message)
-            (add-file-local-variable 'gptel--system-message gptel--system-message))
+            (add-file-local-variable
+             'gptel--system-message
+             (car-safe (gptel--parse-directive gptel--system-message))))
           (when gptel-max-tokens
             (add-file-local-variable 'gptel-max-tokens gptel-max-tokens))
           (when (natnump gptel--num-messages-to-send)
@@ -1046,7 +1169,7 @@ file."
                                 (buttonize
                                  (format "[Prompt: %s]"
                                   (or (car-safe (rassoc gptel--system-message gptel-directives))
-                                   (truncate-string-to-width gptel--system-message 15 nil nil t)))
+                                   (gptel--describe-directive gptel--system-message 15)))
                                  (lambda (&rest _) (gptel-system-prompt)))
                                 'mouse-face 'highlight
                                 'help-echo "System message for session"))
@@ -1126,7 +1249,7 @@ file."
           (setq mode-line-process (propertize msg 'face face))
         (setq mode-line-process
               '(:eval (concat " "
-                       (buttonize gptel-model
+                       (buttonize (gptel--model-name gptel-model)
                             (lambda (&rest _) (gptel-menu))))))
         (message (propertize msg 'face face))))
     (force-mode-line-update)))
@@ -1147,12 +1270,14 @@ The request is asynchronous, the function immediately returns
 with the data that was sent.
 
 Note: This function is not fully self-contained.  Consider
-let-binding the parameters `gptel-backend' and `gptel-model'
-around calls to it as required.
+let-binding the parameters `gptel-backend', `gptel-model' and
+`gptel-use-context' around calls to it as required.
 
 If PROMPT is
 - a string, it is used to create a full prompt suitable for
   sending to the LLM.
+- A list of strings, it is interpreted as a conversation, i.e. a
+  series of alternating user prompts and LLM responses.
 - nil but region is active, the region contents are used.
 - nil, the current buffer's contents up to (point) are used.
   Previous responses from the LLM are identified as responses.
@@ -1163,9 +1288,14 @@ Keyword arguments:
 CALLBACK, if supplied, is a function of two arguments, called
 with the RESPONSE (a string) and INFO (a plist):
 
- (callback RESPONSE INFO)
+ (funcall CALLBACK RESPONSE INFO)
 
-RESPONSE is nil if there was no response or an error.
+RESPONSE is
+
+- A string if the request was successful
+- nil if there was no response or an error.
+- The symbol `abort' if the request was aborted, see
+  `gptel-abort'.
 
 The INFO plist has (at least) the following keys:
 :data         - The request data included with the query
@@ -1173,13 +1303,14 @@ The INFO plist has (at least) the following keys:
                 POSITION is specified.
 :buffer       - The buffer current when the request was sent,
                 unless BUFFER is specified.
-:status       - Short string describing the result of the request
+:status       - Short string describing the result of the request, including
+                possible HTTP errors.
 
 Example of a callback that messages the user with the response
 and info:
 
  (lambda (response info)
-  (if response
+  (if (stringp response)
       (let ((posn (marker-position (plist-get info :position)))
             (buf  (buffer-name (plist-get info :buffer))))
         (message \"Response for request from %S at %d: %s\"
@@ -1209,9 +1340,11 @@ active.
 CONTEXT is any additional data needed for the callback to run. It
 is included in the INFO argument to the callback.
 
-SYSTEM is the system message (chat directive) sent to the LLM. If
-omitted, the value of `gptel--system-message' for the current
-buffer is used.
+SYSTEM is the system message or extended chat directive sent to
+the LLM.  This can be a string, a list of strings or a function
+that returns either; see `gptel-directives' for more
+information. If SYSTEM is omitted, the value of
+`gptel--system-message' for the current buffer is used.
 
 The following keywords are mainly for internal use:
 
@@ -1220,8 +1353,23 @@ the response to determine if delimiters are needed between the
 prompt and the response.
 
 STREAM is a boolean that determines if the response should be
-streamed, as in `gptel-stream'. Do not set this if you are
-specifying a custom CALLBACK!
+streamed, as in `gptel-stream'.  The calling convention for
+streaming callbacks is slightly different:
+
+ (funcall CALLBACK RESPONSE INFO)
+
+- CALLBACK will be called with each response text chunk (a
+  string) as it is received.
+
+- When the HTTP request ends successfully, CALLBACK will be
+  called with a RESPONSE argument of t to indicate success.
+
+- If the HTTP request throws an error, CALLBACK will be called
+  with a RESPONSE argument of nil.  You can find the error via
+  (plist-get INFO :status).
+
+- If the request is aborted, CALLBACK will be called with a
+  RESPONSE argument of `abort'.
 
 If DRY-RUN is non-nil, construct and return the full
 query data as usual, but do not send the request.
@@ -1230,12 +1378,15 @@ Model parameters can be let-bound around calls to this function."
   (declare (indent 1))
   ;; TODO Remove this check in version 1.0
   (gptel--sanitize-model)
-  (let* ((gptel--system-message
-          ;Add context chunks to system message if required
+  (let* ((directive (gptel--parse-directive system))
+         ;; DIRECTIVE contains both the system message and the template prompts
+         (gptel--system-message
+          ;; Add context chunks to system message if required
           (if (and gptel-context--alist
-                   (eq gptel-use-context 'system))
-              (gptel-context--wrap system)
-            system))
+                   (eq gptel-use-context 'system)
+                   (not (gptel--model-capable-p 'nosystem)))
+              (gptel-context--wrap (car directive))
+            (car directive)))
          (gptel-stream stream)
          (start-marker
           (cond
@@ -1247,17 +1398,19 @@ Model parameters can be let-bound around calls to this function."
            ((integerp position)
             (set-marker (make-marker) position buffer))))
          (full-prompt
-          (cond
-           ((null prompt)
-            (gptel--create-prompt start-marker))
-           ((stringp prompt)
-            ;; FIXME Dear reader, welcome to Jank City:
-            (with-temp-buffer
-              (let ((gptel-model (buffer-local-value 'gptel-model buffer))
-                    (gptel-backend (buffer-local-value 'gptel-backend buffer)))
-                (insert prompt)
-                (gptel--create-prompt))))
-           ((consp prompt) prompt)))
+          (nconc
+           (cdr directive)              ;prompt constructed from directive/template
+           (cond                        ;prompt from buffer or explicitly supplied
+            ((null prompt)
+             (gptel--create-prompt start-marker))
+            ((stringp prompt)
+             ;; FIXME Dear reader, welcome to Jank City:
+             (with-temp-buffer
+               (let ((gptel-model (buffer-local-value 'gptel-model buffer))
+                     (gptel-backend (buffer-local-value 'gptel-backend buffer)))
+                 (insert prompt)
+                 (gptel--create-prompt))))
+            ((consp prompt) (gptel--parse-list gptel-backend prompt)))))
          (request-data (gptel--request-data gptel-backend full-prompt))
          (info (list :data request-data
                      :buffer buffer
@@ -1270,6 +1423,35 @@ Model parameters can be let-bound around calls to this function."
                    #'gptel-curl-get-response #'gptel--url-get-response)
                info callback))
     request-data))
+
+(defvar gptel--request-alist nil "Alist of active gptel requests.")
+
+(defun gptel-abort (buf)
+  "Stop any active gptel process associated with buffer BUF.
+
+BUF defaults to the current buffer."
+  (interactive (list (current-buffer)))
+  (when-let* ((proc-attrs
+               (cl-find-if (lambda (proc-list)
+                             (eq (plist-get (cdr proc-list) :buffer) buf))
+                           gptel--request-alist))
+              (proc (car proc-attrs))
+              (info (cdr proc-attrs)))
+    ;; Run callback with abort signal
+    (with-demoted-errors "Callback error: %S"
+      (funcall (plist-get info :callback) 'abort info))
+    (if gptel-use-curl
+        (progn                        ;Clean up Curl process
+          (setf (alist-get proc gptel--request-alist nil 'remove) nil)
+          (set-process-sentinel proc #'ignore)
+          (delete-process proc)
+          (kill-buffer (process-buffer proc)))
+      (plist-put info :callback #'ignore)
+      (let (kill-buffer-query-functions)
+        (kill-buffer proc)))            ;Can't stop url-retrieve process
+    (with-current-buffer buf
+      (when gptel-mode (gptel--update-status  " Abort" 'error)))
+    (message "Stopped gptel request in buffer %S" (buffer-name buf))))
 
 ;; TODO: Handle multiple requests(#15). (Only one request from one buffer at a time?)
 ;;;###autoload
@@ -1408,8 +1590,12 @@ there."
                   (gptel--parse-buffer gptel-backend max-entries)))))
         ;; NOTE: prompts is modified in place here
         (when gptel-context--alist
-          ;; Inject context chunks into the last user prompt if required
-          (when (and (eq gptel-use-context 'user)
+          ;; Inject context chunks into the last user prompt if required.
+          ;; This is also the fallback for when `gptel-use-context' is set to
+          ;; 'system but the model does not support system messages.
+          (when (and gptel-use-context
+                     (or (eq gptel-use-context 'user)
+                         (gptel--model-capable-p 'nosystem))
                      (> (length prompts) 0)) ;FIXME context should be injected
                                              ;even when there are no prompts
             (gptel--wrap-user-prompt gptel-backend prompts))
@@ -1430,6 +1616,16 @@ BACKEND is the LLM backend in use.
 MAX-ENTRIES is the number of queries/responses to include for
 contexbt.")
 
+(cl-defgeneric gptel--parse-list (backend prompt-list)
+  "Parse PROMPT-LIST and return a list of prompts suitable for
+BACKEND.
+
+PROMPT-LIST is interpreted as a conversation, i.e. an alternating
+series of user prompts and LLM responses.  The returned structure
+is suitable for including in the request payload.
+
+BACKEND is the LLM backend in use.")
+
 (cl-defgeneric gptel--parse-media-links (mode beg end)
   "Find media links between BEG and END.
 
@@ -1440,7 +1636,8 @@ Returns a plist where each entry is of the form
 or
   (:media \"media uri or file path\")."
   (ignore mode)                         ;byte-compiler
-  (list `(:text ,(buffer-substring beg end))))
+  (list `(:text ,(buffer-substring-no-properties
+                  beg end))))
 
 (defvar markdown-regex-link-inline)
 (defvar markdown-regex-angle-uri)
@@ -1568,18 +1765,25 @@ the response is inserted into the current buffer after point."
                              url-request-extra-headers))
                     "request headers"))
       (gptel--log url-request-data "request body"))
-    (url-retrieve (let ((backend-url (gptel-backend-url gptel-backend)))
-                    (if (functionp backend-url)
-                        (funcall backend-url) backend-url))
-                  (lambda (_)
-                    (pcase-let ((`(,response ,http-msg ,error)
-                                 (gptel--url-parse-response backend (current-buffer))))
-                      (plist-put info :status http-msg)
-                      (when error (plist-put info :error error))
-                      (funcall (or callback #'gptel--insert-response)
-                               response info)
-                      (kill-buffer)))
-                  nil t nil)))
+    (let ((proc-buf
+          (url-retrieve (let ((backend-url (gptel-backend-url gptel-backend)))
+                          (if (functionp backend-url)
+                              (funcall backend-url) backend-url))
+                        (lambda (_)
+                          (pcase-let ((`(,response ,http-msg ,error)
+                                       (gptel--url-parse-response backend (current-buffer)))
+                                      (buf (current-buffer)))
+                            (plist-put info :status http-msg)
+                            (when error (plist-put info :error error))
+                            (with-demoted-errors "gptel callback error: %S"
+                              (funcall (or callback #'gptel--insert-response)
+                                       response info))
+                            (setf (alist-get buf gptel--request-alist nil 'remove) nil)
+                            (kill-buffer buf)))
+                        nil t nil)))
+      (setf (alist-get proc-buf gptel--request-alist)
+          ;; TODO: Add transformer here.  NOTE: We need info to be mutated here.
+          (nconc info (list :callback callback :backend backend))))))
 
 (cl-defgeneric gptel--parse-response (backend response proc-info)
   "Response extractor for LLM requests.
@@ -1680,11 +1884,13 @@ INTERACTIVEP is t when gptel is called interactively."
    (let* ((backend (default-value 'gptel-backend))
           (backend-name
            (format "*%s*" (gptel-backend-name backend))))
-     (list (read-buffer "Create or choose gptel buffer: "
-                        backend-name nil                         ; DEFAULT and REQUIRE-MATCH
-                        (lambda (b)                              ; PREDICATE
-                          (buffer-local-value 'gptel-mode
-                                              (get-buffer (or (car-safe b) b)))))
+     (list (read-buffer
+            "Create or choose gptel buffer: "
+            backend-name nil                         ; DEFAULT and REQUIRE-MATCH
+            (lambda (b)                                   ; PREDICATE
+              ;; NOTE: buffer check is required (#450)
+              (and-let* ((buf (get-buffer (or (car-safe b) b))))
+                (buffer-local-value 'gptel-mode buf))))
            (condition-case nil
                (gptel--get-api-key
                 (gptel-backend-key backend))

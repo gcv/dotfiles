@@ -49,6 +49,7 @@
 (declare-function gptel--get-buffer-bounds "gptel")
 (declare-function gptel-backend-name "gptel")
 (declare-function gptel--parse-buffer "gptel")
+(declare-function gptel--parse-directive "gptel")
 (declare-function org-entry-get "org")
 (declare-function org-entry-put "org")
 (declare-function org-with-wide-buffer "org-macs")
@@ -195,7 +196,7 @@ value of `gptel-org-branching-context', which see."
                                      '(headline org-data) 'with-self))
                      (end-bounds
                       (cl-loop
-                       for pos in (cdr start-bounds)
+                       for (pos . rest) on (cdr start-bounds)
                        while
                        (and (>= pos (point-min)) ;respect narrowing
                             (goto-char pos)
@@ -204,7 +205,10 @@ value of `gptel-org-branching-context', which see."
                             ;; heading here, it is either a false positive or we
                             ;; would be double counting it.  So we reject this node
                             ;; when also at a heading.
-                            (not (and (eq pos 1) (org-at-heading-p))))
+                            (not (and (eq pos 1) (org-at-heading-p)
+                                      ;; Skip if at the last element of start-bounds,
+                                      ;; since we captured this heading already (#476)
+                                      (null rest))))
                        do (outline-next-heading)
                        collect (point) into ends
                        finally return (cons prompt-end ends))))
@@ -392,7 +396,10 @@ non-nil (default), display a message afterwards."
     (org-entry-put pt "GPTEL_NUM_MESSAGES_TO_SEND"
                    (number-to-string gptel--num-messages-to-send)))
   (org-entry-put pt "GPTEL_SYSTEM"
-                 (string-replace "\n" "\\n" gptel--system-message))
+                 (and-let* ((msg (car-safe
+                                  (gptel--parse-directive
+                                   gptel--system-message))))
+                   (string-replace "\n" "\\n" msg)))
   (when gptel-max-tokens
     (org-entry-put
      pt "GPTEL_MAX_TOKENS" (number-to-string gptel-max-tokens)))
