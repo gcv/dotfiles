@@ -851,9 +851,11 @@
 
 (use-package origami
   :pin melpa
-  :config
-  (setq origami-show-fold-header t)
-  )
+  :custom
+  (origami-show-fold-header t)
+  :bind (:map origami-mode-map
+              ("C-c f" . origami-toggle-node)
+              ("C-c F" . origami-toggle-all-nodes)))
 
 
 (use-package package-lint
