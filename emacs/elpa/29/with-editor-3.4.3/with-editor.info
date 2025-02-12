@@ -1,4 +1,4 @@
-This is docgzGRt5.info, produced by makeinfo version 6.8 from
+This is docua7I5P.info, produced by makeinfo version 6.8 from
 with-editor.texi.
 
      Copyright (C) 2015-2024 Jonas Bernoulli
@@ -20,7 +20,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docgzGRt5.info,  Node: Top,  Next: Using the With-Editor package,  Up: (dir)
+File: docua7I5P.info,  Node: Top,  Next: Using the With-Editor package,  Up: (dir)
 
 With-Editor User Manual
 ***********************
@@ -40,7 +40,7 @@ library is made available as a separate package.  It also defines some
 additional functionality which makes it useful even for end-users, who
 don’t use Magit or another package which uses it internally.
 
-This manual is for With-Editor version 3.4.1.
+This manual is for With-Editor version 3.4.3.
 
      Copyright (C) 2015-2024 Jonas Bernoulli
      <emacs.with-editor@jonas.bernoulli.dev>
@@ -72,7 +72,7 @@ Using the With-Editor package
 
 
 
-File: docgzGRt5.info,  Node: Using the With-Editor package,  Next: Using With-Editor as a library,  Prev: Top,  Up: Top
+File: docua7I5P.info,  Node: Using the With-Editor package,  Next: Using With-Editor as a library,  Prev: Top,  Up: Top
 
 1 Using the With-Editor package
 *******************************
@@ -91,7 +91,7 @@ Magit.
 * Using With-Editor commands::
 
 
-File: docgzGRt5.info,  Node: Configuring With-Editor,  Next: Using With-Editor commands,  Up: Using the With-Editor package
+File: docua7I5P.info,  Node: Configuring With-Editor,  Next: Using With-Editor commands,  Up: Using the With-Editor package
 
 1.1 Configuring With-Editor
 ===========================
@@ -115,7 +115,7 @@ and we have to add another kludge to find it anyway.
 
      You should *not* customize this option permanently.  If you have to
      do it, then you should consider that a temporary kludge and inform
-     the Magit maintainer as described in *note Debugging::.
+     the Magit maintainer as described in *note Debugging: Debugging.
 
      If With-Editor fails to find a suitable ‘emacsclient’ on your
      system, then this should be fixed for all users at once, by
@@ -186,7 +186,7 @@ it receives a signal.
      support floats, then by using ‘nanosleep’ instead.
 
 
-File: docgzGRt5.info,  Node: Using With-Editor commands,  Prev: Configuring With-Editor,  Up: Using the With-Editor package
+File: docua7I5P.info,  Node: Using With-Editor commands,  Prev: Configuring With-Editor,  Up: Using the With-Editor package
 
 1.2 Using With-Editor commands
 ==============================
@@ -258,7 +258,7 @@ appropriate mode hooks:
      ‘$HG_EDITOR’.
 
 
-File: docgzGRt5.info,  Node: Using With-Editor as a library,  Next: Debugging,  Prev: Using the With-Editor package,  Up: Top
+File: docua7I5P.info,  Node: Using With-Editor as a library,  Next: Debugging,  Prev: Using the With-Editor package,  Up: Top
 
 2 Using With-Editor as a library
 ********************************
@@ -302,7 +302,7 @@ package::.
      NO-STANDARD-FILTER.
 
 
-File: docgzGRt5.info,  Node: Debugging,  Next: Function and Command Index,  Prev: Using With-Editor as a library,  Up: Top
+File: docua7I5P.info,  Node: Debugging,  Next: Function and Command Index,  Prev: Using With-Editor as a library,  Up: Top
 
 3 Debugging
 ***********
@@ -321,7 +321,7 @@ about your Emacs installation.  Most importantly how did you install
 Emacs and what is the output of ‘M-x with-editor-debug RET’.
 
 
-File: docgzGRt5.info,  Node: Function and Command Index,  Next: Variable Index,  Prev: Debugging,  Up: Top
+File: docua7I5P.info,  Node: Function and Command Index,  Next: Variable Index,  Prev: Debugging,  Up: Top
 
 Appendix A Function and Command Index
 *************************************
@@ -349,7 +349,7 @@ Appendix A Function and Command Index
                                                                (line 21)
 
 
-File: docgzGRt5.info,  Node: Variable Index,  Prev: Function and Command Index,  Up: Top
+File: docua7I5P.info,  Node: Variable Index,  Prev: Function and Command Index,  Up: Top
 
 Appendix B Variable Index
 *************************
@@ -370,11 +370,11 @@ Tag Table:
 Node: Top797
 Node: Using the With-Editor package2611
 Node: Configuring With-Editor3196
-Node: Using With-Editor commands7750
-Node: Using With-Editor as a library11050
-Node: Debugging13080
-Node: Function and Command Index13970
-Node: Variable Index15466
+Node: Using With-Editor commands7759
+Node: Using With-Editor as a library11059
+Node: Debugging13089
+Node: Function and Command Index13979
+Node: Variable Index15475
 
 End Tag Table
 
