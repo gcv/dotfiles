@@ -120,6 +120,8 @@ evaluate `code-cells-mode'.
 The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
+\\{code-cells-mode-map}
+
 (fn &optional ARG)" t)
 (autoload 'code-cells-mode-maybe "code-cells" "\
 Turn on `code-cells-mode' if the buffer appears to contain cells.

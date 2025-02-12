@@ -6,8 +6,8 @@
 ;; Keywords: convenience, outlines
 ;; URL: https://github.com/astoff/code-cells.el
 ;; Package-Requires: ((emacs "27.1") (compat "29.1"))
-;; Package-Version: 20241101.1618
-;; Package-Revision: 35e68b9d80b2
+;; Package-Version: 20241119.1421
+;; Package-Revision: caffb420be10
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -49,6 +49,14 @@
 ;; This minor mode is automatically activated when opening an ipynb
 ;; file, but you can also activate it in any other buffer, either
 ;; manually or through a hook.
+
+;;; News:
+
+;; Version 0.5
+;; - Several new editing commands.
+;; - Integrate with repeat-mode and context-menu-mode.
+;; - Some changed keybindings.
+;; - More consistent handling of numeric arguments and cell ranges.
 
 ;;; Code:
 
