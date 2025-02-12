@@ -56,24 +56,6 @@ With prefix REVIEW prompt before sending to ChatGPT.
 Send region to ChatGPT, review before submitting." t)
 (autoload 'chatgpt-shell-add-??-command-to-eshell "chatgpt-shell" "\
 Add `??' command to `eshell'.")
-(autoload 'chatgpt-shell-japanese-ocr-lookup "chatgpt-shell" "\
-Select a region of the screen to OCR and look up in Japanese." t)
-(autoload 'chatgpt-shell-japanese-audio-lookup "chatgpt-shell" "\
-Transcribe audio at current file (buffer or `dired') and look up in Japanese." t)
-(autoload 'chatgpt-shell-japanese-lookup "chatgpt-shell" "\
-Look up Japanese TERM.
-
-(fn &optional TERM)" t)
-(autoload 'chatgpt-shell-describe-image "chatgpt-shell" "\
-Request OpenAI to describe image.
-
-When visiting a buffer with an image, send that.
-
-If in a `dired' buffer, use selection (single image only for now)." t)
-(autoload 'chatgpt-shell-fix-error-at-point "chatgpt-shell" "\
-Fixes flymake error at point." t)
-(autoload 'chatgpt-shell-quick-insert "chatgpt-shell" "\
-Request from minibuffer and insert response into current buffer." t)
 (autoload 'chatgpt-shell-prompt-compose "chatgpt-shell" "\
 Compose and send prompt from a dedicated buffer.
 
@@ -109,16 +91,79 @@ query in-progress.
  `\\[View-quit]` Exits the read-only buffer.
  `\\[chatgpt-shell-prompt-compose-retry]` Refresh (re-send the query).  Useful
 to retry on disconnects.
- `\\[chatgpt-shell-prompt-compose-next-block]` Jump to next source block.
- `\\[chatgpt-shell-prompt-compose-previous-block]` Jump to next previous block.
+ `\\[chatgpt-shell-prompt-compose-next-item]` Jump to next source block.
+ `\\[chatgpt-shell-prompt-compose-previous-item]` Jump to next previous block.
  `\\[chatgpt-shell-prompt-compose-reply]` Reply to follow-up with additional questions.
  `\\[chatgpt-shell-prompt-compose-request-entire-snippet]` Send \"Show entire snippet\" query.
+ `\\[chatgpt-shell-prompt-compose-insert-block-at-point]` Insert block at point at last known location.
  `\\[chatgpt-shell-prompt-compose-request-more]` Send \"Show me more\" query.
  `\\[chatgpt-shell-prompt-compose-other-buffer]` Jump to other buffer (ie. the shell itself).
  `\\[chatgpt-shell-mark-block]` Mark block at point.
 
 (fn PREFIX)" t)
+(autoload 'chatgpt-shell-japanese-ocr-lookup "chatgpt-shell" "\
+Select a region of the screen to OCR and look up in Japanese." t)
+(autoload 'chatgpt-shell-japanese-audio-lookup "chatgpt-shell" "\
+Transcribe audio at current file (buffer or `dired') and look up in Japanese." t)
+(autoload 'chatgpt-shell-describe-image "chatgpt-shell" "\
+Request OpenAI to describe image.
+
+When visiting a buffer with an image, send that.
+
+If command invoked with prefix, CAPTURE a screenshot.
+
+If in a `dired' buffer, use selection (single image only for now).
+
+(fn &optional CAPTURE)" t)
+(autoload 'chatgpt-shell-fix-error-at-point "chatgpt-shell" "\
+Fixes flymake error at point." t)
+(autoload 'chatgpt-shell-quick-insert "chatgpt-shell" "\
+Request from minibuffer and insert response into current buffer.
+
+Optionally include any CONTEXT to consider.
+
+(fn &optional CONTEXT)" t)
 (register-definition-prefixes "chatgpt-shell" '("chatgpt-shell-"))
+
+
+;;; Generated autoloads from chatgpt-shell-anthropic.el
+
+(register-definition-prefixes "chatgpt-shell-anthropic" '("chatgpt-shell-anthropic-"))
+
+
+;;; Generated autoloads from chatgpt-shell-google.el
+
+(register-definition-prefixes "chatgpt-shell-google" '("chatgpt-shell-google-"))
+
+
+;;; Generated autoloads from chatgpt-shell-kagi.el
+
+(register-definition-prefixes "chatgpt-shell-kagi" '("chatgpt-shell-kagi-"))
+
+
+;;; Generated autoloads from chatgpt-shell-ollama.el
+
+(register-definition-prefixes "chatgpt-shell-ollama" '("chatgpt-shell-ollama-"))
+
+
+;;; Generated autoloads from chatgpt-shell-openai.el
+
+(register-definition-prefixes "chatgpt-shell-openai" '("chatgpt-shell-"))
+
+
+;;; Generated autoloads from chatgpt-shell-openrouter.el
+
+(register-definition-prefixes "chatgpt-shell-openrouter" '("chatgpt-shell-openrouter-"))
+
+
+;;; Generated autoloads from chatgpt-shell-perplexity.el
+
+(register-definition-prefixes "chatgpt-shell-perplexity" '("chatgpt-shell-perplexity-"))
+
+
+;;; Generated autoloads from chatgpt-shell-prompt-compose.el
+
+(register-definition-prefixes "chatgpt-shell-prompt-compose" '("chatgpt-shell-"))
 
 ;;; End of scraped data
 
