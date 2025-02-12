@@ -394,7 +394,7 @@ theme face specs. These is a simplified spec. For example:
 
 (fn THEME &rest FACES)")
 (function-put 'doom-themes-set-faces 'lisp-indent-function 'defun)
-(when (and (boundp 'custom-theme-load-path) load-file-name) (let* ((base (file-name-directory load-file-name)) (dir (expand-file-name "themes/" base))) (add-to-list 'custom-theme-load-path (or (and (file-directory-p dir) dir) base))))
+(when load-file-name (add-to-list 'custom-theme-load-path (let* ((base (file-name-directory load-file-name)) (dir (expand-file-name "themes/" base))) (or (and (file-directory-p dir) dir) base))))
 (register-definition-prefixes "doom-themes" '("def-doom-theme" "doom-"))
 
 
