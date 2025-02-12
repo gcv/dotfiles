@@ -2,8 +2,8 @@
 
 ;; Author: Colin McLear <mclear@fastmail.com>
 ;; Maintainer: Colin McLear
-;; Package-Version: 20240810.1318
-;; Package-Revision: 6ece62337d60
+;; Package-Version: 20241213.1718
+;; Package-Revision: 7c9cd970c75f
 ;; Package-Requires: ((emacs "27.1") (consult "0.17") (s "1.12.0") (dash "2.19"))
 ;; Keywords: convenience
 ;; Homepage: https://github.com/mclear-tools/consult-notes
