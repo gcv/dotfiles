@@ -1,10 +1,10 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "zoom" "20241019.2101"
+(define-package "zoom" "20250212.1249"
   "Fixed and automatic balanced window layout."
   '((emacs "24.4"))
   :url "https://github.com/cyrus-and/zoom"
-  :commit "f5f635e1fc5a8f606b7386286546bb6439e7124c"
-  :revdesc "f5f635e1fc5a"
+  :commit "950ff02112a1440093764d78b78ed95b855075ce"
+  :revdesc "950ff02112a1"
   :keywords '("frames")
   :authors '(("Andrea Cardaci" . "cyrus.and@gmail.com"))
   :maintainers '(("Andrea Cardaci" . "cyrus.and@gmail.com")))
