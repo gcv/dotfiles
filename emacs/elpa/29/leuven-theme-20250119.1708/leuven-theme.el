@@ -1,12 +1,12 @@
 ;;; leuven-theme.el --- Elegant Emacs color theme for a white background -*- lexical-binding: t -*-
 
-;; Copyright (C) 2003-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2003-2025 Free Software Foundation, Inc.
 
 ;; Author: Fabrice Niessen <(concat "fniessen" at-sign "pirilampo.org")>
 ;; URL: https://github.com/fniessen/emacs-leuven-theme
-;; Package-Version: 20240713.929
-;; Package-Revision: 4f355a983209
-;; Last-Updated: 2024-07-13 11:28
+;; Package-Version: 20250119.1708
+;; Package-Revision: 264ed5beac3a
+;; Last-Updated: 2025-01-19 18:04
 ;; Keywords: color theme
 
 ;; This file is part of GNU Emacs.
@@ -26,14 +26,13 @@
 
 ;;; Commentary:
 
-;; The "leuven" color theme is an elegant and visually appealing theme designed
-;; to enhance the appearance of Emacs, particularly in Org mode and other
-;; contexts.  It provides a carefully crafted color scheme optimized for a white
-;; background, creating a pleasant and readable environment for your Emacs
-;; sessions.
+;; The "leuven" color theme offers a clean, elegant, and visually appealing
+;; design for Emacs. While especially suited for Org mode, it enhances
+;; readability across various contexts. Designed for white backgrounds, it
+;; provides a pleasant and highly readable environment for extended use.
 
-;; To use the "leuven" theme, simply add the following line to your Emacs
-;; configuration file:
+;; To enable the "leuven" theme, add the following line to your Emacs
+;; configuration:
 
 ;;   (load-theme 'leuven t)
 
@@ -122,7 +121,7 @@ more...")
       (diff-changed '(:foreground "#0000FF" :background "#DDDDFF"))
       (diff-header '(:weight bold :foreground "#800000" :background "#FFFFAF"))
       (diff-hunk-header '(:foreground "#990099" :background "#FFEEFF"))
-      (diff-none '(:foreground "#888888"))
+      (diff-none '(:foreground "#A0A1A7"))
       (diff-refine-added '(:background "#97F295"))
       (diff-refine-removed '(:background "#FFB6BA"))
       (diff-removed '(:background "#FEE8E9"))
@@ -219,11 +218,11 @@ more...")
    ;; Font lock faces.
    `(font-lock-builtin-face ((,class (:foreground "#006FE0"))))
    `(font-lock-comment-delimiter-face ((,class (:foreground "#8D8D84")))) ; #696969
-   `(font-lock-comment-face ((,class (:slant italic :foreground "#8D8D84")))) ; #696969
+   `(font-lock-comment-face ((,class (:slant italic :foreground "#A0A1A7")))) ; #696969
    `(font-lock-constant-face ((,class (:foreground "#D0372D"))))
    `(font-lock-doc-face ((,class (:foreground "#036A07"))))
    `(font-lock-function-name-face ((,class (:weight normal :foreground "#006699"))))
-   `(font-lock-keyword-face ((,class (:bold unspecified :foreground "#0000FF")))) ; #3654DC
+   `(font-lock-keyword-face ((,class (:foreground "#0000FF")))) ; #3654DC
    `(font-lock-preprocessor-face ((,class (:foreground "#808080"))))
    `(font-lock-regexp-grouping-backslash ((,class (:weight bold :inherit unspecified))))
    `(font-lock-regexp-grouping-construct ((,class (:weight bold :inherit nil))))
@@ -839,7 +838,7 @@ more...")
    `(org-document-info ((,class (:foreground "#484848"))))
    `(org-document-info-keyword ((,class (:foreground "#008ED1" :background "#EAEAFF"))))
    `(org-document-title ((,class (,@(leuven-scale-font leuven-scale-org-document-title 1.8)  :weight bold :foreground "black"))))
-   `(org-done ((,class (:weight bold :box (:line-width 1 :color "#BBBBBB") :foreground "#BBBBBB" :background "#F0F0F0"))))
+   `(org-done ((,class (:weight bold :box "#89C58F" :foreground "#89C58F" :background "#E2FEDE"))))
    `(org-drawer ((,class (:weight bold :foreground "#00BB00" :background "#EEFFEE"))))
    `(org-ellipsis ((,class (:underline nil :foreground "#999999")))) ; #FFEE62
    `(org-example ((,class (:foreground "blue" :background "#EEFFEE"))))
