@@ -1,6 +1,6 @@
 ;;; consult-register.el --- Consult commands for registers -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; This file is part of GNU Emacs.
 
@@ -136,10 +136,11 @@ SHOW-EMPTY must be t if the window should be shown for an empty register list."
                     mode-line-format nil
                     truncate-lines t
                     window-min-height 1
-                    window-resize-pixelwise t)
+                    window-resize-pixelwise t
+                    scroll-margin 0)
         (insert (mapconcat
                  (lambda (reg)
-                   (concat (funcall register-preview-function reg) separator))
+                   (concat (consult-register-format reg) separator))
                  regs nil))))))
 
 ;;;###autoload

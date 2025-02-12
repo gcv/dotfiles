@@ -2,6 +2,54 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 2.0 (2025-01-28)
+
+- New features:
+  + ~consult--multi~: Add support for asynchronous sources.
+  + ~consult-man~: Add preview.
+- *BREAKING CHANGE*: New async API
+  + Async functions must have the uniform curried form
+    ~(lambda (sink) (lambda (action) ...)~ and are composed with
+    ~consult--async-pipeline~. See the docstring of ~consult--async-pipeline~ for
+    details.
+  + ~consult--read~: New ~:async-wrap~ keyword argument.
+  + ~consult--multi~: Add support for ~:async~ sources.
+  + ~consult--async-min-input~: New async function which enforces a minimum input
+    length. The input length check has been removed from ~consult--async-split~.
+  + ~consult--async-transform~: Macro converted to function.
+  + ~consult--process-collection~: New function replacing ~consult--async-command~.
+    The function accepts keyword arguments to customize the pipeline.
+  + ~consult--dynamic-collection~: The function accepts more keyword arguments to
+    customize the pipeline.
+  + ~consult--async-refresh-timer~ and ~consult--async-refresh-immediate~: Replaced by
+    ~consult--async-refresh~ with a ~DELAY~ argument.
+  + ~consult--async-split-thingatpt~ and ~consult--async-split-initial~: Removed
+    since ~consult--read~ automatically inserts the splitter prefix if needed.
+- Minor changes:
+  + Remove obsolete ~consult-yank-rotate~.
+  + Add customizable variable ~consult-async-indicator~.
+  + ~consult-completion-in-region~: When inside minibuffer, use minibuffer content
+    as prompt.
+
+* Version 1.9 (2024-12-22)
+
+- Require Emacs 28.1.
+- ~consult-grep~, ~consult-find~ and similar commands: Ask for project first, when
+  invoked with double prefix argument ~C-u C-u~.
+- Deprecate ~consult-yank-rotate~ in favor of ~yank-from-kill-ring-rotate~.
+- ~consult-grep-max-columns~: Support value ~nil~ to disable truncation.
+- ~consult-line~: Enforce global completion style settings for compatibility with
+  buffer-local completion style settings, which may be used by Corfu.
+- Support the value 0 for ~consult-async-min-input~.
+- Remove special ~org-fold~ code. Set ~org-fold-core-style~ to ~overlays~ if unfolding
+  in Org files does not work for you.
+- ~consult-info~: Support sub files.
+- ~consult-buffer~, ~consult-project-buffer~: Add sources for known project roots.
+- ~consult--multi~: Support multiple narrow keys per source. Used by the project
+  buffer and project recent file source.
+- ~consult--async-sink~: The new action ~cancel~ was added to the async protocol.
+- ~consult--read~: Add new keyword argument ~:initial-narrow~.
+
 * Version 1.8 (2024-07-25)
 
 - =consult-preview-excluded-buffers=: New customization variable.

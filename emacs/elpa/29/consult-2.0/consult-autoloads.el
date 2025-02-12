@@ -114,9 +114,9 @@ If no MODES are specified, use currently active major and minor modes.
 Select STRING from the kill ring and insert it.
 With prefix ARG, put point at beginning, and mark at end, like `yank' does.
 
-This command behaves like `yank-from-kill-ring' in Emacs 28, which also offers
-a `completing-read' interface to the `kill-ring'.  Additionally the Consult
-version supports preview of the selected string.
+This command behaves like `yank-from-kill-ring', which also offers a
+`completing-read' interface to the `kill-ring'.  Additionally the
+Consult version supports preview of the selected string.
 
 (fn STRING &optional ARG)" t)
 (autoload 'consult-yank-pop "consult" "\
@@ -125,9 +125,9 @@ If there is a recent yank act like `yank-pop'.
 Otherwise select string from the kill ring and insert it.
 See `yank-pop' for the meaning of ARG.
 
-This command behaves like `yank-pop' in Emacs 28, which also offers a
-`completing-read' interface to the `kill-ring'.  Additionally the Consult
-version supports preview of the selected string.
+This command behaves like `yank-pop', which also offers a
+`completing-read' interface to the `kill-ring'.  Additionally the
+Consult version supports preview of the selected string.
 
 (fn &optional ARG)" t)
 (autoload 'consult-yank-replace "consult" "\
@@ -135,8 +135,6 @@ Select STRING from the kill ring.
 
 If there was no recent yank, insert the string.
 Otherwise replace the just-yanked string with the selected string.
-
-There exists no equivalent of this command in Emacs 28.
 
 (fn STRING)" t)
 (autoload 'consult-bookmark "consult" "\
@@ -198,36 +196,35 @@ Variant of `consult-buffer', switching to a buffer in another tab." t)
 (autoload 'consult-grep "consult" "\
 Search with `grep' for files in DIR where the content matches a regexp.
 
-The initial input is given by the INITIAL argument.  DIR can be
-nil, a directory string or a list of file/directory paths.  If
-`consult-grep' is called interactively with a prefix argument,
-the user can specify the directories or files to search in.
-Multiple directories must be separated by comma in the
-minibuffer, since they are read via `completing-read-multiple'.
-By default the project directory is used if
-`consult-project-function' is defined and returns non-nil.
-Otherwise the `default-directory' is searched.
+The initial input is given by the INITIAL argument.  DIR can be nil, a
+directory string or a list of file/directory paths.  If `consult-grep'
+is called interactively with a prefix argument, the user can specify the
+directories or files to search in.  Multiple directories or files must
+be separated by comma in the minibuffer, since they are read via
+`completing-read-multiple'.  By default the project directory is used if
+`consult-project-function' is defined and returns non-nil.  Otherwise
+the `default-directory' is searched.  If the command is invoked with a
+double prefix argument (twice `C-u') the user is asked for a project, if
+not yet inside a project, or the current project is searched.
 
-The input string is split, the first part of the string (grep
-input) is passed to the asynchronous grep process and the second
-part of the string is passed to the completion-style filtering.
+The input string is split, the first part of the string (grep input) is
+passed to the asynchronous grep process and the second part of the
+string is passed to the completion-style filtering.
 
-The input string is split at a punctuation character, which is
-given as the first character of the input string.  The format is
-similar to Perl-style regular expressions, e.g., /regexp/.
-Furthermore command line options can be passed to grep, specified
-behind --.  The overall prompt input has the form
-`#async-input -- grep-opts#filter-string'.
+The input string is split at a punctuation character, which is given as
+the first character of the input string.  The format is similar to
+Perl-style regular expressions, e.g., /regexp/.  Furthermore command
+line options can be passed to grep, specified behind --.  The overall
+prompt input has the form `#async-input -- grep-opts#filter-string'.
 
 Note that the grep input string is transformed from Emacs regular
-expressions to Posix regular expressions.  Always enter Emacs
-regular expressions at the prompt.  `consult-grep' behaves like
-builtin Emacs search commands, e.g., Isearch, which take Emacs
-regular expressions.  Furthermore the asynchronous input split
-into words, each word must match separately and in any order.
-See `consult--regexp-compiler' for the inner workings.  In order
-to disable transformations of the grep input, adjust
-`consult--regexp-compiler' accordingly.
+expressions to Posix regular expressions.  Always enter Emacs regular
+expressions at the prompt.  `consult-grep' behaves like builtin Emacs
+search commands, e.g., Isearch, which take Emacs regular expressions.
+Furthermore the asynchronous input split into words, each word must
+match separately and in any order.  See `consult--regexp-compiler' for
+the inner workings.  In order to disable transformations of the grep
+input, adjust `consult--regexp-compiler' accordingly.
 
 Here we give a few example inputs:
 
