@@ -1,13 +1,13 @@
 ;;; vertico-repeat.el --- Repeat Vertico sessions -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.9
-;; Package-Requires: ((emacs "27.1") (compat "30") (vertico "1.9"))
-;; Homepage: https://github.com/minad/vertico
+;; Version: 1.11
+;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "1.11"))
+;; URL: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
 
@@ -180,9 +180,6 @@ selected candidate for the current command."
        (setq vertico-repeat--pos n)
        session))))
 
-(define-obsolete-function-alias
-  'vertico-repeat-last 'vertico-repeat-previous "1.4")
-
 ;;;###autoload
 (defun vertico-repeat-select ()
   "Select a Vertico session from the session history and repeat it.
@@ -222,6 +219,7 @@ previous sessions for the current command."
                   (if current-cmd
                       (format "History of %s: " current-cmd)
                     "Completion history: ")
+                  ;; TODO: Use `completion-table-with-metadata'
                   (lambda (str pred action)
                     (if (eq action 'metadata)
                         '(metadata (display-sort-function . identity)

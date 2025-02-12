@@ -2,6 +2,22 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 1.11 (2025-01-28)
+
+- Ignore touchscreen events.
+- Disable ~pixel-scroll-precision-mode~ locally.
+- Strip text properties when copying to the kill ring.
+
+* Version 1.10 (2024-12-22)
+
+- Require Emacs 28.1.
+- Fix behavior when a function is passed as =REQUIRE-MATCH= argument to
+  ~completing-read~.
+- Drop obsolete command alias ~vertico-repeat-last~.
+- ~vertico-buffer~: Use ~display-buffer-use-least-recent-window~ as default buffer
+  display action.
+- Simplify the mini window resizing implementation, see ~vertico--resize~.
+
 * Version 1.9 (2024-07-26)
 
 - Bump Compat dependency to Compat 30.

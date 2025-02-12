@@ -1,13 +1,13 @@
 ;;; vertico.el --- VERTical Interactive COmpletion -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.9
-;; Package-Requires: ((emacs "27.1") (compat "30"))
-;; Homepage: https://github.com/minad/vertico
+;; Version: 1.11
+;; Package-Requires: ((emacs "28.1") (compat "30"))
+;; URL: https://github.com/minad/vertico
 ;; Keywords: convenience, files, matching, completion
 
 ;; This file is part of GNU Emacs.
@@ -42,7 +42,8 @@
 (defgroup vertico nil
   "VERTical Interactive COmpletion."
   :link '(info-link :tag "Info Manual" "(vertico)")
-  :link '(url-link :tag "Homepage" "https://github.com/minad/vertico")
+  :link '(url-link :tag "Website" "https://github.com/minad/vertico")
+  :link '(url-link :tag "Wiki" "https://github.com/minad/vertico/wiki")
   :link '(emacs-library-link :tag "Library Source" "vertico.el")
   :group 'convenience
   :group 'minibuffer
@@ -116,7 +117,7 @@ The value should lie between 0 and vertico-count/2."
 (defface vertico-group-title '((t :inherit shadow :slant italic))
   "Face used for the title text of the candidate group headlines.")
 
-(defface vertico-group-separator '((t :inherit shadow :strike-through t))
+(defface vertico-group-separator '((t :inherit vertico-group-title :strike-through t))
   "Face used for the separator lines of the candidate groups.")
 
 (defface vertico-current '((t :inherit highlight :extend t))
@@ -139,7 +140,8 @@ The value should lie between 0 and vertico-count/2."
   "<remap> <exit-minibuffer>" #'vertico-exit
   "<remap> <kill-ring-save>" #'vertico-save
   "M-RET" #'vertico-exit-input
-  "TAB" #'vertico-insert)
+  "TAB" #'vertico-insert
+  "<touchscreen-begin>" #'ignore)
 
 (defvar-local vertico--hilit #'identity
   "Lazy candidate highlighting function.")
@@ -315,7 +317,7 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
                (before (substring content 0 pt))
                (after (substring content pt))
                ;; bug#47678: `completion-boundaries' fails for `partial-completion'
-               ;; if the cursor is moved between the slashes of "~//".
+               ;; if the cursor is moved before the slashes of "~//".
                ;; See also corfu.el which has the same issue.
                (bounds (condition-case nil
                            (completion-boundaries before table pred after)
@@ -521,7 +523,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
     (vertico--update 'interruptible)
     (vertico--prompt-selection)
     (vertico--display-count)
-    (vertico--display-candidates (vertico--arrange-candidates))))
+    (vertico--display-candidates (vertico--arrange-candidates))
+    (vertico--resize)))
 
 (defun vertico--goto (index)
   "Go to candidate with INDEX."
@@ -549,8 +552,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   (let ((rm minibuffer--require-match))
     (or (memq rm '(nil confirm-after-completion))
         (equal "" input) ;; Null completion, returns default value
-        (and (functionp rm) (funcall rm input)) ;; Emacs 29 supports functions
-        (test-completion input minibuffer-completion-table minibuffer-completion-predicate)
+        (if (functionp rm) (funcall rm input) ;; Emacs 29 supports functions
+          (test-completion input minibuffer-completion-table minibuffer-completion-predicate))
         (if (eq rm 'confirm) (eq (ignore-errors (read-char "Confirm")) 13)
           (minibuffer-message "Match required") nil))))
 
@@ -603,23 +606,19 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
   "Update candidates overlay `vertico--candidates-ov' with LINES."
   (move-overlay vertico--candidates-ov (point-max) (point-max))
   (overlay-put vertico--candidates-ov 'after-string
-               (apply #'concat #(" " 0 1 (cursor t)) (and lines "\n") lines))
-  (vertico--resize-window (length lines)))
+               (apply #'concat #(" " 0 1 (cursor t)) (and lines "\n") lines)))
 
-(cl-defgeneric vertico--resize-window (height)
-  "Resize active minibuffer window to HEIGHT."
+(cl-defgeneric vertico--resize ()
+  "Resize active minibuffer window."
   (setq-local truncate-lines (< (point) (* 0.8 (vertico--window-width)))
-              resize-mini-windows 'grow-only
+              resize-mini-windows vertico-resize
               max-mini-window-height 1.0)
   (unless truncate-lines (set-window-hscroll nil 0))
-  (unless (frame-root-window-p (active-minibuffer-window))
-    (unless vertico-resize (setq height (max height vertico-count)))
-    (let ((dp (- (max (cdr (window-text-pixel-size))
-                      (* (default-line-height) (1+ height)))
+  (unless (or vertico-resize (frame-root-window-p (active-minibuffer-window)))
+    (let ((delta (- (max (cdr (window-text-pixel-size))
+                         (* (default-line-height) (1+ vertico-count)))
                  (window-pixel-height))))
-      (when (or (and (> dp 0) (/= height 0))
-                (and (< dp 0) (eq vertico-resize t)))
-        (window-resize nil dp nil nil 'pixelwise)))))
+      (when (/= 0 delta) (window-resize nil delta nil nil 'pixelwise)))))
 
 (cl-defgeneric vertico--prepare ()
   "Ensure that the state is prepared before running the next command."
@@ -628,6 +627,8 @@ The function is configured by BY, BSIZE, BINDEX, BPRED and PRED."
 
 (cl-defgeneric vertico--setup ()
   "Setup completion UI."
+  (when (boundp 'pixel-scroll-precision-mode)
+    (setq-local pixel-scroll-precision-mode nil))
   (setq-local scroll-margin 0
               vertico--input t
               completion-auto-help nil
@@ -720,7 +721,7 @@ When the prefix argument is 0, the group order is reset."
   (interactive)
   (if (or (use-region-p) (not transient-mark-mode))
       (call-interactively #'kill-ring-save)
-    (kill-new (vertico--candidate))))
+    (kill-new (substring-no-properties (vertico--candidate)))))
 
 (defun vertico-insert ()
   "Insert current candidate in minibuffer."
@@ -747,14 +748,14 @@ When the prefix argument is 0, the group order is reset."
   "Return non-nil if Vertico is active in BUFFER."
   (buffer-local-value 'vertico--input buffer))
 
-;; Emacs 28: Do not show Vertico commands in M-X
-(dolist (sym '(vertico-next vertico-next-group vertico-previous vertico-previous-group
-               vertico-scroll-down vertico-scroll-up vertico-exit vertico-insert
-               vertico-exit-input vertico-save vertico-first vertico-last
-               vertico-repeat-previous ;; autoloads in vertico-repeat.el
-               vertico-quick-jump vertico-quick-exit vertico-quick-insert ;; autoloads in vertico-quick.el
-               vertico-directory-up vertico-directory-enter ;; autoloads in vertico-directory.el
-               vertico-directory-delete-char vertico-directory-delete-word))
+;; Do not show Vertico commands in M-X
+(dolist (sym '( vertico-next vertico-next-group vertico-previous vertico-previous-group
+                vertico-scroll-down vertico-scroll-up vertico-exit vertico-insert
+                vertico-exit-input vertico-save vertico-first vertico-last
+                vertico-repeat-previous ;; autoloads in vertico-repeat.el
+                vertico-quick-jump vertico-quick-exit vertico-quick-insert ;; autoloads in vertico-quick.el
+                vertico-directory-up vertico-directory-enter ;; autoloads in vertico-directory.el
+                vertico-directory-delete-char vertico-directory-delete-word))
   (put sym 'completion-predicate #'vertico--command-p))
 
 (provide 'vertico)

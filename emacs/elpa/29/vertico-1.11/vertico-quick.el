@@ -1,13 +1,13 @@
 ;;; vertico-quick.el --- Quick keys for Vertico -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.9
-;; Package-Requires: ((emacs "27.1") (compat "30") (vertico "1.9"))
-;; Homepage: https://github.com/minad/vertico
+;; Version: 1.11
+;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "1.11"))
+;; URL: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
 

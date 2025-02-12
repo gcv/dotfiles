@@ -1,13 +1,13 @@
 ;;; vertico-buffer.el --- Display Vertico like a regular buffer -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.9
-;; Package-Requires: ((emacs "27.1") (compat "30") (vertico "1.9"))
-;; Homepage: https://github.com/minad/vertico
+;; Version: 1.11
+;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "1.11"))
+;; URL: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
 
@@ -45,14 +45,14 @@
   :type 'boolean)
 
 (defcustom vertico-buffer-display-action
-  '(display-buffer-reuse-window)
+  '(display-buffer-use-least-recent-window)
   "Display action for the Vertico buffer."
   :group 'vertico
   :type `(choice
+          (const :tag "Least recently used window"
+                 (display-buffer-use-least-recent-window))
           (const :tag "Reuse some window"
                  (display-buffer-reuse-window))
-          (const :tag "Least recently used window"
-                 (,'display-buffer-use-least-recent-window))
           (const :tag "Left of current window"
                  (display-buffer-in-direction
                   (direction . left)
@@ -146,11 +146,12 @@
                      face-remapping-alist (copy-tree `((mode-line-inactive mode-line)
                                                        ,@face-remapping-alist))
                      mode-line-format
-                     (list (format  #(" %s%s " 1 3 (face mode-line-buffer-id))
-                                    (replace-regexp-in-string ":? *\\'" ""
-                                                              (minibuffer-prompt))
-                                    (let ((depth (recursion-depth)))
-                                      (if (< depth 2) "" (format " [%s]" depth)))))
+                     (when mode-line-format ;; Do not override if nil
+                       (list (format  #(" %s%s " 1 3 (face mode-line-buffer-id))
+                                      (replace-regexp-in-string ":? *\\'" ""
+                                                                (minibuffer-prompt))
+                                      (let ((depth (recursion-depth)))
+                                        (if (< depth 2) "" (format " [%s]" depth))))))
                      vertico-count (- (/ (window-pixel-height win)
                                          (default-line-height)) 2))))
     (set-window-parameter win 'no-other-window t)
@@ -207,7 +208,7 @@
        ((and (not vertico-buffer-mode) vertico-buffer--restore)
         (funcall vertico-buffer--restore))))))
 
-(cl-defmethod vertico--resize-window (_height &context (vertico-buffer-mode (eql t))))
+(cl-defmethod vertico--resize (&context (vertico-buffer-mode (eql t))))
 
 (cl-defmethod vertico--setup :after (&context (vertico-buffer-mode (eql t)))
   (vertico-buffer--setup))
