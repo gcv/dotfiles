@@ -5,8 +5,9 @@
 ;; Author: James Nguyen <james@jojojames.com>
 ;; Maintainer: James Nguyen <james@jojojames.com>
 ;; URL: https://github.com/jojojames/dired-sidebar
-;; Version: 0.0.1
-;; Package-Requires: ((emacs "25.1") (dired-subtree "0.0.1"))
+;; Package-Version: 20250212.629
+;; Package-Revision: 3bc8927ed4d1
+;; Package-Requires: ((emacs "25.1") (dired-subtree "0.0.1") (compat "30.0.0.0"))
 ;; Keywords: dired, files, tools
 ;; HomePage: https://github.com/jojojames/dired-sidebar
 
@@ -34,24 +35,12 @@
 
 ;;; Code:
 
+(require 'compat)
 (require 'dired)
 (require 'dired-subtree)
 (eval-when-compile (require 'subr-x)) ; `if-let*' and `when-let*'
 
 (declare-function buffer-face-mode-invoke "face-remap")
-
-;; Compatibility
-
-(eval-and-compile
-  (with-no-warnings
-    (if (version< emacs-version "26")
-        (progn
-          (defalias 'dired-sidebar-if-let* #'if-let)
-          (defalias 'dired-sidebar-when-let* #'when-let)
-          (function-put #'dired-sidebar-if-let* 'lisp-indent-function 2)
-          (function-put #'dired-sidebar-when-let* 'lisp-indent-function 1))
-      (defalias 'dired-sidebar-if-let* #'if-let*)
-      (defalias 'dired-sidebar-when-let* #'when-let*))))
 
 ;; Customizations
 
@@ -94,27 +83,31 @@ This uses format specified by `dired-sidebar-mode-line-format'."
 it is suitable for terminal.
 `icons' use `all-the-icons'.
 `nerd' use the nerdtree indentation mode and arrow.
+`nerd-icons' uses https://github.com/ryanoasis/nerd-fonts
 `none' use no theme.
 `vscode' use `vscode' icons.
 
 This only takes effect if on a local connection. (e.g. Not Tramp)"
   :group 'dired-sidebar
   :type '(choice (const ascii)
-                 (const icons)
+                 (const icons) ;; https://github.com/jtbm37/all-the-icons-dired
                  (const nerd)
+                 (const nerd-icons) ;; https://github.com/rainstormstudio/nerd-icons.el
                  (const none)
                  (const vscode)))
 
 (defcustom dired-sidebar-width 35
   "Width of the `dired-sidebar' buffer.
 This option does not have effect if `dired-sidebar-resize-on-open' is nil.
-If you set `dired-sidebar-resize-on-open' to nil, you can customize `dired-sidebar-display-alist'
+If you set `dired-sidebar-resize-on-open' to nil, you can customize
+`dired-sidebar-display-alist'
 to control the width anyway."
   :type 'integer
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-window-fixed 'width
-  "Whether the width or height of the sidebar window should be fixed (to prevent from resizing)."
+  "Whether the width or height of the sidebar window should be fixed
+(to prevent from resizing)."
   :type '(choice (const nil)
                  (const width)
                  (const height))
@@ -161,6 +154,14 @@ When finding file to point at for
 in `magit' buffer.
 
 When finding root directory for sidebar, use directory specified by `magit'."
+  :type 'boolean
+  :group 'dired-sidebar)
+
+(defcustom dired-sidebar-use-omit-mode-integration t
+  "Whether to integrate with `dired-omit-mode'.
+
+When true: Attempt to handle `dired-omit-mode' around
+`dired-subtree-cycle' and `dired-subtree-toggle'."
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -272,7 +273,8 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
   :group 'dired-sidebar)
 
 (defcustom dired-sidebar-resize-on-open t
-  "When dired sidebar window is showed, automatically adjust its width according to `dired-sidebar-width'"
+  "When dired sidebar window is showed, automatically adjust its width
+according to `dired-sidebar-width'"
   :type 'boolean
   :group 'dired-sidebar)
 
@@ -299,7 +301,7 @@ with a prefix arg or when `dired-sidebar-find-file-alt' is called."
 (defcustom dired-sidebar-display-alist '((side . left) (slot . -1))
   "Alist used in `display-buffer-in-side-window'.
 
-e.g. (display-buffer-in-side-window buffer '((side . left) (slot . -1)))"
+e.g. (display-buffer-in-side-window buffer \\'((side . left) (slot . -1)))"
   :type 'alist
   :group 'dired-sidebar)
 
@@ -311,11 +313,6 @@ a file."
   :type 'boolean
   :group 'dired-sidebar)
 
-(defcustom dired-sidebar-icon-scale .18
-  "The scale of icons \(currently only applies to vscode theme.\)."
-  :type 'number
-  :group 'dired-sidebar)
-
 (defcustom dired-sidebar-no-delete-other-windows nil
   "Whether or not to add `no-delete-other-window' parameter to window.
 
@@ -325,7 +322,6 @@ will continue showing.
 For more information, look up `delete-other-windows'."
   :type 'boolean
   :group 'dired-sidebar)
-
 
 (defcustom dired-sidebar-use-one-instance nil
   "Only show one buffer instance for dired-sidebar for each frame."
@@ -345,15 +341,6 @@ See https://github.com/jojojames/dired-sidebar/issues/43."
   :group 'dired-sidebar)
 
 ;; Internal
-
-(defvar dired-sidebar-basedir (file-name-directory load-file-name)
-  "Store the directory dired-sidebar.el was loaded from.")
-
-(defvar dired-sidebar-icons-dir (format "%sicons/" dired-sidebar-basedir)
-  "Store the icons directory of `dired-sidebar'.")
-
-(defvar dired-sidebar-alist '()
-  "An alist that maps from frame to currently opened `dired-sidebar' buffer.")
 
 (defvar-local dired-sidebar-stale-buffer-timer nil
   "Timer used for setting `dired-sidebar-check-for-stale-buffer-p'.
@@ -532,6 +519,15 @@ Works around marker pointing to wrong buffer in Emacs 25."
            dired-sidebar-follow-file-idle-delay
            t #'dired-sidebar-follow-file)))
 
+  (when dired-sidebar-use-omit-mode-integration
+    (unless (memq 'dired-omit-mode
+                  dired-sidebar-special-refresh-commands)
+      (push 'dired-omit-mode dired-sidebar-special-refresh-commands))
+    (advice-add 'dired-subtree-cycle
+                :around 'dired-sidebar-omit-after-dired-subtree-cycle)
+    (advice-add 'dired-subtree-toggle
+                :around 'dired-sidebar-omit-after-dired-subtree-cycle))
+
   ;; This comment is taken from `dired-readin'.
   ;; Begin --- Copied comment from dired.el.
   ;; Must first make alist buffer local and set it to nil because
@@ -542,7 +538,6 @@ Works around marker pointing to wrong buffer in Emacs 25."
 
   (dired-unadvertise (dired-current-directory))
   (dired-sidebar-update-buffer-name)
-  (dired-sidebar-update-state (current-buffer))
 
   ;; Move setting theme until the end after `dired-sidebar' has set up
   ;; its directory structure.
@@ -558,6 +553,13 @@ Works around marker pointing to wrong buffer in Emacs 25."
             (autoloadp (symbol-function 'all-the-icons-dired-mode))))
       (with-no-warnings
         (all-the-icons-dired-mode)))
+     ((and (eq dired-sidebar-theme 'nerd-icons)
+           (display-graphic-p)
+           (or
+            (fboundp 'nerd-icons-dired-mode)
+            (autoloadp (symbol-function 'nerd-icons-dired-mode))))
+      (with-no-warnings
+        (nerd-icons-dired-mode)))
      (:default :no-theme))))
 
 ;; User Interface
@@ -678,16 +680,14 @@ This is dependent on `dired-subtree-cycle'."
     (with-current-buffer buffer
       (if (eq major-mode 'dired-sidebar-mode)
           (dired-build-subdir-alist)
-        (dired-sidebar-mode)))
-    (dired-sidebar-update-state buffer)))
+        (dired-sidebar-mode)))))
 
 ;;;###autoload
 (defun dired-sidebar-hide-sidebar ()
   "Hide the sidebar in the selected frame."
   (interactive)
-  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
-    (delete-window (get-buffer-window buffer))
-    (dired-sidebar-update-state nil)))
+  (when-let* ((buffer (dired-sidebar-buffer)))
+    (delete-window (get-buffer-window buffer))))
 
 ;;;###autoload
 (defun dired-sidebar-jump-to-sidebar ()
@@ -702,7 +702,7 @@ If it's not showing, act as `dired-sidebar-toggle-sidebar'."
 
 (defun dired-sidebar-find-file (&optional dir)
   "Wrapper over `dired-find-file'.
-Optional argument DIR Fine file using DIR of available.
+Optional argument DIR: Find file using DIR if available.
 
 With prefix argument, use `dired-sidebar-alternate-select-window-function' for
 window selection."
@@ -719,15 +719,12 @@ window selection."
          (let ((buf-name (dired-sidebar-buffer-name
                           dired-file-name)))
            (if (dired-sidebar-buffer-exists-p buf-name)
-               (progn
-                 (switch-to-buffer buf-name)
-                 (dired-sidebar-update-state (current-buffer)))
+               (switch-to-buffer buf-name)
              (if (and dired-sidebar-use-one-instance (file-directory-p dired-file-name))
                  (find-alternate-file dired-file-name)
                ;; Copied from `dired-find-file'.
                (find-file dired-file-name))
-             (dired-sidebar-mode)
-             (dired-sidebar-update-state (current-buffer)))))
+             (dired-sidebar-mode))))
       ;; Select the sidebar window so that `next-window' is consistent
       ;; in picking the window next to the sidebar.
       ;; This is useful for when `dired-sidebar-find-file' is called
@@ -769,14 +766,11 @@ Select alternate window using `dired-sidebar-alternate-select-window-function'."
           (up (file-name-directory (directory-file-name dir)))
           (up-name (dired-sidebar-buffer-name up)))
      (if (dired-sidebar-buffer-exists-p up-name)
-         (progn
-           (switch-to-buffer up-name)
-           (dired-sidebar-update-state (current-buffer)))
+         (switch-to-buffer up-name)
        (if dired-sidebar-use-one-instance
            (find-alternate-file "..")
          (dired-up-directory))
-       (dired-sidebar-mode)
-       (dired-sidebar-update-state (current-buffer)))
+       (dired-sidebar-mode))
      (let ((default-directory up))
        (dired-goto-file dir)))))
 
@@ -829,7 +823,7 @@ the relevant file-directory clicked on by the mouse."
     ;; Use `project' if `projectile' is not loaded yet.
     ;; `projectile' is a big package and takes a while to load so it's better
     ;; to defer loading it as long as possible (until the user chooses).
-    (dired-sidebar-if-let* ((pr (project-current)))
+    (if-let* ((pr (project-current)))
         ;; It can happen, at least in Emacs 27.1, that
         ;; `project-current` give a non-nil result, while
         ;; `project-root` is undefined. Fallback to assuming that the
@@ -857,7 +851,7 @@ the relevant file-directory clicked on by the mouse."
   "Get or create a `dired-sidebar' buffer matching ROOT."
   (interactive)
   (let ((name (dired-sidebar-buffer-name root)))
-    (dired-sidebar-if-let* ((existing-buffer (get-buffer name)))
+    (if-let* ((existing-buffer (get-buffer name)))
         existing-buffer
       (let ((buffer (dired-noselect root)))
         ;; When opening a sidebar while in a dired buffer that matches
@@ -907,13 +901,6 @@ Set font to a variable width (proportional) in the current buffer."
   (rename-buffer
    (dired-sidebar-buffer-name (dired-current-directory))))
 
-(defun dired-sidebar-update-state (buffer &optional f)
-  "Update current state with BUFFER for sidebar in F or selected frame."
-  (let ((frame (or f (selected-frame))))
-    (if (assq frame dired-sidebar-alist)
-        (setcdr (assq frame dired-sidebar-alist) buffer)
-      (push `(,frame . ,buffer) dired-sidebar-alist))))
-
 (defun dired-sidebar-showing-sidebar-p (&optional f)
   "Whether F or selected frame is showing a sidebar.
 
@@ -921,31 +908,20 @@ Check if F or selected frame contains a sidebar and return
 corresponding buffer if buffer has a window attached to it.
 
 Return buffer if so."
-  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer f)))
+  (when-let* ((buffer (dired-sidebar-buffer f)))
     (get-buffer-window buffer)))
 
-(defun dired-sidebar-buffer (&optional f)
-  "Return the current sidebar buffer in F or selected frame.
-
-This can return nil if the buffer has been killed."
-  (let* ((frame (or f (selected-frame)))
-         (buffer (alist-get frame dired-sidebar-alist)))
-    ;; The buffer can be killed for a variety of reasons.
-    ;; This side effect is kind of messy but it's the simplest place
-    ;; to put the clean up code for `dired-sidebar-alist'.
-    (if (buffer-live-p buffer)
-        buffer
-      ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Association-Lists.html
-      ;; Documentation for `assq-delete-all'.
-      ;; What kind of API is this?? :()
-      ;; Why does it only modify 'often' and not 'always'? ¯\_(ツ)_/¯
-      ;; It returns the shortened alist, and often modifies the original list
-      ;; structure of alist.
-      ;; For correct results, use the return value of assq-delete-all rather
-      ;; than looking at the saved value of alist.
-      (setq dired-sidebar-alist
-            (assq-delete-all frame dired-sidebar-alist))
-      nil)))
+(defun dired-sidebar-buffer (&optional _frame)
+  "Return the current sidebar buffer using `window-list'."
+  (if-let* ((windows
+             (seq-filter
+              (lambda (window)
+                (with-current-buffer (window-buffer window)
+                  (eq major-mode 'dired-sidebar-mode)))
+              (window-list)))
+            (buffer (window-buffer (car windows))))
+      buffer
+    nil))
 
 (defun dired-sidebar-switch-to-dir (dir)
   "Update buffer with DIR as root."
@@ -967,7 +943,7 @@ Optional argument NOCONFIRM Pass NOCONFIRM on to `dired-buffer-stale-p'."
 
 (defun dired-sidebar-refresh-buffer (&rest _)
   "Refresh sidebar buffer."
-  (dired-sidebar-when-let* ((sidebar (dired-sidebar-buffer)))
+  (when-let* ((sidebar (dired-sidebar-buffer)))
     (with-current-buffer sidebar
       (let ((auto-revert-verbose nil))
         (ignore auto-revert-verbose) ;; Make byte compiler happy.
@@ -989,7 +965,7 @@ both accounting for the currently selected window."
       (let ((root (dired-sidebar-get-dir-to-show)))
         (dired-sidebar-switch-to-dir root)
         (when dired-sidebar-follow-file-at-point-on-toggle-open
-          (dired-sidebar-when-let* ((file (dired-sidebar-get-file-to-show)))
+          (when-let* ((file (dired-sidebar-get-file-to-show)))
             (dired-sidebar-point-at-file file root)))))))
 
 (defun dired-sidebar-default-alternate-select-window ()
@@ -1016,8 +992,8 @@ both accounting for the currently selected window."
           (ibuffer-current-buffer))
      (let ((buffer-at-point (ibuffer-current-buffer)))
        (if (fboundp 'ibuffer-projectile-root)
-           (dired-sidebar-if-let* ((ibuffer-projectile-root
-                                    (ibuffer-projectile-root buffer-at-point)))
+           (if-let* ((ibuffer-projectile-root
+                      (ibuffer-projectile-root buffer-at-point)))
                (cdr ibuffer-projectile-root)
              (with-current-buffer buffer-at-point
                default-directory))
@@ -1079,13 +1055,20 @@ This is somewhat experimental/hacky."
 (defun dired-sidebar-redisplay-icons ()
   "Redisplay icon themes unless over TRAMP."
   (when (dired-sidebar-can-display-icons)
-    (when (and (eq dired-sidebar-theme 'icons)
-               (fboundp 'all-the-icons-dired--refresh))
+    (cond
+     ((and (eq dired-sidebar-theme 'icons)
+           (fboundp 'all-the-icons-dired--refresh))
       ;; Refresh `all-the-icons-dired'.
       (dired-sidebar-revert)
       (all-the-icons-dired--refresh))
-    (when (dired-sidebar-using-tui-p)
-      (dired-sidebar-tui-update-with-delay))))
+     ((and (eq dired-sidebar-theme 'nerd-icons)
+           (fboundp 'nerd-icons-dired--refresh))
+      ;; Refresh `nerd-icons-dired'.
+      (dired-sidebar-revert)
+      (nerd-icons-dired--refresh))
+     ((dired-sidebar-using-tui-p)
+      (dired-sidebar-tui-update-with-delay))
+     (:default nil))))
 
 (defun dired-sidebar-advice-hide-temporarily (f &rest args)
   "A function meant to be used with advice to temporarily hide itself.
@@ -1110,6 +1093,19 @@ after."
                ;; since we made it buffer local earlier.
                (not (memq mode (default-value 'dired-mode-hook))))
              dired-sidebar-block-icon-display-modes)))
+
+(defvar dired-omit-mode)
+(defun dired-sidebar-omit-after-dired-subtree-cycle (f &rest args)
+  "Attempt to handle `dired-omit-mode' when applying F.
+
+If `dired-omit-mode' is null, the user isn't interested, so continue as normal.
+Otherwise, try to call `dired-omit-mode' after function runs."
+  (if (and (fboundp 'dired-omit-mode)
+           (bound-and-true-p dired-omit-mode))
+      (let ((result (apply f args)))
+        (dired-omit-mode)
+        result)
+    (apply f args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Text User Interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1158,7 +1154,7 @@ after."
 
 (defun dired-sidebar-tui-update ()
   "Workhorse function to update tui interface."
-  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
+  (when-let* ((buffer (dired-sidebar-buffer)))
     (with-current-buffer buffer
       (dired-sidebar-revert)
       (when dired-sidebar-recenter-cursor-on-tui-update
@@ -1166,8 +1162,8 @@ after."
 
 (defun dired-sidebar-revert (&rest _)
   "Wrapper around `dired-revert' but saves window position."
-  (dired-sidebar-when-let* ((window (get-buffer-window
-                                     (dired-sidebar-buffer))))
+  (when-let* ((window (get-buffer-window
+                       (dired-sidebar-buffer))))
     (with-selected-window window
       (let ((old-window-start (window-start)))
         (when (dired-sidebar-using-tui-p)
@@ -1177,7 +1173,7 @@ after."
 
 (defun dired-sidebar-tui-reset-in-sidebar (&rest _)
   "Runs `dired-sidebar-tui-dired-reset' in current `dired-sidebar' buffer."
-  (dired-sidebar-when-let* ((buffer (dired-sidebar-buffer)))
+  (when-let* ((buffer (dired-sidebar-buffer)))
     (with-current-buffer buffer
       (dired-sidebar-tui-dired-reset))))
 
@@ -1226,7 +1222,7 @@ This is an exact copy of `wdired-change-to-dired-mode' but changes the
     (remove-text-properties
      (point-min) (point-max)
      '(front-sticky nil rear-nonsticky nil read-only nil keymap nil)))
-  (use-local-map dired-mode-map)
+  (use-local-map dired-sidebar-mode-map)
   (force-mode-line-update)
   (setq buffer-read-only t)
   (setq major-mode 'dired-sidebar-mode)
