@@ -1,0 +1,2 @@
+;; Generated package description from vertico-posframe.el  -*- no-byte-compile: t -*-
+(define-package "vertico-posframe" "0.8.0" "Using posframe to show Vertico" '((emacs "26.0") (posframe "1.4.0") (vertico "1.10")) :commit "781ee08f8d92f640dff8a0d8838b67a13a391846" :authors '(("Feng Shu" . "tumashu@163.com")) :maintainer '("Feng Shu" . "tumashu@163.com") :keywords '("abbrev" "convenience" "matching" "vertico") :url "https://github.com/tumashu/vertico-posframe")
