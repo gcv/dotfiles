@@ -140,7 +140,10 @@
   (set-syntax-table racket-mode-syntax-table)
   (setq-local multibyte-syntax-as-symbol t)
   (setq-local parse-sexp-ignore-comments t)
-  (setq-local syntax-propertize-function #'racket-syntax-propertize-function)
+  (setq-local syntax-propertize-function #'racket-syntax-propertize)
+  (add-hook 'syntax-propertize-extend-region-functions
+            #'racket-syntax-propertize-extend-region
+            t t)
   (syntax-propertize (point-max)) ;for e.g. paredit: see issue #222
   ;; -----------------------------------------------------------------
   ;; REPL
@@ -197,7 +200,10 @@
   (add-hook 'xref-backend-functions
             #'racket-mode-xref-backend-function
             nil t)
-  (setq racket-submodules-at-point-function #'racket-submodules-at-point-text-sexp))
+  (setq racket-submodules-at-point-function #'racket-submodules-at-point-text-sexp)
+  (when (boundp 'paredit-space-for-delimiter-predicates)
+    (setq-local paredit-space-for-delimiter-predicates
+                (list #'racket--paredit-space-for-delimiter-predicate))))
 
 ;;;###autoload
 (progn

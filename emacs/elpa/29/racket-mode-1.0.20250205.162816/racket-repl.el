@@ -239,79 +239,87 @@ live prompt this marker will be at `point-max'.")
 (defun racket--repl-insert-output (kind value)
   (let ((moving (= (point) racket--repl-output-mark))
         (inhibit-read-only t))
+    ;; Previous chunks of output may have ended with a rear-nonsticky
+    ;; property to allow input to follow. Now that we're adding more
+    ;; output, remove that property so there are no read/write "seams"
+    ;; between chunks.
+    (let ((inhibit-modification-hooks t)) ;avoid after-change: #731
+      (remove-text-properties (point-min)
+                              (point-max)
+                              '(rear-nonsticky nil)))
     (save-excursion
       (goto-char racket--repl-output-mark)
       (let ((pt (point)))
-        ;; Previous chunks of output may have ended with a
-        ;; rear-nonsticky property to allow input to follow. Now that
-        ;; we're adding more output, remove that property so there are
-        ;; no read/write "seams" between chunks.
-        (remove-text-properties (point-min) (point) '(rear-nonsticky nil))
         (cl-flet*
-            ((fresh-line () (unless (bolp) (newline)))
-             (faced (str face) (propertize str 'font-lock-face face))
-             (insert-faced (str face) (insert (faced str face)))
-             (insert-filtered (str face) (insert (racket--repl-filter-output
-                                                  (faced str face)))))
-          (cl-case kind
-            ((run)
+            ((faced (str face)
+               (propertize str 'font-lock-face face))
+             (insert-faced (str face &optional no-fresh-line)
+               (let ((str (faced str face)))
+                 (insert (if (or no-fresh-line (bolp))
+                             str
+                           (concat "\n" str)))))
+             (insert-filtered (str face)
+               (insert (racket--repl-filter-output
+                        (faced str face)))))
+          (pcase kind
+            ('run
              (racket--repl-delete-prompt-mark 'abandon)
              (unless (equal value "")
-               (fresh-line)
                (insert-faced (format "————— run %s —————\n" value) 'racket-repl-message)))
-            ((prompt)
+            ('prompt
              (racket--repl-make-prompt-mark value))
-            ((message)
-             (fresh-line)
+            ('message
              (insert-faced value 'racket-repl-message)
              (unless (bolp) (newline)))
-            ((exit)
+            ('exit
              (racket--repl-delete-prompt-mark 'abandon)
-             (fresh-line)
              (insert-faced value 'racket-repl-message)
              (unless (bolp) (newline))
-             (setq moving t) ;leave point after, for tests
+             (setq moving t)        ;leave point after, for tests
              (setq racket--repl-session-id nil))
-            ((value)
-             (insert-faced value 'racket-repl-value))
-            ((value-special)
-             (pcase-let ((`(image . ,file) value))
-               (racket--repl-insert-image file)))
-            ((error)
+            ('value
+             (insert-faced value 'racket-repl-value t))
+            ('value-special
+             (pcase value
+               (`(image . ,file)
+                (racket--repl-insert-image file))
+               (value
+                (insert-faced (format "%s" value) 'racket-repl-value t))))
+            ('error
              (pcase value
                (`(,msg ,srclocs (,context-kind . ,context-names-and-locs))
-                (fresh-line)
-                (insert-faced msg 'racket-repl-error-message)
-                (newline)
-                ;; Heuristic: When something supplies exn-srclocs,
-                ;; show those only. Otherwise show context if any.
-                ;; This seems to work well for most runtime
-                ;; exceptions, as well as for rackunit test failures
-                ;; (where the srcloc suffices and the context esp
-                ;; w/errortrace is useless noise).
-                (cond (srclocs
-                       (dolist (loc srclocs)
-                         (insert " ")
-                         (insert (racket--format-error-location loc))
-                         (newline)))
-                      (context-names-and-locs
-                       (insert-faced (format "Context (%s):" context-kind)
-                                     'racket-repl-error-message)
-                       (newline)
-                       (dolist (v context-names-and-locs)
-                         (pcase-let ((`(,name . ,loc) v))
-                           (insert " ")
-                           (insert (racket--format-error-location loc))
-                           (insert " ")
-                           (when name
-                             (insert-faced name 'racket-repl-error-label)))
-                         (newline)))))))
-            ((stdout)
+                (combine-after-change-calls
+                  (insert-faced msg 'racket-repl-error-message)
+                  (newline)
+                  ;; Heuristic: When something supplies exn-srclocs,
+                  ;; show those only. Otherwise show context if any.
+                  ;; This seems to work well for most runtime
+                  ;; exceptions, as well as for rackunit test failures
+                  ;; (where the srcloc suffices and the context esp
+                  ;; w/errortrace is useless noise).
+                  (cond
+                   (srclocs
+                    (dolist (loc srclocs)
+                      (insert " ")
+                      (insert (racket--format-error-location loc))
+                      (newline)))
+                   (context-names-and-locs
+                    (insert-faced (format "Context (%s):" context-kind)
+                                  'racket-repl-error-message)
+                    (newline)
+                    (dolist (v context-names-and-locs)
+                      (pcase-let ((`(,name . ,loc) v))
+                        (insert " ")
+                        (insert (racket--format-error-location loc))
+                        (insert " ")
+                        (when name
+                          (insert-faced name 'racket-repl-error-label t)))
+                      (newline))))))))
+            ('stdout
              (insert-filtered value 'racket-repl-stdout))
-            ((stderr)
+            ('stderr
              (insert-filtered value 'racket-repl-stderr))
-            (otherwise
-             (fresh-line)
+            (_
              (insert-faced value 'racket-repl-message))))
         (unless (eq kind 'prompt)
           (add-text-properties pt (point)
@@ -1211,22 +1219,36 @@ to supply this quickly enough or at all."
 
 ;;; eldoc
 
+(defun racket--repl-in-input-p (pos)
+  (or (eq 'input (field-at-pos pos))
+      (when-let (prompt-end (racket--repl-prompt-mark-end))
+        (<= prompt-end pos))))
+
 (defun racket-repl-eldoc-point (callback &rest _more)
   "Call eldoc CALLBACK about the identifier at point.
 A value for the variable `eldoc-documentation-functions'. Use
 information from back end \"type\" command."
-  (when (racket--cmd-open-p)
-    (racket--eldoc-type callback (point))))
+  (when (and (racket--cmd-open-p)
+             (racket--repl-in-input-p (point)))
+    (let ((pos (if (eq 32 (char-before))
+                   (point)
+                 (condition-case _
+                     (let ((pos (save-excursion
+                                  (backward-sexp)
+                                  (point))))
+                       (if (racket--repl-in-input-p pos)
+                           pos
+                         (point)))
+                   (scan-error (point))))))
+      (racket--eldoc-type callback pos))))
 
 (defun racket-repl-eldoc-sexp-app (callback &rest _more)
   "Call eldoc CALLBACK about sexp application around point.
 A value for the variable `eldoc-documentation-functions'. Use
 information from back end \"type\" command."
   (when (and (racket--cmd-open-p)
+             (racket--repl-in-input-p (point))
              (> (point) (point-min)))
-    ;; Preserve point during the dynamic extent of the eldoc calls,
-    ;; because things like eldoc-box may dismiss the UI if they notice
-    ;; point has moved.
     (when-let (pos (condition-case _
                        (save-excursion
                          (backward-up-list)
@@ -1242,7 +1264,7 @@ the surface syntax, or Typed Racket type information."
   (condition-case _
       (let* ((end (save-excursion (progn (goto-char pos) (forward-sexp) (point))))
              (thing (buffer-substring-no-properties pos end)))
-        (when thing
+        (when (and thing (not (string= thing "")))
           (when-let (str (racket--cmd/await
                           (racket--repl-session-id)
                           `(type namespace ,thing)))
@@ -1487,7 +1509,10 @@ identifier bindings and modules from the REPL's namespace.
   (add-hook 'kill-emacs-hook #'racket-repl-write-all-histories nil t)
   (add-hook 'xref-backend-functions #'racket-repl-xref-backend-function nil t)
   (add-to-list 'semantic-symref-filepattern-alist
-               '(racket-repl-mode "*.rkt" "*.rktd" "*.rktl")))
+               '(racket-repl-mode "*.rkt" "*.rktd" "*.rktl"))
+  (when (boundp 'paredit-space-for-delimiter-predicates)
+    (setq-local paredit-space-for-delimiter-predicates
+                (list #'racket--paredit-space-for-delimiter-predicate))))
 
 (defun racket-repl-write-all-histories ()
   "Call `racket-repl-write-history' for all `racket-repl-mode' buffers.

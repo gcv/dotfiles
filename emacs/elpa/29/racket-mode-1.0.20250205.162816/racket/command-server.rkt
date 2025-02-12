@@ -18,8 +18,7 @@
          "repl-session.rkt"
          (only-in "scribble.rkt"
                   bluebox-command
-                  doc-index
-                  libs-exporting-documented)
+                  doc-search)
          "util.rkt")
 
 (lazy-require
@@ -141,11 +140,10 @@
     [`(macro-stepper ,path ,str ,pol)  (macro-stepper path str pol)]
     [`(macro-stepper/next ,what)       (macro-stepper/next what)]
     [`(module-names)                   (module-names)]
-    [`(requires/tidy ,reqs)            (requires/tidy reqs)]
-    [`(requires/trim ,path-str ,reqs)  (requires/trim path-str reqs)]
-    [`(requires/base ,path-str ,reqs)  (requires/base path-str reqs)]
-    [`(requires/find ,str)             (libs-exporting-documented str)]
-    [`(doc-index ,etag)                (doc-index etag)]
+    [`(requires/tidy ,path-str)        (requires/tidy path-str)]
+    [`(requires/trim ,path-str)        (requires/trim path-str)]
+    [`(requires/base ,path-str)        (requires/base path-str)]
+    [`(doc-search ,prefix)             (doc-search prefix)]
     [`(hash-lang . ,more)              (apply hash-lang more)]
     [`(pkg-list)                       (package-list)]
     [`(pkg-details ,str)               (package-details str)]

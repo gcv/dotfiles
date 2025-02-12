@@ -197,6 +197,44 @@ re-tokenization has progressed sufficiently.")
 
 (defvar-local racket-hash-lang-mode-lighter "#lang")
 
+(defconst racket--agnostic-syntax-table
+  (let ((table (make-syntax-table)))
+    ;; From Emacs Lisp Info node "Syntax Table Internals":
+    ;;
+    ;;     Code Class
+    ;;     0    whitespace
+    ;;     1    punctuation
+    ;;     2    word
+    ;;     3    symbol
+    ;;     4    open parenthesis
+    ;;     5    close parenthesis
+    (map-char-table (lambda (key code+char)
+                      (unless (<= 0 (car code+char) 5)
+                        (aset table key '(3))))
+                    table)
+    table)
+  "Like `standard-syntax-table' but even simpler.
+
+The only syntax categories in this table are whitespace,
+punctuation, word, symbol, and open/close parens. Chars with any
+other syntax are changed to symbol syntax.
+
+For example we change all string-quote syntax to symbol, because
+the chars used to delimit strings vary among programming
+languages. Although that example happens to be the only practical
+difference from `standard-syntax-table', today, we still make a
+generalized pass over it to be sure.
+
+Note: Open/close paren syntax is preserved on the theory that,
+although the /meaning/ of those characters may vary among langs,
+their use as paired delimiters is likely universal, and it is
+useful to support various Emacs features such as
+rainbow-delimiters.
+
+Note: `standard-syntax-table' is a better choice for spans lexed
+as \"text\" tokens, because ?\" is definitely a string delimiter
+in English.")
+
 ;;;###autoload
 (define-derived-mode racket-hash-lang-mode prog-mode
   'racket-hash-lang-mode-lighter
@@ -226,7 +264,7 @@ A discussion of the information provided by a Racket language:
   (add-hook 'kill-buffer-hook
             #'racket-mode-maybe-offer-to-kill-repl-buffer
             nil t)
-  (set-syntax-table racket--plain-syntax-table)
+  (set-syntax-table racket--agnostic-syntax-table)
   ;; Tell `parse-partial-sexp' to consider syntax-table text
   ;; properties.
   (setq-local parse-sexp-lookup-properties t)
@@ -262,6 +300,9 @@ A discussion of the information provided by a Racket language:
   (setq-local imenu-create-index-function nil)
   (setq-local completion-at-point-functions nil) ;rely on racket-xp-mode
   (setq racket-submodules-at-point-function nil) ;might change in on-new-lang
+  (when (boundp 'paredit-space-for-delimiter-predicates)
+    (setq-local paredit-space-for-delimiter-predicates
+                (list #'racket--paredit-space-for-delimiter-predicate)))
   ;; Create back end hash-lang object.
   ;;
   ;; On the one hand, `racket--cmd/await' would be simpler to use
@@ -297,7 +338,7 @@ A discussion of the information provided by a Racket language:
        (setq-local racket--hash-lang-id maybe-id)
        ;; These need non-nil `racket--hash-lang-id':
        (setq-local font-lock-fontify-region-function #'racket--hash-lang-fontify-region)
-       (add-hook 'after-change-functions #'racket--hash-lang-after-change-hook t t)
+       (add-hook 'after-change-functions #'racket--hash-lang-after-change t t)
        (add-hook 'kill-buffer-hook #'racket--hash-lang-delete t t)
        (add-hook 'change-major-mode-hook #'racket--hash-lang-delete t t)
        (setq-local buffer-read-only nil))
@@ -342,8 +383,8 @@ live back end, downgrade them all to `prog-mode'."
 ;;; Updates: Front end --> back end
 
 (defun racket--hash-lang-repl-buffer-string (beg end)
-  "Like `buffer-substring-no-properties' treat as whitespace,
-preserving only line breaks for indentation, everything that is
+  "Like `buffer-substring-no-properties' but treat as whitespace --
+preserving only line breaks for indentation -- everything that is
 not a value output since the last run, or input after the last
 live prompt."
   (let ((result-str ""))
@@ -362,21 +403,22 @@ live prompt."
                                               raw)))))))
     result-str))
 
-(defun racket--hash-lang-after-change-hook (beg end len)
-  ;;;(message "racket--hash-lang-after-change-hook %s %s %s" beg end len)
+(defun racket--hash-lang-after-change (beg end len)
+  ;;;(message "racket--hash-lang-after-change %s %s %s" beg end len)
   ;; This might be called as frequently as once per single changed
   ;; character.
   (when racket--hash-lang-id
-    (racket--cmd/async
-     nil
-     `(hash-lang update
-                 ,racket--hash-lang-id
-                 ,(cl-incf racket--hash-lang-generation)
-                 ,beg
-                 ,len
-                 ,(if (eq major-mode 'racket-repl-mode)
-                      (racket--hash-lang-repl-buffer-string beg end)
-                    (buffer-substring-no-properties beg end))))))
+    (let ((str (if (eq major-mode 'racket-repl-mode)
+                   (racket--hash-lang-repl-buffer-string beg end)
+                 (buffer-substring-no-properties beg end))))
+      (racket--cmd/async
+       nil
+       `(hash-lang update
+                   ,racket--hash-lang-id
+                   ,(cl-incf racket--hash-lang-generation)
+                   ,beg
+                   ,len
+                   ,str)))))
 
 ;;; Notifications: Front end <-- back end
 
@@ -411,7 +453,7 @@ lang's attributes that we care about have changed."
       ;; properties we add from tokens.
       (set-syntax-table (if (plist-get plist 'racket-grouping)
                             racket-mode-syntax-table
-                          racket--plain-syntax-table))
+                          racket--agnostic-syntax-table))
       ;; Similarly for `forward-sexp-function'. The
       ;; drracket:grouping-position protocol doesn't support a nuance
       ;; where a `forward-sexp-function' should signal an exception
@@ -507,13 +549,15 @@ belt+suspenders here. 2. It makes moot the value of
 that need be set."
   ;;;(message "racket--hash-lang-tokens+fontify %S %S <tokens>" beg end)
   (with-silent-modifications
-    ;; As this removes face property do it before adding face props
-    ;; from tokens.
-    (save-excursion
-      (font-lock-unfontify-region beg end))
-    (racket--hash-lang-put-tokens tokens)
-    (save-excursion
-      (font-lock-fontify-keywords-region beg end))))
+    (let ((beg (min beg (point-max)))
+          (end (min end (point-max))))
+      ;; As this removes face property do it before adding face props
+      ;; from tokens.
+      (save-excursion
+        (font-lock-unfontify-region beg end))
+      (racket--hash-lang-put-tokens tokens)
+      (save-excursion
+        (font-lock-fontify-keywords-region beg end)))))
 
 (defun racket--hash-lang-put-tokens (tokens)
   ;;;(message "racket--hash-lang-put-tokens %S" tokens)
@@ -560,7 +604,7 @@ that need be set."
                (put-face beg end (racket--sexp-comment-face (get-face-at beg))))
               ('parenthesis (when (facep 'parenthesis)
                               (put-face beg end 'parenthesis)))
-              ('text (put-stx beg end racket--plain-syntax-table)
+              ('text (put-stx beg end (standard-syntax-table))
                      (put-face beg end racket-hash-lang-text))
               (kind
                (if-let (face (cdr (assq kind racket-hash-lang-token-face-alist)))
@@ -630,7 +674,7 @@ We never use `racket-indent-line' from traditional
 
 ;; Motion
 
-(defun racket-hash-lang-move (direction &optional count)
+(defun racket-hash-lang-move (direction count &optional scan-error-p)
   (let ((count (or count 1)))
     (pcase (racket--cmd/await       ; await = :(
             nil
@@ -643,9 +687,16 @@ We never use `racket-indent-line' from traditional
                         ,count))
       ((and (pred numberp) pos)
        (goto-char pos))
-      (_ (user-error "Cannot move %s%s" direction (if (memq count '(-1 0 1))
-                                                      ""
-                                                    (format " %s times" count)))))))
+      (_
+       (if scan-error-p
+           (signal 'scan-error
+                   (list (format "Cannot move %s" direction)
+                         (point) (point)))
+         (user-error "Cannot move %s%s"
+                     direction
+                     (if (memq count '(-1 0 1))
+                         ""
+                       (format " %s times" count))))))))
 
 (defun racket-hash-lang-backward (&optional count)
   "Like `backward-sexp' but uses #lang supplied navigation."
@@ -679,7 +730,7 @@ However other users don't need that, so we supply this
   (let* ((arg (or arg 1))
          (dir (if (< arg 0) 'backward 'forward))
          (cnt (abs arg)))
-    (racket-hash-lang-move dir cnt)))
+    (racket-hash-lang-move dir cnt t)))
 
 ;;; Pairs
 
@@ -888,6 +939,8 @@ rhombus\"."
       (set-syntax-table (with-current-buffer edit-buffer (syntax-table)))
       (setq-local syntax-propertize-function
                   (with-current-buffer edit-buffer syntax-propertize-function))
+      (setq-local syntax-propertize-extend-region-functions
+                  (with-current-buffer edit-buffer syntax-propertize-extend-region-functions))
       ;; font-lock
       (setq-local font-lock-keywords
                   (with-current-buffer edit-buffer font-lock-keywords))
@@ -904,8 +957,8 @@ rhombus\"."
                   (with-current-buffer edit-buffer forward-sexp-function))
       (racket-hash-lang-repl-mode (if hash-lang-p 1 -1)) ;keybindings
       (if hash-lang-p
-          (add-hook 'after-change-functions #'racket--hash-lang-after-change-hook t t)
-        (remove-hook 'after-change-functions  #'racket--hash-lang-after-change-hook t))
+          (add-hook 'after-change-functions #'racket--hash-lang-after-change t t)
+        (remove-hook 'after-change-functions  #'racket--hash-lang-after-change t))
       (setq-local racket-repl-submit-function
                   (if hash-lang-p #'racket-hash-lang-submit nil)))))
 

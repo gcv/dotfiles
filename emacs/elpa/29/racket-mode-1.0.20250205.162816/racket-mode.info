@@ -1,4 +1,4 @@
-This is doc4N5afI.info, produced by makeinfo version 6.8 from
+This is doc2l5VjJ.info, produced by makeinfo version 6.8 from
 racket-mode.texi.
 
 Copyright (C) 2013-2024 by Greg Hendershott.
@@ -10,7 +10,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: doc4N5afI.info,  Node: Top,  Next: Introduction,  Up: (dir)
+File: doc2l5VjJ.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
 Racket Mode
 ***********
@@ -333,7 +333,7 @@ All
 
 
 
-File: doc4N5afI.info,  Node: Introduction,  Next: Install Update and Uninstall,  Prev: Top,  Up: Top
+File: doc2l5VjJ.info,  Node: Introduction,  Next: Install Update and Uninstall,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -367,7 +367,7 @@ variety of Emacs major and minor modes, including:
 (https://www.paypal.me/greghendershott).
 
 
-File: doc4N5afI.info,  Node: Install Update and Uninstall,  Next: Configure,  Prev: Introduction,  Up: Top
+File: doc2l5VjJ.info,  Node: Install Update and Uninstall,  Next: Configure,  Prev: Introduction,  Up: Top
 
 2 Install, Update, and Uninstall
 ********************************
@@ -391,7 +391,7 @@ Stable”), and is available as a “rolling release” from NonGNU ELPA.
 * Update::
 
 
-File: doc4N5afI.info,  Node: Use Emacs 281 or newer with NonGNU ELPA,  Next: Configure Emacs to use MELPA,  Up: Install Update and Uninstall
+File: doc2l5VjJ.info,  Node: Use Emacs 281 or newer with NonGNU ELPA,  Next: Configure Emacs to use MELPA,  Up: Install Update and Uninstall
 
 2.1 Use Emacs 28.1 or newer with NonGNU ELPA
 ============================================
@@ -403,7 +403,7 @@ Install::.
    With older versions of Emacs, you can use MELPA.
 
 
-File: doc4N5afI.info,  Node: Configure Emacs to use MELPA,  Next: Install,  Prev: Use Emacs 281 or newer with NonGNU ELPA,  Up: Install Update and Uninstall
+File: doc2l5VjJ.info,  Node: Configure Emacs to use MELPA,  Next: Install,  Prev: Use Emacs 281 or newer with NonGNU ELPA,  Up: Install Update and Uninstall
 
 2.2 Configure Emacs to use MELPA
 ================================
@@ -427,7 +427,7 @@ instructions and the latest trouble-shooting tips, please see
      Please see <https://melpa.org/#/getting-started>.
 
 
-File: doc4N5afI.info,  Node: Install,  Next: Minimal Racket,  Prev: Configure Emacs to use MELPA,  Up: Install Update and Uninstall
+File: doc2l5VjJ.info,  Node: Install,  Next: Minimal Racket,  Prev: Configure Emacs to use MELPA,  Up: Install Update and Uninstall
 
 2.3 Install
 ===========
@@ -445,7 +445,7 @@ When Emacs is configured to use NonGNU ELPA or MELPA:
      Please see <https://melpa.org/#/getting-started>.
 
 
-File: doc4N5afI.info,  Node: Minimal Racket,  Next: Uninstall,  Prev: Install,  Up: Install Update and Uninstall
+File: doc2l5VjJ.info,  Node: Minimal Racket,  Next: Uninstall,  Prev: Install,  Up: Install Update and Uninstall
 
 2.4 Minimal Racket
 ==================
@@ -475,7 +475,7 @@ On the other hand, if you leave ‘gui-lib’ installed, you should be
 careful to run the Racket Mode back end using ‘xvfb-run racket’.
 
 
-File: doc4N5afI.info,  Node: Uninstall,  Next: Update,  Prev: Minimal Racket,  Up: Install Update and Uninstall
+File: doc2l5VjJ.info,  Node: Uninstall,  Next: Update,  Prev: Minimal Racket,  Up: Install Update and Uninstall
 
 2.5 Uninstall
 =============
@@ -486,7 +486,7 @@ To uninstall Racket Mode, simply type ‘M-x’ ‘package-delete’ ‘RET’
    You should probably also exit and restart Emacs.
 
 
-File: doc4N5afI.info,  Node: Update,  Prev: Uninstall,  Up: Install Update and Uninstall
+File: doc2l5VjJ.info,  Node: Update,  Prev: Uninstall,  Up: Install Update and Uninstall
 
 2.6 Update
 ==========
@@ -497,7 +497,7 @@ File: doc4N5afI.info,  Node: Update,  Prev: Uninstall,  Up: Install Update and U
 * Updating just Racket Mode::
 
 
-File: doc4N5afI.info,  Node: Upgrading all packages,  Next: Updating just Racket Mode,  Up: Update
+File: doc2l5VjJ.info,  Node: Upgrading all packages,  Next: Updating just Racket Mode,  Up: Update
 
 2.6.1 Upgrading all packages
 ----------------------------
@@ -524,7 +524,7 @@ section — here is how to do so:
      Please see <https://melpa.org/#/getting-started>.
 
 
-File: doc4N5afI.info,  Node: Updating just Racket Mode,  Prev: Upgrading all packages,  Up: Update
+File: doc2l5VjJ.info,  Node: Updating just Racket Mode,  Prev: Upgrading all packages,  Up: Update
 
 2.6.2 Updating just Racket Mode
 -------------------------------
@@ -543,7 +543,7 @@ on.
   3. *note Install:: again.  This will install the latest version.
 
 
-File: doc4N5afI.info,  Node: Configure,  Next: Architecture,  Prev: Install Update and Uninstall,  Up: Top
+File: doc2l5VjJ.info,  Node: Configure,  Next: Architecture,  Prev: Install Update and Uninstall,  Up: Top
 
 3 Configure
 ***********
@@ -583,7 +583,7 @@ might want to set ‘racket-program’ to a complete pathname.
 * Ligatures::
 
 
-File: doc4N5afI.info,  Node: Which major mode to use,  Next: Key bindings,  Up: Configure
+File: doc2l5VjJ.info,  Node: Which major mode to use,  Next: Key bindings,  Up: Configure
 
 3.1 Which major mode to use
 ===========================
@@ -641,7 +641,7 @@ initially for certain file extensions.  Also, in a buffer you can use
 them.
 
 
-File: doc4N5afI.info,  Node: Key bindings,  Next: Font-lock (syntax highlighting),  Prev: Which major mode to use,  Up: Configure
+File: doc2l5VjJ.info,  Node: Key bindings,  Next: Font-lock (syntax highlighting),  Prev: Which major mode to use,  Up: Configure
 
 3.2 Key bindings
 ================
@@ -658,7 +658,7 @@ wanted ‘F5’ to be an additional binding:
    Likewise for ‘racket-repl-mode-hook’ and ‘racket-repl-mode-map’.
 
 
-File: doc4N5afI.info,  Node: Font-lock (syntax highlighting),  Next: Completion at point,  Prev: Key bindings,  Up: Configure
+File: doc2l5VjJ.info,  Node: Font-lock (syntax highlighting),  Next: Completion at point,  Prev: Key bindings,  Up: Configure
 
 3.3 Font-lock (syntax highlighting)
 ===================================
@@ -689,7 +689,7 @@ you might do so because you prefer a simpler appearance.
      languages.).
 
 
-File: doc4N5afI.info,  Node: Completion at point,  Next: Completion in minibuffer,  Prev: Font-lock (syntax highlighting),  Up: Configure
+File: doc2l5VjJ.info,  Node: Completion at point,  Next: Completion in minibuffer,  Prev: Font-lock (syntax highlighting),  Up: Configure
 
 3.4 Completion at point
 =======================
@@ -732,7 +732,7 @@ following to your Emacs init file:
 ‘racket-mode’ and ‘racket-repl-mode’.
 
 
-File: doc4N5afI.info,  Node: Completion in minibuffer,  Next: Xref (definitions and references),  Prev: Completion at point,  Up: Configure
+File: doc2l5VjJ.info,  Node: Completion in minibuffer,  Next: Xref (definitions and references),  Prev: Completion at point,  Up: Configure
 
 3.5 Completion in minibuffer
 ============================
@@ -747,7 +747,7 @@ as helm, ivy, ido-completing-read+, vertico, and so on.
 simply install the ido-completing-read+ package.)
 
 
-File: doc4N5afI.info,  Node: Xref (definitions and references),  Next: Indent,  Prev: Completion in minibuffer,  Up: Configure
+File: doc2l5VjJ.info,  Node: Xref (definitions and references),  Next: Indent,  Prev: Completion in minibuffer,  Up: Configure
 
 3.6 Xref (definitions and references)
 =====================================
@@ -809,7 +809,7 @@ names, shortcut keys, and even a special buffer to navigate among
 references and visit each source location.
 
 
-File: doc4N5afI.info,  Node: Indent,  Next: paredit,  Prev: Xref (definitions and references),  Up: Configure
+File: doc2l5VjJ.info,  Node: Indent,  Next: paredit,  Prev: Xref (definitions and references),  Up: Configure
 
 3.7 Indent
 ==========
@@ -829,7 +829,7 @@ emacs-format-all-the-code
 (https://github.com/lassik/emacs-format-all-the-code).)
 
 
-File: doc4N5afI.info,  Node: paredit,  Next: smartparens,  Prev: Indent,  Up: Configure
+File: doc2l5VjJ.info,  Node: paredit,  Next: smartparens,  Prev: Indent,  Up: Configure
 
 3.8 paredit
 ===========
@@ -880,7 +880,7 @@ do this for all related keys:
        (define-key paredit-mode-map (kbd k) nil))
 
 
-File: doc4N5afI.info,  Node: smartparens,  Next: Appearance of parentheses,  Prev: paredit,  Up: Configure
+File: doc2l5VjJ.info,  Node: smartparens,  Next: Appearance of parentheses,  Prev: paredit,  Up: Configure
 
 3.9 smartparens
 ===============
@@ -896,7 +896,7 @@ it provides for Lisp modes generally and for Racket Mode specifically:
      (require 'smartparens-config)
 
 
-File: doc4N5afI.info,  Node: Appearance of parentheses,  Next: Edit buffers and REPL buffers,  Prev: smartparens,  Up: Configure
+File: doc2l5VjJ.info,  Node: Appearance of parentheses,  Next: Edit buffers and REPL buffers,  Prev: smartparens,  Up: Configure
 
 3.10 Appearance of parentheses
 ==============================
@@ -908,7 +908,7 @@ If you prefer parentheses to appear “dimmed”, see paren-face
 (https://melpa.org/#/rainbow-delimiters).
 
 
-File: doc4N5afI.info,  Node: Edit buffers and REPL buffers,  Next: eldoc,  Prev: Appearance of parentheses,  Up: Configure
+File: doc2l5VjJ.info,  Node: Edit buffers and REPL buffers,  Next: eldoc,  Prev: Appearance of parentheses,  Up: Configure
 
 3.11 Edit buffers and REPL buffers
 ==================================
@@ -941,7 +941,7 @@ if you wanted to make the REPL buffer appear in a new frame:
                     (inhibit-same-window . t)))
 
 
-File: doc4N5afI.info,  Node: eldoc,  Next: Start faster,  Prev: Edit buffers and REPL buffers,  Up: Configure
+File: doc2l5VjJ.info,  Node: eldoc,  Next: Start faster,  Prev: Edit buffers and REPL buffers,  Up: Configure
 
 3.12 eldoc
 ==========
@@ -974,7 +974,7 @@ frame) instead of the echo area.
 ‘eldoc-documentation-function’, singular.
 
 
-File: doc4N5afI.info,  Node: Start faster,  Next: Inserting Unicode math symbols,  Prev: eldoc,  Up: Configure
+File: doc2l5VjJ.info,  Node: Start faster,  Next: Inserting Unicode math symbols,  Prev: eldoc,  Up: Configure
 
 3.13 Start faster
 =================
@@ -983,7 +983,7 @@ You can use *note racket-mode-start-faster:: to make the Racket REPL
 start faster.
 
 
-File: doc4N5afI.info,  Node: Inserting Unicode math symbols,  Next: Ligatures,  Prev: Start faster,  Up: Configure
+File: doc2l5VjJ.info,  Node: Inserting Unicode math symbols,  Next: Ligatures,  Prev: Start faster,  Up: Configure
 
 3.14 Inserting Unicode math symbols
 ===================================
@@ -996,7 +996,7 @@ To insert various Unicode math symbols, you can:
      minor mode: *Note racket-input-mode::.
 
 
-File: doc4N5afI.info,  Node: Ligatures,  Prev: Inserting Unicode math symbols,  Up: Configure
+File: doc2l5VjJ.info,  Node: Ligatures,  Prev: Inserting Unicode math symbols,  Up: Configure
 
 3.15 Ligatures
 ==============
@@ -1011,7 +1011,7 @@ known work-around is to change the value of ‘racket-show-functions’ to
 something “boring” such as ‘(racket-show-echo-area)’.
 
 
-File: doc4N5afI.info,  Node: Architecture,  Next: Reference,  Prev: Configure,  Up: Top
+File: doc2l5VjJ.info,  Node: Architecture,  Next: Reference,  Prev: Configure,  Up: Top
 
 4 Architecture
 **************
@@ -1091,7 +1091,7 @@ normally be done by ‘raco pkg install’.  To address this: *Note
 racket-mode-start-faster::.
 
 
-File: doc4N5afI.info,  Node: Reference,  Next: Commands,  Prev: Architecture,  Up: Top
+File: doc2l5VjJ.info,  Node: Reference,  Next: Commands,  Prev: Architecture,  Up: Top
 
 5 Reference
 ***********
@@ -1106,7 +1106,7 @@ not be quite as nice or correct as in the previous sections.)
    • ‘C-h v’ and enter the name of a variable.
 
 
-File: doc4N5afI.info,  Node: Commands,  Next: Variables,  Prev: Reference,  Up: Top
+File: doc2l5VjJ.info,  Node: Commands,  Next: Variables,  Prev: Reference,  Up: Top
 
 6 Commands
 **********
@@ -1125,7 +1125,7 @@ File: doc4N5afI.info,  Node: Commands,  Next: Variables,  Prev: Reference,  Up: 
 * Other::
 
 
-File: doc4N5afI.info,  Node: Edit,  Next: Hash Langs,  Up: Commands
+File: doc2l5VjJ.info,  Node: Edit,  Next: Hash Langs,  Up: Commands
 
 6.1 Edit
 ========
@@ -1152,7 +1152,7 @@ File: doc4N5afI.info,  Node: Edit,  Next: Hash Langs,  Up: Commands
 * racket-complete-at-point::
 
 
-File: doc4N5afI.info,  Node: racket-mode,  Next: racket-insert-lambda,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-mode,  Next: racket-insert-lambda,  Up: Edit
 
 6.1.1 racket-mode
 -----------------
@@ -1161,36 +1161,36 @@ File: doc4N5afI.info,  Node: racket-mode,  Next: racket-insert-lambda,  Up: Edit
 
    Major mode for editing Racket source files.
 
-Key                                                                                                                                 Binding
-‘TAB’                                                                                                                               ‘indent-for-tab-command’
-‘C-M-u’                                                                                                                             *note racket-backward-up-list::
-‘C-c C-p’                                                                                                                           *note racket-cycle-paren-shapes::
-‘C-c C-s’ , ‘C-c C-.’                                                                                                               *note racket-describe-search::
-‘C-c C-d’                                                                                                                           *note racket-documentation-search::
-‘C-c C-z’                                                                                                                           ‘racket-edit-switch-to-repl’
-‘C-c C-e x’                                                                                                                         *note racket-expand-definition::
-‘C-c C-e f’                                                                                                                         *note racket-expand-file::
-‘C-c C-e e’                                                                                                                         *note racket-expand-last-sexp::
-‘C-c C-e r’                                                                                                                         *note racket-expand-region::
-‘C-c C-f’                                                                                                                           *note racket-fold-all-tests::
-‘)’ , ‘]’ , ‘}’                                                                                                                     *note racket-insert-closing::
-‘C-M-y’                                                                                                                             *note racket-insert-lambda::
-‘C-c C-l’                                                                                                                           *note racket-logger::
-‘C-c C-x C-f’                                                                                                                       *note racket-open-require-path::
-‘C-c C-o’                                                                                                                           *note racket-profile::
-‘C-c C-c’ , ‘C-c C-k’                                                                                                               *note racket-run-module-at-point::
-‘C-M-x’                                                                                                                             *note racket-send-definition::
-‘C-x C-e’                                                                                                                           *note racket-send-last-sexp::
-‘C-c C-r’                                                                                                                           *note racket-send-region::
-‘C-c C-t’                                                                                                                           *note racket-test::
-‘C-c C-u’                                                                                                                           *note racket-unfold-all-tests::
+Key                                                                                                                                     Binding
+‘TAB’                                                                                                                                   ‘indent-for-tab-command’
+‘C-M-u’                                                                                                                                 *note racket-backward-up-list::
+‘C-c C-p’                                                                                                                               *note racket-cycle-paren-shapes::
+‘C-c C-s’ or ‘C-c C-.’                                                                                                                  *note racket-describe-search::
+‘C-c C-d’                                                                                                                               *note racket-documentation-search::
+‘C-c C-z’                                                                                                                               ‘racket-edit-switch-to-repl’
+‘C-c C-e x’                                                                                                                             *note racket-expand-definition::
+‘C-c C-e f’                                                                                                                             *note racket-expand-file::
+‘C-c C-e e’                                                                                                                             *note racket-expand-last-sexp::
+‘C-c C-e r’                                                                                                                             *note racket-expand-region::
+‘C-c C-f’                                                                                                                               *note racket-fold-all-tests::
+‘)’ or ‘]’ or ‘}’                                                                                                                       *note racket-insert-closing::
+‘C-M-y’                                                                                                                                 *note racket-insert-lambda::
+‘C-c C-l’                                                                                                                               *note racket-logger::
+‘C-c C-x C-f’                                                                                                                           *note racket-open-require-path::
+‘C-c C-o’                                                                                                                               *note racket-profile::
+‘C-c C-c’ or ‘C-c C-k’                                                                                                                  *note racket-run-module-at-point::
+‘C-M-x’                                                                                                                                 *note racket-send-definition::
+‘C-x C-e’                                                                                                                               *note racket-send-last-sexp::
+‘C-c C-r’                                                                                                                               *note racket-send-region::
+‘C-c C-t’                                                                                                                               *note racket-test::
+‘C-c C-u’                                                                                                                               *note racket-unfold-all-tests::
 
    In addition to any hooks its parent mode ‘prog-mode’ might have run,
 this mode runs the hook ‘racket-mode-hook’, as the final or penultimate
 step during initialization.
 
 
-File: doc4N5afI.info,  Node: racket-insert-lambda,  Next: racket-insert-symbol,  Prev: racket-mode,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-insert-lambda,  Next: racket-insert-symbol,  Prev: racket-mode,  Up: Edit
 
 6.1.2 racket-insert-lambda
 --------------------------
@@ -1202,7 +1202,7 @@ File: doc4N5afI.info,  Node: racket-insert-lambda,  Next: racket-insert-symbol, 
    To insert Unicode symbols generally, see *note racket-input-mode::.
 
 
-File: doc4N5afI.info,  Node: racket-insert-symbol,  Next: racket-fold-all-tests,  Prev: racket-insert-lambda,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-insert-symbol,  Next: racket-fold-all-tests,  Prev: racket-insert-lambda,  Up: Edit
 
 6.1.3 racket-insert-symbol
 --------------------------
@@ -1219,7 +1219,7 @@ inserted are shown as annotations – a preview unlike what is currently
 provided by the Emacs UI for input method.
 
 
-File: doc4N5afI.info,  Node: racket-fold-all-tests,  Next: racket-unfold-all-tests,  Prev: racket-insert-symbol,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-fold-all-tests,  Next: racket-unfold-all-tests,  Prev: racket-insert-symbol,  Up: Edit
 
 6.1.4 racket-fold-all-tests
 ---------------------------
@@ -1229,7 +1229,7 @@ File: doc4N5afI.info,  Node: racket-fold-all-tests,  Next: racket-unfold-all-tes
    Fold (hide) all test submodules.
 
 
-File: doc4N5afI.info,  Node: racket-unfold-all-tests,  Next: racket-tidy-requires,  Prev: racket-fold-all-tests,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-unfold-all-tests,  Next: racket-tidy-requires,  Prev: racket-fold-all-tests,  Up: Edit
 
 6.1.5 racket-unfold-all-tests
 -----------------------------
@@ -1239,60 +1239,57 @@ File: doc4N5afI.info,  Node: racket-unfold-all-tests,  Next: racket-tidy-require
    Unfold (show) all test submodules.
 
 
-File: doc4N5afI.info,  Node: racket-tidy-requires,  Next: racket-trim-requires,  Prev: racket-unfold-all-tests,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-tidy-requires,  Next: racket-trim-requires,  Prev: racket-unfold-all-tests,  Up: Edit
 
 6.1.6 racket-tidy-requires
 --------------------------
 
 ‘M-x’ ‘racket-tidy-requires’
 
-   Make a single “require” form, modules sorted, one per line.
+   Make a single, sorted “require” form for each module.
 
-   The scope of this command is the innermost module around point,
-including the outermost module for a file using a “#lang” line.  All
-require forms within that module are combined into a single form.
-Within that form:
+   Use a single require-spec for each phase-level, sorted in this order:
+for-syntax, for-template, for-label, for-meta, and plain (phase 0).
 
-   • A single subform is used for each phase level, sorted in this
-     order: for-syntax, for-template, for-label, for-meta, and plain
-     (phase 0).
+   Within each phase-level, sort require-specs by module name.
 
-        • Within each level subform, the modules are sorted:
+   Format at most one module per line.
 
-             • Collection path modules – sorted alphabetically.
-
-             • Subforms such as only-in.
-
-             • Quoted relative requires – sorted alphabetically.
-
-   At most one required module is listed per line.
+   Simplify gratuitous require-specs.  For example reduce (only-in m) to
+m and elide (combine-in).
 
    See also: *note racket-trim-requires:: and *note
 racket-base-requires::.
 
 
-File: doc4N5afI.info,  Node: racket-trim-requires,  Next: racket-base-requires,  Prev: racket-tidy-requires,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-trim-requires,  Next: racket-base-requires,  Prev: racket-tidy-requires,  Up: Edit
 
 6.1.7 racket-trim-requires
 --------------------------
 
 ‘M-x’ ‘racket-trim-requires’
 
-   Like *note racket-tidy-requires:: but also deletes unnecessary
+   Like *note racket-tidy-requires:: but also delete unnecessary
 requires.
 
-   Note: This only works when the source file can be fully expanded with
-no errors.
+   Use macro-debugger/analysis/check-requires to analyze.
 
-   Note: This only works for requires at the top level of a source file
-using #lang.  It does NOT work for require forms inside module forms.
-Furthermore, it is not smart about module+ or module* forms – it might
-delete top level requires that are actually needed by such submodules.
+   The analysis:
+
+   • Needs the ‘macro-debugger-lib’ package.
+
+   • Only works when the source file can be fully expanded with no
+   errors.
+
+   • Only works for requires at the top level of a source file using
+   #lang – not for requires inside submodule forms.  Furthermore, the
+analysis is not smart about module+ or module* forms – it might delete
+outer requires that are actually needed by such submodules.
 
    See also: *note racket-base-requires::.
 
 
-File: doc4N5afI.info,  Node: racket-base-requires,  Next: racket-add-require-for-identifier,  Prev: racket-trim-requires,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-base-requires,  Next: racket-add-require-for-identifier,  Prev: racket-trim-requires,  Up: Edit
 
 6.1.8 racket-base-requires
 --------------------------
@@ -1301,52 +1298,45 @@ File: doc4N5afI.info,  Node: racket-base-requires,  Next: racket-add-require-for
 
    Change from “#lang racket” to “#lang racket/base”.
 
-   Adds explicit requires for imports that are provided by “racket” but
+   Using “racket/base” is a recommended optimization for Racket
+applications.  Loading all of “racket” is slower and uses more memory.
+
+   Add explicit requires for imports that are provided by “racket” but
 not by “racket/base”.
 
-   This is a recommended optimization for Racket applications.  Avoiding
-loading all of “racket” can reduce load time and memory footprint.
-
-   Also, as does *note racket-trim-requires::, this removes unneeded
-modules and tidies everything into a single, sorted require form.
-
-   Note: This only works when the source file can be fully expanded with
-no errors.
-
-   Note: This only works for requires at the top level of a source file
-using #lang.  It does NOT work for require forms inside module forms.
-Furthermore, it is not smart about module+ or module* forms – it might
-delete top level requires that are actually needed by such submodules.
+   Also do the equivalent of *note racket-trim-requires:: and ‘nil’.
+See those commands for additional notes and caveats.
 
    Note: Currently this only helps change “#lang racket” to “#lang
 racket/base”.  It does not help with other similar conversions, such as
 changing “#lang typed/racket” to “#lang typed/racket/base”.
 
 
-File: doc4N5afI.info,  Node: racket-add-require-for-identifier,  Next: racket-indent-line,  Prev: racket-base-requires,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-add-require-for-identifier,  Next: racket-indent-line,  Prev: racket-base-requires,  Up: Edit
 
 6.1.9 racket-add-require-for-identifier
 ---------------------------------------
 
 ‘M-x’ ‘racket-add-require-for-identifier’
 
-   Add a require for the identifier at point.
+   Add a require for an identifier.
 
-   When more than one module supplies an identifer with the same name,
-they are listed for you to choose one.  The list is sorted
-alphabetically, except modules starting with “racket/” and
-“typed/racket/” are sorted before others.
+   Useful when you know the name of an export but don’t remember from
+what module it is exported.
 
-   A “require” form is inserted into the buffer, followed by doing a
-*note racket-tidy-requires::.
+   After you choose an identifier, this command will:
 
-   Caveat: This works in terms of identifiers that are documented.  The
+   • Insert the identifier at point if not already there.
+
+   • Insert a “require” form and do *note racket-tidy-requires::.
+
+   Caveat: This works only for identifiers that are documented.  The
 mechanism is similar to that used for Racket’s “Search Manuals” feature.
 Today there exists no system-wide database of identifiers that are
 exported but not documented.
 
 
-File: doc4N5afI.info,  Node: racket-indent-line,  Next: racket-smart-open-bracket-mode,  Prev: racket-add-require-for-identifier,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-indent-line,  Next: racket-smart-open-bracket-mode,  Prev: racket-add-require-for-identifier,  Up: Edit
 
 6.1.10 racket-indent-line
 -------------------------
@@ -1457,7 +1447,7 @@ forms:
            body)
 
 
-File: doc4N5afI.info,  Node: racket-smart-open-bracket-mode,  Next: racket-insert-closing,  Prev: racket-indent-line,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-smart-open-bracket-mode,  Next: racket-insert-closing,  Prev: racket-indent-line,  Up: Edit
 
 6.1.11 racket-smart-open-bracket-mode
 -------------------------------------
@@ -1518,7 +1508,7 @@ evaluate *note racket-smart-open-bracket-mode::.
 is disabled.
 
 
-File: doc4N5afI.info,  Node: racket-insert-closing,  Next: racket-cycle-paren-shapes,  Prev: racket-smart-open-bracket-mode,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-insert-closing,  Next: racket-cycle-paren-shapes,  Prev: racket-smart-open-bracket-mode,  Up: Edit
 
 6.1.12 racket-insert-closing
 ----------------------------
@@ -1534,7 +1524,7 @@ File: doc4N5afI.info,  Node: racket-insert-closing,  Next: racket-cycle-paren-sh
 added in Emacs 24.5.
 
 
-File: doc4N5afI.info,  Node: racket-cycle-paren-shapes,  Next: racket-backward-up-list,  Prev: racket-insert-closing,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-cycle-paren-shapes,  Next: racket-backward-up-list,  Prev: racket-insert-closing,  Up: Edit
 
 6.1.13 racket-cycle-paren-shapes
 --------------------------------
@@ -1544,7 +1534,7 @@ File: doc4N5afI.info,  Node: racket-cycle-paren-shapes,  Next: racket-backward-u
    Cycle the sexpr among () [] {}.
 
 
-File: doc4N5afI.info,  Node: racket-backward-up-list,  Next: racket-input-mode,  Prev: racket-cycle-paren-shapes,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-backward-up-list,  Next: racket-input-mode,  Prev: racket-cycle-paren-shapes,  Up: Edit
 
 6.1.14 racket-backward-up-list
 ------------------------------
@@ -1560,7 +1550,7 @@ not repeatedly.  Instead, initially use
 comment, if any, then use normal ‘backward-up-list’ repeatedly.
 
 
-File: doc4N5afI.info,  Node: racket-input-mode,  Next: racket-align,  Prev: racket-backward-up-list,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-input-mode,  Next: racket-align,  Prev: racket-backward-up-list,  Up: Edit
 
 6.1.15 racket-input-mode
 ------------------------
@@ -1610,7 +1600,7 @@ evaluate *note racket-input-mode::.
 is disabled.
 
 
-File: doc4N5afI.info,  Node: racket-align,  Next: racket-unalign,  Prev: racket-input-mode,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-align,  Next: racket-unalign,  Prev: racket-input-mode,  Up: Edit
 
 6.1.16 racket-align
 -------------------
@@ -1675,7 +1665,7 @@ For example:
    See also: *note racket-unalign::.
 
 
-File: doc4N5afI.info,  Node: racket-unalign,  Next: racket-complete-at-point,  Prev: racket-align,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-unalign,  Next: racket-complete-at-point,  Prev: racket-align,  Up: Edit
 
 6.1.17 racket-unalign
 ---------------------
@@ -1688,7 +1678,7 @@ File: doc4N5afI.info,  Node: racket-unalign,  Next: racket-complete-at-point,  P
 couple’s value.
 
 
-File: doc4N5afI.info,  Node: racket-complete-at-point,  Prev: racket-unalign,  Up: Edit
+File: doc2l5VjJ.info,  Node: racket-complete-at-point,  Prev: racket-unalign,  Up: Edit
 
 6.1.18 racket-complete-at-point
 -------------------------------
@@ -1700,7 +1690,7 @@ font-lock.  This is a static list.  If you want dynamic, smarter
 completion candidates, enable the minor mode *note racket-xp-mode::.
 
 
-File: doc4N5afI.info,  Node: Hash Langs,  Next: Explore,  Prev: Edit,  Up: Commands
+File: doc2l5VjJ.info,  Node: Hash Langs,  Next: Explore,  Prev: Edit,  Up: Commands
 
 6.2 Hash Langs
 ==============
@@ -1715,7 +1705,7 @@ File: doc4N5afI.info,  Node: Hash Langs,  Next: Explore,  Prev: Edit,  Up: Comma
 * racket-hash-lang-C-M-q-dwim::
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-mode,  Next: racket-hash-lang-backward,  Up: Hash Langs
+File: doc2l5VjJ.info,  Node: racket-hash-lang-mode,  Next: racket-hash-lang-backward,  Up: Hash Langs
 
 6.2.1 racket-hash-lang-mode
 ---------------------------
@@ -1741,38 +1731,38 @@ be used to vary configurations per language.
 
    <https://docs.racket-lang.org/tools/lang-languages-customization.html>
 
-Key                                                                                                            Binding
-‘TAB’                                                                                                          ‘indent-for-tab-command’
-‘RET’                                                                                                          ‘newline-and-indent’
-‘C-c C-z’                                                                                                      ‘racket-edit-switch-to-repl’
-‘C-c C-e x’                                                                                                    *note racket-expand-definition::
-‘C-c C-e f’                                                                                                    *note racket-expand-file::
-‘C-c C-e e’                                                                                                    *note racket-expand-last-sexp::
-‘C-c C-e r’                                                                                                    *note racket-expand-region::
-‘C-c C-f’                                                                                                      *note racket-fold-all-tests::
-‘C-M-q’                                                                                                        *note racket-hash-lang-C-M-q-dwim::
-‘C-M-b’                                                                                                        *note racket-hash-lang-backward::
-‘DEL’                                                                                                          ‘racket-hash-lang-delete-backward-char’
-‘C-M-d’                                                                                                        *note racket-hash-lang-down::
-‘C-M-f’                                                                                                        *note racket-hash-lang-forward::
-‘C-M-u’                                                                                                        *note racket-hash-lang-up::
-‘C-M-y’                                                                                                        *note racket-insert-lambda::
-‘C-c C-l’                                                                                                      *note racket-logger::
-‘C-c C-x C-f’                                                                                                  *note racket-open-require-path::
-‘C-c C-o’                                                                                                      *note racket-profile::
-‘C-c C-c’ , ‘C-c C-k’                                                                                          *note racket-run-module-at-point::
-‘C-M-x’                                                                                                        *note racket-send-definition::
-‘C-x C-e’                                                                                                      *note racket-send-last-sexp::
-‘C-c C-r’                                                                                                      *note racket-send-region::
-‘C-c C-t’                                                                                                      *note racket-test::
-‘C-c C-u’                                                                                                      *note racket-unfold-all-tests::
+Key                                                                                                              Binding
+‘TAB’                                                                                                            ‘indent-for-tab-command’
+‘RET’                                                                                                            ‘newline-and-indent’
+‘C-c C-z’                                                                                                        ‘racket-edit-switch-to-repl’
+‘C-c C-e x’                                                                                                      *note racket-expand-definition::
+‘C-c C-e f’                                                                                                      *note racket-expand-file::
+‘C-c C-e e’                                                                                                      *note racket-expand-last-sexp::
+‘C-c C-e r’                                                                                                      *note racket-expand-region::
+‘C-c C-f’                                                                                                        *note racket-fold-all-tests::
+‘C-M-q’                                                                                                          *note racket-hash-lang-C-M-q-dwim::
+‘C-M-b’                                                                                                          *note racket-hash-lang-backward::
+‘DEL’                                                                                                            ‘racket-hash-lang-delete-backward-char’
+‘C-M-d’                                                                                                          *note racket-hash-lang-down::
+‘C-M-f’                                                                                                          *note racket-hash-lang-forward::
+‘C-M-u’                                                                                                          *note racket-hash-lang-up::
+‘C-M-y’                                                                                                          *note racket-insert-lambda::
+‘C-c C-l’                                                                                                        *note racket-logger::
+‘C-c C-x C-f’                                                                                                    *note racket-open-require-path::
+‘C-c C-o’                                                                                                        *note racket-profile::
+‘C-c C-c’ or ‘C-c C-k’                                                                                           *note racket-run-module-at-point::
+‘C-M-x’                                                                                                          *note racket-send-definition::
+‘C-x C-e’                                                                                                        *note racket-send-last-sexp::
+‘C-c C-r’                                                                                                        *note racket-send-region::
+‘C-c C-t’                                                                                                        *note racket-test::
+‘C-c C-u’                                                                                                        *note racket-unfold-all-tests::
 
    In addition to any hooks its parent mode ‘prog-mode’ might have run,
 this mode runs the hook ‘racket-hash-lang-mode-hook’, as the final or
 penultimate step during initialization.
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-backward,  Next: racket-hash-lang-forward,  Prev: racket-hash-lang-mode,  Up: Hash Langs
+File: doc2l5VjJ.info,  Node: racket-hash-lang-backward,  Next: racket-hash-lang-forward,  Prev: racket-hash-lang-mode,  Up: Hash Langs
 
 6.2.2 racket-hash-lang-backward
 -------------------------------
@@ -1782,7 +1772,7 @@ File: doc4N5afI.info,  Node: racket-hash-lang-backward,  Next: racket-hash-lang-
    Like ‘backward-sexp’ but uses #lang supplied navigation.
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-forward,  Next: racket-hash-lang-up,  Prev: racket-hash-lang-backward,  Up: Hash Langs
+File: doc2l5VjJ.info,  Node: racket-hash-lang-forward,  Next: racket-hash-lang-up,  Prev: racket-hash-lang-backward,  Up: Hash Langs
 
 6.2.3 racket-hash-lang-forward
 ------------------------------
@@ -1792,7 +1782,7 @@ File: doc4N5afI.info,  Node: racket-hash-lang-forward,  Next: racket-hash-lang-u
    Like ‘forward-sexp’ but uses #lang supplied navigation.
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-up,  Next: racket-hash-lang-down,  Prev: racket-hash-lang-forward,  Up: Hash Langs
+File: doc2l5VjJ.info,  Node: racket-hash-lang-up,  Next: racket-hash-lang-down,  Prev: racket-hash-lang-forward,  Up: Hash Langs
 
 6.2.4 racket-hash-lang-up
 -------------------------
@@ -1802,7 +1792,7 @@ File: doc4N5afI.info,  Node: racket-hash-lang-up,  Next: racket-hash-lang-down, 
    Like ‘backward-up-list’ but uses #lang supplied navigation.
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-down,  Next: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lang-up,  Up: Hash Langs
+File: doc2l5VjJ.info,  Node: racket-hash-lang-down,  Next: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lang-up,  Up: Hash Langs
 
 6.2.5 racket-hash-lang-down
 ---------------------------
@@ -1812,7 +1802,7 @@ File: doc4N5afI.info,  Node: racket-hash-lang-down,  Next: racket-hash-lang-C-M-
    Like ‘down-list’ but uses #lang supplied navigation.
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lang-down,  Up: Hash Langs
+File: doc2l5VjJ.info,  Node: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lang-down,  Up: Hash Langs
 
 6.2.6 racket-hash-lang-C-M-q-dwim
 ---------------------------------
@@ -1832,7 +1822,7 @@ File: doc4N5afI.info,  Node: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lan
    • anything else, do ‘prog-indent-sexp’.
 
 
-File: doc4N5afI.info,  Node: Explore,  Next: Run,  Prev: Hash Langs,  Up: Commands
+File: doc2l5VjJ.info,  Node: Explore,  Next: Run,  Prev: Hash Langs,  Up: Commands
 
 6.3 Explore
 ===========
@@ -1857,7 +1847,7 @@ File: doc4N5afI.info,  Node: Explore,  Next: Run,  Prev: Hash Langs,  Up: Comman
 * racket-describe-search::
 
 
-File: doc4N5afI.info,  Node: racket-xp-mode,  Next: racket-xp-describe,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-mode,  Next: racket-xp-describe,  Up: Explore
 
 6.3.1 racket-xp-mode
 --------------------
@@ -1995,24 +1985,24 @@ an Emacs user, you are free to bind this map to a more convenient
 prefix, and/or bind any individual commands directly to whatever keys
 you prefer.
 
-Key                                                                                                    Binding
-‘C-c # N’                                                                                              ‘next-error’
-‘C-c # P’                                                                                              ‘previous-error’
-‘C-c C-s’                                                                                              *note racket-describe-search::
-‘C-c # g’                                                                                              ‘racket-xp-annotate’
-‘C-c C-.’                                                                                              *note racket-xp-describe::
-‘C-c C-d’                                                                                              *note racket-xp-documentation::
-‘C-c # j’                                                                                              *note racket-xp-next-definition::
-‘C-c # n’                                                                                              *note racket-xp-next-use::
-‘C-c # k’                                                                                              *note racket-xp-previous-definition::
-‘C-c # p’                                                                                              *note racket-xp-previous-use::
-‘C-c # r’                                                                                              ‘racket-xp-rename’
-‘C-c # v’                                                                                              *note racket-xp-tail-down::
-‘C-c # >’                                                                                              *note racket-xp-tail-next-sibling::
-‘C-c # <’                                                                                              *note racket-xp-tail-previous-sibling::
-‘C-c # ^’                                                                                              *note racket-xp-tail-up::
-‘M-.’ , ‘C-c # .’                                                                                      ‘xref-find-definitions’
-‘C-c # ?’                                                                                              ‘xref-find-references’
+Key                                                                                                      Binding
+‘C-c # N’                                                                                                ‘next-error’
+‘C-c # P’                                                                                                ‘previous-error’
+‘C-c C-s’                                                                                                *note racket-describe-search::
+‘C-c # g’                                                                                                ‘racket-xp-annotate’
+‘C-c C-.’                                                                                                *note racket-xp-describe::
+‘C-c C-d’                                                                                                *note racket-xp-documentation::
+‘C-c # j’                                                                                                *note racket-xp-next-definition::
+‘C-c # n’                                                                                                *note racket-xp-next-use::
+‘C-c # k’                                                                                                *note racket-xp-previous-definition::
+‘C-c # p’                                                                                                *note racket-xp-previous-use::
+‘C-c # r’                                                                                                ‘racket-xp-rename’
+‘C-c # v’                                                                                                *note racket-xp-tail-down::
+‘C-c # >’                                                                                                *note racket-xp-tail-next-sibling::
+‘C-c # <’                                                                                                *note racket-xp-tail-previous-sibling::
+‘C-c # ^’                                                                                                *note racket-xp-tail-up::
+‘M-.’ or ‘C-c # .’                                                                                       ‘xref-find-definitions’
+‘C-c # ?’                                                                                                ‘xref-find-references’
 
    This is a minor mode.  If called interactively, toggle the ‘Racket-Xp
 mode’ mode.  If the prefix argument is positive, enable the mode, and if
@@ -2029,7 +2019,7 @@ evaluate *note racket-xp-mode::.
 is disabled.
 
 
-File: doc4N5afI.info,  Node: racket-xp-describe,  Next: racket-xp-documentation,  Prev: racket-xp-mode,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-describe,  Next: racket-xp-documentation,  Prev: racket-xp-mode,  Up: Explore
 
 6.3.2 racket-xp-describe
 ------------------------
@@ -2074,7 +2064,7 @@ within Emacs, without switching to a web browser.
 F1 or C-h in its pop up completion list.
 
 
-File: doc4N5afI.info,  Node: racket-xp-documentation,  Next: racket-xp-next-definition,  Prev: racket-xp-describe,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-documentation,  Next: racket-xp-next-definition,  Prev: racket-xp-describe,  Up: Explore
 
 6.3.3 racket-xp-documentation
 -----------------------------
@@ -2111,7 +2101,7 @@ supply.
      for example.
 
 
-File: doc4N5afI.info,  Node: racket-xp-next-definition,  Next: racket-xp-previous-definition,  Prev: racket-xp-documentation,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-next-definition,  Next: racket-xp-previous-definition,  Prev: racket-xp-documentation,  Up: Explore
 
 6.3.4 racket-xp-next-definition
 -------------------------------
@@ -2121,7 +2111,7 @@ File: doc4N5afI.info,  Node: racket-xp-next-definition,  Next: racket-xp-previou
    Move point to the next definition.
 
 
-File: doc4N5afI.info,  Node: racket-xp-previous-definition,  Next: racket-xp-next-use,  Prev: racket-xp-next-definition,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-previous-definition,  Next: racket-xp-next-use,  Prev: racket-xp-next-definition,  Up: Explore
 
 6.3.5 racket-xp-previous-definition
 -----------------------------------
@@ -2131,7 +2121,7 @@ File: doc4N5afI.info,  Node: racket-xp-previous-definition,  Next: racket-xp-nex
    Move point to the previous definition.
 
 
-File: doc4N5afI.info,  Node: racket-xp-next-use,  Next: racket-xp-previous-use,  Prev: racket-xp-previous-definition,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-next-use,  Next: racket-xp-previous-use,  Prev: racket-xp-previous-definition,  Up: Explore
 
 6.3.6 racket-xp-next-use
 ------------------------
@@ -2141,7 +2131,7 @@ File: doc4N5afI.info,  Node: racket-xp-next-use,  Next: racket-xp-previous-use, 
    When point is on a use, go to the next, sibling use.
 
 
-File: doc4N5afI.info,  Node: racket-xp-previous-use,  Next: racket-xp-next-error,  Prev: racket-xp-next-use,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-previous-use,  Next: racket-xp-next-error,  Prev: racket-xp-next-use,  Up: Explore
 
 6.3.7 racket-xp-previous-use
 ----------------------------
@@ -2151,7 +2141,7 @@ File: doc4N5afI.info,  Node: racket-xp-previous-use,  Next: racket-xp-next-error
    When point is on a use, go to the previous, sibling use.
 
 
-File: doc4N5afI.info,  Node: racket-xp-next-error,  Next: racket-xp-previous-error,  Prev: racket-xp-previous-use,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-next-error,  Next: racket-xp-previous-error,  Prev: racket-xp-previous-use,  Up: Explore
 
 6.3.8 racket-xp-next-error
 --------------------------
@@ -2161,7 +2151,7 @@ File: doc4N5afI.info,  Node: racket-xp-next-error,  Next: racket-xp-previous-err
    An obsolete alias for ‘next-error’.
 
 
-File: doc4N5afI.info,  Node: racket-xp-previous-error,  Next: racket-xp-tail-up,  Prev: racket-xp-next-error,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-previous-error,  Next: racket-xp-tail-up,  Prev: racket-xp-next-error,  Up: Explore
 
 6.3.9 racket-xp-previous-error
 ------------------------------
@@ -2171,7 +2161,7 @@ File: doc4N5afI.info,  Node: racket-xp-previous-error,  Next: racket-xp-tail-up,
    An obsolete alias for ‘previous-error’.
 
 
-File: doc4N5afI.info,  Node: racket-xp-tail-up,  Next: racket-xp-tail-down,  Prev: racket-xp-previous-error,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-tail-up,  Next: racket-xp-tail-down,  Prev: racket-xp-previous-error,  Up: Explore
 
 6.3.10 racket-xp-tail-up
 ------------------------
@@ -2185,7 +2175,7 @@ position, go its “target” – that is, go to the enclosing expression with
 the same continuation as the tail expression.
 
 
-File: doc4N5afI.info,  Node: racket-xp-tail-down,  Next: racket-xp-tail-next-sibling,  Prev: racket-xp-tail-up,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-tail-down,  Next: racket-xp-tail-next-sibling,  Prev: racket-xp-tail-up,  Up: Explore
 
 6.3.11 racket-xp-tail-down
 --------------------------
@@ -2196,7 +2186,7 @@ File: doc4N5afI.info,  Node: racket-xp-tail-down,  Next: racket-xp-tail-next-sib
 expression.
 
 
-File: doc4N5afI.info,  Node: racket-xp-tail-next-sibling,  Next: racket-xp-tail-previous-sibling,  Prev: racket-xp-tail-down,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-tail-next-sibling,  Next: racket-xp-tail-previous-sibling,  Prev: racket-xp-tail-down,  Up: Explore
 
 6.3.12 racket-xp-tail-next-sibling
 ----------------------------------
@@ -2206,7 +2196,7 @@ File: doc4N5afI.info,  Node: racket-xp-tail-next-sibling,  Next: racket-xp-tail-
    Go to the next tail position sharing the same enclosing expression.
 
 
-File: doc4N5afI.info,  Node: racket-xp-tail-previous-sibling,  Next: racket-documentation-search,  Prev: racket-xp-tail-next-sibling,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-xp-tail-previous-sibling,  Next: racket-documentation-search,  Prev: racket-xp-tail-next-sibling,  Up: Explore
 
 6.3.13 racket-xp-tail-previous-sibling
 --------------------------------------
@@ -2217,7 +2207,7 @@ File: doc4N5afI.info,  Node: racket-xp-tail-previous-sibling,  Next: racket-docu
 expression.
 
 
-File: doc4N5afI.info,  Node: racket-documentation-search,  Next: racket-describe-mode,  Prev: racket-xp-tail-previous-sibling,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-documentation-search,  Next: racket-describe-mode,  Prev: racket-xp-tail-previous-sibling,  Up: Explore
 
 6.3.14 racket-documentation-search
 ----------------------------------
@@ -2244,7 +2234,7 @@ definition provided by any specific module.  Instead it goes to the
 Racket “Search Manuals” page.
 
 
-File: doc4N5afI.info,  Node: racket-describe-mode,  Next: racket-describe-search,  Prev: racket-documentation-search,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-describe-mode,  Next: racket-describe-search,  Prev: racket-documentation-search,  Up: Explore
 
 6.3.15 racket-describe-mode
 ---------------------------
@@ -2259,6 +2249,11 @@ listed below.
    To see “On this page” links, use ‘M-g i’ for ‘imenu’, or, when
 ‘context-menu-mode’ is enabled, right click the mouse.
 
+   Supports bookmarks: ‘bookmark-set’.
+
+   Supports org links: ‘org-store-link’, ‘org-insert-link’, and
+‘org-open-at-point’.
+
    Internal, intra-doc links – which go to other doc pages in the same
 *note racket-describe-mode:: buffer in Emacs – are given *note
 racket-doc-link-face:: unless the documentation specifies some
@@ -2268,28 +2263,28 @@ non-default face.
 racket-browse-url-function::, by default in an external web browser
 program – are given *note racket-ext-link-face::.
 
-Key                                                                                                                                           Binding
-‘<’                                                                                                                                           ‘beginning-of-buffer’
-‘>’                                                                                                                                           ‘end-of-buffer’
-‘q’                                                                                                                                           ‘quit-window’
-‘l’ , ‘b’ , ‘C-c C-b’                                                                                                                         ‘racket-describe-back’
-‘x’                                                                                                                                           ‘racket-describe-browse-external’
-‘r’ , ‘f’ , ‘C-c C-f’                                                                                                                         ‘racket-describe-forward’
-‘n’                                                                                                                                           ‘racket-describe-nav-next’
-‘p’                                                                                                                                           ‘racket-describe-nav-prev’
-‘C-^’                                                                                                                                         ‘racket-describe-nav-top’
-‘^’                                                                                                                                           ‘racket-describe-nav-up’
-‘i’ , ‘C-c C-s’                                                                                                                               *note racket-describe-search::
-‘g’                                                                                                                                           ‘revert-buffer’
-‘DEL’ , ‘S-SPC’                                                                                                                               ‘scroll-down-command’
-‘SPC’                                                                                                                                         ‘scroll-up-command’
+Key                                                                                                                                               Binding
+‘<’                                                                                                                                               ‘beginning-of-buffer’
+‘>’                                                                                                                                               ‘end-of-buffer’
+‘q’                                                                                                                                               ‘quit-window’
+‘l’ or ‘b’ or ‘C-c C-b’                                                                                                                           ‘racket-describe-back’
+‘x’                                                                                                                                               ‘racket-describe-browse-external’
+‘r’ or ‘f’ or ‘C-c C-f’                                                                                                                           ‘racket-describe-forward’
+‘n’                                                                                                                                               ‘racket-describe-nav-next’
+‘p’                                                                                                                                               ‘racket-describe-nav-prev’
+‘C-^’                                                                                                                                             ‘racket-describe-nav-top’
+‘^’                                                                                                                                               ‘racket-describe-nav-up’
+‘i’ or ‘C-c C-s’                                                                                                                                  *note racket-describe-search::
+‘g’                                                                                                                                               ‘revert-buffer’
+‘DEL’ or ‘S-SPC’                                                                                                                                  ‘scroll-down-command’
+‘SPC’                                                                                                                                             ‘scroll-up-command’
 
    In addition to any hooks its parent mode ‘special-mode’ might have
 run, this mode runs the hook ‘racket-describe-mode-hook’, as the final
 or penultimate step during initialization.
 
 
-File: doc4N5afI.info,  Node: racket-describe-search,  Prev: racket-describe-mode,  Up: Explore
+File: doc2l5VjJ.info,  Node: racket-describe-search,  Prev: racket-describe-mode,  Up: Explore
 
 6.3.16 racket-describe-search
 -----------------------------
@@ -2300,7 +2295,7 @@ File: doc4N5afI.info,  Node: racket-describe-search,  Prev: racket-describe-mode
 racket-describe-mode::.
 
 
-File: doc4N5afI.info,  Node: Run,  Next: Test,  Prev: Explore,  Up: Commands
+File: doc2l5VjJ.info,  Node: Run,  Next: Test,  Prev: Explore,  Up: Commands
 
 6.4 Run
 =======
@@ -2324,7 +2319,7 @@ File: doc4N5afI.info,  Node: Run,  Next: Test,  Prev: Explore,  Up: Commands
 * racket-repl-clear-leaving-last-prompt::
 
 
-File: doc4N5afI.info,  Node: racket-repl-mode,  Next: racket-run,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-repl-mode,  Next: racket-run,  Up: Run
 
 6.4.1 racket-repl-mode
 ----------------------
@@ -2338,37 +2333,37 @@ File: doc4N5afI.info,  Node: racket-repl-mode,  Next: racket-run,  Up: Run
 to the variable ‘xref-backend-functions’.  This backend uses information
 about identifier bindings and modules from the REPL’s namespace.
 
-Key                                                                                                                                 Binding
-‘TAB’                                                                                                                               ‘indent-for-tab-command’
-‘C-j’                                                                                                                               ‘newline-and-indent’
-‘C-M-q’                                                                                                                             ‘prog-indent-sexp’
-‘C-M-u’                                                                                                                             *note racket-backward-up-list::
-‘C-c C-s’                                                                                                                           *note racket-describe-search::
-‘C-c C-e x’                                                                                                                         *note racket-expand-definition::
-‘C-c C-e f’                                                                                                                         *note racket-expand-file::
-‘C-c C-e e’                                                                                                                         *note racket-expand-last-sexp::
-‘C-c C-e r’                                                                                                                         *note racket-expand-region::
-‘)’ , ‘]’ , ‘}’                                                                                                                     *note racket-insert-closing::
-‘C-M-y’                                                                                                                             *note racket-insert-lambda::
-‘C-c C-l’                                                                                                                           *note racket-logger::
-‘C-c C-c’                                                                                                                           ‘racket-repl-break’
-‘C-c C-u’                                                                                                                           ‘racket-repl-clear-input’
-‘C-c C-o’                                                                                                                           ‘racket-repl-delete-output’
-‘C-c C-.’                                                                                                                           *note racket-repl-describe::
-‘C-c C-d’                                                                                                                           *note racket-repl-documentation::
-‘C-c C-\’                                                                                                                           ‘racket-repl-exit’
-‘M-n’                                                                                                                               ‘racket-repl-next-input’
-‘C-c C-n’                                                                                                                           ‘racket-repl-next-prompt-or-run’
-‘M-p’                                                                                                                               ‘racket-repl-previous-input’
-‘C-c C-p’                                                                                                                           ‘racket-repl-previous-prompt-or-run’
-‘RET’                                                                                                                               ‘racket-repl-submit’
-‘C-c C-z’                                                                                                                           ‘racket-repl-switch-to-edit’
+Key                                                                                                                                     Binding
+‘TAB’                                                                                                                                   ‘indent-for-tab-command’
+‘C-j’                                                                                                                                   ‘newline-and-indent’
+‘C-M-q’                                                                                                                                 ‘prog-indent-sexp’
+‘C-M-u’                                                                                                                                 *note racket-backward-up-list::
+‘C-c C-s’                                                                                                                               *note racket-describe-search::
+‘C-c C-e x’                                                                                                                             *note racket-expand-definition::
+‘C-c C-e f’                                                                                                                             *note racket-expand-file::
+‘C-c C-e e’                                                                                                                             *note racket-expand-last-sexp::
+‘C-c C-e r’                                                                                                                             *note racket-expand-region::
+‘)’ or ‘]’ or ‘}’                                                                                                                       *note racket-insert-closing::
+‘C-M-y’                                                                                                                                 *note racket-insert-lambda::
+‘C-c C-l’                                                                                                                               *note racket-logger::
+‘C-c C-c’                                                                                                                               ‘racket-repl-break’
+‘C-c C-u’                                                                                                                               ‘racket-repl-clear-input’
+‘C-c C-o’                                                                                                                               ‘racket-repl-delete-output’
+‘C-c C-.’                                                                                                                               *note racket-repl-describe::
+‘C-c C-d’                                                                                                                               *note racket-repl-documentation::
+‘C-c C-\’                                                                                                                               ‘racket-repl-exit’
+‘M-n’                                                                                                                                   ‘racket-repl-next-input’
+‘C-c C-n’                                                                                                                               ‘racket-repl-next-prompt-or-run’
+‘M-p’                                                                                                                                   ‘racket-repl-previous-input’
+‘C-c C-p’                                                                                                                               ‘racket-repl-previous-prompt-or-run’
+‘RET’                                                                                                                                   ‘racket-repl-submit’
+‘C-c C-z’                                                                                                                               ‘racket-repl-switch-to-edit’
 
    This mode runs the hook ‘racket-repl-mode-hook’, as the final or
 penultimate step during initialization.
 
 
-File: doc4N5afI.info,  Node: racket-run,  Next: racket-run-and-switch-to-repl,  Prev: racket-repl-mode,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-run,  Next: racket-run-and-switch-to-repl,  Prev: racket-repl-mode,  Up: Run
 
 6.4.2 racket-run
 ----------------
@@ -2423,7 +2418,7 @@ click.  Or, use the standard ‘next-error’ and ‘previous-error’ commands
 from either the edit or REPL buffer.
 
 
-File: doc4N5afI.info,  Node: racket-run-and-switch-to-repl,  Next: racket-run-module-at-point,  Prev: racket-run,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-run-and-switch-to-repl,  Next: racket-run-module-at-point,  Prev: racket-run,  Up: Run
 
 6.4.3 racket-run-and-switch-to-repl
 -----------------------------------
@@ -2439,7 +2434,7 @@ window.
 to the variable *note racket-before-run-hook::.
 
 
-File: doc4N5afI.info,  Node: racket-run-module-at-point,  Next: racket-repl,  Prev: racket-run-and-switch-to-repl,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-run-module-at-point,  Next: racket-repl,  Prev: racket-run-and-switch-to-repl,  Up: Run
 
 6.4.4 racket-run-module-at-point
 --------------------------------
@@ -2454,7 +2449,7 @@ which is determined textually by looking for “module”, “module*”, or
 module.
 
 
-File: doc4N5afI.info,  Node: racket-repl,  Next: racket-repl-describe,  Prev: racket-run-module-at-point,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-repl,  Next: racket-repl-describe,  Prev: racket-run-module-at-point,  Up: Run
 
 6.4.5 racket-repl
 -----------------
@@ -2476,7 +2471,7 @@ exist, it is created to contain just “#lang racket/base”.  You may edit
 the file to use a different lang, require other modules, or whatever.
 
 
-File: doc4N5afI.info,  Node: racket-repl-describe,  Next: racket-repl-documentation,  Prev: racket-repl,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-repl-describe,  Next: racket-repl-documentation,  Prev: racket-repl,  Up: Run
 
 6.4.6 racket-repl-describe
 --------------------------
@@ -2518,7 +2513,7 @@ regardless of whether it has installed documentation – and to do so
 within Emacs, without switching to a web browser.
 
 
-File: doc4N5afI.info,  Node: racket-repl-documentation,  Next: racket-racket,  Prev: racket-repl-describe,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-repl-documentation,  Next: racket-racket,  Prev: racket-repl-describe,  Up: Run
 
 6.4.7 racket-repl-documentation
 -------------------------------
@@ -2555,7 +2550,7 @@ supply.
      for example.
 
 
-File: doc4N5afI.info,  Node: racket-racket,  Next: racket-profile,  Prev: racket-repl-documentation,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-racket,  Next: racket-profile,  Prev: racket-repl-documentation,  Up: Run
 
 6.4.8 racket-racket
 -------------------
@@ -2568,7 +2563,7 @@ File: doc4N5afI.info,  Node: racket-racket,  Next: racket-profile,  Prev: racket
 variable *note racket-shell-or-terminal-function::.
 
 
-File: doc4N5afI.info,  Node: racket-profile,  Next: racket-profile-mode,  Prev: racket-racket,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-profile,  Next: racket-profile-mode,  Prev: racket-racket,  Up: Run
 
 6.4.9 racket-profile
 --------------------
@@ -2589,7 +2584,7 @@ functions in the REPL, and refresh the profile results.
 compiled/*.zo files.
 
 
-File: doc4N5afI.info,  Node: racket-profile-mode,  Next: racket-logger,  Prev: racket-profile,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-profile-mode,  Next: racket-logger,  Prev: racket-profile,  Up: Run
 
 6.4.10 racket-profile-mode
 --------------------------
@@ -2598,19 +2593,19 @@ File: doc4N5afI.info,  Node: racket-profile-mode,  Next: racket-logger,  Prev: r
 
    Major mode for results of *note racket-profile::.
 
-Key                                                                                        Binding
-‘q’                                                                                        ‘quit-window’
-‘g’                                                                                        ‘racket-profile-refresh’
-‘f’                                                                                        ‘racket-profile-show-non-project’
-‘z’                                                                                        ‘racket-profile-show-zero’
-‘.’ , ‘RET’                                                                                ‘racket-profile-visit’
+Key                                                                                          Binding
+‘q’                                                                                          ‘quit-window’
+‘g’                                                                                          ‘racket-profile-refresh’
+‘f’                                                                                          ‘racket-profile-show-non-project’
+‘z’                                                                                          ‘racket-profile-show-zero’
+‘.’ or ‘RET’                                                                                 ‘racket-profile-visit’
 
    In addition to any hooks its parent mode ‘tabulated-list-mode’ might
 have run, this mode runs the hook ‘racket-profile-mode-hook’, as the
 final or penultimate step during initialization.
 
 
-File: doc4N5afI.info,  Node: racket-logger,  Next: racket-logger-mode,  Prev: racket-profile-mode,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-logger,  Next: racket-logger-mode,  Prev: racket-profile-mode,  Up: Run
 
 6.4.11 racket-logger
 --------------------
@@ -2620,7 +2615,7 @@ File: doc4N5afI.info,  Node: racket-logger,  Next: racket-logger-mode,  Prev: ra
    Create the *note racket-logger-mode:: buffer.
 
 
-File: doc4N5afI.info,  Node: racket-logger-mode,  Next: racket-debug-mode,  Prev: racket-logger,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-logger-mode,  Next: racket-debug-mode,  Prev: racket-logger,  Up: Run
 
 6.4.12 racket-logger-mode
 -------------------------
@@ -2648,7 +2643,7 @@ run, this mode runs the hook ‘racket-logger-mode-hook’, as the final or
 penultimate step during initialization.
 
 
-File: doc4N5afI.info,  Node: racket-debug-mode,  Next: racket-repl-clear,  Prev: racket-logger-mode,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-debug-mode,  Next: racket-repl-clear,  Prev: racket-logger-mode,  Up: Run
 
 6.4.13 racket-debug-mode
 ------------------------
@@ -2720,7 +2715,7 @@ evaluate *note racket-debug-mode::.
 is disabled.
 
 
-File: doc4N5afI.info,  Node: racket-repl-clear,  Next: racket-repl-clear-leaving-last-prompt,  Prev: racket-debug-mode,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-repl-clear,  Next: racket-repl-clear-leaving-last-prompt,  Prev: racket-debug-mode,  Up: Run
 
 6.4.14 racket-repl-clear
 ------------------------
@@ -2737,7 +2732,7 @@ file something like:
    See also the command *note racket-repl-clear-leaving-last-prompt::.
 
 
-File: doc4N5afI.info,  Node: racket-repl-clear-leaving-last-prompt,  Prev: racket-repl-clear,  Up: Run
+File: doc2l5VjJ.info,  Node: racket-repl-clear-leaving-last-prompt,  Prev: racket-repl-clear,  Up: Run
 
 6.4.15 racket-repl-clear-leaving-last-prompt
 --------------------------------------------
@@ -2747,7 +2742,7 @@ File: doc4N5afI.info,  Node: racket-repl-clear-leaving-last-prompt,  Prev: racke
    Delete all text in the REPL, except for the last prompt.
 
 
-File: doc4N5afI.info,  Node: Test,  Next: Eval,  Prev: Run,  Up: Commands
+File: doc2l5VjJ.info,  Node: Test,  Next: Eval,  Prev: Run,  Up: Commands
 
 6.5 Test
 ========
@@ -2758,7 +2753,7 @@ File: doc4N5afI.info,  Node: Test,  Next: Eval,  Prev: Run,  Up: Commands
 * racket-raco-test::
 
 
-File: doc4N5afI.info,  Node: racket-test,  Next: racket-raco-test,  Up: Test
+File: doc2l5VjJ.info,  Node: racket-test,  Next: racket-raco-test,  Up: Test
 
 6.5.1 racket-test
 -----------------
@@ -2787,7 +2782,7 @@ and highlights uncovered code using ‘font-lock-warning-face’.
    • *note racket-unfold-all-tests::
 
 
-File: doc4N5afI.info,  Node: racket-raco-test,  Prev: racket-test,  Up: Test
+File: doc2l5VjJ.info,  Node: racket-raco-test,  Prev: racket-test,  Up: Test
 
 6.5.2 racket-raco-test
 ----------------------
@@ -2800,7 +2795,7 @@ File: doc4N5afI.info,  Node: racket-raco-test,  Prev: racket-test,  Up: Test
 variable *note racket-shell-or-terminal-function::.
 
 
-File: doc4N5afI.info,  Node: Eval,  Next: Collections,  Prev: Test,  Up: Commands
+File: doc2l5VjJ.info,  Node: Eval,  Next: Collections,  Prev: Test,  Up: Commands
 
 6.6 Eval
 ========
@@ -2812,7 +2807,7 @@ File: doc4N5afI.info,  Node: Eval,  Next: Collections,  Prev: Test,  Up: Command
 * racket-send-last-sexp::
 
 
-File: doc4N5afI.info,  Node: racket-send-region,  Next: racket-send-definition,  Up: Eval
+File: doc2l5VjJ.info,  Node: racket-send-region,  Next: racket-send-definition,  Up: Eval
 
 6.6.1 racket-send-region
 ------------------------
@@ -2822,7 +2817,7 @@ File: doc4N5afI.info,  Node: racket-send-region,  Next: racket-send-definition, 
    Send the current region (if any) to the Racket REPL.
 
 
-File: doc4N5afI.info,  Node: racket-send-definition,  Next: racket-send-last-sexp,  Prev: racket-send-region,  Up: Eval
+File: doc2l5VjJ.info,  Node: racket-send-definition,  Next: racket-send-last-sexp,  Prev: racket-send-region,  Up: Eval
 
 6.6.2 racket-send-definition
 ----------------------------
@@ -2832,7 +2827,7 @@ File: doc4N5afI.info,  Node: racket-send-definition,  Next: racket-send-last-sex
    Send the current definition to the Racket REPL.
 
 
-File: doc4N5afI.info,  Node: racket-send-last-sexp,  Prev: racket-send-definition,  Up: Eval
+File: doc2l5VjJ.info,  Node: racket-send-last-sexp,  Prev: racket-send-definition,  Up: Eval
 
 6.6.3 racket-send-last-sexp
 ---------------------------
@@ -2851,7 +2846,7 @@ into the REPL, followed by a “=>” line, to distinguish it from the zero
 or more values to which it evaluates.
 
 
-File: doc4N5afI.info,  Node: Collections,  Next: Macro expand,  Prev: Eval,  Up: Commands
+File: doc2l5VjJ.info,  Node: Collections,  Next: Macro expand,  Prev: Eval,  Up: Commands
 
 6.7 Collections
 ===============
@@ -2861,7 +2856,7 @@ File: doc4N5afI.info,  Node: Collections,  Next: Macro expand,  Prev: Eval,  Up:
 * racket-open-require-path::
 
 
-File: doc4N5afI.info,  Node: racket-open-require-path,  Up: Collections
+File: doc2l5VjJ.info,  Node: racket-open-require-path,  Up: Collections
 
 6.7.1 racket-open-require-path
 ------------------------------
@@ -2882,7 +2877,7 @@ the top, marked with “->”.
    • C-g aborts.
 
 
-File: doc4N5afI.info,  Node: Macro expand,  Next: Packages,  Prev: Collections,  Up: Commands
+File: doc2l5VjJ.info,  Node: Macro expand,  Next: Packages,  Prev: Collections,  Up: Commands
 
 6.8 Macro expand
 ================
@@ -2896,7 +2891,7 @@ File: doc4N5afI.info,  Node: Macro expand,  Next: Packages,  Prev: Collections, 
 * racket-expand-last-sexp::
 
 
-File: doc4N5afI.info,  Node: racket-stepper-mode,  Next: racket-expand-file,  Up: Macro expand
+File: doc2l5VjJ.info,  Node: racket-stepper-mode,  Next: racket-expand-file,  Up: Macro expand
 
 6.8.1 racket-stepper-mode
 -------------------------
@@ -2909,18 +2904,18 @@ File: doc4N5afI.info,  Node: racket-stepper-mode,  Next: racket-expand-file,  Up
 racket-expand-definition::, *note racket-expand-region::, and *note
 racket-expand-last-sexp::.
 
-Key                                                                                    Binding
-‘n’ , ‘j’                                                                              ‘racket-stepper-next-item’
-‘p’ , ‘k’                                                                              ‘racket-stepper-previous-item’
-‘g’                                                                                    ‘racket-stepper-refresh’
-‘RET’                                                                                  ‘racket-stepper-step’
+Key                                                                                      Binding
+‘n’ or ‘j’                                                                               ‘racket-stepper-next-item’
+‘p’ or ‘k’                                                                               ‘racket-stepper-previous-item’
+‘g’                                                                                      ‘racket-stepper-refresh’
+‘RET’                                                                                    ‘racket-stepper-step’
 
    In addition to any hooks its parent mode ‘special-mode’ might have
 run, this mode runs the hook ‘racket-stepper-mode-hook’, as the final or
 penultimate step during initialization.
 
 
-File: doc4N5afI.info,  Node: racket-expand-file,  Next: racket-expand-region,  Prev: racket-stepper-mode,  Up: Macro expand
+File: doc2l5VjJ.info,  Node: racket-expand-file,  Next: racket-expand-region,  Prev: racket-stepper-mode,  Up: Macro expand
 
 6.8.2 racket-expand-file
 ------------------------
@@ -2942,7 +2937,7 @@ displayed and you can start stepping.
    With ‘C-u’ behaves as if *note racket-expand-hiding:: were ’disabled.
 
 
-File: doc4N5afI.info,  Node: racket-expand-region,  Next: racket-expand-definition,  Prev: racket-expand-file,  Up: Macro expand
+File: doc2l5VjJ.info,  Node: racket-expand-region,  Next: racket-expand-definition,  Prev: racket-expand-file,  Up: Macro expand
 
 6.8.3 racket-expand-region
 --------------------------
@@ -2956,7 +2951,7 @@ File: doc4N5afI.info,  Node: racket-expand-region,  Next: racket-expand-definiti
    With ‘C-u’ behaves as if *note racket-expand-hiding:: were ’disabled.
 
 
-File: doc4N5afI.info,  Node: racket-expand-definition,  Next: racket-expand-last-sexp,  Prev: racket-expand-region,  Up: Macro expand
+File: doc2l5VjJ.info,  Node: racket-expand-definition,  Next: racket-expand-last-sexp,  Prev: racket-expand-region,  Up: Macro expand
 
 6.8.4 racket-expand-definition
 ------------------------------
@@ -2970,7 +2965,7 @@ File: doc4N5afI.info,  Node: racket-expand-definition,  Next: racket-expand-last
    With ‘C-u’ behaves as if *note racket-expand-hiding:: were ’disabled.
 
 
-File: doc4N5afI.info,  Node: racket-expand-last-sexp,  Prev: racket-expand-definition,  Up: Macro expand
+File: doc2l5VjJ.info,  Node: racket-expand-last-sexp,  Prev: racket-expand-definition,  Up: Macro expand
 
 6.8.5 racket-expand-last-sexp
 -----------------------------
@@ -2984,7 +2979,7 @@ File: doc4N5afI.info,  Node: racket-expand-last-sexp,  Prev: racket-expand-defin
    With ‘C-u’ behaves as if *note racket-expand-hiding:: were ’disabled.
 
 
-File: doc4N5afI.info,  Node: Packages,  Next: Other,  Prev: Macro expand,  Up: Commands
+File: doc2l5VjJ.info,  Node: Packages,  Next: Other,  Prev: Macro expand,  Up: Commands
 
 6.9 Packages
 ============
@@ -2997,7 +2992,7 @@ File: doc4N5afI.info,  Node: Packages,  Next: Other,  Prev: Macro expand,  Up: C
 * describe-racket-package::
 
 
-File: doc4N5afI.info,  Node: racket-package-refresh,  Next: list-racket-packages,  Up: Packages
+File: doc2l5VjJ.info,  Node: racket-package-refresh,  Next: list-racket-packages,  Up: Packages
 
 6.9.1 racket-package-refresh
 ----------------------------
@@ -3010,7 +3005,7 @@ File: doc4N5afI.info,  Node: racket-package-refresh,  Next: list-racket-packages
 seconds to complete.
 
 
-File: doc4N5afI.info,  Node: list-racket-packages,  Next: racket-package-mode,  Prev: racket-package-refresh,  Up: Packages
+File: doc2l5VjJ.info,  Node: list-racket-packages,  Next: racket-package-mode,  Prev: racket-package-refresh,  Up: Packages
 
 6.9.2 list-racket-packages
 --------------------------
@@ -3020,7 +3015,7 @@ File: doc4N5afI.info,  Node: list-racket-packages,  Next: racket-package-mode,  
    Open a *note racket-package-mode:: buffer for the active back end.
 
 
-File: doc4N5afI.info,  Node: racket-package-mode,  Next: describe-racket-package,  Prev: list-racket-packages,  Up: Packages
+File: doc2l5VjJ.info,  Node: racket-package-mode,  Next: describe-racket-package,  Prev: list-racket-packages,  Up: Packages
 
 6.9.3 racket-package-mode
 -------------------------
@@ -3046,7 +3041,7 @@ have run, this mode runs the hook ‘racket-package-mode-hook’, as the
 final or penultimate step during initialization.
 
 
-File: doc4N5afI.info,  Node: describe-racket-package,  Prev: racket-package-mode,  Up: Packages
+File: doc2l5VjJ.info,  Node: describe-racket-package,  Prev: racket-package-mode,  Up: Packages
 
 6.9.4 describe-racket-package
 -----------------------------
@@ -3083,7 +3078,7 @@ be shown, assuming you have run the command *note
 racket-package-refresh::.
 
 
-File: doc4N5afI.info,  Node: Other,  Prev: Packages,  Up: Commands
+File: doc2l5VjJ.info,  Node: Other,  Prev: Packages,  Up: Commands
 
 6.10 Other
 ==========
@@ -3095,7 +3090,7 @@ File: doc4N5afI.info,  Node: Other,  Prev: Packages,  Up: Commands
 * racket-mode-start-slower::
 
 
-File: doc4N5afI.info,  Node: racket-debug-toggle-breakpoint,  Next: racket-mode-start-faster,  Up: Other
+File: doc2l5VjJ.info,  Node: racket-debug-toggle-breakpoint,  Next: racket-mode-start-faster,  Up: Other
 
 6.10.1 racket-debug-toggle-breakpoint
 -------------------------------------
@@ -3140,7 +3135,7 @@ positions that are tail calls – most open parens and close parens are
 breakble positions.
 
 
-File: doc4N5afI.info,  Node: racket-mode-start-faster,  Next: racket-mode-start-slower,  Prev: racket-debug-toggle-breakpoint,  Up: Other
+File: doc2l5VjJ.info,  Node: racket-mode-start-faster,  Next: racket-mode-start-slower,  Prev: racket-debug-toggle-breakpoint,  Up: Other
 
 6.10.2 racket-mode-start-faster
 -------------------------------
@@ -3175,7 +3170,7 @@ not be worth the complication.
 racket-mode-start-slower::.
 
 
-File: doc4N5afI.info,  Node: racket-mode-start-slower,  Prev: racket-mode-start-faster,  Up: Other
+File: doc2l5VjJ.info,  Node: racket-mode-start-slower,  Prev: racket-mode-start-faster,  Up: Other
 
 6.10.3 racket-mode-start-slower
 -------------------------------
@@ -3186,7 +3181,7 @@ File: doc4N5afI.info,  Node: racket-mode-start-slower,  Prev: racket-mode-start-
 racket-mode-start-faster::.
 
 
-File: doc4N5afI.info,  Node: Variables,  Next: Configuration functions,  Prev: Commands,  Up: Top
+File: doc2l5VjJ.info,  Node: Variables,  Next: Configuration functions,  Prev: Commands,  Up: Top
 
 7 Variables
 ***********
@@ -3203,7 +3198,7 @@ File: doc4N5afI.info,  Node: Variables,  Next: Configuration functions,  Prev: C
 * Racket input method::
 
 
-File: doc4N5afI.info,  Node: General variables,  Next: Hash lang variables,  Up: Variables
+File: doc2l5VjJ.info,  Node: General variables,  Next: Hash lang variables,  Up: Variables
 
 7.1 General variables
 =====================
@@ -3224,7 +3219,7 @@ File: doc4N5afI.info,  Node: General variables,  Next: Hash lang variables,  Up:
 * racket-expand-hiding::
 
 
-File: doc4N5afI.info,  Node: racket-program,  Next: racket-command-timeout,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-program,  Next: racket-command-timeout,  Up: General variables
 
 7.1.1 racket-program
 --------------------
@@ -3235,7 +3230,7 @@ Pathname of the Racket executable.
 ‘racket-program’ property list value.  See *note racket-add-back-end::.
 
 
-File: doc4N5afI.info,  Node: racket-command-timeout,  Next: racket-memory-limit,  Prev: racket-program,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-command-timeout,  Next: racket-memory-limit,  Prev: racket-program,  Up: General variables
 
 7.1.2 racket-command-timeout
 ----------------------------
@@ -3248,7 +3243,7 @@ Instead most Racket Mode commands these days receive their response
 asychronously.
 
 
-File: doc4N5afI.info,  Node: racket-memory-limit,  Next: racket-error-context,  Prev: racket-command-timeout,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-memory-limit,  Next: racket-error-context,  Prev: racket-command-timeout,  Up: General variables
 
 7.1.3 racket-memory-limit
 -------------------------
@@ -3264,7 +3259,7 @@ the first garbage collection where memory exceeds the limit (maybe by a
 significant amount).
 
 
-File: doc4N5afI.info,  Node: racket-error-context,  Next: racket-user-command-line-arguments,  Prev: racket-memory-limit,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-error-context,  Next: racket-user-command-line-arguments,  Prev: racket-memory-limit,  Up: General variables
 
 7.1.4 racket-error-context
 --------------------------
@@ -3291,7 +3286,7 @@ using ‘C-u’ .  This lets you normally run with a lower, faster setting,
 and re-run when desired to get a more-helpful error message.
 
 
-File: doc4N5afI.info,  Node: racket-user-command-line-arguments,  Next: racket-browse-url-function,  Prev: racket-error-context,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-user-command-line-arguments,  Next: racket-browse-url-function,  Prev: racket-error-context,  Up: General variables
 
 7.1.5 racket-user-command-line-arguments
 ----------------------------------------
@@ -3319,7 +3314,7 @@ example:
          (list "-f" "bar")
 
 
-File: doc4N5afI.info,  Node: racket-browse-url-function,  Next: racket-xp-after-change-refresh-delay,  Prev: racket-user-command-line-arguments,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-browse-url-function,  Next: racket-xp-after-change-refresh-delay,  Prev: racket-user-command-line-arguments,  Up: General variables
 
 7.1.6 racket-browse-url-function
 --------------------------------
@@ -3330,7 +3325,7 @@ Function to call to browse a URL.
 and ‘browse-url-browser-function’ on other platforms.
 
 
-File: doc4N5afI.info,  Node: racket-xp-after-change-refresh-delay,  Next: racket-xp-highlight-unused-regexp,  Prev: racket-browse-url-function,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-xp-after-change-refresh-delay,  Next: racket-xp-highlight-unused-regexp,  Prev: racket-browse-url-function,  Up: General variables
 
 7.1.7 racket-xp-after-change-refresh-delay
 ------------------------------------------
@@ -3341,7 +3336,7 @@ Seconds to wait before refreshing *note racket-xp-mode:: annotations.
 ‘racket-xp-annotate’.
 
 
-File: doc4N5afI.info,  Node: racket-xp-highlight-unused-regexp,  Next: racket-xp-add-binding-faces,  Prev: racket-xp-after-change-refresh-delay,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-xp-highlight-unused-regexp,  Next: racket-xp-add-binding-faces,  Prev: racket-xp-after-change-refresh-delay,  Up: General variables
 
 7.1.8 racket-xp-highlight-unused-regexp
 ---------------------------------------
@@ -3353,7 +3348,7 @@ this regexp.
 underline, which is a common convention.
 
 
-File: doc4N5afI.info,  Node: racket-xp-add-binding-faces,  Next: racket-xp-eldoc-level,  Prev: racket-xp-highlight-unused-regexp,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-xp-add-binding-faces,  Next: racket-xp-eldoc-level,  Prev: racket-xp-highlight-unused-regexp,  Up: General variables
 
 7.1.9 racket-xp-add-binding-faces
 ---------------------------------
@@ -3375,7 +3370,7 @@ Have *note racket-xp-mode:: fontify binding identifier sites.
 property applied by the major mode’s fontification.
 
 
-File: doc4N5afI.info,  Node: racket-xp-eldoc-level,  Next: racket-documentation-search-location,  Prev: racket-xp-add-binding-faces,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-xp-eldoc-level,  Next: racket-documentation-search-location,  Prev: racket-xp-add-binding-faces,  Up: General variables
 
 7.1.10 racket-xp-eldoc-level
 ----------------------------
@@ -3396,7 +3391,7 @@ minimal level.  Even some bluebox signatures can take many lines to show
 on screen.
 
 
-File: doc4N5afI.info,  Node: racket-documentation-search-location,  Next: racket-expand-hiding,  Prev: racket-xp-eldoc-level,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-documentation-search-location,  Next: racket-expand-hiding,  Prev: racket-xp-eldoc-level,  Up: General variables
 
 7.1.11 racket-documentation-search-location
 -------------------------------------------
@@ -3414,7 +3409,7 @@ racket-repl-documentation:: should look for the search page.
      be a properly encoded URL.
 
 
-File: doc4N5afI.info,  Node: racket-expand-hiding,  Prev: racket-documentation-search-location,  Up: General variables
+File: doc2l5VjJ.info,  Node: racket-expand-hiding,  Prev: racket-documentation-search-location,  Up: General variables
 
 7.1.12 racket-expand-hiding
 ---------------------------
@@ -3422,7 +3417,7 @@ File: doc4N5afI.info,  Node: racket-expand-hiding,  Prev: racket-documentation-s
 The macro hiding policy for commands like *note racket-expand-file::.
 
 
-File: doc4N5afI.info,  Node: Hash lang variables,  Next: REPL variables,  Prev: General variables,  Up: Variables
+File: doc2l5VjJ.info,  Node: Hash lang variables,  Next: REPL variables,  Prev: General variables,  Up: Variables
 
 7.2 Hash lang variables
 =======================
@@ -3434,7 +3429,7 @@ File: doc4N5afI.info,  Node: Hash lang variables,  Next: REPL variables,  Prev: 
 * racket-hash-lang-module-language-hook::
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-token-face-alist,  Next: racket-hash-lang-pairs,  Up: Hash lang variables
+File: doc2l5VjJ.info,  Node: racket-hash-lang-token-face-alist,  Next: racket-hash-lang-pairs,  Up: Hash lang variables
 
 7.2.1 racket-hash-lang-token-face-alist
 ---------------------------------------
@@ -3464,7 +3459,7 @@ defined, as by the paren-face package.  String tokens use
 *note racket-hash-lang-text::.
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-pairs,  Next: racket-hash-lang-module-language-hook,  Prev: racket-hash-lang-token-face-alist,  Up: Hash lang variables
+File: doc2l5VjJ.info,  Node: racket-hash-lang-pairs,  Next: racket-hash-lang-module-language-hook,  Prev: racket-hash-lang-token-face-alist,  Up: Hash lang variables
 
 7.2.2 racket-hash-lang-pairs
 ----------------------------
@@ -3481,7 +3476,7 @@ drracket:quote-matches.
 racket-hash-lang-module-language-hook::.
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-module-language-hook,  Prev: racket-hash-lang-pairs,  Up: Hash lang variables
+File: doc2l5VjJ.info,  Node: racket-hash-lang-module-language-hook,  Prev: racket-hash-lang-pairs,  Up: Hash lang variables
 
 7.2.3 racket-hash-lang-module-language-hook
 -------------------------------------------
@@ -3559,7 +3554,7 @@ choices include:
                                             racket-font-lock-keywords-3)))
 
 
-File: doc4N5afI.info,  Node: REPL variables,  Next: Other variables,  Prev: Hash lang variables,  Up: Variables
+File: doc2l5VjJ.info,  Node: REPL variables,  Next: Other variables,  Prev: Hash lang variables,  Up: Variables
 
 7.3 REPL variables
 ==================
@@ -3579,7 +3574,7 @@ File: doc4N5afI.info,  Node: REPL variables,  Next: Other variables,  Prev: Hash
 * racket-repl-command-file::
 
 
-File: doc4N5afI.info,  Node: racket-repl-buffer-name-function,  Next: racket-submodules-to-run,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-repl-buffer-name-function,  Next: racket-submodules-to-run,  Up: REPL variables
 
 7.3.1 racket-repl-buffer-name-function
 --------------------------------------
@@ -3605,7 +3600,7 @@ racket-repl-mode:: buffer name.  As a result, *note racket-run::
 commands will use a buffer of that name, creating it if necessary.
 
 
-File: doc4N5afI.info,  Node: racket-submodules-to-run,  Next: racket-repl-history-directory,  Prev: racket-repl-buffer-name-function,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-submodules-to-run,  Next: racket-repl-history-directory,  Prev: racket-repl-buffer-name-function,  Up: REPL variables
 
 7.3.2 racket-submodules-to-run
 ------------------------------
@@ -3627,7 +3622,7 @@ to support submodules nested to any depth.
    • *note racket-profile::
 
 
-File: doc4N5afI.info,  Node: racket-repl-history-directory,  Next: racket-history-filter-regexp,  Prev: racket-submodules-to-run,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-repl-history-directory,  Next: racket-history-filter-regexp,  Prev: racket-submodules-to-run,  Up: REPL variables
 
 7.3.3 racket-repl-history-directory
 -----------------------------------
@@ -3635,7 +3630,7 @@ File: doc4N5afI.info,  Node: racket-repl-history-directory,  Next: racket-histor
 Directory for *note racket-repl-mode:: history files.
 
 
-File: doc4N5afI.info,  Node: racket-history-filter-regexp,  Next: racket-images-inline,  Prev: racket-repl-history-directory,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-history-filter-regexp,  Next: racket-images-inline,  Prev: racket-repl-history-directory,  Up: REPL variables
 
 7.3.4 racket-history-filter-regexp
 ----------------------------------
@@ -3644,7 +3639,7 @@ Input matching this regexp are NOT saved on the history list.  Default
 value is a regexp to ignore input that is all whitespace.
 
 
-File: doc4N5afI.info,  Node: racket-images-inline,  Next: racket-imagemagick-props,  Prev: racket-history-filter-regexp,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-images-inline,  Next: racket-imagemagick-props,  Prev: racket-history-filter-regexp,  Up: REPL variables
 
 7.3.5 racket-images-inline
 --------------------------
@@ -3652,7 +3647,7 @@ File: doc4N5afI.info,  Node: racket-images-inline,  Next: racket-imagemagick-pro
 Whether to display inline images in the REPL.
 
 
-File: doc4N5afI.info,  Node: racket-imagemagick-props,  Next: racket-images-keep-last,  Prev: racket-images-inline,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-imagemagick-props,  Next: racket-images-keep-last,  Prev: racket-images-inline,  Up: REPL variables
 
 7.3.6 racket-imagemagick-props
 ------------------------------
@@ -3668,7 +3663,7 @@ and with this property list.
 supply (:max-width 500).
 
 
-File: doc4N5afI.info,  Node: racket-images-keep-last,  Next: racket-images-system-viewer,  Prev: racket-imagemagick-props,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-images-keep-last,  Next: racket-images-system-viewer,  Prev: racket-imagemagick-props,  Up: REPL variables
 
 7.3.7 racket-images-keep-last
 -----------------------------
@@ -3676,7 +3671,7 @@ File: doc4N5afI.info,  Node: racket-images-keep-last,  Next: racket-images-syste
 How many images to keep in the image cache.
 
 
-File: doc4N5afI.info,  Node: racket-images-system-viewer,  Next: racket-images-do-not-use-svg,  Prev: racket-images-keep-last,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-images-system-viewer,  Next: racket-images-do-not-use-svg,  Prev: racket-images-keep-last,  Up: REPL variables
 
 7.3.8 racket-images-system-viewer
 ---------------------------------
@@ -3684,7 +3679,7 @@ File: doc4N5afI.info,  Node: racket-images-system-viewer,  Next: racket-images-d
 The image viewer program to use for ‘racket-view-image’.
 
 
-File: doc4N5afI.info,  Node: racket-images-do-not-use-svg,  Next: racket-pretty-print,  Prev: racket-images-system-viewer,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-images-do-not-use-svg,  Next: racket-pretty-print,  Prev: racket-images-system-viewer,  Up: REPL variables
 
 7.3.9 racket-images-do-not-use-svg
 ----------------------------------
@@ -3696,7 +3691,7 @@ each run.  If you change this, for it to take effect you must restart by
 using ‘racket-start-back-end’.
 
 
-File: doc4N5afI.info,  Node: racket-pretty-print,  Next: racket-repl-command-file,  Prev: racket-images-do-not-use-svg,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-pretty-print,  Next: racket-repl-command-file,  Prev: racket-images-do-not-use-svg,  Up: REPL variables
 
 7.3.10 racket-pretty-print
 --------------------------
@@ -3711,7 +3706,7 @@ with its own global port print handler – for example to implement
 printing a non-s-expression syntax.
 
 
-File: doc4N5afI.info,  Node: racket-repl-command-file,  Prev: racket-pretty-print,  Up: REPL variables
+File: doc2l5VjJ.info,  Node: racket-repl-command-file,  Prev: racket-pretty-print,  Up: REPL variables
 
 7.3.11 racket-repl-command-file
 -------------------------------
@@ -3719,7 +3714,7 @@ File: doc4N5afI.info,  Node: racket-repl-command-file,  Prev: racket-pretty-prin
 Name of the file used by *note racket-repl::.
 
 
-File: doc4N5afI.info,  Node: Other variables,  Next: Experimental debugger variables,  Prev: REPL variables,  Up: Variables
+File: doc2l5VjJ.info,  Node: Other variables,  Next: Experimental debugger variables,  Prev: REPL variables,  Up: Variables
 
 7.4 Other variables
 ===================
@@ -3738,7 +3733,7 @@ File: doc4N5afI.info,  Node: Other variables,  Next: Experimental debugger varia
 * racket-sexp-comment-fade::
 
 
-File: doc4N5afI.info,  Node: racket-doc-index-directory,  Next: racket-doc-index-predicate-function,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-doc-index-directory,  Next: racket-doc-index-predicate-function,  Up: Other variables
 
 7.4.1 racket-doc-index-directory
 --------------------------------
@@ -3746,7 +3741,7 @@ File: doc4N5afI.info,  Node: racket-doc-index-directory,  Next: racket-doc-index
 Directory for *note racket-describe-search:: doc index files.
 
 
-File: doc4N5afI.info,  Node: racket-doc-index-predicate-function,  Next: racket-indent-curly-as-sequence,  Prev: racket-doc-index-directory,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-doc-index-predicate-function,  Next: racket-indent-curly-as-sequence,  Prev: racket-doc-index-directory,  Up: Other variables
 
 7.4.2 racket-doc-index-predicate-function
 -----------------------------------------
@@ -3764,7 +3759,7 @@ of completion candidates.  An example that limits candidates to the
 “Rhombus”)
 
 
-File: doc4N5afI.info,  Node: racket-indent-curly-as-sequence,  Next: racket-indent-sequence-depth,  Prev: racket-doc-index-predicate-function,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-indent-curly-as-sequence,  Next: racket-indent-sequence-depth,  Prev: racket-doc-index-predicate-function,  Up: Other variables
 
 7.4.3 racket-indent-curly-as-sequence
 -------------------------------------
@@ -3775,7 +3770,7 @@ Indent ‘{}’ with items aligned with the head item?
 is 0.  This is safe to set as a file-local variable.
 
 
-File: doc4N5afI.info,  Node: racket-indent-sequence-depth,  Next: racket-pretty-lambda,  Prev: racket-indent-curly-as-sequence,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-indent-sequence-depth,  Next: racket-pretty-lambda,  Prev: racket-indent-curly-as-sequence,  Up: Other variables
 
 7.4.4 racket-indent-sequence-depth
 ----------------------------------
@@ -3790,7 +3785,7 @@ this to a high value can make indentation noticeably slower.  This is
 safe to set as a file-local variable.
 
 
-File: doc4N5afI.info,  Node: racket-pretty-lambda,  Next: racket-smart-open-bracket-enable,  Prev: racket-indent-sequence-depth,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-pretty-lambda,  Next: racket-smart-open-bracket-enable,  Prev: racket-indent-sequence-depth,  Up: Other variables
 
 7.4.5 racket-pretty-lambda
 --------------------------
@@ -3801,7 +3796,7 @@ Display lambda keywords using λ.  This is DEPRECATED.
 use *note racket-insert-lambda:: to insert actual λ characters.
 
 
-File: doc4N5afI.info,  Node: racket-smart-open-bracket-enable,  Next: racket-logger-config,  Prev: racket-pretty-lambda,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-smart-open-bracket-enable,  Next: racket-logger-config,  Prev: racket-pretty-lambda,  Up: Other variables
 
 7.4.6 racket-smart-open-bracket-enable
 --------------------------------------
@@ -3813,7 +3808,7 @@ This variable is obsolete and has no effect.
 ‘racket-repl-mode-map’ keymaps.
 
 
-File: doc4N5afI.info,  Node: racket-logger-config,  Next: racket-before-run-hook,  Prev: racket-smart-open-bracket-enable,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-logger-config,  Next: racket-before-run-hook,  Prev: racket-smart-open-bracket-enable,  Up: Other variables
 
 7.4.7 racket-logger-config
 --------------------------
@@ -3835,7 +3830,7 @@ quieter.  That way you can set the “*” topic to a level like “debug” and
 not get overhwelmed by these noisy topics.
 
 
-File: doc4N5afI.info,  Node: racket-before-run-hook,  Next: racket-after-run-hook,  Prev: racket-logger-config,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-before-run-hook,  Next: racket-after-run-hook,  Prev: racket-logger-config,  Up: Other variables
 
 7.4.8 racket-before-run-hook
 ----------------------------
@@ -3851,7 +3846,7 @@ needs the *note racket-repl-mode:: buffer, it should get that from the
 variable ‘racket-repl-buffer-name’.
 
 
-File: doc4N5afI.info,  Node: racket-after-run-hook,  Next: racket-sexp-comment-fade,  Prev: racket-before-run-hook,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-after-run-hook,  Next: racket-sexp-comment-fade,  Prev: racket-before-run-hook,  Up: Other variables
 
 7.4.9 racket-after-run-hook
 ---------------------------
@@ -3867,7 +3862,7 @@ needs the *note racket-repl-mode:: buffer, it should get that from the
 variable ‘racket-repl-buffer-name’.
 
 
-File: doc4N5afI.info,  Node: racket-sexp-comment-fade,  Prev: racket-after-run-hook,  Up: Other variables
+File: doc2l5VjJ.info,  Node: racket-sexp-comment-fade,  Prev: racket-after-run-hook,  Up: Other variables
 
 7.4.10 racket-sexp-comment-fade
 -------------------------------
@@ -3885,7 +3880,7 @@ change the value of this customization variable and after any
 ‘racket-refresh-sexp-comment-faces’.
 
 
-File: doc4N5afI.info,  Node: Experimental debugger variables,  Next: Showing information,  Prev: Other variables,  Up: Variables
+File: doc2l5VjJ.info,  Node: Experimental debugger variables,  Next: Showing information,  Prev: Other variables,  Up: Variables
 
 7.5 Experimental debugger variables
 ===================================
@@ -3895,7 +3890,7 @@ File: doc4N5afI.info,  Node: Experimental debugger variables,  Next: Showing inf
 * racket-debuggable-files::
 
 
-File: doc4N5afI.info,  Node: racket-debuggable-files,  Up: Experimental debugger variables
+File: doc2l5VjJ.info,  Node: racket-debuggable-files,  Up: Experimental debugger variables
 
 7.5.1 racket-debuggable-files
 -----------------------------
@@ -3914,7 +3909,7 @@ with respect to the file being run and given to
 ‘racket-file-name-front-to-back’.
 
 
-File: doc4N5afI.info,  Node: Showing information,  Next: Running racket and raco commands in a shell or terminal,  Prev: Experimental debugger variables,  Up: Variables
+File: doc2l5VjJ.info,  Node: Showing information,  Next: Running racket and raco commands in a shell or terminal,  Prev: Experimental debugger variables,  Up: Variables
 
 7.6 Showing information
 =======================
@@ -3924,7 +3919,7 @@ File: doc4N5afI.info,  Node: Showing information,  Next: Running racket and raco
 * racket-show-functions::
 
 
-File: doc4N5afI.info,  Node: racket-show-functions,  Up: Showing information
+File: doc2l5VjJ.info,  Node: racket-show-functions,  Up: Showing information
 
 7.6.1 racket-show-functions
 ---------------------------
@@ -3958,7 +3953,7 @@ POS.  Examples: *note racket-show-echo-area:: and *note
 racket-show-header-line::
 
 
-File: doc4N5afI.info,  Node: Running racket and raco commands in a shell or terminal,  Next: Racket input method,  Prev: Showing information,  Up: Variables
+File: doc2l5VjJ.info,  Node: Running racket and raco commands in a shell or terminal,  Next: Racket input method,  Prev: Showing information,  Up: Variables
 
 7.7 Running racket and raco commands in a shell or terminal
 ===========================================================
@@ -3968,7 +3963,7 @@ File: doc4N5afI.info,  Node: Running racket and raco commands in a shell or term
 * racket-shell-or-terminal-function::
 
 
-File: doc4N5afI.info,  Node: racket-shell-or-terminal-function,  Up: Running racket and raco commands in a shell or terminal
+File: doc2l5VjJ.info,  Node: racket-shell-or-terminal-function,  Up: Running racket and raco commands in a shell or terminal
 
 7.7.1 racket-shell-or-terminal-function
 ---------------------------------------
@@ -3983,7 +3978,7 @@ enter.
 *note racket-ansi-term::, and *note racket-vterm::.
 
 
-File: doc4N5afI.info,  Node: Racket input method,  Prev: Running racket and raco commands in a shell or terminal,  Up: Variables
+File: doc2l5VjJ.info,  Node: Racket input method,  Prev: Running racket and raco commands in a shell or terminal,  Up: Variables
 
 7.8 Racket input method
 =======================
@@ -3994,7 +3989,7 @@ File: doc4N5afI.info,  Node: Racket input method,  Prev: Running racket and raco
 * racket-input-translations::
 
 
-File: doc4N5afI.info,  Node: racket-input-prefix,  Next: racket-input-translations,  Up: Racket input method
+File: doc2l5VjJ.info,  Node: racket-input-prefix,  Next: racket-input-translations,  Up: Racket input method
 
 7.8.1 racket-input-prefix
 -------------------------
@@ -4013,7 +4008,7 @@ customization buffer or ‘setopt’) you need to call ‘racket-input-setup’
 in order for the change to take effect.
 
 
-File: doc4N5afI.info,  Node: racket-input-translations,  Prev: racket-input-prefix,  Up: Racket input method
+File: doc2l5VjJ.info,  Node: racket-input-translations,  Prev: racket-input-prefix,  Up: Racket input method
 
 7.8.2 racket-input-translations
 -------------------------------
@@ -4031,7 +4026,7 @@ customization buffer or ‘setopt’) you need to call ‘racket-input-setup’
 in order for the change to take effect.
 
 
-File: doc4N5afI.info,  Node: Configuration functions,  Next: Faces,  Prev: Variables,  Up: Top
+File: doc2l5VjJ.info,  Node: Configuration functions,  Next: Faces,  Prev: Variables,  Up: Top
 
 8 Configuration functions
 *************************
@@ -4045,7 +4040,7 @@ File: doc4N5afI.info,  Node: Configuration functions,  Next: Faces,  Prev: Varia
 * Running racket and raco commands in a shell or terminal: Running racket and raco commands in a shell or terminal (1).
 
 
-File: doc4N5afI.info,  Node: Showing information (1),  Next: Associating edit buffers with REPL buffers,  Up: Configuration functions
+File: doc2l5VjJ.info,  Node: Showing information (1),  Next: Associating edit buffers with REPL buffers,  Up: Configuration functions
 
 8.1 Showing information
 =======================
@@ -4058,7 +4053,7 @@ File: doc4N5afI.info,  Node: Showing information (1),  Next: Associating edit bu
 * racket-show-pos-tip::
 
 
-File: doc4N5afI.info,  Node: racket-show-pseudo-tooltip,  Next: racket-show-echo-area,  Up: Showing information (1)
+File: doc2l5VjJ.info,  Node: racket-show-pseudo-tooltip,  Next: racket-show-echo-area,  Up: Showing information (1)
 
 8.1.1 racket-show-pseudo-tooltip
 --------------------------------
@@ -4078,7 +4073,7 @@ that spans multiple lines or is too wide to fit the window.  In that
 case, we simply left-justify everything and do not draw any border.
 
 
-File: doc4N5afI.info,  Node: racket-show-echo-area,  Next: racket-show-header-line,  Prev: racket-show-pseudo-tooltip,  Up: Showing information (1)
+File: doc2l5VjJ.info,  Node: racket-show-echo-area,  Next: racket-show-header-line,  Prev: racket-show-pseudo-tooltip,  Up: Showing information (1)
 
 8.1.2 racket-show-echo-area
 ---------------------------
@@ -4092,7 +4087,7 @@ File: doc4N5afI.info,  Node: racket-show-echo-area,  Next: racket-show-header-li
    This does _not_ add STR to the “*Messages*” log buffer.
 
 
-File: doc4N5afI.info,  Node: racket-show-header-line,  Next: racket-show-pos-tip,  Prev: racket-show-echo-area,  Up: Showing information (1)
+File: doc2l5VjJ.info,  Node: racket-show-header-line,  Next: racket-show-pos-tip,  Prev: racket-show-echo-area,  Up: Showing information (1)
 
 8.1.3 racket-show-header-line
 -----------------------------
@@ -4108,7 +4103,7 @@ the buffer below doesn’t “jump up and down” by a line as messages appear
 and disappear.  Only when V is nil do we remove the header line.
 
 
-File: doc4N5afI.info,  Node: racket-show-pos-tip,  Prev: racket-show-header-line,  Up: Showing information (1)
+File: doc2l5VjJ.info,  Node: racket-show-pos-tip,  Prev: racket-show-header-line,  Up: Showing information (1)
 
 8.1.4 racket-show-pos-tip
 -------------------------
@@ -4120,7 +4115,7 @@ File: doc4N5afI.info,  Node: racket-show-pos-tip,  Prev: racket-show-header-line
    A value for the variable *note racket-show-functions::.
 
 
-File: doc4N5afI.info,  Node: Associating edit buffers with REPL buffers,  Next: Browsing file URLs with anchors,  Prev: Showing information (1),  Up: Configuration functions
+File: doc2l5VjJ.info,  Node: Associating edit buffers with REPL buffers,  Next: Browsing file URLs with anchors,  Prev: Showing information (1),  Up: Configuration functions
 
 8.2 Associating edit buffers with REPL buffers
 ==============================================
@@ -4133,7 +4128,7 @@ File: doc4N5afI.info,  Node: Associating edit buffers with REPL buffers,  Next: 
 * racket-project-root::
 
 
-File: doc4N5afI.info,  Node: racket-repl-buffer-name-shared,  Next: racket-repl-buffer-name-unique,  Up: Associating edit buffers with REPL buffers
+File: doc2l5VjJ.info,  Node: racket-repl-buffer-name-shared,  Next: racket-repl-buffer-name-unique,  Up: Associating edit buffers with REPL buffers
 
 8.2.1 racket-repl-buffer-name-shared
 ------------------------------------
@@ -4145,7 +4140,7 @@ File: doc4N5afI.info,  Node: racket-repl-buffer-name-shared,  Next: racket-repl-
    A value for the variable *note racket-repl-buffer-name-function::.
 
 
-File: doc4N5afI.info,  Node: racket-repl-buffer-name-unique,  Next: racket-repl-buffer-name-project,  Prev: racket-repl-buffer-name-shared,  Up: Associating edit buffers with REPL buffers
+File: doc2l5VjJ.info,  Node: racket-repl-buffer-name-unique,  Next: racket-repl-buffer-name-project,  Prev: racket-repl-buffer-name-shared,  Up: Associating edit buffers with REPL buffers
 
 8.2.2 racket-repl-buffer-name-unique
 ------------------------------------
@@ -4158,7 +4153,7 @@ racket-repl-mode:: buffer.
    A value for the variable *note racket-repl-buffer-name-function::.
 
 
-File: doc4N5afI.info,  Node: racket-repl-buffer-name-project,  Next: racket-project-root,  Prev: racket-repl-buffer-name-unique,  Up: Associating edit buffers with REPL buffers
+File: doc2l5VjJ.info,  Node: racket-repl-buffer-name-project,  Next: racket-project-root,  Prev: racket-repl-buffer-name-unique,  Up: Associating edit buffers with REPL buffers
 
 8.2.3 racket-repl-buffer-name-project
 -------------------------------------
@@ -4172,7 +4167,7 @@ File: doc4N5afI.info,  Node: racket-repl-buffer-name-project,  Next: racket-proj
    The “project” is determined by *note racket-project-root::.
 
 
-File: doc4N5afI.info,  Node: racket-project-root,  Prev: racket-repl-buffer-name-project,  Up: Associating edit buffers with REPL buffers
+File: doc2l5VjJ.info,  Node: racket-project-root,  Prev: racket-repl-buffer-name-project,  Up: Associating edit buffers with REPL buffers
 
 8.2.4 racket-project-root
 -------------------------
@@ -4190,7 +4185,7 @@ directory.
    • ‘file-name-directory’
 
 
-File: doc4N5afI.info,  Node: Browsing file URLs with anchors,  Next: Configuring back ends,  Prev: Associating edit buffers with REPL buffers,  Up: Configuration functions
+File: doc2l5VjJ.info,  Node: Browsing file URLs with anchors,  Next: Configuring back ends,  Prev: Associating edit buffers with REPL buffers,  Up: Configuration functions
 
 8.3 Browsing file URLs with anchors
 ===================================
@@ -4200,7 +4195,7 @@ File: doc4N5afI.info,  Node: Browsing file URLs with anchors,  Next: Configuring
 * racket-browse-url-using-temporary-file::
 
 
-File: doc4N5afI.info,  Node: racket-browse-url-using-temporary-file,  Up: Browsing file URLs with anchors
+File: doc2l5VjJ.info,  Node: racket-browse-url-using-temporary-file,  Up: Browsing file URLs with anchors
 
 8.3.1 racket-browse-url-using-temporary-file
 --------------------------------------------
@@ -4225,7 +4220,7 @@ racket-browse-url-function:: instead to be ‘browse-url’, or
 indeed whatever you want.
 
 
-File: doc4N5afI.info,  Node: Configuring back ends,  Next: Running racket and raco commands in a shell or terminal (1),  Prev: Browsing file URLs with anchors,  Up: Configuration functions
+File: doc2l5VjJ.info,  Node: Configuring back ends,  Next: Running racket and raco commands in a shell or terminal (1),  Prev: Browsing file URLs with anchors,  Up: Configuration functions
 
 8.4 Configuring back ends
 =========================
@@ -4235,7 +4230,7 @@ File: doc4N5afI.info,  Node: Configuring back ends,  Next: Running racket and ra
 * racket-add-back-end::
 
 
-File: doc4N5afI.info,  Node: racket-add-back-end,  Up: Configuring back ends
+File: doc2l5VjJ.info,  Node: racket-add-back-end,  Up: Configuring back ends
 
 8.4.1 racket-add-back-end
 -------------------------
@@ -4360,7 +4355,7 @@ file:
          ((nil . ((eval . (racket-add-back-end default-directory)))))
 
 
-File: doc4N5afI.info,  Node: Running racket and raco commands in a shell or terminal (1),  Prev: Configuring back ends,  Up: Configuration functions
+File: doc2l5VjJ.info,  Node: Running racket and raco commands in a shell or terminal (1),  Prev: Configuring back ends,  Up: Configuration functions
 
 8.5 Running racket and raco commands in a shell or terminal
 ===========================================================
@@ -4373,7 +4368,7 @@ File: doc4N5afI.info,  Node: Running racket and raco commands in a shell or term
 * racket-vterm::
 
 
-File: doc4N5afI.info,  Node: racket-shell,  Next: racket-term,  Up: Running racket and raco commands in a shell or terminal (1)
+File: doc2l5VjJ.info,  Node: racket-shell,  Next: racket-term,  Up: Running racket and raco commands in a shell or terminal (1)
 
 8.5.1 racket-shell
 ------------------
@@ -4385,7 +4380,7 @@ File: doc4N5afI.info,  Node: racket-shell,  Next: racket-term,  Up: Running rack
    A value for the variable *note racket-shell-or-terminal-function::.
 
 
-File: doc4N5afI.info,  Node: racket-term,  Next: racket-ansi-term,  Prev: racket-shell,  Up: Running racket and raco commands in a shell or terminal (1)
+File: doc2l5VjJ.info,  Node: racket-term,  Next: racket-ansi-term,  Prev: racket-shell,  Up: Running racket and raco commands in a shell or terminal (1)
 
 8.5.2 racket-term
 -----------------
@@ -4397,7 +4392,7 @@ File: doc4N5afI.info,  Node: racket-term,  Next: racket-ansi-term,  Prev: racket
    A value for the variable *note racket-shell-or-terminal-function::.
 
 
-File: doc4N5afI.info,  Node: racket-ansi-term,  Next: racket-vterm,  Prev: racket-term,  Up: Running racket and raco commands in a shell or terminal (1)
+File: doc2l5VjJ.info,  Node: racket-ansi-term,  Next: racket-vterm,  Prev: racket-term,  Up: Running racket and raco commands in a shell or terminal (1)
 
 8.5.3 racket-ansi-term
 ----------------------
@@ -4409,7 +4404,7 @@ File: doc4N5afI.info,  Node: racket-ansi-term,  Next: racket-vterm,  Prev: racke
    A value for the variable *note racket-shell-or-terminal-function::.
 
 
-File: doc4N5afI.info,  Node: racket-vterm,  Prev: racket-ansi-term,  Up: Running racket and raco commands in a shell or terminal (1)
+File: doc2l5VjJ.info,  Node: racket-vterm,  Prev: racket-ansi-term,  Up: Running racket and raco commands in a shell or terminal (1)
 
 8.5.4 racket-vterm
 ------------------
@@ -4421,7 +4416,7 @@ File: doc4N5afI.info,  Node: racket-vterm,  Prev: racket-ansi-term,  Up: Running
    A value for the variable *note racket-shell-or-terminal-function::.
 
 
-File: doc4N5afI.info,  Node: Faces,  Prev: Configuration functions,  Up: Top
+File: doc2l5VjJ.info,  Node: Faces,  Prev: Configuration functions,  Up: Top
 
 9 Faces
 *******
@@ -4431,7 +4426,7 @@ File: doc4N5afI.info,  Node: Faces,  Prev: Configuration functions,  Up: Top
 * All::
 
 
-File: doc4N5afI.info,  Node: All,  Up: Faces
+File: doc2l5VjJ.info,  Node: All,  Up: Faces
 
 9.1 All
 =======
@@ -4474,7 +4469,7 @@ File: doc4N5afI.info,  Node: All,  Up: Faces
 * racket-hash-lang-text::
 
 
-File: doc4N5afI.info,  Node: racket-keyword-argument-face,  Next: racket-reader-quoted-symbol-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-keyword-argument-face,  Next: racket-reader-quoted-symbol-face,  Up: All
 
 9.1.1 racket-keyword-argument-face
 ----------------------------------
@@ -4482,7 +4477,7 @@ File: doc4N5afI.info,  Node: racket-keyword-argument-face,  Next: racket-reader-
 Face for ‘#:keyword’ arguments.
 
 
-File: doc4N5afI.info,  Node: racket-reader-quoted-symbol-face,  Next: racket-reader-syntax-quoted-symbol-face,  Prev: racket-keyword-argument-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-reader-quoted-symbol-face,  Next: racket-reader-syntax-quoted-symbol-face,  Prev: racket-keyword-argument-face,  Up: All
 
 9.1.2 racket-reader-quoted-symbol-face
 --------------------------------------
@@ -4495,7 +4490,7 @@ quoted using “quote” or “quasiquote”, get the face
 ‘font-lock-constant-face’.
 
 
-File: doc4N5afI.info,  Node: racket-reader-syntax-quoted-symbol-face,  Next: racket-here-string-face,  Prev: racket-reader-quoted-symbol-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-reader-syntax-quoted-symbol-face,  Next: racket-here-string-face,  Prev: racket-reader-quoted-symbol-face,  Up: All
 
 9.1.3 racket-reader-syntax-quoted-symbol-face
 ---------------------------------------------
@@ -4508,7 +4503,7 @@ symbols quoted using “syntax” or “quasisyntax”, get the face
 ‘font-lock-constant-face’.
 
 
-File: doc4N5afI.info,  Node: racket-here-string-face,  Next: racket-xp-def-face,  Prev: racket-reader-syntax-quoted-symbol-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-here-string-face,  Next: racket-xp-def-face,  Prev: racket-reader-syntax-quoted-symbol-face,  Up: All
 
 9.1.4 racket-here-string-face
 -----------------------------
@@ -4516,7 +4511,7 @@ File: doc4N5afI.info,  Node: racket-here-string-face,  Next: racket-xp-def-face,
 Face for here strings.
 
 
-File: doc4N5afI.info,  Node: racket-xp-def-face,  Next: racket-xp-use-face,  Prev: racket-here-string-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-def-face,  Next: racket-xp-use-face,  Prev: racket-here-string-face,  Up: All
 
 9.1.5 racket-xp-def-face
 ------------------------
@@ -4524,7 +4519,7 @@ File: doc4N5afI.info,  Node: racket-xp-def-face,  Next: racket-xp-use-face,  Pre
 Face *note racket-xp-mode:: uses when point is on a definition.
 
 
-File: doc4N5afI.info,  Node: racket-xp-use-face,  Next: racket-xp-unused-face,  Prev: racket-xp-def-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-use-face,  Next: racket-xp-unused-face,  Prev: racket-xp-def-face,  Up: All
 
 9.1.6 racket-xp-use-face
 ------------------------
@@ -4532,7 +4527,7 @@ File: doc4N5afI.info,  Node: racket-xp-use-face,  Next: racket-xp-unused-face,  
 Face *note racket-xp-mode:: uses when point is on a use.
 
 
-File: doc4N5afI.info,  Node: racket-xp-unused-face,  Next: racket-xp-tail-target-face,  Prev: racket-xp-use-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-unused-face,  Next: racket-xp-tail-target-face,  Prev: racket-xp-use-face,  Up: All
 
 9.1.7 racket-xp-unused-face
 ---------------------------
@@ -4541,7 +4536,7 @@ Face *note racket-xp-mode:: uses to highlight unused requires or
 definitions.
 
 
-File: doc4N5afI.info,  Node: racket-xp-tail-target-face,  Next: racket-xp-tail-position-face,  Prev: racket-xp-unused-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-tail-target-face,  Next: racket-xp-tail-position-face,  Prev: racket-xp-unused-face,  Up: All
 
 9.1.8 racket-xp-tail-target-face
 --------------------------------
@@ -4550,7 +4545,7 @@ Face *note racket-xp-mode:: uses to highlight targets of a tail
 position.
 
 
-File: doc4N5afI.info,  Node: racket-xp-tail-position-face,  Next: racket-xp-binding-lang-face,  Prev: racket-xp-tail-target-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-tail-position-face,  Next: racket-xp-binding-lang-face,  Prev: racket-xp-tail-target-face,  Up: All
 
 9.1.9 racket-xp-tail-position-face
 ----------------------------------
@@ -4559,7 +4554,7 @@ Face *note racket-xp-mode:: uses to highlight expressions in a tail
 position.
 
 
-File: doc4N5afI.info,  Node: racket-xp-binding-lang-face,  Next: racket-xp-binding-lang-use-face,  Prev: racket-xp-tail-position-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-binding-lang-face,  Next: racket-xp-binding-lang-use-face,  Prev: racket-xp-tail-position-face,  Up: All
 
 9.1.10 racket-xp-binding-lang-face
 ----------------------------------
@@ -4569,7 +4564,7 @@ Face *note racket-xp-mode:: gives to the module language name.
    See the variable ‘nil’.
 
 
-File: doc4N5afI.info,  Node: racket-xp-binding-lang-use-face,  Next: racket-xp-binding-import-face,  Prev: racket-xp-binding-lang-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-binding-lang-use-face,  Next: racket-xp-binding-import-face,  Prev: racket-xp-binding-lang-face,  Up: All
 
 9.1.11 racket-xp-binding-lang-use-face
 --------------------------------------
@@ -4580,7 +4575,7 @@ module language.
    See the variable ‘nil’.
 
 
-File: doc4N5afI.info,  Node: racket-xp-binding-import-face,  Next: racket-xp-binding-import-use-face,  Prev: racket-xp-binding-lang-use-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-binding-import-face,  Next: racket-xp-binding-import-use-face,  Prev: racket-xp-binding-lang-use-face,  Up: All
 
 9.1.12 racket-xp-binding-import-face
 ------------------------------------
@@ -4590,7 +4585,7 @@ Face *note racket-xp-mode:: gives to imported module names.
    See the variable ‘nil’.
 
 
-File: doc4N5afI.info,  Node: racket-xp-binding-import-use-face,  Next: racket-xp-binding-local-face,  Prev: racket-xp-binding-import-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-binding-import-use-face,  Next: racket-xp-binding-local-face,  Prev: racket-xp-binding-import-face,  Up: All
 
 9.1.13 racket-xp-binding-import-use-face
 ----------------------------------------
@@ -4600,7 +4595,7 @@ Face *note racket-xp-mode:: gives uses of imported bindings.
    See the variable ‘nil’.
 
 
-File: doc4N5afI.info,  Node: racket-xp-binding-local-face,  Next: racket-xp-binding-local-use-face,  Prev: racket-xp-binding-import-use-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-binding-local-face,  Next: racket-xp-binding-local-use-face,  Prev: racket-xp-binding-import-use-face,  Up: All
 
 9.1.14 racket-xp-binding-local-face
 -----------------------------------
@@ -4610,7 +4605,7 @@ Face *note racket-xp-mode:: gives to local definitions.
    See the variable ‘nil’.
 
 
-File: doc4N5afI.info,  Node: racket-xp-binding-local-use-face,  Next: racket-logger-config-face,  Prev: racket-xp-binding-local-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-xp-binding-local-use-face,  Next: racket-logger-config-face,  Prev: racket-xp-binding-local-face,  Up: All
 
 9.1.15 racket-xp-binding-local-use-face
 ---------------------------------------
@@ -4620,7 +4615,7 @@ Face *note racket-xp-mode:: gives to uses of local definitions.
    See the variable ‘nil’.
 
 
-File: doc4N5afI.info,  Node: racket-logger-config-face,  Next: racket-logger-topic-face,  Prev: racket-xp-binding-local-use-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-logger-config-face,  Next: racket-logger-topic-face,  Prev: racket-xp-binding-local-use-face,  Up: All
 
 9.1.16 racket-logger-config-face
 --------------------------------
@@ -4628,7 +4623,7 @@ File: doc4N5afI.info,  Node: racket-logger-config-face,  Next: racket-logger-top
 Face for *note racket-logger-mode:: configuration.
 
 
-File: doc4N5afI.info,  Node: racket-logger-topic-face,  Next: racket-logger-fatal-face,  Prev: racket-logger-config-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-logger-topic-face,  Next: racket-logger-fatal-face,  Prev: racket-logger-config-face,  Up: All
 
 9.1.17 racket-logger-topic-face
 -------------------------------
@@ -4636,7 +4631,7 @@ File: doc4N5afI.info,  Node: racket-logger-topic-face,  Next: racket-logger-fata
 Face for *note racket-logger-mode:: topics.
 
 
-File: doc4N5afI.info,  Node: racket-logger-fatal-face,  Next: racket-logger-error-face,  Prev: racket-logger-topic-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-logger-fatal-face,  Next: racket-logger-error-face,  Prev: racket-logger-topic-face,  Up: All
 
 9.1.18 racket-logger-fatal-face
 -------------------------------
@@ -4644,7 +4639,7 @@ File: doc4N5afI.info,  Node: racket-logger-fatal-face,  Next: racket-logger-erro
 Face for *note racket-logger-mode:: fatal level.
 
 
-File: doc4N5afI.info,  Node: racket-logger-error-face,  Next: racket-logger-warning-face,  Prev: racket-logger-fatal-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-logger-error-face,  Next: racket-logger-warning-face,  Prev: racket-logger-fatal-face,  Up: All
 
 9.1.19 racket-logger-error-face
 -------------------------------
@@ -4652,7 +4647,7 @@ File: doc4N5afI.info,  Node: racket-logger-error-face,  Next: racket-logger-warn
 Face for *note racket-logger-mode:: error level.
 
 
-File: doc4N5afI.info,  Node: racket-logger-warning-face,  Next: racket-logger-info-face,  Prev: racket-logger-error-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-logger-warning-face,  Next: racket-logger-info-face,  Prev: racket-logger-error-face,  Up: All
 
 9.1.20 racket-logger-warning-face
 ---------------------------------
@@ -4660,7 +4655,7 @@ File: doc4N5afI.info,  Node: racket-logger-warning-face,  Next: racket-logger-in
 Face for *note racket-logger-mode:: warning level.
 
 
-File: doc4N5afI.info,  Node: racket-logger-info-face,  Next: racket-logger-debug-face,  Prev: racket-logger-warning-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-logger-info-face,  Next: racket-logger-debug-face,  Prev: racket-logger-warning-face,  Up: All
 
 9.1.21 racket-logger-info-face
 ------------------------------
@@ -4668,7 +4663,7 @@ File: doc4N5afI.info,  Node: racket-logger-info-face,  Next: racket-logger-debug
 Face for *note racket-logger-mode:: info level.
 
 
-File: doc4N5afI.info,  Node: racket-logger-debug-face,  Next: racket-doc-link-face,  Prev: racket-logger-info-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-logger-debug-face,  Next: racket-doc-link-face,  Prev: racket-logger-info-face,  Up: All
 
 9.1.22 racket-logger-debug-face
 -------------------------------
@@ -4676,7 +4671,7 @@ File: doc4N5afI.info,  Node: racket-logger-debug-face,  Next: racket-doc-link-fa
 Face for *note racket-logger-mode:: debug level.
 
 
-File: doc4N5afI.info,  Node: racket-doc-link-face,  Next: racket-ext-link-face,  Prev: racket-logger-debug-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-doc-link-face,  Next: racket-ext-link-face,  Prev: racket-logger-debug-face,  Up: All
 
 9.1.23 racket-doc-link-face
 ---------------------------
@@ -4686,7 +4681,7 @@ Note: When some special face is already specified by the documentation,
 then to avoid visual clutter this face is NOT also added.
 
 
-File: doc4N5afI.info,  Node: racket-ext-link-face,  Next: racket-doc-output-face,  Prev: racket-doc-link-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-ext-link-face,  Next: racket-doc-output-face,  Prev: racket-doc-link-face,  Up: All
 
 9.1.24 racket-ext-link-face
 ---------------------------
@@ -4695,7 +4690,7 @@ Face *note racket-describe-mode:: uses for external links.  See the
 variable *note racket-browse-url-function::.
 
 
-File: doc4N5afI.info,  Node: racket-doc-output-face,  Next: racket-doc-litchar-face,  Prev: racket-ext-link-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-doc-output-face,  Next: racket-doc-litchar-face,  Prev: racket-ext-link-face,  Up: All
 
 9.1.25 racket-doc-output-face
 -----------------------------
@@ -4704,7 +4699,7 @@ Face *note racket-describe-mode:: uses for Scribble @example or
 @interactions output.
 
 
-File: doc4N5afI.info,  Node: racket-doc-litchar-face,  Next: racket-repl-message,  Prev: racket-doc-output-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-doc-litchar-face,  Next: racket-repl-message,  Prev: racket-doc-output-face,  Up: All
 
 9.1.26 racket-doc-litchar-face
 ------------------------------
@@ -4712,7 +4707,7 @@ File: doc4N5afI.info,  Node: racket-doc-litchar-face,  Next: racket-repl-message
 Face *note racket-describe-mode:: uses for Scribble @litchar.
 
 
-File: doc4N5afI.info,  Node: racket-repl-message,  Next: racket-repl-prompt,  Prev: racket-doc-litchar-face,  Up: All
+File: doc2l5VjJ.info,  Node: racket-repl-message,  Next: racket-repl-prompt,  Prev: racket-doc-litchar-face,  Up: All
 
 9.1.27 racket-repl-message
 --------------------------
@@ -4720,7 +4715,7 @@ File: doc4N5afI.info,  Node: racket-repl-message,  Next: racket-repl-prompt,  Pr
 Face *note racket-repl-mode:: uses for messages from the back end.
 
 
-File: doc4N5afI.info,  Node: racket-repl-prompt,  Next: racket-repl-value,  Prev: racket-repl-message,  Up: All
+File: doc2l5VjJ.info,  Node: racket-repl-prompt,  Next: racket-repl-value,  Prev: racket-repl-message,  Up: All
 
 9.1.28 racket-repl-prompt
 -------------------------
@@ -4728,7 +4723,7 @@ File: doc4N5afI.info,  Node: racket-repl-prompt,  Next: racket-repl-value,  Prev
 Face *note racket-repl-mode:: uses for prompts.
 
 
-File: doc4N5afI.info,  Node: racket-repl-value,  Next: racket-repl-error-message,  Prev: racket-repl-prompt,  Up: All
+File: doc2l5VjJ.info,  Node: racket-repl-value,  Next: racket-repl-error-message,  Prev: racket-repl-prompt,  Up: All
 
 9.1.29 racket-repl-value
 ------------------------
@@ -4736,7 +4731,7 @@ File: doc4N5afI.info,  Node: racket-repl-value,  Next: racket-repl-error-message
 Face *note racket-repl-mode:: uses for ‘print’-ed values.
 
 
-File: doc4N5afI.info,  Node: racket-repl-error-message,  Next: racket-repl-error-location,  Prev: racket-repl-value,  Up: All
+File: doc2l5VjJ.info,  Node: racket-repl-error-message,  Next: racket-repl-error-location,  Prev: racket-repl-value,  Up: All
 
 9.1.30 racket-repl-error-message
 --------------------------------
@@ -4744,7 +4739,7 @@ File: doc4N5afI.info,  Node: racket-repl-error-message,  Next: racket-repl-error
 Face *note racket-repl-mode:: uses for error messages.
 
 
-File: doc4N5afI.info,  Node: racket-repl-error-location,  Next: racket-repl-stdout,  Prev: racket-repl-error-message,  Up: All
+File: doc2l5VjJ.info,  Node: racket-repl-error-location,  Next: racket-repl-stdout,  Prev: racket-repl-error-message,  Up: All
 
 9.1.31 racket-repl-error-location
 ---------------------------------
@@ -4752,7 +4747,7 @@ File: doc4N5afI.info,  Node: racket-repl-error-location,  Next: racket-repl-stdo
 Face *note racket-repl-mode:: uses for error locations.
 
 
-File: doc4N5afI.info,  Node: racket-repl-stdout,  Next: racket-repl-stderr,  Prev: racket-repl-error-location,  Up: All
+File: doc2l5VjJ.info,  Node: racket-repl-stdout,  Next: racket-repl-stderr,  Prev: racket-repl-error-location,  Up: All
 
 9.1.32 racket-repl-stdout
 -------------------------
@@ -4760,7 +4755,7 @@ File: doc4N5afI.info,  Node: racket-repl-stdout,  Next: racket-repl-stderr,  Pre
 Face *note racket-repl-mode:: uses for output to current-output-port.
 
 
-File: doc4N5afI.info,  Node: racket-repl-stderr,  Next: racket-hash-lang-text,  Prev: racket-repl-stdout,  Up: All
+File: doc2l5VjJ.info,  Node: racket-repl-stderr,  Next: racket-hash-lang-text,  Prev: racket-repl-stdout,  Up: All
 
 9.1.33 racket-repl-stderr
 -------------------------
@@ -4768,7 +4763,7 @@ File: doc4N5afI.info,  Node: racket-repl-stderr,  Next: racket-hash-lang-text,  
 Face *note racket-repl-mode:: uses for output to current-error-port.
 
 
-File: doc4N5afI.info,  Node: racket-hash-lang-text,  Prev: racket-repl-stderr,  Up: All
+File: doc2l5VjJ.info,  Node: racket-hash-lang-text,  Prev: racket-repl-stderr,  Up: All
 
 9.1.34 racket-hash-lang-text
 ----------------------------
@@ -4811,193 +4806,193 @@ Node: Reference37898
 Node: Commands38391
 Node: Edit38629
 Node: racket-mode39191
-Node: racket-insert-lambda43377
-Node: racket-insert-symbol43645
-Node: racket-fold-all-tests44212
-Node: racket-unfold-all-tests44447
-Node: racket-tidy-requires44688
-Node: racket-trim-requires45730
-Node: racket-base-requires46438
-Node: racket-add-require-for-identifier47701
-Node: racket-indent-line48605
-Node: racket-smart-open-bracket-mode52557
-Node: racket-insert-closing54992
-Node: racket-cycle-paren-shapes55483
-Node: racket-backward-up-list55732
-Node: racket-input-mode56273
-Node: racket-align58152
-Node: racket-unalign60190
-Node: racket-complete-at-point60521
-Node: Hash Langs60941
-Node: racket-hash-lang-mode61236
-Node: racket-hash-lang-backward66030
-Node: racket-hash-lang-forward66311
-Node: racket-hash-lang-up66587
-Node: racket-hash-lang-down66853
-Node: racket-hash-lang-C-M-q-dwim67119
-Node: Explore67636
-Node: racket-xp-mode68193
-Node: racket-xp-describe76987
-Node: racket-xp-documentation78589
-Node: racket-xp-next-definition79741
-Node: racket-xp-previous-definition80002
-Node: racket-xp-next-use80270
-Node: racket-xp-previous-use80527
-Node: racket-xp-next-error80787
-Node: racket-xp-previous-error81055
-Node: racket-xp-tail-up81334
-Node: racket-xp-tail-down81796
-Node: racket-xp-tail-next-sibling82075
-Node: racket-xp-tail-previous-sibling82375
-Node: racket-documentation-search82695
-Node: racket-describe-mode83719
-Node: racket-describe-search87419
-Node: Run87687
-Node: racket-repl-mode88154
-Node: racket-run92892
-Node: racket-run-and-switch-to-repl94943
-Node: racket-run-module-at-point95397
-Node: racket-repl95902
-Node: racket-repl-describe96837
-Node: racket-repl-documentation98323
-Node: racket-racket99439
-Node: racket-profile99776
-Node: racket-profile-mode100492
-Node: racket-logger101666
-Node: racket-logger-mode101885
-Node: racket-debug-mode103021
-Node: racket-repl-clear106302
-Node: racket-repl-clear-leaving-last-prompt106887
-Node: Test107200
-Node: racket-test107343
-Node: racket-raco-test108159
-Node: Eval108506
-Node: racket-send-region108696
-Node: racket-send-definition108912
-Node: racket-send-last-sexp109159
-Node: Collections109739
-Node: racket-open-require-path109904
-Node: Macro expand110513
-Node: racket-stepper-mode110784
-Node: racket-expand-file111949
-Node: racket-expand-region112650
-Node: racket-expand-definition113061
-Node: racket-expand-last-sexp113495
-Node: Packages113892
-Node: racket-package-refresh114124
-Node: list-racket-packages114462
-Node: racket-package-mode114753
-Node: describe-racket-package115805
-Node: Other117178
-Node: racket-debug-toggle-breakpoint117374
-Node: racket-mode-start-faster119248
-Node: racket-mode-start-slower120630
-Node: Variables120923
-Node: General variables121288
-Node: racket-program121805
-Node: racket-command-timeout122134
-Node: racket-memory-limit122602
-Node: racket-error-context123206
-Node: racket-user-command-line-arguments124321
-Node: racket-browse-url-function125187
-Node: racket-xp-after-change-refresh-delay125590
-Node: racket-xp-highlight-unused-regexp126005
-Node: racket-xp-add-binding-faces126452
-Node: racket-xp-eldoc-level127286
-Node: racket-documentation-search-location127977
-Node: racket-expand-hiding128833
-Node: Hash lang variables129083
-Node: racket-hash-lang-token-face-alist129366
-Node: racket-hash-lang-pairs130828
-Node: racket-hash-lang-module-language-hook131431
-Node: REPL variables134864
-Node: racket-repl-buffer-name-function135361
-Node: racket-submodules-to-run136394
-Node: racket-repl-history-directory137139
-Node: racket-history-filter-regexp137420
-Node: racket-images-inline137770
-Node: racket-imagemagick-props138016
-Node: racket-images-keep-last138622
-Node: racket-images-system-viewer138874
-Node: racket-images-do-not-use-svg139155
-Node: racket-pretty-print139587
-Node: racket-repl-command-file140142
-Node: Other variables140360
-Node: racket-doc-index-directory140847
-Node: racket-doc-index-predicate-function141102
-Node: racket-indent-curly-as-sequence141813
-Node: racket-indent-sequence-depth142238
-Node: racket-pretty-lambda142926
-Node: racket-smart-open-bracket-enable143331
-Node: racket-logger-config143785
-Node: racket-before-run-hook144634
-Node: racket-after-run-hook145234
-Node: racket-sexp-comment-fade145837
-Node: Experimental debugger variables146541
-Node: racket-debuggable-files146784
-Node: Showing information147410
-Node: racket-show-functions147667
-Node: Running racket and raco commands in a shell or terminal148760
-Node: racket-shell-or-terminal-function149089
-Node: Racket input method149648
-Node: racket-input-prefix149893
-Node: racket-input-translations150650
-Node: Configuration functions151250
-Node: Showing information (1)151688
-Node: racket-show-pseudo-tooltip151993
-Node: racket-show-echo-area152710
-Node: racket-show-header-line153126
-Node: racket-show-pos-tip153703
-Node: Associating edit buffers with REPL buffers154032
-Node: racket-repl-buffer-name-shared154444
-Node: racket-repl-buffer-name-unique154841
-Node: racket-repl-buffer-name-project155305
-Node: racket-project-root155816
-Node: Browsing file URLs with anchors156302
-Node: racket-browse-url-using-temporary-file156603
-Node: Configuring back ends157692
-Node: racket-add-back-end157971
-Node: Running racket and raco commands in a shell or terminal (1)163169
-Node: racket-shell163523
-Node: racket-term163822
-Node: racket-ansi-term164142
-Node: racket-vterm164482
-Node: Faces164816
-Node: All164931
-Node: racket-keyword-argument-face166006
-Node: racket-reader-quoted-symbol-face166226
-Node: racket-reader-syntax-quoted-symbol-face166746
-Node: racket-here-string-face167281
-Node: racket-xp-def-face167507
-Node: racket-xp-use-face167743
-Node: racket-xp-unused-face167970
-Node: racket-xp-tail-target-face168232
-Node: racket-xp-tail-position-face168510
-Node: racket-xp-binding-lang-face168802
-Node: racket-xp-binding-lang-use-face169116
-Node: racket-xp-binding-import-face169462
-Node: racket-xp-binding-import-use-face169784
-Node: racket-xp-binding-local-face170112
-Node: racket-xp-binding-local-use-face170428
-Node: racket-logger-config-face170752
-Node: racket-logger-topic-face171013
-Node: racket-logger-fatal-face171257
-Node: racket-logger-error-face171505
-Node: racket-logger-warning-face171755
-Node: racket-logger-info-face172010
-Node: racket-logger-debug-face172256
-Node: racket-doc-link-face172499
-Node: racket-ext-link-face172883
-Node: racket-doc-output-face173177
-Node: racket-doc-litchar-face173451
-Node: racket-repl-message173702
-Node: racket-repl-prompt173946
-Node: racket-repl-value174163
-Node: racket-repl-error-message174398
-Node: racket-repl-error-location174650
-Node: racket-repl-stdout174906
-Node: racket-repl-stderr175153
-Node: racket-hash-lang-text175394
+Node: racket-insert-lambda43469
+Node: racket-insert-symbol43737
+Node: racket-fold-all-tests44304
+Node: racket-unfold-all-tests44539
+Node: racket-tidy-requires44780
+Node: racket-trim-requires45483
+Node: racket-base-requires46305
+Node: racket-add-require-for-identifier47185
+Node: racket-indent-line48022
+Node: racket-smart-open-bracket-mode51974
+Node: racket-insert-closing54409
+Node: racket-cycle-paren-shapes54900
+Node: racket-backward-up-list55149
+Node: racket-input-mode55690
+Node: racket-align57569
+Node: racket-unalign59607
+Node: racket-complete-at-point59938
+Node: Hash Langs60358
+Node: racket-hash-lang-mode60653
+Node: racket-hash-lang-backward65497
+Node: racket-hash-lang-forward65778
+Node: racket-hash-lang-up66054
+Node: racket-hash-lang-down66320
+Node: racket-hash-lang-C-M-q-dwim66586
+Node: Explore67103
+Node: racket-xp-mode67660
+Node: racket-xp-describe76490
+Node: racket-xp-documentation78092
+Node: racket-xp-next-definition79244
+Node: racket-xp-previous-definition79505
+Node: racket-xp-next-use79773
+Node: racket-xp-previous-use80030
+Node: racket-xp-next-error80290
+Node: racket-xp-previous-error80558
+Node: racket-xp-tail-up80837
+Node: racket-xp-tail-down81299
+Node: racket-xp-tail-next-sibling81578
+Node: racket-xp-tail-previous-sibling81878
+Node: racket-documentation-search82198
+Node: racket-describe-mode83222
+Node: racket-describe-search87124
+Node: Run87392
+Node: racket-repl-mode87859
+Node: racket-run92697
+Node: racket-run-and-switch-to-repl94748
+Node: racket-run-module-at-point95202
+Node: racket-repl95707
+Node: racket-repl-describe96642
+Node: racket-repl-documentation98128
+Node: racket-racket99244
+Node: racket-profile99581
+Node: racket-profile-mode100297
+Node: racket-logger101483
+Node: racket-logger-mode101702
+Node: racket-debug-mode102838
+Node: racket-repl-clear106119
+Node: racket-repl-clear-leaving-last-prompt106704
+Node: Test107017
+Node: racket-test107160
+Node: racket-raco-test107976
+Node: Eval108323
+Node: racket-send-region108513
+Node: racket-send-definition108729
+Node: racket-send-last-sexp108976
+Node: Collections109556
+Node: racket-open-require-path109721
+Node: Macro expand110330
+Node: racket-stepper-mode110601
+Node: racket-expand-file111776
+Node: racket-expand-region112477
+Node: racket-expand-definition112888
+Node: racket-expand-last-sexp113322
+Node: Packages113719
+Node: racket-package-refresh113951
+Node: list-racket-packages114289
+Node: racket-package-mode114580
+Node: describe-racket-package115632
+Node: Other117005
+Node: racket-debug-toggle-breakpoint117201
+Node: racket-mode-start-faster119075
+Node: racket-mode-start-slower120457
+Node: Variables120750
+Node: General variables121115
+Node: racket-program121632
+Node: racket-command-timeout121961
+Node: racket-memory-limit122429
+Node: racket-error-context123033
+Node: racket-user-command-line-arguments124148
+Node: racket-browse-url-function125014
+Node: racket-xp-after-change-refresh-delay125417
+Node: racket-xp-highlight-unused-regexp125832
+Node: racket-xp-add-binding-faces126279
+Node: racket-xp-eldoc-level127113
+Node: racket-documentation-search-location127804
+Node: racket-expand-hiding128660
+Node: Hash lang variables128910
+Node: racket-hash-lang-token-face-alist129193
+Node: racket-hash-lang-pairs130655
+Node: racket-hash-lang-module-language-hook131258
+Node: REPL variables134691
+Node: racket-repl-buffer-name-function135188
+Node: racket-submodules-to-run136221
+Node: racket-repl-history-directory136966
+Node: racket-history-filter-regexp137247
+Node: racket-images-inline137597
+Node: racket-imagemagick-props137843
+Node: racket-images-keep-last138449
+Node: racket-images-system-viewer138701
+Node: racket-images-do-not-use-svg138982
+Node: racket-pretty-print139414
+Node: racket-repl-command-file139969
+Node: Other variables140187
+Node: racket-doc-index-directory140674
+Node: racket-doc-index-predicate-function140929
+Node: racket-indent-curly-as-sequence141640
+Node: racket-indent-sequence-depth142065
+Node: racket-pretty-lambda142753
+Node: racket-smart-open-bracket-enable143158
+Node: racket-logger-config143612
+Node: racket-before-run-hook144461
+Node: racket-after-run-hook145061
+Node: racket-sexp-comment-fade145664
+Node: Experimental debugger variables146368
+Node: racket-debuggable-files146611
+Node: Showing information147237
+Node: racket-show-functions147494
+Node: Running racket and raco commands in a shell or terminal148587
+Node: racket-shell-or-terminal-function148916
+Node: Racket input method149475
+Node: racket-input-prefix149720
+Node: racket-input-translations150477
+Node: Configuration functions151077
+Node: Showing information (1)151515
+Node: racket-show-pseudo-tooltip151820
+Node: racket-show-echo-area152537
+Node: racket-show-header-line152953
+Node: racket-show-pos-tip153530
+Node: Associating edit buffers with REPL buffers153859
+Node: racket-repl-buffer-name-shared154271
+Node: racket-repl-buffer-name-unique154668
+Node: racket-repl-buffer-name-project155132
+Node: racket-project-root155643
+Node: Browsing file URLs with anchors156129
+Node: racket-browse-url-using-temporary-file156430
+Node: Configuring back ends157519
+Node: racket-add-back-end157798
+Node: Running racket and raco commands in a shell or terminal (1)162996
+Node: racket-shell163350
+Node: racket-term163649
+Node: racket-ansi-term163969
+Node: racket-vterm164309
+Node: Faces164643
+Node: All164758
+Node: racket-keyword-argument-face165833
+Node: racket-reader-quoted-symbol-face166053
+Node: racket-reader-syntax-quoted-symbol-face166573
+Node: racket-here-string-face167108
+Node: racket-xp-def-face167334
+Node: racket-xp-use-face167570
+Node: racket-xp-unused-face167797
+Node: racket-xp-tail-target-face168059
+Node: racket-xp-tail-position-face168337
+Node: racket-xp-binding-lang-face168629
+Node: racket-xp-binding-lang-use-face168943
+Node: racket-xp-binding-import-face169289
+Node: racket-xp-binding-import-use-face169611
+Node: racket-xp-binding-local-face169939
+Node: racket-xp-binding-local-use-face170255
+Node: racket-logger-config-face170579
+Node: racket-logger-topic-face170840
+Node: racket-logger-fatal-face171084
+Node: racket-logger-error-face171332
+Node: racket-logger-warning-face171582
+Node: racket-logger-info-face171837
+Node: racket-logger-debug-face172083
+Node: racket-doc-link-face172326
+Node: racket-ext-link-face172710
+Node: racket-doc-output-face173004
+Node: racket-doc-litchar-face173278
+Node: racket-repl-message173529
+Node: racket-repl-prompt173773
+Node: racket-repl-value173990
+Node: racket-repl-error-message174225
+Node: racket-repl-error-location174477
+Node: racket-repl-stdout174733
+Node: racket-repl-stderr174980
+Node: racket-hash-lang-text175221
 
 End Tag Table
 
