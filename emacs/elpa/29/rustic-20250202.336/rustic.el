@@ -1,7 +1,7 @@
 ;;; rustic.el --- Rust development environment -*-lexical-binding: t-*-
 
-;; Package-Version: 20241025.1648
-;; Package-Revision: 2f3c5ffd7537
+;; Package-Version: 20250202.336
+;; Package-Revision: 31ecd5582cd8
 ;; Author: Mozilla
 ;;
 ;; Keywords: languages
@@ -65,7 +65,7 @@
 ;;; workaround for with-temp-buffer not propagating the environment, as per
 ;;; https://github.com/magit/magit/pull/4169
 (defmacro rustic--with-temp-process-buffer (&rest body)
-  "Like `with-temp-buffer', but always propagate `process-environment' and 'exec-path'.
+  "Like `with-temp-buffer', but always propagate `process-environment' and `exec-path'.
 When those vars are buffer-local in the calling buffer, they are not
 propagated by `with-temp-buffer', so we explicitly ensure that
 happens, so that processes will be invoked consistently.  BODY is
@@ -90,17 +90,20 @@ as for that macro."
   ;; this variable is buffer local so we can use the cached value
   (if rustic--buffer-workspace
       rustic--buffer-workspace
-    (rustic--with-temp-process-buffer
-      (let ((ret (process-file (rustic-cargo-bin) nil (list (current-buffer) nil) nil "locate-project" "--workspace")))
-        (cond ((and (/= ret 0) nodefault)
-               (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
-              ((and (/= ret 0) (not nodefault))
-               (setq rustic--buffer-workspace default-directory))
-              (t
-               (goto-char 0)
-               (let* ((output (json-read))
-                      (dir (file-name-directory (cdr (assoc-string "root" output)))))
-                 (setq rustic--buffer-workspace dir))))))))
+    ;; Resolve the bin path while still buffer local (in cases like
+    ;; remote via TRAMP)
+    (let ((cargo-bin (rustic-cargo-bin)))
+      (rustic--with-temp-process-buffer
+        (let ((ret (process-file cargo-bin nil (list (current-buffer) nil) nil "locate-project" "--workspace")))
+          (cond ((and (/= ret 0) nodefault)
+                 (error "`cargo locate-project' returned %s status: %s" ret (buffer-string)))
+                ((and (/= ret 0) (not nodefault))
+                 (setq rustic--buffer-workspace default-directory))
+                (t
+                 (goto-char 0)
+                 (let* ((output (json-read))
+                        (dir (file-name-directory (cdr (assoc-string "root" output)))))
+                   (setq rustic--buffer-workspace dir)))))))))
 
 (defun rustic-buffer-crate (&optional nodefault)
   "Return the crate for the current buffer.

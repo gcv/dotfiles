@@ -29,11 +29,11 @@ Major mode for Rust code.
 ;;; Generated autoloads from rustic-cargo.el
 
 (autoload 'rustic-cargo-test-run "rustic-cargo" "\
-Start compilation process for 'cargo test' with optional TEST-ARGS.
+Start compilation process for `cargo test' with optional TEST-ARGS.
 
 (fn &optional TEST-ARGS)" t)
 (autoload 'rustic-cargo-test "rustic-cargo" "\
-Run 'cargo test'.
+Run `cargo test'.
 
 If ARG is not nil, use value as argument and store it in
 `rustic-test-arguments'.  When calling this function from
@@ -42,13 +42,15 @@ If ARG is not nil, use value as argument and store it in
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-test-rerun "rustic-cargo" "\
-Run 'cargo test' with `rustic-test-arguments'." t)
+Run `cargo test' with `rustic-test-arguments'.
+
+(fn ARG)" t)
 (autoload 'rustic-cargo-current-test "rustic-cargo" "\
-Run 'cargo test' for the test near point." t)
+Run `cargo test' for the test near point." t)
 (autoload 'rustic-cargo-test-dwim "rustic-cargo" "\
 Run test or mod at point. Otherwise run `rustic-cargo-test'." t)
 (autoload 'rustic-cargo-outdated "rustic-cargo" "\
-Use 'cargo outdated' to list outdated packages in `tabulated-list-mode'.
+Use `cargo outdated' to list outdated packages in `tabulated-list-mode'.
 Execute process in PATH.
 
 (fn &optional PATH)" t)
@@ -67,21 +69,21 @@ Clear any marks on a package." t)
 (autoload 'rustic-cargo-upgrade-execute "rustic-cargo" "\
 Perform marked menu actions." t)
 (autoload 'rustic-cargo-new "rustic-cargo" "\
-Run 'cargo new' to start a new package in the path specified by PROJECT-PATH.
+Run `cargo new' to start a new package in the path specified by PROJECT-PATH.
 If BIN is not nil, create a binary application, otherwise a library.
 
 (fn PROJECT-PATH &optional BIN)" t)
 (autoload 'rustic-cargo-init "rustic-cargo" "\
-Run 'cargo init' to initialize a directory in the path specified by PROJECT-PATH.
+Run `cargo init' to initialize a directory in the path specified by PROJECT-PATH.
 If BIN is not nil, create a binary application, otherwise a library.
 
 (fn PROJECT-PATH &optional BIN)" t)
 (autoload 'rustic-cargo-run-command "rustic-cargo" "\
-Start compilation process for 'cargo run' with optional RUN-ARGS.
+Start compilation process for `cargo run' with optional RUN-ARGS.
 
 (fn &optional RUN-ARGS)" t)
 (autoload 'rustic-cargo-run "rustic-cargo" "\
-Run 'cargo run'.
+Run `cargo run'.
 
 If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of
@@ -89,7 +91,9 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-run-rerun "rustic-cargo" "\
-Run 'cargo run' with `rustic-run-arguments'." t)
+Run `cargo run' with `rustic-run-arguments'.
+
+(fn ARG)" t)
 (autoload 'rustic-run-shell-command "rustic-cargo" "\
 Run an arbitrary shell command using ARG for the current project.
 Example: use it to provide an environment variable to your
@@ -99,12 +103,12 @@ in your project like `pwd'
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-build "rustic-cargo" "\
-Run 'cargo build' for the current project, allow configuring
+Run `cargo build' for the current project, allow configuring
 `rustic-cargo-build-arguments' when prefix argument (C-u) is enabled.
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-clean "rustic-cargo" "\
-Run 'cargo clean' for the current project.
+Run `cargo clean' for the current project.
 
 If ARG is not nil, use value as argument and store it in `rustic-clean-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of
@@ -112,29 +116,29 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-check "rustic-cargo" "\
-Run 'cargo check' for the current project, allow configuring
+Run `cargo check' for the current project, allow configuring
 `rustic-cargo-check-arguments' when prefix argument (C-u) is enabled.
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-bench "rustic-cargo" "\
-Run 'cargo bench' for the current project." t)
+Run `cargo bench' for the current project." t)
 (autoload 'rustic-cargo-build-doc "rustic-cargo" "\
 Build the documentation for the current project." t)
 (autoload 'rustic-cargo-doc "rustic-cargo" "\
 Open the documentation for the current project in a browser.
 The documentation is built if necessary." t)
 (autoload 'rustic-cargo-add "rustic-cargo" "\
-Add crate to Cargo.toml using 'cargo add'.
+Add crate to Cargo.toml using `cargo add'.
 If running with prefix command `C-u', read whole command from minibuffer.
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-rm "rustic-cargo" "\
-Remove crate from Cargo.toml using 'cargo rm'.
+Remove crate from Cargo.toml using `cargo rm'.
 If running with prefix command `C-u', read whole command from minibuffer.
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-upgrade "rustic-cargo" "\
-Upgrade dependencies as specified in the local manifest file using 'cargo upgrade'.
+Upgrade dependencies as specified in the local manifest file using `cargo upgrade'.
 If running with prefix command `C-u', read whole command from minibuffer.
 
 (fn &optional ARG)" t)
@@ -154,9 +158,9 @@ Add crates.io API token using `cargo login'.
 
 (fn TOKEN)" t)
 (autoload 'rustic-cargo-install-rerun "rustic-cargo" "\
-Run 'cargo install' with `rustic-install-arguments'." t)
+Run `cargo install' with `rustic-install-arguments'." t)
 (autoload 'rustic-cargo-install "rustic-cargo" "\
-Install rust binary using 'cargo install'.
+Install rust binary using `cargo install'.
 If running with prefix command `C-u', read whole command from minibuffer.
 
 (fn &optional ARG)" t)
@@ -170,9 +174,9 @@ Run `cargo clippy' with optional ARGS.
 
 (fn &rest ARGS)" t)
 (autoload 'rustic-cargo-lints "rustic-clippy" "\
-Run cargo-lints with optional ARGS." t)
+Run `cargo-lints' with optional ARGS." t)
 (autoload 'rustic-cargo-clippy "rustic-clippy" "\
-Run 'cargo clippy'.
+Run `cargo clippy'.
 
 If ARG is not nil, use value as argument and store it in `rustic-clippy-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of
@@ -180,14 +184,14 @@ When calling this function from `rustic-popup-mode', always use the value of
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-clippy-rerun "rustic-clippy" "\
-Run 'cargo clippy' with `rustic-clippy-arguments'." t)
+Run `cargo clippy' with `rustic-clippy-arguments'." t)
 (register-definition-prefixes "rustic-clippy" '("rustic-"))
 
 
 ;;; Generated autoloads from rustic-comint.el
 
 (autoload 'rustic-cargo-comint-run "rustic-comint" "\
-Run 'cargo run' but for interactive programs.
+Run `cargo run' but for interactive programs.
 
 If ARG is not nil, use value as argument and store it in `rustic-run-arguments'.
 When calling this function from `rustic-popup-mode', always use the value of
@@ -216,7 +220,9 @@ Interactively, prompts for the command if the variable
 
 (fn COMMAND)" t)
 (autoload 'rustic-recompile "rustic-compile" "\
-Re-compile the program using `compilation-arguments'." t)
+Re-compile the program using `compilation-arguments'.
+
+(fn ARG)" t)
 (register-definition-prefixes "rustic-compile" '("rust"))
 
 
@@ -275,7 +281,7 @@ it is disabled.
 ;;; Generated autoloads from rustic-expand.el
 
 (autoload 'rustic-cargo-expand "rustic-expand" "\
-Run 'cargo expand'.
+Run `cargo expand'.
 
 If ARG is not nil, use value as argument and store it in
 `rustic-expand-arguments'.  When calling this function from
@@ -284,7 +290,7 @@ If ARG is not nil, use value as argument and store it in
 
 (fn &optional ARG)" t)
 (autoload 'rustic-cargo-expand-rerun "rustic-expand" "\
-Run 'cargo expand' with `rustic-expand-arguments'." t)
+Run `cargo expand' with `rustic-expand-arguments'." t)
 (register-definition-prefixes "rustic-expand" '("rustic-"))
 
 
@@ -349,7 +355,7 @@ Kill popup help buffer and switch to popup buffer." t)
 ;;; Generated autoloads from rustic-rustfix.el
 
 (autoload 'rustic-rustfix "rustic-rustfix" "\
-Run 'cargo fix'." t)
+Run `cargo fix'." t)
 (register-definition-prefixes "rustic-rustfix" '("rustic-rustfix-"))
 
 
