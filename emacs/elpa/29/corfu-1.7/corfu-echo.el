@@ -1,13 +1,13 @@
 ;;; corfu-echo.el --- Show candidate documentation in echo area -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2022
-;; Version: 1.5
-;; Package-Requires: ((emacs "27.1") (compat "30") (corfu "1.5"))
-;; Homepage: https://github.com/minad/corfu
+;; Version: 1.7
+;; Package-Requires: ((emacs "28.1") (compat "30") (corfu "1.7"))
+;; URL: https://github.com/minad/corfu
 
 ;; This file is part of GNU Emacs.
 
@@ -86,8 +86,7 @@ subsequent delay."
                       (funcall (if corfu-echo--message #'cdr #'car)
                                corfu-echo-delay)
                     corfu-echo-delay))
-           (extra (nth 4 completion-in-region--data))
-           (fun (plist-get extra :company-docsig))
+           (fun (corfu--metadata-get 'company-docsig))
            (cand (and (>= corfu--index 0)
                       (nth corfu--index corfu--candidates))))
       (if (<= delay 0)
