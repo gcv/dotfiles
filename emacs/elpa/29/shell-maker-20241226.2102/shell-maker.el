@@ -3,9 +3,9 @@
 ;; Copyright (C) 2023 Alvaro Ramirez
 
 ;; Author: Alvaro Ramirez https://xenodium.com
-;; URL: https://github.com/xenodium/chatgpt-shell
-;; Package-Version: 20241102.850
-;; Package-Revision: a4b81ac8dec3
+;; URL: https://github.com/xenodium/shell-maker
+;; Package-Version: 20241226.2102
+;; Package-Revision: 72ce76bb3059
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This package is free software; you can redistribute it and/or modify
@@ -38,8 +38,6 @@
 (require 'seq)
 (require 'shell)
 (require 'view)
-
-(declare-function closurep "src/data.c")
 
 (eval-when-compile
   (require 'cl-lib)
@@ -148,7 +146,7 @@ For example:
        (with-temp-buffer ,@body)
      ,@body))
 
-(defun shell-maker-start (config &optional no-focus welcome-function new-session buffer-name)
+(defun shell-maker-start (config &optional no-focus welcome-function new-session buffer-name mode-line-name)
   "Start a shell with CONFIG.
 
 Specify NO-FOCUS if started shell should not be focused.
@@ -157,7 +155,9 @@ Set WELCOME-FUNCTION to create and show a welcome message.
 
 Set NEW-SESSION to start a new session.
 
-Set BUFFER-NAME to override the buffer name."
+Set BUFFER-NAME to override the buffer name.
+
+Set MODE-LINE-NAME to override the mode line name."
   (shell-maker--with-temp-buffer-if new-session ;; Avoid picking up buffer-local vars from current buffer
     (let* ((old-point)
            (namespace (downcase (shell-maker-config-name config)))
@@ -168,6 +168,7 @@ Set BUFFER-NAME to override the buffer name."
       (when new-session
         (setq buffer-name (generate-new-buffer-name buffer-name)))
       ;; Alias with concrete shell symbols.
+      (fset (intern (concat namespace "-shell-clear-buffer")) #'shell-maker-clear-buffer)
       (fset (intern (concat namespace "-shell-previous-input")) #'comint-previous-input)
       (fset (intern (concat namespace "-shell-next-input")) #'comint-next-input)
       (fset (intern (concat namespace "-shell-submit")) #'shell-maker-submit)
@@ -177,10 +178,11 @@ Set BUFFER-NAME to override the buffer name."
       (fset (intern (concat namespace "-shell-newline")) #'newline)
       (fset (intern (concat namespace "-shell-rename-buffer")) #'shell-maker-rename-buffer)
       (fset (intern (concat namespace "-shell-delete-interaction-at-point")) #'shell-maker-delete-interaction-at-point)
+      (fset (intern (concat namespace "-shell-restore-session-from-transcript")) #'shell-maker-restore-session-from-transcript)
       (eval
        (macroexpand
         `(define-derived-mode ,(shell-maker-major-mode config) comint-mode
-           ,(shell-maker-config-name config)
+           ,(or mode-line-name (shell-maker-config-name config))
            ,(format "Major mode for %s shell." (shell-maker-config-name config))
            (define-key ,(shell-maker-major-mode-map config)
                        [remap comint-send-input] 'shell-maker-submit)
@@ -343,10 +345,6 @@ Of the form:
     (user-error "Not in a shell"))
   (let* ((shell-buffer (shell-maker-buffer shell-maker--config))
          (called-interactively (called-interactively-p #'interactive))
-         (command-handler (shell-maker-config-execute-command shell-maker--config))
-         (is-command-v1 (and (closurep command-handler)
-                             (string-match-p "shell-maker-async-shell-command"
-                                             (format "%s" command-handler))))
          (shell-maker--input))
     (when input
       (with-current-buffer shell-buffer
@@ -355,26 +353,19 @@ Of the form:
     (comint-send-input) ;; Sets shell-maker--input
     (when (shell-maker--clear-input-for-execution shell-maker--input)
       (if called-interactively
-          (if is-command-v1
-              (shell-maker--eval-input-on-buffer-v1 :input shell-maker--input
-                                                    :config shell-maker--config)
-            (shell-maker--eval-input-on-buffer-v2 :input shell-maker--input
-                                                  :config shell-maker--config))
-        (if is-command-v1
-            (shell-maker--eval-input-on-buffer-v1 :input shell-maker--input
-                                                  :config shell-maker--config)
           (shell-maker--eval-input-on-buffer-v2 :input shell-maker--input
-                                                :config shell-maker--config
-                                                :on-output-broadcast on-output
-                                                :on-finished-broadcast on-finished))))))
-
+                                                :config shell-maker--config)
+        (shell-maker--eval-input-on-buffer-v2 :input shell-maker--input
+                                              :config shell-maker--config
+                                              :on-output-broadcast on-output
+                                              :on-finished-broadcast on-finished)))))
 (defun shell-maker-clear-buffer ()
   "Clear the current shell buffer."
   (interactive)
   (when shell-maker-forget-file-after-clear
-
     (setq shell-maker--file nil))
-  (comint-clear-buffer))
+  (when (shell-maker--process)
+    (comint-clear-buffer)))
 
 (defun shell-maker-search-history ()
   "Search previous input history."
@@ -631,8 +622,9 @@ With prefix TREAT-AS-FAILURE, mark as failed."
                                               'invisible (not shell-maker--show-invisible-markers))))
     (when (process-live-p shell-maker--request-process)
       (kill-process shell-maker--request-process))
-    (message "%s: interrupted!"
-             (shell-maker-config-name shell-maker--config))
+    (when shell-maker--busy
+      (message "%s: interrupted!"
+               (shell-maker-config-name shell-maker--config)))
     (comint-send-input) ;; Sets shell-maker--input
     (shell-maker--output-filter
      (shell-maker--process)
@@ -671,11 +663,16 @@ Return t if INPUT us cleared.  nil otherwise."
             shell-maker--config)
            (funcall (shell-maker-config-validate-command
                      shell-maker--config) input))
-      (shell-maker--write-reply shell-maker--config
-                                (concat "\n"
-                                        (funcall (shell-maker-config-validate-command
-                                                  shell-maker--config) input)
-                                        "\n\n"))
+      (let ((error (concat "\n"
+                           (funcall (shell-maker-config-validate-command
+                                     shell-maker--config) input)
+                           "\n\n")))
+        (shell-maker--write-reply shell-maker--config error)
+        (shell-maker--notify-on-command-finished
+         :config shell-maker--config
+         :input input
+         :output error
+         :success nil))
       (setq shell-maker--busy nil)
       nil)
      ((string-empty-p (string-trim input))
@@ -710,16 +707,20 @@ Return filtered response."
     (setq filter #'identity))
   (with-temp-buffer
     (let* ((buffer (current-buffer))
-           (exit-status (apply #'call-process (seq-first command) nil buffer nil (cdr command)))
+           (stderr-file (make-temp-file "stderr-"))
+           (exit-status (apply #'call-process (seq-first command) nil (list buffer stderr-file) nil (cdr command)))
            (data (buffer-substring-no-properties (point-min) (point-max)))
            (filtered (funcall filter data))
            (text (or (map-elt filtered :filtered)
                      (map-elt filtered :pending)
                      filtered
+                     (with-temp-buffer
+                       (insert-file-contents stderr-file)
+                       (string-trim (buffer-string)))
                      "")))
       (list
-       :exit-status exit-status
-       :output text))))
+       (cons :exit-status exit-status)
+       (cons :output text)))))
 
 (cl-defun shell-maker--execute-command-async (&key command filter on-output on-finished log)
   "Execute COMMAND list (command + params) asynchronously.
@@ -751,10 +752,14 @@ LOG: A function to log to.
   (unless log
     (error "Missing mandatory :log param"))
   (let* ((process-name (make-temp-name "shell-maker--execute-command-async-"))
+         (logs)
          (output)
          (pending))
-    (cl-flet ((log (format &rest args)
-                (apply log (append (list format) args))))
+    (cl-flet ((flush-logs ()
+                (apply log (list logs)))
+              (log (format &rest args)
+                (when format
+                  (setq logs (concat logs (apply #'format (append (list format) args)) "\n")))))
       (log "Async Command v2")
       (log "%s" command)
       (setq shell-maker--request-process
@@ -766,12 +771,12 @@ LOG: A function to log to.
                        (condition-case err
                            (progn
                              (log "Filter pending")
-                             (log pending)
+                             (log "%s" pending)
                              (log "Filter output")
-                             (log raw-output)
+                             (log "%s" raw-output)
                              (setq raw-output (concat pending raw-output))
                              (log "Filter combined")
-                             (log raw-output)
+                             (log "%s" raw-output)
                              (let ((filtered (funcall filter raw-output)))
                                (map-elt filtered :filtered)
                                (cond ((null filtered)
@@ -805,10 +810,10 @@ LOG: A function to log to.
                       :name (concat process-name "-stderr")
                       :filter (lambda (_process raw-output)
                                 (log "Stderr")
-                                (log raw-output)
+                                (log "%s" raw-output)
                                 (setq output (concat output raw-output))
                                 (when on-output
-                                  (funcall on-output (concat "\n" (string-trim raw-output)))))
+                                  (funcall on-output (string-trim raw-output))))
                       :sentinel (lambda (process _event)
                                   (kill-buffer (process-buffer process))))
              :sentinel (lambda (process _event)
@@ -818,14 +823,16 @@ LOG: A function to log to.
                                (log "Exit status: %d" exit-status)
                                (when on-finished
                                  (funcall on-finished (list
-                                                       :exit-status exit-status
-                                                       :output output))))
+                                                       (cons :exit-status exit-status)
+                                                       (cons :output output))))
+                               (flush-logs))
                            (error
                             (when on-output
-                              (funcall on-output (format "\n\n%s" err)))))))))))
+                              (funcall on-output (format "\n\n%s" err))))))))
+      shell-maker--request-process)))
 
-(cl-defun shell-maker-make-http-request (&key async url data encoding timeout
-                                              headers filter on-output on-finished shell)
+(cl-defun shell-maker-make-http-request (&key async url data encoding timeout proxy
+                                              headers fields filter on-output on-finished shell)
   "Make HTTP request at URL.
 
 Optionally set:
@@ -833,10 +840,15 @@ Optionally set:
 ASYNC: Non-nil if request should be asynchronous.
 DATA: Any data to be posted.
 ENCODING: Defaults to ='utf-8 (as per `coding-system-for-write').
-HEADERS: Of the form
+HEADERS: As a list of strings
 
   (\"header1: value1\")
    \"header2: value2\")
+
+FIELDS: As a list of strings
+
+  (\"field1=value1\")
+   \"field2=value2\")
 
 TIMEOUT: defaults to 600ms.
 FILTER: An optional function filter command output.  Use it for convertions.
@@ -852,28 +864,43 @@ ON-OUTPUT: (lambda (output))
 ON-FINISHED: (lambda (result))."
   (unless url
     (error "Missing mandatory :url param"))
-  (shell-maker-execute-command :async async
-                               :command (shell-maker-make--curl-command :url url
-                                                                        :data data
-                                                                        :encoding encoding
-                                                                        :timeout timeout
-                                                                        :headers headers)
-                               :filter filter
-                               :on-output on-output
-                               :on-finished on-finished
-                               :shell shell))
+  (let ((result (shell-maker-execute-command
+                 :async async
+                 :command (shell-maker-make--curl-command :url url
+                                                          :data data
+                                                          :encoding encoding
+                                                          :timeout timeout
+                                                          :headers headers
+                                                          :fields fields
+                                                          :proxy proxy)
+                 :filter filter
+                 :on-output on-output
+                 :on-finished on-finished
+                 :shell shell)))
+    (when (and (listp result)
+               (map-elt result :exit-status))
+      (list
+       (cons :success (eq (map-elt result :exit-status) 0))
+       (cons :output (map-elt result :output))))))
 
-(cl-defun shell-maker-make--curl-command (&key url data encoding timeout headers)
+(cl-defun shell-maker-make--curl-command (&key url data encoding timeout headers fields proxy)
   "Build curl command list using URL.
 
 Optionally, add:
 
 DATA: To send.
 ENCODING: Defaults to ='utf-8 (as per `coding-system-for-write').
-HEADERS: Of the form
+HEADERS: As a list of strings
 
   (\"header1: value1\")
    \"header2: value2\")
+
+FIELDS: As a list of strings
+
+  (\"field1=value1\")
+   \"field2=value2\")
+
+PROXY: Set when needing an http proxy.
 
 and TIMEOUT: defaults to 600ms."
   (unless encoding
@@ -890,10 +917,16 @@ and TIMEOUT: defaults to 600ms."
                   "--fail-with-body"
                   "--no-progress-meter"
                   "-m" (number-to-string timeout))
+            (when proxy
+              (list "--proxy" proxy))
             (apply #'append
                    (mapcar (lambda (header)
                              (list "-H" header))
                            headers))
+            (apply #'append
+                   (mapcar (lambda (field)
+                             (list "-F" field))
+                           fields))
             (when data
               (list "-d" (format "@%s" data-file))))))
 
@@ -1094,10 +1127,47 @@ ERROR-CALLBACK accordingly."
       (json-serialize obj)
     (json-encode obj)))
 
+(defun shell-maker--split-text (text)
+  "Splits TEXT text into chunks.
+
+RESPONSE is of the form:
+
+\"
+data: text1
+data: text2
+text3
+\"
+
+returned list is of the form:
+
+  (((:key . \"data:\")
+    (:value . \"text1\"))
+   ((:key . \"data:\")
+    (:value . \"text2\"))
+   ((:key . nil)
+    (:value . \"text3\")))"
+  (if (string-prefix-p "{" text) ;; starts with { keep whole.
+      (list `((:key . nil)
+              (:value . ,text)))
+    (let ((lines (split-string text "\n"))
+          (result '()))
+      (dolist (line lines)
+        (if (string-match (rx (group (+ (not (any " " ":"))) ":")
+                              (group (* nonl)))
+                          line)
+            (let* ((key (match-string 1 line))
+                   (value (string-trim (match-string 2 line))))
+              (push (list (cons :key key)
+                          (cons :value value)) result))
+          (when-let* ((value (string-trim line))
+                      (non-empty (not (string-empty-p value))))
+            (push (list (cons :key nil)
+                        (cons :value value)) result))))
+      (reverse result))))
+
 (defun shell-maker--curl-version-supported ()
   "Return t if curl version is 7.76 or newer, nil otherwise."
-  (let* ((curl-error-redirect (if (eq system-type (or 'windows-nt 'ms-dos)) "2> NUL" "2>/dev/null"))
-         (curl-version-string (shell-command-to-string (concat "curl --version " curl-error-redirect))))
+  (let ((curl-version-string (shell-command-to-string (concat "curl --version "))))
     (when (string-match "\\([0-9]+\\.[0-9]+\\.[0-9]+\\)" curl-version-string)
       (let ((version (match-string 1 curl-version-string)))
         (version<= "7.76" version)))))
@@ -1115,11 +1185,16 @@ ERROR-CALLBACK accordingly."
 (defun shell-maker--write-partial-reply (config reply)
   "Write partial REPLY to CONFIG shell."
   (let ((inhibit-read-only t)
-        (shell-buffer (shell-maker-buffer config)))
+        (shell-buffer (shell-maker-buffer config))
+        (auto-scroll (eobp)))
     (with-current-buffer shell-buffer
-      (save-excursion
-        (goto-char (point-max))
-        (shell-maker--output-filter (shell-maker--process) reply)))))
+      (if auto-scroll
+          (progn
+            (goto-char (point-max))
+            (shell-maker--output-filter (shell-maker--process) reply))
+        (save-excursion
+          (goto-char (point-max))
+          (shell-maker--output-filter (shell-maker--process) reply))))))
 
 (defun shell-maker--preparse-json (json)
   "Preparse JSON and return a cons of parsed objects vs unparsed text."
@@ -1129,7 +1204,7 @@ ERROR-CALLBACK accordingly."
     ;; TODO: Remove and rely on preprocess-response
     ;; from `shell-maker-async-shell-command'.
     (setq json (replace-regexp-in-string (rx bol "data:") "" json))
-    (with-temp-buffer ;; with-current-buffer (get-buffer-create "*preparse*")
+    (with-temp-buffer
       (erase-buffer)
       (insert json)
       (goto-char (point-min))
@@ -1167,26 +1242,22 @@ ERROR-CALLBACK accordingly."
     (with-current-buffer (get-buffer-create (format "*%s-log*"
                                                     (shell-maker-process-name config)))
       (goto-char (point-max))
-      (insert "\n" (format-time-string "%Y:%T") ": " format))))
+      (insert format))))
 
 (defun shell-maker--temp-file (&rest components)
-  "Create temp file path for COMPONENTS."
-  (let ((temp-dir (apply #' file-name-concat
-                            (append (list
-                                     temporary-file-directory
-                                     "shell-maker")
-                                    components))))
-    (make-directory (file-name-directory temp-dir) t)
-    temp-dir))
+  "Create an absolute temp file path for COMPONENTS."
+  (let* ((components (cons "shell-maker" components))
+         (relative-path (apply #'file-name-concat components))
+         (temp-file (expand-file-name relative-path temporary-file-directory)))
+    (make-directory (file-name-directory temp-file) t)
+    temp-file))
 
 (defun shell-maker--process nil
   "Get shell buffer process."
   (get-buffer-process (shell-maker-buffer shell-maker--config)))
 
 (defun shell-maker-save-session-transcript ()
-  "Save shell transcript to file.
-
-Very much EXPERIMENTAL."
+  "Save shell transcript to file."
   (interactive)
   (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
     (user-error "Not in a shell"))
@@ -1207,6 +1278,68 @@ Very much EXPERIMENTAL."
         (write-file path t))
       (setq shell-maker--file path)
       (set-buffer-modified-p nil))))
+
+(defun shell-maker-restore-session-from-transcript (&optional history)
+  "Restore session from file transcript (or HISTORY)."
+  (interactive)
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
+    (user-error "Not in a shell"))
+  (let* ((dir (when shell-maker-transcript-default-path
+                (file-name-as-directory shell-maker-transcript-default-path)))
+         (path (unless history
+                 (read-file-name "Restore from: " dir nil t)))
+         (config shell-maker--config)
+         (history (or history
+                      (with-temp-buffer
+                        (insert-file-contents path)
+                        (shell-maker--extract-history
+                         (buffer-string) (shell-maker-prompt-regexp config)))))
+         (execute-command (shell-maker-config-execute-command
+                           config))
+         (validate-command (shell-maker-config-validate-command
+                            config))
+         (entry)
+         (failed))
+    ;; Momentarily overrides request handling to replay all commands
+    ;; read from file so comint treats all commands/outputs like
+    ;; any other command.
+    (unwind-protect
+        (progn
+          (setf (shell-maker-config-validate-command config) nil)
+          (setf (shell-maker-config-execute-command config)
+                (lambda (_command shell)
+                  (when entry
+                    (unless (consp entry)
+                      (setq failed t)
+                      (user-error "Invalid transcript"))
+                    (funcall (map-elt shell :write-output) (cdr entry))
+                    (funcall (map-elt shell :finish-output) t)
+                    (setq entry (car history))
+                    (setq history (cdr history))
+                    (when entry
+                      (goto-char (point-max))
+                      (insert (car entry))
+                      (shell-maker-submit)))))
+          (goto-char (point-max))
+          (comint-clear-buffer)
+          (setq entry (car history))
+          (setq history (cdr history))
+          (when entry
+            (unless (consp entry)
+              (setq failed t)
+              (user-error "Invalid transcript"))
+            (goto-char (point-max))
+            (insert (car entry))
+            (shell-maker-submit)))
+      (if failed
+          (setq shell-maker--file nil)
+        (setq shell-maker--file path))
+      (setq shell-maker--busy nil)
+      (setf (shell-maker-config-validate-command config)
+            validate-command)
+      (setf (shell-maker-config-execute-command config)
+            execute-command)))
+  (goto-char (point-max)))
 
 (defun shell-maker--prompt-end-markers ()
   "Return the location of all \"<shell-maker-end-of-prompt>\" markers.
@@ -1242,6 +1375,20 @@ If BACKWARDS is non-nil, move backwards."
                                    (line-number-at-pos point-after))))))
     (goto-char point-after)
     (shell-maker--command-and-response-at-point)))
+
+(defun shell-maker-history ()
+  "Get all buffer commands along with respective outputs."
+  (unless (eq major-mode (shell-maker-major-mode shell-maker--config))
+    (user-error "Not in a shell"))
+  (shell-maker--extract-history
+   (buffer-string)
+   (shell-maker-prompt-regexp shell-maker--config)))
+
+(cl-defun shell-maker-append-history (&key items)
+  "Append ITEMS to current shell buffer history."
+  (shell-maker-restore-session-from-transcript
+   (append (shell-maker-history)
+           items)))
 
 (defun shell-maker--extract-history (text prompt-regexp)
   "Extract all commands and respective output in TEXT with PROMPT-REGEXP.
@@ -1665,8 +1812,21 @@ Of the form:
                                                                               (shell-maker--current-request-id))))))
                                        (with-current-buffer shell-buffer
                                          (setq shell-maker--busy nil)
-                                         (shell-maker--write-reply config "\n\n" (not success))
-                                         (goto-char (point-max))))
+                                         (let ((auto-scroll (eobp)))
+                                           (shell-maker--write-reply config (save-excursion
+                                                                              (goto-char (point-max))
+                                                                              ;; Command output may have ended in newlines.
+                                                                              ;; Adjust final number of added newlines
+                                                                              ;; prior to printing prompt.
+                                                                              (cond ((looking-back "\n\n" nil)
+                                                                                     "")
+                                                                                    ((looking-back "\n" nil)
+                                                                                     "\n")
+                                                                                    (t
+                                                                                     "\n\n")))
+                                                                     (not success))
+                                           (when auto-scroll
+                                             (goto-char (point-max))))))
                                      ;; Do not execute anything requiring a shell buffer
                                      ;; after this point, as on-finished or on-finished
                                      ;; subscribers may kill the shell buffers.
@@ -1674,98 +1834,30 @@ Of the form:
                                      ;; the shell buffer.
                                      (when on-finished-broadcast
                                        (funcall on-finished-broadcast input full-output success))
-                                     (when (shell-maker-config-on-command-finished config)
-                                       (let* ((params (func-arity (shell-maker-config-on-command-finished config)))
-                                              (params-max (cdr params)))
-                                         (cond ((= params-max 2)
-                                                (funcall (shell-maker-config-on-command-finished config)
-                                                         input
-                                                         full-output))
-                                               ((= params-max 3)
-                                                (funcall (shell-maker-config-on-command-finished config)
-                                                         input
-                                                         full-output
-                                                         success))
-                                               (t
-                                                (message (concat ":on-command-finished expects "
-                                                                 "(lambda (command output)) or "
-                                                                 "(lambda (command output success))"))))))))))))
+                                     (shell-maker--notify-on-command-finished
+                                      :config config
+                                      :input input
+                                      :output full-output
+                                      :success success)))))))
 
-;; TODO: Remove in favor of shell-maker--eval-input-on-buffer-v2.
-(cl-defun shell-maker--eval-input-on-buffer-v1 (&key input config on-output no-announcement)
-  "Evaluate INPUT string and output to CONFIG's shell buffer.
-
-Use ON-OUTPUT function to get notified of output events.
-
-With NO-ANNOUNCEMENT, skip announcing response when shell is in the background."
-  (message (concat "`shell-maker-async-shell-command' is deprecated "
-                   "(and will be removed). Please use `shell-maker-execute-command'."))
-  (unless config
-    (error "Missing mandatory :config param"))
-  ;; For viewing prompt delimiter (used to handle multiline prompts).
-  ;; (shell-maker--output-filter (shell-maker--process) "<shell-maker-end-of-prompt>")
-  (shell-maker--output-filter (shell-maker--process)
-                              (propertize "<shell-maker-end-of-prompt>"
-                                          'invisible (not shell-maker--show-invisible-markers)))
-  (let ((shell-buffer (shell-maker-buffer config))
-        (prefix-newline "")
-        (suffix-newline "\n\n")
-        (response-count 0)
-        (errored))
-    (funcall (shell-maker-config-execute-command shell-maker--config)
-             input
-             (shell-maker--extract-history
-              (with-current-buffer shell-buffer
-                (buffer-string))
-              (shell-maker-prompt-regexp shell-maker--config))
-             (lambda (response partial)
-               (setq response-count (1+ response-count))
-               (setq prefix-newline (if (> response-count 1)
-                                        ""
-                                      "\n"))
-               (if response
-                   (if partial
-                       (progn
-                         (shell-maker--write-partial-reply config (concat prefix-newline response))
-                         (setq shell-maker--busy partial)
-                         (when on-output
-                           (funcall on-output
-                                    input response nil nil)))
-                     (shell-maker--write-reply config (concat prefix-newline response suffix-newline))
-                     (unless no-announcement
-                       (shell-maker--announce-response shell-buffer))
-                     (setq shell-maker--busy nil)
-                     (shell-maker--write-input-ring-history shell-maker--config)
-                     ;; FIXME use (concat prefix-newline response suffix-newline) if not streaming.
-                     (when on-output
-                       (funcall on-output input response nil t))
-                     (when (shell-maker-config-on-command-finished shell-maker--config)
-                       (funcall (shell-maker-config-on-command-finished shell-maker--config)
-                                input
-                                (shell-maker-last-output)))
-                     (goto-char (point-max)))
-                 (shell-maker--write-reply config "Error: that's all is known" t) ;; comeback
-                 (setq shell-maker--busy nil)
-                 (unless no-announcement
-                   (shell-maker--announce-response shell-buffer))
-                 (when on-output
-                   (funcall on-output
-                            input (shell-maker-last-output) t t))))
-             (lambda (error)
-               (unless errored
-                 (shell-maker--write-reply config (concat (string-trim error) suffix-newline) t)
-                 (setq errored t))
-               (setq shell-maker--busy nil)
-               (unless no-announcement
-                 (shell-maker--announce-response shell-buffer))
-               (when on-output
-                 (funcall on-output
-                          input error t t))
-               (when (shell-maker-config-on-command-finished shell-maker--config)
-                 (funcall (shell-maker-config-on-command-finished shell-maker--config)
-                          input
-                          error)
-                 (goto-char (point-max)))))))
+(cl-defun shell-maker--notify-on-command-finished (&key config input output success)
+  "Notify CONFIG's :on-command-finished observer of INPUT, OUTPUT, and SUCCESS."
+  (when (shell-maker-config-on-command-finished config)
+    (let* ((params (func-arity (shell-maker-config-on-command-finished config)))
+           (params-max (cdr params)))
+      (cond ((= params-max 2)
+             (funcall (shell-maker-config-on-command-finished config)
+                      input
+                      output))
+            ((= params-max 3)
+             (funcall (shell-maker-config-on-command-finished config)
+                      input
+                      output
+                      success))
+            (t
+             (message (concat ":on-command-finished expects "
+                              "(lambda (command output)) or "
+                              "(lambda (command output success))")))))))
 
 (provide 'shell-maker)
 
