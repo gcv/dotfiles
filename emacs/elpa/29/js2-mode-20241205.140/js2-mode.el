@@ -7,8 +7,8 @@
 ;;         Dmitry Gutov <dmitry@gutov.dev>
 ;; URL:  https://github.com/mooz/js2-mode/
 ;;       http://code.google.com/p/js2-mode/
-;; Package-Version: 20240908.1236
-;; Package-Revision: 62d6cb169ed4
+;; Package-Version: 20241205.140
+;; Package-Revision: e0c302872de4
 ;; Keywords: languages, javascript
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
 
@@ -12868,7 +12868,7 @@ to beginning of previous script-level element.
 With ARG N, do that N times. If N is negative, move forward."
   (setq arg (or arg 1))
   (if (cl-plusp arg)
-      (let ((parent (js2-node-parent-script-or-fn (js2-node-at-point))))
+      (let ((parent (js2-node-parent-script-or-fn (js2-node-at-point nil t))))
         (when (cond
                ((js2-function-node-p parent)
                 (goto-char (js2-node-abs-pos parent)))
