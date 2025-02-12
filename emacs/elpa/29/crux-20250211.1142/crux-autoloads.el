@@ -191,6 +191,15 @@ Edit the `user-init-file', in another window." t)
 Edit the `custom-file', in another window." t)
 (autoload 'crux-find-shell-init-file "crux" "\
 Edit the shell init file in another window." t)
+(autoload 'crux-find-current-directory-dir-locals-file "crux" "\
+Edit the `.dir-locals.el' file for the current buffer in another window.
+If prefix arg FIND-2 is set then edit the `.dir-locals-2.el' file instead
+of `.dir-locals.el'. Scans parent directories if the file does not exist in
+the default directory of the current buffer. If not found, create a new,
+empty buffer in the current buffer's default directory, or if there is no
+such directory, in the user's home directory.
+
+(fn FIND-2)" t)
 (autoload 'crux-upcase-region "crux" "\
 `upcase-region' when `transient-mark-mode' is on and region is active.
 

@@ -4,7 +4,8 @@
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/bbatsov/crux
-;; Version: 0.5.0
+;; Package-Version: 20250211.1142
+;; Package-Revision: 519c2907c312
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -730,6 +731,28 @@ Doesn't mess with special buffers."
     (if (> (length candidates) 1)
         (find-file-other-window (completing-read "Choose shell init file: " candidates))
       (find-file-other-window (car candidates)))))
+
+;;;###autoload
+(defun crux-find-current-directory-dir-locals-file (find-2)
+  "Edit the `.dir-locals.el' file for the current buffer in another window.
+If prefix arg FIND-2 is set then edit the `.dir-locals-2.el' file instead
+of `.dir-locals.el'. Scans parent directories if the file does not exist in
+the default directory of the current buffer. If not found, create a new,
+empty buffer in the current buffer's default directory, or if there is no
+such directory, in the user's home directory."
+  (interactive "P")
+  (let* ((prefix (if (eq system-type 'ms-dos) "_" "."))
+         (file (concat prefix (if find-2 "dir-locals-2" "dir-locals") ".el"))
+         (starting-dir (or (when (and default-directory
+                                      (file-readable-p default-directory))
+                             default-directory)
+                           (file-truename "~/")))
+         (found-dir (or (locate-dominating-file starting-dir file) starting-dir))
+         (found-file (concat found-dir file)))
+    (find-file-other-window found-file)
+    (if (file-exists-p found-file)
+        (message "Editing existing file %s" found-file)
+      (message "Editing new file %s" found-file))))
 
 ;;;###autoload
 (defun crux-upcase-region (beg end)
