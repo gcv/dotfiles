@@ -5,8 +5,8 @@
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
 ;; Keywords: help, lisp
-;; Package-Version: 20240613.1523
-;; Package-Revision: 4ba24cac9fb1
+;; Package-Version: 20250131.1645
+;; Package-Revision: 34328c639ed7
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -1318,8 +1318,8 @@ Return nil otherwise."
        (package-version
         (format
          "This variable was added, or its default value changed, in %s version %s."
-         (car package-version)
-         (cdr package-version)))
+         (or (car-safe package-version) "unknown")
+         (or (cdr-safe package-version) "unknown")))
        (emacs-version
         (format
          "This variable was added, or its default value changed, in Emacs %s."
