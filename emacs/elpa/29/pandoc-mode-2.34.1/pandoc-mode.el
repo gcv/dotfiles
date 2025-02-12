@@ -5,8 +5,8 @@
 ;; Author: Joost Kremers <joostkremers@fastmail.fm>
 ;; Maintainer: Joost Kremers <joostkremers@fastmail.fm>
 ;; Created: 31 Oct 2009
-;; Package-Version: 2.33
-;; Package-Revision: 3068a544fc2d
+;; Package-Version: 2.34.1
+;; Package-Revision: bbb687a6ad9d
 ;; Keywords: text, pandoc
 ;; URL: http://joostkremers.github.io/pandoc-mode/
 ;; Package-Requires: ((hydra "0.10.0") (dash "2.10.0"))
@@ -346,9 +346,11 @@ EXTENSIONS is an alist of (<extension> . <value>) pairs."
                          (memq option pandoc--filepath-options))
                 (setq value (pandoc--expand-absolute-path value)))
               (cond
-               ((eq value t) (format "--%s" option))
+               ((eq value t)
+                (format "--%s" option))
                ((or (numberp value)
-                    (stringp value)) (format "--%s=%s" option value))
+                    (stringp value))
+                (format "--%s=%s" option value))
                (t nil))))
           pandoc--cli-options))
 
