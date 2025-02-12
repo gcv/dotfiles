@@ -114,10 +114,10 @@ Call CAPF and make sure that no completion style filtering takes place.
 
 (fn CAPF)")
 (autoload 'cape-wrap-properties "cape" "\
-Call CAPF and add additional completion PROPERTIES.
-Completion properties include for example :exclusive, :annotation-function and
-the various :company-* extensions.  Furthermore a boolean :sort flag and a
-completion :category symbol can be specified.
+Call CAPF and strip or add completion PROPERTIES.
+Completion properties include for example :exclusive, :category,
+:annotation-function, :display-sort-function and various :company-*
+extensions.  The :strip flag means to strip all completion properties.
 
 (fn CAPF &rest PROPERTIES)")
 (autoload 'cape-wrap-nonexclusive "cape" "\
@@ -125,6 +125,11 @@ Call CAPF and ensure that it is marked as non-exclusive.
 This function can be used as an advice around an existing Capf.
 
 (fn CAPF)")
+(autoload 'cape-wrap-sort "cape" "\
+Call CAPF and add SORT function.
+This function can be used as an advice around an existing Capf.
+
+(fn CAPF SORT)")
 (autoload 'cape-wrap-predicate "cape" "\
 Call CAPF and add an additional candidate PREDICATE.
 The PREDICATE is passed the candidate symbol or string.

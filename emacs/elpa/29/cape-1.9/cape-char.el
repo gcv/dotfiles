@@ -1,6 +1,6 @@
 ;;; cape-char.el --- Character completion functions -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; This file is part of GNU Emacs.
 
@@ -44,19 +44,24 @@ are not included. Hash values are either char or strings."
         (apply #'quail-use-package method (nthcdr 5 im))
         (quail-build-decode-map (list (quail-map)) "" dm 0)
         (pcase-dolist (`(,name . ,val) (cdr dm))
+          (when (equal method "emoji")
+            (setq name (replace-regexp-in-string
+                        ": " "-"
+                        (replace-regexp-in-string
+                         "[’“”!()]" ""
+                         (replace-regexp-in-string
+                          "[_ &.]+" "-" name))))
+            (when (string-match-p "\\`[[:alnum:]-]*\\'" name)
+              (setq name (format ":%s:" name))))
           (when (memq (aref name 0) prefix)
-            (puthash
-             (if (equal method "emoji")
-                 (string-replace "_" "-" name)
-               name)
-             (if (vectorp val) (aref val 0) val) hash)))
+            (puthash name (if (vectorp val) (aref val 0) val) hash)))
         (quail-deactivate)
         hash))))
 
 (defun cape-char--annotation (hash name)
   "Lookup NAME in HASH and return annotation."
   (when-let ((char (gethash name hash)))
-    (if (stringp char) (format " %s" char) (format " %c" char))))
+    (format (if (stringp char) " %s " " %c ") char)))
 
 (defun cape-char--signature (hash name)
   "Lookup NAME in HASH and return signature."
@@ -103,6 +108,7 @@ PREFIX are the prefix characters."
                :company-docsig (apply-partially #'cape-char--signature ,hash)
                :exit-function (apply-partially #'cape-char--exit ,hash)
                :company-kind (lambda (_) 'text)
+               :category ',capf
                :exclusive 'no)
          ,(format "Completion extra properties for `%s'." capf))
        (defun ,capf (&optional interactive)
@@ -123,10 +129,7 @@ function acts like a Capf." method method)
                         ((looking-back ,pre-rx (pos-bol))
                          (cons (match-beginning 0) (point)))
                         ((not ,pre-req) (cons (point) (point))))))
-             (append
-              (list (car bounds) (cdr bounds)
-                    (cape--properties-table ,hash :category ',capf))
-              ,props)))))))
+             (append (list (car bounds) (cdr bounds) ,hash) ,props)))))))
 
 ;;;###autoload (autoload 'cape-tex "cape-char" nil t)
 (cape-char--define tex "TeX" ?\\ ?^ ?_)

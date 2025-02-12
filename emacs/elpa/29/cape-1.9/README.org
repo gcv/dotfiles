@@ -86,7 +86,7 @@ information.
 (use-package cape
   ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
   ;; Press C-c p ? to for help.
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
+  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
   ;; Alternatively bind Cape commands individually.
   ;; :bind (("C-c p d" . cape-dabbrev)
   ;;        ("C-c p h" . cape-history)
@@ -249,6 +249,7 @@ the Capf transformers with =defalias= to a function symbol.
 - ~cape-capf-properties~, ~cape-wrap-properties~: Add completion properties to a Capf.
 - ~cape-capf-purify~, ~cape-wrap-purify~: Purify a broken Capf and ensure that it does not modify the buffer.
 - ~cape-capf-silent~, ~cape-wrap-silent~: Silence Capf messages and errors.
+- ~cape-capf-sort~, ~cape-wrap-sort~: Add sort function to a Capf.
 - ~cape-capf-super~, ~cape-wrap-super~: Merge multiple Capfs into a Super-Capf.
 
 In the following we show a few example configurations, which have come up on the
@@ -257,8 +258,8 @@ personal configuration.
 
 #+begin_src emacs-lisp
 ;; Example 1: Sanitize the `pcomplete-completions-at-point' Capf.  The Capf has
-;; undesired side effects on Emacs 28 and earlier.  These advices are not needed
-;; on Emacs 29 and newer.
+;; undesired side effects on Emacs 28.  These advices are not needed on Emacs 29
+;; and newer.
 (when (< emacs-major-version 29)
   (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
   (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))

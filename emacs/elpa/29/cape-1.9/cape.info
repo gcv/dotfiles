@@ -1,4 +1,4 @@
-This is doc5HsHLa.info, produced by makeinfo version 6.8 from cape.texi.
+This is docAJHTwr.info, produced by makeinfo version 6.8 from cape.texi.
 
 INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: doc5HsHLa.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
+File: docAJHTwr.info,  Node: Top,  Next: Available Capfs,  Up: (dir)
 
 cape.el - Let your completions fly!
 ***********************************
@@ -52,7 +52,7 @@ CAPF adapters and transformers
 
 
 
-File: doc5HsHLa.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
+File: docAJHTwr.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top,  Up: Top
 
 1 Available Capfs
 *****************
@@ -75,7 +75,7 @@ File: doc5HsHLa.info,  Node: Available Capfs,  Next: Configuration,  Prev: Top, 
    • ‘cape-tex’: Complete Unicode char from TeX command, e.g.  ‘\hbar’.
 
 
-File: doc5HsHLa.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
+File: docAJHTwr.info,  Node: Configuration,  Next: CAPF adapters and transformers,  Prev: Available Capfs,  Up: Top
 
 2 Configuration
 ***************
@@ -116,7 +116,7 @@ information.
      (use-package cape
        ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
        ;; Press C-c p ? to for help.
-       :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
+       :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
        ;; Alternatively bind Cape commands individually.
        ;; :bind (("C-c p d" . cape-dabbrev)
        ;;        ("C-c p h" . cape-history)
@@ -135,7 +135,7 @@ information.
      )
 
 
-File: doc5HsHLa.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
+File: docAJHTwr.info,  Node: CAPF adapters and transformers,  Next: Contributions,  Prev: Configuration,  Up: Top
 
 3 CAPF adapters and transformers
 ********************************
@@ -148,7 +148,7 @@ File: doc5HsHLa.info,  Node: CAPF adapters and transformers,  Next: Contribution
 * Capf transformers::
 
 
-File: doc5HsHLa.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
+File: docAJHTwr.info,  Node: Company adapter,  Next: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.1 Company adapter
 ===================
@@ -214,7 +214,7 @@ Company backend, which can then be used as a Capf via
                               '(company-dabbrev company-elisp)))))
 
 
-File: doc5HsHLa.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
+File: docAJHTwr.info,  Node: Super-Capf - Merging multiple Capfs,  Next: Capf-Buster - Cache busting,  Prev: Company adapter,  Up: CAPF adapters and transformers
 
 3.2 Super-Capf - Merging multiple Capfs
 =======================================
@@ -256,7 +256,7 @@ multi-step completions like ‘cape-file’.
 Company, which allows you to merge multiple Company backends.
 
 
-File: doc5HsHLa.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
+File: docAJHTwr.info,  Node: Capf-Buster - Cache busting,  Next: Capf transformers,  Prev: Super-Capf - Merging multiple Capfs,  Up: CAPF adapters and transformers
 
 3.3 Capf-Buster - Cache busting
 ===============================
@@ -276,7 +276,7 @@ similarly refreshing strategy.
                  (list (cape-capf-buster #'some-caching-capf)))
 
 
-File: doc5HsHLa.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
+File: docAJHTwr.info,  Node: Capf transformers,  Prev: Capf-Buster - Cache busting,  Up: CAPF adapters and transformers
 
 3.4 Capf transformers
 =====================
@@ -320,6 +320,7 @@ function symbol.
      ensure that it does not modify the buffer.
    • ‘cape-capf-silent’, ‘cape-wrap-silent’: Silence Capf messages and
      errors.
+   • ‘cape-capf-sort’, ‘cape-wrap-sort’: Add sort function to a Capf.
    • ‘cape-capf-super’, ‘cape-wrap-super’: Merge multiple Capfs into a
      Super-Capf.
 
@@ -330,8 +331,8 @@ issue tracker (https://github.com/minad/corfu/issues) or the Corfu wiki.
 personal configuration.
 
      ;; Example 1: Sanitize the `pcomplete-completions-at-point' Capf.  The Capf has
-     ;; undesired side effects on Emacs 28 and earlier.  These advices are not needed
-     ;; on Emacs 29 and newer.
+     ;; undesired side effects on Emacs 28.  These advices are not needed on Emacs 29
+     ;; and newer.
      (when (< emacs-major-version 29)
        (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
        (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
@@ -368,7 +369,7 @@ personal configuration.
                                             #'ignore-elisp-keywords)))
 
 
-File: doc5HsHLa.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
+File: docAJHTwr.info,  Node: Contributions,  Prev: CAPF adapters and transformers,  Up: Top
 
 4 Contributions
 ***************
@@ -383,12 +384,12 @@ Tag Table:
 Node: Top208
 Node: Available Capfs1948
 Node: Configuration3059
-Node: CAPF adapters and transformers5864
-Node: Company adapter6172
-Node: Super-Capf - Merging multiple Capfs8867
-Node: Capf-Buster - Cache busting11048
-Node: Capf transformers11987
-Node: Contributions16749
+Node: CAPF adapters and transformers5867
+Node: Company adapter6175
+Node: Super-Capf - Merging multiple Capfs8870
+Node: Capf-Buster - Cache busting11051
+Node: Capf transformers11990
+Node: Contributions16820
 
 End Tag Table
 

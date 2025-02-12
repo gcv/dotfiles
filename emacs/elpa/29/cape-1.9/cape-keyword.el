@@ -1,6 +1,6 @@
 ;;; cape-keyword.el --- Keyword completion function -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; This file is part of GNU Emacs.
 
@@ -402,7 +402,8 @@
 (defvar cape--keyword-properties
   (list :annotation-function (lambda (_) " Keyword")
         :company-kind (lambda (_) 'keyword)
-        :exclusive 'no)
+        :exclusive 'no
+        :category 'cape-keyword)
   "Completion extra properties for `cape-keyword'.")
 
 ;;;###autoload
@@ -415,9 +416,7 @@ If INTERACTIVE is nil the function acts like a capf."
       (cape-interactive #'cape-keyword)
     (when-let (keywords (cape--keyword-list))
       (let ((bounds (cape--bounds 'symbol)))
-        `(,(car bounds) ,(cdr bounds)
-          ,(cape--properties-table keywords :category 'cape-keyword)
-          ,@cape--keyword-properties)))))
+        `(,(car bounds) ,(cdr bounds) ,keywords ,@cape--keyword-properties)))))
 
 (provide 'cape-keyword)
 ;;; cape-keyword.el ends here
