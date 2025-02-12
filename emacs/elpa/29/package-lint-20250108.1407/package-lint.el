@@ -6,8 +6,8 @@
 ;;         Fanael Linithien <fanael4@gmail.com>
 ;; URL: https://github.com/purcell/package-lint
 ;; Keywords: lisp
-;; Package-Version: 20240923.1044
-;; Package-Revision: ae5491c511cb
+;; Package-Version: 20250108.1407
+;; Package-Revision: 6f05a369e071
 ;; Package-Requires: ((emacs "24.4") (let-alist "1.0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -195,6 +195,7 @@ TYPE is `function' or `variable'."
     "org-dblock-write:"
     "org-babel-execute:"
     "org-babel-expand-body:"
+    "org-babel-header-args:"
     "org-babel-prep-session:"
     "org-babel-variable-assignments:"
     "org-babel-default-header-args:"
@@ -983,7 +984,7 @@ Valid definition names are:
 - a NAME matching `package-lint--sane-prefixes', or
 
 - a NAME whose POSITION in the buffer denotes a global definition."
-  (or (string-prefix-p prefix name)
+  (or (string-match-p (rx-to-string `(seq string-start ,prefix (or string-end (not alpha)))) name)
       (string-match-p package-lint--sane-prefixes name)
       (string-match-p (rx-to-string `(seq string-start (or "define" "defun" "defvar" "defface" "with") "-" ,prefix)) name)
       (string-match-p (rx-to-string  `(seq string-start "global-" ,prefix (or "-mode" (seq "-" (* any) "-mode")) string-end)) name)
