@@ -4,8 +4,8 @@
 
 ;; This file is not part of GNU Emacs.
 
-;; Package-Version: 20241007.1655
-;; Package-Revision: 9be25db0566d
+;; Package-Version: 20241114.1751
+;; Package-Revision: 15b7d29f2539
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This is free software; you can redistribute it and/or modify it under
