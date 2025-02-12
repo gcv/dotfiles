@@ -79,7 +79,7 @@ See `colorful-mode' for more information on Colorful mode.
 in.
 
 (fn &optional ARG)" t)
-(defvar global-colorful-modes '(mhtml-mode html-ts-mode latex-mode prog-mode) "\
+(defvar global-colorful-modes '(mhtml-mode html-ts-mode latex-mode prog-mode help-mode) "\
 Which major modes `colorful-mode' is switched on in.
 This variable can be either t (all major modes), nil (no major modes),
 or a list of modes and (not modes) to switch use this minor mode or

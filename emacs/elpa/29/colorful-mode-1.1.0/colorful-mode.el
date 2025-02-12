@@ -3,11 +3,12 @@
 ;; Copyright (C) 2024 Free Software Foundation, Inc
 
 ;; Author: Elias G. Perez <eg642616@gmail.com>
+;; Maintainer: Shen, Jen-Chieh <jcs090218@gmail.com>
 ;; Created: 2024-04-10
 ;; Package-Requires: ((emacs "28.1") (compat "29.1.4.4"))
 ;; Homepage: https://github.com/DevelopmentCool2449/colorful-mode
 ;; Keywords: faces, tools, matching, convenience
-;; Version: 1.0.4
+;; Version: 1.1.0
 
 ;; This file is part of GNU Emacs.
 
@@ -216,7 +217,7 @@ Each entry should have the form (COLOR-NAME . HEXADECIMAL-COLOR)."
     (latex-mode . colorful-add-latex-colors)
     colorful-add-hex-colors)
   "List of functions to add extra color keywords to `colorful-color-keywords'.
-It can be a cons cell specifing the mode (or a list of modes)
+It can be a cons cell specifying the mode (or a list of modes)
 e.g:
 \(((`css-mode' `css-ts-mode') . `colorful-add-rgb-colors')
   (`emacs-lisp-mode' . (`colorful-add-color-names'
@@ -264,7 +265,7 @@ Only relevant if `colorful-use-prefix' is non-nil."
   "List of keyword to don't highlight."
   :type '(repeat string))
 
-(defcustom colorful-short-hex-convertions 2
+(defcustom colorful-short-hex-conversions 2
   "If set to 2, hex values converted by colorful should be as short as possible.
 Setting this to 2 will make hex values follow a 24-bit specification
 and can make them inaccurate."
@@ -286,7 +287,7 @@ mode is derived from `prog-mode'."
 
 ;;;; Internal Functions
 
-;;;;; Base Convertion functions
+;;;;; Base Conversion functions
 
 (defun colorful--percentage-to-absolute (percentage)
   "Convert PERCENTAGE to a absolute number.
@@ -433,23 +434,24 @@ PROMPT must be a string with 1 format control (generally a string argument)."
                   choices nil nil 'equal)))
     (pcase choice ; Convert to...
       ('hex
-       (if (not (string-prefix-p "#" color)) ; Ensure is not already a hex
+       (if (not (or (string-prefix-p "#" color)
+                    (string-prefix-p "0x" color))) ; Ensure is not already a hex
            (cond
             ;; Is Name?
             ((or (member color (defined-colors))
                  (assoc-string color colorful-html-colors-alist))
              (list (colorful--name-to-hex
-                    color colorful-short-hex-convertions)
+                    color colorful-short-hex-conversions)
                    beg end))
             ;; Is CSS rgb?
             ((string-match-p (rx (one-or-more "rgb" (opt "a") "(")) color)
              (list (colorful--rgb-to-hex
-                    color colorful-short-hex-convertions)
+                    color colorful-short-hex-conversions)
                    beg end))
             ;; Is HSL?
             ((string-match-p (rx (one-or-more "hsl" (opt "a") "(")) color)
              (list (colorful--hsl-to-hex
-                    color colorful-short-hex-convertions)
+                    color colorful-short-hex-conversions)
                    beg end)))
 
          (colorful--change-color ov "%s is already a Hex color. Try again: "
@@ -458,21 +460,22 @@ PROMPT must be a string with 1 format control (generally a string argument)."
        (if (not (assoc-string color color-name-rgb-alist))
            (cond
             ;; Is Hex?
-            ((string-prefix-p "#" color)
-             (if-let ((rep (colorful--hex-to-name color)))
+            ((or (string-prefix-p "#" color)
+                 (string-prefix-p "0x" color))
+             (if-let* ((rep (colorful--hex-to-name color)))
                  (list rep beg end)
                (user-error "No color name available")
                nil))
             ;; Is CSS rgb?
             ((string-match-p (rx (one-or-more "rgb" (opt "a") "(")) color)
-             (if-let ((rep (colorful--hex-to-name (colorful--rgb-to-hex
-                                                   color colorful-short-hex-convertions))))
+             (if-let* ((rep (colorful--hex-to-name (colorful--rgb-to-hex
+                                                    color colorful-short-hex-conversions))))
                  (list rep beg end)
                (user-error "No color name available")))
             ;; Is HSL?
             ((string-match-p (rx (one-or-more "hsl" (opt "a") "(")) color)
-             (if-let ((rep (colorful--hex-to-name (colorful--hsl-to-hex
-                                                   color colorful-short-hex-convertions))))
+             (if-let* ((rep (colorful--hex-to-name (colorful--hsl-to-hex
+                                                    color colorful-short-hex-conversions))))
                  (list rep beg end)
                (user-error "No color name available"))))
 
@@ -486,15 +489,14 @@ PROMPT must be a string with 1 format control (generally a string argument)."
 (defun colorful--colorize-match (color beg end)
   "Overlay match with a face from BEG to END.
 The background uses COLOR color value.  The foreground is obtained
-bu `readable-foreground-color' and it can be white or black."
+from `readable-foreground-color' and it can be white or black."
   ;; Delete duplicates overlays found
   (dolist (ov (overlays-in beg end))
     (if (overlay-get ov 'colorful--overlay)
         (colorful--delete-overlay ov)))
 
-  (when-let* (color
-              (ov (make-overlay beg end nil t t))
-              (map (make-sparse-keymap)))
+  (let* ((ov (make-overlay beg end nil t t))
+         (map (make-sparse-keymap)))
 
     (if colorful-allow-mouse-clicks
         (keymap-set map "<mouse-1>" (if buffer-read-only
@@ -550,36 +552,58 @@ converted to a Hex color."
                         (not colorful-only-strings))))
               (beg (match-beginning match))
               (end (match-end match)))
+
     (cond
      ((assoc-string string colorful-html-colors-alist)
       (setq string (cdr (assoc-string string colorful-html-colors-alist))))
+
      ((string-match-p (rx (one-or-more "rgb" (opt "a") "(")) string)
       (setq string (colorful--rgb-to-hex string)))
+
      ((string-match-p (rx (one-or-more "hsl" (opt "a") "(")) string)
       (setq string (colorful--hsl-to-hex string)))
+
      ((string-prefix-p "{rgb}{" string)
       (setq string (colorful--latex-rgb-to-hex string)))
+
      ((string-prefix-p "{RGB}{" string)
       (setq string (colorful--rgb-to-hex
                     (string-remove-prefix "{RGB}{" string))))
+
      ((string-prefix-p "{HTML}{" string)
       (setq string (concat "#" (string-remove-suffix
                                 "}" (string-remove-prefix "{HTML}{" string)))))
-     ((string-prefix-p "{gray}{" string)
-      (setq string (colorful--latex-gray-to-hex string))))
 
-    (colorful--colorize-match string beg end)))
+     ((string-prefix-p "{gray}{" string)
+      (setq string (colorful--latex-gray-to-hex string)))
+
+     ((string-prefix-p "#" string)
+      (setq string (cond
+                    ;; Check if hex is #RRGGBBAA or #RGBA and then
+                    ;; ignore their Alpha hex values.
+                    ((length= string 9) ; For #RRGGBBAA
+                     (substring string 0 7))
+                    ((length= string 5) ; For #RGBA
+                     (substring string 0 4))
+                    ;; Otherwise, just pass it.
+                    (t string))))
+
+     (t (setq string (string-replace "0x" "#" string))))
+
+    ;; Ensure that is a valid color and that string is non-nil
+    (if (and string (color-defined-p string))
+        (colorful--colorize-match string beg end))))
 
 
 ;;;; Extra coloring definitions
 
 (defvar colorful-hex-font-lock-keywords
   `((,(rx (seq (not (any "&"))
-               (group "#" (repeat 1 4 (= 3 (any "0-9A-Fa-f"))))
+               (group (or "#" "0x") (repeat 1 14 (any "0-9A-Fa-f")))
                word-boundary))
      (1 (colorful--colorize 1)))
     (,(rx (seq bol
-               (group "#" (repeat 1 4 (= 3 (any "0-9A-Fa-f"))))
+               (group (or "#" "0x") (repeat 1 14 (any "0-9A-Fa-f")))
                word-boundary))
      (0 (colorful--colorize)))
     (,(rx (seq (any "Rr") (any "Gg") (any "Bb") ":"
@@ -717,7 +741,7 @@ This is intended to be used with `colorful-extra-color-keyword-functions'."
     (cl-pushnew colors colorful-color-keywords)))
 
 
-;;;; Minor mode defintinions
+;;;; Minor mode definitions
 
 (defun colorful--turn-on ()
   "Helper function for turn on `colorful-mode'."
@@ -760,8 +784,8 @@ This is intended to be used with `colorful-extra-color-keyword-functions'."
   (font-lock-flush))
 
 ;; Silence a byte-compile warning about global-colorful-modes not
-;; being defined, if anyone knows why this happens please send a
-;; patch.
+;; being defined
+;; NOTE: This bug is already fixed in emacs-30
 (defvar global-colorful-modes)
 
 ;;;###autoload
@@ -773,7 +797,7 @@ This is intended to be used with `colorful-extra-color-keyword-functions'."
 ;;;###autoload
 (define-globalized-minor-mode global-colorful-mode
   colorful-mode turn-on-colorful-mode
-  :predicate '(mhtml-mode html-ts-mode latex-mode prog-mode))
+  :predicate '(mhtml-mode html-ts-mode latex-mode prog-mode help-mode))
 
 
 (provide 'colorful-mode)
