@@ -5,9 +5,9 @@
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 1.7
-;; Package-Requires: ((emacs "27.1") (compat "30"))
-;; Homepage: https://github.com/minad/marginalia
+;; Version: 1.8
+;; Package-Requires: ((emacs "28.1") (compat "30"))
+;; URL: https://github.com/minad/marginalia
 ;; Keywords: docs, help, matching, completion
 
 ;; This file is part of GNU Emacs.
@@ -41,7 +41,7 @@
 (defgroup marginalia nil
   "Enrich existing commands with completion annotations."
   :link '(info-link :tag "Info Manual" "(marginalia)")
-  :link '(url-link :tag "Homepage" "https://github.com/minad/marginalia")
+  :link '(url-link :tag "Website" "https://github.com/minad/marginalia")
   :link '(emacs-library-link :tag "Library Source" "marginalia.el")
   :group 'help
   :group 'docs
@@ -136,7 +136,7 @@ determine it."
     ("\\<color\\>" . color)
     ("\\<face\\>" . face)
     ("\\<environment variable\\>" . environment-variable)
-    ("\\<function\\|hook to remove\\>" . function)
+    ("\\<function\\|\\(?:hook\\|advice\\) to remove\\>" . function)
     ("\\<variable\\>" . variable)
     ("\\<input method\\>" . input-method)
     ("\\<charset\\>" . charset)
@@ -304,6 +304,7 @@ The value of `this-command' is used as key for the lookup."
 (declare-function bookmark-prop-get "bookmark")
 
 (declare-function project-current "project")
+(declare-function project-root "project")
 
 (defvar package--builtins)
 (defvar package-archive-contents)
@@ -502,6 +503,7 @@ l local (L modified compared to default value)
 & alias
 
 Other:
+G custom group
 a face
 t cl-type"
   (let ((class
@@ -535,7 +537,7 @@ t cl-type"
                                  (default-value s))))
                    '("L" . "local, modified from global")
                  '("l" . "local, unmodified")))
-             (if (custom-variable-p s)
+             (if (get s 'standard-value)
                  (if (ignore-errors
                        (not (equal (symbol-value s)
                                    (eval (car (get s 'standard-value))))))
@@ -546,6 +548,7 @@ t cl-type"
                   (cons "&" (format "alias for `%s'" (ignore-errors (indirect-variable s)))))
              (and (get s 'byte-obsolete-variable) '("-" . "obsolete"))))
           (list
+           (and (get s 'group-documentation) '("G" . "custom group"))
            (and (facep s) '("a" . "face"))
            (and (get s 'cl--class) '("t" . "cl-type")))))) ;; cl-find-class, cl--find-class
     (setq class (delq nil class))
@@ -1048,9 +1051,7 @@ These annotations are skipped for remote paths."
                         prompt)
                        (match-string 1 prompt)))
                 (when-let (proj (project-current))
-                  (cond
-                   ((fboundp 'project-root) (project-root proj))
-                   ((fboundp 'project-roots) (car (project-roots proj))))))))
+                  (project-root proj)))))
     marginalia--project-root))
 
 (defun marginalia-annotate-project-file (cand)
@@ -1171,8 +1172,8 @@ These annotations are skipped for remote paths."
   "Return original category reported by completion metadata."
   ;; Bypass our `marginalia--completion-metadata-get' advice.
   (when-let (cat (marginalia--orig-completion-metadata-get marginalia--metadata 'category))
-    ;; Ignore Emacs 28 symbol-help category in order to ensure that the
-    ;; categories are refined to our categories function and variable.
+    ;; Ignore `symbol-help' category in order to ensure that the categories are
+    ;; refined to our categories function and variable.
     (and (not (eq cat 'symbol-help)) cat)))
 
 (defun marginalia-classify-symbol ()
@@ -1226,8 +1227,7 @@ completion UIs like Vertico or Icomplete."
    (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
      (setq marginalia--cand-width-max
            (max marginalia--cand-width-max
-                (* (ceiling (+ (string-width cand)
-                               (compat-call string-width ann 0 align))
+                (* (ceiling (+ (string-width cand) (string-width ann 0 align))
                             marginalia--cand-width-step)
                    marginalia--cand-width-step)))))
   (cl-loop
@@ -1241,7 +1241,7 @@ completion UIs like Vertico or Icomplete."
                    ('center `(+ center ,marginalia-align-offset))
                    ('left `(+ left ,(+ marginalia-align-offset marginalia--cand-width-max)))
                    ('right `(+ right ,(+ marginalia-align-offset 1
-                                         (- (compat-call string-width ann 0 align)
+                                         (- (string-width ann 0 align)
                                             (string-width ann)))))))
         ann))
      (list cand "" ann))))
@@ -1333,6 +1333,8 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 ;;;###autoload
 (defun marginalia-cycle ()
   "Cycle between annotators in `marginalia-annotator-registry'."
+  ;; Only show `marginalia-cycle' in M-x in recursive minibuffers
+  (declare (completion (lambda (&rest _) (> (minibuffer-depth) 1))))
   (interactive)
   (with-current-buffer (window-buffer
                         (or (active-minibuffer-window)
@@ -1356,10 +1358,6 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
                  (not (marginalia--orig-completion-metadata-get md 'affixation-function)))
         (setcdr ann (append (cddr ann) (list (cadr ann)))))
       (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) (car ann)))))
-
-;; Emacs 28: Only show `marginalia-cycle' in M-x in recursive minibuffers
-(put #'marginalia-cycle 'completion-predicate
-     (lambda (&rest _) (> (minibuffer-depth) 1)))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
