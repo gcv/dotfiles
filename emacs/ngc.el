@@ -70,12 +70,13 @@
   )
 
 
+;; FIXME: Should not be needed after Emacs 31.
 (use-package corfu-terminal
- :pin nongnu
- :if (not window-system)
- :init
- (corfu-terminal-mode 1)
- )
+  :pin nongnu
+  :if (not window-system)
+  :init
+  (corfu-terminal-mode 1)
+  )
 
 
 (use-package cape

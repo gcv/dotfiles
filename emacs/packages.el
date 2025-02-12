@@ -610,10 +610,6 @@
   )
 
 
-(use-package chatgpt-shell
-  :pin melpa)
-
-
 (use-package iedit
   :init
   (setq iedit-toggle-key-default nil)
