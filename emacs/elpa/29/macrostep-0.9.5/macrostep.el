@@ -4,10 +4,11 @@
 ;; Copyright (C) 2020-2024 Free Software Foundation, Inc.
 
 ;; Author: Jon Oddie <j.j.oddie@gmail.com>
+;; Maintainer: Jeremy Bryant <jb@jeremybryant.net>
 ;; Url: https://github.com/emacsorphanage/macrostep
 ;; Keywords: lisp, languages, macro, debugging
 
-;; Package-Version: 0.9.4
+;; Package-Version: 0.9.5
 ;; Package-Requires: ((cl-lib "0.5") (compat "29"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -237,6 +238,12 @@
 
 ;;; News:
 
+;;   - v0.9.5, 2024-02-01:
+;;     - documentation improvements
+;;   - v0.9.4, 2024-05-09:
+;;     - add compat dependency for defvar-keymap
+;;   - v0.9.3, 2024-04-30:
+;;     - code simplifications, checkdoc fixes.
 ;;   - v0.9.2, 2023-05-12:
 ;;     - name the keymap macrostep-mode-map, fixing a regression in v0.9.1
 ;;   - v0.9.1, 2023-03-12:
@@ -273,7 +280,7 @@
   "Number of macro expansion levels that have introduced gensyms so far.")
 
 (defvar-local macrostep-gensyms-this-level nil
-  "Non-nil if gensyms have been encountered during current level of macro expansion.")
+  "Non-nil if gensyms were encountered during current level of macro expansion.")
 
 (defvar-local macrostep-saved-undo-list nil
   "Saved value of `buffer-undo-list' upon entering macrostep mode.")
