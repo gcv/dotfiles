@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2009-2014 Julia contributors, 2015-2024 julia-mode.el contributors
 ;; URL: https://github.com/JuliaEditorSupport/julia-emacs
-;; Package-Version: 20240926.1528
-;; Package-Revision: 09897a8cbab4
+;; Package-Version: 20241213.1620
+;; Package-Revision: 0f4d74f9049d
 ;; Keywords: languages
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -339,7 +339,7 @@ partial match for LaTeX completion, or `nil' when not applicable."
      "try" "catch" "return" "local" "function" "macro"
      "finally" "break" "continue" "global" "where"
      "module" "using" "import" "export" "const" "let" "do"
-     "baremodule"
+     "baremodule" "public"
      ;; "importall" ;; deprecated in 0.7
      ;; "immutable" "type" "bitstype" "abstract" "typealias" ;; removed in 1.0
      "abstract type" "primitive type" "struct" "mutable struct")
@@ -501,9 +501,9 @@ a keyword if used as a field name, X.word, or quoted, :word."
       (ignore-errors (backward-char))))
 
 (defun julia-following-import-export-using ()
-  "If the current line follows an `export` or `import` keyword
-with valid syntax, return the position of the keyword, otherwise
-`nil`. Works by stepping backwards through comma-separated
+  "If the current line follows an `export`, `import`, `using`, or
+`public` keyword with valid syntax, return the position of the keyword,
+otherwise `nil`. Works by stepping backwards through comma-separated
 symbol, gives up when this is not true."
   ;; Implementation accepts a single Module: right after the keyword, and saves
   ;; the module name for future use, but does not enforce that `export` has no
@@ -515,7 +515,7 @@ symbol, gives up when this is not true."
       (while (and (not done) (< (point-min) (point)))
         (julia-safe-backward-sexp)
         (cond
-         ((looking-at (regexp-opt (list "import" "export" "using")))
+         ((looking-at (regexp-opt (list "import" "export" "using" "public")))
           (setf done (point)))
          ((looking-at (rx (group (* (or word (syntax symbol)))) (0+ space) ":"))
           (if module
