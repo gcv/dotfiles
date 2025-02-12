@@ -1,8 +1,7 @@
 ;;; dirvish-side.el --- Toggle Dirvish in side window like treemacs -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2022 Alex Lu
+;; Copyright (C) 2021-2025 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -15,8 +14,7 @@
 
 (require 'dirvish-subtree)
 
-(defcustom dirvish-side-display-alist
-  '((side . left) (slot . -1))
+(defcustom dirvish-side-display-alist '((side . left) (slot . -1))
   "Display alist for `dirvish-side' window."
   :group 'dirvish :type 'alist)
 
@@ -29,7 +27,6 @@
   "Window parameters for `dirvish-side' window."
   :group 'dirvish :type 'alist)
 
-(define-obsolete-variable-alias 'dirvish-side-open-file-window-function 'dirvish-side-open-file-action "Sep 23, 2022")
 (defcustom dirvish-side-open-file-action 'mru
   "The action of how to open a file in side window.
 The value can be one of:
@@ -49,22 +46,21 @@ The value can be one of:
   "Whether to auto close the side session after opening a file."
   :group 'dirvish :type 'boolean)
 
-(define-obsolete-variable-alias 'dirvish-side-follow-buffer-file 'dirvish-side-auto-expand "Sep 15, 2022")
 (defcustom dirvish-side-auto-expand t
   "Whether to auto expand parent directories of current file.
 If non-nil, expand all the parent directories of current buffer's
 filename until the project root when opening a side session."
   :group 'dirvish :type 'boolean)
 
-(defconst dirvish-side-header (dirvish--mode-line-fmt-setter '(project) nil t))
+(defconst dirvish-side-header (dirvish--mode-line-composer '(project) nil t))
 
-(defun dirvish-side-file-open-fn ()
+(defun dirvish-side-open-file-fn ()
   "Called before opening a file in side sessions."
-  (let* ((dv (dirvish-curr)) (layout (car (dv-layout dv)))
+  (let* ((dv (dirvish-curr)) (layout (dv-curr-layout dv))
          (mru (get-mru-window nil nil t)))
-    (if layout (dirvish-kill dv)
+    (if layout (dirvish--clear-session dv)
       (when dirvish-side-auto-close
-        (dirvish-kill dv)
+        (dirvish--clear-session dv)
         (when dirvish-reuse-session (quit-window)))
       (select-window (cond ((functionp dirvish-side-open-file-action)
                             (funcall dirvish-side-open-file-action))
@@ -77,7 +73,8 @@ filename until the project root when opening a side session."
 (defun dirvish-side-root-window-fn ()
   "Create root window according to `dirvish-side-display-alist'."
   (let ((win (display-buffer-in-side-window
-              (dirvish--util-buffer "temp") dirvish-side-display-alist)))
+              (dirvish--util-buffer "temp")
+              (append '((dedicated . t)) dirvish-side-display-alist))))
     (cl-loop for (key . value) in dirvish-side-window-parameters
              do (set-window-parameter win key value))
     (with-selected-window win
@@ -94,37 +91,44 @@ filename until the project root when opening a side session."
    for w in (window-list)
    for b = (window-buffer w)
    for dv = (with-current-buffer b (dirvish-curr))
-   thereis (and dv (eq 'side (car (dv-type dv))) w)))
+   thereis (and dv (eq 'side (dv-type dv)) w)))
 
 (defun dirvish-side--auto-jump ()
   "Select latest buffer file in the visible `dirvish-side' session."
+  ;; some commands such as `consult-buffer' that uses minibuffer somehow causes
+  ;; a delay on `current-buffer' updating, so we wait for 0.01s here to ensure
+  ;; the latest buffer is correctly grabbed. (#264)
   (run-with-timer
-   0.5 nil
+   0.01 nil
    (lambda ()
      (when-let* (((not dirvish--this))
-                 (dir (or (dirvish--get-project-root) default-directory))
+                 ((not (active-minibuffer-window)))
                  (win (dirvish-side--session-visible-p))
                  (dv (with-selected-window win (dirvish-curr)))
-                 ((not (active-minibuffer-window)))
-                 (file buffer-file-name))
+                 (dir (or (dirvish--get-project-root) default-directory))
+                 (prev (with-selected-window win (dirvish-prop :index)))
+                 (curr buffer-file-name)
+                 ((not (string-suffix-p "COMMIT_EDITMSG" curr)))
+                 ((not (equal prev curr))))
        (with-selected-window win
-         (when dir
-           (setq dirvish--this dv)
-           (let (buffer-list-update-hook) (dirvish-find-entry-a dir))
-           (if dirvish-side-auto-expand (dirvish-subtree-expand-to file)
-             (dired-goto-file file))
-           (dirvish-prop :cus-header 'dirvish-side-header)
-           (dirvish--setup-mode-line (car (dv-layout dv)))
-           (dirvish-update-body-h))
+         (setq dirvish--this dv)
+         (let (buffer-list-update-hook) (dirvish-find-entry-a dir))
+         (if dirvish-side-auto-expand (dirvish-subtree-expand-to curr)
+           (dired-goto-file curr))
+         (dirvish-prop :cus-header 'dirvish-side-header)
+         (dirvish-update-body-h)
          (setq dirvish--this nil))))))
 
 (defun dirvish-side--new (path)
   "Open a side session in PATH."
   (let* ((bname buffer-file-name)
          (dv (or (car (dirvish--find-reusable 'side))
-                 (dirvish-new :type '(side width dedicated
-                                      dirvish-side-root-window-fn
-                                      dirvish-side-file-open-fn))))
+                 (dirvish--new
+                  :type 'side
+                  :size-fixed 'width
+                  :dedicated t
+                  :root-window-fn #'dirvish-side-root-window-fn
+                  :open-file-fn #'dirvish-side-open-file-fn)))
          (r-win (dv-root-window dv)))
     (unless (window-live-p r-win) (setq r-win (dirvish--create-root-window dv)))
     (with-selected-window r-win
@@ -140,7 +144,7 @@ filename until the project root when opening a side session."
 (dirvish-define-mode-line project
   "Return a string showing current project."
   (let ((project (dirvish--get-project-root))
-        (face (if (dirvish--window-selected-p dv) 'dired-header 'shadow)))
+        (face (if (dirvish--selected-p) 'dired-header 'shadow)))
     (if project
         (setq project (file-name-base (directory-file-name project)))
       (setq project "-"))
@@ -172,7 +176,7 @@ If called with \\[universal-arguments], prompt for PATH,
 otherwise it defaults to `project-current'."
   (interactive (list (and current-prefix-arg
                           (read-directory-name "Open sidetree: "))))
-  (let ((fullframep (when-let ((dv (dirvish-curr))) (car (dv-layout dv))))
+  (let ((fullframep (when-let* ((dv (dirvish-curr))) (dv-curr-layout dv)))
         (visible (dirvish-side--session-visible-p))
         (path (or path (dirvish--get-project-root) default-directory)))
     (cond (fullframep (user-error "Can not create side session here"))

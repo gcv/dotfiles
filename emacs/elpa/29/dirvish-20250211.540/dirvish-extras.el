@@ -1,18 +1,14 @@
 ;;; dirvish-extras.el --- Extra utilities and transient prefixes for dirvish -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2022 Alex Lu
+;; Copyright (C) 2021-2025 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;;; Commentary:
 
-;; dirvish-extras.el contains the TRAMP integration for dirvish, it is only
-;; loaded after a TRAMP connection is initiated.  Besides, it provides some
-;; utilities and transient prefixes.  This is an optimization to avoid having to
-;; load functions that are rarely used during start-up.
+;; Extra utilities and transient prefixes for Dirvish.
 ;;
 ;; Commands included:
 ;; - `dirvish-find-file-true-path'
@@ -36,7 +32,8 @@
 ;;; Code:
 
 (require 'dirvish)
-(require 'tramp)
+(declare-function tramp-file-name-user "tramp")
+(declare-function tramp-file-name-host "tramp")
 
 (defcustom dirvish-layout-recipes
   '((0 0    0.4)   ;        | CURRENT | preview
@@ -131,114 +128,15 @@ predicate for that infix."
          [:description (lambda () (dirvish--format-menu-heading "Setup Dirvish UI"))
                        ["Attributes:" ,@attrs]]
          ["Switch layouts:"
-          :if (lambda () (car (dv-layout (dirvish-curr)))) ,@layouts]
+          :if (lambda () (dv-curr-layout (dirvish-curr))) ,@layouts]
          ["Actions:"
           ("M-t" "Toggle fullscreen" dirvish-layout-toggle)
           ("RET" "Apply current settings to future sessions"
            (lambda () (interactive)
              (setq-default dirvish-attributes dirvish-attributes)
-             (setq dirvish-default-layout (cdr (dv-layout (dirvish-curr))))
-             (dirvish--init-session (dirvish-curr))
+             (setq dirvish-default-layout (dv-ff-layout (dirvish-curr)))
+             (dirvish--build-layout (dirvish-curr))
              (revert-buffer)))])))))
-
-(defconst dirvish-tramp-preview-cmd
-  "head -n 1000 %s 2>/dev/null || ls -Alh --group-directories-first %s 2>/dev/null")
-(defvar dirvish-tramp-hosts '())
-
-(defun dirvish-ls-output-parser (entry output)
-  "Parse ls OUTPUT for ENTRY and store it in `dirvish--attrs-hash'."
-  (dolist (file (and (> (length output) 2) (cl-subseq output 2 -1)))
-    (cl-destructuring-bind
-        (inode priv lnum user group size mon day time &rest path)
-        (split-string file)
-      (let* ((sym (cl-position "->" path :test #'equal))
-             (f-name (string-join (cl-subseq path 0 sym) " "))
-             (f-mtime (concat mon " " day " " time))
-             (f-truename (and sym (string-join (cl-subseq path (1+ sym)) " ")))
-             (f-dirp (string-prefix-p "d" priv))
-             (f-type (or f-truename f-dirp)))
-        (puthash (intern (secure-hash 'md5 (expand-file-name f-name entry)))
-                 `(:builtin ,(list f-type lnum user group nil
-                                   f-mtime nil size priv nil inode)
-                   :type ,(cons (if f-dirp 'dir 'file) f-truename))
-                 dirvish--attrs-hash)))))
-
-(defun dirvish-noselect-tramp (fn dir flags remote)
-  "Return the Dired buffer at DIR with listing FLAGS.
-Save the REMOTE host to `dirvish-tramp-hosts'.
-FN is the original `dired-noselect' closure."
-  (let* ((saved-flags (cdr (assoc remote dirvish-tramp-hosts #'equal)))
-         (ftp? (tramp-ftp-file-name-p dir))
-         (short-flags "-Alh")
-         (default-directory dir)
-         (dired-buffers nil)
-         (buffer (cond (ftp? (funcall fn dir short-flags))
-                       (saved-flags (funcall fn dir saved-flags))
-                       ((= (process-file "ls" nil nil nil "--version") 0)
-                        (push (cons remote flags) dirvish-tramp-hosts)
-                        (funcall fn dir flags))
-                       (t (push (cons remote short-flags) dirvish-tramp-hosts)
-                          (funcall fn dir short-flags)))))
-    (with-current-buffer buffer
-      (dirvish-prop :tramp (tramp-dissect-file-name dir))
-      buffer)))
-
-(defun dirvish-tramp--async-p (vec)
-  "Return t if tramp connection VEC support async commands."
-  (or (tramp-local-host-p vec) ; localhost
-      ;; the connection support `direct-async-process' and no password needed
-      (and (stringp (tramp-get-connection-property
-                     vec "first-password-request" nil))
-           (tramp-get-method-parameter vec 'tramp-direct-async)
-           (tramp-get-connection-property vec "direct-async-process" nil))))
-
-(defun dirvish-tramp-dir-data-proc-s (proc _exit)
-  "Sentinel for `dirvish-data-for-dir''s process PROC."
-  (unwind-protect
-      (pcase-let* ((`(,dir ,buf ,setup) (process-get proc 'meta))
-                   (str (with-current-buffer (process-buffer proc)
-                          (substring-no-properties (buffer-string))))
-                   (data (split-string str "\n")))
-        (when (buffer-live-p buf)
-          (with-current-buffer buf
-            (dirvish-ls-output-parser dir data)
-            (when setup (run-hooks 'dirvish-setup-hook))
-            (unless (derived-mode-p 'wdired-mode) (dirvish-update-body-h)))))
-    (dirvish--kill-buffer (process-buffer proc))))
-
-(cl-defmethod dirvish-data-for-dir
-  (dir buffer setup &context ((dirvish-prop :remote) string))
-  "DIR BUFFER SETUP DIRVISH-PROP."
-  (when (dirvish-tramp--async-p (dirvish-prop :tramp))
-    (let* ((process-connection-type nil)
-           (buf (dirvish--util-buffer (make-temp-name "dir-data-")))
-           (cmd (format "ls -1lahi %s" (file-local-name dir)))
-           (proc (start-file-process-shell-command (buffer-name buf) buf cmd)))
-      (process-put proc 'meta (list dir buffer setup))
-      (set-process-sentinel proc #'dirvish-tramp-dir-data-proc-s))))
-
-(dirvish-define-preview tramp (file _ dv)
-  "Preview files with `ls' or `head' for tramp files."
-  (let ((vec (dirvish-prop :tramp)))
-    (if (not (dirvish-tramp--async-p vec))
-        '(info . "File preview is not supported in current connection")
-      (let ((process-connection-type nil)
-            (localname (file-remote-p file 'localname))
-            (buf (dirvish--util-buffer 'preview dv nil t)) proc)
-        (when-let ((proc (get-buffer-process buf))) (delete-process proc))
-        (setq proc (start-file-process-shell-command
-                    (buffer-name buf) buf
-                    (format dirvish-tramp-preview-cmd localname localname)))
-        (set-process-sentinel
-         proc (lambda (proc _sig)
-                (when (memq (process-status proc) '(exit signal))
-                  (shell-command-set-point-after-cmd (process-buffer proc)))))
-        (set-process-filter
-         proc (lambda (proc str)
-                (with-current-buffer (process-buffer proc)
-                  (fundamental-mode)
-                  (insert str))))
-        `(buffer . ,buf)))))
 
 (defun dirvish-find-file-true-path ()
   "Open truename of (maybe) symlink file under the cursor."
@@ -278,9 +176,10 @@ If MULTI-LINE, make every path occupy a new line."
 
 (defun dirvish-copy-remote-path (&optional multi-line)
   "Copy remote path of marked files.
-If MULTI-LINE, make every path occupy a new line."
+If MULTI-LINE, every file takes a whole line."
   (interactive "P")
-  (let* ((tramp (or (dirvish-prop :tramp) (user-error "Not a remote folder")))
+  (let* ((tramp (or (dirvish-prop :tramp)
+                    (user-error "Not a remote folder")))
          (files (cl-loop for file in (dired-get-marked-files)
                          for user = (tramp-file-name-user tramp)
                          for host = (tramp-file-name-host tramp)
@@ -321,15 +220,15 @@ A session with layout means it has a companion preview window and
 possibly one or more parent windows."
   (interactive)
   (let* ((dv (or (dirvish-curr) (user-error "Not a dirvish buffer")))
-         (old-layout (car (dv-layout dv)))
-         (new-layout (unless old-layout (cdr (dv-layout dv))))
+         (old-layout (dv-curr-layout dv))
+         (new-layout (unless old-layout (dv-ff-layout dv)))
          (buf (current-buffer)))
     (if old-layout (set-window-configuration (dv-winconf dv))
       (with-selected-window (dv-root-window dv) (quit-window)))
-    (setcar (dv-layout dv) new-layout)
+    (setf (dv-curr-layout dv) new-layout)
     (with-selected-window (dirvish--create-root-window dv)
-      (switch-to-buffer buf)
-      (dirvish--init-session dv))))
+      (dirvish-save-dedication (switch-to-buffer buf))
+      (dirvish--build-layout dv))))
 
 ;;;###autoload
 (defun dirvish-layout-switch (&optional recipe)
@@ -340,10 +239,10 @@ current layout defined in `dirvish-layout-recipes'."
   (cl-loop
    with dv = (let ((dv (dirvish-curr)))
                (unless dv (user-error "Not in a Dirvish session"))
-               (unless (car (dv-layout dv))
+               (unless (dv-curr-layout dv)
                  (dirvish-layout-toggle)
                  (user-error "Dirvish: entering fullscreen")) dv)
-   with old-recipe = (car (dv-layout dv))
+   with old-recipe = (dv-curr-layout dv)
    with recipes = (if recipe (list recipe) dirvish-layout-recipes)
    with l-length = (length recipes)
    for idx from 1
@@ -352,8 +251,9 @@ current layout defined in `dirvish-layout-recipes'."
    return
    (let* ((new-idx (if (> idx (1- l-length)) 0 idx))
           (new-recipe (nth new-idx recipes)))
-     (setf (dv-layout dv) (cons new-recipe new-recipe))
-     (dirvish--init-session dv))))
+     (setf (dv-curr-layout dv) new-recipe)
+     (setf (dv-ff-layout dv) new-recipe)
+     (dirvish--build-layout dv))))
 
 (defun dirvish-rename-space-to-underscore ()
   "Rename marked files by replacing space to underscore."

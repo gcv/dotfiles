@@ -1,8 +1,7 @@
 ;;; dirvish-ls.el --- Setup ls command switches on the fly -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2022 Alex Lu
+;; Copyright (C) 2021-2025 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -159,7 +158,7 @@ invoke the sort function, SWITCHES is the the sort flags for
     ""
     "toggles"
     ("r" "Reverse order while sorting" "--reverse")
-    ("d" "List directories ontop" "--group-directories-first")
+    ("d" "List directories on top" "--group-directories-first")
     ("~" "Hide backups files (eg. foo~)" "--ignore-backups")
     ("A" "Show the author" "--author")
     ("C" "Show security context" "--context")

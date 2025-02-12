@@ -1,8 +1,7 @@
 ;;; dirvish-emerge.el --- Pin files you are interested in at top -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2022 Alex Lu
+;; Copyright (C) 2021-2025 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -51,7 +50,7 @@ in the buffer are separated and rearranged by the following groups:
 4. files whose extension is \"tex\" or \"bib\"
 5. other files
 
-Althought you can set this variable globally, a more appropriate
+Although you can set this variable globally, a more appropriate
 way would be set it directory locally.  In that case, it is
 recommended to compose and save this variable to .dir-locals.el
 by the help of `dirvish-emerge-menu'."
@@ -108,7 +107,7 @@ turned on in the buffer."
 
 (cl-defmethod transient-infix-set ((obj dirvish-emerge-group) _value)
   "Set value for OBJ."
-  (if-let ((sel (oref obj selected)))
+  (if-let* ((sel (oref obj selected)))
       (dirvish-emerge-read-recipe (oref obj recipe) obj)
     (oset obj selected t)))
 
@@ -117,7 +116,7 @@ turned on in the buffer."
 
 (defmacro dirvish-emerge-define-predicate (name docstring &rest body)
   "Define a group predicate NAME with BODY.
-DOCSTRING is the documention of the predicate.
+DOCSTRING is the documentation of the predicate.
 The predicate takes the following arguments:
 
 - `local-name': output from (file-name-nondirectory FILE)
@@ -435,8 +434,8 @@ PREDS are locally composed predicates."
         (max-idx (length preds))
         (dir (file-local-name (dired-current-directory))))
     (while (< (point) end)
-      (when-let ((f-beg (dired-move-to-filename))
-                 (f-end (dired-move-to-end-of-filename)))
+      (when-let* ((f-beg (dired-move-to-filename))
+                  (f-end (dired-move-to-end-of-filename)))
         (let* ((l-beg (line-beginning-position))
                (l-end (1+ (line-end-position)))
                (local (buffer-substring-no-properties f-beg f-end))
@@ -458,7 +457,7 @@ PREDS are locally composed predicates."
                  (< (hash-table-count dirvish--attrs-hash)
                     dirvish-emerge-max-file-count)))
     (dirvish-emerge--readin-groups)
-    (when-let ((preds (dirvish-prop :emerge-preds)))
+    (when-let* ((preds (dirvish-prop :emerge-preds)))
       (dirvish-emerge--apply-1 preds))))
 
 ;;;; Interactive commands

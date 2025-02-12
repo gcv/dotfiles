@@ -1,8 +1,7 @@
 ;;; dirvish-subtree.el --- Turn Dirvish into a tree browser -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2022 Alex Lu
+;; Copyright (C) 2021-2025 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -20,6 +19,7 @@
 (declare-function consult-imenu "consult-imenu")
 (declare-function consult-line "consult")
 (require 'dirvish)
+(require 'dired-x)
 
 (defcustom dirvish-subtree-listing-switches nil
   "Listing SWITCHES used in subtrees.
@@ -27,7 +27,6 @@ The value may be a string of options or nil which means the
 working switches of current buffer will be used."
   :type '(choice symbol string) :group 'dirvish)
 
-(define-obsolete-variable-alias 'dirvish-subtree-line-prefix 'dirvish-subtree-prefix "Sep 1, 2022")
 (defcustom dirvish-subtree-prefix " │"
   "A string put into each nested subtree.
 The prefix is repeated \"depth\" times."
@@ -140,7 +139,7 @@ Ensure correct DIR when inside of a subtree."
   (if dirvish-subtree--overlays
       (save-excursion
         (and (dirvish-subtree-expand-to file)
-	     (let (buffer-read-only)
+             (let (buffer-read-only)
                (delete-region (line-beginning-position)
                               (line-beginning-position 2)))))
     (funcall fn file)))
@@ -183,7 +182,9 @@ creation even the entry is in nested subtree nodes."
 
 (defun dirvish-subtree--readin (dir)
   "Readin DIR as a subtree node."
-  (let ((flags (or dirvish-subtree-listing-switches dired-actual-switches)) str)
+  (let ((flags (or dirvish-subtree-listing-switches dired-actual-switches))
+        (omit-p (bound-and-true-p dired-omit-mode))
+        str)
     (with-temp-buffer
       (cl-letf (((symbol-function 'dired-insert-set-properties) #'ignore))
         (save-excursion
@@ -192,7 +193,18 @@ creation even the entry is in nested subtree nodes."
           (delete-region (point) (line-beginning-position 2)))
         (setq str (buffer-string))
         (if (or (= (length str) 0) (string-prefix-p "//DIRED-OPTIONS//" str)) ""
-          (substring (buffer-string) 0 -1))))))
+          (let ((str (substring (buffer-string) 0 -1)))
+            (if omit-p
+                (string-join
+                 (seq-remove
+                  (lambda (s)
+                    (string-match-p
+                     (dired-omit-regexp)
+                     (substring s (next-single-property-change
+                                   0 'dired-filename s))))
+                  (split-string str "\n"))
+                             "\n")
+              str)))))))
 
 (defun dirvish-subtree--insert ()
   "Insert subtree under this directory."
@@ -285,8 +297,8 @@ See `dirvish-subtree-file-viewer' for details"
   "Go to line describing TARGET and expand its parent directories."
   (interactive
    (list (directory-file-name (expand-file-name
-	                       (read-file-name "Expand to file: "
-			                       (dired-current-directory))))))
+                               (read-file-name "Expand to file: "
+                                               (dired-current-directory))))))
   (let ((file (dired-get-filename nil t)) (dir (dired-current-directory)))
     (cond ((equal file target) target)
           ((and file (string-prefix-p file target))
@@ -314,7 +326,7 @@ See `dirvish-subtree-file-viewer' for details"
 (defun dirvish-subtree-up ()
   "Jump to beginning of current subtree."
   (interactive)
-  (when-let ((ov (dirvish-subtree--parent)))
+  (when-let* ((ov (dirvish-subtree--parent)))
     (goto-char (overlay-start ov))
     (dired-previous-line 1)))
 
@@ -375,7 +387,7 @@ See `dirvish-subtree-file-viewer' for details"
 
 (defun dirvish-subtree-toggle-or-open (ev)
   "Toggle the subtree if in a dirline, otherwise open the file.
-This command takes a mouse event EV as its argment."
+This command takes a mouse event EV as its argument."
   (interactive "e")
   (let ((win (posn-window (event-end ev)))
         (pos (posn-point (event-end ev))))
@@ -383,9 +395,10 @@ This command takes a mouse event EV as its argment."
     (select-window win)
     (with-current-buffer (window-buffer win)
       (goto-char pos)
-      (condition-case nil
-          (dirvish-subtree-toggle)
-        (error (dirvish-find-entry-a (dired-get-file-for-visit)))))
+      (when-let* ((entry (dired-get-filename nil t)))
+        (if (file-directory-p entry)
+            (dirvish-subtree-toggle)
+          (dirvish-find-entry-a entry))))
     (when (window-live-p win) (select-window win))))
 
 ;;;###autoload (autoload 'dirvish-subtree-menu "dirvish-subtree" nil t)

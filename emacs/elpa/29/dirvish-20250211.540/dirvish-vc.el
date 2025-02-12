@@ -1,8 +1,7 @@
 ;;; dirvish-vc.el --- Version-control integration for Dirvish -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2022 Alex Lu
+;; Copyright (C) 2021-2025 Alex Lu
 ;; Author : Alex Lu <https://github.com/alexluigit>
-;; Version: 2.0.53
 ;; Keywords: files, convenience
 ;; Homepage: https://github.com/alexluigit/dirvish
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -20,24 +19,31 @@
 (defclass dirvish-vc-preview (transient-switches) ()
   "Class for dirvish vc-* preview dispatchers.")
 
+(defcustom dirvish-vc-state-fringe 3
+  "The width of the fringe used to display the vc state indicator.
+It is recommended to make this value greater than
+`dirvish-window-fringe', which ensures that the `vc-state' attribute is
+displayed properly."
+  :group 'dirvish :type 'integer)
+
 (defcustom dirvish-vc-state-face-alist
   '((up-to-date       . nil)
-    (edited           . vc-edited-state)
-    (added            . vc-locally-added-state)
-    (removed          . vc-removed-state)
-    (missing          . vc-missing-state)
+    (edited           . dirvish-vc-edited-state)
+    (added            . dirvish-vc-added-state)
+    (removed          . dirvish-vc-removed-state)
+    (missing          . dirvish-vc-missing-state)
     (needs-merge      . dirvish-vc-needs-merge-face)
-    (conflict         . vc-conflict-state)
-    (unlocked-changes . vc-locked-state)
-    (needs-update     . vc-needs-update-state)
-    (ignored          . dired-ignored)
+    (conflict         . dirvish-vc-conflict-state)
+    (unlocked-changes . dirvish-vc-locked-state)
+    (needs-update     . dirvish-vc-needs-update-state)
+    (ignored          . nil)
     (unregistered     . dirvish-vc-unregistered-face))
   "Alist of (VC-STATE . FACE).
-This value is consumed by `vc-state' attribute in Dirvish.  FACE
-is the face used for that VC-STATE.  See `vc-state' in (in
-vc-hooks.el) for detail explanation of these states."
+This value is consumed by `vc-state' attribute in Dirvish.  FACE is the
+face used for that VC-STATE.  See `vc-state' in (in vc-hooks.el) for
+detail explanation of these states."
   :group 'dirvish
-  :type '(alist :key-type symbol :value-type '(symbol :tag "Face")))
+  :type '(alist :key-type symbol :value-type (symbol :tag "Face")))
 
 (defface dirvish-vc-needs-merge-face
   '((((background dark)) (:background "#500f29"))
@@ -55,6 +61,41 @@ vc-hooks.el) for detail explanation of these states."
   "Face for commit message overlays."
   :group 'dirvish)
 
+(defface dirvish-vc-edited-state
+  '((t :inherit vc-edited-state))
+  "Face used for `edited' vc state in the Dirvish buffer."
+  :group 'dirvish)
+
+(defface dirvish-vc-added-state
+  '((t :inherit vc-locally-added-state))
+  "Face used for `added' vc state in the Dirvish buffer."
+  :group 'dirvish)
+
+(defface dirvish-vc-removed-state
+  '((t :inherit vc-removed-state))
+  "Face used for `removed' vc state in the Dirvish buffer."
+  :group 'dirvish)
+
+(defface dirvish-vc-missing-state
+  '((t :inherit vc-missing-state))
+  "Face used for `missing' vc state in the Dirvish buffer."
+  :group 'dirvish)
+
+(defface dirvish-vc-conflict-state
+  '((t :inherit vc-conflict-state))
+  "Face used for `conflict' vc state in the Dirvish buffer."
+  :group 'dirvish)
+
+(defface dirvish-vc-locked-state
+  '((t :inherit vc-locked-state))
+  "Face used for `locked' vc state in the Dirvish buffer."
+  :group 'dirvish)
+
+(defface dirvish-vc-needs-update-state
+  '((t :inherit vc-needs-update-state))
+  "Face used for `needs-update' vc state in the Dirvish buffer."
+  :group 'dirvish)
+
 (defvar vc-dir-process-buffer)
 
 (cl-defmethod transient-infix-set ((obj dirvish-vc-preview) value)
@@ -62,8 +103,8 @@ vc-hooks.el) for detail explanation of these states."
   (oset obj value value)
   (let* ((dv (dirvish-curr))
          (buf (current-buffer))
-         (old-layout (car (dv-layout dv)))
-         (new-layout (unless old-layout (cdr (dv-layout dv))))
+         (old-layout (dv-curr-layout dv))
+         (new-layout (unless old-layout (dv-ff-layout dv)))
          (new-dps (seq-difference
                    dirvish-preview-dispatchers '(vc-diff vc-log vc-blame))))
     (when value (push (intern (format "%s" value)) new-dps))
@@ -73,9 +114,9 @@ vc-hooks.el) for detail explanation of these states."
         (dirvish--preview-update dv (dirvish-prop :index))
       (quit-window nil (dv-root-window dv))
       (delete-window transient--window)
-      (setcar (dv-layout dv) new-layout)
+      (setf (dv-curr-layout dv) new-layout)
       (switch-to-buffer buf)
-      (dirvish--init-session dv))))
+      (dirvish--build-layout dv))))
 
 (transient-define-infix dirvish-vc-preview-ifx ()
   :description "Preview style"
@@ -85,16 +126,19 @@ vc-hooks.el) for detail explanation of these states."
   :choices '("log" "diff" "blame"))
 
 (dirvish-define-attribute vc-state
-  "The version control state at left fringe."
-  :when (and (dirvish-prop :vc-backend)
-             (or (set-window-fringes nil 5 1) t))
-  (let* ((state (dirvish-attribute-cache f-name :vc-state))
-         (face (alist-get state dirvish-vc-state-face-alist))
-         (display (and face `(left-fringe dirvish-vc-gutter . ,(cons face nil))))
-         (gutter-str (and display (propertize "!" 'display display))) ov)
-    (when gutter-str
-      (prog1 `(ov . ,(setq ov (make-overlay f-beg f-beg)))
-        (overlay-put ov 'before-string gutter-str)))))
+  "The version control state at left fringe.
+This attribute only works on graphic displays."
+  ;; Avoid setting fringes constantly
+  (unless (= (car (window-fringes)) dirvish-vc-state-fringe)
+    (set-window-fringes nil dirvish-vc-state-fringe dirvish-window-fringe))
+  (let ((ov (make-overlay l-beg l-beg)))
+    (when-let* (((dirvish-prop :vc-backend))
+                (state (dirvish-attribute-cache f-name :vc-state))
+                (face (alist-get state dirvish-vc-state-face-alist))
+                (display `(left-fringe dirvish-vc-gutter . ,(cons face nil))))
+      (overlay-put ; TODO: very slow when the directory doesn't have any commit
+       ov 'before-string (propertize " " 'display display)))
+    `(ov . ,ov)))
 
 (dirvish-define-attribute git-msg
   "Append git commit message to filename."
