@@ -4,9 +4,9 @@
 #+language: en
 #+options: ':t toc:nil author:t email:t num:t
 #+startup: content
-#+macro: stable-version 0.1.0
-#+macro: release-date 2024-09-10
-#+macro: development-version 0.2.0-dev
+#+macro: stable-version 0.2.0
+#+macro: release-date 2025-01-25
+#+macro: development-version 0.3.0-dev
 #+export_file_name: show-font.texi
 #+texinfo_filename: show-font.info
 #+texinfo_dir_category: Emacs misc features
@@ -35,7 +35,8 @@ Current development target is {{{development-version}}}.
 + Official manual: <https://protesilaos.com/emacs/show-font>
 + Change log: <https://protesilaos.com/emacs/show-font-changelog>
 + Git repository: <https://github.com/protesilaos/show-font>
-+ Backronym: Show How Outlines Will Feature Only in Non-TTY.
++ Sample pictures: <https://protesilaos.com/codelog/2024-09-10-emacs-show-font-0-1-0/>
++ Backronym: Should Highlight Only With the Family Of the Named Typeface.
 
 If you are viewing the README.org version of this file, please note that
 the GNU ELPA machinery automatically generates an Info manual out of it.
@@ -52,13 +53,21 @@ Emacs. This can be done in the following ways:
 
 #+findex: show-font-select-preview
 - The command ~show-font-select-preview~ uses the minibuffer to
-  completion with completion for a font on the system. The selected
+  prompt with completion for a font on the system. The selected
   font is then displayed in a bespoke buffer.
 
 #+findex: show-font-list
 - The command ~show-font-list~ produces a list with all the fonts
-  available on the system each font on display is styled with its
-  given character set.
+  available on the system. Each font on display is styled with its
+  given character set. With an optional prefix argument (=C-u= by
+  default), it prompt for a string or regular expression to limit the
+  list of fonts to only the matching ones.
+
+#+findex: show-font-tabulated
+- The command ~show-font-tabulated~ is almost the same as
+  ~show-font-list~ except it uses the built-in Emacs framework of a
+  tabulated view. Concretely, users can sort by column and may prefer
+  the slightly more compact listing.
 
 #+findex: show-font-mode
 - The ~show-font-mode~ is a major mode that gets activated when the
@@ -66,6 +75,11 @@ Emacs. This can be done in the following ways:
   if it is installed on the system, else it will provide a helpful
   message and an option to install the font (NOTE 2024-09-10: this
   only works on Linux).
+
+#+vindex: show-font-display-buffer-action-alist
+Where the buffer which previews the font is displayed is controlled by
+the user option ~show-font-display-buffer-action-alist~. The default
+value is to show the buffer at the bottom of the frame.
 
 #+vindex: show-font-pangram
 The previews include a pangram, which is controlled by the user option
@@ -176,6 +190,7 @@ Everything is in place to set up the package.
 
 (define-key global-map (kbd "C-c s f") #'show-font-select-preview)
 (define-key global-map (kbd "C-c s l") #'show-font-list)
+(define-key global-map (kbd "C-c s t") #'show-font-tabulated)
 #+end_src
 
 * Acknowledgements
@@ -200,7 +215,7 @@ matters.
 :CUSTOM_ID: h:0a1de49d-1448-4cc0-b911-863ac1ebdd58
 :END:
 
-Copyright (C) 2023  Free Software Foundation, Inc.
+Copyright (C) 2024-2025  Free Software Foundation, Inc.
 
 #+begin_quote
 Permission is granted to copy, distribute and/or modify this document

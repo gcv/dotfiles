@@ -1,11 +1,11 @@
 ;;; show-font.el --- Show font features in a buffer -*- lexical-binding: t -*-
 
-;; Copyright (C) 2024  Free Software Foundation, Inc.
+;; Copyright (C) 2024-2025  Free Software Foundation, Inc.
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
 ;; Maintainer: Protesilaos Stavrou <info@protesilaos.com>
 ;; URL: https://github.com/protesilaos/show-font
-;; Version: 0.1.1
+;; Version: 0.2.1
 ;; Package-Requires: ((emacs "28.1"))
 ;; Keywords: convenience, writing, font
 
@@ -63,7 +63,7 @@ experimenting with `show-font-pangram-p'."
           ,@(mapcar
              (lambda (element)
                (list 'const :tag (cdr element) (car element)))
-               show-font-pangrams)
+             show-font-pangrams)
           (string :tag "A custom pangram"))
   :group 'show-font)
 
@@ -83,6 +83,35 @@ x×X .,·°;:¡!¿?`'‘’   ÄAÃÀ TODO
   :package-version '(show-font . "0.1.0")
   :type 'string
   :group 'show-font)
+
+(defcustom show-font-display-buffer-action-alist
+  '((display-buffer-at-bottom)
+    (dedicated . t)
+    (preserve-size . (t . t)))
+  "The `display-buffer' action alist for displaying a font list.
+This is the same data that is passed to `display-buffer-alist'.
+Read Info node `(elisp) Displaying Buffers'.  As such, it is
+meant for experienced users.
+
+Example of a valid value:
+
+    \\='((display-buffer-in-side-window)
+      (side . bottom)
+      (window-height . 0.2)
+      (preserve-size . (t . t)))
+
+The value may also be a function, which returns a `display-buffer'
+action alist."
+  :group 'show-font
+  :package-version '(show-font . "0.2.0")
+  :type `(choice
+          (alist :key-type
+                 (choice :tag "Condition"
+                         regexp
+                         (function :tag "Matcher function"))
+                 :value-type ,display-buffer--action-custom-type)
+          (function :tag "Custom function to return an action alist"))
+  :risky t)
 
 ;;;; Faces
 
@@ -163,19 +192,19 @@ return nil."
 Determine how to render the font file contents in a buffer."
   (cond
    ((eq operation 'insert-file-contents)
-    (when-let ((filename (car args))
-               (visit (cadr args)))
-         (setq buffer-file-name filename)
-         (list buffer-file-name (point-max)))
-     (show-font--add-text))
-    ;; Handle any operation we do not know about.  This is copied from
-    ;; the example shown in (info "(elisp) Magic File Names").
-    (t (let ((inhibit-file-name-handlers
-              (cons #'show-font-handler
-                    (and (eq inhibit-file-name-operation operation)
-                         inhibit-file-name-handlers)))
-             (inhibit-file-name-operation operation))
-         (apply operation args)))))
+    (when-let* ((filename (car args))
+                (visit (cadr args)))
+      (setq buffer-file-name filename)
+      (list buffer-file-name (point-max)))
+    (show-font--add-text))
+   ;; Handle any operation we do not know about.  This is copied from
+   ;; the example shown in (info "(elisp) Magic File Names").
+   (t (let ((inhibit-file-name-handlers
+             (cons #'show-font-handler
+                   (and (eq inhibit-file-name-operation operation)
+                        inhibit-file-name-handlers)))
+            (inhibit-file-name-operation operation))
+        (apply operation args)))))
 
 (defun show-font--get-attribute-from-file (attribute &optional file)
   "Get font family ATTRIBUTE from the current file or given FILE.
@@ -184,32 +213,34 @@ matched against the output of the `fc-scan' executable."
   ;; TODO 2024-09-06: Make this work with other font backends.
   (unless (executable-find "fc-scan")
     (error "Cannot find `fc-scan' executable; will not render font"))
-  (when-let ((f (or file buffer-file-name))
-             (_ (string-match-p "\\.\\(ttf\\|otf\\)\\'" f))
-             (output (shell-command-to-string (format "fc-scan -f \"%%{%s}\" %s"
-                                                      (shell-quote-argument attribute)
-                                                      (shell-quote-argument f)))))
+  (when-let* ((f (or file buffer-file-name))
+              (_ (string-match-p "\\.\\(ttf\\|otf\\)\\'" f))
+              (output (shell-command-to-string (format "fc-scan -f \"%%{%s}\" %s"
+                                                       (shell-quote-argument attribute)
+                                                       (shell-quote-argument f)))))
     (if (string-match-p "," output)
         (car (split-string output ","))
       output)))
 
-(defun show-font--get-installed-font-families (&optional full)
+(defun show-font-get-installed-font-families (&optional regexp)
   "Return list of installed font families names.
-With optional FULL, return the full XLFD representation instead."
-  (sort
-   (delete-dups
-    (mapcar
-     (lambda (font)
-       (if full
-           (aref font 6)
-         (format "%s" (aref font 0))))
-     (x-family-fonts)))
-   #'string-lessp))
+With optional REGEXP filter the list to only include fonts whose name
+matches the given regular expression."
+  (let ((fonts (delete-dups
+                (mapcar
+                 (lambda (font)
+                   (format "%s" (aref font 0)))
+                 (x-family-fonts)))))
+    (when regexp
+      (setq fonts (seq-filter (lambda (family) (string-match-p regexp family)) fonts)))
+    (sort fonts #'string-lessp)))
 
-(defun show-font-installed-p (family)
+(defun show-font-installed-p (family &optional regexp)
   "Return non-nil if font family FAMILY is installed on the system.
-FAMILY is a string like those of `show-font--get-installed-font-families'."
-  (member family (show-font--get-installed-font-families)))
+FAMILY is a string like those of `show-font-get-installed-font-families'.
+With optional REGEXP filter the list to only include fonts whose name
+matches the given regular expression."
+  (member family (show-font-get-installed-font-families regexp)))
 
 (defun show-font--get-installed-font-files ()
   "Get list of font files available on the system."
@@ -222,34 +253,12 @@ FAMILY is a string like those of `show-font--get-installed-font-families'."
   "Return non-nil if FILE is among `show-font--get-installed-font-files'."
   (member file (show-font--get-installed-font-files)))
 
-;; TODO 2024-09-06: Maybe we can rewrite `show-font--get-pangram' in some smart way to do this:
-;;
-;; `(cond
-;;   ((stringp show-font-pangram)
-;;    show-font-pangram)
-;;   ,@(mapcar
-;;      (lambda (element)
-;;        (list `(eq show-font-pangram ',(car element)) (cdr element)))
-;;      show-font-pangrams)
-;;   (t
-;;    "No string or acceptable symbol value for `show-font-pangram', but this will do...")))
-;;
-;; Can it be done without all the magic of `pcase' and friends?
 (defun show-font--get-pangram ()
   "Return `show-font-pangram' or fallback string."
   (cond
-   ((stringp show-font-pangram)
-    show-font-pangram)
-   ((eq show-font-pangram 'fox)
-    "The quick brown fox jumps over the lazy dog")
-   ((eq show-font-pangram 'wizards)
-    "Grumpy wizards make toxic brew for the evil queen and jack")
-   ((eq show-font-pangram 'gunboats)
-    "A quick movement of the enemy will jeopardize six gunboats")
-   ((eq show-font-pangram 'prot)
-    "Prot may find zesty owls join quiet vixens as the night beckons")
-   (t
-    "No string or acceptable symbol value for `show-font-pangram', but this will do...")))
+   ((stringp show-font-pangram) show-font-pangram)
+   ((alist-get show-font-pangram show-font-pangrams))
+   (t "No string or acceptable symbol value for `show-font-pangram', but this will do...")))
 
 (defun show-font--install-get-destination ()
   "Return directory where fonts can be copied locally."
@@ -267,8 +276,8 @@ FAMILY is a string like those of `show-font--get-installed-font-families'."
 
 (defun show-font--install (file)
   "Install the font FILE."
-  (when-let ((destination (show-font--install-get-destination))
-             (_ (show-font--install-confirmation destination)))
+  (when-let* ((destination (show-font--install-get-destination))
+              (_ (show-font--install-confirmation destination)))
     (copy-file file destination 1) ; ask for confirmation to overwrite
     (message "Copied `%s' to `%s'; now updating the font cache" file destination)
     ;; TODO 2024-09-06: How to do the same on all operating systems?
@@ -352,12 +361,12 @@ instead of that of the file."
 With optional BUFFER, operate therein.  Otherwise, do it in the current
 buffer."
   (with-silent-modifications
-   (with-current-buffer (or buffer (current-buffer))
-     (let ((inhibit-read-only t))
-       (save-excursion
-         (if-let ((text (show-font--prepare-text)))
-             (insert text)
-           (show-font--insert-button)))))))
+    (with-current-buffer (or buffer (current-buffer))
+      (let ((inhibit-read-only t))
+        (save-excursion
+          (if-let* ((text (show-font--prepare-text)))
+              (insert text)
+            (show-font--insert-button)))))))
 
 (defmacro show-font-with-preview-buffer (name &rest body)
   "Evaluate BODY inside NAME buffer."
@@ -368,19 +377,20 @@ buffer."
          (erase-buffer)
          ,@body)
        (show-font-mode))
-     (display-buffer buffer)))
+     (display-buffer buffer show-font-display-buffer-action-alist)))
 
 ;;;; Preview an installed font
 
 (defvar show-font-select-preview-history nil
   "Minibuffer history for `show-font-select-preview'.")
 
-(defun show-font--select-preview-prompt ()
-  "Prompt for a font among `show-font--get-installed-font-families'."
+(defun show-font--select-preview-prompt (&optional regexp)
+  "Prompt for a font among `show-font-get-installed-font-families'.
+Optional REGEXP has the same meaning as in the aforementioned function."
   (let ((def (car show-font-select-preview-history)))
     (completing-read
      (format-prompt "Select font to preview" def)
-     (show-font--get-installed-font-families))))
+     (show-font-get-installed-font-families regexp))))
 
 ;;;###autoload
 (defun show-font-select-preview (family)
@@ -401,31 +411,91 @@ FAMILY is a string that satisfies `show-font-installed-p'."
 
 ;;;; Preview fonts in a list
 
+(defvar show-font-regexp-history nil
+  "Minibuffer history for `show-font-regexp-prompt'.")
+
+(defun show-font-regexp-prompt ()
+  "Prompt for a string or regular expression."
+  (let ((default (car show-font-regexp-history)))
+    (read-string
+     (format-prompt "Fonts matching REGEXP" default)
+     nil 'show-font-regexp-history default)))
+
 ;;;###autoload
-(defun show-font-list ()
-  "Produce a list of installed fonts with their preview.
-The preview text is that of `show-font-pangram'."
-  (declare (interactive-only t))
-  (interactive)
+(defun show-font-list (&optional regexp)
+  "Produce a list of installed fonts with `show-font-pangram' preview text.
+With optional REGEXP as a prefix argument, prompt for a string or
+regular expression to list only fonts matching the given input.
+Otherwise, list all installed fonts."
+  (interactive
+   (list
+    (when current-prefix-arg
+      (show-font-regexp-prompt))))
   ;; FIXME 2024-09-06: Here we should only list fonts that can display
   ;; the pangram OR, better, we should have something appropriate to
   ;; show for them (e.g. emoji for the Emoji font).
-  (show-font-with-preview-buffer "*show-font preview of all installed fonts*"
+  (show-font-with-preview-buffer (if regexp
+                                     (format-message "*show-font preview matching `%s'*" regexp)
+                                   "*show-font preview of all installed fonts*")
     (save-excursion
-      (let* ((counter 0)
+      (let* ((counter 1)
              (counter-string (lambda () (concat (number-to-string counter)  ". "))))
-        (dolist (family (show-font--get-installed-font-families))
-           (insert (concat
-                    (propertize (funcall counter-string) 'face 'show-font-misc)
-                    (propertize family 'face (list 'show-font-title-small :family family))
-                    "\n"
-                    (make-string (length (funcall counter-string)) ?\s)
-                    (propertize (show-font--get-pangram) 'face (list 'show-font-regular :family family))))
-           (insert "\n\n")
-           (setq counter (+ counter 1)))))
+        (dolist (family (show-font-get-installed-font-families regexp))
+          (insert (concat
+                   (propertize (funcall counter-string) 'face 'show-font-misc)
+                   (propertize family 'face (list 'show-font-title-small :family family))
+                   "\n"
+                   (make-string (length (funcall counter-string)) ?\s)
+                   (propertize (show-font--get-pangram) 'face (list 'show-font-regular :family family))))
+          (insert "\n\n")
+          (setq counter (+ counter 1)))))
     (setq-local revert-buffer-function
                 (lambda (_ignore-auto _noconfirm)
                   (show-font-list)))))
+
+(defun show-font--list-families (&optional regexp)
+  "Return a list of propertized family strings for `show-font-list'.
+Optional REGEXP has the meaning documented in the function
+`show-font-get-installed-font-families'."
+  (mapcar
+   (lambda (family)
+     (list
+      family
+      (vector
+       (propertize family 'face (list 'show-font-title-small :family family))
+       (propertize (show-font--get-pangram) 'face (list 'show-font-regular :family family)))))
+   (show-font-get-installed-font-families regexp)))
+
+(defvar show-font-tabulated-current-regexp nil
+  "Regexp for `show-font-get-installed-font-families'.
+Only `let' bind this while calling `show-font-tabulated-mode'.")
+
+(define-derived-mode show-font-tabulated-mode tabulated-list-mode "Show fonts"
+  "Major mode to display a Modus themes palette."
+  :interactive nil
+  (setq-local tabulated-list-format
+              [("Font family" 60 t)
+               ("Sample text" 0 t)])
+  (setq-local tabulated-list-entries
+              (show-font--list-families show-font-tabulated-current-regexp))
+  (tabulated-list-init-header)
+  (tabulated-list-print))
+
+;;;###autoload
+(defun show-font-tabulated (&optional regexp)
+  "Produce a tabulated view of installed fonts with `show-font-pangram' preview.
+With optional REGEXP as a prefix argument, prompt for a string or
+regular expression to list only fonts matching the given input.
+Otherwise, list all installed fonts."
+  (interactive
+   (list
+    (when current-prefix-arg
+      (show-font-regexp-prompt))))
+  (let ((buffer (get-buffer-create "*show-font-list*")))
+    (with-current-buffer buffer
+      (let ((show-font-tabulated-current-regexp regexp))
+        (show-font-tabulated-mode)))
+    (display-buffer buffer show-font-display-buffer-action-alist)))
 
 ;;;; Major mode to preview the font of the current TTF or OTF file
 
