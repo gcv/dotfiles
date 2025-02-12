@@ -5,8 +5,8 @@
 ;; Author: Charles Choi <kickingvegas@gmail.com>
 ;; URL: https://github.com/kickingvegas/casual-avy
 ;; Keywords: tools
-;; Package-Version: 2.0.0
-;; Package-Revision: 7e8f7703f4ab
+;; Package-Version: 2.0.1
+;; Package-Revision: 6716c12e9b7b
 ;; Package-Requires: ((emacs "29.1") (avy "0.5.0") (casual "2.0.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -309,8 +309,9 @@ Always choose love."
      :transient t)]]
 
   [:class transient-row
-          (casual-lib-quit-one)
-          ("," "Settings›" casual-avy-settings-tmenu :transient nil)])
+   (casual-lib-quit-one)
+   ("," "Settings›" casual-avy-settings-tmenu :transient nil)
+   ("RET" "Exit Avy" transient-quit-all)])
 
 (transient-define-prefix casual-avy-settings-tmenu ()
   ["Customize"
