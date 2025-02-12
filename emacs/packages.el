@@ -368,8 +368,10 @@
   (eat-kill-buffer-on-exit t)
 
   :config
-  (delete [?\C-u] eat-semi-char-non-bound-keys)
-  (delete [?\C-g] eat-semi-char-non-bound-keys)
+  (dolist (key '([?\C-u] [?\C-g]
+                 [C-left] [C-right] [C-up] [C-down]
+                 [M-left] [M-right]))
+    (delete key eat-semi-char-non-bound-keys))
   (eat-update-semi-char-mode-map)
   ;; XXX: Workaround awkward need to call eat-reload after changing its keymaps,
   ;; but reloading from :config section causes infinite recursion.
