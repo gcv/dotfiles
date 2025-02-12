@@ -11,11 +11,6 @@
 
 ;;; Generated autoloads from highlight-indent-guides.el
 
-(autoload 'highlight-indent-guides-auto-set-faces "highlight-indent-guides" "\
-Automatically calculate indent guide faces.
-If this feature is enabled, calculate reasonable values for the indent guide
-colors based on the current theme's colorscheme, and set them appropriately.
-This runs whenever a theme is loaded, but it can also be run interactively." t)
 (autoload 'highlight-indent-guides-mode "highlight-indent-guides" "\
 Display indent guides in a buffer.
 
@@ -35,6 +30,13 @@ The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
 (fn &optional ARG)" t)
+(autoload 'highlight-indent-guides-auto-set-faces "highlight-indent-guides" "\
+Automatically calculate indent guide faces.
+If this feature is enabled, calculate reasonable values for the indent guide
+colors based on the current theme's colorscheme, and set them appropriately.
+This runs whenever a theme is loaded, but it can also be run interactively.
+
+(fn &rest _)" t)
 (register-definition-prefixes "highlight-indent-guides" '("highlight-indent-guides-"))
 
 ;;; End of scraped data
