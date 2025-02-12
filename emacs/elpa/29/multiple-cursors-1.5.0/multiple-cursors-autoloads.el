@@ -82,25 +82,68 @@ With zero ARG, skip the last one and mark next.
 
 (fn ARG)" t)
 (autoload 'mc/mark-next-word-like-this "mc-mark-more" "\
-
-
-(fn ARG)" t)
-(autoload 'mc/mark-next-symbol-like-this "mc-mark-more" "\
-
-
-(fn ARG)" t)
-(autoload 'mc/mark-previous-like-this "mc-mark-more" "\
-Find and mark the previous part of the buffer matching the currently active region
+Find and mark the next word of the buffer matching the currently active region
+The matching region must be a whole word to be a match
+If no region is active add a cursor on the next line
 With negative ARG, delete the last one instead.
 With zero ARG, skip the last one and mark next.
 
 (fn ARG)" t)
-(autoload 'mc/mark-previous-word-like-this "mc-mark-more" "\
+(autoload 'mc/mark-next-symbol-like-this "mc-mark-more" "\
+Find and mark the next symbol of the buffer matching the currently active region
+The matching region must be a whole symbol to be a match
+If no region is active add a cursor on the next line
+With negative ARG, delete the last one instead.
+With zero ARG, skip the last one and mark next.
 
+(fn ARG)" t)
+(autoload 'mc/mark-previous-like-this "mc-mark-more" "\
+Find and mark the previous part of the buffer matching the
+currently active region.
+
+If no region is active ,add a cursor on the previous line.
+
+With negative ARG, delete the last one instead.
+
+With zero ARG, skip the last one and mark next.
+
+(fn ARG)" t)
+(autoload 'mc/mark-previous-like-this-word "mc-mark-more" "\
+Find and mark the previous part of the buffer matching the
+currently active region.
+
+If no region is active, mark the word at the point and find the
+previous match.
+
+With negative ARG, delete the last one instead.
+
+With zero ARG, skip the last one and mark previous.
+
+(fn ARG)" t)
+(autoload 'mc/mark-previous-word-like-this "mc-mark-more" "\
+Find and mark the previous part of the buffer matching the
+currently active region.
+
+The matching region must be a whole word to be a match.
+
+If no region is active, add a cursor on the previous line.
+
+With negative ARG, delete the last one instead.
+
+With zero ARG, skip the last one and mark next.
 
 (fn ARG)" t)
 (autoload 'mc/mark-previous-symbol-like-this "mc-mark-more" "\
+Find and mark the previous part of the buffer matching
+the currently active region.
 
+The matching region must be a whole symbol to be a match.
+
+If no region is active add a cursor on the previous line.
+
+With negative ARG, delete the last one instead.
+
+With zero ARG, skip the last one and mark next.
 
 (fn ARG)" t)
 (autoload 'mc/mark-next-lines "mc-mark-more" "\
@@ -116,9 +159,11 @@ Deselect next part of the buffer matching the currently active region." t)
 (autoload 'mc/unmark-previous-like-this "mc-mark-more" "\
 Deselect prev part of the buffer matching the currently active region." t)
 (autoload 'mc/skip-to-next-like-this "mc-mark-more" "\
-Skip the current one and select the next part of the buffer matching the currently active region." t)
+Skip the current one and select the next part of the buffer
+matching the currently active region." t)
 (autoload 'mc/skip-to-previous-like-this "mc-mark-more" "\
-Skip the current one and select the prev part of the buffer matching the currently active region." t)
+Skip the current one and select the prev part of the buffer
+matching the currently active region." t)
 (autoload 'mc/mark-all-like-this "mc-mark-more" "\
 Find and mark all the parts of the buffer matching the currently active region" t)
 (autoload 'mc/mark-all-words-like-this "mc-mark-more" nil t)
@@ -132,23 +177,24 @@ Find and mark all the parts in the region matching the given regexp.
 
 (fn BEG END)" t)
 (autoload 'mc/mark-more-like-this-extended "mc-mark-more" "\
-Like mark-more-like-this, but then lets you adjust with arrows key.
+Like mark-more-like-this, but then lets you adjust with arrow keys.
 The adjustments work like this:
 
-   <up>    Mark previous like this and set direction to 'up
-   <down>  Mark next like this and set direction to 'down
+   <up>    Mark previous like this and set direction to \\='up
+   <down>  Mark next like this and set direction to \\='down
 
-If direction is 'up:
+If direction is \\='up:
 
    <left>  Skip past the cursor furthest up
    <right> Remove the cursor furthest up
 
-If direction is 'down:
+If direction is \\='down:
 
    <left>  Remove the cursor furthest down
    <right> Skip past the cursor furthest down
 
-The bindings for these commands can be changed. See `mc/mark-more-like-this-extended-keymap'." t)
+The bindings for these commands can be changed.
+See `mc/mark-more-like-this-extended-keymap'." t)
 (autoload 'mc/mark-all-like-this-dwim "mc-mark-more" "\
 Tries to guess what you want to mark all of.
 Can be pressed multiple times to increase selection.
@@ -194,7 +240,8 @@ to the popped mark." t)
 ;;; Generated autoloads from mc-separate-operations.el
 
 (autoload 'mc/insert-numbers "mc-separate-operations" "\
-Insert increasing numbers for each cursor, starting at 0 or ARG.
+Insert increasing numbers for each cursor, starting at
+`mc/insert-numbers-default' or ARG.
 
 (fn ARG)" t)
 (autoload 'mc/insert-letters "mc-separate-operations" "\
@@ -206,17 +253,22 @@ Insert increasing letters for each cursor, starting at 0 or ARG.
 (autoload 'mc/sort-regions "mc-separate-operations" nil t)
 (autoload 'mc/vertical-align "mc-separate-operations" "\
 Aligns all cursors vertically with a given CHARACTER to the one with the
-highest colum number (the rightest).
+highest column number (the rightest).
 Might not behave as intended if more than one cursors are on the same line.
 
 (fn CHARACTER)" t)
 (autoload 'mc/vertical-align-with-space "mc-separate-operations" "\
 Aligns all cursors with whitespace like `mc/vertical-align' does" t)
-(register-definition-prefixes "mc-separate-operations" '("mc--"))
+(register-definition-prefixes "mc-separate-operations" '("mc--" "mc/insert-numbers-default"))
 
 
 ;;; Generated autoloads from multiple-cursors-core.el
 
+(autoload 'activate-cursor-for-undo "multiple-cursors-core" "\
+Called when undoing to temporarily activate the fake cursor
+which action is being undone.
+
+(fn ID)")
 (autoload 'multiple-cursors-mode "multiple-cursors-core" "\
 Mode while multiple cursors are active.
 
@@ -235,8 +287,10 @@ evaluate `multiple-cursors-mode'.
 The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
+\\{mc/keymap}
+
 (fn &optional ARG)" t)
-(register-definition-prefixes "multiple-cursors-core" '("activate-cursor-for-undo" "deactivate-cursor-after-undo" "multiple-cursors-mode" "unsupported-cmd"))
+(register-definition-prefixes "multiple-cursors-core" '("deactivate-cursor-after-undo" "mc--" "mc/" "unsupported-cmd"))
 
 
 ;;; Generated autoloads from rectangular-region-mode.el
@@ -244,8 +298,9 @@ it is disabled.
 (autoload 'set-rectangular-region-anchor "rectangular-region-mode" "\
 Anchors the rectangular region at point.
 
-Think of this one as `set-mark' except you're marking a rectangular region. It is
-an exceedingly quick way of adding multiple cursors to multiple lines." t)
+Think of this one as `set-mark' except you're marking a
+rectangular region. It is an exceedingly quick way of adding
+multiple cursors to multiple lines." t)
 (autoload 'rectangular-region-mode "rectangular-region-mode" "\
 A mode for creating a rectangular region to edit
 
