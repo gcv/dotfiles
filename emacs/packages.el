@@ -67,6 +67,21 @@
   :pin "gnu")
 
 
+(use-package casual-avy
+  :bind ("M-g a" . casual-avy-tmenu))
+
+
+(use-package casual
+  :bind ((:map dired-mode-map
+               ("C-c c" . casual-dired-tmenu))
+         (:map Info-mode-map
+               ("C-c c" . casual-info-tmenu))
+         (:map isearch-mode-map
+               ("C-c c" . casual-isearch-tmenu))
+         (:map calc-mode-map
+               ("C-c c" . casual-calc-tmenu))))
+
+
 (use-package cider
   ;; :mode (rx (or ".clj" ".cljs" ".cljc" ".cljx") eol)
 

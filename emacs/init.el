@@ -226,13 +226,10 @@
              quelpa-checkout-melpa-p nil)
        (quelpa-use-package-activate-advice) ; undocumented!
        )
-      ;; vc-use-package must be manually installed
+      ;; vc-use-package must be manually installed on Emacs versions <30
       ((and (>= emacs-major-version 29) (< emacs-major-version 30))
        (unless (package-installed-p 'vc-use-package)
          (package-vc-install "https://github.com/slotThe/vc-use-package"))
-       (require 'vc-use-package))
-      ;; Emacs 30+ have vc-use-package built-in
-      (t
        (require 'vc-use-package)))
 
 
@@ -1269,7 +1266,6 @@ See `eshell-prompt-regexp'."
                       "themes.el"
                       "modeline.el"
                       "ngc.el"
-                      "casual.el"
                       ;;"helm.el"
                       ;;"ivy.el"
                       ;;"selectrum.el"
