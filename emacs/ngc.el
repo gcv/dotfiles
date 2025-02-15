@@ -41,11 +41,13 @@
   :pin melpa
   :after (vertico)
   :commands (consult-notes consult-notes-search-in-all-notes)
+  :init
+  (with-eval-after-load 'vertico-multiform
+    (add-to-list 'vertico-multiform-commands '(consult-notes buffer)))
   :config
   ;; TODO: This does not seem to search recursively.
   (setq consult-notes-file-dir-sources
         '(("Obsidian" ?o "~/w/obsidian/Notes 2/")))
-  (add-to-list 'vertico-multiform-commands '(consult-notes buffer))
   )
 
 
