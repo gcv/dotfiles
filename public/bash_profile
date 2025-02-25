@@ -41,13 +41,6 @@ if command_exists direnv; then
     eval "$(direnv hook bash)"
 fi
 
-# autojump
-if [[ -f /usr/share/autojump/autojump.bash ]]; then
-    . /usr/share/autojump/autojump.bash
-elif [[ -f "${HOME}/.nix-profile/share/autojump/autojump.bash" ]]; then
-    . "${HOME}/.nix-profile/share/autojump/autojump.bash"
-fi
-
 # look for and maybe enable programmable completion features (Debian):
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then

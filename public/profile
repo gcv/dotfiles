@@ -46,17 +46,27 @@ command_exists devbox && eval "$(devbox global shellenv --init-hook)"
 ### environment variables
 
 export DO_NOT_TRACK=1 # https://consoledonottrack.com
-export EDITOR=vi
-export LESS="-M -R"
-export LESSHISTFILE=/dev/null
-if command_exists bat; then
-    export PAGER=bat
-    export MANPAGER="bat -p"
+if command_exists hx; then
+    export EDITOR=hx
+else
+    export EDITOR=vi
+fi
+if command_exists moar; then
+    export PAGER=moar
 elif command_exists less; then
     export PAGER=less
 fi
+export LESS="-M -R"
+export LESSHISTFILE=/dev/null
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
+
+if [ "${UNAME}" = "Darwin" ]; then
+    export XDG_DATA_HOME="${HOME}/.local/share"
+    export XDG_CONFIG_HOME="${HOME}/.config"
+    export XDG_STATE_HOME="${HOME}/.local/state"
+    export XDG_CACHE_HOME="${HOME}/.cache"
+fi
 
 # load private environment variables:
 [[ -f ~/.dotfiles/private/shell-profile-private ]] && . ~/.dotfiles/private/shell-profile-private
