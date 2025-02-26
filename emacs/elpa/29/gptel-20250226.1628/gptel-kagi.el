@@ -39,6 +39,8 @@
   (let* ((data (plist-get response :data))
          (output (plist-get data :output))
          (references (plist-get data :references)))
+    (if (eq references :null) (setq references nil))
+    (if (eq output :null) (setq output nil))
     (when references
       (setq references
             (cl-loop with linker =
@@ -67,7 +69,7 @@
                      into ref-strings
                      finally return
                      (concat "\n\n" (mapconcat #'identity ref-strings "\n")))))
-        (concat output references)))
+    (concat output references)))
 
 ;; TODO: Add model and backend-specific request-params support
 (cl-defmethod gptel--request-data ((_backend gptel-kagi) prompts)
@@ -110,8 +112,8 @@
              ;; If the entire contents of the prompt looks like a url, send the url
              ;; Else send the text of the region
              (setq prompts
-                   (if-let (((prop-match-p prop))
-                            (engine (substring model 10)))
+                   (if-let* (((prop-match-p prop))
+                             (engine (substring model 10)))
                        ;; It's a region of text
                        (list :text prompts)
                      ""))))

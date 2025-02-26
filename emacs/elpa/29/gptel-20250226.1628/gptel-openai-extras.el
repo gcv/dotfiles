@@ -1,8 +1,8 @@
-;;; gptel-privategpt.el ---  Privategpt AI suppport for gptel  -*- lexical-binding: t; -*-
+;;; gptel-openai-extras.el --- Extensions to the OpenAI API -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023  Karthik Chikmagalur
 
-;; Author: Karthik Chikmagalur <karthikchikmagalur@gmail.com>
+;; Authors: Karthik Chikmagalur <karthikchikmagalur@gmail.com> and pirminj
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 
 ;;; Commentary:
 
-;; This file adds support for Privategpt's Messages API to gptel
+;; This file adds support for Privategpt's Messages API and
+;; Perplexity's Citations feature to gptel
 
 ;;; Code:
 (require 'cl-generic)
@@ -57,13 +58,14 @@
                     else collect (format "- %s" file-name) into source-items
                     finally return (mapconcat #'identity (cons "\n\nSources:" source-items) "\n"))))
 
+;; FIXME(tool) add tool use
 (cl-defmethod gptel-curl--parse-stream ((_backend gptel-privategpt) info)
   (let* ((content-strs))
     (condition-case nil
         (while (re-search-forward "^data:" nil t)
           (save-match-data
             (if (looking-at " *\\[DONE\\]")
-                (when-let ((sources-string (plist-get info :sources)))
+                (when-let* ((sources-string (plist-get info :sources)))
                   (push sources-string content-strs))
               (let ((response (gptel--json-read)))
 		(unless (or (plist-get info :sources)
@@ -72,10 +74,11 @@
 		(let* ((delta (map-nested-elt response '(:choices 0 :delta)))
 		       (content (plist-get delta :content)))
 		  (push content content-strs))))))
-    (error
-     (goto-char (match-beginning 0))))
-  (apply #'concat (nreverse content-strs))))
+      (error
+       (goto-char (match-beginning 0))))
+    (apply #'concat (nreverse content-strs))))
 
+;; FIXME(tool) add tool use
 (cl-defmethod gptel--parse-response ((_backend gptel-privategpt) response info)
   (let ((response-string (map-nested-elt response '(:choices 0 :message :content)))
         (sources-string (and (gptel-privategpt-sources (plist-get info :backend))
@@ -89,9 +92,10 @@
 	   :messages [,@prompts]
 	   :use_context ,(or (gptel-privategpt-context gptel-backend) :json-false)
 	   :include_sources ,(or (gptel-privategpt-sources gptel-backend) :json-false)
-           :stream ,(or (and gptel-stream gptel-use-curl
-                         (gptel-backend-stream gptel-backend))
-                     :json-false))))
+           :stream ,(or gptel-stream :json-false))))
+    (when (and gptel--system-message
+               (not (gptel--model-capable-p 'nosystem)))
+      (plist-put prompts-plist :system gptel--system-message))
     (when gptel-temperature
       (plist-put prompts-plist :temperature gptel-temperature))
     (when gptel-max-tokens
@@ -107,8 +111,8 @@
 (cl-defun gptel-make-privategpt
     (name &key curl-args stream key request-params
           (header
-           (lambda () (when-let (key (gptel--get-api-key))
-			`(("Authorization" . ,(concat "Bearer " key))))))
+           (lambda () (when-let* ((key (gptel--get-api-key)))
+		   `(("Authorization" . ,(concat "Bearer " key))))))
           (host "localhost:8001")
           (protocol "http")
 	  (models '(private-gpt))
@@ -167,7 +171,107 @@ for."
     (prog1 backend
       (setf (alist-get name gptel--known-backends
                        nil nil #'equal)
-                  backend))))
+            backend))))
 
-(provide 'gptel-privategpt)
-;;; gptel-backends.el ends here
+
+;;; Perplexity
+(cl-defstruct (gptel-perplexity (:constructor gptel--make-perplexity)
+				(:copier nil)
+				(:include gptel-openai)))
+
+(defsubst gptel--perplexity-parse-citations (citations)
+  (let ((counter 0))
+    (concat "\n\nCitations:\n"
+            (mapconcat (lambda (url)
+                         (setq counter (1+ counter))
+                         (format "[%d] %s" counter url))
+                       citations "\n"))))
+
+(cl-defmethod gptel--parse-response ((_backend gptel-perplexity) response _info)
+  "Parse Perplexity response RESPONSE."
+  (let ((response-string (map-nested-elt response '(:choices 0 :message :content)))
+        (citations-string (when-let* ((citations (map-elt response :citations)))
+			    (gptel--perplexity-parse-citations citations))))
+    (concat response-string citations-string)))
+
+(cl-defmethod gptel-curl--parse-stream ((_backend gptel-perplexity) info)
+  "Parse a Perplexity API data stream with INFO.
+
+If available, collect citations at the end and include them with
+the response."
+  (let ((resp (cl-call-next-method)))
+    (unless (plist-get info :citations)
+      (save-excursion
+        (goto-char (point-max))
+        (when (search-backward (plist-get info :token)
+                               (line-beginning-position) t)
+          (forward-line 0)
+          (when (re-search-backward "^data: " nil t)
+            (goto-char (match-end 0))
+            (ignore-errors
+              (when-let* ((chunk (gptel--json-read))
+                          (citations (map-elt chunk :citations)))
+                (plist-put info :citations t)
+                (setq resp (concat resp (gptel--perplexity-parse-citations
+                                         citations)))))))))
+    resp))
+
+;;;###autoload
+(cl-defun gptel-make-perplexity
+    (name &key curl-args stream key
+          (header 
+           (lambda () (when-let* ((key (gptel--get-api-key)))
+                   `(("Authorization" . ,(concat "Bearer " key))))))
+          (host "api.perplexity.ai")
+          (protocol "https")
+          ;; https://docs.perplexity.ai/guides/model-cards
+          (models '(sonar sonar-pro sonar-reasoning sonar-reasoning-pro sonar-deep-research))
+          (endpoint "/chat/completions")
+          request-params)
+  "Register a Perplexity backend for gptel with NAME.
+
+Keyword arguments:
+
+CURL-ARGS (optional) is a list of additional Curl arguments.
+
+HOST (optional) is the API host, \"api.perplexity.ai\" by default.
+
+MODELS is a list of available model names.
+
+STREAM is a boolean to toggle streaming responses.
+
+PROTOCOL (optional) specifies the protocol, https by default.
+
+ENDPOINT (optional) is the API endpoint for completions.
+
+HEADER (optional) is for additional headers to send with each
+request. It should be an alist or a function that returns an
+alist.
+
+KEY is a variable whose value is the API key, or function that
+returns the key.
+
+REQUEST-PARAMS (optional) is a plist of additional HTTP request
+parameters."
+  (declare (indent 1))
+  (let ((backend (gptel--make-perplexity
+                  :curl-args curl-args
+                  :name name
+                  :host host
+                  :header header
+                  :key key
+                  :models models
+                  :protocol protocol
+                  :endpoint endpoint
+                  :stream stream
+                  :request-params request-params
+                  :url (if protocol
+                           (concat protocol "://" host endpoint)
+                         (concat host endpoint)))))
+    (prog1 backend
+      (setf (alist-get name gptel--known-backends
+                       nil nil #'equal)
+            backend))))
+
+(provide 'gptel-openai-extras)
+;;; gptel-openai-extras.el ends here

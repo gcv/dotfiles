@@ -231,7 +231,7 @@ value of `gptel-org-branching-context', which see."
                     (gptel--parse-buffer gptel-backend max-entries)))))
           (display-warning
              '(gptel org)
-             "Using `gptel-org-branching-context' requires Org version 9.6.7 or higher, it will be ignored.")
+             "Using `gptel-org-branching-context' requires Org version 9.7 or higher, it will be ignored.")
           (gptel--parse-buffer gptel-backend max-entries))
       ;; Create prompt the usual way
       (gptel--parse-buffer gptel-backend max-entries))))
@@ -268,16 +268,16 @@ for inclusion into the user prompt for the gptel request."
             (when (file-readable-p path)
               ;; Collect text up to this image, and
               ;; Collect this image
-              (when-let ((text (string-trim (buffer-substring-no-properties
-                                             from-pt (gptel-org--element-begin link)))))
+              (when-let* ((text (string-trim (buffer-substring-no-properties
+                                              from-pt (gptel-org--element-begin link)))))
                 (unless (string-empty-p text) (push (list :text text) parts)))
               (push (list :media path :mime mime) parts)
               (setq from-pt (point))))
            ((member type '("http" "https" "ftp"))
             ;; Collect text up to this image, and
             ;; Collect this image url
-            (when-let ((text (string-trim (buffer-substring-no-properties
-                                             from-pt (gptel-org--element-begin link)))))
+            (when-let* ((text (string-trim (buffer-substring-no-properties
+                                            from-pt (gptel-org--element-begin link)))))
               (unless (string-empty-p text) (push (list :text text) parts)))
             (push (list :url raw-link :mime mime) parts)
             (setq from-pt (point))))))
@@ -288,13 +288,12 @@ for inclusion into the user prompt for the gptel request."
 (defun gptel-org--link-standalone-p (object)
   "Check if link OBJECT is on a line by itself."
   ;; Specify ancestor TYPES as list (#245)
-  (let ((par (org-element-lineage object '(paragraph))))
+  (when-let* ((par (org-element-lineage object '(paragraph))))
     (and (= (gptel-org--element-begin object)
             (save-excursion
               (goto-char (org-element-property :contents-begin par))
               (skip-chars-forward "\t ")
-              (point)))                 ;account for leading space
-                                        ;before object
+              (point)))                 ;account for leading space before object
          (<= (- (org-element-property :contents-end par)
                 (org-element-property :end object))
              1))))
@@ -355,9 +354,10 @@ ARGS are the original function call arguments."
     (widen)
     (condition-case status
         (progn
-          (when-let ((bounds (org-entry-get (point-min) "GPTEL_BOUNDS")))
+          (when-let* ((bounds (org-entry-get (point-min) "GPTEL_BOUNDS")))
             (mapc (pcase-lambda (`(,beg . ,end))
-                    (put-text-property beg end 'gptel 'response))
+                    (add-text-properties
+                     beg end '(gptel response front-sticky (gptel))))
                   (read bounds)))
           (pcase-let ((`(,system ,backend ,model ,temperature ,tokens ,num)
                        (gptel-org--entry-properties (point-min))))
@@ -433,7 +433,6 @@ non-nil (default), display a message afterwards."
 
 This is a very basic converter that handles only a few markup
 elements."
-  (interactive)
   (with-temp-buffer
     (insert str)
     (goto-char (point-min))
@@ -447,13 +446,16 @@ elements."
              (while (search-forward ticks nil t)
                (unless (or (eq (char-before (match-beginning 0)) ?`)
                            (eq (char-after) ?`))
-                   (gptel--replace-source-marker (length ticks) 'end)
-                   (throw 'block-end nil))))))
+                 (gptel--replace-source-marker (length ticks) 'end)
+                 (throw 'block-end nil))))))
         ;; Handle headings
         ((and (guard (eq (char-before) ?#)) heading)
-         (when (looking-at "[[:space:]]")
+         (cond
+          ((looking-at "[[:space:]]")   ;Handle headings
            (delete-region (line-beginning-position) (point))
-           (insert (make-string (length heading) ?*))))
+           (insert (make-string (length heading) ?*)))
+          ((looking-at "\\+begin_src") ;Overeager LLM switched to using Org src blocks
+           (save-match-data (re-search-forward "^#\\+end_src" nil t)))))
         ;; Handle emphasis
         ("**" (cond
                ;; ((looking-at "\\*\\(?:[[:word:]]\\|\s\\)")
@@ -464,8 +466,9 @@ elements."
         ("*"
          (cond
           ((save-match-data
-             (and (looking-back "\\(?:[[:space:]]\\|\s\\)\\(?:_\\|\\*\\)"
-                                (max (- (point) 2) (point-min)))
+             (and (or (= (point) 2)
+                      (looking-back "\\(?:[[:space:]]\\|\s\\)\\(?:_\\|\\*\\)"
+                                    (max (- (point) 2) (point-min))))
                   (not (looking-at "[[:space:]]\\|\s"))))
            ;; Possible beginning of emphasis
            (and
@@ -479,7 +482,8 @@ elements."
             (progn (delete-char -1) (insert "/"))))
           ((save-excursion
              (ignore-errors (backward-char 2))
-             (looking-at "\\(?:$\\|\\`\\)\n\\*[[:space:]]"))
+             (or (and (bobp) (looking-at "\\*[[:space:]]"))
+                 (looking-at "\\(?:$\\|\\`\\)\n\\*[[:space:]]")))
            ;; Bullet point, replace with hyphen
            (delete-char -1) (insert "-"))))))
     (buffer-string)))
@@ -500,26 +504,32 @@ This is intended for use in the markdown to org stream converter."
         (insert (if end "#+end_src" "#+begin_src "))
       (insert "="))))
 
-(defun gptel--stream-convert-markdown->org ()
+(defun gptel--stream-convert-markdown->org (start-marker)
   "Return a Markdown to Org converter.
 
 This function parses a stream of Markdown text to Org
 continuously when it is called with successive chunks of the
-text stream."
+text stream.
+
+START-MARKER is used to identify the corresponding process when
+cleaning up after."
   (letrec ((in-src-block nil)           ;explicit nil to address BUG #183
-           (temp-buf (generate-new-buffer-name "*gptel-temp*"))
+           (in-org-src-block nil)
+           (temp-buf (generate-new-buffer " *gptel-temp*" t))
            (start-pt (make-marker))
-           (ticks-total 0)
+           (ticks-total 0)      ;MAYBE should we let-bind case-fold-search here?
            (cleanup-fn
-            (lambda (&rest _)
-              (when (buffer-live-p (get-buffer temp-buf))
-                (set-marker start-pt nil)
-                (kill-buffer temp-buf))
-              (remove-hook 'gptel-post-response-functions cleanup-fn))))
+            (lambda (beg _)
+              (when (and (equal beg (marker-position start-marker))
+                         (eq (current-buffer) (marker-buffer start-marker)))
+                (when (buffer-live-p (get-buffer temp-buf))
+                  (set-marker start-pt nil)
+                  (kill-buffer temp-buf))
+                (remove-hook 'gptel-post-response-functions cleanup-fn)))))
     (add-hook 'gptel-post-response-functions cleanup-fn)
     (lambda (str)
       (let ((noop-p) (ticks 0))
-        (with-current-buffer (get-buffer-create temp-buf)
+        (with-current-buffer (get-buffer temp-buf)
           (save-excursion (goto-char (point-max)) (insert str))
           (when (marker-position start-pt) (goto-char start-pt))
           (when in-src-block (setq ticks ticks-total))
@@ -556,15 +566,28 @@ text stream."
                     ;; Negative number of ticks or in a src block already,
                     ;; reset ticks
                     (t (setq ticks ticks-total)))))
-                ;; Handle other chars: heading, emphasis, bold and bullet items
-                ((and (guard (and (not in-src-block) (eq (char-before) ?#))) heading)
-                 (if (eobp)
-                     ;; Not enough information about the heading yet
-                     (progn (setq noop-p t) (set-marker start-pt (match-beginning 0)))
-                   ;; Convert markdown heading to Org heading
-                   (when (looking-at "[[:space:]]")
+                ;; Handle headings and misguided #+begin_src text
+                ((and (guard (and (eq (char-before) ?#) (or (not in-src-block) in-org-src-block)))
+                      heading)
+                 (if in-org-src-block
+                     ;; If we are inside an Org-style src block, look for #+end_src
+                     (cond
+                      ((< (- (point-max) (point)) 8) ;not enough information to close Org src block
+                       (setq noop-p t) (set-marker start-pt (match-beginning 0)))
+                      ((looking-at "\\+end_src") ;Close Org src block
+                       (setq in-src-block nil in-org-src-block nil)))
+                   ;; Otherwise check for Markdown headings, or for #+begin_src
+                   (cond
+                    ((eobp)       ; Not enough information about the heading yet
+                     (setq noop-p t) (set-marker start-pt (match-beginning 0)))
+                    ((looking-at "[[:space:]]") ; Convert markdown heading to Org heading
                      (delete-region (line-beginning-position) (point))
-                     (insert (make-string (length heading) ?*)))))
+                     (insert (make-string (length heading) ?*)))
+                    ((< (- (point-max) (point)) 11) ;Not enough information to check if Org src block
+                     (setq noop-p t) (set-marker start-pt (match-beginning 0)))
+                    ((looking-at "\\+begin_src ") ;Overeager LLM switched to using Org src blocks
+                     (setq in-src-block t in-org-src-block t)))))
+                ;; Handle other chars: emphasis, bold and bullet items
                 ((and "**" (guard (not in-src-block)))
                  (cond
                   ;; TODO Not sure why this branch was needed
@@ -582,16 +605,18 @@ text stream."
                    (save-match-data
                      (save-excursion
                        (ignore-errors (backward-char 2))
-                       (cond
-                        ((or (looking-at
+                       (cond      ; At bob, underscore/asterisk followed by word
+                        ((or (and (bobp) (looking-at "\\(?:_\\|\\*\\)\\([^[:space:][:punct:]]\\|$\\)"))
+                             (looking-at ; word followed by underscore/asterisk
                               "[^[:space:][:punct:]\n]\\(?:_\\|\\*\\)\\(?:[[:space:][:punct:]]\\|$\\)")
-                             (looking-at
+                             (looking-at ; underscore/asterisk followed by word
                               "\\(?:[[:space:][:punct:]]\\)\\(?:_\\|\\*\\)\\([^[:space:][:punct:]]\\|$\\)"))
                          ;; Emphasis, replace with slashes
-                         (forward-char 2) (delete-char -1) (insert "/"))
-                        ((looking-at "\\(?:$\\|\\`\\)\n\\*[[:space:]]")
+                         (forward-char (if (bobp) 1 2)) (delete-char -1) (insert "/"))
+                        ((or (and (bobp) (looking-at "\\*[[:space:]]"))
+                             (looking-at "\\(?:$\\|\\`\\)\n\\*[[:space:]]"))
                          ;; Bullet point, replace with hyphen
-                         (forward-char 2) (delete-char -1) (insert "-"))))))))))
+                         (forward-char (if (bobp) 1 2)) (delete-char -1) (insert "-"))))))))))
           (if noop-p
               (buffer-substring (point) start-pt)
             (prog1 (buffer-substring (point) (point-max))
