@@ -1,11 +1,11 @@
 ;;; crux.el --- A Collection of Ridiculously Useful eXtensions -*- lexical-binding: t -*-
 ;;
-;; Copyright © 2015-2024 Bozhidar Batsov
+;; Copyright © 2015-2025 Bozhidar Batsov
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/bbatsov/crux
-;; Package-Version: 20250211.1142
-;; Package-Revision: 519c2907c312
+;; Package-Version: 20250212.2017
+;; Package-Revision: c83c54d3d746
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -736,8 +736,10 @@ Doesn't mess with special buffers."
 (defun crux-find-current-directory-dir-locals-file (find-2)
   "Edit the `.dir-locals.el' file for the current buffer in another window.
 If prefix arg FIND-2 is set then edit the `.dir-locals-2.el' file instead
-of `.dir-locals.el'. Scans parent directories if the file does not exist in
-the default directory of the current buffer. If not found, create a new,
+of `.dir-locals.el'.
+
+Scans parent directories if the file does not exist in
+the default directory of the current buffer.  If not found, create a new,
 empty buffer in the current buffer's default directory, or if there is no
 such directory, in the user's home directory."
   (interactive "P")
