@@ -21,8 +21,8 @@
 ;; SOFTWARE.
 
 ;; Author: Andrea Cardaci <cyrus.and@gmail.com>
-;; Package-Version: 20250212.1249
-;; Package-Revision: 950ff02112a1
+;; Package-Version: 20250214.1251
+;; Package-Revision: 36f9db90941b
 ;; URL: https://github.com/cyrus-and/zoom
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: frames
@@ -61,6 +61,13 @@ above."
                        (choice (integer :tag "Lines")
                                (float :tag "Height ratio"))))
   :safe #'consp
+  :group 'zoom)
+
+(defcustom zoom-use-total-window-size t
+  "If nil the window body only is used to compute the sizes.
+
+Otherwise also consider, margins, fringes, header line, etc."
+  :type 'boolean
   :group 'zoom)
 
 (defcustom zoom-ignored-major-modes nil
@@ -187,9 +194,10 @@ Argument IGNORED is ignored."
       ;; zoom the previously selected window if a mouse tracking is in progress
       ;; of if the minibuffer is selected (according to the user preference)
       (with-selected-window
-          (if (or (equal (selected-window) zoom--last-window)
-                  (and zoom-minibuffer-preserve-layout (window-minibuffer-p))
-                  (default-value 'track-mouse))
+          (if (and (window-valid-p zoom--last-window) ; might be deleted
+                   (or (equal (selected-window) zoom--last-window)
+                       (and zoom-minibuffer-preserve-layout (window-minibuffer-p))
+                       (default-value 'track-mouse)))
               zoom--last-window
             ;; XXX this can't be simply omitted because it's needed to address
             ;; the case where a window changes buffer from/to a ignored buffer
@@ -268,7 +276,7 @@ resized horizontally or vertically."
          ;; use the total size (including fringes, scroll bars, etc.) for ratios
          ;; and the body size for absolute values
          (window-size
-          (if (floatp size-hint)
+          (if zoom-use-total-window-size
               (if horizontal (window-total-width) (window-total-height))
             (if horizontal (window-body-width) (window-body-height))))
          ;; either use an absolute value or a ratio
