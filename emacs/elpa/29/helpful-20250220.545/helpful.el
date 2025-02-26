@@ -5,8 +5,8 @@
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
 ;; Keywords: help, lisp
-;; Package-Version: 20250131.1645
-;; Package-Revision: 34328c639ed7
+;; Package-Version: 20250220.545
+;; Package-Revision: 5ad8a9ce57b6
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -607,7 +607,9 @@ overrides that to include previously opened buffers."
   (let* ((sym (button-get button 'symbol))
          (buf (button-get button 'buffer))
          (sym-value (helpful--sym-value sym buf))
-         (set-func (symbol-name helpful-set-variable-function))
+         (set-func (if (local-variable-p sym buf)
+                       "setq"
+                     (symbol-name helpful-set-variable-function)))
          ;; Inspired by `counsel-read-setq-expression'.
          (expr
           (minibuffer-with-setup-hook
