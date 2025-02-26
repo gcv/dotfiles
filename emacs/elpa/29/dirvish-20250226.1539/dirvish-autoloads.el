@@ -39,16 +39,16 @@ it is disabled.
 
 (fn &optional ARG)" t)
 (autoload 'dirvish "dirvish" "\
-Start a full frame Dirvish session with optional PATH.
-If called with \\[universal-arguments], prompt for PATH,
-otherwise it defaults to `default-directory'.
+Open PATH in a fullframe Dirvish session.
+Prompt for PATH if called with \\[universal-arguments], otherwise PATH
+defaults to `default-directory'.
 
 (fn &optional PATH)" t)
 (autoload 'dirvish-dwim "dirvish" "\
-Start a fullframe session only when `one-window-p'.
-If called with \\[universal-arguments], prompt for PATH,
-otherwise it defaults to `default-directory'.
-If `one-window-p' returns nil, open PATH using regular Dired.
+Open PATH in a fullframe session if selected window is the only window.
+Prompt for PATH if called with \\[universal-arguments], otherwise PATH
+defaults to `default-directory'.  If there are other windows exist in the
+selected frame, the session occupies only the selected window.
 
 (fn &optional PATH)" t)
 (register-definition-prefixes "dirvish" '("dirvish-"))
@@ -56,7 +56,7 @@ If `one-window-p' returns nil, open PATH using regular Dired.
 
 ;;; Generated autoloads from dirvish-collapse.el
 
-(register-definition-prefixes "dirvish-collapse" '("dirvish-collapse--cache"))
+(register-definition-prefixes "dirvish-collapse" '("dirvish-collapse-"))
 
 
 ;;; Generated autoloads from dirvish-emerge.el
@@ -102,10 +102,6 @@ Echo total file size of FILESET.
 FILESET defaults to `dired-get-marked-files'.
 
 (fn &optional FILESET)" t)
-(autoload 'dirvish-layout-toggle "dirvish-extras" "\
-Toggle layout of current Dirvish session.
-A session with layout means it has a companion preview window and
-possibly one or more parent windows." t)
 (autoload 'dirvish-layout-switch "dirvish-extras" "\
 Switch Dirvish layout according to RECIPE.
 If RECIPE is not provided, switch to the recipe next to the
@@ -115,7 +111,9 @@ current layout defined in `dirvish-layout-recipes'.
  (autoload 'dirvish-file-info-menu "dirvish-extras" nil t)
  (autoload 'dirvish-chxxx-menu "dirvish-extras" nil t)
  (autoload 'dirvish-mark-menu "dirvish-extras" nil t)
+ (autoload 'dirvish-renaming-menu "dirvish-extras" nil t)
  (autoload 'dirvish-dired-cheatsheet "dirvish-extras" nil t)
+ (autoload 'dirvish-dispatch "dirvish-extras" nil t)
 (register-definition-prefixes "dirvish-extras" '("dirvish-"))
 
 
@@ -124,8 +122,10 @@ current layout defined in `dirvish-layout-recipes'.
  (autoload 'dirvish-fd-switches-menu "dirvish-fd" nil t)
 (autoload 'dirvish-fd-jump "dirvish-fd" "\
 Browse directories using `fd' command.
-This command takes a while to index all the directories the first
-time you run it.  After the indexing, it fires up instantly.
+This command takes a while to index all the directories the first time
+you run it.  After the indexing, it fires up instantly except for those
+huge directories such as root.  It is recommended to setup your
+.fdignore properly before using this command.
 
 If called with \\`C-u' or if CURRENT-DIR-P holds the value 4,
 search for directories in the current directory.  Otherwise,

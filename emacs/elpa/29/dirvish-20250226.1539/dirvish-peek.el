@@ -61,26 +61,33 @@ one of categories in `dirvish-peek-categories'."
                   minibuffer-completion-predicate)))
          (category (completion-metadata-get meta 'category))
          (p-category (and (memq category dirvish-peek-categories) category))
-         new-dv)
+         (dv (dirvish--get-session 'curr-layout 'any))
+         (win (and dv (dv-preview-window dv))) new-dv)
     (dirvish-prop :peek-category p-category)
     (when p-category
       (dirvish-peek--prepare-cand-fetcher)
       (add-hook 'post-command-hook #'dirvish-peek-update-h 90 t)
       (add-hook 'minibuffer-exit-hook #'dirvish-peek-exit-h nil t)
-      (unless (and dirvish--this (dv-preview-window dirvish--this))
-        (setq new-dv (dirvish--new :type 'peek))
-        ;; `dirvish-image-dp' needs this.
-        (setf (dv-index new-dv) (cons default-directory (current-buffer)))
-        (setf (dv-preview-window new-dv)
-              (or (minibuffer-selected-window) (next-window)))))))
+      (setq new-dv (dirvish--new :type 'peek))
+      ;; `dirvish-image-dp' needs this.
+      (setf (dv-index new-dv) (cons default-directory (current-buffer)))
+      (setf (dv-preview-window new-dv)
+            (or (and (window-live-p win) win)
+                (minibuffer-selected-window) (next-window)))
+      (cl-loop for (k v) on dirvish-scopes by 'cddr
+               do (dirvish-prop k (and (functionp v) (funcall v))))
+      (dirvish-prop :dv (dv-id new-dv))
+      (dirvish-prop :preview-dps
+        (if (file-remote-p default-directory) '(dirvish-tramp-dp)
+          (dv-preview-dispatchers new-dv))))))
 
 (defun dirvish-peek-update-h ()
   "Hook for `post-command-hook' to update peek window."
   (when-let* ((category (dirvish-prop :peek-category))
               (cand-fetcher (dirvish-prop :peek-fetcher))
               (cand (funcall cand-fetcher))
-              ((not (string= cand (dirvish-prop :index)))))
-    (dirvish-prop :index cand)
+              ((not (string= cand (dirvish-prop :peek-last)))))
+    (dirvish-prop :peek-last cand)
     (pcase category
       ('file (setq cand (expand-file-name cand)))
       ('project-file
@@ -89,17 +96,18 @@ one of categories in `dirvish-peek-categories'."
                             (car (minibuffer-history-value))))))
       ('library (setq cand (file-truename
                             (or (ignore-errors (find-library-name cand)) "")))))
+    (dirvish-prop :index cand)
     (unless (file-remote-p cand)
       (dirvish-debounce nil
-        (dirvish--preview-update dirvish--this cand)))))
+        (dirvish--preview-update (dirvish-curr) cand)))))
 
 (defun dirvish-peek-exit-h ()
   "Hook for `minibuffer-exit-hook' to destroy peek session."
   (dolist (dv (hash-table-values dirvish--session-hash))
     (when (eq (dv-type dv) 'peek)
       (dirvish--clear-session dv)
-      (remhash (dv-name dv) dirvish--session-hash)))
-  (dirvish-prop :index nil))
+      (remhash (dv-id dv) dirvish--session-hash)))
+  (dirvish-prop :peek-last nil))
 
 ;;;###autoload
 (define-minor-mode dirvish-peek-mode

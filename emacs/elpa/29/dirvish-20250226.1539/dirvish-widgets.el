@@ -15,12 +15,25 @@
 ;; `file-size', `file-time'
 ;;
 ;; Mode-line segments:
+;;
 ;; `path', `symlink', `omit', `sort', `index', `free-space', `file-link-number',
 ;; `file-user', `file-group', `file-time', `file-size', `file-modes',
 ;; `file-inode-number', `file-device-number'
 ;;
-;; Preview dispatchers (all enabled by default):
-;; `image', `gif', `video', `epub', `archive', `pdf'
+;; Preview dispatchers:
+;;
+;; - `image':       preview image files, requires `imagemagick'
+;; - `gif':         preview GIF image files with animation
+;; - `video':       preview videos files with thumbnail image
+;;                    - requires `ffmpegthumbnailer' on Linux/macOS
+;;                    - requires `mtn' on Windows (special thanks to @samb233!)
+;; - `audio':       preview audio files with metadata, requires `mediainfo'
+;; - `epub':        preview epub documents, requires `epub-thumbnail'
+;; - `pdf':         preview pdf documents via `pdf-tools'
+;; - `archive':     preview archive files, requires `tar' and `unzip'
+;; - `dired':       preview directories using `dired' (asynchronously)
+;; - `pdf-preface': preview pdf documents with thumbnail image, require `pdftoppm'
+;; - `image-dired'  NOT implemented yet | TODO
 
 ;;; Code:
 
@@ -38,6 +51,56 @@ The value is a list with 3 elements:
 - icon for root directory [/]
 - icon for path separators [/]"
   :group 'dirvish :type '(repeat (string :tag "path separator")))
+
+(defcustom dirvish-magick-program "magick"
+  "Absolute or reletive name of the `magick' program.
+This is used to generate image thumbnails."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-ffmpegthumbnailer-program "ffmpegthumbnailer"
+  "Absolute or reletive name of the `ffmpegthumbnailer' program.
+This is used to generate video thumbnails on macOS/Linux."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-mtn-program "mtn"
+  "Absolute or reletive name of the `mtn' program.
+This is used to generate video thumbnails on Windows."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-epub-thumbnailer-program "epub-thumbnailer"
+  "Absolute or reletive name of the `epub-thumbnailer' program.
+This is used to generate thumbnail for epub files."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-mediainfo-program "mediainfo"
+  "Absolute or reletive name of the `mediainfo' program.
+This is used to retrieve metadata for multiple types of media files."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-pdfinfo-program "pdfinfo"
+  "Absolute or reletive name of the `pdfinfo' program.
+This is used to retrieve pdf metadata."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-pdftoppm-program "pdftoppm"
+  "Absolute or reletive name of the `pdftoppm' program.
+This is used to generate thumbnails for pdf files."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-zipinfo-program "zipinfo"
+  "Absolute or reletive name of the `zipinfo' program.
+This is used to list files and their attributes for .zip archives."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-tar-program "tar"
+  "Absolute or reletive name of the `tar' program.
+This is used to list files and their attributes for .tar, .gz etc. archives."
+  :group 'dirvish :type 'string)
+
+(defcustom dirvish-show-media-properties
+  (and (executable-find dirvish-mediainfo-program) t)
+  "Show media properties automatically in preview window."
+  :group 'dirvish :type 'boolean)
 
 (defvar dirvish-media--cache-pool '())
 (defvar dirvish-media--auto-cache-timer nil)
@@ -59,13 +122,6 @@ variable is nil, the auto caching is disabled."
            (setq dirvish-media--auto-cache-timer
                  (run-with-timer 0 0.25 #'dirvish-media--autocache)))))
 
-(defcustom dirvish-show-media-properties
-  (and (executable-find "mediainfo") (executable-find "pdfinfo") t)
-  "Show media properties automatically in preview window."
-  :group 'dirvish :type 'boolean)
-
-(defconst dirvish-media--embedded-video-thumb
-  (string-match "prefer embedded image" (shell-command-to-string "ffmpegthumbnailer -h")))
 (defconst dirvish-media--img-max-width 2400)
 (defconst dirvish-media--img-scale-h 0.75)
 (defconst dirvish-media--img-scale-w 0.92)
@@ -187,14 +243,16 @@ Audio;(Audio-codec . \"\"%CodecID%\"\")(Audio-bitrate . \"\"%BitRate/String%\"\"
                        dirvish-time-format-string
                        (file-attribute-modification-time attrs))))))
 
-(defun dirvish--format-file-attr (attr-name)
-  "Return a string of cursor file's attribute ATTR-NAME."
-  (when-let* ((name (dirvish-prop :index))
-              (attrs (dirvish-attribute-cache name :builtin))
-              (attr-getter (intern (format "file-attribute-%s" attr-name)))
-              (attr-face (intern (format "dirvish-file-%s" attr-name)))
-              (attr-val (and attrs (funcall attr-getter attrs))))
-    (propertize (format "%s" attr-val) 'face attr-face)))
+(defun dirvish--format-file-attr (name &optional suffix)
+  "Return a (ATTR . FACE) cons of index's attribute NAME.
+Use optional SUFFIX or NAME to intern the face symbol."
+  (when-let* ((fname (dirvish-prop :index))
+              (attrs (dirvish-attribute-cache fname :builtin))
+              (attr-getter (intern (format "file-attribute-%s" name)))
+              (a-face (intern (format "dirvish-file-%s" (or suffix name))))
+              (face (if (dirvish--selected-p) a-face 'dirvish-inactive))
+              (attr (and attrs (funcall attr-getter attrs))))
+    (cons attr face)))
 
 (defun dirvish-media--cache-path (file &optional base ext no-mkdir)
   "Get FILE's cache path.
@@ -210,7 +268,7 @@ A new directory is created unless NO-MKDIR."
 
 (defun dirvish-media--cache-sentinel (proc _exitcode)
   "Sentinel for image cache process PROC."
-  (when-let* ((dv (or (dirvish-curr) dirvish--this))
+  (when-let* ((dv (dirvish-curr))
               (path (dirvish-prop :index)))
     (and (equal path (process-get proc 'path))
          (dirvish-debounce nil (dirvish--preview-update dv path)))))
@@ -246,14 +304,15 @@ GROUP-TITLES is a list of group titles."
 (defun dirvish-media--metadata-from-mediainfo (file)
   "Return result string from command `mediainfo' for FILE."
   (read (format "(%s)" (shell-command-to-string
-                        (format "mediainfo --Output='%s' %s"
+                        (format "%s --Output='%s' %s"
+                                dirvish-mediainfo-program
                                 dirvish-media--info
                                 (shell-quote-argument file))))))
 
 (defun dirvish-media--metadata-from-pdfinfo (file)
   "Return result string from command `pdfinfo' for FILE."
   (cl-loop with out = (shell-command-to-string
-                       (format "pdfinfo %s" (shell-quote-argument file)))
+                       (format "%s %s" dirvish-pdfinfo-program (shell-quote-argument file)))
            with lines = (remove "" (split-string out "\n"))
            for line in lines
            for (title content) = (split-string line ":\s+")
@@ -306,7 +365,7 @@ GROUP-TITLES is a list of group titles."
   "Path of file under the cursor."
   (let* ((directory-abbrev-alist nil) ; TODO: support custom `directory-abbrev-alist'
          (index (dired-current-directory))
-         (face (if (dirvish--selected-p) 'dired-header 'shadow))
+         (face (if (dirvish--selected-p) 'dired-header 'dirvish-inactive))
          (rmt (dirvish-prop :remote))
          (abvname (if rmt (file-local-name index) (abbreviate-file-name index)))
          (host (propertize (if rmt (concat " " (substring rmt 1)) "")
@@ -331,6 +390,7 @@ GROUP-TITLES is a list of group titles."
 (dirvish-define-mode-line sort
   "Current sort criteria."
   (let* ((switches (split-string dired-actual-switches))
+         (unfocused (unless (dirvish--selected-p) 'dirvish-inactive))
          (crit (cond (dired-sort-inhibit "DISABLED")
                      ((member "--sort=none" switches) "none")
                      ((member "--sort=time" switches) "time")
@@ -345,9 +405,9 @@ GROUP-TITLES is a list of group titles."
                      (t "mtime")))
          (rev (if (member "--reverse" switches) "↓" "↑")))
     (format " %s %s|%s "
-            (propertize rev 'face 'font-lock-constant-face)
-            (propertize crit 'face 'font-lock-type-face)
-            (propertize time 'face 'font-lock-doc-face))))
+            (propertize rev 'face (or unfocused 'font-lock-constant-face))
+            (propertize crit 'face (or unfocused 'font-lock-type-face))
+            (propertize time 'face (or unfocused 'font-lock-doc-face)))))
 
 (dirvish-define-mode-line omit
   "A `dired-omit-mode' indicator."
@@ -358,15 +418,19 @@ GROUP-TITLES is a list of group titles."
   "Show the truename of symlink file under the cursor."
   (when-let* ((name (dirvish-prop :index))
               (truename (cdr (dirvish-attribute-cache name :type))))
-    (format " %s %s "
-            (propertize "→" 'face 'font-lock-comment-delimiter-face)
+    (format "%s %s"
+            (propertize "→ " 'face 'font-lock-comment-delimiter-face)
             (propertize truename 'face 'dired-symlink))))
 
 (dirvish-define-mode-line index
   "Current file's index and total files count."
-  (let ((cur-pos (- (line-number-at-pos (point)) 1))
-        (fin-pos (number-to-string (- (line-number-at-pos (point-max)) 2))))
-    (format " %d / %s " cur-pos (propertize fin-pos 'face 'bold))))
+  (let ((cur-pos (format "%3d " (- (line-number-at-pos (point)) 1)))
+        (fin-pos (format "/%3d " (- (line-number-at-pos (point-max)) 2))))
+    (if (dirvish--selected-p)
+        (put-text-property 0 (length fin-pos) 'face 'bold fin-pos)
+      (put-text-property 0 (length cur-pos) 'face 'dirvish-inactive cur-pos)
+      (put-text-property 0 (length fin-pos) 'face 'dirvish-inactive fin-pos))
+    (format "%s%s" cur-pos fin-pos)))
 
 (dirvish-define-mode-line free-space
   "Amount of free space on `default-directory''s file system."
@@ -378,33 +442,28 @@ GROUP-TITLES is a list of group titles."
 
 (dirvish-define-mode-line file-link-number
   "Number of links to file."
-  (dirvish--format-file-attr 'link-number))
+  (pcase-let ((`(,lk . ,face) (dirvish--format-file-attr 'link-number)))
+    (propertize (format "%s" lk) 'face face)))
 
 (dirvish-define-mode-line file-user
   "User name of file."
-  (when-let* ((name (dirvish-prop :index))
-              (attrs (dirvish-attribute-cache name :builtin))
-              (uid (and attrs (file-attribute-user-id attrs)))
-              (uname (if (dirvish-prop :remote) uid (user-login-name uid))))
-    (propertize uname 'face 'dirvish-file-user-id)))
+  (pcase-let ((`(,uid . ,face) (dirvish--format-file-attr 'user-id)))
+    (unless (dirvish-prop :remote) (setq uid (user-login-name uid)))
+    (propertize (format "%s" uid) 'face face)))
 
 (dirvish-define-mode-line file-group
   "Group name of file."
-  (when-let* ((name (dirvish-prop :index))
-              (attrs (dirvish-attribute-cache name :builtin))
-              (gid (file-attribute-group-id attrs))
-              (gname (if (dirvish-prop :remote) gid (group-name gid))))
-    (propertize gname 'face 'dirvish-file-group-id)))
+  (pcase-let ((`(,gid . ,face) (dirvish--format-file-attr 'group-id)))
+    (unless (dirvish-prop :remote) (setq gid (group-name gid)))
+    (propertize (format "%s" gid) 'face face)))
 
 (dirvish-define-mode-line file-time
   "Last modification time of file."
-  (when-let* ((name (dirvish-prop :index))
-              (attrs (dirvish-attribute-cache name :builtin))
-              (f-mtime (file-attribute-modification-time attrs))
-              (time-string
-               (if (dirvish-prop :remote) f-mtime
-                 (format-time-string dirvish-time-format-string f-mtime))))
-    (format "%s" (propertize time-string 'face 'dirvish-file-time))))
+  (pcase-let ((`(,time . ,face)
+               (dirvish--format-file-attr 'modification-time 'time)))
+    (unless (dirvish-prop :remote)
+      (setq time (format-time-string dirvish-time-format-string time)))
+    (propertize (format "%s" time) 'face face)))
 
 (dirvish-define-mode-line file-size
   "File size of files or file count of directories."
@@ -415,15 +474,29 @@ GROUP-TITLES is a list of group titles."
 
 (dirvish-define-mode-line file-modes
   "File modes, as a string of ten letters or dashes as in ls -l."
-  (dirvish--format-file-attr 'modes))
+  (pcase-let ((`(,modes . ,face) (dirvish--format-file-attr 'modes)))
+    (propertize (format "%s" modes) 'face face)))
 
 (dirvish-define-mode-line file-inode-number
   "File's inode number, as a nonnegative integer."
-  (dirvish--format-file-attr 'inode-number))
+  (pcase-let ((`(,attr . ,face) (dirvish--format-file-attr 'inode-number)))
+    (propertize (format "%s" attr) 'face face)))
 
 (dirvish-define-mode-line file-device-number
   "Filesystem device number, as an integer."
-  (dirvish--format-file-attr 'device-number))
+  (pcase-let ((`(,attr . ,face) (dirvish--format-file-attr 'device-number)))
+    (propertize (format "%s" attr) 'face face)))
+
+(dirvish-define-mode-line project
+  "Return a string showing current project."
+  (let ((project (dirvish--get-project-root))
+        (face (if (dirvish--selected-p) 'dired-header 'dirvish-inactive)))
+    (if project
+        (setq project (file-name-base (directory-file-name project)))
+      (setq project "-"))
+    (format " %s %s"
+            (propertize "Project:" 'face face)
+            (propertize project 'face 'font-lock-string-face))))
 
 ;;;; Preview dispatchers
 
@@ -435,8 +508,7 @@ GROUP-TITLES is a list of group titles."
               (win (dv-preview-window dv))
               ((window-live-p win))
               (width (window-width win))
-              (files (hash-table-keys dirvish--attrs-hash))
-              ((< (length files)
+              ((< (hash-table-count dirvish--attrs-hash)
                   (or (car dirvish-media-auto-cache-threshold) 0))))
     (cl-loop
      with fns = '(dirvish-image-dp dirvish-video-dp dirvish-epub-dp)
@@ -556,23 +628,26 @@ GROUP-TITLES is a list of group titles."
 (dirvish-define-preview audio (file ext)
   "Preview audio files by printing its metadata.
 Require: `mediainfo' (executable)"
-  :require ("mediainfo")
-  (when (member ext dirvish-audio-exts) `(shell . ("mediainfo" ,file))))
+  :require (dirvish-mediainfo-program)
+  (when (member ext dirvish-audio-exts)
+    `(shell . (,dirvish-mediainfo-program ,file))))
 
 (dirvish-define-preview image (file ext preview-window)
   "Preview image files.
-Require: `convert' (executable from `imagemagick' suite)"
-  :require ("convert")
+Require: `magick' (executable from `imagemagick' suite)"
+  :require (dirvish-magick-program)
   (when (member ext dirvish-image-exts)
     (let* ((w (dirvish-media--img-size preview-window))
            (h (dirvish-media--img-size preview-window 'height))
-           (cache (dirvish-media--cache-path file (format "images/%s" w) ".jpg")))
+           (cache (dirvish-media--cache-path
+                   file (format "images/%s" w) ".jpg")))
       (cond ((file-exists-p cache)
              `(img . ,(create-image cache nil nil :max-width w :max-height h)))
             ((and (< (file-attribute-size (file-attributes file)) 250000)
                   (member ext '("jpg" "jpeg" "png" "ico" "icns" "bmp" "svg")))
              `(img . ,(create-image file nil nil :max-width w :max-height h)))
-            (t `(cache . ("convert" ,file "-define" "jpeg:extent=300kb" "-resize"
+            (t `(cache . (,dirvish-magick-program
+                          ,file "-define" "jpeg:extent=300kb" "-resize"
                           ,(number-to-string w) ,cache)))))))
 
 (dirvish-define-preview gif (file ext)
@@ -588,28 +663,42 @@ Require: `convert' (executable from `imagemagick' suite)"
 (dirvish-define-preview video (file ext preview-window)
   "Preview video files.
 Require: `ffmpegthumbnailer' (executable)"
-  :require ("ffmpegthumbnailer")
+  :require (dirvish-ffmpegthumbnailer-program)
   (when (member ext dirvish-video-exts)
     (let* ((width (dirvish-media--img-size preview-window))
            (height (dirvish-media--img-size preview-window 'height))
            (cache (dirvish-media--cache-path file (format "images/%s" width) ".jpg")))
       (if (file-exists-p cache)
           `(img . ,(create-image cache nil nil :max-width width :max-height height))
-        `(cache . ("ffmpegthumbnailer" "-i" ,file "-o" ,cache "-s"
-                         ,(number-to-string width)
-                         ,(if dirvish-media--embedded-video-thumb "-m" "")))))))
+        `(cache . (,dirvish-ffmpegthumbnailer-program "-i" ,file "-o" ,cache "-s"
+                         ,(number-to-string width) "-m"))))))
+
+(dirvish-define-preview video-mtn (file ext preview-window)
+  "Preview video files on MS-Windows.
+Require: `mtn' (executable)"
+  :require (dirvish-mtn-program)
+  (when (member ext dirvish-video-exts)
+    (let* ((width (dirvish-media--img-size preview-window))
+           (height (dirvish-media--img-size preview-window 'height))
+           (cache (dirvish-media--cache-path file (format "images/%s" width) ".jpg"))
+           (path (dirvish--get-parent-path cache)))
+      (if (file-exists-p cache)
+          `(img . ,(create-image cache nil nil :max-width width :max-height height))
+        `(cache . (,dirvish-mtn-program "-P" "-i" "-c" "1" "-r" "1" "-O" ,path ,file "-o"
+                   ,(format ".%s.jpg" ext) "-w"
+                   ,(number-to-string width)))))))
 
 (dirvish-define-preview epub (file preview-window)
   "Preview epub files.
 Require: `epub-thumbnailer' (executable)"
-  :require ("epub-thumbnailer")
+  :require (dirvish-epub-thumbnailer-program)
   (when (equal ext "epub")
     (let* ((width (dirvish-media--img-size preview-window))
            (height (dirvish-media--img-size preview-window 'height))
            (cache (dirvish-media--cache-path file (format "images/%s" width) ".jpg")))
       (if (file-exists-p cache)
           `(img . ,(create-image cache nil nil :max-width width :max-height height))
-        `(cache . ("epub-thumbnailer" ,file ,cache ,(number-to-string width)))))))
+        `(cache . (,dirvish-epub-thumbnailer-program ,file ,cache ,(number-to-string width)))))))
 
 (dirvish-define-preview pdf (file ext)
   "Preview pdf files.
@@ -623,7 +712,7 @@ Require: `pdf-tools' (Emacs package)"
 
 (dirvish-define-preview pdf-preface (file ext preview-window)
   "Display the preface image as preview for pdf files."
-  :require ("pdftoppm")
+  :require (dirvish-pdftoppm-program)
   (when (equal ext "pdf")
     (let* ((width (dirvish-media--img-size preview-window))
            (height (dirvish-media--img-size preview-window 'height))
@@ -631,19 +720,19 @@ Require: `pdf-tools' (Emacs package)"
            (cache-jpg (concat cache ".jpg")))
       (if (file-exists-p cache-jpg)
           `(img . ,(create-image cache-jpg nil nil :max-width width :max-height height))
-        `(cache . ("pdftoppm" "-jpeg" "-f" "1" "-singlefile" ,file ,cache))))))
+        `(cache . (,dirvish-pdftoppm-program "-jpeg" "-f" "1" "-singlefile" ,file ,cache))))))
 
 (dirvish-define-preview archive (file ext)
   "Preview archive files.
 Require: `zipinfo' (executable)
 Require: `tar' (executable)"
-  :require ("zipinfo" "tar")
-  (cond ((equal ext "zip") `(shell . ("zipinfo" ,file)))
+  :require (dirvish-zipinfo-program dirvish-tar-program)
+  (cond ((equal ext "zip") `(shell . (,dirvish-zipinfo-program ,file)))
         ;; Emacs source code files
         ((string-suffix-p ".el.gz" file)
          (dirvish--find-file-temporarily file))
         ((member ext '("tar" "zst" "bz2" "bz" "gz" "xz" "tgz"))
-         `(shell . ("tar" "-tvf" ,file)))))
+         `(shell . (,dirvish-tar-program "-tvf" ,file)))))
 
 (provide 'dirvish-widgets)
 ;;; dirvish-widgets.el ends here

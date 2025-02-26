@@ -28,10 +28,13 @@
 ;; - `dirvish-mark-menu'
 ;; - `dirvish-epa-dired-menu'
 ;; - `dirvish-setup-menu'
+;; - `dirvish-dired-cheatsheet'
+;; - `dirvish-dispatch'
 
 ;;; Code:
 
 (require 'dirvish)
+(require 'transient)
 (declare-function tramp-file-name-user "tramp")
 (declare-function tramp-file-name-host "tramp")
 
@@ -79,10 +82,8 @@ RECIPE has the same form as `dirvish-default-layout'."
                     (remq item old-val))))
     (mapc #'require '(dirvish-widgets dirvish-vc dirvish-collapse))
     (dirvish--render-attrs 'clear)
-    (setq-local dirvish-attributes new-val)
-    (setq-local dirvish--working-attrs
-                (dirvish--attrs-expand
-                 (append '(hl-line symlink-target) new-val)))
+    (dirvish-prop :attrs
+      (dirvish--attrs-expand (append '(hl-line symlink-target) new-val)))
     (dirvish--render-attrs)))
 
 ;;;###autoload (autoload 'dirvish-setup-menu "dirvish-extras" nil t)
@@ -92,9 +93,9 @@ RECIPE has the same form as `dirvish-default-layout'."
     ("c"  collapse      "Collapse unique nested paths"
      (not (dirvish-prop :remote)))
     ("v"  vc-state      "Version control state"
-     (and (display-graphic-p) (dirvish-prop :vc-backend)))
+     (and (display-graphic-p) (symbolp (dirvish-prop :vc-backend))))
     ("m"  git-msg       "Git commit messages"
-     (and (dirvish-prop :vc-backend) (not (dirvish-prop :remote))))
+     (and (symbolp (dirvish-prop :vc-backend)) (not (dirvish-prop :remote))))
     ("1" '(0 nil  0.4)  "     -       | current (60%) | preview (40%)")
     ("2" '(0 nil  0.8)  "     -       | current (20%) | preview (80%)")
     ("3" '(1 0.08 0.8)  "parent (8%)  | current (12%) | preview (80%)")
@@ -212,23 +213,6 @@ FILESET defaults to `dired-get-marked-files'."
                               (mapcar #'f-size) (cl-reduce #'+)
                               file-size-human-readable)))
       (message "%s" (format "Total size of %s entries: %s" count size)))))
-
-;;;###autoload
-(defun dirvish-layout-toggle ()
-  "Toggle layout of current Dirvish session.
-A session with layout means it has a companion preview window and
-possibly one or more parent windows."
-  (interactive)
-  (let* ((dv (or (dirvish-curr) (user-error "Not a dirvish buffer")))
-         (old-layout (dv-curr-layout dv))
-         (new-layout (unless old-layout (dv-ff-layout dv)))
-         (buf (current-buffer)))
-    (if old-layout (set-window-configuration (dv-winconf dv))
-      (with-selected-window (dv-root-window dv) (quit-window)))
-    (setf (dv-curr-layout dv) new-layout)
-    (with-selected-window (dirvish--create-root-window dv)
-      (dirvish-save-dedication (switch-to-buffer buf))
-      (dirvish--build-layout dv))))
 
 ;;;###autoload
 (defun dirvish-layout-switch (&optional recipe)
@@ -369,6 +353,7 @@ current layout defined in `dirvish-layout-recipes'."
   (require 'dired-aux)
   (transient-setup 'dirvish-mark-menu))
 
+;;;###autoload (autoload 'dirvish-renaming-menu "dirvish-extras" nil t)
 (transient-define-prefix dirvish-renaming-menu ()
   "Help Menu for file renaming in Dired."
   [:description
@@ -413,6 +398,36 @@ current layout defined in `dirvish-layout-recipes'."
    ("s" "  Manage subdirs"         dirvish-subdir-menu)
    (":" "  GnuPG helpers"          dirvish-epa-dired-menu)
    ("h" "  More info about Dired"  describe-mode)])
+
+;;;###autoload (autoload 'dirvish-dispatch "dirvish-extras" nil t)
+(transient-define-prefix dirvish-dispatch ()
+  "Main menu for Dired/Dirvish."
+  [:description
+   (lambda () (dirvish--format-menu-heading
+          "Dirvish main menu"
+          "NOTICE: these commands require relevant Dirvish extensions"))
+   "" "Actions & Essential commands"
+   ("u" "User interface setup"   dirvish-setup-menu)
+   ("c" "Dired cheatsheet"       dirvish-dired-cheatsheet)
+   ("/" "Perform fd search"      dirvish-fd)
+   ("@" "Find all dirs by fd"    dirvish-fd-jump)
+   ("R" "Rsync marked files"     dirvish-rsync)
+   ("n" "Live narrowing"         dirvish-narrow)
+   "Transient commands"
+   ("a" "Quick access"           dirvish-quick-access)
+   ("h" "Go to history entries"  dirvish-history-menu)
+   ("s" "Sort current buffer"    dirvish-quicksort)
+   ("l" "Setup listing switches" dirvish-ls-switches-menu)
+   ("f" "Setup fd-find switches" dirvish-fd-switches-menu
+    :if (lambda () (dirvish-prop :fd-arglist)))
+   ("S" "Setup rsync switches"   dirvish-rsync-switches-menu)
+   ("m" "Manage marks"           dirvish-mark-menu)
+   ("e" "Manage emerged groups"  dirvish-emerge-menu)
+   ("t" "Manage subtrees"        dirvish-subtree-menu)
+   ("r" "Rename files"           dirvish-renaming-menu)
+   ("v" "Version control system" dirvish-vc-menu)
+   ("y" "Yank marked files"      dirvish-yank-menu)
+   ("i" "Get file information"   dirvish-file-info-menu)])
 
 (provide 'dirvish-extras)
 ;;; dirvish-extras.el ends here

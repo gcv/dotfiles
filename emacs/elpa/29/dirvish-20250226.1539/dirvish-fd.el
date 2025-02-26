@@ -13,6 +13,7 @@
 ;;; Code:
 
 (require 'dirvish)
+(require 'transient)
 
 (defcustom dirvish-fd-switches ""
   "Fd arguments inserted before user input."
@@ -96,7 +97,7 @@ Raise an error if fd executable is not available."
   "Return fd buffer name of DV with user INPUT at DIR."
   (format dirvish-fd-bufname (or input "")
           (file-name-nondirectory (directory-file-name dir))
-          (dv-name dv)))
+          (dv-id dv)))
 
 (defun dirvish-fd--apply-switches ()
   "Apply fd SWITCHES to current buffer."
@@ -217,7 +218,7 @@ Raise an error if fd executable is not available."
   "Return a formatted string showing the DIRVISH-FD-ACTUAL-SWITCHES."
   (pcase-let ((`(,globp ,casep ,ign-range ,types ,exts ,excludes)
                (dirvish-prop :fd-arglist))
-              (face (if (dirvish--selected-p) 'dired-header 'shadow)))
+              (face (if (dirvish--selected-p) 'dired-header 'dirvish-inactive)))
     (format "  %s | %s"
             (propertize "FD" 'face face)
             (if (not (dirvish-prop :fd-time))
@@ -253,8 +254,10 @@ Raise an error if fd executable is not available."
 ;;;###autoload
 (defun dirvish-fd-jump (&optional current-dir-p)
   "Browse directories using `fd' command.
-This command takes a while to index all the directories the first
-time you run it.  After the indexing, it fires up instantly.
+This command takes a while to index all the directories the first time
+you run it.  After the indexing, it fires up instantly except for those
+huge directories such as root.  It is recommended to setup your
+.fdignore properly before using this command.
 
 If called with \\`C-u' or if CURRENT-DIR-P holds the value 4,
 search for directories in the current directory.  Otherwise,
@@ -313,7 +316,7 @@ value 16, let the user choose the root directory of their search."
 
 (defun dirvish-fd-find (entry)
   "Run fd accroring to ENTRY."
-  (let* ((dv (or dirvish--this (dirvish-curr)))
+  (let* ((dv (dirvish-curr))
          (roots (and dv (dv-roots dv)))
          (buf (and roots (alist-get entry roots nil nil #'equal))))
     (or buf
@@ -349,7 +352,9 @@ value 16, let the user choose the root directory of their search."
       (cond ((not input) (setq input (dirvish-fd--read-input)))
             (t (dirvish-update-body-h)))
       (when (eq input 'cancelled)
-        (cl-return-from dirvish-fd-proc-sentinel (kill-buffer buf)))
+        (kill-buffer buf)
+        (setf (dv-index dv) (car (dv-roots dv)))
+        (cl-return-from dirvish-fd-proc-sentinel))
       (let ((bufname (dirvish-fd--bufname input dir dv)))
         (dirvish-prop :root bufname)
         (setf (dv-index dv) (cons bufname buf))
@@ -414,7 +419,8 @@ The command run is essentially:
          (fd-program (dirvish-fd--ensure-fd remote))
          (ls-program (or (and remote (dirvish-fd--find-gnu-ls remote))
                          dirvish-fd-ls-program))
-         (dv (or (dirvish-curr) (progn (dirvish dir) dirvish--this)))
+         (dv (or (dirvish-curr)
+                 (progn (dirvish dir) (dirvish--get-session 'type 'default))))
          (fd-switches (or (dirvish-prop :fd-switches) dirvish-fd-switches ""))
          (ls-switches (or dired-actual-switches (dv-ls-switches dv)))
          (buffer (dirvish--util-buffer 'fd dv nil t)))
@@ -430,12 +436,17 @@ The command run is essentially:
         (set-keymap-parent map (current-local-map))
         (define-key map "\C-c\C-k" #'dirvish-fd-kill)
         (use-local-map map))
-      (dirvish-prop :dv (dv-name dv))
+      (dirvish-prop :dv (dv-id dv))
       (dirvish-prop :gui (display-graphic-p))
       (dirvish-prop :fd-switches fd-switches)
       (dirvish-prop :cus-header 'dirvish-fd-header)
       (dirvish-prop :remote remote)
       (dirvish-prop :global-header t)
+      (dirvish-prop :preview-dps
+        (if remote '(dirvish-tramp-dp) (dv-preview-dispatchers dv)))
+      (dirvish-prop :attrs (dv-attributes dv))
+      (cl-loop for (k v) on dirvish-scopes by 'cddr
+               do (dirvish-prop k (and (functionp v) (funcall v))))
       (let ((proc (apply #'start-file-process
                          "fd" buffer
                          `(,fd-program "--color=never"

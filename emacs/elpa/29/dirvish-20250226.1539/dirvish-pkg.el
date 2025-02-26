@@ -1,11 +1,10 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "dirvish" "20250211.540"
+(define-package "dirvish" "20250226.1539"
   "A modern file manager based on dired mode."
-  '((emacs     "27.1")
-    (transient "0.3.7"))
+  '((emacs "28.1"))
   :url "https://github.com/alexluigit/dirvish"
-  :commit "e7faf3916c5e74fef450ca4b338df03dabf34cda"
-  :revdesc "e7faf3916c5e"
+  :commit "3a4edf669ae4b1f66b11784f23d335224dfd6bb3"
+  :revdesc "3a4edf669ae4"
   :keywords '("files" "convenience")
   :authors '(("Alex Lu" . "https://github.com/alexluigit"))
   :maintainers '(("Alex Lu" . "https://github.com/alexluigit")))

@@ -27,6 +27,21 @@
   "Window parameters for `dirvish-side' window."
   :group 'dirvish :type 'alist)
 
+(defcustom dirvish-side-mode-line-format dirvish-mode-line-format
+  "Mode line format used in `dirvish-side' window.
+See `dirvish-mode-line-format' for details."
+  :group 'dirvish :type 'plist)
+
+(defcustom dirvish-side-header-line-format '(:left (project))
+  "Header line format used in `dirvish-side' window.
+See `dirvish-mode-line-format' for details."
+  :group 'dirvish :type 'plist)
+
+(defcustom dirvish-side-attributes dirvish-attributes
+  "File attributes used in `dirvish-side' window.
+See `dirvish-attributes' for details."
+  :group 'dirvish :type '(repeat (symbol :tag "Dirvish attribute")))
+
 (defcustom dirvish-side-open-file-action 'mru
   "The action of how to open a file in side window.
 The value can be one of:
@@ -51,8 +66,6 @@ The value can be one of:
 If non-nil, expand all the parent directories of current buffer's
 filename until the project root when opening a side session."
   :group 'dirvish :type 'boolean)
-
-(defconst dirvish-side-header (dirvish--mode-line-composer '(project) nil t))
 
 (defun dirvish-side-open-file-fn ()
   "Called before opening a file in side sessions."
@@ -101,7 +114,7 @@ filename until the project root when opening a side session."
   (run-with-timer
    0.01 nil
    (lambda ()
-     (when-let* (((not dirvish--this))
+     (when-let* (((not (dirvish-curr)))
                  ((not (active-minibuffer-window)))
                  (win (dirvish-side--session-visible-p))
                  (dv (with-selected-window win (dirvish-curr)))
@@ -111,18 +124,18 @@ filename until the project root when opening a side session."
                  ((not (string-suffix-p "COMMIT_EDITMSG" curr)))
                  ((not (equal prev curr))))
        (with-selected-window win
-         (setq dirvish--this dv)
          (let (buffer-list-update-hook) (dirvish-find-entry-a dir))
          (if dirvish-side-auto-expand (dirvish-subtree-expand-to curr)
            (dired-goto-file curr))
-         (dirvish-prop :cus-header 'dirvish-side-header)
-         (dirvish-update-body-h)
-         (setq dirvish--this nil))))))
+         (dirvish-update-body-h))))))
 
 (defun dirvish-side--new (path)
   "Open a side session in PATH."
   (let* ((bname buffer-file-name)
-         (dv (or (car (dirvish--find-reusable 'side))
+         (dirvish-mode-line-format dirvish-side-mode-line-format)
+         (dirvish-header-line-format dirvish-side-header-line-format)
+         (dirvish-attributes dirvish-side-attributes)
+         (dv (or (dirvish--get-session 'type 'side)
                  (dirvish--new
                   :type 'side
                   :size-fixed 'width
@@ -131,26 +144,16 @@ filename until the project root when opening a side session."
                   :open-file-fn #'dirvish-side-open-file-fn)))
          (r-win (dv-root-window dv)))
     (unless (window-live-p r-win) (setq r-win (dirvish--create-root-window dv)))
-    (with-selected-window r-win
-      (setq dirvish--this dv)
+    (with-selected-window r-win ; `dirvish-curr' returns nil in this temp buffer
+      ;; so set the prop to let `dired-noselect' get `dirvish-curr' correctly
+      (dirvish-prop :dv (dv-id dv))
       (dirvish-find-entry-a path)
+      (kill-buffer (dirvish--util-buffer "temp")) ; remove `:dv' prop in it
       (cond ((not bname) nil)
             (dirvish-side-auto-expand
              (dirvish-subtree-expand-to bname))
             (t (dired-goto-file bname)))
-      (dirvish-prop :cus-header 'dirvish-side-header)
       (dirvish-update-body-h))))
-
-(dirvish-define-mode-line project
-  "Return a string showing current project."
-  (let ((project (dirvish--get-project-root))
-        (face (if (dirvish--selected-p) 'dired-header 'shadow)))
-    (if project
-        (setq project (file-name-base (directory-file-name project)))
-      (setq project "-"))
-    (format " %s %s"
-            (propertize "Project:" 'face face)
-            (propertize project 'face 'font-lock-string-face))))
 
 ;;;###autoload
 (define-minor-mode dirvish-side-follow-mode

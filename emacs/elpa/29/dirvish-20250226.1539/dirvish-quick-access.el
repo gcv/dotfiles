@@ -20,6 +20,7 @@
 ;;; Code:
 
 (require 'dirvish)
+(require 'transient)
 
 (defcustom dirvish-quick-access-function 'dirvish-dwim
   "Function used to access `dirvish-quick-access-entries'.

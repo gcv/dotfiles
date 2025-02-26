@@ -20,6 +20,7 @@
 (declare-function consult-line "consult")
 (require 'dirvish)
 (require 'dired-x)
+(require 'transient)
 
 (defcustom dirvish-subtree-listing-switches nil
   "Listing SWITCHES used in subtrees.
@@ -40,9 +41,16 @@ The prefix is repeated \"depth\" times."
          (if v (add-hook 'dirvish-after-revert-hook #'dirvish-subtree--revert)
            (remove-hook 'dirvish-after-revert-hook #'dirvish-subtree--revert))))
 
-(defcustom dirvish-subtree-always-show-state nil
-  "Non-nil means always show the subtree state indicator."
+(defcustom dirvish-subtree-always-show-state t
+  "Non-nil means show subtree state indicator even there is no subtrees."
   :type 'boolean :group 'dirvish)
+
+(defcustom dirvish-subtree-icon-scale-factor '(0.8 . 0.1)
+  "Scale factor for subtree state indicator.
+The value is a cons of \\='(HEIGHT . V-ADJUST) that used as values of
+:height and :v-adjust keyword respectively in `all-the-icons' and
+`nerd-icons'."
+  :type '(cons float float) :group 'dirvish)
 
 (defvar dirvish-subtree--state-icons nil)
 (defcustom dirvish-subtree-state-style 'chevron
@@ -64,22 +72,30 @@ The value can be one of: `plus', `arrow', `chevron', `nerd'."
              (cons
               (nerd-icons-octicon
                "nf-oct-chevron_down"
-               :height (* (or (bound-and-true-p dirvish-nerd-icons-height) 1) 0.8)
-               :v-adjust 0.1 :face 'dirvish-subtree-state)
+               :height (* (or (bound-and-true-p dirvish-nerd-icons-height) 1)
+                          (car dirvish-subtree-icon-scale-factor))
+               :v-adjust (cdr dirvish-subtree-icon-scale-factor)
+               :face 'dirvish-subtree-state)
               (nerd-icons-octicon
                "nf-oct-chevron_right"
-               :height (* (or (bound-and-true-p dirvish-nerd-icons-height) 1) 0.8)
-               :v-adjust 0.1 :face 'dirvish-subtree-state)))
+               :height (* (or (bound-and-true-p dirvish-nerd-icons-height) 1)
+                          (car dirvish-subtree-icon-scale-factor))
+               :v-adjust (cdr dirvish-subtree-icon-scale-factor)
+               :face 'dirvish-subtree-state)))
             ('chevron
              (cons
               (all-the-icons-octicon
                "chevron-down"
-               :height (* (or (bound-and-true-p dirvish-all-the-icons-height) 1) 0.8)
-               :v-adjust 0.1 :face 'dirvish-subtree-state)
+               :height (* (or (bound-and-true-p dirvish-all-the-icons-height) 1)
+                          (car dirvish-subtree-icon-scale-factor))
+               :v-adjust (cdr dirvish-subtree-icon-scale-factor)
+               :face 'dirvish-subtree-state)
               (all-the-icons-octicon
                "chevron-right"
-               :height (* (or (bound-and-true-p dirvish-all-the-icons-height) 1) 0.8)
-               :v-adjust 0.1 :face 'dirvish-subtree-state)))))))
+               :height (* (or (bound-and-true-p dirvish-all-the-icons-height) 1)
+                          (car dirvish-subtree-icon-scale-factor))
+               :v-adjust (cdr dirvish-subtree-icon-scale-factor)
+               :face 'dirvish-subtree-state)))))))
 
 (defcustom dirvish-subtree-file-viewer #'dirvish-subtree-default-file-viewer
   "The function used to view a file node.
@@ -211,7 +227,7 @@ creation even the entry is in nested subtree nodes."
   (let* ((dir (dired-get-filename))
          (listing (dirvish-subtree--readin dir))
          buffer-read-only beg end)
-    (dirvish-data-for-dir dir (current-buffer) nil)
+    (dirvish--dir-data-async dir (current-buffer) t)
     (with-silent-modifications
       (save-excursion
         (setq beg (progn (move-end-of-line 1) (insert "\n") (point)))
