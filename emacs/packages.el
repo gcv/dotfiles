@@ -546,6 +546,7 @@
 
 ;;; LLM interaction package: https://github.com/karthink/gptel
 (use-package gptel
+  :pin melpa
   :custom
   (gptel-display-buffer-action nil)
   :config
