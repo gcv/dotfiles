@@ -11,27 +11,6 @@
 
 ;;; Generated autoloads from colorful-mode.el
 
-(autoload 'colorful-convert-and-change-color "colorful-mode" "\
-Convert color to a valid format and replace color at current cursor position." t)
-(autoload 'colorful-convert-and-copy-color "colorful-mode" "\
-Convert color to a valid format and copy it at current cursor position." t)
-(autoload 'colorful-change-or-copy-color "colorful-mode" "\
-Change or copy color to a converted format at current cursor position." t)
-(autoload 'colorful-add-hex-colors "colorful-mode" "\
-Function for add hex colors to `colorful-color-keywords'.
-This is intended to be used with `colorful-extra-color-keyword-functions'.")
-(autoload 'colorful-add-color-names "colorful-mode" "\
-Function for add Color names to `colorful-color-keywords'.
-This is intended to be used with `colorful-extra-color-keyword-functions'.")
-(autoload 'colorful-add-rgb-colors "colorful-mode" "\
-Function for add CSS RGB colors to `colorful-color-keywords'.
-This is intended to be used with `colorful-extra-color-keyword-functions'.")
-(autoload 'colorful-add-hsl-colors "colorful-mode" "\
-Function for add CSS HSL colors.
-This is intended to be used with `colorful-extra-color-keyword-functions'.")
-(autoload 'colorful-add-latex-colors "colorful-mode" "\
-Function for add LaTex rgb/RGB/HTML/Grey colors.
-This is intended to be used with `colorful-extra-color-keyword-functions'.")
 (autoload 'colorful-mode "colorful-mode" "\
 Preview any color in your buffer such as hex, color names, CSS rgb in real time.
 
@@ -79,7 +58,7 @@ See `colorful-mode' for more information on Colorful mode.
 in.
 
 (fn &optional ARG)" t)
-(defvar global-colorful-modes '(mhtml-mode html-ts-mode latex-mode prog-mode help-mode) "\
+(defvar global-colorful-modes '(prog-mode help-mode html-mode css-mode latex-mode) "\
 Which major modes `colorful-mode' is switched on in.
 This variable can be either t (all major modes), nil (no major modes),
 or a list of modes and (not modes) to switch use this minor mode or
