@@ -68,7 +68,7 @@ if [ "${UNAME}" = "Darwin" ]; then
     export XDG_CACHE_HOME="${HOME}/.cache"
 fi
 
-# load private environment variables:
+# load private configuration:
 [[ -f ~/.dotfiles/private/shell-profile-private ]] && . ~/.dotfiles/private/shell-profile-private
 
 
