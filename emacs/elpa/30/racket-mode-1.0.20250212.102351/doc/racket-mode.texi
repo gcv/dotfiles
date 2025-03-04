@@ -1,0 +1,4492 @@
+\input texinfo    @c -*- texinfo -*-
+@c %**start of header
+@setfilename racket-mode.info
+@settitle Racket Mode
+@documentencoding UTF-8
+@documentlanguage en
+@syncodeindex pg cp
+@c %**end of header
+
+@copying
+Copyright (C) 2013-2024 by Greg Hendershott.
+
+SPDX-License-Identifier: GPL-3.0-or-later
+@end copying
+
+@dircategory Emacs
+@direntry
+* Racket Mode: (racket-mode). Edit and REPL major modes for Racket lang.
+@end direntry
+
+@finalout
+@titlepage
+@title Racket Mode
+@author Greg Hendershott (@email{racket-mode-author@@greghendershott.com})
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Racket Mode
+@end ifnottex
+
+@menu
+* Introduction::
+* Install, Update, and Uninstall: Install Update and Uninstall. 
+* Configure::
+* Architecture::
+* Reference::
+* Commands::
+* Variables::
+* Configuration functions::
+* Faces::
+
+@detailmenu
+--- The Detailed Node Listing ---
+
+Install, Update, and Uninstall
+
+* Use Emacs 28.1 or newer with NonGNU ELPA: Use Emacs 281 or newer with NonGNU ELPA. 
+* Configure Emacs to use MELPA::
+* Install::
+* Minimal Racket::
+* Uninstall::
+* Update::
+
+Update
+
+* Upgrading all packages::
+* Updating just Racket Mode::
+
+Configure
+
+* Which major mode to use::
+* Key bindings::
+* Font-lock (syntax highlighting)::
+* Completion at point::
+* Completion in minibuffer::
+* Xref (definitions and references)::
+* Indent::
+* paredit::
+* smartparens::
+* Appearance of parentheses::
+* Edit buffers and REPL buffers::
+* eldoc::
+* Start faster::
+* Inserting Unicode math symbols::
+* Ligatures::
+
+Commands
+
+* Edit::
+* Hash Langs::
+* Explore::
+* Run::
+* Test::
+* Eval::
+* Collections::
+* Macro expand::
+* Packages::
+* Other::
+
+Edit
+
+* racket-mode::
+* racket-insert-lambda::
+* racket-insert-symbol::
+* racket-fold-all-tests::
+* racket-unfold-all-tests::
+* racket-tidy-requires::
+* racket-trim-requires::
+* racket-base-requires::
+* racket-add-require-for-identifier::
+* racket-indent-line::
+* racket-smart-open-bracket-mode::
+* racket-insert-closing::
+* racket-cycle-paren-shapes::
+* racket-backward-up-list::
+* racket-input-mode::
+* racket-align::
+* racket-unalign::
+* racket-complete-at-point::
+
+Hash Langs
+
+* racket-hash-lang-mode::
+* racket-hash-lang-backward::
+* racket-hash-lang-forward::
+* racket-hash-lang-up::
+* racket-hash-lang-down::
+* racket-hash-lang-C-M-q-dwim::
+
+Explore
+
+* racket-xp-mode::
+* racket-xp-describe::
+* racket-xp-documentation::
+* racket-xp-next-definition::
+* racket-xp-previous-definition::
+* racket-xp-next-use::
+* racket-xp-previous-use::
+* racket-xp-next-error::
+* racket-xp-previous-error::
+* racket-xp-tail-up::
+* racket-xp-tail-down::
+* racket-xp-tail-next-sibling::
+* racket-xp-tail-previous-sibling::
+* racket-documentation-search::
+* racket-describe-mode::
+* racket-describe-search::
+
+Run
+
+* racket-repl-mode::
+* racket-run::
+* racket-run-and-switch-to-repl::
+* racket-run-module-at-point::
+* racket-repl::
+* racket-repl-describe::
+* racket-repl-documentation::
+* racket-racket::
+* racket-profile::
+* racket-profile-mode::
+* racket-logger::
+* racket-logger-mode::
+* racket-debug-mode::
+* racket-repl-clear::
+* racket-repl-clear-leaving-last-prompt::
+
+Test
+
+* racket-test::
+* racket-raco-test::
+
+Eval
+
+* racket-send-region::
+* racket-send-definition::
+* racket-send-last-sexp::
+
+Collections
+
+* racket-open-require-path::
+
+Macro expand
+
+* racket-stepper-mode::
+* racket-expand-file::
+* racket-expand-region::
+* racket-expand-definition::
+* racket-expand-last-sexp::
+
+Packages
+
+* racket-package-refresh::
+* list-racket-packages::
+* racket-package-mode::
+* describe-racket-package::
+
+Other
+
+* racket-debug-toggle-breakpoint::
+* racket-mode-start-faster::
+* racket-mode-start-slower::
+
+Variables
+
+* General variables::
+* Hash lang variables::
+* REPL variables::
+* Other variables::
+* Experimental debugger variables::
+* Showing information::
+* Running racket and raco commands in a shell or terminal::
+* Racket input method::
+
+General variables
+
+* racket-program::
+* racket-command-timeout::
+* racket-memory-limit::
+* racket-error-context::
+* racket-user-command-line-arguments::
+* racket-browse-url-function::
+* racket-xp-after-change-refresh-delay::
+* racket-xp-highlight-unused-regexp::
+* racket-xp-add-binding-faces::
+* racket-xp-eldoc-level::
+* racket-documentation-search-location::
+* racket-expand-hiding::
+
+Hash lang variables
+
+* racket-hash-lang-token-face-alist::
+* racket-hash-lang-pairs::
+* racket-hash-lang-module-language-hook::
+
+REPL variables
+
+* racket-repl-buffer-name-function::
+* racket-submodules-to-run::
+* racket-repl-history-directory::
+* racket-history-filter-regexp::
+* racket-images-inline::
+* racket-imagemagick-props::
+* racket-images-keep-last::
+* racket-images-system-viewer::
+* racket-images-do-not-use-svg::
+* racket-pretty-print::
+* racket-repl-command-file::
+
+Other variables
+
+* racket-doc-index-directory::
+* racket-doc-index-predicate-function::
+* racket-indent-curly-as-sequence::
+* racket-indent-sequence-depth::
+* racket-pretty-lambda::
+* racket-smart-open-bracket-enable::
+* racket-logger-config::
+* racket-before-run-hook::
+* racket-after-run-hook::
+* racket-sexp-comment-fade::
+
+Experimental debugger variables
+
+* racket-debuggable-files::
+
+Showing information
+
+* racket-show-functions::
+
+Running racket and raco commands in a shell or terminal
+
+* racket-shell-or-terminal-function::
+
+Racket input method
+
+* racket-input-prefix::
+* racket-input-translations::
+
+Configuration functions
+
+* Showing information: Showing information (1). 
+* Associating edit buffers with REPL buffers::
+* Browsing file URLs with anchors::
+* Configuring back ends::
+* Running racket and raco commands in a shell or terminal: Running racket and raco commands in a shell or terminal (1). 
+
+Showing information
+
+* racket-show-pseudo-tooltip::
+* racket-show-echo-area::
+* racket-show-header-line::
+* racket-show-pos-tip::
+
+Associating edit buffers with REPL buffers
+
+* racket-repl-buffer-name-shared::
+* racket-repl-buffer-name-unique::
+* racket-repl-buffer-name-project::
+* racket-project-root::
+
+Browsing file URLs with anchors
+
+* racket-browse-url-using-temporary-file::
+
+Configuring back ends
+
+* racket-add-back-end::
+
+Running racket and raco commands in a shell or terminal
+
+* racket-shell::
+* racket-term::
+* racket-ansi-term::
+* racket-vterm::
+
+Faces
+
+* All::
+
+All
+
+* racket-keyword-argument-face::
+* racket-reader-quoted-symbol-face::
+* racket-reader-syntax-quoted-symbol-face::
+* racket-here-string-face::
+* racket-xp-def-face::
+* racket-xp-use-face::
+* racket-xp-unused-face::
+* racket-xp-tail-target-face::
+* racket-xp-tail-position-face::
+* racket-xp-binding-lang-face::
+* racket-xp-binding-lang-use-face::
+* racket-xp-binding-import-face::
+* racket-xp-binding-import-use-face::
+* racket-xp-binding-local-face::
+* racket-xp-binding-local-use-face::
+* racket-logger-config-face::
+* racket-logger-topic-face::
+* racket-logger-fatal-face::
+* racket-logger-error-face::
+* racket-logger-warning-face::
+* racket-logger-info-face::
+* racket-logger-debug-face::
+* racket-doc-link-face::
+* racket-ext-link-face::
+* racket-doc-output-face::
+* racket-doc-litchar-face::
+* racket-repl-message::
+* racket-repl-prompt::
+* racket-repl-value::
+* racket-repl-error-message::
+* racket-repl-error-location::
+* racket-repl-stdout::
+* racket-repl-stderr::
+* racket-hash-lang-text::
+
+@end detailmenu
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+The @uref{https://www.racket-mode.com/, Racket Mode} package consists of a variety of Emacs major and minor modes, including:
+
+@itemize
+@item
+@code{racket-mode}: A major mode to edit @code{.rkt} files. Generally assumes @code{#lang racket}.
+
+@item
+@ref{racket-hash-lang-mode}: An alternative to @code{racket-mode} using behavior specified by a @code{#lang} for colors, indent, expression navigation, etc. @emph{Experimental}.
+
+@item
+@ref{racket-xp-mode}: A minor mode to enhance either edit mode. Explain and explore code, similar to background check-syntax in Dr Racket.
+
+@item
+@code{racket-repl-mode}: A major mode to run programs and use a REPL@.
+
+@item
+Various other modes to support specific features:
+@itemize
+@item
+@ref{racket-logger-mode}
+@item
+@ref{racket-profile-mode}
+@item
+@ref{racket-debug-mode}
+@end itemize
+@end itemize
+
+For code, issues, and pull requests, see the @uref{https://github.com/greghendershott/racket-mode, Git repo}.
+
+To sponsor this work, see @uref{https://github.com/users/greghendershott/sponsorship, GitHub Sponsors} or @uref{https://www.paypal.me/greghendershott, PayPal}.
+
+@node Install Update and Uninstall
+@chapter Install, Update, and Uninstall
+
+The most common way to use Racket Mode is to install from a package archive like MELPA or NonGNU ELPA@.
+
+Some people also use a system like @uref{https://github.com/radian-software/straight.el, straight.el}.
+
+Note that Racket Mode is only available on MELPA (@emph{not} ``MELPA Stable''), and is available as a ``rolling release'' from NonGNU ELPA@.
+
+@menu
+* Use Emacs 28.1 or newer with NonGNU ELPA: Use Emacs 281 or newer with NonGNU ELPA. 
+* Configure Emacs to use MELPA::
+* Install::
+* Minimal Racket::
+* Uninstall::
+* Update::
+@end menu
+
+@node Use Emacs 281 or newer with NonGNU ELPA
+@section Use Emacs 28.1 or newer with NonGNU ELPA
+
+Emacs 28.1 or newer comes configured to use @uref{https://elpa.nongnu.org, NonGNU ELPA}, in which case you can skip ahead to @ref{Install}.
+
+With older versions of Emacs, you can use MELPA@.
+
+@node Configure Emacs to use MELPA
+@section Configure Emacs to use MELPA
+
+Following is a quick guide that may work for you. (For definitive instructions and the latest trouble-shooting tips, please see @uref{https://melpa.org/#/getting-started}.)
+
+@itemize
+@item
+Add the following to your @samp{~/.emacs} or @samp{~/.emacs.d/init.el}:
+@end itemize
+
+@lisp
+(require 'package)
+(add-to-list 'package-archives
+              '("melpa" . "https://melpa.org/packages/")
+              t)
+(package-initialize)
+@end lisp
+
+@itemize
+@item
+Restart Emacs.
+@end itemize
+
+@quotation
+NOTE: If you ever get an error message about ``contacting a host'' or ``downloading an archive'', the problem is not unique to Racket Mode. Please see @uref{https://melpa.org/#/getting-started}.
+
+@end quotation
+
+@node Install
+@section Install
+
+When Emacs is configured to use NonGNU ELPA or MELPA:
+
+@enumerate
+@item
+Type @kbd{M-x}  @code{package-initialize} @kbd{RET} .
+
+@item
+Type @kbd{M-x}  @code{package-refresh-contents} @kbd{RET} .
+
+@item
+Type @kbd{M-x}  @code{package-install} @kbd{RET}  @code{racket-mode} @kbd{RET} .
+@end enumerate
+
+@quotation
+NOTE: If you get an error message about ``contacting a host'' or ``downloading an archive'', the problem is not unique to Racket Mode. Please see @uref{https://melpa.org/#/getting-started}.
+
+@end quotation
+
+@node Minimal Racket
+@section Minimal Racket
+
+If you have installed the minimal Racket distribution (for example by using the @uref{https://github.com/Homebrew/homebrew-core/blob/master/Formula/minimal-racket.rb, homebrew formula}) Racket Mode needs some additional Racket packages. A simple way to get all these packages is to install the @code{drracket} Racket package. In a command shell:
+
+@example
+raco pkg install --auto drracket
+@end example
+
+A more-targeted approach is instead to install these specific packages and their dependencies:
+
+@example
+raco pkg install --auto data-lib errortrace-lib macro-debugger-text-lib rackunit-lib racket-index scribble-lib drracket-tool-text-lib
+@end example
+
+If you do @emph{not} want to use @code{racket-xp-mode}, then you can omit @code{drracket-tool-text-lib}.
+
+On a headless server, you might want to omit @code{gui-lib}. Unfortunately, @code{racket-doc} depends on @code{gui-lib}. On the one hand, if you uninstall @code{racket-doc} and @code{gui-lib}, you will no longer be able to access documentation when using a Racket Mode back end running there. On the other hand, if you leave @code{gui-lib} installed, you should be careful to run the Racket Mode back end using @code{xvfb-run racket}.
+
+@node Uninstall
+@section Uninstall
+
+To uninstall Racket Mode, simply type @kbd{M-x}  @code{package-delete} @kbd{RET}  @code{racket-mode} @kbd{RET} .
+
+You should probably also exit and restart Emacs.
+
+@node Update
+@section Update
+
+@menu
+* Upgrading all packages::
+* Updating just Racket Mode::
+@end menu
+
+@node Upgrading all packages
+@subsection Upgrading all packages
+
+The ``easy path'' provided by Emacs is to update @emph{all} packages to their latest versions. Although you might not want to do this --- see next section --- here is how to do so:
+
+@enumerate
+@item
+Use @kbd{M-x}  @code{package-initialize}.
+
+@item
+Use @kbd{M-x}  @code{package-refresh-contents}.
+
+@item
+Use @kbd{M-x}  @code{list-packages}. It should display a message like ``42 packages can be upgraded; type ‘U’ to mark them for upgrading.''.
+
+@item
+Press @kbd{U}  as suggested to mark them all.
+
+@item
+Press @kbd{x}  to execute.
+@end enumerate
+
+After such a mass update, it might be wise to exit and restart Emacs.
+
+@quotation
+NOTE: If you get an error message about ``contacting a host'' or ``downloading an archive'', the problem is not unique to Racket Mode. Please see @uref{https://melpa.org/#/getting-started}.
+
+@end quotation
+
+@node Updating just Racket Mode
+@subsection Updating just Racket Mode
+
+Updating all packages sometimes is more than you want. For example, maybe you will discover that some packages have changed in ways that require you to take time to learn about, change customizations, and so on.
+
+To update just Racket Mode:
+
+@enumerate
+@item
+@ref{Uninstall}.
+
+@item
+Optional but most reliable: Exit and restart Emacs.
+
+@item
+@ref{Install} again. This will install the latest version.
+@end enumerate
+
+@node Configure
+@chapter Configure
+
+Although Racket Mode can be customized with many @ref{Variables}, there is only one that you might @emph{need} to set: @ref{racket-program}. This is the name or pathname of the Racket executable. It defaults to @code{Racket.exe} on Windows else @code{racket}.
+
+On Windows or Linux, this default will probably work for you.
+
+On macOS, downloading Racket doesn't add its @code{bin} directory to your @code{PATH}. Even after you add it, GUI Emacs doesn't automatically use your path (unless you use the handy @uref{https://melpa.org/#/exec-path-from-shell, exec-path-from-shell} package). Therefore you might want to set @code{racket-program} to a complete pathname.
+
+You can @code{setq} this directly in your Emacs init file (@samp{~/.emacs} or @samp{~/.emacs.d/init.el}), or, use @kbd{M-x}  @code{customize}, as you prefer.
+
+@menu
+* Which major mode to use::
+* Key bindings::
+* Font-lock (syntax highlighting)::
+* Completion at point::
+* Completion in minibuffer::
+* Xref (definitions and references)::
+* Indent::
+* paredit::
+* smartparens::
+* Appearance of parentheses::
+* Edit buffers and REPL buffers::
+* eldoc::
+* Start faster::
+* Inserting Unicode math symbols::
+* Ligatures::
+@end menu
+
+@node Which major mode to use
+@section Which major mode to use
+
+Racket is a programming language.
+
+Racket is also a ``language-oriented programming language''. Most Racket source files contain a `#lang` line. The lang may be an s-expression lang like @code{racket}, or an at-expression lang like @code{scribble/manual}, or something completely different like @code{datalog} or @code{rhombus}.
+
+The Racket Mode package offers a choice of two major modes to use in buffers for viewing and editing source code. Each has pros and cons.
+
+Whereas @code{racket-mode} is in the tradition of Emacs @code{lisp-mode} and @code{scheme-mode} and assumes s-expression langs, @code{racket-hash-lang-mode} takes the approach of DrRacket to work for all langs.
+
+@itemize
+@item
+@code{racket-mode} is the original, ``classic'' mode for @code{#lang racket} and related s-expression languages. It is implemented entirely in Emacs and does @emph{not} need Racket Mode's back end racket process running. Font-lock (coloring) uses rules for a fixed set of identifiers from @code{racket} lang and popular modules like @code{racket/match}. Indentation uses rules for a fixed set of forms, and may be customized.
+
+@item
+@code{racket-hash-lang-mode} uses font-lock (colors) and indentation determined by the lang; to get this information it @emph{does} need the Racket Mode's back end racket process running. Although basic editing should feel fast, you might notice some delay when indenting. You might see colors appear after a small delay (but it will not block editing). Speaking of colors, they will be ``plainer'' than @code{racket-mode} -- just colors for tokens like numbers, comments, strings, and keywords. This looks similar to DrRacket. However you can enhance this in various ways; see the discussion of @ref{racket-hash-lang-module-language-hook}.
+@end itemize
+
+You can use different major modes for different kinds of files:
+
+@itemize
+@item
+For editing @code{.rkt} files and s-expression langs, which mode to use is personal preference.
+
+@item
+For @code{.scrbl} and at-expression langs like @code{scribble/manual}, @code{racket-hash-lang-mode} is probably better than @code{racket-mode}. (Note there is also an unrelated @code{scribble-mode} package.)
+
+@item
+For non-s-expression langs like @code{datalog} or @code{rhombus} (@code{.rhm}), @code{racket-hash-lang-mode} is definitely better than @code{racket-mode}. (Note there is also an unrelated @code{rhombus-mode} package.)
+@end itemize
+
+You can use @code{auto-mode-alist} to tell Emacs which major mode to use initially for certain file extensions. Also, in a buffer you can use @code{M-x racket-mode} and @code{M-x racket-hash-lang-mode} to switch between them.
+
+@node Key bindings
+@section Key bindings
+
+To customize things like key bindings, you can use @code{racket-mode-hook} in your Emacs init file to modify @code{racket-mode-map}. For example, although @kbd{C-c C-c}  is bound by default to the @code{racket-run} command, let's say you wanted @kbd{F5}  to be an additional binding:
+
+@lisp
+(add-hook 'racket-mode-hook
+          (lambda ()
+            (define-key racket-mode-map (kbd "<f5>") 'racket-run)))
+@end lisp
+
+Likewise for @code{racket-repl-mode-hook} and @code{racket-repl-mode-map}.
+
+@node Font-lock (syntax highlighting)
+@section Font-lock (syntax highlighting)
+
+@quotation
+Note: The alternative major mode @ref{racket-hash-lang-mode} disables all of the following behavior and uses colors determined by the #lang.
+
+@end quotation
+
+Font-lock (as Emacs calls syntax highlighting) can be controlled using the variable @code{font-lock-maximum-decoration}, which defaults to @code{t} (maximum). You can set it to a number, where @code{0} is the lowest level. You can even supply an association list to specify different values for different major modes.
+
+Historically you might choose a lower level for speed. These days you might do so because you prefer a simpler appearance.
+
+Racket Mode supports four, increasing levels of font-lock:
+
+@itemize
+@item
+@code{0}: Just strings, comments, and @code{#lang}.
+@item
+@code{1}: @code{#:keyword} and self-evaluating literals like numbers, quoted symbols (including symbols with spaces delimited by @code{|} characters), and @code{#rx} and @code{#px} regular expressions.
+@item
+@code{2}: Identifiers in @code{define}-like and @code{let}-like forms.
+@item
+@code{3}: Identifiers provided by @code{racket}, @code{typed/racket}, @code{racket/syntax}, and @code{syntax/parse}. (This level effectively treats Racket as a language, instead of a language for making languages.).
+@end itemize
+
+@node Completion at point
+@section Completion at point
+
+In Emacs, a major mode may supply a ``completion-at-point function''. This function is used by manual completion commands like @code{complete-symbol} (bound by default to @kbd{C-M-i} ), as well as by auto-completion packages like @code{company-mode}.
+
+@itemize
+@item
+@code{racket-mode} supplies @code{racket-complete-at-point}, which simply supplies the same symbols that it knows how to font-lock. This does @emph{not} require the Racket Mode back end to be running. But of course the completion candidates do not correspond to your program's definitions or those it imports. This is a static, ``better than nothing'' fallback.
+
+@item
+@code{racket-xp-mode} --- an optional minor mode that enhances @code{racket-mode} --- supplies @code{racket-xp-complete-at-point}, which uses a static analysis to find local and imported binding names. Although this requires the Racket Mode back end to be running --- and will automatically start it --- it does @emph{not} require the edit buffer to be @code{racket-run}. This also supplies meta data usable by the @code{company-capf} backend.
+
+@item
+@code{racket-repl-mode} supplies @code{racket-repl-complete-at-point}, which uses the result of @code{namespace-mapped-symbols} on the program currently running in the REPL@.
+@end itemize
+
+These completion functions are set by default. (However, @code{racket-xp-mode} is not enabled by default. To do so: @ref{racket-xp-mode}.)
+
+If you want @kbd{TAB}  to do completion as well as indent, add the following to your Emacs init file:
+
+@lisp
+(setq tab-always-indent 'complete)
+@end lisp
+
+This changes the behavior of Emacs' standard @code{indent-for-tab-command}, to which @kbd{TAB}  is bound by default in @code{racket-mode} and @code{racket-repl-mode}.
+
+@node Completion in minibuffer
+@section Completion in minibuffer
+
+Sometimes Racket Mode asks for input in the minibuffer. To do so it uses the standard Emacs function @code{completing-read}, so as to be compatible with all Emacs packages that enhance @code{completing-read}, such as helm, ivy, ido-completing-read+, vertico, and so on.
+
+(Earlier versions of Racket Mode sometimes used @code{ido-completing-read}. If you have upgraded Racket Mode and miss that, simply install the ido-completing-read+ package.)
+
+@node Xref (definitions and references)
+@section Xref (definitions and references)
+
+Several modes support the Emacs commands
+
+@itemize
+@item
+@kbd{M-.}  @code{xref-find-definitions}
+@item
+@kbd{M-?}  @code{xref-find-references}
+@item
+@kbd{M-,}  @code{xref-pop-marker-stack}
+@end itemize
+
+To do so, each mode adds a local hook for @code{xref-backend-functions}:
+
+@itemize
+@item
+@ref{racket-mode}: @code{#'racket-mode-xref-backend-function}
+@item
+@ref{racket-xp-mode}: @code{#'racket-xp-xref-backend-function}
+@item
+@ref{racket-repl-mode}: @code{#'racket-repl-xref-backend-function}
+@end itemize
+
+If you prefer, you can remove the local hook --- e.g. for @code{racket-mode}: @code{(remove-hook 'xref-backend-functions #'racket-mode-xref-function t)}.
+
+You can @code{M-x customize-group} and enter @code{xref} to adjust some other settings. For example, the customization variable @code{xref-prompt-for-identifier} controls which commands prompt you and when. You might prefer to set it to @code{nil}.
+
+If you use @code{paredit}, by default it binds @kbd{M-?}  to @code{paredit-convolute-sexp}. You can change that binding in @code{paredit-mode-map} allowing the global binding for @kbd{M-?}  to be used, or, pick some other key for @code{xref-find-references} in the global map.
+
+Finally, what to expect:
+
+@itemize
+@item
+Racket does not have a global or project-wide database of definitions and references.
+@item
+Various modules can export identifiers with the same symbolic value -- for example a different ``define'' is provided by @code{racket/base}, @code{typed/racket/base}, and other modules.
+@item
+A module can import something, then rename, contract, and re-export it.
+@end itemize
+
+As a result, to find a definition, it is necessary to know exactly @emph{which} identifier is meant --- either by expanding the module (as is done by @code{racket-xp-mode}) or by actually running it (@code{racket-repl-mode}). Once known, we can usually find the definition site, even through a chain of renaming and/or contract-wrapping exports. In addition, when point is on a module within  @code{require} form, we can usually find the source file. (In plain @code{racket-mode} edit buffers not enhanced by @code{racket-xp-mode}, the only thing that @code{xref-find-definitions} does is visit relative requires, e.g. @code{foo.rkt} in @code{(require "foo.rkt")}.)
+
+As for finding references, the default xref implementation is used, which greps for strings among a project's files. Although @code{racket-xp-mode} can sometimes do better, using @code{drracket/check-syntax} for definitions and references @emph{within} the current buffer, beyond those it also falls back to the default implementation.
+
+In any case, using the Emacs xref API allows for consistent command names, shortcut keys, and even a special buffer to navigate among references and visit each source location.
+
+@node Indent
+@section Indent
+
+@quotation
+Note: The alternative major mode @ref{racket-hash-lang-mode} disables all of the following behavior and uses indentation determined by the #lang.
+
+@end quotation
+
+Indentation can be customized in a way similar to lisp-mode and scheme-mode: @ref{racket-indent-line}.
+
+(Indentation preserves your line breaks. If you want to use an auto-reformatter --- an expressive pretty printer that chooses line breaks while computing an optimal layout --- the Racket package @uref{https://docs.racket-lang.org/fmt/, fmt} is supported by the Emacs package @uref{https://github.com/lassik/emacs-format-all-the-code, emacs-format-all-the-code}.)
+
+@node paredit
+@section paredit
+
+@quotation
+Note: If you use @ref{racket-hash-lang-mode}, see @ref{racket-hash-lang-module-language-hook} for how to enable/disable paredit based on the specific #lang.
+
+@end quotation
+
+If you use @uref{https://melpa.org/#/paredit, paredit}, you might want to add keybindings to @code{paredit-mode-map}:
+
+@itemize
+@item
+Bind the curly brace keys to @code{paredit-open-curly} and @code{paredit-close-curly}.
+
+@item
+Bind whatever keys you prefer for @code{paredit-wrap-square} and @code{paredit-wrap-curly}.
+@end itemize
+
+For example, with @uref{https://melpa.org/#/use-package, @code{use-package}}:
+
+@lisp
+(use-package paredit
+  :ensure t
+  :config
+  (dolist (m '(emacs-lisp-mode-hook
+               racket-mode-hook
+               racket-repl-mode-hook))
+    (add-hook m #'paredit-mode))
+  (bind-keys :map paredit-mode-map
+             ("@{"   . paredit-open-curly)
+             ("@}"   . paredit-close-curly))
+  (unless terminal-frame
+    (bind-keys :map paredit-mode-map
+               ("M-[" . paredit-wrap-square)
+               ("M-@{" . paredit-wrap-curly))))
+@end lisp
+
+Starting c. November 2022, paredit binds the @kbd{RET}  key to its own command. Unfortunately this is @emph{not} compatible with interactive modes --- including but not limited to @code{racket-repl-mode} --- which expect @kbd{RET}  to be bound to a command to submit your input to the REPL@. In other words, if you type an expression and hit @kbd{RET} , nothing will happen and the REPL will seem frozen. You @code{M-x racket-repl-submit} to proceed.
+
+If you want to use paredit with interactive modes, their advice is to remove the binding from @code{paredit-mode-map} (note that this will also disable it for all buffers, including editing buffers). One way you can do this for all related keys:
+
+@lisp
+(dolist (k '("RET" "C-m" "C-j"))
+  (define-key paredit-mode-map (kbd k) nil))
+@end lisp
+
+@node smartparens
+@section smartparens
+
+@quotation
+Note: If you use @ref{racket-hash-lang-mode}, see @ref{racket-hash-lang-module-language-hook} for how to enable/disable smartparens based on the specific #lang.
+
+@end quotation
+
+If instead of paredit you prefer @uref{https://melpa.org/#/smartparens, smartparens}, you can use the default configuration it provides for Lisp modes generally and for Racket Mode specifically:
+
+@lisp
+(require 'smartparens-config)
+@end lisp
+
+@node Appearance of parentheses
+@section Appearance of parentheses
+
+If you prefer parentheses to appear ``dimmed'', see @uref{https://melpa.org/#/paren-face, paren-face}.
+
+If you prefer the opposite, see @uref{https://melpa.org/#/rainbow-delimiters, rainbow-delimiters}.
+
+@node Edit buffers and REPL buffers
+@section Edit buffers and REPL buffers
+
+By default, all @code{racket-mode} edit buffers share one @code{racket-repl-mode} buffer, named @code{*Racket REPL*}. For example, if you run foo.rkt, the REPL prompt changes to @code{foo.rkt>}, and the REPL is inside the file module namespace. If you then run bar.rkt, the REPL prompt changes to @code{bar.rkt>}, and you are in that namespace.
+
+If you prefer, you can use more than one REPL buffer, by customizing the variable @ref{racket-repl-buffer-name-function}:
+
+@itemize
+@item
+Share a REPL buffer among files belonging to the same project; each REPL buffer is named @code{*Racket REPL <project-name>*}.
+@item
+A unique REPL buffer for each edit buffer, similar to Dr Racket; each REPL buffer is named @code{*Racket REPL <file.rkt>*}.
+@item
+You can also define your own, custom function.
+@end itemize
+
+You can customize where the REPL buffer is displayed by adding an item to the Emacs variable @code{display-buffer-alist}. A good regular expression to use for this would be @code{\\`\\*Racket REPL}. For example, if you wanted to make the REPL buffer appear in a new frame:
+
+@lisp
+(add-to-list 'display-buffer-alist
+             '("\\`\\*Racket REPL"
+               (display-buffer-reuse-window
+                display-buffer-pop-up-frame)
+               (reusable-frames . 0)
+               (inhibit-same-window . t)))
+@end lisp
+
+@node eldoc
+@section eldoc
+
+Various modes add local hooks to @code{eldoc-documentation-functions}.
+
+@itemize
+@item
+The minor mode @code{racket-xp-mode} adds hooks to document the identifiers at point or at an apparent s-expression application head position. The identifiers are documented from check-syntax annotations. You may customize the variable @ref{racket-xp-eldoc-level} to choose how much information is shown.
+
+@item
+The major mode @code{racket-repl-mode} adds hooks to describe the namespace identifers at point or at an apparent s-expression application head position. The description is a signature from surface syntax, or a Typed Racket type, or a ``bluebox'' for the namespace identifier.
+@end itemize
+
+Tip: With an @code{eldoc-documentation-strategy} of @code{eldoc-documentation-default}, these hooks show info about point when available, @emph{or else} for the s-expression application head. You may change that to @code{eldoc-documentation-compose} to show info for @emph{both} positions when available.
+
+Tip: Some people use the third-party package @code{eldoc-box} to show information in a child frame (near point, or in a corner of the main frame) instead of the echo area.
+
+Note: Racket Mode does not support the ``old'' eldoc API that uses @code{eldoc-documentation-function}, singular.
+
+@node Start faster
+@section Start faster
+
+You can use @ref{racket-mode-start-faster} to make the Racket REPL start faster.
+
+@node Inserting Unicode math symbols
+@section Inserting Unicode math symbols
+
+To insert various Unicode math symbols, you can:
+
+@itemize
+@item
+Use a command: @xref{racket-insert-symbol}.
+
+@item
+Use an Emacs input method, which you can enable in a buffer using a minor mode: @xref{racket-input-mode}.
+@end itemize
+
+@node Ligatures
+@section Ligatures
+
+Prior to Emacs 28.0.50, things like @code{auto-composition-mode} or @code{ligature-mode} that use @code{composition-function-table} to display ligatures can cause Emacs to freeze. This can happen when an Emacs @emph{overlay} displays a string containing such a ligature. Although the problem is not limited to Racket Mode, it affects the overlays created by @code{racket-show-pseudo-tooltip}, as used by @code{racket-xp-mode}. The only known work-around is to change the value of @code{racket-show-functions} to something ``boring'' such as @code{(racket-show-echo-area)}.
+
+@node Architecture
+@chapter Architecture
+
+Racket Mode consists of a single Emacs front end, and one or more processes running a back end written in Racket.@footnote{Racket Mode's Racket code is delivered as part of the Emacs package --- @emph{not} as a Racket package. Delivering both Emacs and Racket code in one Emacs package simplifies installation and updates. The main drawback is that the Racket code is not automatically compiled, as would normally be done by @code{raco pkg install}. To address this: @xref{racket-mode-start-faster}.}
+
+A back end is responsible for commands that cannot be implemented in Emacs Lisp, as well as supplying zero or more REPLs.
+
+Although you can start and stop a back end with @code{racket-start-back-end} and @code{racket-stop-back-end}, a back end is normally started automatically when the front end needs to issue some command. This includes commands that do @emph{not} involve @code{racket-run} or a REPL@. For example @code{racket-xp-mode} issues commands to check your code and annotate the buffer, even if you do not run it. In other words, a back end supplies zero or more REPLs --- a back end is not the same thing as a REPL@.
+
+To learn more about how @emph{many} REPLs are used: @xref{racket-repl-buffer-name-function}.
+
+In the common case there is only one back end, on the same local host as Emacs, and it is used for @code{.rkt} files in any directory.
+
+@image{scenario-0,,, Emacs front end and one local back end. Command I/O via pipe (local) or ssh (remote). Each back end provides zero or more REPLs.,.svg}
+
+However you can configure using any number of back ends on any number of local or remote host paths.
+
+As one example, you can have multiple back ends on the local host. One back end is used for a project under a specific subdirectory, and the other back end for all others. (Perhaps one project needs Racket built from source, and everything else uses an installed, older version of Racket. By using different back ends, not only will @code{racket-run} use the desired version of Racket for a file, so will commands for documentation or visiting definitions.)
+
+@image{scenario-1,,, Emacs front end and two local back ends --- one for a project path. Command I/O via pipe (local) or ssh (remote). Each back end provides zero or more REPLs.,.svg}
+
+(Note: If you use various versions of Racket via @uref{https://direnv.net/, @code{direnv}} combined with the @uref{https://github.com/purcell/envrc, @code{envrc} Emacs package}, you still need a distinct back end for each project. To arrange this, add or modify a @code{.dir-locals.el} file next to each @code{.envrc} file; @xref{racket-add-back-end}.)
+
+Furthermore, you could work with a project located on a remote host, whose files you edit using TRAMP@. You also want the back end to run there. For a remote host, Racket Mode copies its back end source files to the remote when necessary, and runs the back end using ssh.
+
+@image{scenario-2,,, Emacs front end and a back end on a remote host. Command I/O via pipe (local) or ssh (remote). Each back end provides zero or more REPLs.,.svg}
+
+Of course the remote can also use different back ends for different paths.
+
+@image{scenario-3,,, Emacs front end and two back ends on a remote host. Command I/O via pipe (local) or ssh (remote). Each back end provides zero or more REPLs.,.svg}
+
+And of course you can have multiple remotes.
+
+@image{scenario-4,,, Emacs front end and two back ends each on two remote hosts. Command I/O via pipe (local) or ssh (remote). Each back end provides zero or more REPLs.,.svg}
+
+If you need any of these ``fancy'' configurations: @xref{racket-add-back-end}.
+
+However by default a configuration is automatically created for one back end on the local host. For that very common case, you don't need to configure anything.
+
+@node Reference
+@chapter Reference
+
+The following sections are generated from the doc strings for each command, variable, or face. (As a result, some of the formatting might not be quite as nice or correct as in the previous sections.)
+
+You can also view these by using the normal Emacs help mechanism:
+
+@itemize
+@item
+@kbd{C-h f}  and enter the name of a command.
+@item
+@kbd{C-h v}  and enter the name of a variable.
+@end itemize
+
+@node Commands
+@chapter Commands
+
+@menu
+* Edit::
+* Hash Langs::
+* Explore::
+* Run::
+* Test::
+* Eval::
+* Collections::
+* Macro expand::
+* Packages::
+* Other::
+@end menu
+
+@node Edit
+@section Edit
+
+@menu
+* racket-mode::
+* racket-insert-lambda::
+* racket-insert-symbol::
+* racket-fold-all-tests::
+* racket-unfold-all-tests::
+* racket-tidy-requires::
+* racket-trim-requires::
+* racket-base-requires::
+* racket-add-require-for-identifier::
+* racket-indent-line::
+* racket-smart-open-bracket-mode::
+* racket-insert-closing::
+* racket-cycle-paren-shapes::
+* racket-backward-up-list::
+* racket-input-mode::
+* racket-align::
+* racket-unalign::
+* racket-complete-at-point::
+@end menu
+
+@node racket-mode
+@subsection racket-mode
+
+@kbd{M-x}  @code{racket-mode}
+
+Major mode for editing Racket source files.
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{TAB} 
+@tab @code{indent-for-tab-command}
+@item @kbd{C-M-u} 
+@tab @ref{racket-backward-up-list}
+@item @kbd{C-c C-p} 
+@tab @ref{racket-cycle-paren-shapes}
+@item @kbd{C-c C-s}  or @kbd{C-c C-.} 
+@tab @ref{racket-describe-search}
+@item @kbd{C-c C-d} 
+@tab @ref{racket-documentation-search}
+@item @kbd{C-c C-z} 
+@tab @code{racket-edit-switch-to-repl}
+@item @kbd{C-c C-e x} 
+@tab @ref{racket-expand-definition}
+@item @kbd{C-c C-e f} 
+@tab @ref{racket-expand-file}
+@item @kbd{C-c C-e e} 
+@tab @ref{racket-expand-last-sexp}
+@item @kbd{C-c C-e r} 
+@tab @ref{racket-expand-region}
+@item @kbd{C-c C-f} 
+@tab @ref{racket-fold-all-tests}
+@item @kbd{)}  or @kbd{]}  or @kbd{@}} 
+@tab @ref{racket-insert-closing}
+@item @kbd{C-M-y} 
+@tab @ref{racket-insert-lambda}
+@item @kbd{C-c C-l} 
+@tab @ref{racket-logger}
+@item @kbd{C-c C-x C-f} 
+@tab @ref{racket-open-require-path}
+@item @kbd{C-c C-o} 
+@tab @ref{racket-profile}
+@item @kbd{C-c C-c}  or @kbd{C-c C-k} 
+@tab @ref{racket-run-module-at-point}
+@item @kbd{C-M-x} 
+@tab @ref{racket-send-definition}
+@item @kbd{C-x C-e} 
+@tab @ref{racket-send-last-sexp}
+@item @kbd{C-c C-r} 
+@tab @ref{racket-send-region}
+@item @kbd{C-c C-t} 
+@tab @ref{racket-test}
+@item @kbd{C-c C-u} 
+@tab @ref{racket-unfold-all-tests}
+@end multitable
+
+
+
+In addition to any hooks its parent mode @code{prog-mode} might have run,
+this mode runs the hook @code{racket-mode-hook}, as the final or
+penultimate step during initialization.
+
+@node racket-insert-lambda
+@subsection racket-insert-lambda
+
+@kbd{C-M-y} 
+
+Insert λ.
+
+To insert Unicode symbols generally, see @ref{racket-input-mode}.
+
+@node racket-insert-symbol
+@subsection racket-insert-symbol
+
+@kbd{M-x}  @code{racket-insert-symbol}
+
+Insert a symbol from @ref{racket-input-translations}.
+
+A command alternative to the ``Racket'' input method activated by
+@ref{racket-input-mode}.
+
+Presents a @code{completing-read} UI, in which the symbols that would
+be inserted are shown as annotations -- a preview unlike what is
+currently provided by the Emacs UI for input method.
+
+@node racket-fold-all-tests
+@subsection racket-fold-all-tests
+
+@kbd{C-c C-f} 
+
+Fold (hide) all test submodules.
+
+@node racket-unfold-all-tests
+@subsection racket-unfold-all-tests
+
+@kbd{C-c C-u} 
+
+Unfold (show) all test submodules.
+
+@node racket-tidy-requires
+@subsection racket-tidy-requires
+
+@kbd{M-x}  @code{racket-tidy-requires}
+
+Make a single, sorted ``require'' form for each module.
+
+Use a single require-spec for each phase-level, sorted in this
+order: for-syntax, for-template, for-label, for-meta, and
+plain (phase 0).
+
+Within each phase-level, sort require-specs by module name.
+
+Format at most one module per line.
+
+Simplify gratuitous require-specs. For example reduce (only-in m)
+to m and elide (combine-in).
+
+See also: @ref{racket-trim-requires} and @ref{racket-base-requires}.
+
+@node racket-trim-requires
+@subsection racket-trim-requires
+
+@kbd{M-x}  @code{racket-trim-requires}
+
+Like @ref{racket-tidy-requires} but also delete unnecessary requires.
+
+Use macro-debugger/analysis/check-requires to analyze.
+
+The analysis:
+
+@itemize
+@item
+Needs the @code{macro-debugger-lib} package.
+
+@item
+Only works when the source file can be fully expanded with no
+@end itemize
+errors.
+
+@itemize
+@item
+Only works for requires at the top level of a source file using
+@end itemize
+#lang -- not for requires inside submodule forms. Furthermore,
+the analysis is not smart about module+ or module* forms -- it
+might delete outer requires that are actually needed by such
+submodules.
+
+See also: @ref{racket-base-requires}.
+
+@node racket-base-requires
+@subsection racket-base-requires
+
+@kbd{M-x}  @code{racket-base-requires}
+
+Change from ``#lang racket'' to ``#lang racket/base''.
+
+Using ``racket/base'' is a recommended optimization for Racket
+applications. Loading all of ``racket'' is slower and uses more
+memory.
+
+Add explicit requires for imports that are provided by ``racket''
+but not by ``racket/base''.
+
+Also do the equivalent of @ref{racket-trim-requires} and
+@code{nil}. See those commands for additional notes
+and caveats.
+
+Note: Currently this only helps change ``#lang racket'' to
+``#lang racket/base''. It does not help with other similar
+conversions, such as changing ``#lang typed/racket'' to ``#lang
+typed/racket/base''.
+
+@node racket-add-require-for-identifier
+@subsection racket-add-require-for-identifier
+
+@kbd{M-x}  @code{racket-add-require-for-identifier}
+
+Add a require for an identifier.
+
+Useful when you know the name of an export but don't remember
+from what module it is exported.
+
+After you choose an identifier, this command will:
+
+@itemize
+@item
+Insert the identifier at point if not already there.
+
+@item
+Insert a ``require'' form and do @ref{racket-tidy-requires}.
+@end itemize
+
+Caveat: This works only for identifiers that are documented. The
+mechanism is similar to that used for Racket's ``Search Manuals''
+feature. Today there exists no system-wide database of
+identifiers that are exported but not documented.
+
+@node racket-indent-line
+@subsection racket-indent-line
+
+@kbd{M-x}  @code{racket-indent-line}
+
+Indent current line as Racket code.
+
+Normally you don't invoke this command directly. Instead, because
+it is used as the value for the variable @code{indent-line-function}
+in @ref{racket-mode} and @ref{racket-repl-mode} buffers, it is used
+automatically when you press keys like RET or TAB@. However you
+might refer to it when configuring custom indentation, explained
+below.
+
+Following the tradition of @code{lisp-mode} and @code{scheme-mode}, the
+primary way to determine the indentation of a form is to look for
+a rule stored as a @code{racket-indent-function} property.
+
+To extend, use your Emacs init file to
+
+@lisp
+    (put SYMBOL 'racket-indent-function INDENT)
+@end lisp
+
+SYMBOL is the name of the Racket form like ``test-case'' and
+INDENT is an integer or the symbol ``defun''. When INDENT is an
+integer, the meaning is the same as for lisp-indent-function and
+scheme-indent-function: Indent the first INDENT arguments
+specially and indent any further arguments like a body. (The
+number may be negative; see discussion below.)
+
+For example:
+
+@lisp
+    (put 'test-case 'racket-indent-function 1)
+@end lisp
+
+This will change the indent of @code{test-case} from this:
+
+@example
+    (test-case foo
+               blah
+               blah)
+@end example
+
+to this:
+
+@example
+    (test-case foo
+      blah
+      blah)
+@end example
+
+For backward compatibility, if @code{racket-indent-function} has no
+property for a symbol, a scheme-indent-function property is also
+considered, although the ``with-'' indents defined by scheme-mode
+are ignored. This is only to help people who may have extensive
+scheme-indent-function settings, particularly in the form of file
+or dir local variables. Otherwise prefer putting properties on
+@code{racket-indent-function}.
+
+If no explicit rules match, regular expressions are used for a
+couple special cases:
+
+@itemize
+@item
+Forms that start with ``begin'' indent like ``begin''.
+
+@item
+Forms that start with ``def'' or ``with-'' indent like
+``define''.
+@end itemize
+
+On the one hand this is convenient when you create your own
+``DRY'' macros; they will indent as expected without you needing
+to make custom indent rules. On the other hand there can be false
+matches; for example a function or form named ``defer'' will
+indent like ``define''. This is a known drawback and is unlikely
+to be fixed unless/until Racket macros someday support a protocol
+to communicate how they should be indented.
+
+There is also automatic handling for:
+
+@itemize
+@item
+Forms that begin with a #:keyword (as found in contracts)
+
+@item
+Literal forms like #hasheq()
+
+@item
+Quoted forms when the variable @ref{racket-indent-sequence-depth}
+is > 0.
+
+@item
+@{@} forms when the variable @ref{racket-indent-curly-as-sequence} is
+not nil.
+@end itemize
+
+Finally and otherwise, a form will be indented as if it were a
+procedure application.
+
+--- --- ---
+
+Note: Racket Mode extends the traditional Emacs lisp indent spec
+to allow a @emph{negative} integer, which means that all distinguished
+forms should align with the first one. This style originated with
+``for/fold'', which has two distinguished forms. Traditionally
+those would indent like this:
+
+@example
+    (for/fold ([x xs])
+        ([y ys])            ; twice body indent
+      body)
+@end example
+
+However the popularly desired indent is:
+
+@example
+    (for/fold ([x xs])
+              ([y ys])      ; same as first distingushed form
+      body)
+@end example
+
+This idea extends to optional distinguished forms, such as Typed
+Racket annotation ``prefixes'' in ``for/fold'', ``for/x'', and
+even ``let'' forms:
+
+@example
+    (for/fold : Type
+              ([x xs])
+              ([y ys])      ; same as first distingushed form
+      body)
+@end example
+
+@node racket-smart-open-bracket-mode
+@subsection racket-smart-open-bracket-mode
+
+@kbd{M-x}  @code{racket-smart-open-bracket-mode}
+
+Minor mode to let you always type @code{[}' to insert @code{(} or @code{[} automatically.
+
+Behaves like the ``Automatically adjust opening square brackets''
+feature in Dr. Racket.
+
+By default, inserts a @code{(}. Inserts a @code{[} in the following cases:
+
+@itemize
+@item
+@code{let}-like bindings -- forms with @code{let} in the name as well
+as things like @code{parameterize}, @code{with-handlers}, and
+@code{with-syntax}.
+
+@item
+@code{case}, @code{cond}, @code{match}, @code{syntax-case}, @code{syntax-parse}, and
+@code{syntax-rules} clauses.
+
+@item
+@code{for}-like bindings and @code{for/fold} accumulators.
+
+@item
+@code{class} declaration syntax, such as @code{init} and @code{inherit}.
+@end itemize
+
+When the previous s-expression in a sequence is a compound
+expression, uses the same kind of delimiter.
+
+To force insert @code{[}, use @code{quoted-insert}.
+
+Combined with @ref{racket-insert-closing} this means that you can
+press the unshifted @code{[} and @code{]} keys to get whatever delimiters
+follow the Racket conventions for these forms. When something
+like @code{electric-pair-mode} or @code{paredit-mode} is active, you need
+not even press @code{]}.
+
+Tip: When also using @code{paredit-mode}, enable that first so that
+the binding for the @code{[}' key in the map for
+@ref{racket-smart-open-bracket-mode} has higher priority. See also
+the variable @code{minor-mode-map-alist}.
+
+Tip: When using this with @ref{racket-hash-lang-mode}, you may want
+to use @ref{racket-hash-lang-module-language-hook} to enable it IFF
+the module langugage is something like ``racket''.
+
+This is a minor mode.  If called interactively, toggle the
+@code{Racket-Smart-Open-Bracket mode} mode.  If the prefix argument is
+positive, enable the mode, and if it is zero or negative, disable
+the mode.
+
+If called from Lisp, toggle the mode if ARG is @code{toggle}.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate @ref{racket-smart-open-bracket-mode}.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+@node racket-insert-closing
+@subsection racket-insert-closing
+
+@kbd{]} or @kbd{)} 
+
+Insert a matching closing delimiter.
+
+With @kbd{C-u}  insert the typed character as-is.
+
+This is handy if you're not yet using something like
+@code{paredit-mode}, @code{smartparens-mode}, @code{parinfer-mode}, or simply
+@code{electric-pair-mode} added in Emacs 24.5.
+
+@node racket-cycle-paren-shapes
+@subsection racket-cycle-paren-shapes
+
+@kbd{C-c C-p} 
+
+Cycle the sexpr among () [] @{@}.
+
+@node racket-backward-up-list
+@subsection racket-backward-up-list
+
+@kbd{C-M-u} 
+
+Like @code{backward-up-list} but works when point is in a string or comment.
+
+Typically you should not use this command in Emacs Lisp --
+especially not repeatedly. Instead, initially use
+@code{racket--escape-string-or-comment} to move to the start of a
+string or comment, if any, then use normal @code{backward-up-list}
+repeatedly.
+
+@node racket-input-mode
+@subsection racket-input-mode
+
+@kbd{M-x}  @code{racket-input-mode}
+
+A minor mode to enable the ``Racket'' input method.
+
+The Racket input method lets you type @ref{racket-input-prefix},
+followed by a key sequence from @ref{racket-input-translations},
+directly in a buffer, to insert a symbol.
+
+For example when @ref{racket-input-prefix} is the default ``\'', you
+can type ``\All'' and it is immediately replaced with ``∀''.
+
+To enable @ref{racket-input-mode} (and the Racket input method) for
+all new buffers, put the following in your Emacs init file:
+
+@lisp
+    (dolist (hook '(racket-mode-hook
+                    racket-hash-lang-mode-hook
+                    racket-repl-mode-hook))
+      (add-hook hook #'racket-input-mode))
+@end lisp
+
+Tip: You may use the standard Emacs key C-\ to toggle the
+current input method.
+
+Tip: If you don’t like the highlighting of partially matching
+tokens you can disable that using @code{input-method-highlight-flag}.
+
+See the Emacs manual for other information about input methods.
+
+Tip: Another way to use @ref{racket-input-translations} is by using a
+command: @ref{racket-insert-symbol}.
+
+This is a minor mode.  If called interactively, toggle the
+@code{Racket-Input mode} mode.  If the prefix argument is positive,
+enable the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is @code{toggle}.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate @ref{racket-input-mode}.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+@node racket-align
+@subsection racket-align
+
+@kbd{M-x}  @code{racket-align}
+
+Align values in the same column.
+
+Useful for binding forms like ``let'' and ``parameterize'',
+conditionals like ``cond'' and ``match'', association lists, and
+any series of couples like the arguments to ``hash''.
+
+Before choosing this command, put point on the first of a series
+of ``couples''. A couple is:
+
+@itemize
+@item
+A list of two or more sexprs: ``[sexpr val sexpr @dots{}]''.
+@item
+Two sexprs: ``sexpr val''.
+@end itemize
+
+Each ``val'' moves to the same column and is
+@code{prog-indent-sexp}-ed (in case it is a multi-line form).
+
+For example with point on the ``['' before ``a'':
+
+@example
+    Before             After
+
+    (let ([a 12]       (let ([a   12]
+          [bar 23])          [bar 23])
+      ....)              ....)
+
+    ([a . 12]          ([a   . 12]
+     [bar . 23])        [bar . 23])
+
+    (cond [a? #t]      (cond [a?   #t]
+          [b? (f x           [b?   (f x
+                 y)]                  y)]
+          [else #f])         [else #f])
+@end example
+
+Or with point on the quote before ``a'':
+
+@example
+    (list a 12        (list a   12
+          bar 23)           bar 23)
+@end example
+
+If more than one couple is on the same line, none are aligned,
+because it is unclear where the value column should be. For
+example the following form will not change; @ref{racket-align} will
+display an error message:
+
+@example
+    (let ([a 0][b 1]
+          [c 2])       error; unchanged
+      ....)
+@end example
+
+When a couple's sexprs start on different lines, that couple is
+ignored. Other, single-line couples in the series are aligned as
+usual. For example:
+
+@example
+    (let ([foo         (let ([foo
+           0]                 0]
+          [bar 1]            [bar 1]
+          [x 2])             [x   2])
+      ....)              ....)
+@end example
+
+See also: @ref{racket-unalign}.
+
+@node racket-unalign
+@subsection racket-unalign
+
+@kbd{M-x}  @code{racket-unalign}
+
+The opposite of @ref{racket-align}.
+
+Effectively does M-x @code{just-one-space} and @code{prog-indent-sexp} for
+each couple's value.
+
+@node racket-complete-at-point
+@subsection racket-complete-at-point
+
+A value for the variable @code{completion-at-point-functions}.
+
+Completion candidates are drawn from the same symbols used for
+font-lock. This is a static list. If you want dynamic, smarter
+completion candidates, enable the minor mode @ref{racket-xp-mode}.
+
+@node Hash Langs
+@section Hash Langs
+
+@menu
+* racket-hash-lang-mode::
+* racket-hash-lang-backward::
+* racket-hash-lang-forward::
+* racket-hash-lang-up::
+* racket-hash-lang-down::
+* racket-hash-lang-C-M-q-dwim::
+@end menu
+
+@node racket-hash-lang-mode
+@subsection racket-hash-lang-mode
+
+@kbd{M-x}  @code{racket-hash-lang-mode}
+
+Use color-lexer, indent, and navigation supplied by a #lang.
+
+An experimental major mode alternative to @ref{racket-mode} for
+source file edit buffers.
+
+In your Emacs configuration, you may want to update the
+variable @code{auto-mode-alist} to use @ref{racket-hash-lang-mode} for
+file extensions like ``.rkt'', ``.scrbl'', and/or ``.rhm''.
+
+Languages supply colors for lexer tokens like strings and
+comments; see the customization variable
+@ref{racket-hash-lang-token-face-alist}. For more colors see the hook
+variable @ref{racket-hash-lang-module-language-hook}, which can also
+be used to vary configurations per language.
+
+A discussion of the information provided by a Racket language:
+
+@uref{https://docs.racket-lang.org/tools/lang-languages-customization.html}
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{TAB} 
+@tab @code{indent-for-tab-command}
+@item @kbd{RET} 
+@tab @code{newline-and-indent}
+@item @kbd{C-c C-z} 
+@tab @code{racket-edit-switch-to-repl}
+@item @kbd{C-c C-e x} 
+@tab @ref{racket-expand-definition}
+@item @kbd{C-c C-e f} 
+@tab @ref{racket-expand-file}
+@item @kbd{C-c C-e e} 
+@tab @ref{racket-expand-last-sexp}
+@item @kbd{C-c C-e r} 
+@tab @ref{racket-expand-region}
+@item @kbd{C-c C-f} 
+@tab @ref{racket-fold-all-tests}
+@item @kbd{C-M-q} 
+@tab @ref{racket-hash-lang-C-M-q-dwim}
+@item @kbd{C-M-b} 
+@tab @ref{racket-hash-lang-backward}
+@item @kbd{DEL} 
+@tab @code{racket-hash-lang-delete-backward-char}
+@item @kbd{C-M-d} 
+@tab @ref{racket-hash-lang-down}
+@item @kbd{C-M-f} 
+@tab @ref{racket-hash-lang-forward}
+@item @kbd{C-M-u} 
+@tab @ref{racket-hash-lang-up}
+@item @kbd{C-M-y} 
+@tab @ref{racket-insert-lambda}
+@item @kbd{C-c C-l} 
+@tab @ref{racket-logger}
+@item @kbd{C-c C-x C-f} 
+@tab @ref{racket-open-require-path}
+@item @kbd{C-c C-o} 
+@tab @ref{racket-profile}
+@item @kbd{C-c C-c}  or @kbd{C-c C-k} 
+@tab @ref{racket-run-module-at-point}
+@item @kbd{C-M-x} 
+@tab @ref{racket-send-definition}
+@item @kbd{C-x C-e} 
+@tab @ref{racket-send-last-sexp}
+@item @kbd{C-c C-r} 
+@tab @ref{racket-send-region}
+@item @kbd{C-c C-t} 
+@tab @ref{racket-test}
+@item @kbd{C-c C-u} 
+@tab @ref{racket-unfold-all-tests}
+@end multitable
+
+
+
+
+In addition to any hooks its parent mode @code{prog-mode} might have run,
+this mode runs the hook @code{racket-hash-lang-mode-hook}, as the final or
+penultimate step during initialization.
+
+@node racket-hash-lang-backward
+@subsection racket-hash-lang-backward
+
+@kbd{C-M-b} 
+
+Like @code{backward-sexp} but uses #lang supplied navigation.
+
+@node racket-hash-lang-forward
+@subsection racket-hash-lang-forward
+
+@kbd{C-M-f} 
+
+Like @code{forward-sexp} but uses #lang supplied navigation.
+
+@node racket-hash-lang-up
+@subsection racket-hash-lang-up
+
+@kbd{C-M-u} 
+
+Like @code{backward-up-list} but uses #lang supplied navigation.
+
+@node racket-hash-lang-down
+@subsection racket-hash-lang-down
+
+@kbd{C-M-d} 
+
+Like @code{down-list} but uses #lang supplied navigation.
+
+@node racket-hash-lang-C-M-q-dwim
+@subsection racket-hash-lang-C-M-q-dwim
+
+@kbd{C-M-q} 
+
+Fill or indent depending on lang lexer's token at point.
+
+When the lang lexer token is@dots{}
+
+@itemize
+@item
+``text'', for example in Scribble document text, do
+@code{fill-paragraph}.
+
+@item
+``comment'', do @code{fill-comment}.
+
+@item
+``whitespace'', give an error message.
+
+@item
+anything else, do @code{prog-indent-sexp}.
+@end itemize
+
+@node Explore
+@section Explore
+
+@menu
+* racket-xp-mode::
+* racket-xp-describe::
+* racket-xp-documentation::
+* racket-xp-next-definition::
+* racket-xp-previous-definition::
+* racket-xp-next-use::
+* racket-xp-previous-use::
+* racket-xp-next-error::
+* racket-xp-previous-error::
+* racket-xp-tail-up::
+* racket-xp-tail-down::
+* racket-xp-tail-next-sibling::
+* racket-xp-tail-previous-sibling::
+* racket-documentation-search::
+* racket-describe-mode::
+* racket-describe-search::
+@end menu
+
+@node racket-xp-mode
+@subsection racket-xp-mode
+
+@kbd{M-x}  @code{racket-xp-mode}
+
+A minor mode that analyzes expanded code to explain and explore.
+
+This minor mode is an optional enhancement to @ref{racket-mode} edit
+buffers. Like any minor mode, you can turn it on or off for a
+specific buffer. If you always want to use it, put the following
+code in your Emacs init file:
+
+@lisp
+    (require 'racket-xp)
+    (add-hook 'racket-mode-hook #'racket-xp-mode)
+@end lisp
+
+Note: This mode won't do anything unless/until the Racket Mode
+back end is running. It will try to start the back end
+automatically. You do @emph{not} need to @ref{racket-run} the buffer you
+are editing.
+
+This mode uses the drracket/check-syntax package to analyze
+fully-expanded programs, without needing to evaluate a.k.a.
+``run'' them. The resulting analysis provides information for:
+
+@itemize
+@item
+Visually annotating bindings -- local or imported definitions
+and references to them.
+
+@item
+Visually annotating expressions in a tail position, as well as
+the enclosing expression with respect to which they are in a
+tail position.
+
+@item
+Completion candidates.
+
+@item
+Defintions' source and documentation.
+@end itemize
+
+When point is on a definition or use, related items are
+highlighted using @ref{racket-xp-def-face} and @ref{racket-xp-use-face}
+-- instead of drawing arrows as in Dr Racket. Information is
+displayed using the function(s) in the hook variable
+@ref{racket-show-functions}; it is also available when hovering the
+mouse cursor.
+
+Note: If you find these point-motion features too distracting
+and/or slow, in your @code{racket-xp-mode-hook} you may disable them:
+
+@lisp
+  (require 'racket-xp)
+  (add-hook 'racket-xp-mode-hook
+            (lambda ()
+              (remove-hook 'pre-redisplay-functions
+                           #'racket-xp-pre-redisplay
+                           t)))
+@end lisp
+
+The remaining features discussed below will still work.
+
+You may also use commands to navigate among a definition and its
+uses, or to rename a local definitions and all its uses:
+
+@itemize
+@item
+@ref{racket-xp-next-definition}
+@item
+@ref{racket-xp-previous-definition}
+@item
+@ref{racket-xp-next-use}
+@item
+@ref{racket-xp-previous-use}
+@end itemize
+
+In the following little example, not only does
+drracket/check-syntax distinguish the various ``x'' bindings, it
+understands the two different imports of ``define'':
+
+@example
+  #lang racket/base
+  (define x 1)
+  x
+  (let ([x x])
+    (+ x 1))
+  (module m typed/racket/base
+    (define x 2)
+    x)
+@end example
+
+When point is on the opening parenthesis of an expression in tail
+position, it is highlighted using the face
+@ref{racket-xp-tail-position-face}.
+
+When point is on the opening parenthesis of an enclosing
+expression with respect to which one or more expressions are in
+tail position, it is highlighted using the face
+@ref{racket-xp-tail-target-face}.
+
+Furthermore, when point is on the opening parenthesis of either
+kind of expression, all of the immediately related expressions
+are also highlighted. Various commands move among them:
+
+@itemize
+@item
+@ref{racket-xp-tail-up}
+@item
+@ref{racket-xp-tail-down}
+@item
+@ref{racket-xp-tail-next-sibling}
+@item
+@ref{racket-xp-tail-previous-sibling}
+@end itemize
+
+The function @code{racket-xp-complete-at-point} is added to the
+variable @code{completion-at-point-functions}. Note that in this case,
+it is not smart about submodules; identifiers are assumed to be
+definitions from the file's module or its imports. In addition to
+supplying completion candidates, it supports the
+``:company-location'' property to inspect the definition of a
+candidate and the ``:company-doc-buffer'' property to view its
+documentation.
+
+When you edit the buffer, existing annotations are retained;
+their positions are updated to reflect the edit. Annotations for
+new or deleted text are not requested until after
+@ref{racket-xp-after-change-refresh-delay} seconds. The request is
+made asynchronously so that Emacs will not block -- for
+moderately complex source files, it can take some seconds simply
+to fully expand them, as well as a little more time for the
+drracket/check-syntax analysis. When the results are ready, all
+annotations for the buffer are completely refreshed.
+
+You may also set @ref{racket-xp-after-change-refresh-delay} to nil
+and use the @code{racket-xp-annotate} command manually.
+
+The mode line changes to reflect the current status of
+annotations, and whether or not you had a syntax error.
+
+If you have one or more syntax errors, @code{next-error} and
+@code{previous-error} navigate among them. Although most languages
+will stop after the first syntax error, some like Typed Racket
+will try to collect and report multiple errors.
+
+You may use @code{xref-find-definitions} @kbd{M-.} ,
+@code{xref-pop-marker-stack} @kbd{M-x}  @code{xref-pop-marker-stack}, and
+@code{xref-find-references}: @ref{racket-xp-mode} adds a backend to the
+variable @code{xref-backend-functions}. This backend uses information
+from the drracket/check-syntax static analysis. Its ability to
+find references is limited to the current file; when it finds
+none it will try the default xref backend implementation which is
+grep-based.
+
+Tip: This mode follows the convention that a minor mode may only
+use a prefix key consisting of ``C-c'' followed by a punctuation
+key. As a result, @code{racket-xp-control-c-hash-keymap} is bound to
+``C-c #'' by default. Although you might find this awkward to
+type, remember that as an Emacs user, you are free to bind this
+map to a more convenient prefix, and/or bind any individual
+commands directly to whatever keys you prefer.
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{C-c # N} 
+@tab @code{next-error}
+@item @kbd{C-c # P} 
+@tab @code{previous-error}
+@item @kbd{C-c C-s} 
+@tab @ref{racket-describe-search}
+@item @kbd{C-c # g} 
+@tab @code{racket-xp-annotate}
+@item @kbd{C-c C-.} 
+@tab @ref{racket-xp-describe}
+@item @kbd{C-c C-d} 
+@tab @ref{racket-xp-documentation}
+@item @kbd{C-c # j} 
+@tab @ref{racket-xp-next-definition}
+@item @kbd{C-c # n} 
+@tab @ref{racket-xp-next-use}
+@item @kbd{C-c # k} 
+@tab @ref{racket-xp-previous-definition}
+@item @kbd{C-c # p} 
+@tab @ref{racket-xp-previous-use}
+@item @kbd{C-c # r} 
+@tab @code{racket-xp-rename}
+@item @kbd{C-c # v} 
+@tab @ref{racket-xp-tail-down}
+@item @kbd{C-c # >} 
+@tab @ref{racket-xp-tail-next-sibling}
+@item @kbd{C-c # <} 
+@tab @ref{racket-xp-tail-previous-sibling}
+@item @kbd{C-c # ^} 
+@tab @ref{racket-xp-tail-up}
+@item @kbd{M-.}  or @kbd{C-c # .} 
+@tab @code{xref-find-definitions}
+@item @kbd{C-c # ?} 
+@tab @code{xref-find-references}
+@end multitable
+
+
+
+This is a minor mode.  If called interactively, toggle the
+@code{Racket-Xp mode} mode.  If the prefix argument is positive,
+enable the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is @code{toggle}.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate @ref{racket-xp-mode}.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+@node racket-xp-describe
+@subsection racket-xp-describe
+
+@kbd{C-c C-.} 
+
+Describe the identifier at point.
+
+The command varies based on how many @kbd{C-u}  command prefixes you supply.
+
+@itemize
+@item
+@kbd{C-c C-.} 
+
+Uses the symbol at point. If no such symbol exists, you are
+prompted enter the identifier, but in this case it only
+considers definitions or imports at the file's module level --
+not local bindings nor definitions in submodules.
+
+@itemize
+@item
+If the identifier has installed Racket documentation, then a
+simplified version of the HTML is presented in the buffer,
+including the ``blue box'', documentation prose, and
+examples.
+
+@item
+Otherwise, if the identifier is a function, then its
+signature is displayed, for example ``(name arg-1-name
+arg-2-name)''.
+@end itemize
+
+@item
+@kbd{C-u}  @kbd{C-c C-.} 
+
+Always prompts you to enter a symbol, defaulting to the symbol
+at point if any.
+
+@item
+@kbd{C-u}  @kbd{C-u}  @kbd{C-c C-.} 
+
+This is an alias for @ref{racket-describe-search}, which uses
+installed documentation in a @ref{racket-describe-mode} buffer
+instead of an external web browser.
+@end itemize
+
+The intent is to give a quick reminder or introduction to
+something, regardless of whether it has installed documentation
+-- and to do so within Emacs, without switching to a web browser.
+
+This buffer is also displayed when you use @code{company-mode} and
+press F1 or C-h in its pop up completion list.
+
+@node racket-xp-documentation
+@subsection racket-xp-documentation
+
+@kbd{C-c C-d} 
+
+View documentation in an external web browser.
+
+The command varies based on how many @kbd{C-u} 
+command prefixes you supply.
+
+@itemize
+@item
+@kbd{C-c C-d} 
+
+Uses the symbol at point. Tries to find documentation for an
+identifer defined in the expansion of the current buffer.
+
+If no such identifer exists, opens the Search Manuals page. In
+this case, the variable @ref{racket-documentation-search-location}
+determines whether the search is done locally as with @code{raco
+  doc}, or visits a URL@.
+
+@item
+@kbd{C-u}  @kbd{C-c C-d} 
+
+Always prompts you to enter a symbol, defaulting to the symbol
+at point if any.
+
+@item
+@kbd{C-u}  @kbd{C-u}  @kbd{C-c C-d} 
+
+Always prompts you to enter anything, defaulting to the symbol
+at point if any.
+
+Proceeds directly to the Search Manuals page. Use this if you
+would like to see documentation for all identifiers named
+``define'', for example.
+@end itemize
+
+@node racket-xp-next-definition
+@subsection racket-xp-next-definition
+
+@kbd{C-c # j} 
+
+Move point to the next definition.
+
+@node racket-xp-previous-definition
+@subsection racket-xp-previous-definition
+
+@kbd{C-c # k} 
+
+Move point to the previous definition.
+
+@node racket-xp-next-use
+@subsection racket-xp-next-use
+
+@kbd{C-c # n} 
+
+When point is on a use, go to the next, sibling use.
+
+@node racket-xp-previous-use
+@subsection racket-xp-previous-use
+
+@kbd{C-c # p} 
+
+When point is on a use, go to the previous, sibling use.
+
+@node racket-xp-next-error
+@subsection racket-xp-next-error
+
+@kbd{M-x}  @code{racket-xp-next-error}
+
+An obsolete alias for @code{next-error}.
+
+@node racket-xp-previous-error
+@subsection racket-xp-previous-error
+
+@kbd{M-x}  @code{racket-xp-previous-error}
+
+An obsolete alias for @code{previous-error}.
+
+@node racket-xp-tail-up
+@subsection racket-xp-tail-up
+
+@kbd{C-c # ^} 
+
+Go ``up'' to the expression enclosing an expression in tail position.
+
+When point is on the opening parenthesis of an expression in tail
+position, go its ``target'' -- that is, go to the enclosing
+expression with the same continuation as the tail expression.
+
+@node racket-xp-tail-down
+@subsection racket-xp-tail-down
+
+@kbd{C-c # v} 
+
+Go ``down'' to the first tail position enclosed by the current expression.
+
+@node racket-xp-tail-next-sibling
+@subsection racket-xp-tail-next-sibling
+
+@kbd{C-c # >} 
+
+Go to the next tail position sharing the same enclosing expression.
+
+@node racket-xp-tail-previous-sibling
+@subsection racket-xp-tail-previous-sibling
+
+@kbd{C-c # <} 
+
+Go to the previous tail position sharing the same enclosing expression.
+
+@node racket-documentation-search
+@subsection racket-documentation-search
+
+@kbd{C-c C-d} 
+
+Search documentation.
+
+This command is useful in several situations:
+
+@itemize
+@item
+You are not using @ref{racket-xp-mode} for a @ref{racket-mode} edit
+buffer, so @ref{racket-xp-documentation} is not available.
+
+@item
+There is no @ref{racket-repl-mode} buffer with a live namespace, so
+@ref{racket-repl-documentation} is not available or helpful.
+
+@item
+You want to search for definitions provided by all modules --
+for example, the ``define'' syntax provided by racket/base, by
+typed/racket/base, and by other modules, as well definitions or
+topics that merely include ``define''.
+@end itemize
+
+This command does not try to go directly to the help topic for a
+definition provided by any specific module. Instead it goes to
+the Racket ``Search Manuals'' page.
+
+@node racket-describe-mode
+@subsection racket-describe-mode
+
+@kbd{M-x}  @code{racket-describe-mode}
+
+Major mode for viewing Racket documentation.
+
+Many of the default key bindings are similar to @code{Info-mode}, as
+listed below.
+
+To see ``On this page'' links, use @kbd{M-g i}  for @code{imenu}, or,
+when @code{context-menu-mode} is enabled, right click the mouse.
+
+Supports bookmarks: @code{bookmark-set}.
+
+Supports org links: @code{org-store-link}, @code{org-insert-link}, and
+@code{org-open-at-point}.
+
+Internal, intra-doc links -- which go to other doc pages in the
+same @ref{racket-describe-mode} buffer in Emacs -- are given
+@ref{racket-doc-link-face} unless the documentation specifies some
+non-default face.
+
+External links -- which are opened using the variable
+@ref{racket-browse-url-function}, by default in an external web
+browser program -- are given @ref{racket-ext-link-face}.
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{<} 
+@tab @code{beginning-of-buffer}
+@item @kbd{>} 
+@tab @code{end-of-buffer}
+@item @kbd{q} 
+@tab @code{quit-window}
+@item @kbd{l}  or @kbd{b}  or @kbd{C-c C-b} 
+@tab @code{racket-describe-back}
+@item @kbd{x} 
+@tab @code{racket-describe-browse-external}
+@item @kbd{r}  or @kbd{f}  or @kbd{C-c C-f} 
+@tab @code{racket-describe-forward}
+@item @kbd{n} 
+@tab @code{racket-describe-nav-next}
+@item @kbd{p} 
+@tab @code{racket-describe-nav-prev}
+@item @kbd{C-^} 
+@tab @code{racket-describe-nav-top}
+@item @kbd{^} 
+@tab @code{racket-describe-nav-up}
+@item @kbd{i}  or @kbd{C-c C-s} 
+@tab @ref{racket-describe-search}
+@item @kbd{g} 
+@tab @code{revert-buffer}
+@item @kbd{DEL}  or @kbd{S-SPC} 
+@tab @code{scroll-down-command}
+@item @kbd{SPC} 
+@tab @code{scroll-up-command}
+@end multitable
+
+
+
+In addition to any hooks its parent mode @code{special-mode} might have
+run, this mode runs the hook @code{racket-describe-mode-hook}, as the final
+or penultimate step during initialization.
+
+@node racket-describe-search
+@subsection racket-describe-search
+
+@kbd{C-c C-.} or @kbd{C-c C-s} 
+
+Search installed documentation; view using @ref{racket-describe-mode}.
+
+@node Run
+@section Run
+
+@menu
+* racket-repl-mode::
+* racket-run::
+* racket-run-and-switch-to-repl::
+* racket-run-module-at-point::
+* racket-repl::
+* racket-repl-describe::
+* racket-repl-documentation::
+* racket-racket::
+* racket-profile::
+* racket-profile-mode::
+* racket-logger::
+* racket-logger-mode::
+* racket-debug-mode::
+* racket-repl-clear::
+* racket-repl-clear-leaving-last-prompt::
+@end menu
+
+@node racket-repl-mode
+@subsection racket-repl-mode
+
+@kbd{M-x}  @code{racket-repl-mode}
+
+Major mode for Racket REPL@.
+
+You may use @code{xref-find-definitions} @kbd{M-.}  and
+@code{xref-pop-marker-stack} @kbd{M-x}  @code{xref-pop-marker-stack}:
+@ref{racket-repl-mode} adds a backend to the variable
+@code{xref-backend-functions}. This backend uses information about
+identifier bindings and modules from the REPL's namespace.
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{TAB} 
+@tab @code{indent-for-tab-command}
+@item @kbd{C-j} 
+@tab @code{newline-and-indent}
+@item @kbd{C-M-q} 
+@tab @code{prog-indent-sexp}
+@item @kbd{C-M-u} 
+@tab @ref{racket-backward-up-list}
+@item @kbd{C-c C-s} 
+@tab @ref{racket-describe-search}
+@item @kbd{C-c C-e x} 
+@tab @ref{racket-expand-definition}
+@item @kbd{C-c C-e f} 
+@tab @ref{racket-expand-file}
+@item @kbd{C-c C-e e} 
+@tab @ref{racket-expand-last-sexp}
+@item @kbd{C-c C-e r} 
+@tab @ref{racket-expand-region}
+@item @kbd{)}  or @kbd{]}  or @kbd{@}} 
+@tab @ref{racket-insert-closing}
+@item @kbd{C-M-y} 
+@tab @ref{racket-insert-lambda}
+@item @kbd{C-c C-l} 
+@tab @ref{racket-logger}
+@item @kbd{C-c C-c} 
+@tab @code{racket-repl-break}
+@item @kbd{C-c C-u} 
+@tab @code{racket-repl-clear-input}
+@item @kbd{C-c C-o} 
+@tab @code{racket-repl-delete-output}
+@item @kbd{C-c C-.} 
+@tab @ref{racket-repl-describe}
+@item @kbd{C-c C-d} 
+@tab @ref{racket-repl-documentation}
+@item @kbd{C-c C-\} 
+@tab @code{racket-repl-exit}
+@item @kbd{M-n} 
+@tab @code{racket-repl-next-input}
+@item @kbd{C-c C-n} 
+@tab @code{racket-repl-next-prompt-or-run}
+@item @kbd{M-p} 
+@tab @code{racket-repl-previous-input}
+@item @kbd{C-c C-p} 
+@tab @code{racket-repl-previous-prompt-or-run}
+@item @kbd{RET} 
+@tab @code{racket-repl-submit}
+@item @kbd{C-c C-z} 
+@tab @code{racket-repl-switch-to-edit}
+@end multitable
+
+
+
+This mode runs the hook @code{racket-repl-mode-hook}, as the final or
+penultimate step during initialization.
+
+@node racket-run
+@subsection racket-run
+
+@kbd{M-x}  @code{racket-run}
+
+Save the buffer in REPL and run your program.
+
+As well as evaluating the outermost, file module, automatically
+runs the submodules specified by the customization variable
+@ref{racket-submodules-to-run}.
+
+See also @ref{racket-run-module-at-point}, which runs just the
+specific module at point.
+
+The command varies based on how many @kbd{C-u} 
+prefix arguments you supply.
+
+@itemize
+@item
+@kbd{<f5>} 
+
+Follows the @ref{racket-error-context} setting.
+
+@item
+@kbd{C-u}  @kbd{<f5>} 
+
+Uses errortrace for improved stack traces, as if
+@ref{racket-error-context} were set to ``high''.
+
+This lets you keep @ref{racket-error-context} set to a faster
+value like ``low'' or ``medium'', then conveniently re-run
+when you need a better strack trace.
+
+@item
+@kbd{C-u}  @kbd{C-u}  @kbd{<f5>} 
+
+Instruments code for step debugging. See @ref{racket-debug-mode}
+and the variable @ref{racket-debuggable-files}.
+@end itemize
+
+Each run occurs within a Racket custodian. Any prior run's
+custodian is shut down, releasing resources like threads and
+ports. Each run's evaluation environment is reset to the contents
+of the source file. In other words, like Dr Racket, this provides
+the benefit that your source file is the ``single source of
+truth''. At the same time, the run gives you a REPL inside the
+namespace of the module, giving you the ability to explore it
+interactively. Any explorations are temporary, unless you also
+make them to your source file, they will be lost on the next run.
+
+See also @ref{racket-run-and-switch-to-repl}, which is even more like
+Dr Racket's Run command because it selects the REPL window after
+running.
+
+To visit error locations, move point there and press RET or mouse
+click. Or, use the standard @code{next-error} and @code{previous-error}
+commands from either the edit or REPL buffer.
+
+@node racket-run-and-switch-to-repl
+@subsection racket-run-and-switch-to-repl
+
+@kbd{<f5>} 
+
+This is @ref{racket-run} followed by selecting the REPL buffer window.
+
+This is similar to how Dr Racket behaves.
+
+To make it even more similar, you may add @ref{racket-repl-clear} to
+the variable @ref{racket-before-run-hook}.
+
+@node racket-run-module-at-point
+@subsection racket-run-module-at-point
+
+@kbd{C-c C-k} or @kbd{C-c C-c} 
+
+Save the buffer and run the module at point.
+
+Like @ref{racket-run} but runs the innermost module around point,
+which is determined textually by looking for ``module'',
+``module*'', or ``module+'' forms nested to any depth, else
+simply the outermost, file module.
+
+@node racket-repl
+@subsection racket-repl
+
+@kbd{M-x}  @code{racket-repl}
+
+Show a Racket REPL buffer in some window.
+
+The intended use of Racket Mode's REPL is that you @code{find-file}
+some specific file, then run it using a command like @ref{racket-run}
+or @ref{racket-run-module-at-point}. The resulting REPL will
+correspond to those definitions and match your expectations.
+
+Therefore this @ref{racket-repl} command -- which is intended as a
+convenience for people who want to ``just get a quick scratch
+REPL'' -- is actually implemented as running the file named in
+the customization variable @ref{racket-repl-command-file}. When that
+file doesn't exist, it is created to contain just ``#lang
+racket/base''. You may edit the file to use a different lang,
+require other modules, or whatever.
+
+@node racket-repl-describe
+@subsection racket-repl-describe
+
+@kbd{C-c C-.} 
+
+Describe the identifier at point.
+
+The command varies based on how many @kbd{C-u}  prefix arguments you supply.
+
+@itemize
+@item
+@kbd{C-c C-.} 
+
+Uses the symbol at point. If no such symbol exists, you are
+prompted enter the identifier, but in this case it only
+considers definitions or imports at the file's module level --
+not local bindings nor definitions in submodules.
+
+@itemize
+@item
+If the identifier has installed Racket documentation, then a
+simplified version of the HTML is presented in the buffer,
+including the ``blue box'', documentation prose, and
+examples.
+
+@item
+Otherwise, if the identifier is a function, then its
+signature is displayed, for example ``(name arg-1-name
+arg-2-name)''.
+@end itemize
+
+@item
+@kbd{C-u}  @kbd{C-c C-.} 
+
+Always prompts you to enter a symbol, defaulting to the symbol
+at point if any.
+
+@item
+@kbd{C-u}  @kbd{C-u}  @kbd{C-c C-.} 
+
+This is an alias for @ref{racket-describe-search}, which uses
+installed documentation in a @ref{racket-describe-mode} buffer
+instead of an external web browser.
+@end itemize
+
+The intent is to give a quick reminder or introduction to
+something, regardless of whether it has installed documentation
+-- and to do so within Emacs, without switching to a web browser.
+
+@node racket-repl-documentation
+@subsection racket-repl-documentation
+
+@kbd{C-c C-d} 
+
+View documentation in an external web browser.
+
+The command varies based on how many @kbd{C-u}  command prefixes you supply.
+
+@itemize
+@item
+@kbd{C-c C-d} 
+
+Uses the symbol at point. Tries to find documentation for an
+identifer defined in the current namespace.
+
+If no such identifer exists, opens the Search Manuals page. In
+this case, the variable @ref{racket-documentation-search-location}
+determines whether the search is done locally as with @code{raco
+  doc}, or visits a URL@.
+
+@item
+@kbd{C-u}  @kbd{C-c C-d} 
+
+Prompts you to enter a symbol, defaulting to the symbol at
+point if any.
+
+@item
+@kbd{C-u}  @kbd{C-u}  @kbd{C-c C-d} 
+
+Prompts you to enter anything, defaulting to the symbol at
+point if any.
+
+Proceeds directly to the Search Manuals page. Use this if you
+would like to see documentation for all identifiers named
+``define'', for example.
+@end itemize
+
+@node racket-racket
+@subsection racket-racket
+
+@kbd{C-M-<f5>} 
+
+Use command-line racket to run the file.
+
+Uses a shell or terminal buffer as specified by the configuration
+variable @ref{racket-shell-or-terminal-function}.
+
+@node racket-profile
+@subsection racket-profile
+
+@kbd{C-c C-o} 
+
+Like @ref{racket-run-module-at-point} but with profiling.
+
+Results are presented in a @ref{racket-profile-mode} buffer, which
+also lets you quickly view the source code.
+
+You may evaluate expressions in the REPL@. They are also profiled.
+Use @code{racket-profile-refresh} to see the updated results. In
+other words a possible workflow is: @ref{racket-profile} a .rkt file,
+call one its functions in the REPL, and refresh the profile
+results.
+
+Caveat: Only source files are instrumented. You may need to
+delete compiled/*.zo files.
+
+@node racket-profile-mode
+@subsection racket-profile-mode
+
+@kbd{M-x}  @code{racket-profile-mode}
+
+Major mode for results of @ref{racket-profile}.
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{q} 
+@tab @code{quit-window}
+@item @kbd{g} 
+@tab @code{racket-profile-refresh}
+@item @kbd{f} 
+@tab @code{racket-profile-show-non-project}
+@item @kbd{z} 
+@tab @code{racket-profile-show-zero}
+@item @kbd{.}  or @kbd{RET} 
+@tab @code{racket-profile-visit}
+@end multitable
+
+
+
+
+In addition to any hooks its parent mode @code{tabulated-list-mode} might
+have run, this mode runs the hook @code{racket-profile-mode-hook}, as the
+final or penultimate step during initialization.
+
+@node racket-logger
+@subsection racket-logger
+
+@kbd{C-c C-l} 
+
+Create the @ref{racket-logger-mode} buffer.
+
+@node racket-logger-mode
+@subsection racket-logger-mode
+
+@kbd{M-x}  @code{racket-logger-mode}
+
+Major mode for Racket logger output.
+
+The customization variable @ref{racket-logger-config} determines the
+levels for topics. During a session you may change topic levels
+using @code{racket-logger-topic-level}.
+
+For more information see:
+  @uref{https://docs.racket-lang.org/reference/logging.html}
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{g} 
+@tab @code{racket-logger-clear}
+@item @kbd{n} 
+@tab @code{racket-logger-next-item}
+@item @kbd{p} 
+@tab @code{racket-logger-previous-item}
+@item @kbd{l} 
+@tab @code{racket-logger-topic-level}
+@item @kbd{w} 
+@tab @code{toggle-truncate-lines}
+@end multitable
+
+
+
+
+In addition to any hooks its parent mode @code{special-mode} might have
+run, this mode runs the hook @code{racket-logger-mode-hook}, as the final
+or penultimate step during initialization.
+
+@node racket-debug-mode
+@subsection racket-debug-mode
+
+@kbd{M-x}  @code{racket-debug-mode}
+
+Minor mode for debug breaks.
+
+This feature is @strong{@strong{EXPERIMENTAL}}!!! It is likely to have
+significant limitations and bugs. You are welcome to open an
+issue to provide feedback. Please understand that this feature
+might never be improved -- it might even be removed someday if it
+turns out to have too little value and/or too much cost.
+
+How to debug:
+
+@enumerate
+@item
+``Instrument'' code for step debugging.
+
+Use two @kbd{C-u}  command prefixes for either
+@ref{racket-run} or @ref{racket-run-module-at-point}.
+
+The file will be instrumented for step debugging before it is
+run. Any imported files are also instrumented if they are in
+the variable @ref{racket-debuggable-files}.
+
+The run will break at the first breakable position.
+
+Tip: After you run to completion and return to a normal
+REPL prompt, the code remains instrumented. You may enter
+expressions that evaluate instrumented code and it will
+break so you can step debug again.
+
+@item
+When a break occurs, the @ref{racket-repl-mode} prompt changes. In
+this debug REPL, local variables are available for you to use
+and even to @code{set!}.
+
+Also, in the @ref{racket-mode} buffer where the break is located,
+@ref{racket-debug-mode} is enabled. This minor mode makes the
+buffer read-only, provides visual feedback -- about the break
+position, local variable values, and result values -- and
+provides shortcut keys:
+@end enumerate
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{c} 
+@tab @code{racket-debug-continue}
+@item @kbd{g} 
+@tab @code{racket-debug-go}
+@item @kbd{?} 
+@tab @code{racket-debug-help}
+@item @kbd{n} 
+@tab @code{racket-debug-next-breakable}
+@item @kbd{N} 
+@tab @code{racket-debug-next-breakpoint}
+@item @kbd{p} 
+@tab @code{racket-debug-prev-breakable}
+@item @kbd{P} 
+@tab @code{racket-debug-prev-breakpoint}
+@item @kbd{h} 
+@tab @code{racket-debug-run-to-here}
+@item @kbd{SPC} 
+@tab @code{racket-debug-step}
+@item @kbd{u} 
+@tab @code{racket-debug-step-out}
+@item @kbd{o} 
+@tab @code{racket-debug-step-over}
+@item @kbd{!} 
+@tab @ref{racket-debug-toggle-breakpoint}
+@end multitable
+
+
+
+This is a minor mode.  If called interactively, toggle the
+@code{Racket-Debug mode} mode.  If the prefix argument is positive,
+enable the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is @code{toggle}.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate @ref{racket-debug-mode}.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
+@node racket-repl-clear
+@subsection racket-repl-clear
+
+Delete all text in the REPL@.
+
+A suitable value for the hook @ref{racket-before-run-hook} if you
+want the REPL buffer to be cleared before each run, much like
+with Dr Racket. To do so you can use @code{customize}, or, add to your
+Emacs init file something like:
+
+(add-hook 'racket-before-run-hook #'racket-repl-clear)
+
+See also the command @ref{racket-repl-clear-leaving-last-prompt}.
+
+@node racket-repl-clear-leaving-last-prompt
+@subsection racket-repl-clear-leaving-last-prompt
+
+@kbd{M-x}  @code{racket-repl-clear-leaving-last-prompt}
+
+Delete all text in the REPL, except for the last prompt.
+
+@node Test
+@section Test
+
+@menu
+* racket-test::
+* racket-raco-test::
+@end menu
+
+@node racket-test
+@subsection racket-test
+
+@kbd{C-<f5>} or @kbd{C-c C-t} 
+
+Run the ``test'' submodule.
+
+Put your tests in a ``test'' submodule. For example:
+
+@example
+    (module+ test
+      (require rackunit)
+      (check-true #t))
+@end example
+
+Any rackunit test failure messages show the location. You may use
+@code{next-error} to jump to the location of each failing test.
+
+With @kbd{C-u}  uses errortrace for improved stack traces.
+Otherwise follows the @ref{racket-error-context} setting.
+
+With @kbd{C-u}  @kbd{C-u}  also runs the
+tests with coverage instrumentation and highlights uncovered code
+using @code{font-lock-warning-face}.
+
+See also:
+@itemize
+@item
+@ref{racket-fold-all-tests}
+@item
+@ref{racket-unfold-all-tests}
+@end itemize
+
+@node racket-raco-test
+@subsection racket-raco-test
+
+@kbd{M-x}  @code{racket-raco-test}
+
+Use command-line raco test to run the ``test'' submodule.
+
+Uses a shell or terminal buffer as specified by the configuration
+variable @ref{racket-shell-or-terminal-function}.
+
+@node Eval
+@section Eval
+
+@menu
+* racket-send-region::
+* racket-send-definition::
+* racket-send-last-sexp::
+@end menu
+
+@node racket-send-region
+@subsection racket-send-region
+
+@kbd{C-c C-r} 
+
+Send the current region (if any) to the Racket REPL@.
+
+@node racket-send-definition
+@subsection racket-send-definition
+
+@kbd{C-M-x} 
+
+Send the current definition to the Racket REPL@.
+
+@node racket-send-last-sexp
+@subsection racket-send-last-sexp
+
+@kbd{C-x C-e} 
+
+Send the expression before point to the Racket REPL@.
+
+The expression may be either an at-expression or an s-expression.
+
+When the expression is a sexp comment, the sexp itself is sent,
+without the #; prefix.
+
+With a prefix argument (e.g. @kbd{C-u}  @kbd{C-x C-e} ), the sexp is copied
+into the REPL, followed by a ``=>'' line, to distinguish it
+from the zero or more values to which it evaluates.
+
+@node Collections
+@section Collections
+
+@menu
+* racket-open-require-path::
+@end menu
+
+@node racket-open-require-path
+@subsection racket-open-require-path
+
+@kbd{C-c C-x C-f} 
+
+Like Dr Racket's Open Require Path.
+
+Type (or delete) characters that are part of a module path name.
+``Fuzzy'' matches appear. For example try typing ``t/t/r''.
+
+Choices are displayed in a vertical list. The current choice is
+at the top, marked with ``->''.
+
+@itemize
+@item
+C-n and C-p move among the choices.
+@item
+RET on a directory adds its contents to the choices.
+@item
+RET on a file exits doing @code{find-file}.
+@item
+C-g aborts.
+@end itemize
+
+@node Macro expand
+@section Macro expand
+
+@menu
+* racket-stepper-mode::
+* racket-expand-file::
+* racket-expand-region::
+* racket-expand-definition::
+* racket-expand-last-sexp::
+@end menu
+
+@node racket-stepper-mode
+@subsection racket-stepper-mode
+
+@kbd{M-x}  @code{racket-stepper-mode}
+
+Major mode for Racket stepper output.
+
+Used by the commands @ref{racket-expand-file},
+@ref{racket-expand-definition}, @ref{racket-expand-region}, and
+@ref{racket-expand-last-sexp}.
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{n}  or @kbd{j} 
+@tab @code{racket-stepper-next-item}
+@item @kbd{p}  or @kbd{k} 
+@tab @code{racket-stepper-previous-item}
+@item @kbd{g} 
+@tab @code{racket-stepper-refresh}
+@item @kbd{RET} 
+@tab @code{racket-stepper-step}
+@end multitable
+
+
+
+
+In addition to any hooks its parent mode @code{special-mode} might have
+run, this mode runs the hook @code{racket-stepper-mode-hook}, as the final
+or penultimate step during initialization.
+
+@node racket-expand-file
+@subsection racket-expand-file
+
+@kbd{C-c C-e f} 
+
+Expand the @ref{racket-mode} buffer's file in @ref{racket-stepper-mode}.
+
+Uses the @code{macro-debugger} package to do the expansion.
+
+You do not need to @ref{racket-run} the file first; the namespace
+active in the REPL is not used.
+
+If the file is non-trivial and/or is not compiled to a .zo
+bytecode file, then it might take many seconds before the
+original form is displayed and you can start stepping.
+
+With @kbd{C-u}  behaves as if @ref{racket-expand-hiding}
+were 'disabled.
+
+@node racket-expand-region
+@subsection racket-expand-region
+
+@kbd{C-c C-e r} 
+
+Expand the active region using @ref{racket-stepper-mode}.
+
+Uses the @code{macro-debugger} package to do the expansion.
+
+With @kbd{C-u}  behaves as if @ref{racket-expand-hiding}
+were 'disabled.
+
+@node racket-expand-definition
+@subsection racket-expand-definition
+
+@kbd{C-c C-e x} 
+
+Expand the definition around point using @ref{racket-stepper-mode}.
+
+Uses the @code{macro-debugger} package to do the expansion.
+
+With @kbd{C-u}  behaves as if @ref{racket-expand-hiding}
+were 'disabled.
+
+@node racket-expand-last-sexp
+@subsection racket-expand-last-sexp
+
+@kbd{C-c C-e e} 
+
+Expand the sexp before point using @ref{racket-stepper-mode}.
+
+Uses the @code{macro-debugger} package to do the expansion.
+
+With @kbd{C-u}  behaves as if @ref{racket-expand-hiding}
+were 'disabled.
+
+@node Packages
+@section Packages
+
+@menu
+* racket-package-refresh::
+* list-racket-packages::
+* racket-package-mode::
+* describe-racket-package::
+@end menu
+
+@node racket-package-refresh
+@subsection racket-package-refresh
+
+@kbd{M-x}  @code{racket-package-refresh}
+
+Refresh the local copy of package catalogs.
+
+Will make HTTP requests to remote catalog servers. May take a few
+seconds to complete.
+
+@node list-racket-packages
+@subsection list-racket-packages
+
+@kbd{M-x}  @code{list-racket-packages}
+
+Open a @ref{racket-package-mode} buffer for the active back end.
+
+@node racket-package-mode
+@subsection racket-package-mode
+
+@kbd{M-x}  @code{racket-package-mode}
+
+Major mode for Racket package management.
+
+The list of packages is equivalent to ``raco pkg show -all'' on
+the active back end -- that is, all packages installed manually
+or as dependencies -- plus packages available from your
+configured catalogs, assuming you have run the command
+@ref{racket-package-refresh}.
+
+On each row you can press RET to @code{describe-racket-package}, which
+opens a buffer where you can view details, and use buttons to
+install/update/remove the package.
+
+@multitable {aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} {aaaaaaaaaaaaaaaaaaaaaaaaa}
+@item Key
+@tab Binding
+@item @kbd{RET} 
+@tab @code{racket-package-describe}
+@end multitable
+
+
+
+
+In addition to any hooks its parent mode @code{tabulated-list-mode} might
+have run, this mode runs the hook @code{racket-package-mode-hook}, as the
+final or penultimate step during initialization.
+
+@node describe-racket-package
+@subsection describe-racket-package
+
+@kbd{M-x}  @code{describe-racket-package}
+
+Describe details of a Racket package.
+
+Depending on the package status, buttons let you install, update,
+and/or remove the package and its dependencies. These convenience
+buttons are equivalent to using the command line on the active
+back end to do ``raco pkg @{install update remove@} --auto''. For
+other operations, you still need to use ``raco pkg'' yourself;
+see @uref{https://docs.racket-lang.org/pkg/cmdline.html}.
+
+Detail values are links when possible:
+
+@itemize
+@item
+The @emph{Catalog} (when ``@uref{https://pkgs.racket-lang.org}'') links to
+the package's web page, which may have additional details not
+available locally.
+
+@item
+The @emph{Source} links to the repo's web page or local filesystem.
+
+@item
+The @emph{Directory} for an installed package opens a dired buffer.
+
+@item
+Each @emph{Dependencies} name links to details about that package.
+
+@item
+For installed packages, each @emph{Modules} item links to the local
+file. There is also a button to each module's locally installed
+documentation, if any.
+@end itemize
+
+If the package is available from a catalog, additional details
+will be shown, assuming you have run the command
+@ref{racket-package-refresh}.
+
+@node Other
+@section Other
+
+@menu
+* racket-debug-toggle-breakpoint::
+* racket-mode-start-faster::
+* racket-mode-start-slower::
+@end menu
+
+@node racket-debug-toggle-breakpoint
+@subsection racket-debug-toggle-breakpoint
+
+@kbd{M-x}  @code{racket-debug-toggle-breakpoint}
+
+Add or remove a breakpoint.
+
+Each breakpoint has a condition and a list of actions.
+
+The condition is a Racket expression that is evaluated in a
+context where local variables exist. Examples:
+
+@itemize
+@item
+``#t'' means break always.
+
+@item
+If the code around the breakpoint is something like
+``(for ([n 100]) _)'', then a condition like
+``(zero? (modulo n 10))'' is every 10 times through the
+loop.
+@end itemize
+
+Actions is a list of symbols; you may specify one or more. The
+action symbols are:
+
+@itemize
+@item
+``break'' causes a break, enabling @ref{racket-debug-mode}.
+
+@item
+``log'' and ``print'' display information about local
+variables to the logger or REPL output, respectively.
+Although @ref{racket-debug-mode} already shows these values ``in
+situ'' when you reach a break, this may be useful if you want
+a history. Specifying ``log'' or ``print'', but not
+``break'', is equivalent to what many debuggers call a
+watchpoint instead of a breakpoint: Output some information
+and automatically resume.
+@end itemize
+
+Note: Although @ref{racket-debug-mode} provides a convenient
+keybinding, you may invoke this command anytime using M-x.
+
+Note: If you're warned that point isn't known to be a breakable
+position, that might be because it truly isn't, or, just because
+you are not in @ref{racket-debug-mode} and the breakable positions
+aren't yet known. Worst case, if you set a breakpoint someplace
+that is not breakable, it is ignored. With a few exceptions --
+such as close paren positions that are tail calls -- most open
+parens and close parens are breakble positions.
+
+@node racket-mode-start-faster
+@subsection racket-mode-start-faster
+
+@kbd{M-x}  @code{racket-mode-start-faster}
+
+Compile Racket Mode's .rkt files for faster startup.
+
+Racket Mode is implemented as an Emacs Lisp ``front end'' that
+talks to a Racket process ``back end''. Because Racket Mode is
+delivered as an Emacs package instead of a Racket package,
+installing it does not do the @code{raco setup} that is normally done
+for Racket packages.
+
+This command will do a @code{raco make} of Racket Mode's .rkt files,
+creating bytecode files in @code{compiled/} subdirectories. As a
+result, when a command must start the Racket process, it will
+start somewhat faster.
+
+On many computers, the resulting speed up is negligible, and
+might not be worth the complication.
+
+If you run this command, ever, you will need to run it again
+after:
+
+@itemize
+@item
+Installing an updated version of Racket Mode. Otherwise, you
+might lose some of the speed-up.
+
+@item
+Installing a new version of Racket and/or changing the value of
+the variable @ref{racket-program}. Otherwise, you might get an
+error message due to the bytecode being different versions.
+@end itemize
+
+To revert to compiling on startup, use
+@ref{racket-mode-start-slower}.
+
+@node racket-mode-start-slower
+@subsection racket-mode-start-slower
+
+@kbd{M-x}  @code{racket-mode-start-slower}
+
+Delete the ``compiled'' directories made by @ref{racket-mode-start-faster}.
+
+@node Variables
+@chapter Variables
+
+@menu
+* General variables::
+* Hash lang variables::
+* REPL variables::
+* Other variables::
+* Experimental debugger variables::
+* Showing information::
+* Running racket and raco commands in a shell or terminal::
+* Racket input method::
+@end menu
+
+@node General variables
+@section General variables
+
+@menu
+* racket-program::
+* racket-command-timeout::
+* racket-memory-limit::
+* racket-error-context::
+* racket-user-command-line-arguments::
+* racket-browse-url-function::
+* racket-xp-after-change-refresh-delay::
+* racket-xp-highlight-unused-regexp::
+* racket-xp-add-binding-faces::
+* racket-xp-eldoc-level::
+* racket-documentation-search-location::
+* racket-expand-hiding::
+@end menu
+
+@node racket-program
+@subsection racket-program
+
+Pathname of the Racket executable.
+
+Note that a back end configuration can override this with a
+non-nil @code{racket-program} property list value. See
+@ref{racket-add-back-end}.
+
+@node racket-command-timeout
+@subsection racket-command-timeout
+
+How many seconds to wait for command server responses.
+
+Note: This is mostly obsolete, fortunately, because it applies
+only to commands that must block the Emacs UI until they get a
+response. Instead most Racket Mode commands these days receive
+their response asychronously.
+
+@node racket-memory-limit
+@subsection racket-memory-limit
+
+Terminate the Racket process if memory use exceeds this value in MB@.
+
+Changes to this value take effect upon the next @ref{racket-run}. A value
+of 0 means no limit.
+
+Caveat: This uses Racket's @code{custodian-limit-memory}, which does
+not enforce the limit exactly. Instead, the program will be
+terminated upon the first garbage collection where memory exceeds
+the limit (maybe by a significant amount).
+
+@node racket-error-context
+@subsection racket-error-context
+
+The amount of context for error messages.
+
+Each increasing level supplies better context (``stack trace'')
+for error messages, but causing your program to run more slowly.
+
+@itemize
+@item
+low corresponds to compile-enforce-module-constants #t and
+compile-context-preservation-enabled #f.
+
+@item
+medium corresponds to compile-enforce-module-constants #f and
+compile-context-preservation-enabled #t, which disables some
+optimizations like inlining.
+
+@item
+high corresponds to medium plus the use of errortrace, which
+extensively instruments your code and therefore might cause
+it to run significantly slower.
+@end itemize
+
+Tip: Regardless of this setting, you can enable high errortrace
+for a specific @ref{racket-run} or @ref{racket-run-module-at-point} by
+using @kbd{C-u} . This lets you normally run with a
+lower, faster setting, and re-run when desired to get a
+more-helpful error message.
+
+@node racket-user-command-line-arguments
+@subsection racket-user-command-line-arguments
+
+List of command-line arguments to supply to your Racket program.
+
+Accessible in your Racket program in the usual way --- the
+parameter @code{current-command-line-arguments} and friends.
+
+This is an Emacs buffer-local variable --- convenient to set as a
+file local variable. For example at the end of your .rkt file:
+
+@lisp
+    ;; Local Variables:
+    ;; racket-user-command-line-arguments: ("-f" "bar")
+    ;; End:
+@end lisp
+
+Set this way, the value must be an @strong{unquoted} list of strings.
+For example:
+
+@lisp
+    ("-f" "bar")
+@end lisp
+
+The following values will @emph{not} work:
+
+@lisp
+    '("-f" "bar")
+    (list "-f" "bar")
+@end lisp
+
+@node racket-browse-url-function
+@subsection racket-browse-url-function
+
+Function to call to browse a URL@.
+
+Defaults to @ref{racket-browse-url-using-temporary-file} on macOS and
+@code{browse-url-browser-function} on other platforms.
+
+@node racket-xp-after-change-refresh-delay
+@subsection racket-xp-after-change-refresh-delay
+
+Seconds to wait before refreshing @ref{racket-xp-mode} annotations.
+
+Set to nil to disable automatic refresh and manually use @code{racket-xp-annotate}.
+
+@node racket-xp-highlight-unused-regexp
+@subsection racket-xp-highlight-unused-regexp
+
+Only give @ref{racket-xp-unused-face} to unused bindings that match this regexp.
+
+The default is to highlight identifiers that do not start with
+an underline, which is a common convention.
+
+@node racket-xp-add-binding-faces
+@subsection racket-xp-add-binding-faces
+
+Have @ref{racket-xp-mode} fontify binding identifier sites.
+
+A 'font-lock-face property is added for bindings from:
+
+@itemize
+@item
+the module language, using @ref{racket-xp-binding-lang-face} and
+@ref{racket-xp-binding-lang-use-face}.
+
+@item
+other imports, using @ref{racket-xp-binding-import-face} and
+@ref{racket-xp-binding-import-use-face}.
+
+@item
+local definitions, using @ref{racket-xp-binding-local-face} and
+@ref{racket-xp-binding-local-use-face}.
+@end itemize
+
+This has a visible effect only when there is @emph{not} also a
+'face property applied by the major mode's fontification.
+
+@node racket-xp-eldoc-level
+@subsection racket-xp-eldoc-level
+
+How much documentation to show via @code{eldoc}.
+
+Used by @code{racket-xp-eldoc-point} and @code{racket-xp-eldoc-sexp-app}.
+
+@itemize
+@item
+Minimal: Only the help-echo string.
+
+@item
+Summary: Also the signature a.k.a. ``blubox'' from the
+documentation.
+
+@item
+Complete: Also the complete prose documentation.
+@end itemize
+
+A third-party package like @code{eldoc-box} can be useful for all but
+the minimal level. Even some bluebox signatures can take many
+lines to show on screen.
+
+@node racket-documentation-search-location
+@subsection racket-documentation-search-location
+
+The location of the Racket ``Search Manuals'' web page.
+Where @ref{racket-documentation-search}, @ref{racket-xp-documentation}
+and @ref{racket-repl-documentation} should look for the search page.
+
+@itemize
+@item
+If the value of this variable is the symbol ``local'', open the
+search page from the local documentation, as with ``raco doc''.
+
+@item
+Otherwise, the value is a string recognizable by @code{format}, with
+``%s'' at the point at which to insert the user's search text
+after applying @code{url-hexify-string}. Apart from ``%s'', the
+string should be a properly encoded URL@.
+@end itemize
+
+@node racket-expand-hiding
+@subsection racket-expand-hiding
+
+The macro hiding policy for commands like @ref{racket-expand-file}.
+
+@node Hash lang variables
+@section Hash lang variables
+
+@menu
+* racket-hash-lang-token-face-alist::
+* racket-hash-lang-pairs::
+* racket-hash-lang-module-language-hook::
+@end menu
+
+@node racket-hash-lang-token-face-alist
+@subsection racket-hash-lang-token-face-alist
+
+An association list from color-lexer token symbols to face symbols.
+
+Note: In many Racket languages, the lexer classifies tokens for
+identifiers as 'symbol. In many programs, a majority of the
+source consists of identifiers at binding definition and use
+sites. Therefore the appearance of ``symbol'' tokens is
+significant, and a matter of personal preference.
+
+@itemize
+@item
+If you prefer a ``plainer'' appearance, similar to Dr Racket:
+Add 'symbol with the value 'default. This gives an
+explicit 'face property that prevails over any
+'font-lock-face property that a minor mode might apply to
+enhance the basic fontification.
+
+@item
+If you prefer a more ``colorful'' appearance, similar to
+``classic'' @ref{racket-mode}: Do @emph{not} map 'symbol tokens in
+this list. See @ref{racket-hash-lang-module-language-hook} for
+ideas.
+@end itemize
+
+Note: Some tokens are hardwired and not customizable by this
+list: Comment tokens use the face @code{font-lock-comment-face},
+sometimes blended with other faces. Parenthesis tokens use the
+face @code{parenthesis} if defined, as by the paren-face package.
+String tokens use @code{font-lock-string-face}. Text tokens, e.g.
+Scribble text, use the face @ref{racket-hash-lang-text}.
+
+@node racket-hash-lang-pairs
+@subsection racket-hash-lang-pairs
+
+Pairs of delimiters to insert or delete automatically.
+
+The format of each item is (cons string string).
+
+This is initialized whenever a module language changes, using
+values from the language's reported values for
+drracket:paren-matches and drracket:quote-matches.
+
+You may customize this default initialization in
+@ref{racket-hash-lang-module-language-hook}.
+
+@node racket-hash-lang-module-language-hook
+@subsection racket-hash-lang-module-language-hook
+
+Hook run when the module language changes.
+
+Typically in Emacs each language gets its own major mode. As a
+result, the major mode hook is your opportunity to express
+preferences. However @ref{racket-hash-lang-mode} handles radically
+different kinds of hash langs in one major mode. And a given
+buffer can change langs when you edit the ``#lang'' line. As a
+result, @code{racket-hash-lang-mode-hook} is not useful for per-lang
+configuration. Instead you need a kind of ``sub major mode
+hook''. This is that hook.
+
+The hook is run when a file is first visited, and thereafter
+whenever the ``#lang'' line is edited -- provided that results in
+different language info; for example changing from ``#lang
+racket'' to ``#lang racket/base'' will @emph{not} run the hook.
+
+The function is called with a string returned by the lang's
+``module-language'' info key. This info key is supplied
+automatically when a language is defined using
+syntax/module-reader:
+
+@uref{https://docs.racket-lang.org/syntax/reader-helpers.html#%28mod-path._syntax%2Fmodule-reader%29}.
+
+Otherwise a lang might not supply this and the value will be nil.
+
+The hook is useful when you want to vary Emacs behavior in ways
+that go beyond what a lang can describe. This may include
+enabling ``fancy'' or ``classic'' Emacs behaviors only for
+s-expression langs.
+
+For example, maybe you want to use @code{paredit-mode} when it is
+suitable for the module language:
+
+@lisp
+  (defun my-hook (module-language)
+    (let ((rackety
+           (member module-language
+                   (list "racket" "racket/base"
+                         "typed/racket" "typed/racket/base"))))
+      (if rackety
+          (paredit-mode 1)
+        (paredit-mode -1))))
+  (add-hook 'racket-hash-lang-module-language-hook #'my-hook)
+@end lisp
+
+A similar tactic can be used for @code{smartparens} or
+@code{electric-pair-mode}. In general, none of these
+delimiter-matching modes is likely to work well unless the
+hash-lang uses racket for drracket:grouping-position, in which
+case @ref{racket-hash-lang-mode} uses the classic @ref{racket-mode}
+syntax-table for the buffer. Otherwise you should not enable one
+of these modes, and instead just use the simple delimiter
+matching built into @ref{racket-hash-lang-mode}; see
+@ref{racket-hash-lang-pairs}.
+
+As another example, if you prefer more colors than just tokens,
+choices include:
+
+@itemize
+@item
+Enable @ref{racket-xp-mode} in @code{racket-hash-lang-mode-hook} and in
+the module language hook locally set
+@ref{racket-xp-add-binding-faces}:
+@end itemize
+
+@lisp
+  (setq-local racket-xp-add-binding-faces t)
+@end lisp
+
+OR
+
+@itemize
+@item
+Use some of the regexp search-based fontification from classic
+@ref{racket-mode} for rackety module languages:
+@end itemize
+
+@lisp
+  (require 'racket-font-lock)
+  (if rackety
+      (font-lock-add-keywords nil
+                              (append racket-font-lock-keywords-2
+                                      racket-font-lock-keywords-3))
+    (font-lock-remove-keywords nil
+                               (append racket-font-lock-keywords-2
+                                       racket-font-lock-keywords-3)))
+@end lisp
+
+@node REPL variables
+@section REPL variables
+
+@menu
+* racket-repl-buffer-name-function::
+* racket-submodules-to-run::
+* racket-repl-history-directory::
+* racket-history-filter-regexp::
+* racket-images-inline::
+* racket-imagemagick-props::
+* racket-images-keep-last::
+* racket-images-system-viewer::
+* racket-images-do-not-use-svg::
+* racket-pretty-print::
+* racket-repl-command-file::
+@end menu
+
+@node racket-repl-buffer-name-function
+@subsection racket-repl-buffer-name-function
+
+How to associate @ref{racket-mode} edit buffers with @ref{racket-repl-mode} buffers.
+
+The default is nil, which is equivalent to supplying
+@ref{racket-repl-buffer-name-shared}: One REPL buffer is shared.
+
+Other predefined choices include @ref{racket-repl-buffer-name-unique}
+and @ref{racket-repl-buffer-name-project}.
+
+This is used when a @ref{racket-mode} buffer is created. Changing
+this to a new value only affects @ref{racket-mode} buffers created
+later.
+
+Any such function takes no arguments, should look at the variable
+@code{buffer-file-name} if necessary, and either @code{setq-default} or
+@code{setq-local} the variable @code{racket-repl-buffer-name} to a desired
+@ref{racket-repl-mode} buffer name. As a result, @ref{racket-run}
+commands will use a buffer of that name, creating it if
+necessary.
+
+@node racket-submodules-to-run
+@subsection racket-submodules-to-run
+
+Extra submodules to run.
+
+This is a list of submodules. Each submodule is described as a
+list, to support submodules nested to any depth.
+
+This is used by commands that emulate the DrRacket Run command:
+
+
+@itemize
+@item
+@ref{racket-run}
+@item
+@ref{racket-run-and-switch-to-repl} @kbd{<f5>} 
+@end itemize
+
+It is NOT used by commands that run one specific module, such as:
+
+@itemize
+@item
+@ref{racket-run-module-at-point} @kbd{C-c C-k} or @kbd{C-c C-c} 
+@item
+@ref{racket-test} @kbd{C-<f5>} or @kbd{C-c C-t} 
+@item
+@ref{racket-profile}
+@end itemize
+
+@node racket-repl-history-directory
+@subsection racket-repl-history-directory
+
+Directory for @ref{racket-repl-mode} history files.
+
+@node racket-history-filter-regexp
+@subsection racket-history-filter-regexp
+
+Input matching this regexp are NOT saved on the history list.
+Default value is a regexp to ignore input that is all whitespace.
+
+@node racket-images-inline
+@subsection racket-images-inline
+
+Whether to display inline images in the REPL@.
+
+@node racket-imagemagick-props
+@subsection racket-imagemagick-props
+
+Use ImageMagick with these properties for REPL images.
+
+When this property list is not empty -- and the variable
+@ref{racket-images-inline} is true, and Emacs is built with with
+ImageMagick support -- then @code{create-image} is called with
+``imagemagick'' as the type and with this property list.
+
+For example, to scale images whose width is larger than 500
+pixels, supply (:max-width 500).
+
+@node racket-images-keep-last
+@subsection racket-images-keep-last
+
+How many images to keep in the image cache.
+
+@node racket-images-system-viewer
+@subsection racket-images-system-viewer
+
+The image viewer program to use for @code{racket-view-image}.
+
+@node racket-images-do-not-use-svg
+@subsection racket-images-do-not-use-svg
+
+Do not use SVG to render images?
+
+Note: This value is used only when starting a back end -- @emph{not}
+for each run. If you change this, for it to take effect you must
+restart by using @code{racket-start-back-end}.
+
+@node racket-pretty-print
+@subsection racket-pretty-print
+
+Use pretty-print instead of plain print?
+
+When true, before each run set global-port-print-handler to use
+pretty-print from racket/pretty, which is suitable for
+s-expressions.
+
+Note: A configure-runtime submodule might replace this initial
+value with its own global port print handler -- for example to
+implement printing a non-s-expression syntax.
+
+@node racket-repl-command-file
+@subsection racket-repl-command-file
+
+Name of the file used by @ref{racket-repl}.
+
+@node Other variables
+@section Other variables
+
+@menu
+* racket-doc-index-directory::
+* racket-doc-index-predicate-function::
+* racket-indent-curly-as-sequence::
+* racket-indent-sequence-depth::
+* racket-pretty-lambda::
+* racket-smart-open-bracket-enable::
+* racket-logger-config::
+* racket-before-run-hook::
+* racket-after-run-hook::
+* racket-sexp-comment-fade::
+@end menu
+
+@node racket-doc-index-directory
+@subsection racket-doc-index-directory
+
+Directory for @ref{racket-describe-search} doc index files.
+
+@node racket-doc-index-predicate-function
+@subsection racket-doc-index-predicate-function
+
+A function used by @ref{racket-describe-search} to filter results.
+
+The default value, the @code{always} function, filters nothing.
+
+The function is given four string arguments -- TERM, WHAT,
+FROM-LIBS, and FAMILIES -- and should return whether to include
+the item in the list of completion candidates. An example that
+limits candidates to the ``Rhombus'' family:
+
+(lambda (@math{_term} _what _from-libs families)
+  (string-equal families ``Rhombus'')
+
+@node racket-indent-curly-as-sequence
+@subsection racket-indent-curly-as-sequence
+
+Indent @code{@{@}} with items aligned with the head item?
+
+This is indirectly disabled if @ref{racket-indent-sequence-depth} is 0.
+This is safe to set as a file-local variable.
+
+@node racket-indent-sequence-depth
+@subsection racket-indent-sequence-depth
+
+To what depth should @ref{racket-indent-line} search.
+
+This affects the indentation of forms like '() `() #() --
+and @{@} if @ref{racket-indent-curly-as-sequence} is t --- but not
+#'() #`() ,() ,@@(). A zero value disables, giving the
+normal indent behavior of DrRacket or Emacs @code{lisp-mode} derived
+modes like @code{scheme-mode}. Setting this to a high value can make
+indentation noticeably slower. This is safe to set as a
+file-local variable.
+
+@node racket-pretty-lambda
+@subsection racket-pretty-lambda
+
+Display lambda keywords using λ. This is DEPRECATED@.
+
+Instead use @code{prettify-symbols-mode} in newer verisons of Emacs,
+or, use @ref{racket-insert-lambda} to insert actual λ characters.
+
+@node racket-smart-open-bracket-enable
+@subsection racket-smart-open-bracket-enable
+
+This variable is obsolete and has no effect.
+
+Instead of using this variable, you may bind the @code{[} key to the
+@code{racket-smart-open-bracket} command in the @code{racket-mode-map}
+and/or @code{racket-repl-mode-map} keymaps.
+
+@node racket-logger-config
+@subsection racket-logger-config
+
+Configuration of @ref{racket-logger-mode} topics and levels.
+
+The topic ``*'' respresents the default level used for topics not
+assigned a level. Otherwise, the topic symbols are the same as
+used by Racket's @code{define-logger}.
+
+The levels are those used by Racket's logging system: ``debug'',
+``info'', ``warning'', ``error'', ``fatal''.
+
+For more information see:
+  @uref{https://docs.racket-lang.org/reference/logging.html}
+
+The default value sets some known ``noisy'' topics to be one
+level quieter. That way you can set the ``*'' topic to a level
+like ``debug'' and not get overhwelmed by these noisy topics.
+
+@node racket-before-run-hook
+@subsection racket-before-run-hook
+
+Normal hook done before various Racket Mode run commands.
+
+Here ``before'' means that the @ref{racket-repl-mode} buffer might not
+exist yet.
+
+When hook functions are called, @code{current-buffer} is that of the
+edit buffer when the run command was issued. If a hook function
+instead needs the @ref{racket-repl-mode} buffer, it should get that
+from the variable @code{racket-repl-buffer-name}.
+
+@node racket-after-run-hook
+@subsection racket-after-run-hook
+
+Normal hook done after various Racket Mode run commands.
+
+Here ``after'' means that the run has completed and the REPL is
+waiting at another prompt.
+
+When hook functions are called, @code{current-buffer} is that of the
+buffer when the run command was issued. If a hook function
+instead needs the @ref{racket-repl-mode} buffer, it should get that
+from the variable @code{racket-repl-buffer-name}.
+
+@node racket-sexp-comment-fade
+@subsection racket-sexp-comment-fade
+
+How much to fade faces used in s-expression comment bodies.
+
+A number from 0.0 to 1.0, where 0.0 is 0% fade and 1.0 is 100%
+fade (invisible).
+
+This feature works by creating faces that are alternatives for
+faces used in s-expression comments. The alernative faces use a
+faded foreground color. The colors are recalculated automatically
+after you change the value of this customization variable and
+after any @code{load-theme}. However in other circumstances you might
+need to use @code{racket-refresh-sexp-comment-faces}.
+
+@node Experimental debugger variables
+@section Experimental debugger variables
+
+@menu
+* racket-debuggable-files::
+@end menu
+
+@node racket-debuggable-files
+@subsection racket-debuggable-files
+
+Used to tell @ref{racket-run} what files may be instrumented for debugging.
+
+This isn't yet a defcustom becuase the debugger status is still
+``experimental''.
+
+Must be either a list of file name strings, or, a function that
+takes the name of the file being run and returns a list of file
+names.
+
+Each file name in the list is made absolute using
+@code{expand-file-name} with respect to the file being run and given
+to @code{racket-file-name-front-to-back}.
+
+@node Showing information
+@section Showing information
+
+@menu
+* racket-show-functions::
+@end menu
+
+@node racket-show-functions
+@subsection racket-show-functions
+
+An ``abnormal hook'' variable to customize @code{racket-show}.
+
+This is a list of one or more functions.
+
+Each such function must accept two arguments: STR and POS@.
+
+STR is one of:
+
+@itemize
+@item
+Non-blank string: Display the string somehow.
+
+@item
+Blank string: Hide any previously displayed string.
+
+@item
+nil: Hide any persistent UI that might have been created. For
+instance @ref{racket-show-header-line} hides the header line.
+@end itemize
+
+POS may be nil when STR is nil or a blank string.
+
+Otherwise POS is the buffer position -- typically the end of a
+span -- that the non-blank STR describes.
+
+A function that shows STR near POS should position it not to hide
+the span, i.e. below and/or right of POS@. Examples:
+@ref{racket-show-pseudo-tooltip} and @ref{racket-show-pos-tip}.
+
+A function that shows STR in a fixed location may of course
+ignore POS@. Examples: @ref{racket-show-echo-area} and
+@ref{racket-show-header-line}
+
+@node Running racket and raco commands in a shell or terminal
+@section Running racket and raco commands in a shell or terminal
+
+@menu
+* racket-shell-or-terminal-function::
+@end menu
+
+@node racket-shell-or-terminal-function
+@subsection racket-shell-or-terminal-function
+
+How @ref{racket-racket} and @ref{racket-raco-test} run commands.
+
+The function should accept a command string, not including a
+newline, get or create a suitable buffer, send the command, and
+send a newline or enter.
+
+Predefined choices include @ref{racket-shell}, @ref{racket-term},
+@ref{racket-ansi-term}, and @ref{racket-vterm}.
+
+@node Racket input method
+@section Racket input method
+
+@menu
+* racket-input-prefix::
+* racket-input-translations::
+@end menu
+
+@node racket-input-prefix
+@subsection racket-input-prefix
+
+A prefix used by the ``Racket'' input method.
+
+This string is prepended to the key sequence strings in
+@ref{racket-input-translations}, when setting up the input method.
+
+Using some non-nil, non-blank prefix avoids conflicts between key
+sequences and portions of normal words. For example ``oint''
+would insert ``∮'' while you're typing ``point'' -- but not
+``\oint''.
+
+If you change this setting manually with @code{setq} (instead of using
+the customization buffer or @code{setopt}) you need to call
+@code{racket-input-setup} in order for the change to take effect.
+
+@node racket-input-translations
+@subsection racket-input-translations
+
+A list of translations.
+
+Each element is (KEY-SEQUENCE-STRING TRANSLATION-STRING).
+
+Used by the ``Racket'' input method activated by
+@ref{racket-input-mode}, as well as by the @ref{racket-insert-symbol}
+command.
+
+If you change this setting manually with @code{setq} (instead of using
+the customization buffer or @code{setopt}) you need to call
+@code{racket-input-setup} in order for the change to take effect.
+
+@node Configuration functions
+@chapter Configuration functions
+
+@menu
+* Showing information: Showing information (1). 
+* Associating edit buffers with REPL buffers::
+* Browsing file URLs with anchors::
+* Configuring back ends::
+* Running racket and raco commands in a shell or terminal: Running racket and raco commands in a shell or terminal (1). 
+@end menu
+
+@node Showing information (1)
+@section Showing information
+
+@menu
+* racket-show-pseudo-tooltip::
+* racket-show-echo-area::
+* racket-show-header-line::
+* racket-show-pos-tip::
+@end menu
+
+@node racket-show-pseudo-tooltip
+@subsection racket-show-pseudo-tooltip
+
+@code{(racket-show-pseudo-tooltip str &optional pos)}
+
+
+Show using an overlay that resembles a tooltip.
+
+This is nicer than @ref{racket-show-pos-tip} because it:
+
+@itemize
+@item
+Doesn't flicker while navigating.
+@item
+Doesn't disappear after a timeout.
+@item
+Performs well when @code{x-gtk-use-system-tooltips} is nil.
+@end itemize
+
+On the other hand, this does not look as nice when displaying
+text that spans multiple lines or is too wide to fit the window.
+In that case, we simply left-justify everything and do not draw
+any border.
+
+@node racket-show-echo-area
+@subsection racket-show-echo-area
+
+@code{(racket-show-echo-area str &optional _pos)}
+
+
+Show things in the echo area.
+
+A value for the variable @ref{racket-show-functions}.
+
+This does @emph{not} add STR to the ``@strong{Messages}'' log buffer.
+
+@node racket-show-header-line
+@subsection racket-show-header-line
+
+@code{(racket-show-header-line str &optional _pos)}
+
+
+Show things using a buffer header line.
+
+A value for the variable @ref{racket-show-functions}.
+
+When there is nothing to show, keep a blank header-line. That
+way, the buffer below doesn't ``jump up and down'' by a line as
+messages appear and disappear. Only when V is nil do we remove
+the header line.
+
+@node racket-show-pos-tip
+@subsection racket-show-pos-tip
+
+@code{(racket-show-pos-tip str &optional pos)}
+
+
+Show things using @code{pos-tip-show} if available.
+
+A value for the variable @ref{racket-show-functions}.
+
+@node Associating edit buffers with REPL buffers
+@section Associating edit buffers with REPL buffers
+
+@menu
+* racket-repl-buffer-name-shared::
+* racket-repl-buffer-name-unique::
+* racket-repl-buffer-name-project::
+* racket-project-root::
+@end menu
+
+@node racket-repl-buffer-name-shared
+@subsection racket-repl-buffer-name-shared
+
+@code{(racket-repl-buffer-name-shared)}
+
+
+Share one @ref{racket-repl-mode} buffer per back end.
+
+A value for the variable @ref{racket-repl-buffer-name-function}.
+
+@node racket-repl-buffer-name-unique
+@subsection racket-repl-buffer-name-unique
+
+@code{(racket-repl-buffer-name-unique)}
+
+
+Each @ref{racket-mode} edit buffer gets its own @ref{racket-repl-mode} buffer.
+
+A value for the variable @ref{racket-repl-buffer-name-function}.
+
+@node racket-repl-buffer-name-project
+@subsection racket-repl-buffer-name-project
+
+@code{(racket-repl-buffer-name-project)}
+
+
+Share a @ref{racket-repl-mode} buffer per back end and per project.
+
+A value for the variable @ref{racket-repl-buffer-name-function}.
+
+The ``project'' is determined by @ref{racket-project-root}.
+
+@node racket-project-root
+@subsection racket-project-root
+
+@code{(racket-project-root file)}
+
+
+Given an absolute pathname for FILE, return its project root directory.
+
+The ``project'' is determined by trying, in order:
+
+@itemize
+@item
+@code{projectile-project-root}
+@item
+@code{vc-root-dir}
+@item
+@code{project-current}
+@item
+@code{file-name-directory}
+@end itemize
+
+@node Browsing file URLs with anchors
+@section Browsing file URLs with anchors
+
+@menu
+* racket-browse-url-using-temporary-file::
+@end menu
+
+@node racket-browse-url-using-temporary-file
+@subsection racket-browse-url-using-temporary-file
+
+@code{(racket-browse-url-using-temporary-file url &rest _args)}
+
+
+Browse a URL via a temporary HTML file using a meta redirect.
+
+A suitable value for the variable @ref{racket-browse-url-function}.
+
+Racket documentation URLs depend on anchors -- the portion of the
+URL after the # character -- to jump to a location within a page.
+Unfortunately on some operating systems and/or versions of Emacs,
+the default handling for browsing file URLs ignores anchors. This
+function attempts to avoid the problem by using a temporary HTML
+file with a meta redirect as a ``trampoline''.
+
+Although the intent is to provide a default that ``just works'',
+you do not need to use this. You can customize the variable
+@ref{racket-browse-url-function} instead to be @code{browse-url}, or
+@code{browse-url-browser-function} in case have have customized that,
+or indeed whatever you want.
+
+@node Configuring back ends
+@section Configuring back ends
+
+@menu
+* racket-add-back-end::
+@end menu
+
+@node racket-add-back-end
+@subsection racket-add-back-end
+
+@code{(racket-add-back-end directory &rest plist)}
+
+
+Add a description of a Racket Mode back end.
+
+Racket Mode supports one or more back ends, which are Racket
+processes supporting REPLs as well as various other Racket Mode
+features.
+
+DIRECTORY is a string describing a @code{file-name-absolute-p}
+directory on some local or remote server.
+
+When a back end's DIRECTORY is the longest matching prefix of a
+buffer's @code{default-directory}, that back end is used for the
+buffer.
+
+DIRECTORY can be a local directory like ``/'' or
+``/path/to/project'', or a @code{file-remote-p} directory like
+``/user@@host:'' or ``/user@@host:/path/to/project''.
+
+Note that you need not include a method -- such as the ``ssh'' in
+``/ssh:user@@host:'' -- and if you do it is stripped: A back end
+process is always started using SSH@. Even if multiple buffers for
+the same user+host+port use different methods, they will share
+the same back end.
+
+Practically speaking, DIRECTORY is a path you could give to
+@code{find-file} to successfully find some local or remote file, but
+omitting any method. (Some remote file shorthand forms get
+expanded to at least ``/method:host:''. When in doubt check
+@code{buffer-file-name} and follow its example.)
+
+In addition to being used as a pattern to pick a back end for a
+buffer, DIRECTORY determines:
+
+@itemize
+@item
+Whether the back end is local or remote.
+
+@item
+When remote, any explicit user and port used to make SSH
+connections (as opposed to relying on values from
+~/.ssh/config).
+
+@item
+Other properties get reasonable defaults based on whether the
+back end is local or remote, as described below.
+@end itemize
+
+After DIRECTORY, the remainining arguments are optional; they are
+alternating :keywords and values describing some other properties
+of a back end:
+
+@itemize
+@item
+:racket-program
+
+When not nil this is used instead of the value of the
+customization variable @ref{racket-program}.
+
+@item
+:remote-source-dir
+
+Where on a remote host to copy the back end's *.rkt files when
+they do not exist or do not match the digest of the local
+files. This must be @code{file-name-absolute-p} on the remote. Only
+supply the localname there (not a full @code{file-remote-p}). The
+default value is ``/tmp/racket-mode-back-end''.
+
+@item
+:windows
+
+Whether the back end uses Windows style path names. Used to
+translate betwen slashes and backslashes between the Emacs
+front end (which uses slashes even on Windows) and the Racket
+back end (which expects native backslashes on Windows).
+
+@item
+:restart-watch-directories
+
+A list of @code{directory-name-p} strings. Each directory, and
+recursively its subdirectories, will be watched for file system
+changes. After any changes are detected, the next
+@ref{racket-run} (or @ref{racket-run-module-at-point} etc.) command
+will ask you if it should restart the back end for you. This
+may be helpful when you are changing source files used by the
+back end.
+@end itemize
+
+The default property values are appropriate for whether
+DIRECTORY is local or remote:
+
+@itemize
+@item
+When DIRECTORY is remote, :windows defaults to nil.
+
+@item
+Otherwise, :windows defaults to a value based on @code{system-type}.
+@end itemize
+
+Although the default values usually ``just work'' for local and
+remote back ends, you might want a special configuration. Here
+are a few examples.
+
+@lisp
+    ;; 1. A back end configuration for "/" is
+    ;; created automatically and works fine as a default
+    ;; for buffers visiting local files, so we don't need
+    ;; to add one here.
+
+    ;; 2. However assume we want buffers under /var/tmp/8.0
+    ;; instead to use Racket 8.0.
+    (racket-add-back-end "/var/tmp/8.0"
+                         :racket-program "~/racket/8.0/bin/racket")
+
+    ;; 3. A back end configuration will be created
+    ;; automatically for buffers visiting file names like
+    ;; "/ssh:user@@linode", so we don't need to add one here.
+    ;;
+    ;; If ~/.ssh/config defines a Host alias named "linode",
+    ;; with HostName and User settings, a file name as simple as
+    ;; "/linode:" would work fine with tramp -- and the
+    ;; automatically created back end configuration would work
+    ;; fine, too.
+
+    ;; 4. For example's sake, assume for buffers visiting
+    ;; /ssh:headless:~/gui-project/ we want :racket-program instead
+    ;; to be "xvfb-run racket".
+    (racket-add-back-end "/ssh:headless:~/gui-project/"
+                         :racket-program "xvfb-run racket")
+@end lisp
+
+If you use various versions of Racket by setting PATH values via
+direnv, .envrc files and @code{envrc-global-mode}, then you need a
+distinct back end for each such project subdirectory. One
+approach is to use @ref{racket-add-back-end} for each project in your
+Emacs init file. Another way to is to have a .dir-locals.el file
+alongside each .envrc file:
+
+@lisp
+    ((nil . ((eval . (racket-add-back-end default-directory)))))
+@end lisp
+
+@node Running racket and raco commands in a shell or terminal (1)
+@section Running racket and raco commands in a shell or terminal
+
+@menu
+* racket-shell::
+* racket-term::
+* racket-ansi-term::
+* racket-vterm::
+@end menu
+
+@node racket-shell
+@subsection racket-shell
+
+@code{(racket-shell cmd)}
+
+
+Run CMD using @code{shell}.
+
+A value for the variable @ref{racket-shell-or-terminal-function}.
+
+@node racket-term
+@subsection racket-term
+
+@code{(racket-term cmd)}
+
+
+Run CMD using @code{term}.
+
+A value for the variable @ref{racket-shell-or-terminal-function}.
+
+@node racket-ansi-term
+@subsection racket-ansi-term
+
+@code{(racket-ansi-term cmd)}
+
+
+Run CMD using @code{ansi-term}.
+
+A value for the variable @ref{racket-shell-or-terminal-function}.
+
+@node racket-vterm
+@subsection racket-vterm
+
+@code{(racket-vterm cmd)}
+
+
+Run CMD using @code{vterm}, if that package is installed.
+
+A value for the variable @ref{racket-shell-or-terminal-function}.
+
+@node Faces
+@chapter Faces
+
+@menu
+* All::
+@end menu
+
+@node All
+@section All
+
+@menu
+* racket-keyword-argument-face::
+* racket-reader-quoted-symbol-face::
+* racket-reader-syntax-quoted-symbol-face::
+* racket-here-string-face::
+* racket-xp-def-face::
+* racket-xp-use-face::
+* racket-xp-unused-face::
+* racket-xp-tail-target-face::
+* racket-xp-tail-position-face::
+* racket-xp-binding-lang-face::
+* racket-xp-binding-lang-use-face::
+* racket-xp-binding-import-face::
+* racket-xp-binding-import-use-face::
+* racket-xp-binding-local-face::
+* racket-xp-binding-local-use-face::
+* racket-logger-config-face::
+* racket-logger-topic-face::
+* racket-logger-fatal-face::
+* racket-logger-error-face::
+* racket-logger-warning-face::
+* racket-logger-info-face::
+* racket-logger-debug-face::
+* racket-doc-link-face::
+* racket-ext-link-face::
+* racket-doc-output-face::
+* racket-doc-litchar-face::
+* racket-repl-message::
+* racket-repl-prompt::
+* racket-repl-value::
+* racket-repl-error-message::
+* racket-repl-error-location::
+* racket-repl-stdout::
+* racket-repl-stderr::
+* racket-hash-lang-text::
+@end menu
+
+@node racket-keyword-argument-face
+@subsection racket-keyword-argument-face
+
+Face for @code{#:keyword} arguments.
+
+@node racket-reader-quoted-symbol-face
+@subsection racket-reader-quoted-symbol-face
+
+Face for symbols quoted using ' or `.
+
+This face is given only to symbols directly quoted using the
+reader shorthands ' or `. All other directly quoted values,
+including symbols quoted using ``quote'' or ``quasiquote'', get
+the face @code{font-lock-constant-face}.
+
+@node racket-reader-syntax-quoted-symbol-face
+@subsection racket-reader-syntax-quoted-symbol-face
+
+Face for symbols quoted using #' or #`.
+
+This face is given only to symbols directly quoted using the
+reader shorthands #' or #`. All other directly quoted
+values, including symbols quoted using ``syntax'' or
+``quasisyntax'', get the face @code{font-lock-constant-face}.
+
+@node racket-here-string-face
+@subsection racket-here-string-face
+
+Face for here strings.
+
+@node racket-xp-def-face
+@subsection racket-xp-def-face
+
+Face @ref{racket-xp-mode} uses when point is on a definition.
+
+@node racket-xp-use-face
+@subsection racket-xp-use-face
+
+Face @ref{racket-xp-mode} uses when point is on a use.
+
+@node racket-xp-unused-face
+@subsection racket-xp-unused-face
+
+Face @ref{racket-xp-mode} uses to highlight unused requires or definitions.
+
+@node racket-xp-tail-target-face
+@subsection racket-xp-tail-target-face
+
+Face @ref{racket-xp-mode} uses to highlight targets of a tail position.
+
+@node racket-xp-tail-position-face
+@subsection racket-xp-tail-position-face
+
+Face @ref{racket-xp-mode} uses to highlight expressions in a tail position.
+
+@node racket-xp-binding-lang-face
+@subsection racket-xp-binding-lang-face
+
+Face @ref{racket-xp-mode} gives to the module language name.
+
+See the variable @code{nil}.
+
+@node racket-xp-binding-lang-use-face
+@subsection racket-xp-binding-lang-use-face
+
+Face @ref{racket-xp-mode} gives uses of bindings imported from the module language.
+
+See the variable @code{nil}.
+
+@node racket-xp-binding-import-face
+@subsection racket-xp-binding-import-face
+
+Face @ref{racket-xp-mode} gives to imported module names.
+
+See the variable @code{nil}.
+
+@node racket-xp-binding-import-use-face
+@subsection racket-xp-binding-import-use-face
+
+Face @ref{racket-xp-mode} gives uses of imported bindings.
+
+See the variable @code{nil}.
+
+@node racket-xp-binding-local-face
+@subsection racket-xp-binding-local-face
+
+Face @ref{racket-xp-mode} gives to local definitions.
+
+See the variable @code{nil}.
+
+@node racket-xp-binding-local-use-face
+@subsection racket-xp-binding-local-use-face
+
+Face @ref{racket-xp-mode} gives to uses of local definitions.
+
+See the variable @code{nil}.
+
+@node racket-logger-config-face
+@subsection racket-logger-config-face
+
+Face for @ref{racket-logger-mode} configuration.
+
+@node racket-logger-topic-face
+@subsection racket-logger-topic-face
+
+Face for @ref{racket-logger-mode} topics.
+
+@node racket-logger-fatal-face
+@subsection racket-logger-fatal-face
+
+Face for @ref{racket-logger-mode} fatal level.
+
+@node racket-logger-error-face
+@subsection racket-logger-error-face
+
+Face for @ref{racket-logger-mode} error level.
+
+@node racket-logger-warning-face
+@subsection racket-logger-warning-face
+
+Face for @ref{racket-logger-mode} warning level.
+
+@node racket-logger-info-face
+@subsection racket-logger-info-face
+
+Face for @ref{racket-logger-mode} info level.
+
+@node racket-logger-debug-face
+@subsection racket-logger-debug-face
+
+Face for @ref{racket-logger-mode} debug level.
+
+@node racket-doc-link-face
+@subsection racket-doc-link-face
+
+Face @ref{racket-describe-mode} uses for links within documentation.
+Note: When some special face is already specified by the
+documentation, then to avoid visual clutter this face is NOT also
+added.
+
+@node racket-ext-link-face
+@subsection racket-ext-link-face
+
+Face @ref{racket-describe-mode} uses for external links.
+See the variable @ref{racket-browse-url-function}.
+
+@node racket-doc-output-face
+@subsection racket-doc-output-face
+
+Face @ref{racket-describe-mode} uses for Scribble @@example or @@interactions output.
+
+@node racket-doc-litchar-face
+@subsection racket-doc-litchar-face
+
+Face @ref{racket-describe-mode} uses for Scribble @@litchar.
+
+@node racket-repl-message
+@subsection racket-repl-message
+
+Face @ref{racket-repl-mode} uses for messages from the back end.
+
+@node racket-repl-prompt
+@subsection racket-repl-prompt
+
+Face @ref{racket-repl-mode} uses for prompts.
+
+@node racket-repl-value
+@subsection racket-repl-value
+
+Face @ref{racket-repl-mode} uses for @code{print}-ed values.
+
+@node racket-repl-error-message
+@subsection racket-repl-error-message
+
+Face @ref{racket-repl-mode} uses for error messages.
+
+@node racket-repl-error-location
+@subsection racket-repl-error-location
+
+Face @ref{racket-repl-mode} uses for error locations.
+
+@node racket-repl-stdout
+@subsection racket-repl-stdout
+
+Face @ref{racket-repl-mode} uses for output to current-output-port.
+
+@node racket-repl-stderr
+@subsection racket-repl-stderr
+
+Face @ref{racket-repl-mode} uses for output to current-error-port.
+
+@node racket-hash-lang-text
+@subsection racket-hash-lang-text
+
+Face @ref{racket-hash-lang-mode} uses for text tokens.
+
+@bye

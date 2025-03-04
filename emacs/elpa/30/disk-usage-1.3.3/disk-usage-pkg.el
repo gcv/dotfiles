@@ -1,0 +1,2 @@
+;; Generated package description from disk-usage.el  -*- no-byte-compile: t -*-
+(define-package "disk-usage" "1.3.3" "Sort and browse disk usage listings" '((emacs "26.1")) :commit "b0fb8af34291a49b041eab8b5570e7bc8433a8d8" :authors '(("Pierre Neidhardt" . "mail@ambrevar.xyz")) :maintainer '("Pierre Neidhardt" . "mail@ambrevar.xyz") :keywords '("files" "convenience" "tools") :url "https://gitlab.com/Ambrevar/emacs-disk-usage")

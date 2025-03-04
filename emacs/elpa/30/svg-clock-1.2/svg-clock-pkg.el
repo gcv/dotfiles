@@ -1,0 +1,2 @@
+;; Generated package description from svg-clock.el  -*- no-byte-compile: t -*-
+(define-package "svg-clock" "1.2" "Analog clock using Scalable Vector Graphics" '((svg "1.0") (emacs "27.0")) :commit "1c04475520a125432c4e873ca944323999a3ff83" :url "https://elpa.gnu.org/packages/svg-clock.html" :authors '(("Ulf Jasper" . "ulf.jasper@web.de")) :maintainer '("Ulf Jasper" . "ulf.jasper@web.de") :keywords '("demo" "svg" "clock"))
