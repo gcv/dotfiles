@@ -95,7 +95,8 @@
     "xz@latest",
     "yazi@latest",
     "yt-dlp@latest",
-    "zsh@latest"
+    "zsh@latest",
+    "jujutsu@latest"
   ],
   "shell": {
     "init_hook": [
