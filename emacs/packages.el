@@ -58,6 +58,7 @@
 (use-package breadcrumb
   :pin "gnu"
   :if (>= emacs-major-version 29)
+  ;; NB: :vc checkouts should be added to elpa-level .gitignore.
   ;;:vc (:fetcher github :repo "joaotavora/breadcrumb")
   )
 
@@ -1193,6 +1194,7 @@
 
 
 (use-package typst-ts-mode
+  ;; NB: :vc checkouts should be added to elpa-level .gitignore.
   :vc (typst-ts-mode :url "https://codeberg.org/meow_king/typst-ts-mode" :branch "main")
   :custom
   (typst-ts-mode-indent-offset 2)
