@@ -1,2 +1,0 @@
-;;; Generated package description from git-auto-commit-mode.el  -*- no-byte-compile: t -*-
-(define-package "git-auto-commit-mode" "20200828.653" "Emacs Minor mode to automatically commit and push" 'nil :commit "a6b6e0fa183be381463e2b44ef128db1b6c4234b" :authors '(("Tom Willemse" . "tom@ryuslash.org")) :maintainer '("Tom Willemse" . "tom@ryuslash.org") :keywords '("vc") :url "https://github.com/ryuslash/git-auto-commit-mode")
