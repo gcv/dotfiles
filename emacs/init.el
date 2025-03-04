@@ -168,6 +168,10 @@
 (when (file-exists-p "~/.nix-profile")
   (setenv "NIX_SSL_CERT_FILE" (format "%s/.nix-profile/etc/ssl/certs/ca-bundle.crt" (getenv "HOME"))))
 
+(when (and (eq 'darwin system-type)
+           (file-exists-p "/etc/ssl/cert.pem"))
+  (setenv "GIT_SSL_CAINFO" "/etc/ssl/cert.pem"))
+
 
 ;;; ----------------------------------------------------------------------------
 ;;; package system configuration
