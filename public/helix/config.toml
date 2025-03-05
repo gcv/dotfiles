@@ -4,7 +4,8 @@ theme = "night_owl"
 soft-wrap = { enable = true }
 auto-pairs = false
 #auto-save = true
-bufferline = "never"
+#bufferline = "never"
+bufferline = "multiple"
 #cursorline = true
 line-number = "relative"
 #scrolloff = 0
@@ -23,8 +24,13 @@ newline = "none"
 [editor.statusline]
 left = ["mode", "spinner", "file-name", "file-encoding"]
 #center = []
-right = ["diagnostics", "selections", "position", "position-percentage"]
+right = ["file-modification-indicator", "spacer", "diagnostics", "selections", "position", "spacer", "position-percentage"]
 #separator = "│"
+
+[editor.indent-guides]
+render = true
+character = "┊" # Some characters that work well: "▏", "┆", "┊", "⸽"
+skip-levels = 1
 
 [keys.insert]
 # jk exits insert mode instead of having to reach for Esc
