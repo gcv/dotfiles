@@ -35,5 +35,17 @@ skip-levels = 1
 [keys.insert]
 # jk exits insert mode instead of having to reach for Esc
 #j = { k = "normal_mode" }
-"A-left" = "move_prev_long_word_start"
-"A-right" = "move_next_long_word_start"
+# Emacs compatibility:
+A-left = ["move_prev_long_word_start", "collapse_selection"]
+A-right = ["move_next_long_word_start", "collapse_selection"]
+C-left = ["move_prev_long_word_start", "collapse_selection"]
+C-right = ["move_next_long_word_start", "collapse_selection"]
+A-up = "scroll_down"
+A-down = "scroll_up"
+C-up = ["goto_prev_paragraph", "collapse_selection"]
+C-down = ["goto_next_paragraph", "collapse_selection"]
+C-a = "goto_line_start"
+C-e = ["goto_line_end", "move_char_right"]
+"A-." = "goto_definition"
+"A-," = "jump_backward"
+A-i = "symbol_picker"
