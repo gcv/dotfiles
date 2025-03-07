@@ -51,13 +51,15 @@ if command_exists hx; then
 else
     export EDITOR=vi
 fi
+if command_exists less; then
+    export PAGER=less
+    export LESS="-M -R"
+    export LESSHISTFILE=/dev/null
+fi
 if command_exists moar; then
     export PAGER=moar
-elif command_exists less; then
-    export PAGER=less
+    export MOAR=--quit-if-one-screen
 fi
-export LESS="-M -R"
-export LESSHISTFILE=/dev/null
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
