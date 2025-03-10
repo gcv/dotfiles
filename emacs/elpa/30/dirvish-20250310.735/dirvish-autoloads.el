@@ -166,6 +166,7 @@ ARG defaults to 1.
 
 (fn ARG)" t)
  (autoload 'dirvish-history-menu "dirvish-history" nil t)
+(register-definition-prefixes "dirvish-history" '("dirvish-history-"))
 
 
 ;;; Generated autoloads from dirvish-icons.el

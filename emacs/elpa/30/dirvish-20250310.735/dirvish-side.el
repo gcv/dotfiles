@@ -69,25 +69,32 @@ filename until the project root when opening a side session."
 
 (defun dirvish-side-open-file-fn ()
   "Called before opening a file in side sessions."
-  (let* ((dv (dirvish-curr)) (layout (dv-curr-layout dv))
-         (mru (get-mru-window nil nil t)))
-    (if layout (dirvish--clear-session dv)
-      (when dirvish-side-auto-close
-        (dirvish--clear-session dv)
-        (when dirvish-reuse-session (quit-window)))
-      (select-window (cond ((functionp dirvish-side-open-file-action)
-                            (funcall dirvish-side-open-file-action))
-                           ((eq dirvish-side-open-file-action 'mru) mru)
-                           ((eq dirvish-side-open-file-action 'split)
-                            (with-selected-window mru (split-window-below)))
-                           ((eq dirvish-side-open-file-action 'vsplit)
-                            (with-selected-window mru (split-window-right))))))))
+  (when (dv-curr-layout (dirvish-curr)) (dirvish-layout-toggle))
+  (when dirvish-side-auto-close (quit-window))
+  (let* ((mru (get-mru-window nil nil t)))
+    (select-window (cond ((functionp dirvish-side-open-file-action)
+                          (funcall dirvish-side-open-file-action))
+                         ((eq dirvish-side-open-file-action 'mru) mru)
+                         ((eq dirvish-side-open-file-action 'split)
+                          (with-selected-window mru (split-window-below)))
+                         ((eq dirvish-side-open-file-action 'vsplit)
+                          (with-selected-window mru (split-window-right)))))))
 
-(defun dirvish-side-root-window-fn ()
-  "Create root window according to `dirvish-side-display-alist'."
-  (let ((win (display-buffer-in-side-window
-              (get-buffer-create "*side-temp*")
-              (append '((dedicated . t)) dirvish-side-display-alist))))
+(defun dirvish-side-root-conf-fn (buffer)
+  "Setup BUFFER for side session."
+  (let ((name (buffer-name buffer)))
+    (unless (dirvish-prop :side-buf-renamed) ; hide it by prefix with " "
+      (rename-buffer (format " *SIDE::%s" name))
+      (dirvish-prop :side-buf-renamed t))))
+
+(defun dirvish-side-root-window-fn (dv)
+  "Create root window of DV according to `dirvish-side-display-alist'."
+  (let* ((buf (with-current-buffer (get-buffer-create " *temp*")
+                ;; set the :dv prop for `dirvish-curr'
+                (dirvish-prop :dv (dv-id dv))
+                (current-buffer)))
+         (win (display-buffer-in-side-window
+               buf (append '((dedicated . t)) dirvish-side-display-alist))))
     (cl-loop for (key . value) in dirvish-side-window-parameters
              do (set-window-parameter win key value))
     (with-selected-window win
@@ -117,13 +124,14 @@ filename until the project root when opening a side session."
      (when-let* (((not (dirvish-curr)))
                  ((not (active-minibuffer-window)))
                  (win (dirvish-side--session-visible-p))
-                 (dv (with-selected-window win (dirvish-curr)))
+                 (dv (with-current-buffer (window-buffer win) (dirvish-curr)))
                  (dir (or (dirvish--get-project-root) default-directory))
                  (prev (with-selected-window win (dirvish-prop :index)))
                  (curr buffer-file-name)
                  ((not (string-suffix-p "COMMIT_EDITMSG" curr)))
                  ((not (equal prev curr))))
        (with-selected-window win
+         ;; TODO: `find-alternate-file' lead to incorrect auto-expanding, why?
          (let (buffer-list-update-hook) (dirvish--find-entry 'find-file dir))
          (if dirvish-side-auto-expand (dirvish-subtree-expand-to curr)
            (dired-goto-file curr))
@@ -132,23 +140,18 @@ filename until the project root when opening a side session."
 (defun dirvish-side--new (path)
   "Open a side session in PATH."
   (let* ((bname buffer-file-name)
-         (dirvish-mode-line-format dirvish-side-mode-line-format)
-         (dirvish-header-line-format dirvish-side-header-line-format)
-         (dirvish-attributes dirvish-side-attributes)
          (dv (or (dirvish--get-session 'type 'side)
                  (dirvish--new
                   :type 'side
                   :size-fixed 'width
                   :dedicated t
+                  :root-conf #'dirvish-side-root-conf-fn
                   :root-window-fn #'dirvish-side-root-window-fn
                   :open-file-fn #'dirvish-side-open-file-fn)))
          (r-win (dv-root-window dv)))
-    (unless (window-live-p r-win) (setq r-win (dirvish--create-root-window dv)))
-    (with-selected-window r-win ; `dirvish-curr' returns nil in this temp buffer
-      ;; so set the prop to let `dired-noselect' get `dirvish-curr' correctly
-      (dirvish-prop :dv (dv-id dv))
-      (dirvish--find-entry 'find-file path)
-      (kill-buffer (get-buffer "*side-temp*")) ; remove `:dv' prop in it
+    (setq r-win (dirvish--create-root-window dv))
+    (with-selected-window r-win
+      (dirvish--find-entry 'find-alternate-file path)
       (cond ((not bname) nil)
             (dirvish-side-auto-expand
              (dirvish-subtree-expand-to bname))
