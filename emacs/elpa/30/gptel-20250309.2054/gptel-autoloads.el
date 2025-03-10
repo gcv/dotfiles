@@ -175,7 +175,7 @@ For a list of currently recognized plist keys, see
 including both kinds of specs:
 
 :models
-\\='(gemini-pro                            ;Simple specs
+\\='(gemini-2.0-flash-lite              ;Simple specs
   gemini-1.5-flash
   (gemini-1.5-pro-latest                ;Full spec
    :description
@@ -529,6 +529,11 @@ parameters.
 
 (fn NAME &key CURL-ARGS STREAM KEY (HEADER (lambda nil (when-let* ((key (gptel--get-api-key))) \\=`((\"Authorization\" \\=\\, (concat \"Bearer \" key)))))) (HOST \"api.perplexity.ai\") (PROTOCOL \"https\") (MODELS \\='(sonar sonar-pro sonar-reasoning sonar-reasoning-pro sonar-deep-research)) (ENDPOINT \"/chat/completions\") REQUEST-PARAMS)")
 (function-put 'gptel-make-perplexity 'lisp-indent-function 1)
+(autoload 'gptel-make-deepseek "gptel-openai-extras" "\
+Register a DeepSeek backend for gptel with NAME.
+
+(fn NAME &key CURL-ARGS STREAM KEY REQUEST-PARAMS (HEADER (lambda nil (when-let (key (gptel--get-api-key)) \\=`((\"Authorization\" \\=\\, (concat \"Bearer \" key)))))) (HOST \"api.deepseek.com\") (PROTOCOL \"https\") (ENDPOINT \"/v1/chat/completions\") (MODELS \\='((deepseek-reasoner :capabilities (tool reasoning) :context-window 64 :input-cost 0.55 :output-cost 2.19) (deepseek-chat :capabilities (tool) :context-window 64 :input-cost 0.27 :output-cost 1.1))))")
+(function-put 'gptel-make-deepseek 'lisp-indent-function 1)
 (register-definition-prefixes "gptel-openai-extras" '("gptel--p"))
 
 
