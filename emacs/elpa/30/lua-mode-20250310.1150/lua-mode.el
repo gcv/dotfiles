@@ -12,8 +12,8 @@
 ;;              Aaron Smith <aaron-lua@gelatinous.com>.
 ;;
 ;; URL:         https://immerrr.github.io/lua-mode
-;; Package-Version: 20231023.947
-;; Package-Revision: d074e4134b1b
+;; Package-Version: 20250310.1150
+;; Package-Revision: 2f6b8d7a6317
 ;; Package-Requires: ((emacs "24.3"))
 ;;
 ;; This file is NOT part of Emacs.
@@ -377,8 +377,8 @@ If the latter is nil, the keymap translates into `lua-mode-map' verbatim.")
   "Keymap used in lua-mode buffers.")
 
 (defvar lua-electric-flag t
-  "If t, electric actions (like automatic reindentation) will happen when an electric
- key like `{' is pressed")
+  "If t, electric actions will happen when an electric key like `{' is pressed.
+Automatic reindentation is an example of an electric action.")
 (make-variable-buffer-local 'lua-electric-flag)
 
 (defcustom lua-prompt-regexp "[^\n]*\\(>[\t ]+\\)+$"
@@ -1055,9 +1055,15 @@ found, returns point position, nil otherwise."
 Each token information entry is of the form:
   KEYWORD FORWARD-MATCH-REGEXP BACKWARDS-MATCH-REGEXP TOKEN-TYPE
 KEYWORD is the token.
-FORWARD-MATCH-REGEXP is a regexp that matches all possible tokens when going forward.
-BACKWARDS-MATCH-REGEXP is a regexp that matches all possible tokens when going backwards.
-TOKEN-TYPE determines where the token occurs on a statement. open indicates that the token appears at start, close indicates that it appears at end, middle indicates that it is a middle type token, and middle-or-open indicates that it can appear both as a middle or an open type.")
+FORWARD-MATCH-REGEXP is a regexp that matches all possible tokens
+  when going forward.
+BACKWARDS-MATCH-REGEXP is a regexp that matches all possible tokens
+  when going backwards.
+TOKEN-TYPE determines where the token occurs on a statement. `open'
+  indicates that the token appears at start, close indicates that it
+  appears at end, `middle' indicates that it is a middle type token,
+  and `middle-or-open' indicates that it can appear both as a middle
+  or an open type.")
 
 (defconst lua-indentation-modifier-regexp
   ;; The absence of else is deliberate, since it does not modify the
@@ -1443,14 +1449,12 @@ The criteria for a continuing statement are:
 
 
 (defun lua-is-continuing-statement-p (&optional parse-start)
-  "Returns non-nil if the line at PARSE-START should be indented as continuation line.
+  "Return non-nil if line at PARSE-START is a continuation line.
 
-This true is when the line :
-
-* is continuing a statement itself
-
-* starts with a 1+ block-closer tokens, an top-most block opener is on a continuation line
-"
+This affects how it should be indented.  A line is a continuation line if
+- it is continuing a statement itself, or
+- it starts with a 1+ block-closer tokens, an top-most block opener is on
+  a continuation line."
   (save-excursion
     (if parse-start (goto-char parse-start))
 
