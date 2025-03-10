@@ -30,7 +30,7 @@ disabled.
 
 (fn &optional ARG)" t)
 (autoload 'turn-on-colorful-mode "colorful-mode" "\
-Turn on `colorful-mode' mode if the current buffer.")
+Turn on `colorful-mode' mode in the current buffer.")
 (put 'global-colorful-mode 'globalized-minor-mode t)
 (defvar global-colorful-mode nil "\
 Non-nil if Global Colorful mode is enabled.
