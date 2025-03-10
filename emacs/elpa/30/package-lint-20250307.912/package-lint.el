@@ -6,8 +6,8 @@
 ;;         Fanael Linithien <fanael4@gmail.com>
 ;; URL: https://github.com/purcell/package-lint
 ;; Keywords: lisp
-;; Package-Version: 20250303.1353
-;; Package-Revision: 43681bca2333
+;; Package-Version: 20250307.912
+;; Package-Revision: 6170c1e5b79f
 ;; Package-Requires: ((emacs "24.4") (let-alist "1.0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
