@@ -1,42 +1,36 @@
--- Ctrl handling: hold as Ctrl modifier, tap as Esc.
--- from https://gist.github.com/zcmarine/f65182fe26b029900792fa0b59f09d7f
+--- Make Ctrl and Esc share a key: tap for Esc, hold as a modifier for Ctrl
 
-len = function(t)
-   local length = 0
-   for k, v in pairs(t) do
-      length = length + 1
-   end
-   return length
-end
+local ctrl_esc_send_escape = false
+local ctrl_esc_last_mods = {}
 
-send_escape = false
-prev_modifiers = {}
+ctrl_esc_ctrl_table = {
+    handler = function(evt)
+        local new_mods = evt:getFlags()
+        if ctrl_esc_last_mods["ctrl"] == new_mods["ctrl"] then
+            return false
+        end
+        if new_mods["ctrl"] then
+            -- control key pressed
+            ctrl_esc_last_mods = new_mods
+            ctrl_esc_send_escape = true
+        else
+            -- control key released
+            ctrl_esc_last_mods = new_mods
+            if ctrl_esc_send_escape then
+                hs.eventtap.keyStroke({}, "escape")
+            end
+        end
+        return false
+    end,
+    flags = {ctrl = true}
+}
 
-modifier_handler = function(evt)
-    -- evt:getFlags() holds the modifiers that are currently held down
-    local curr_modifiers = evt:getFlags()
+ctrl_esc_ctrl_key_tap = hs.eventtap.new({hs.eventtap.event.types.flagsChanged}, ctrl_esc_ctrl_table.handler)
+ctrl_esc_ctrl_key_tap:start()
 
-    if curr_modifiers["ctrl"] and len(curr_modifiers) == 1 and len(prev_modifiers) == 0 then
-        -- We need this here because we might have had additional modifiers, which
-        -- we don't want to lead to an escape, e.g. [Ctrl + Cmd] —> [Ctrl] —> [ ]
-        send_escape = true
-    elseif prev_modifiers["ctrl"]  and len(curr_modifiers) == 0 and send_escape then
-		send_escape = false
-        hs.eventtap.keyStroke({}, "ESCAPE")
-    else
-        send_escape = false
-	end
-    prev_modifiers = curr_modifiers
-	return false
-end
-
--- Call the modifier_handler function anytime a modifier key is pressed or released
-modifier_tap = hs.eventtap.new({hs.eventtap.event.types.flagsChanged}, modifier_handler)
-modifier_tap:start()
-
--- If any non-modifier key is pressed, we know we won't be sending an escape
-non_modifier_tap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(evt)
-    send_escape = false
+-- If any other key is pressed while ctrl is held, we don't want to send escape:
+ctrl_esc_other_key_tap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(evt)
+    ctrl_esc_send_escape = false
     return false
 end)
-non_modifier_tap:start()
+ctrl_esc_other_key_tap:start()
