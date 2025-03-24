@@ -97,7 +97,8 @@
     "yt-dlp@latest",
     "zsh@latest",
     "jujutsu@latest",
-    "lazyjj@latest"
+    "lazyjj@latest",
+    "numbat@latest"
   ],
   "shell": {
     "init_hook": [
