@@ -5,6 +5,7 @@
 # shared non-Bash sh-type shell configuration:
 [[ -f ~/.profile ]] && . ~/.profile
 
+# basic prompt:
 PS1="[\u@\h:\W]\$ "
 
 # history configuration

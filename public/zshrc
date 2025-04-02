@@ -7,131 +7,12 @@ ulimit -c 0                                                # no core dumps
 ulimit -s unlimited                                        # no stack limits
 
 
-### command finding helper:
-command_exists () { command -v "$1" >/dev/null 2>&1; }
+### shared POSIX-type shell configuration:
+
+[[ -f ~/.profile ]] && . ~/.profile
 
 
-### Path wrangling:
-path_prepend() { [[ -d "$2" ]] && eval "${(L)1}[1,0]=\"$2\"" }
-path_append() { [[ -d "${2}" ]] && eval "${(L)1}+=(\"${2}\")" }
-
-path=()
-path_prepend PATH /sbin
-path_prepend PATH /bin
-path_prepend PATH /usr/sbin
-path_prepend PATH /usr/bin
-path_prepend PATH /usr/local/sbin
-path_prepend PATH /usr/local/bin
-path_prepend PATH /opt/brew/sbin
-path_prepend PATH /opt/brew/bin
-path_prepend PATH /opt/homebrew/sbin
-path_prepend PATH /opt/homebrew/bin
-path_prepend PATH ~/.linuxbrew/sbin
-path_prepend PATH ~/.linuxbrew/bin
-path_prepend PATH /home/linuxbrew/.linuxbrew/sbin
-path_prepend PATH /home/linuxbrew/.linuxbrew/bin
-path_prepend PATH /run/current-system/sw/bin
-path_prepend PATH /run/wrappers/bin
-path_prepend PATH ~/.nix-profile/sbin
-path_prepend PATH ~/.nix-profile/bin
-path_prepend PATH ~/.local/sbin
-path_prepend PATH ~/.local/bin
-typeset -U path                 # dedup
-
-path_prepend MANPATH ~/.nix-profile/share/man
-path_prepend MANPATH /opt/brew/share/man
-path_prepend MANPATH /opt/homebrew/share/man
-path_prepend MANPATH /home/linuxbrew/.linuxbrew/share/man
-path_prepend MANPATH ~/.local/share/man
-typeset -U manpath              # dedup
-
-path_prepend FPATH /opt/brew/share/zsh/site-functions
-path_prepend FPATH /opt/homebrew/share/zsh/site-functions
-path_prepend FPATH /home/linuxbrew/.linuxbrew/share/zsh/site-functions
-typeset -U fpath                # dedup
-
-
-### Nix and Devbox (must happen early for correct path setup):
-if command_exists devbox; then
-    eval "$(devbox global shellenv --init-hook)"
-    export NIX_LOCAL_ROOT="${HOME}/.local/share/devbox/global/default/.devbox/nix/profile/default"
-elif [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
-    . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
-    export NIX_LOCAL_ROOT="${HOME}/.nix-profile"
-fi
-
-
-### environmental variables
-export CVS_RSH=ssh
-export DO_NOT_TRACK=1 # https://consoledonottrack.com
-if command_exists hx; then
-    export EDITOR=hx
-else
-    export EDITOR=vi
-fi
-if command_exists less; then
-    export PAGER=less
-    export LESS="-M -R"
-    export LESSHISTFILE=/dev/null
-    export LESS_TERMCAP_so=$'\E[1;38;2;0;0;0;48;2;70;130;180m' # highlight "standout" color: "1" bold, "38;2" foreground, "48;2" background
-    export LESS_TERMCAP_se=$'\E[39;49m' # standout end
-fi
-if command_exists moar; then
-    export PAGER=moar
-    export MOAR=--quit-if-one-screen
-fi
-export LC_CTYPE=en_US.UTF-8
-export LC_COLLATE=C
-export UNAME=$(uname)
-export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
-export MACHINE_STORAGE_PATH="${HOME}/Virtual Machines/Docker"
-
-if [ "${UNAME}" = "Darwin" ]; then
-    export XDG_DATA_HOME="${HOME}/.local/share"
-    export XDG_CONFIG_HOME="${HOME}/.config"
-    export XDG_STATE_HOME="${HOME}/.local/state"
-    export XDG_CACHE_HOME="${HOME}/.cache"
-fi
-
-# load private configuration:
-[[ -f ~/.dotfiles/private/shell-profile-private ]] && . ~/.dotfiles/private/shell-profile-private
-
-
-### aliases
-if [[ $(ls --color --sort=version 2>/dev/null) ]]; then
-    # GNU ls probably available
-    alias ls='ls --color --sort=version'
-elif command_exists gls && [[ $(gls --color --sort=version 2>/dev/null) ]]; then
-    alias ls='gls --color --sort=version'
-fi
-alias v="ls -lahF"
-alias grep="grep --color"
-alias rm="rm -i"
-alias cp="cp -p"
-if command_exists eza; then
-    alias e="eza -l"
-fi
-
-if command_exists emacsclient; then
-    alias ec="emacsclient -n"
-    alias et='emacsclient -a "" -t'
-fi
-#alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs -nw'
-#[[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
-#    alias ec='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -n' || \
-#    alias ec='emacsclient -n'
-#[[ ${UNAME} == "Darwin" && -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" ]] && \
-#    alias et='/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -a "" -t' || \
-#    alias et='emacsclient -a "" -t'
-
-if command_exists mc; then # use Midnight Commander directory-following wrapper
-    if [ -f "${NIX_LOCAL_ROOT}/libexec/mc/mc-wrapper.sh" ]; then
-        alias mc=". ${NIX_LOCAL_ROOT}/libexec/mc/mc-wrapper.sh"
-    fi
-fi
-
-[[ ${UNAME} == "Darwin" && -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ]] && \
-    alias firewall="sudo /usr/libexec/ApplicationFirewall/socketfilterfw"
+### aliases:
 
 alias -g ...='../..'
 alias -g ....='../../..'
@@ -140,21 +21,14 @@ alias -g ......='../../../../..'
 alias -g .......='../../../../../..'
 
 
-### ls color output
-export LS_COLORS="no=00:fi=00:di=95:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40;33;01:or=01;05;37;41:mi=01;05;37;41:ex=01;32:*.cmd=01;32:*.exe=01;32:*.com=01;32:*.btm=01;32:*.bat=01;32:*.sh=01;32:*.csh=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.bz=01;31:*.tz=01;31:*.rpm=01;31:*.cpio=01;31:*.jpg=01;35:*.gif=01;35:*.bmp=01;35:*.xbm=01;35:*.xpm=01;35:*.png=01;35:*.tif=01;35:"
+### shell settings:
 
+REPORTTIME=10                     # command timing
 
-### shell history settings
 HISTSIZE=500000
 HISTFILE="${HOME}/.dotfiles/private/history-files/zsh_history_$(hostname -s)"
 SAVEHIST=500000
 
-
-### shell command timing
-REPORTTIME=10
-
-
-### history options
 setopt extended_history           # saves timestamps on history
 setopt hist_ignore_space          # do not save command entries which start with a space
 setopt hist_expire_dups_first     # expire history duplicates first
@@ -165,8 +39,6 @@ setopt hist_verify                # preview history expansions
 # setopt inc_append_history       # append each command (c.f. share_history)
 setopt share_history              # share commands between shells (c.f. inc_append_history)
 
-
-### shell options
 setopt auto_cd                    # automatically execute chdir
 setopt check_jobs                 # check jobs before exiting the shell
 setopt correct                    # correct spelling of commands
@@ -191,7 +63,8 @@ setopt rc_quotes                  # '' means a single quote in single quotes
 setopt rm_star_silent             # do not prompt before deleting *
 
 
-### directory stack customization
+### directory stack customization:
+
 setopt auto_pushd                 # automatic directory stack
 setopt pushd_minus                # swap +/- for pushd and popd
 setopt pushd_silent               # no output after pushd and popd
@@ -199,8 +72,9 @@ setopt pushd_to_home              # pushd with no arguments goes to ~
 setopt pushd_ignore_dups          # no duplicates in directory stack
 
 
-### keyboard settings
+### keyboard settings:
 ### hint: use ctrl-v in a terminal to print out a key sequence
+
 bindkey '^?' backward-delete-char     # Mac keyboard backspace
 bindkey '^P' history-beginning-search-backward
 bindkey '^N' history-beginning-search-forward
@@ -246,6 +120,7 @@ bindkey 'f' forward-word # alt
 
 
 ### command completion
+
 # cache: https://gist.github.com/ctechols/ca1035271ad134841284
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
     compinit -i
@@ -275,15 +150,6 @@ zstyle ':completion:*:*:kill:*' menu yes select
 
 ### colors
 
-case $TERM in
-    linux | screen*)
-        unset COLORTERM
-        ;;
-    *)
-        export COLORTERM=truecolor
-        ;;
-esac
-
 if [[ "$terminfo[colors]" -ge 8 ]]; then
     colors
 fi
@@ -295,6 +161,7 @@ COLOR_NONE="%{$terminfo[sgr0]%}"
 
 
 ### prompt
+
 if command_exists starship; then
     eval "$(starship init zsh)"
 else
@@ -316,6 +183,7 @@ fi
 
 
 ### title bar or status bar
+
 case $TERM in
     xterm*|rxvt*|cygwin)
         function precmd_xterm() {
@@ -343,6 +211,7 @@ esac
 
 
 ### TRAMP environment settings
+
 if [[ $TERM == "dumb" ]]; then
     PS1="%m%# "
     unsetopt zle
@@ -350,6 +219,7 @@ fi
 
 
 ### Turn on fzf (fuzzy finder) integration with custom multi-shell history search:
+
 if command_exists fzf && command_exists fzf-history-all; then
     fzf-history-all-widget () {
         local selected=$(fzf-history-all zsh)
@@ -362,6 +232,7 @@ fi
 
 
 ### Turn on Docker autocompletion on Mac with Docker.app.
+
 if [[ "${UNAME}" == "Darwin" && -f "/Applications/Docker.app/Contents/Resources/etc/docker.zsh-completion" ]]; then
     . /Applications/Docker.app/Contents/Resources/etc/docker.zsh-completion
     compinit -i
@@ -370,130 +241,21 @@ fi
 
 
 ### Turn on direnv integration if found.
+
 if command_exists direnv; then
     eval "$(direnv hook zsh)"
 fi
 
 
 ### Turn on zoxide (modern autojump replacement) if found.
+
 if command_exists zoxide; then
     export _ZO_DATA_DIR="${HOME}/.local/share/zoxide"
     eval "$(zoxide init zsh)"
 fi
 
 
-### Turn on terminal GPG pinentry if on SSH connection or in tmux session:
-export GPG_TTY=$(tty)
-if [[ -n "$SSH_CONNECTION" || -n "$TMUX" ]]; then
-    export PINENTRY_USER_DATA="USE_CURSES=1"
-fi
-
-
-### Deal with ssh-agent (trying to stick to POSIX shell here):
-if [ -z "${SSH_AUTH_SOCK}" -o ! -e "${SSH_AUTH_SOCK}" ]; then
-    if [ "${UNAME}" = "Darwin" ]; then
-        # launchd manages ssh-agent on Mac, but individual shells can sometimes lose SSH_AUTH_SOCK
-        ssh_agent_pid=$(ps uwx | grep "${USER}" | grep ssh-agent | grep -v grep | awk '{print $2}')
-        if [ -z ${ssh_agent_pid} ]; then
-            # try to restart ssh-agent
-            launchctl start gui/$(id -u)/com.openssh.ssh-agent
-            ssh_agent_pid=$(ps uwx | grep "${USER}" | grep ssh-agent | grep -v grep | awk '{print $2}')
-        fi
-        # launchd may fail to restart the ssh-agent, sigh
-        if [ ! -z ${ssh_agent_pid} ]; then
-            export SSH_AUTH_SOCK=$(lsof -p ${ssh_agent_pid} | grep com.apple.launchd | grep Listeners | awk '{print $8}' | head -1)
-        fi
-    else
-        ssh_agent_sock_file="${HOME}/.ssh/ssh-agent-$(hostname -s)-$(id -un).sock"
-        if [ ! -S "${ssh_agent_sock_file}" ]; then
-            ssh-agent -s -a "${ssh_agent_sock_file}" > /dev/null
-        fi
-        export SSH_AUTH_SOCK="${ssh_agent_sock_file}"
-    fi
-fi
-
-
 ### random functions
-function notify() { osascript -e "display notification \"$2\" with title \"$1\"" }
-function dtmux() { docker exec -ti $1 script -q -c "tmux attach || tmux new" /dev/null }
-function dlatex() { docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data "blang/latex:ubuntu" "$@" }
-# latexmk -cd -f -interaction=batchmode -pdf file.tex
-# latexmk -c or -C to clean up
-function doctave() { docker run --rm -it -v "$PWD":/source schickling/octave }
-
-
-### pskill <process name>
-function pskill() {
-   kill -9 $(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')
-   echo -n "Killed $1."
-}
-
-
-### Search for files containing the given string in the current
-### directory.
-function findf() {
-    find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
-        xargs -0 grep -I -l -i -e $1
-}
-
-
-### Search for files containing the given string in the current directory,
-### and print lines with the string.
-function findl() {
-    find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
-        xargs -0 grep -I -n -i -e $1
-}
-
-
-### Semi-portable GNU readlink -f replacement, requires Perl.
-function readlinkf() {
-    perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1";
-}
-
-
-# 1. Search for text in files using Ripgrep
-# 2. Interactively narrow down the list using fzf
-# 3. Open the file in $EDITOR at the given line
-# Requires: rg, fzf
-function rgfzf() {
-    rg --color=always --line-number --no-heading --smart-case "${*:-}" |
-        fzf --ansi \
-            --color "hl:-1:underline,hl+:-1:underline:reverse" \
-            --delimiter : \
-            --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' \
-            --bind "enter:become(${EDITOR} {1} +{2})"
-}
-
-
-# A little helpful fd and fzf integration.
-function fdfzf() {
-    local target=$(fd . "${*:-}" |
-                       fzf --ansi \
-                           --color "hl:-1:underline,hl+:-1:underline:reverse")
-    if [ -d "${target}" ]; then
-        chdir "${target}"
-    else
-        # insert file path into the command line
-        if [[ ! -z "${target}" ]]; then
-            print -z "\"${target}\""
-        fi
-    fi
-}
-
-
-
-### Find Homebrew formula dependencies.
-function brewdeps() {
-    function brewdeps_check() {
-        echo -ne "\x1B[1;34m $1 \x1B[0m"; brew uses "$1" --installed | awk '{printf(" %s ", $0)}'; echo "";
-    }
-    if [[ -z "$1" ]]; then
-        brew list -1 | while read cask; do brewdeps_check $cask; done
-    else
-        brewdeps_check "$1"
-    fi
-}
-
 
 ### utility function for unambiguously shortening the present working directory
 function shorten_path_disambiguate_keep_last() {
@@ -660,7 +422,7 @@ function s3cp() {
 }
 
 
-### utility function: cycle firewall and add mosh-server
+### cycle firewall and add mosh-server
 function firewall-add-mosh() {
     firewall --setglobalstate off
     firewall --add $(readlinkf $(which mosh-server))
@@ -669,53 +431,6 @@ function firewall-add-mosh() {
 }
 
 
-### Nix: profile switcher
-function nix-profile() {
-    # no args: print current profile link
-    # tab-completion should work
-    local profile=$1
-    local profile_dir="/nix/var/nix/profiles/per-user/${USER}"
-    local profile_link="${profile_dir}/profile"
-    if [[ -z "${profile}" ]]; then
-        echo $(readlink ~/.nix-profile)
-        return 0
-    elif [[ "${profile}" != "${USER}" ]]; then
-        profile_dir="/nix/var/nix/profiles/projects/${profile}"
-        profile_link="${profile_dir}/profile"
-        if [[ ! -d "${profile_dir}" ]]; then
-            mkdir -p "${profile_dir}"
-            nix-env -p "${profile_link}" -i nix nss-cacert
-        fi
-    fi
-    if [[ -x "${profile_link}/bin/nix-env" ]]; then
-        nix-env --switch-profile "${profile_link}"
-        echo "${profile_link}"
-    else
-        echo "resulting profile invalid" 1>&2
-    fi
-}
-
-function _nix-profile() {
-    compadd $(print -l /nix/var/nix/profiles/**/profile | perl -pe 's/\/nix\/var\/nix\/profiles\/(.*)\/(.*)\/profile/\2/')
-}
-
-compdef _nix-profile nix-profile
-
-
-### Nix: package file lister
-function nix-files() {
-    local cmd=$1
-    local cmd_path=$(readlinkf $(readlinkf $(which "${cmd}"))/../..)
-    print -l "${cmd_path}"/**
-}
-
-
-### Nix: package finder
-function nix-find() {
-    local str=$1
-    nix-env -f '<nixpkgs>' -qaP ".*${str}.*"
-}
-
-
 ######### yesterday we obeyed kings and bent our necks before emperors #########
 #########               but today we kneel only to truth               #########
+

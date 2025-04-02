@@ -10,37 +10,90 @@
 
 ### command finding helper:
 
-command_exists () { command -v "$1" >/dev/null 2>&1; }
+command_exists() { command -v "$1" >/dev/null 2>&1; }
 
 
-### path setup
+### path wrangling:
 
-path_add () {
-    local _grep
-    if [ -e /bin/grep ]; then
-        _grep=/bin/grep
-    elif [ -e /usr/bin/grep ]; then
-        _grep=/usr/bin/grep
+path_add() {
+    local dir="$1"
+    local position="${2:-prepend}"
+    # Only proceed if directory exists
+    if [[ ! -d "$dir" ]]; then
+        return
     fi
-    if ! echo "$PATH" | "${_grep}" -Eq "(^|:)$1($|:)" ; then
-        if [ "$2" = "after" ] ; then
-            PATH="$PATH:$1"
-        else
-            PATH="$1:$PATH"
+    local NEWPATH
+    local paths
+    if [[ -n "$ZSH_VERSION" ]]; then
+        # zsh path splitting
+        paths=(${(s[:])PATH})
+    else
+        # bash path splitting
+        IFS=: read -ra paths <<< "$PATH"
+    fi
+    if [[ "$position" == "append" ]]; then
+        NEWPATH=""
+    else
+        NEWPATH="$dir"
+    fi
+    for DIR in "${paths[@]}"; do
+        if [[ "$DIR" != "$dir" && ! ( ":${NEWPATH}:" == *":${DIR}:"* ) ]]; then
+            NEWPATH="${NEWPATH:+${NEWPATH}:}${DIR}"
         fi
+    done
+    if [[ "$position" == "append" ]]; then
+        NEWPATH="${NEWPATH:+${NEWPATH}:}${dir}"
     fi
+    PATH="${NEWPATH}"
 }
 
-path_add "${HOME}/.nix-profile/sbin" before
-path_add "${HOME}/.nix-profile/bin" before
-path_add "${HOME}/.local/sbin" before
-path_add "${HOME}/.local/bin" before
+path_add /usr/sbin
+path_add /usr/bin
+path_add /usr/local/sbin
+path_add /usr/local/bin
+path_add /sbin
+path_add /bin
+path_add /opt/homebrew/sbin
+path_add /opt/homebrew/bin
+path_add ~/.local/sbin
+path_add ~/.local/bin
 
 
 ### enable Nix and Devbox (must happen early for correct path setup):
 
 if command_exists devbox; then
-    eval "$(devbox global shellenv --init-hook)"
+    # This works around the terrible performance of `devbox global shellenv --init-hook`.
+    DEVBOX_CACHE_DIR="$HOME/.cache/devbox-shellenv"
+    DEVBOX_RAW="$DEVBOX_CACHE_DIR/raw"
+    DEVBOX_PROCESSED="$DEVBOX_CACHE_DIR/processed"
+    if [[ ! -f $DEVBOX_PROCESSED ]] || [[ $(find "$DEVBOX_PROCESSED" -mmin +60) ]]; then
+        # Create cache directory with restrictive permissions
+        mkdir -p "$DEVBOX_CACHE_DIR"
+        chmod 700 "$DEVBOX_CACHE_DIR"
+        # Capture current environment
+        env > "$DEVBOX_CACHE_DIR/env_before"
+        # Run devbox shellenv and capture its output
+        devbox global shellenv --init-hook > "$DEVBOX_RAW"
+        chmod 600 "$DEVBOX_RAW"
+        # Source the raw output to get new environment
+        source "$DEVBOX_RAW"
+        env > "$DEVBOX_CACHE_DIR/env_after"
+        # Compare environments and only save differences
+        {
+            echo "# Generated $(date)"
+            diff "$DEVBOX_CACHE_DIR/env_before" "$DEVBOX_CACHE_DIR/env_after" | \
+                grep '^>' | cut -c 3- | while read -r line; do
+                var_name=${line%%=*}
+                var_value=${line#*=}
+                echo "export $var_name=\"$var_value\""
+            done
+        } > "$DEVBOX_PROCESSED"
+        chmod 600 "$DEVBOX_PROCESSED"
+        # Cleanup intermediate files
+        rm "$DEVBOX_CACHE_DIR/env_before" "$DEVBOX_CACHE_DIR/env_after"
+    else
+        source "$DEVBOX_PROCESSED"
+    fi
     export NIX_LOCAL_ROOT="${HOME}/.local/share/devbox/global/default/.devbox/nix/profile/default"
 elif [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
     . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
@@ -51,22 +104,31 @@ fi
 ### environment variables
 
 export DO_NOT_TRACK=1 # https://consoledonottrack.com
+
 if command_exists hx; then
     export EDITOR=hx
 else
     export EDITOR=vi
 fi
+
 if command_exists less; then
     export PAGER=less
     export LESS="-M -R"
     export LESSHISTFILE=/dev/null
+    export LESS_TERMCAP_so=$'\E[1;38;2;0;0;0;48;2;70;130;180m' # highlight "standout" color: "1" bold, "38;2" foreground, "48;2" background
+    export LESS_TERMCAP_se=$'\E[39;49m' # standout end
 fi
+
 if command_exists moar; then
     export PAGER=moar
     export MOAR=--quit-if-one-screen
 fi
+
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
+export WORDCHARS="*?_-.[]~=&;!#$%^(){}<>"
+
+export LS_COLORS="no=00:fi=00:di=95:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40;33;01:or=01;05;37;41:mi=01;05;37;41:ex=01;32:*.cmd=01;32:*.exe=01;32:*.com=01;32:*.btm=01;32:*.bat=01;32:*.sh=01;32:*.csh=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.bz=01;31:*.tz=01;31:*.rpm=01;31:*.cpio=01;31:*.jpg=01;35:*.gif=01;35:*.bmp=01;35:*.xbm=01;35:*.xpm=01;35:*.png=01;35:*.tif=01;35:"
 
 if [ "${UNAME}" = "Darwin" ]; then
     export XDG_DATA_HOME="${HOME}/.local/share"
@@ -75,7 +137,9 @@ if [ "${UNAME}" = "Darwin" ]; then
     export XDG_CACHE_HOME="${HOME}/.cache"
 fi
 
-# load private configuration:
+
+### load private configuration:
+
 [[ -f ~/.dotfiles/private/shell-profile-private ]] && . ~/.dotfiles/private/shell-profile-private
 
 
@@ -89,6 +153,14 @@ case $TERM in
         export COLORTERM=truecolor
         ;;
 esac
+
+
+### Turn on terminal GPG pinentry if on SSH connection or in tmux session:
+
+export GPG_TTY=$(tty)
+if [[ -n "$SSH_CONNECTION" || -n "$TMUX" ]]; then
+    export PINENTRY_USER_DATA="USE_CURSES=1"
+fi
 
 
 ### deal with ssh-agent
@@ -151,3 +223,63 @@ if command_exists mc; then # use Midnight Commander directory-following wrapper
         alias mc=". ${NIX_LOCAL_ROOT}/libexec/mc/mc-wrapper.sh"
     fi
 fi
+
+[[ ${UNAME} == "Darwin" && -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ]] && \
+    alias firewall="sudo /usr/libexec/ApplicationFirewall/socketfilterfw"
+
+
+### useful functions
+
+# 1. Search for text in files using Ripgrep
+# 2. Interactively narrow down the list using fzf
+# 3. Open the file in $EDITOR at the given line
+# Requires: rg, fzf
+rgfzf() {
+    rg --color=always --line-number --no-heading --smart-case "${*:-}" |
+        fzf --ansi \
+            --color "hl:-1:underline,hl+:-1:underline:reverse" \
+            --delimiter : \
+            --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' \
+            --bind "enter:become(${EDITOR} {1} +{2})"
+}
+
+
+# A little helpful fd and fzf integration.
+fdfzf() {
+    local target=$(fd . "${*:-}" |
+                       fzf --ansi \
+                           --color "hl:-1:underline,hl+:-1:underline:reverse")
+    if [ -d "${target}" ]; then
+        chdir "${target}"
+    else
+        # insert file path into the command line
+        if [[ ! -z "${target}" ]]; then
+            print -z "\"${target}\""
+        fi
+    fi
+}
+
+
+# pskill <process name>
+pskill() {
+   kill -9 "$(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')"
+   echo -n "killed $1"
+}
+
+# Search for files containing the given string in the current directory.
+findf() {
+    find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
+        xargs -0 grep -I -l -i -e "$1"
+}
+
+# Search for files containing the given string in the current directory,
+# and print lines with the string.
+findl() {
+    find . \( -path '*.svn' -o -path '*.git' \) -prune -o -type f -print0 | \
+        xargs -0 grep -I -n -i -e "$1"
+}
+
+# Semi-portable GNU readlink -f replacement, requires Perl.
+readlinkf() {
+    perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"
+}
