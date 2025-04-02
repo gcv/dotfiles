@@ -26,15 +26,61 @@ HISTTIMEFORMAT="%F %T "
 # better globbing:
 shopt -s globstar
 
-# fzf with custom multi-shell history search:
+# fzf integrations:
 if command_exists fzf && command_exists fzf-history-all; then
+    # custom multi-shell history search:
     fzf-history-all-widget () {
         local selected=$(fzf-history-all bash)
         READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
         READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
     }
     bind -x '"\er":fzf-history-all-widget'
+
+    # file and directory completion:
+    fzf-file-widget() {
+        local curr_word="${READLINE_LINE:0:READLINE_POINT}"
+        local last_word="${curr_word##* }"
+        local start_pos
+        if [ "$curr_word" = "$last_word" ]; then
+            start_pos=0
+            local prompt_prefix=""
+        else
+            start_pos=$((READLINE_POINT - ${#last_word}))
+            local prompt_prefix="${READLINE_LINE:0:$start_pos}"
+        fi
+        # handle directory completion when input ends with /
+        if [[ "$last_word" =~ /$ ]] && [ -d "${last_word%/}" ]; then
+            search_dir="${last_word%/}"
+            search_term=""
+        else
+            # split last_word into directory and search term
+            if [[ "$last_word" =~ / ]]; then
+                search_dir="$(dirname "$last_word")"
+                search_term="$(basename "$last_word")"
+            else
+                search_dir="."
+                search_term="$last_word"
+            fi
+        fi
+        local selected=$(find "$search_dir" -maxdepth 1 \( -type f -o -type d \) ! -name "." \
+                | sed "s|^${search_dir}/||" \
+                | fzf --height ${FZF_TMUX_HEIGHT:-20%} --layout=reverse --inline-info --tiebreak=index +m \
+                    --prompt "${prompt_prefix}" --query="$search_term" --select-1)
+        if [ -n "$selected" ]; then
+            if [[ $selected =~ [[:space:]\'\"\\] ]]; then
+                selected="\"$selected\""
+            fi
+            # If we were in a subdirectory, prepend it back
+            if [ "$search_dir" != "." ]; then
+                selected="${search_dir}/${selected}"
+            fi
+            READLINE_LINE="${READLINE_LINE:0:$start_pos}$selected${READLINE_LINE:READLINE_POINT}"
+            READLINE_POINT=$((start_pos + ${#selected}))
+        fi
+    }
+    bind -x '"\C-f": fzf-file-widget'
 fi
+
 
 # direnv
 if command_exists direnv; then
