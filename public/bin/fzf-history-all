@@ -70,7 +70,7 @@ tmpl_bash() {
     # use a bogus timestamp string as a separator. Then replace the bogus
     # timestamp with a null byte. Only Perl (not sed) can do this reliably on
     # the command line.
-    echo "bash -c 'HISTTIMEFORMAT=\"!!!COMMAND!!!\" history -r "$hf"; HISTTIMEFORMAT=\"!!!COMMAND!!!\" history | cut -c 8- | perl -pe \"s/!!!COMMAND!!!/\0/g\"'"
+    echo "bash -c 'HISTTIMEFORMAT=\"!!!COMMAND!!!\" history -r \"$hf\"; HISTTIMEFORMAT=\"!!!COMMAND!!!\" history | cut -c 8- | perl -pe \"s/\s+$//; s/!!!COMMAND!!!/\0/g\"'"
 }
 
 
