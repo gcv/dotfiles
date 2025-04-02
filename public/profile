@@ -39,8 +39,13 @@ path_add "${HOME}/.local/bin" before
 
 ### enable Nix and Devbox (must happen early for correct path setup):
 
-[[ -e ~/.nix-profile/etc/profile.d/nix.sh ]] && . ~/.nix-profile/etc/profile.d/nix.sh
-command_exists devbox && eval "$(devbox global shellenv --init-hook)"
+if command_exists devbox; then
+    eval "$(devbox global shellenv --init-hook)"
+    export NIX_LOCAL_ROOT="${HOME}/.local/share/devbox/global/default/.devbox/nix/profile/default"
+elif [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
+    . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+    export NIX_LOCAL_ROOT="${HOME}/.nix-profile"
+fi
 
 
 ### environment variables
@@ -142,7 +147,7 @@ if command_exists emacsclient; then
 fi
 
 if command_exists mc; then # use Midnight Commander directory-following wrapper
-    if [ -f "${HOME}/.nix-profile/libexec/mc/mc-wrapper.sh" ]; then
-        alias mc=". ${HOME}/.nix-profile/libexec/mc/mc-wrapper.sh"
+    if [ -f "${NIX_LOCAL_ROOT}/libexec/mc/mc-wrapper.sh" ]; then
+        alias mc=". ${NIX_LOCAL_ROOT}/libexec/mc/mc-wrapper.sh"
     fi
 fi

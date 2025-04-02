@@ -98,7 +98,8 @@
     "zsh@latest",
     "jujutsu@latest",
     "lazyjj@latest",
-    "numbat@latest"
+    "numbat@latest",
+    "zoxide@latest"
   ],
   "shell": {
     "init_hook": [

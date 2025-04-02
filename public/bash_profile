@@ -41,6 +41,12 @@ if command_exists direnv; then
     eval "$(direnv hook bash)"
 fi
 
+# zoxide (modern autojump replacement)
+if command_exists zoxide; then
+    export _ZO_DATA_DIR="${HOME}/.local/share/zoxide"
+    eval "$(zoxide init bash)"
+fi
+
 # look for and maybe enable programmable completion features (Debian):
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
