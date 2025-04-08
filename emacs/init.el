@@ -204,10 +204,10 @@
     (package-install 'use-package)))
 (require 'use-package)
 
-(customize-set-variable 'use-package-enable-imenu-support t)
-(customize-set-variable 'use-package-always-ensure t)
-(customize-set-variable 'use-package-always-defer t)
-(customize-set-variable 'use-package-always-pin "melpa-stable")
+(setopt use-package-enable-imenu-support t)
+(setopt use-package-always-ensure t)
+(setopt use-package-always-defer t)
+(setopt use-package-always-pin "melpa-stable")
 ;;(setq use-package-verbose t)
 
 (defmacro use-feature (name &rest args)
@@ -394,9 +394,9 @@
 ;; display-buffer customization; note that this formerly changed
 ;; display-buffer-alist, but this is deemed too aggressive
 ;; (https://debbugs.gnu.org/cgi/bugreport.cgi?bug=49069#28)
-(customize-set-variable 'even-window-sizes nil)     ; avoid resizing
-(customize-set-variable 'split-height-threshold 15) ; for rare occasions
-(customize-set-variable 'display-buffer-base-action
+(setopt even-window-sizes nil)     ; avoid resizing
+(setopt split-height-threshold 15) ; for rare occasions
+(setopt display-buffer-base-action
   '((display-buffer-reuse-window display-buffer-same-window)
     (reusable-frames . t)))
 
@@ -739,23 +739,6 @@
     (add-to-list 'eshell-visual-commands "tmux")
     (eshell/alias "dir" "ls -a")
     (eshell/alias "v" "ls -laH"))
-
-;;; TODO: Delete these after Emacs 25.3.
-  (defun eshell-next-prompt (n)
-    "Move to end of Nth next prompt in the buffer.
-See `eshell-prompt-regexp'."
-    (interactive "p")
-    (re-search-forward eshell-prompt-regexp nil t n)
-    (when eshell-highlight-prompt
-      (while (not (get-text-property (line-beginning-position) 'read-only) )
-        (re-search-forward eshell-prompt-regexp nil t n)))
-    (eshell-skip-prompt))
-  (defun eshell-previous-prompt (n)
-    "Move to end of Nth previous prompt in the buffer.
-See `eshell-prompt-regexp'."
-    (interactive "p")
-    (backward-char)
-    (eshell-next-prompt (- n)))
   )
 
 
@@ -964,8 +947,8 @@ See `eshell-prompt-regexp'."
 
 
 ;;; ediff
-(customize-set-variable 'ediff-window-setup-function 'ediff-setup-windows-plain)
-(customize-set-variable 'ediff-split-window-function 'split-window-horizontally)
+(setopt ediff-window-setup-function 'ediff-setup-windows-plain)
+(setopt ediff-split-window-function 'split-window-horizontally)
 
 
 ;;; outline
