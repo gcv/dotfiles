@@ -15,6 +15,10 @@ readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd
 basedir=$(dirname "$(readlinkf "$0")")
 [[ ${#BASH_SOURCE[@]} > 0 ]] && script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}") || script="" # set script to "" if run from stdin (i.e. curl | bash piped invocation)
 
+# TODO: Test if this snippet is equivalent in functionality to the above:
+# readlinkf() { p="$1"; while [[ -L "$p" && -e "$p" ]]; do p=$(readlink "$p"); done; a=$(cd -P "$(dirname -- "$p")" 2>/dev/null && pwd -P)/$(basename -- "$p"); echo "${a//\/.\//\/}"|sed 's/\/[^/]*\/\.\.\//\//g'; }
+# basedir=$(dirname "$(readlinkf "${BASH_SOURCE[0]}")")
+# script=$(basename "${BASH_SOURCE[0]:-}")
 
 set -Eeuo pipefail
 
@@ -46,6 +50,7 @@ parse_params() {
     link_direnv=0
     link_elvish=0
     link_emacs=0
+    link_ghostty=0
     link_git=0
     link_hammerspoon=0
     link_helix=0
@@ -68,6 +73,7 @@ parse_params() {
             --direnv) link_all=0; link_direnv=1 ;;
             --emacs) link_all=0; link_emacs=1 ;;
             --elvish) link_all=0; link_elvish=1 ;;
+            --ghostty) link_all=0; link_ghostty=1 ;;
             --git) link_all=0; link_git=1 ;;
             --hammerspoon) link_all=0; link_hammerspoon=1 ;;
             --helix) link_all=0; link_helix=1 ;;
@@ -109,11 +115,11 @@ link() {
     # /expanded/path/to/home/.dotfiles/public/bin/gpgd" because a relative path
     # would be difficult to read.
     if [[ "$2" =~ "/" ]]; then
-        eval from="~/.dotfiles/$1" # force expansion
+        eval from="${HOME}/.dotfiles/$1" # force expansion
     else
         from=".dotfiles/$1"
     fi
-    local to="~/$2"
+    local to="${HOME}/$2"
     eval to="${to}" # force ~ expansion
     if [[ -L "${to}" || -e "${to}" ]]; then
         echo " -> ${to} already exists, ignoring"
@@ -177,6 +183,10 @@ fi
 
 if [[ $link_all = "1" || $link_emacs = "1" ]]; then
     link "emacs" ".emacs.d"
+fi
+
+if [[ $link_all = "1" || $link_ghostty = "1" ]]; then
+    link "public/ghostty" ".config/ghostty"
 fi
 
 if [[ $link_all = "1" || $link_git = "1" ]]; then

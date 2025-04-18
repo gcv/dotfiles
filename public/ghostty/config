@@ -1,0 +1,213 @@
+# Alt on Macs should be used to insert special characters.
+macos-option-as-alt = false
+
+font-family = Hack Nerd Font
+font-size = 14
+
+theme = iTerm2 Dark Background
+
+cursor-style = block
+cursor-style-blink = false
+cursor-click-to-move = true
+
+
+# Fix Apple Cmd key to be Meta / Alt. This requires a lot of remapping in Ghostty (for now):
+# TODO: Is there a more global mapping that relies on "super" keys that'll work cross-platform?
+# Keys: https://github.com/ghostty-org/ghostty/blob/d6e76858164d52cff460fedc61ddf2e560912d71/src/input/key.zig
+
+# TODO: Maybe add another binding here to reload Ghostty configuration?
+keybind = cmd+shift+comma=unbind
+
+# Set up Cmd-Shift versions of common Mac shortcuts:
+# - T new tab
+# - N new window
+# - C copy
+# - V paste
+keybind = ctrl+shift+t=new_tab
+keybind = cmd+shift+t=new_tab
+keybind = cmd+t=unbind
+keybind = ctrl+shift+n=new_window
+keybind = cmd+shift+n=new_window
+keybind = cmd+n=unbind
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = cmd+shift+c=copy_to_clipboard
+keybind = cmd+c=unbind
+keybind = ctrl+shift+v=paste_from_clipboard
+keybind = cmd+shift+v=paste_from_clipboard
+keybind = cmd+v=unbind
+
+# temporary? until https://github.com/ghostty-org/ghostty/discussions/3493 is fully resolved as a Ghostty setting
+keybind = cmd+backspace=text:\x1B\x7F
+#keybind = cmd+space=text:\x1Bspace
+
+keybind = cmd+a=text:\x1Ba
+keybind = cmd+b=text:\x1Bb
+keybind = cmd+c=text:\x1Bc
+keybind = cmd+d=text:\x1Bd
+keybind = cmd+e=text:\x1Be
+keybind = cmd+f=text:\x1Bf
+keybind = cmd+g=text:\x1Bg
+keybind = cmd+h=text:\x1Bh
+keybind = cmd+i=text:\x1Bi
+keybind = cmd+j=text:\x1Bj
+keybind = cmd+k=text:\x1Bk
+keybind = cmd+l=text:\x1Bl
+keybind = cmd+m=text:\x1Bm
+keybind = cmd+n=text:\x1Bn
+keybind = cmd+o=text:\x1Bo
+keybind = cmd+p=text:\x1Bp
+keybind = cmd+q=text:\x1Bq
+keybind = cmd+r=text:\x1Br
+keybind = cmd+s=text:\x1Bs
+keybind = cmd+t=text:\x1Bt
+keybind = cmd+u=text:\x1Bu
+keybind = cmd+v=text:\x1Bv
+keybind = cmd+w=text:\x1Bw
+keybind = cmd+x=text:\x1Bx
+keybind = cmd+y=text:\x1By
+keybind = cmd+z=text:\x1Bz
+keybind = cmd+shift+a=text:\x1BA
+keybind = cmd+shift+b=text:\x1BB
+#keybind = cmd+shift+c=text:\x1BC
+keybind = cmd+shift+d=text:\x1BD
+keybind = cmd+shift+e=text:\x1BE
+keybind = cmd+shift+f=text:\x1BF
+keybind = cmd+shift+g=text:\x1BG
+keybind = cmd+shift+h=text:\x1BH
+keybind = cmd+shift+i=text:\x1BI
+keybind = cmd+shift+j=text:\x1BJ
+keybind = cmd+shift+k=text:\x1BK
+keybind = cmd+shift+l=text:\x1BL
+keybind = cmd+shift+m=text:\x1BM
+#keybind = cmd+shift+n=text:\x1BN
+keybind = cmd+shift+o=text:\x1BO
+keybind = cmd+shift+p=text:\x1BP
+keybind = cmd+shift+q=text:\x1BQ
+keybind = cmd+shift+r=text:\x1BR
+keybind = cmd+shift+s=text:\x1BS
+#keybind = cmd+shift+t=text:\x1BT
+keybind = cmd+shift+u=text:\x1BU
+#keybind = cmd+shift+v=text:\x1BV
+#keybind = cmd+shift+w=text:\x1BW
+keybind = cmd+shift+x=text:\x1BX
+keybind = cmd+shift+y=text:\x1BY
+keybind = cmd+shift+z=text:\x1BZ
+
+# Arrow keys
+keybind = cmd+left=text:\x1B[1;9D
+keybind = cmd+right=text:\x1B[1;9C
+keybind = cmd+up=text:\x1B[1;9A
+keybind = cmd+down=text:\x1B[1;9B
+
+# Symbols
+keybind = cmd+semicolon=text:\x1B;
+keybind = cmd+space=text:\x1Bspace
+keybind = cmd+apostrophe=text:\x1B'
+keybind = cmd+comma=text:\x1B,
+#keybind = cmd+grave_accent=text:\x1B`
+keybind = cmd+period=text:\x1B.
+keybind = cmd+slash=text:\x1B/
+keybind = cmd+minus=text:\x1B-
+keybind = cmd+plus=text:\x1B+
+keybind = cmd+equal=text:\x1B=
+keybind = cmd+left_bracket=text:\x1B[
+keybind = cmd+right_bracket=text:\x1B]
+keybind = cmd+backslash=text:\x1B\\
+
+# Shifted symbols
+keybind = cmd+shift+semicolon=text:\x1B:
+keybind = cmd+shift+space=text:\x1Bspace
+keybind = cmd+shift+apostrophe=text:\x1B"
+keybind = cmd+shift+comma=text:\x1B<
+#keybind = cmd+shift+grave_accent=text:\x1B~
+keybind = cmd+shift+period=text:\x1B>
+keybind = cmd+shift+slash=text:\x1B?
+keybind = cmd+shift+minus=text:\x1B_
+keybind = cmd+shift+plus=text:\x1B+
+keybind = cmd+shift+equal=text:\x1B+
+#keybind = cmd+shift+left_bracket=text:\x1B{
+#keybind = cmd+shift+right_bracket=text:\x1B}
+keybind = cmd+shift+backslash=text:\x1B|
+
+# Shifted numbers
+keybind = cmd+shift+1=text:\x1B!
+keybind = cmd+shift+2=text:\x1B@
+#keybind = cmd+shift+3=text:\x1B#
+#keybind = cmd+shift+4=text:\x1B$
+keybind = cmd+shift+5=text:\x1B%
+keybind = cmd+shift+6=text:\x1B^
+keybind = cmd+shift+7=text:\x1B&
+keybind = cmd+shift+8=text:\x1B*
+keybind = cmd+shift+9=text:\x1B(
+keybind = cmd+shift+0=text:\x1B)
+
+# ctrl+cmd+[a-z]
+keybind = ctrl+cmd+a=text:\x1B\x01
+keybind = ctrl+cmd+b=text:\x1B\x02
+keybind = ctrl+cmd+c=text:\x1B\x03
+keybind = ctrl+cmd+d=text:\x1B\x04
+keybind = ctrl+cmd+e=text:\x1B\x05
+keybind = ctrl+cmd+f=text:\x1B\x06
+keybind = ctrl+cmd+g=text:\x1B\x07
+keybind = ctrl+cmd+h=text:\x1B\x08
+keybind = ctrl+cmd+i=text:\x1B\x09
+keybind = ctrl+cmd+j=text:\x1B\x0A
+keybind = ctrl+cmd+k=text:\x1B\x0B
+keybind = ctrl+cmd+l=text:\x1B\x0C
+keybind = ctrl+cmd+m=text:\x1B\x0D
+keybind = ctrl+cmd+n=text:\x1B\x0E
+keybind = ctrl+cmd+o=text:\x1B\x0F
+keybind = ctrl+cmd+p=text:\x1B\x10
+keybind = ctrl+cmd+q=text:\x1B\x11
+keybind = ctrl+cmd+r=text:\x1B\x12
+keybind = ctrl+cmd+s=text:\x1B\x13
+keybind = ctrl+cmd+t=text:\x1B\x14
+keybind = ctrl+cmd+u=text:\x1B\x15
+keybind = ctrl+cmd+v=text:\x1B\x16
+keybind = ctrl+cmd+w=text:\x1B\x17
+keybind = ctrl+cmd+x=text:\x1B\x18
+keybind = ctrl+cmd+y=text:\x1B\x19
+keybind = ctrl+cmd+z=text:\x1B\x1A
+
+# ctrl+cmd+shift+[A-Z]
+keybind = ctrl+cmd+shift+a=text:\x1B\x01
+keybind = ctrl+cmd+shift+b=text:\x1B\x02
+keybind = ctrl+cmd+shift+c=text:\x1B\x03
+keybind = ctrl+cmd+shift+d=text:\x1B\x04
+keybind = ctrl+cmd+shift+e=text:\x1B\x05
+keybind = ctrl+cmd+shift+f=text:\x1B\x06
+keybind = ctrl+cmd+shift+g=text:\x1B\x07
+keybind = ctrl+cmd+shift+h=text:\x1B\x08
+keybind = ctrl+cmd+shift+i=text:\x1B\x09
+keybind = ctrl+cmd+shift+j=text:\x1B\x0A
+keybind = ctrl+cmd+shift+k=text:\x1B\x0B
+keybind = ctrl+cmd+shift+l=text:\x1B\x0C
+keybind = ctrl+cmd+shift+m=text:\x1B\x0D
+keybind = ctrl+cmd+shift+n=text:\x1B\x0E
+keybind = ctrl+cmd+shift+o=text:\x1B\x0F
+keybind = ctrl+cmd+shift+p=text:\x1B\x10
+keybind = ctrl+cmd+shift+q=text:\x1B\x11
+keybind = ctrl+cmd+shift+r=text:\x1B\x12
+keybind = ctrl+cmd+shift+s=text:\x1B\x13
+keybind = ctrl+cmd+shift+t=text:\x1B\x14
+keybind = ctrl+cmd+shift+u=text:\x1B\x15
+keybind = ctrl+cmd+shift+v=text:\x1B\x16
+keybind = ctrl+cmd+shift+w=text:\x1B\x17
+keybind = ctrl+cmd+shift+x=text:\x1B\x18
+keybind = ctrl+cmd+shift+y=text:\x1B\x19
+keybind = ctrl+cmd+shift+z=text:\x1B\x1A
+
+# ctrl-cmd symbols
+keybind = ctrl+cmd+semicolon=text:\x1B;
+#keybind = ctrl+cmd+space=text:\x1B\x00
+keybind = ctrl+cmd+apostrophe=text:\x1B'
+keybind = ctrl+cmd+comma=text:\x1B,
+keybind = ctrl+cmd+grave_accent=text:\x1B\x1C
+keybind = ctrl+cmd+period=text:\x1B.
+keybind = ctrl+cmd+slash=text:\x1B\x1F
+keybind = ctrl+cmd+minus=text:\x1B-
+keybind = ctrl+cmd+plus=text:\x1B+
+keybind = ctrl+cmd+equal=text:\x1B=
+keybind = ctrl+cmd+left_bracket=text:\x1B\x1B
+keybind = ctrl+cmd+right_bracket=text:\x1B\x1D
+keybind = ctrl+cmd+backslash=text:\x1B\x1C
