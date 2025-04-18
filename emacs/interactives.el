@@ -374,7 +374,7 @@ Written by ChatGPT 4o."
         ;; replace selection in history with key
         (setf (car imenu--history-list) key)))))
 
-(global-set-key (kbd "M-i") 'imenu-cr)
+;;(global-set-key (kbd "M-i") 'imenu-cr)
 
 
 (defun what-face (pos)
@@ -772,6 +772,7 @@ end tell")))
                (erase-buffer)
                (insert (seq-elt notes idx))
                (incf idx)))))))
+
 ;;(global-set-key (kbd "H-n") #'screencast-posframe-notes)
 
 

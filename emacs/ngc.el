@@ -6,6 +6,7 @@
   :bind
   (("C-M-y" . consult-yank-from-kill-ring)
    ("C-M-s" . consult-line)
+   ("M-i" . consult-imenu)
    ("C-c p s r" . consult-ripgrep))
 
   :custom
