@@ -9,13 +9,14 @@ hs.alert("Reloading Hammerspoon configuration")
 
 
 --- KeePassXC launcher:
-hs.hotkey.bind(
-   {"cmd", "alt"}, "\\",
-   function()
+if not hs.application.infoForBundleID("com.1password.1password") then
+  hs.hotkey.bind(
+    {"cmd", "alt"}, "\\",
+    function()
       hs.application.launchOrFocus("KeePassXC")
-      local app = hs.application.find("KeePassXC")
-   end
-)
+    end
+  )
+end
 
 
 --- external scripts

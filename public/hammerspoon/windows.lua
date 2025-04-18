@@ -217,7 +217,8 @@ function makeScreenFillHotkeysForScreen(keyString, screenId)
          local f = win:frame()
          local screen = hs.screen.allScreens()[screenId]
          local max = screen:frame()
-         frameFillMostOfScreenCenter1(f, max)
+         --frameFillMostOfScreenCenter1(f, max)
+         frameFillScreen(f, max)
          win:setFrame(f)
       end
    )
@@ -257,9 +258,15 @@ function makeScreenFillHotkeysForScreen(keyString, screenId)
    )
 end
 
+-- Wonky code to account for screens 2 and 3 being reversed in this data structure.
 makeScreenFillHotkeysForScreen("1", 1)
-makeScreenFillHotkeysForScreen("2", 2)
-makeScreenFillHotkeysForScreen("3", 3)
+if #hs.screen.allScreens() > 2 then
+   makeScreenFillHotkeysForScreen("2", 3)
+   makeScreenFillHotkeysForScreen("3", 2)
+else
+   makeScreenFillHotkeysForScreen("2", 2)
+   makeScreenFillHotkeysForScreen("3", 3)
+end
 makeScreenFillHotkeysForScreen("4", 4)
 
 --- stretch fully but not full-screen on current display
