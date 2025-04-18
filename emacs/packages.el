@@ -425,6 +425,9 @@
   :custom
   ;;(envrc-lighter nil)
   (envrc-on-lighter '(" ε"))
+
+  :hook
+  (after-init . envrc-global-mode)
   )
 
 
