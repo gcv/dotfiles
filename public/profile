@@ -1,11 +1,6 @@
 # -*- mode: shell-script; -*-
 #
-# .profile should work with all non-Bash POSIX sh compatible shells (ash, dash,
-# and ideally ksh and sh). This version probably does not yet.
-#
-# Known POSIX incompatibilities:
-# - use of [[ ]] instead of [ ]
-# - use of local
+# .profile for POSIX-compatible shells (ash, dash, ksh, sh)
 
 
 ### command finding helper:
@@ -16,35 +11,41 @@ command_exists() { command -v "$1" >/dev/null 2>&1; }
 ### path wrangling:
 
 path_add() {
-    local dir="$1"
-    local position="${2:-prepend}"
+    path_add_dir="$1"
+    path_add_position="${2:-prepend}"
     # Only proceed if directory exists
-    if [[ ! -d "$dir" ]]; then
+    if [ ! -d "$path_add_dir" ]; then
         return
     fi
-    local NEWPATH
-    local paths
-    if [[ -n "$ZSH_VERSION" ]]; then
-        # zsh path splitting
-        paths=(${(s[:])PATH})
+    path_add_NEWPATH=""
+    path_add_OLDIFS="$IFS"
+    IFS=:
+
+    # Handle prepend vs append
+    if [ "$path_add_position" = "append" ]; then
+        path_add_NEWPATH=""
     else
-        # bash path splitting
-        IFS=: read -ra paths <<< "$PATH"
+        path_add_NEWPATH="$path_add_dir"
     fi
-    if [[ "$position" == "append" ]]; then
-        NEWPATH=""
-    else
-        NEWPATH="$dir"
-    fi
-    for DIR in "${paths[@]}"; do
-        if [[ "$DIR" != "$dir" && ! ( ":${NEWPATH}:" == *":${DIR}:"* ) ]]; then
-            NEWPATH="${NEWPATH:+${NEWPATH}:}${DIR}"
+
+    # Iterate through PATH using POSIX shell constructs
+    for p in $PATH; do
+        if [ "$p" != "$path_add_dir" ]; then
+            # Check if path is already in path_add_NEWPATH
+            case ":$path_add_NEWPATH:" in
+                *":$p:"*) ;;  # Already in path, skip
+                *) path_add_NEWPATH="${path_add_NEWPATH:+$path_add_NEWPATH:}$p" ;;
+            esac
         fi
     done
-    if [[ "$position" == "append" ]]; then
-        NEWPATH="${NEWPATH:+${NEWPATH}:}${dir}"
+
+    # Add path_add_dir to the end if appending
+    if [ "$path_add_position" = "append" ]; then
+        path_add_NEWPATH="${path_add_NEWPATH:+$path_add_NEWPATH:}$path_add_dir"
     fi
-    PATH="${NEWPATH}"
+
+    IFS="$path_add_OLDIFS"
+    PATH="$path_add_NEWPATH"
 }
 
 path_add /usr/sbin
@@ -66,7 +67,7 @@ if command_exists devbox; then
     DEVBOX_CACHE_DIR="$HOME/.cache/devbox-shellenv"
     DEVBOX_RAW="$DEVBOX_CACHE_DIR/raw"
     DEVBOX_PROCESSED="$DEVBOX_CACHE_DIR/processed"
-    if [[ ! -f $DEVBOX_PROCESSED ]] || [[ $(find "$DEVBOX_PROCESSED" -mmin +60) ]]; then
+    if [ ! -f "${DEVBOX_PROCESSED}" ] || [ -n "$(find "${DEVBOX_PROCESSED}" -mmin +60 2>/dev/null)" ]; then
         # Create cache directory with restrictive permissions
         mkdir -p "$DEVBOX_CACHE_DIR"
         chmod 700 "$DEVBOX_CACHE_DIR"
@@ -76,13 +77,13 @@ if command_exists devbox; then
         devbox global shellenv --init-hook > "$DEVBOX_RAW"
         chmod 600 "$DEVBOX_RAW"
         # Source the raw output to get new environment
-        source "$DEVBOX_RAW"
+        . "$DEVBOX_RAW"
         env > "$DEVBOX_CACHE_DIR/env_after"
         # Compare environments and only save differences
         {
             echo "# Generated $(date)"
             diff "$DEVBOX_CACHE_DIR/env_before" "$DEVBOX_CACHE_DIR/env_after" | \
-                grep '^>' | cut -c 3- | while read -r line; do
+                grep '^>' | cut -c 3- | while read line; do
                 var_name=${line%%=*}
                 var_value=${line#*=}
                 echo "export $var_name=\"$var_value\""
@@ -92,7 +93,7 @@ if command_exists devbox; then
         # Cleanup intermediate files
         rm "$DEVBOX_CACHE_DIR/env_before" "$DEVBOX_CACHE_DIR/env_after"
     else
-        source "$DEVBOX_PROCESSED"
+        . "$DEVBOX_PROCESSED"
     fi
     export NIX_LOCAL_ROOT="${HOME}/.local/share/devbox/global/default/.devbox/nix/profile/default"
 elif [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
@@ -140,7 +141,7 @@ fi
 
 ### load private configuration:
 
-[[ -f ~/.dotfiles/private/shell-profile-private ]] && . ~/.dotfiles/private/shell-profile-private
+[ -f ~/.dotfiles/private/shell-profile-private ] && . ~/.dotfiles/private/shell-profile-private
 
 
 ### 24-bit terminal color handling
@@ -158,24 +159,24 @@ esac
 ### Turn on terminal GPG pinentry if on SSH connection or in tmux session:
 
 export GPG_TTY=$(tty)
-if [[ -n "$SSH_CONNECTION" || -n "$TMUX" ]]; then
+if [ -n "$SSH_CONNECTION" ] || [ -n "$TMUX" ]; then
     export PINENTRY_USER_DATA="USE_CURSES=1"
 fi
 
 
 ### deal with ssh-agent
 
-if [ -z "${SSH_AUTH_SOCK}" -o ! -e "${SSH_AUTH_SOCK}" ]; then
+if [ -z "${SSH_AUTH_SOCK}" ] || [ ! -e "${SSH_AUTH_SOCK}" ]; then
     if [ "${UNAME}" = "Darwin" ]; then
         # launchd manages ssh-agent on Mac, but individual shells can sometimes lose SSH_AUTH_SOCK
         ssh_agent_pid=$(ps uwx | grep "${USER}" | grep ssh-agent | grep -v grep | awk '{print $2}')
-        if [ -z ${ssh_agent_pid} ]; then
+        if [ -z "${ssh_agent_pid}" ]; then
             # try to restart ssh-agent
             launchctl start gui/$(id -u)/com.openssh.ssh-agent
             ssh_agent_pid=$(ps uwx | grep "${USER}" | grep ssh-agent | grep -v grep | awk '{print $2}')
         fi
         # launchd may fail to restart the ssh-agent, sigh
-        if [ ! -z ${ssh_agent_pid} ]; then
+        if [ -n "${ssh_agent_pid}" ]; then
             export SSH_AUTH_SOCK=$(lsof -p ${ssh_agent_pid} | grep com.apple.launchd | grep Listeners | awk '{print $8}' | head -1)
         fi
     else
@@ -199,10 +200,10 @@ alias .....="cd ../../../.."
 alias .....="cd ../../../../.."
 alias ......="cd ../../../../../.."
 
-if [[ $(ls --color 2>/dev/null) ]]; then
+if ls --color >/dev/null 2>&1; then
     # GNU ls probably available
     alias ls='ls --color --sort=version'
-elif command_exists gls && [[ $(gls --color 2>/dev/null) ]]; then
+elif command_exists gls && gls --color >/dev/null 2>&1; then
     alias ls='gls --color --sort=version'
 fi
 alias v="ls -lahF"
@@ -224,7 +225,7 @@ if command_exists mc; then # use Midnight Commander directory-following wrapper
     fi
 fi
 
-[[ ${UNAME} == "Darwin" && -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ]] && \
+[ "${UNAME}" = "Darwin" ] && [ -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ] && \
     alias firewall="sudo /usr/libexec/ApplicationFirewall/socketfilterfw"
 
 
@@ -246,15 +247,16 @@ rgfzf() {
 
 # A little helpful fd and fzf integration.
 fdfzf() {
-    local target=$(fd . "${*:-}" |
+    fdfzf_target=$(fd "${*:-}" |
                        fzf --ansi \
                            --color "hl:-1:underline,hl+:-1:underline:reverse")
-    if [ -d "${target}" ]; then
-        chdir "${target}"
+    if [ -d "${fdfzf_target}" ]; then
+        chdir "${fdfzf_target}"
     else
         # insert file path into the command line
-        if [[ ! -z "${target}" ]]; then
-            print -z "\"${target}\""
+        if [ -n "${fdfzf_target}" ]; then
+            # Note: print -z is zsh-specific, but this is handled in shell-specific rc files
+            print -z "\"${fdfzf_target}\""
         fi
     fi
 }
@@ -262,8 +264,8 @@ fdfzf() {
 
 # pskill <process name>
 pskill() {
-   kill -9 "$(ps -aux | grep $1 | grep -v grep | awk '{ print $1 }')"
-   echo -n "killed $1"
+   kill -9 "$(ps -aux | grep "$1" | grep -v grep | awk '{ print $1 }')"
+   echo "killed $1"
 }
 
 # Search for files containing the given string in the current directory.
