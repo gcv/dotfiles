@@ -11,14 +11,11 @@
 ### - https://yadm.io/ (single bash-script dotfiles installer; built on Git)
 
 
-readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
-basedir=$(dirname "$(readlinkf "$0")")
-[[ ${#BASH_SOURCE[@]} > 0 ]] && script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}") || script="" # set script to "" if run from stdin (i.e. curl | bash piped invocation)
+readlinkf() { p="$1"; while [[ -L "$p" && -e "$p" ]]; do p=$(readlink "$p"); done; a=$(cd -P "$(dirname -- "$p")" 2>/dev/null && pwd -P)/$(basename -- "$p"); echo "${a//\/.\//\/}"|sed 's/\/[^/]*\/\.\.\//\//g'; }
+basedir=$(dirname "$(readlinkf "${BASH_SOURCE[0]}")")
+# set script to "" if run from stdin (i.e. curl | bash piped invocation)
+script=$(basename "${BASH_SOURCE[0]:-}")
 
-# TODO: Test if this snippet is equivalent in functionality to the above:
-# readlinkf() { p="$1"; while [[ -L "$p" && -e "$p" ]]; do p=$(readlink "$p"); done; a=$(cd -P "$(dirname -- "$p")" 2>/dev/null && pwd -P)/$(basename -- "$p"); echo "${a//\/.\//\/}"|sed 's/\/[^/]*\/\.\.\//\//g'; }
-# basedir=$(dirname "$(readlinkf "${BASH_SOURCE[0]}")")
-# script=$(basename "${BASH_SOURCE[0]:-}")
 
 set -Eeuo pipefail
 
