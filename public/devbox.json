@@ -99,7 +99,9 @@
     "jujutsu@latest",
     "lazyjj@latest",
     "numbat@latest",
-    "zoxide@latest"
+    "zoxide@latest",
+    "jjui@latest",
+    "claude-code@latest"
   ],
   "shell": {
     "init_hook": [
