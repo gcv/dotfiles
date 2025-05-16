@@ -28,6 +28,8 @@ If QUERY is nil, it is read interactively from the minibuffer.
 Other optional parameters are used as follows:
 
   OLDEST-FIRST: A Boolean controlling the sort order of returned threads
+  HIDE-EXCLUDED: A boolean controlling whether to omit threads with excluded
+                 tags.
   TARGET-THREAD: A thread ID (without the thread: prefix) that will be made
                  current if it appears in the search results.
   TARGET-LINE: The line number to move to if the target thread does not
@@ -39,7 +41,7 @@ Other optional parameters are used as follows:
 When called interactively, this will prompt for a query and use
 the configured default sort order.
 
-(fn &optional QUERY OLDEST-FIRST TARGET-THREAD TARGET-LINE NO-DISPLAY)" t)
+(fn &optional QUERY OLDEST-FIRST HIDE-EXCLUDED TARGET-THREAD TARGET-LINE NO-DISPLAY)" t)
 (autoload 'notmuch "notmuch" "\
 Run notmuch and display saved searches, known tags, etc." t)
 (autoload 'notmuch-cycle-notmuch-buffers "notmuch" "\
@@ -135,6 +137,26 @@ not appear in the pop-up buffer.
 
 ;;; Generated autoloads from notmuch-mua.el
 
+(autoload 'notmuch-mua-mail "notmuch-mua" "\
+Invoke the notmuch mail composition window.
+
+The position of point when the function returns differs depending
+on the values of TO and SUBJECT.  If both are non-nil, point is
+moved to the message's body.  If SUBJECT is nil but TO isn't,
+point is moved to the \"Subject:\" header.  Otherwise, point is
+moved to the \"To:\" header.
+
+(fn &optional TO SUBJECT OTHER-HEADERS CONTINUE SWITCH-FUNCTION YANK-ACTION SEND-ACTIONS RETURN-ACTION &rest IGNORED)" t)
+(autoload 'notmuch-mua-send-and-exit "notmuch-mua" "\
+
+
+(fn &optional ARG)" t)
+(autoload 'notmuch-mua-send "notmuch-mua" "\
+
+
+(fn &optional ARG)" t)
+(autoload 'notmuch-mua-kill-buffer "notmuch-mua" nil t)
+(define-mail-user-agent 'notmuch-user-agent 'notmuch-mua-mail 'notmuch-mua-send-and-exit 'notmuch-mua-kill-buffer 'notmuch-mua-send-hook)
 (register-definition-prefixes "notmuch-mua" '("notmuch-"))
 
 
@@ -188,6 +210,23 @@ matched.
 
 ;;; Generated autoloads from notmuch-tree.el
 
+(autoload 'notmuch-tree "notmuch-tree" "\
+Display threads matching QUERY in tree view.
+
+The arguments are:
+  QUERY: the main query. This can be any query but in many cases will be
+      a single thread. If nil this is read interactively from the minibuffer.
+  QUERY-CONTEXT: is an additional term for the query. The query used
+      is QUERY and QUERY-CONTEXT unless that does not match any messages
+      in which case we fall back to just QUERY.
+  TARGET: A message ID (with the id: prefix) that will be made
+      current if it appears in the tree view results.
+  BUFFER-NAME: the name of the buffer to display the tree view. If
+      it is nil \"*notmuch-tree\" followed by QUERY is used.
+  OPEN-TARGET: If TRUE open the target message in the message pane.
+  UNTHREADED: If TRUE only show matching messages in an unthreaded view.
+
+(fn &optional QUERY QUERY-CONTEXT TARGET BUFFER-NAME OPEN-TARGET UNTHREADED PARENT-BUFFER OLDEST-FIRST HIDE-EXCLUDED)" t)
 (register-definition-prefixes "notmuch-tree" '("notmuch-"))
 
 
