@@ -1,4 +1,4 @@
-This is docw0avru.info, produced by makeinfo version 6.8 from
+This is docZRuNJu.info, produced by makeinfo version 6.8 from
 magit-section.texi.
 
      Copyright (C) 2015-2025 Jonas Bernoulli
@@ -20,7 +20,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docw0avru.info,  Node: Top,  Next: Introduction,  Up: (dir)
+File: docZRuNJu.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
 Magit-Section Developer Manual
 ******************************
@@ -34,7 +34,7 @@ packages that have nothing to do with Magit or Git.
 and user options see *note (magit)Sections::.  This manual documents how
 you can use sections in your own packages.
 
-This manual is for Magit-Section version 4.3.1.
+This manual is for Magit-Section version 4.3.2.
 
      Copyright (C) 2015-2025 Jonas Bernoulli
      <emacs.magit@jonas.bernoulli.dev>
@@ -57,7 +57,7 @@ This manual is for Magit-Section version 4.3.1.
 * Matching Functions::
 
 
-File: docw0avru.info,  Node: Introduction,  Next: Creating Sections,  Prev: Top,  Up: Top
+File: docZRuNJu.info,  Node: Introduction,  Next: Creating Sections,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -76,7 +76,7 @@ consider that Magit uses this library extensively and search its source
 for suitable examples before asking me for help.  Thanks!
 
 
-File: docw0avru.info,  Node: Creating Sections,  Next: Core Functions,  Prev: Introduction,  Up: Top
+File: docZRuNJu.info,  Node: Creating Sections,  Next: Core Functions,  Prev: Introduction,  Up: Top
 
 2 Creating Sections
 *******************
@@ -171,7 +171,7 @@ Function: magit-wash-sequence function
      ‘nil’.
 
 
-File: docw0avru.info,  Node: Core Functions,  Next: Matching Functions,  Prev: Creating Sections,  Up: Top
+File: docZRuNJu.info,  Node: Core Functions,  Next: Matching Functions,  Prev: Creating Sections,  Up: Top
 
 3 Core Functions
 ****************
@@ -238,7 +238,7 @@ Function magit-thing-at-point thing &optional no-properties
      For the meaning of THING and NO-PROPERTIES see that function.
 
 
-File: docw0avru.info,  Node: Matching Functions,  Prev: Core Functions,  Up: Top
+File: docZRuNJu.info,  Node: Matching Functions,  Prev: Core Functions,  Up: Top
 
 4 Matching Functions
 ********************
