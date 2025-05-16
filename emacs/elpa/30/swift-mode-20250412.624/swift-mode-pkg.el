@@ -1,11 +1,11 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "swift-mode" "20250111.539"
+(define-package "swift-mode" "20250412.624"
   "Major-mode for Apple's Swift programming language."
   '((emacs "24.4")
     (seq   "2.3"))
   :url "https://github.com/swift-emacs/swift-mode"
-  :commit "2c0b2b72dc908652914b62a1e64b1d30144839ce"
-  :revdesc "2c0b2b72dc90"
+  :commit "e30b9d46e031fd25e794f00f23b6427f44f7d221"
+  :revdesc "e30b9d46e031"
   :keywords '("languages" "swift")
   :authors '(("taku0" . "mxxouy6x3m_github@tatapa.org")
              ("Chris Barrett" . "chris.d.barrett@me.com")
