@@ -365,24 +365,19 @@ Table of Contents
     the candidates.
   • `consult-info': Full text search through info pages. If the command
     is invoked from within an `*info*' buffer, it will search through
-    the current manual. You may want to create your own commands which
-    search through a predefined set of info pages, for example:
+    the current manual. You may want to create your own `consult-info-*'
+    commands which search through a predefined set of info pages. You
+    can use the function `consult-info-define' to define commands
+    `consult-info-emacs', `consult-info-completion', `consult-info-org',
+    and so on:
   ┌────
-  │ (defun consult-info-emacs ()
-  │   "Search through Emacs info pages."
-  │   (interactive)
-  │   (consult-info "emacs" "efaq" "elisp" "cl" "compat"))
-  │ 
-  │ (defun consult-info-org ()
-  │   "Search through the Org info page."
-  │   (interactive)
-  │   (consult-info "org"))
-  │ 
-  │ (defun consult-info-completion ()
-  │   "Search through completion info pages."
-  │   (interactive)
-  │   (consult-info "vertico" "consult" "marginalia" "orderless" "embark"
-  │ 		"corfu" "cape" "tempel"))
+  │ (consult-info-define "emacs" "efaq" "elisp" "cl" "compat" "eshell")
+  │ (consult-info-define 'completion
+  │ 		     "vertico" "consult" "marginalia" "orderless"
+  │ 		     "embark" "corfu" "cape" "tempel")
+  │ (consult-info-define "org")
+  │ (consult-info-define "gnus")
+  │ (consult-info-define "magit")
   └────
 
 
@@ -401,14 +396,7 @@ Table of Contents
     `completion-in-region-function'. Then your minibuffer completion UI
     (e.g., Vertico or Icomplete) will be used for `completion-at-point'.
     ┌────
-    │ ;; Use `consult-completion-in-region' if Vertico is enabled.
-    │ ;; Otherwise use the default `completion--in-region' function.
-    │ (setq completion-in-region-function
-    │       (lambda (&rest args)
-    │ 	(apply (if vertico-mode
-    │ 		   #'consult-completion-in-region
-    │ 		 #'completion--in-region)
-    │ 	       args)))
+    │ (setq completion-in-region-function #'consult-completion-in-region)
     └────
     Instead of `consult-completion-in-region', you may prefer to see the
     completions directly in the buffer as a small popup. In that case, I

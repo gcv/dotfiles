@@ -2,6 +2,29 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 2.3 (2025-04-19)
+
+- Bugfix: ~consult--read~ accepts list of symbols.
+- Bugfix: ~consult-theme~ handles invalid themes gracefully.
+
+* Version 2.2 (2025-04-02)
+
+- Add ~consult-info-define~ to conveniently define custom ~consult-info-*~ commands
+  to search through a subset of info manuals.
+- ~consult-focus-lines~: Add mode line indicator if active.
+- ~consult-grep~: Preserve empty context lines.
+- ~consult-register-store~: Support Dired buffers.
+
+* Version 2.1 (2025-03-11)
+
+- Remove obsolete ~consult--async-*~ APIs.
+- File preview: Ensure that remote files do not slow down preview.
+- File preview: Do not preview gpg files.
+- ~consult-yank-pop~, ~consult-history~: Respect display properties when previewing
+  to avoid leaking hidden data.
+- ~consult-completion-in-region~: Auto-detect completion UI.
+- ~consult-completion-in-region~: Improve handling of single candidates.
+
 * Version 2.0 (2025-01-28)
 
 - New features:
