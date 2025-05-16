@@ -4,8 +4,8 @@
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/bbatsov/crux
-;; Package-Version: 20250212.2017
-;; Package-Revision: c83c54d3d746
+;; Package-Version: 20250421.936
+;; Package-Revision: e42f55581995
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -619,6 +619,31 @@ as the current user."
   "Insert a timestamp according to locale's date and time format."
   (interactive)
   (insert (format-time-string "%c" (current-time))))
+
+;;;###autoload
+(defun crux-keyboard-quit-dwim ()
+  "Do-What-I-Mean behaviour for a general `keyboard-quit'.
+
+The generic `keyboard-quit' does not do the expected thing when
+the minibuffer is open.  Whereas we want it to close the
+minibuffer, even without explicitly focusing it.
+
+The DWIM behaviour of this command is as follows:
+
+- When the region is active, disable it.
+- When a minibuffer is open, but not focused, close the minibuffer.
+- When the Completions buffer is selected, close it.
+- In every other case use the regular `keyboard-quit'."
+  (interactive)
+  (cond
+   ((region-active-p)
+    (keyboard-quit))
+   ((derived-mode-p 'completion-list-mode)
+    (delete-completion-window))
+   ((> (minibuffer-depth) 0)
+    (abort-recursive-edit))
+   (t
+    (keyboard-quit))))
 
 ;;;###autoload
 (defun crux-recentf-find-file (&optional filter)
