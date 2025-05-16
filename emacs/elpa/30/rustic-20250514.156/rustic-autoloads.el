@@ -274,6 +274,8 @@ evaluate the variable `rustic-doc-mode'.
 The mode's hook is called both when the mode is enabled and when it is
 disabled.
 
+\\{rustic-doc-mode-map}
+
 (fn &optional ARG)" t)
 (register-definition-prefixes "rustic-doc" '("rustic-doc-"))
 
