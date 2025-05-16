@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.7
+;; Version: 2.1
 ;; Package-Requires: ((emacs "28.1") (compat "30"))
 ;; URL: https://github.com/minad/corfu
 ;; Keywords: abbrev, convenience, matching, completion, text
@@ -777,10 +777,14 @@ FRAME is the existing frame."
   (pcase-let* ((last (min (+ corfu--scroll corfu-count) corfu--total))
                (bar (ceiling (* corfu-count corfu-count) corfu--total))
                (lo (min (- corfu-count bar 1) (floor (* corfu-count corfu--scroll) corfu--total)))
-               (`(,mf . ,acands) (corfu--affixate
-                                  (cl-loop repeat corfu-count
-                                           for c in (nthcdr corfu--scroll corfu--candidates)
-                                           collect (funcall corfu--hilit (substring c)))))
+               (`(,mf . ,acands)
+                (corfu--affixate
+                 (cl-loop
+                  repeat corfu-count for c in (nthcdr corfu--scroll corfu--candidates)
+                  collect (funcall corfu--hilit
+                                   ;; bug#77754: Highlight unquoted string.
+                                   (substring (or (get-text-property
+                                                   0 'completion--unquoted c) c))))))
                (`(,pw ,width ,fcands) (corfu--format-candidates acands))
                ;; Disable the left margin if a margin formatter is active.
                (corfu-left-margin-width (if mf 0 corfu-left-margin-width)))
@@ -886,7 +890,7 @@ See `completion-in-region' for the arguments BEG, END, TABLE, PRED."
   (setq beg (if (markerp beg) beg (copy-marker beg))
         end (if (and (markerp end) (marker-insertion-type end)) end (copy-marker end t))
         completion-in-region--data (list beg end table pred completion-extra-properties))
-  (completion-in-region-mode 1)
+  (completion-in-region-mode)
   (activate-change-group (setq corfu--change-group (prepare-change-group)))
   (setcdr (assq #'completion-in-region-mode minor-mode-overriding-map-alist) corfu-map)
   (add-hook 'pre-command-hook #'corfu--prepare nil 'local)
@@ -1030,7 +1034,7 @@ Auto completion is only performed if the tick did not change."
 WIDTH is the width of the popup.
 The current candidate CURR is highlighted.
 A scroll bar is displayed from LO to LO+BAR."
-  (let ((lh (default-line-height)))
+  (let ((lh (max (default-line-height) (cdr (posn-object-width-height pos)))))
     (with-current-buffer (corfu--make-buffer " *corfu*")
       (let* ((ch (default-line-height))
              (cw (default-font-width))
@@ -1431,7 +1435,7 @@ local `completion-at-point-functions'."
                                   ('nil 0)
                                   ((pred symbolp) (and (derived-mode-p p) t))
                                   (`(not . ,m) (and (seq-some #'derived-mode-p m) 0)))))))
-    (corfu-mode 1)))
+    (corfu-mode)))
 
 (defun corfu--minibuffer-on ()
   "Enable `corfu-mode' in the minibuffer respecting `global-corfu-minibuffer'."
@@ -1439,7 +1443,7 @@ local `completion-at-point-functions'."
              (if (functionp global-corfu-minibuffer)
                  (funcall global-corfu-minibuffer)
                (local-variable-p 'completion-at-point-functions)))
-    (corfu-mode 1)))
+    (corfu-mode)))
 
 ;; Do not show Corfu commands with M-X
 (dolist (sym '( corfu-next corfu-previous corfu-first corfu-last corfu-quit corfu-reset
