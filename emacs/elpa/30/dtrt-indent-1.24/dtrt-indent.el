@@ -6,8 +6,8 @@
 ;; Author: Julian Scheid <julians37@googlemail.com>
 ;; Maintainer: Reuben Thomas <rrt@sc3d.org>
 ;; URL: https://github.com/jscheid/dtrt-indent
-;; Package-Version: 1.23
-;; Package-Revision: 4a5c08c9e0d7
+;; Package-Version: 1.24
+;; Package-Revision: 015b26d6d6af
 ;; Keywords: convenience files languages c
 ;; Package-Requires: ((emacs "24.4"))
 
@@ -200,7 +200,7 @@ adjusted transparently."
   (if dtrt-indent-mode
       (if (and (boundp 'smie-grammar) (not (null smie-grammar)) (not (eq smie-grammar 'unset)))
           (progn
-            (when (and (null smie-config--buffer-local)
+            (when (and (not (bound-and-true-p smie-config--buffer-local))
                        (fboundp 'smie-config-guess))
               (smie-config-guess))
             (when (bound-and-true-p dtrt-indent-run-after-smie)
@@ -392,6 +392,7 @@ quote, for example.")
     (gpr-ts-mode     ada           gpr-ts-mode-indent-offset)
     (java-ts-mode    c/c++/java    java-ts-mode-indent-offset)
     (rust-ts-mode    c/c++/java    rust-ts-mode-indent-offset)
+    (js-ts-mode      javascript    js-indent-level)
     (json-ts-mode    javascript    json-ts-mode-indent-offset)
     (cmake-ts-mode   cmake         cmake-ts-mode-indent-offset)
     (typescript-ts-base-mode javascript typescript-ts-mode-indent-offset)
