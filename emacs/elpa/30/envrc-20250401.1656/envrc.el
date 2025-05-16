@@ -6,8 +6,8 @@
 ;; Keywords: processes, tools
 ;; Homepage: https://github.com/purcell/envrc
 ;; Package-Requires: ((emacs "26.1") (inheritenv "0.1") (seq "2.24"))
-;; Package-Version: 20250110.1756
-;; Package-Revision: 2b818ca6e4a2
+;; Package-Version: 20250401.1656
+;; Package-Revision: 4ca2166ac72e
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -324,9 +324,10 @@ variable names and values."
               (envrc--at-end-of-special-buffer "*envrc*"
                 (insert "──── " (format-time-string "%Y-%m-%d %H:%M:%S") " ──── " env-dir " ────\n\n")
                 (let ((initial-pos (point)))
-                  (insert-file-contents (let (ansi-color-context)
-                                          (ansi-color-apply stderr-file)))
+                  (insert-file-contents stderr-file)
                   (goto-char (point-max))
+                  (let (ansi-color-context)
+                    (ansi-color-apply-on-region initial-pos (point)))
                   (add-face-text-property initial-pos (point) (if (eq 0 exit-code) 'success 'error)))
                 (insert "\n\n")
                 (when (and (numberp exit-code) (/= 0 exit-code))
@@ -514,9 +515,9 @@ Shortcuts tramp caching direnv sets the exec-path."
     (or envrc--remote-path
         (apply fn vec nil))))
 
-(advice-add 'shell-command-to-string :around #'envrc-propagate-environment)
-(advice-add 'async-shell-command :around #'envrc-propagate-environment)
+(advice-add 'shell-command :around #'envrc-propagate-environment)
 (advice-add 'org-babel-eval :around #'envrc-propagate-environment)
+(advice-add 'org-export-file :around #'envrc-propagate-environment)
 (advice-add 'tramp-get-connection-buffer :filter-return #'envrc-propagate-tramp-environment)
 (advice-add 'tramp-get-remote-path :around #'envrc-get-remote-path)
 
