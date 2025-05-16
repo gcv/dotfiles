@@ -1,6 +1,6 @@
 ;;; racket-custom.el -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2013-2024 by Greg Hendershott.
+;; Copyright (c) 2013-2025 by Greg Hendershott.
 ;; Portions Copyright (C) 1985-1986, 1999-2013 Free Software Foundation, Inc.
 
 ;; Author: Greg Hendershott
@@ -40,12 +40,20 @@
 (defvar racket--winp (eq 'windows-nt system-type))
 
 (defcustom racket-program (if racket--winp "Racket.exe" "racket")
-  "Pathname of the Racket executable.
+  "Pathname of the Racket executable or command line to launch it.
+
+- If the value of this variable is a string, it will be interpreted as a
+  simple command without arguments.
+
+- If it is a list of strings, the first element will be taken to be the
+  executable, and the rest of the list command line arguments to pass to
+  it before any other arguments.
 
 Note that a back end configuration can override this with a
 non-nil `racket-program` property list value. See
 `racket-add-back-end'."
-  :type '(file :must-match t)
+  :type '(choice (string)
+                 (repeat string))
   :risky t)
 
 (make-obsolete-variable 'racket-command-port nil "2020-04-25")
@@ -188,8 +196,10 @@ lines to show on screen."
   :group 'racket)
 
 (defcustom racket-hash-lang-token-face-alist
-  `((constant           . font-lock-constant-face)
+  `((builtin            . font-lock-builtin-face)
+    (constant           . font-lock-constant-face)
     (error              . error)
+    (operator           . font-lock-operator-face)
     (other              . font-lock-doc-face)
     (keyword            . font-lock-keyword-face)
     (hash-colon-keyword . racket-keyword-argument-face)
@@ -450,6 +460,17 @@ from the variable `racket-repl-buffer-name'."
                     (locate-user-emacs-file (file-name-as-directory "racket-mode")))
   "Name of the file used by `racket-repl'."
   :type 'file)
+
+(defcustom racket-repl-echo-sent-expressions t
+  "Should commands that send an expresion to the REPL echo it there?
+
+The echoed expression and \" => \" are displayed using the face
+`racket-repl-message' to distinguish them from result values.
+
+Affects `racket-send-last-sexp', `racket-send-region', and
+`racket-send-definition'."
+  :type 'boolean
+  :safe #'booleanp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; racket-other group
