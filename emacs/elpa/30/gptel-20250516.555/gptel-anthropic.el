@@ -23,8 +23,7 @@
 
 ;;; Code:
 (require 'cl-generic)
-(eval-when-compile
-  (require 'cl-lib))
+(require 'cl-lib)
 (require 'map)
 (require 'gptel)
 
@@ -54,8 +53,9 @@
 ;; Do NOT change the plist-put to push or setf!
 
 ;; NOTE: The stream parser looks complicated only because it handles streaming
-;; tool calls.  Stream parsing is simple: if you are studying this code, look at
-;; a commit from before tool-use support was added to gptel.
+;; tool calls, streaming "thinking" blocks and their interactions.  Stream
+;; parsing is simple: if you are studying this code, look instead at a commit
+;; from before tool-use support was added to gptel.
 (cl-defmethod gptel-curl--parse-stream ((_backend gptel-anthropic) info)
   "Parse an Anthropic data stream.
 
@@ -82,8 +82,11 @@ information if the stream contains it.  Not my best work, I know."
                      (cons partial-json (plist-get info :partial_json)))
                   (if-let* ((thinking (plist-get delta :thinking)))
                       (plist-put info :reasoning
-                                 (concat (plist-get info :reasoning) thinking)))))))
-           
+                                 (concat (plist-get info :reasoning) thinking))
+                    (if-let* ((signature (plist-get delta :signature)))
+                        (plist-put info :signature
+                                   (concat (plist-get info :signature) signature))))))))
+
            ((looking-at "content_block_start") ;Is the following block text or tool-use?
             (forward-line 1) (forward-char 5)
             (when-let* ((cblock (plist-get (gptel--json-read) :content_block)))
@@ -94,8 +97,8 @@ information if the stream contains it.  Not my best work, I know."
                                                    :name (plist-get cblock :name))
                                              (plist-get info :tool-use))))
                 ("thinking" (plist-put info :reasoning (plist-get cblock :thinking))
-                 (plist-put info :thinking-block t)))))
-           
+                 (plist-put info :reasoning-block 'in)))))
+
            ((looking-at "content_block_stop")
             (cond
              ((plist-get info :partial_json)   ;End of tool block
@@ -111,14 +114,14 @@ information if the stream contains it.  Not my best work, I know."
                 (error (pop (plist-get info :tool-use)))) ;TODO: nreverse :tool-use list
               (plist-put info :partial_json nil))
 
-             ((plist-get info :thinking-block) ;End of reasoning block
-              (plist-put info :thinking-block nil)
-              (plist-put info :reasoning t)))) ;Signal end of reasoning stream to filter
-           
+             ((eq (plist-get info :reasoning-block) 'in) ;End of reasoning block
+              (plist-put info :reasoning-block t)))) ;Signal end of reasoning stream to filter
+
            ((looking-at "message_delta")
             ;; collect stop_reason, usage_tokens and prepare tools
             (forward-line 1) (forward-char 5)
-            (when-let* ((tool-use (plist-get info :tool-use)))
+            (when-let* ((tool-use (plist-get info :tool-use))
+                        (response (gptel--json-read)))
               (let* ((data (plist-get info :data))
                      (prompts (plist-get data :messages)))
                 (plist-put ; Append a COPY of response text + tool-use to the prompts list
@@ -126,9 +129,12 @@ information if the stream contains it.  Not my best work, I know."
                  (vconcat
                   prompts
                   `((:role "assistant"
-                     :content ,(vconcat ;Insert any LLM text
+                     :content ,(vconcat ;Insert any LLM text and thinking text
+                                (and-let* ((reasoning (plist-get info :partial_reasoning)))
+                                 `((:type "thinking" :thinking ,reasoning
+                                    :signature ,(plist-get info :signature))))
                                 (and-let* ((strs (plist-get info :partial_text)))
-                                 (list (list :type "text" :text (apply #'concat (nreverse strs)))))
+                                 `((:type "text" :text ,(apply #'concat (nreverse strs)))))
                                 (mapcar (lambda (tool-call) ;followed by the tool calls
                                           (append (list :type "tool_use")
                                            (copy-sequence tool-call)))
@@ -138,10 +144,8 @@ information if the stream contains it.  Not my best work, I know."
                 (mapc (lambda (tool-call)
                         (plist-put tool-call :args (plist-get tool-call :input))
                         (plist-put tool-call :input nil)
-                        (plist-put tool-call :id (gptel--anthropic-unformat-tool-id
-                                                  (plist-get tool-call :id))))
-                      tool-use)))
-            (when-let* ((response (gptel--json-read)))
+                        (plist-put tool-call :id (plist-get tool-call :id)))
+                      tool-use))
               (plist-put info :output-tokens
                          (map-nested-elt response '(:usage :output_tokens)))
               (plist-put info :stop-reason
@@ -151,6 +155,10 @@ information if the stream contains it.  Not my best work, I know."
       (unless (string-empty-p response-text)
         (plist-put info :partial_text
                    (cons response-text (plist-get info :partial_text))))
+      (when (plist-get info :tools)
+        (when-let* ((reasoning (plist-get info :reasoning)))
+          (plist-put info :partial_reasoning
+                     (concat (plist-get info :partial_reasoning) reasoning))))
       response-text)))
 
 (cl-defmethod gptel--parse-response ((_backend gptel-anthropic) response info)
@@ -189,8 +197,7 @@ Mutate state INFO with response metadata."
       for call = (copy-sequence call-raw) do
       (plist-put call :args (plist-get call :input))
       (plist-put call :input nil)
-      (plist-put call :id (gptel--anthropic-unformat-tool-id
-                           (plist-get call :id)))
+      (plist-put call :id (plist-get call :id))
       collect call into calls
       finally do (plist-put info :tool-use calls)))
    finally return
@@ -201,18 +208,28 @@ Mutate state INFO with response metadata."
   (let ((prompts-plist
          `(:model ,(gptel--model-name gptel-model)
            :stream ,(or gptel-stream :json-false)
-           :max_tokens ,(or gptel-max-tokens 1024)
+           :max_tokens ,(or gptel-max-tokens 4096)
            :messages [,@prompts])))
     (when gptel--system-message
-      (plist-put prompts-plist :system gptel--system-message))
+      (if (and (or (eq gptel-cache t) (memq 'system gptel-cache))
+               (gptel--model-capable-p 'cache))
+          ;; gptel--system-message is guaranteed to be a string
+          (plist-put prompts-plist :system
+                     `[(:type "text" :text ,gptel--system-message
+                        :cache_control (:type "ephemeral"))])
+        (plist-put prompts-plist :system gptel--system-message)))
     (when gptel-temperature
       (plist-put prompts-plist :temperature gptel-temperature))
     (when gptel-use-tools
       (when (eq gptel-use-tools 'force)
         (plist-put prompts-plist :tool_choice '(:type "any")))
       (when gptel-tools
-        (plist-put prompts-plist :tools
-                   (gptel--parse-tools backend gptel-tools))))
+        (let ((tools-array (gptel--parse-tools backend gptel-tools)))
+          (plist-put prompts-plist :tools tools-array)
+          (when (and (or (eq gptel-cache t) (memq 'tool gptel-cache))
+                     (gptel--model-capable-p 'cache))
+            (nconc (aref tools-array (1- (length tools-array)))
+                   '(:cache_control (:type "ephemeral")))))))
     ;; Merge request params with model and backend params.
     (gptel--merge-plists
      prompts-plist
@@ -230,25 +247,22 @@ TOOLS is a list of `gptel-tool' structs, which see."
             :description (gptel-tool-description tool)
             :input_schema ;NOTE: Anthropic wants "{}" if the function takes no args, not null
             (list :type "object"
+                  ;; See the generic implementation for an explanation of this
+                  ;; transformation.
                   :properties
                   (cl-loop
                    for arg in (gptel-tool-args tool)
-                   for name = (plist-get arg :name)
-                   for type = (plist-get arg :type)
+                   for argspec = (copy-sequence arg)
+                   for name = (plist-get arg :name) ;handled differently
                    for newname = (or (and (keywordp name) name)
                                      (make-symbol (concat ":" name)))
-                   for enum = (plist-get arg :enum)
-                   append (list newname
-                                `(:type ,(plist-get arg :type)
-                                  :description ,(plist-get arg :description)
-                                  ,@(if enum (list :enum (vconcat enum)))
-                                  ,@(cond
-                                     ((equal type "object")
-                                      (list
-                                       :properties (plist-get arg :properties)
-                                       :required (or (plist-get arg :required) [])))
-                                     ((equal type "array")
-                                      (list :items (plist-get arg :items)))))))
+                   do                  ;ARGSPEC is ARG without unrecognized keys
+                   (cl-remf argspec :name)
+                   (cl-remf argspec :optional)
+                   if (equal (plist-get arg :type) "object")
+                   do (unless (plist-member argspec :required)
+                        (plist-put argspec :required []))
+                   append (list newname argspec))
                   :required
                   (vconcat
                    (delq nil (mapcar
@@ -271,8 +285,7 @@ TOOL-USE is a list of plists containing tool names, arguments and call results."
        (let* ((result (plist-get tool-call :result))
               (formatted
                (list :type "tool_result"
-                     :tool_use_id (gptel--anthropic-format-tool-id
-                                   (plist-get tool-call :id))
+                     :tool_use_id (plist-get tool-call :id)
                      :content (if (stringp result) result
                                 (prin1-to-string result)))))
          (prog1 formatted
@@ -283,24 +296,57 @@ TOOL-USE is a list of plists containing tool names, arguments and call results."
 ;; NOTE: No `gptel--inject-prompt' method required for gptel-anthropic, since
 ;; this is handled by its defgeneric implementation
 
+;; TODO: Remove these functions (#792)
 (defun gptel--anthropic-format-tool-id (tool-id)
-  (if (string-prefix-p "toolu_" tool-id)
+  (unless tool-id
+    (setq tool-id (substring
+                   (md5 (format "%s%s" (random) (float-time)))
+                   nil 24)))
+  (if (or (string-prefix-p "call_" tool-id)
+          (string-prefix-p "toolu_" tool-id))
       tool-id
     (format "toolu_%s" tool-id)))
 
 (defun gptel--anthropic-unformat-tool-id (tool-id)
   (or (and (string-match "toolu_\\(.+\\)" tool-id)
            (match-string 1 tool-id))
-      (progn
-        (message "Unexpected tool_call_id format: %s" tool-id)
-        tool-id)))
+      tool-id))
 
-(cl-defmethod gptel--parse-list ((_backend gptel-anthropic) prompt-list)
-  (cl-loop for text in prompt-list
-           for role = t then (not role)
-           if text collect
-           (list :role (if role "user" "assistant")
-                 :content `[(:type "text" :text ,text)])))
+(cl-defmethod gptel--parse-list ((backend gptel-anthropic) prompt-list)
+  (let ((full-prompt
+         (if (stringp (car prompt-list))
+             (cl-loop for text in prompt-list ; Simple format, list of strings
+                      for role = t then (not role)
+                      if text
+                      collect (list :role (if role "user" "assistant")
+                                    :content `[(:type "text" :text ,text)]))
+           (let ((prompts))
+             (dolist (entry prompt-list) ; Advanced format, list of lists
+               (pcase entry
+                 (`(prompt . ,msg)
+                  (push (list :role "user"
+                              :content `[(:type "text" :text ,(or (car-safe msg) msg))])
+                        prompts))
+                 (`(response . ,msg)
+                  (push (list :role "assistant"
+                              :content `[(:type "text" :text ,(or (car-safe msg) msg))])
+                        prompts))
+                 (`(tool . ,call)
+                  (unless (plist-get call :id)
+                    (plist-put call :id (gptel--anthropic-format-tool-id nil)))
+                  (push (list :role "assistant"
+                              :content `[( :type "tool_use" :id ,(plist-get call :id)
+                                           :name ,(plist-get call :name)
+                                           :input ,(plist-get call :args))])
+                        prompts)
+                  (push (gptel--parse-tool-results backend (list (cdr entry))) prompts))))
+             (nreverse prompts)))))
+    ;; cache messages if required: add cache_control to the last message
+    (when (and (or (eq gptel-cache t) (memq 'message gptel-cache))
+               (gptel--model-capable-p 'cache))
+      (nconc (aref (plist-get (car (last full-prompt)) :content) 0)
+             '(:cache_control (:type "ephemeral"))))
+    full-prompt))
 
 (cl-defmethod gptel--parse-buffer ((backend gptel-anthropic) &optional max-entries)
   (let ((prompts) (prev-pt (point))
@@ -328,7 +374,7 @@ TOOL-USE is a list of plists containing tool names, arguments and call results."
                (save-excursion
                  (condition-case nil
                      (let* ((tool-call (read (current-buffer)))
-                            (id (gptel--anthropic-format-tool-id id))
+                            ;; (id (gptel--anthropic-format-tool-id id))
                             (name (plist-get tool-call :name))
                             (arguments (plist-get tool-call :args)))
                        (plist-put tool-call :id id)
@@ -361,6 +407,16 @@ TOOL-USE is a list of plists containing tool names, arguments and call results."
         ;; XXX fails if content is empty.  The correct error behavior is left to
         ;; a future discussion.
         (push (list :role "user" :content content) prompts)))
+    ;; Cache messages if required: add cache_control to the last message
+    (if (and (or (eq gptel-cache t) (memq 'message gptel-cache))
+             (gptel--model-capable-p 'cache))
+        (let ((last-message (plist-get (car (last prompts)) :content)))
+          (if (stringp last-message)
+              (plist-put
+               (car (last prompts)) :content
+               `[(:type "text" :text ,last-message :cache_control (:type "ephemeral"))])
+            (nconc (aref (plist-get (car (last prompts)) :content) 0)
+                   '(:cache_control (:type "ephemeral"))))))
     prompts))
 
 (defun gptel--anthropic-parse-multipart (parts)
@@ -468,7 +524,7 @@ files in the context."
      :cutoff-date "2024-04")
     (claude-3-5-haiku-20241022
      :description "Intelligence at blazing speeds"
-     :capabilities (tool-use)
+     :capabilities (tool-use cache)
      :context-window 200
      :input-cost 1.00
      :output-cost 5.00
@@ -491,7 +547,7 @@ files in the context."
      :cutoff-date "2023-08")
     (claude-3-haiku-20240307
      :description "Fast and most compact model for near-instant responsiveness"
-     :capabilities (tool-use)
+     :capabilities (tool-use cache)
      :context-window 200
      :input-cost 0.25
      :output-cost 1.25

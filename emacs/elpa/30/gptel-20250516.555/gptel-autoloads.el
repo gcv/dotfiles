@@ -28,6 +28,8 @@ evaluate the variable `gptel-mode'.
 The mode's hook is called both when the mode is enabled and when it is
 disabled.
 
+\\{gptel-mode-map}
+
 (fn &optional ARG)" t)
 (autoload 'gptel-send "gptel" "\
 Submit this prompt to the current LLM backend.
@@ -148,7 +150,7 @@ Call CALLBACK with the response and INFO afterwards.  If omitted
 the response is inserted into the current buffer after point.
 
 (fn FSM)")
-(register-definition-prefixes "gptel-curl" '("gptel-curl--"))
+(register-definition-prefixes "gptel-curl" '("gptel-curl-"))
 
 
 ;;; Generated autoloads from gptel-gemini.el
@@ -209,6 +211,70 @@ for.
 (fn NAME &key CURL-ARGS HEADER KEY REQUEST-PARAMS (STREAM nil) (HOST \"generativelanguage.googleapis.com\") (PROTOCOL \"https\") (MODELS gptel--gemini-models) (ENDPOINT \"/v1beta/models\"))")
 (function-put 'gptel-make-gemini 'lisp-indent-function 1)
 (register-definition-prefixes "gptel-gemini" '("gptel--gemini-"))
+
+
+;;; Generated autoloads from gptel-gh.el
+
+(autoload 'gptel-make-gh-copilot "gptel-gh" "\
+Register a Github Copilot chat backend for gptel with NAME.
+
+Keyword arguments:
+
+CURL-ARGS (optional) is a list of additional Curl arguments.
+
+HOST (optional) is the API host, typically \"api.githubcopilot.com\".
+
+MODELS is a list of available model names, as symbols.
+Additionally, you can specify supported LLM capabilities like
+vision or tool-use by appending a plist to the model with more
+information, in the form
+
+ (model-name . plist)
+
+For a list of currently recognized plist keys, see
+`gptel--openai-models'.  An example of a model specification
+including both kinds of specs:
+
+:models
+\\='(gpt-3.5-turbo                         ;Simple specs
+  gpt-4-turbo
+  (gpt-4o-mini                          ;Full spec
+   :description
+   \"Affordable and intelligent small model for lightweight tasks\"
+   :capabilities (media tool json url)
+   :mime-types
+   (\"image/jpeg\" \"image/png\" \"image/gif\" \"image/webp\")))
+
+Defaults to a list of models supported by GitHub Copilot.
+
+STREAM is a boolean to toggle streaming responses, defaults to
+false.
+
+PROTOCOL (optional) specifies the protocol, https by default.
+
+ENDPOINT (optional) is the API endpoint for completions, defaults to
+\"/chat/completions\".
+
+HEADER (optional) is for additional headers to send with each
+request.  It should be an alist or a function that returns an
+alist, like:
+ ((\"Content-Type\" . \"application/json\"))
+
+Defaults to headers required by GitHub Copilot.
+
+REQUEST-PARAMS (optional) is a plist of additional HTTP request
+parameters (as plist keys) and values supported by the API.  Use
+these to set parameters that gptel does not provide user options
+for.
+
+(fn NAME &key CURL-ARGS REQUEST-PARAMS (HEADER (lambda nil (gptel--gh-auth) \\=`((\"openai-intent\" . \"conversation-panel\") (\"authorization\" \\=\\, (concat \"Bearer \" (plist-get (gptel--gh-token gptel-backend) :token))) (\"x-request-id\" \\=\\, (gptel--gh-uuid)) (\"vscode-sessionid\" \\=\\, (or (gptel--gh-sessionid gptel-backend) \"\")) (\"vscode-machineid\" \\=\\, (or (gptel--gh-machineid gptel-backend) \"\")) (\"copilot-vision-request\" . \"true\") (\"copilot-integration-id\" . \"vscode-chat\")))) (HOST \"api.githubcopilot.com\") (PROTOCOL \"https\") (ENDPOINT \"/chat/completions\") (STREAM t) (MODELS gptel--gh-models))")
+(function-put 'gptel-make-gh-copilot 'lisp-indent-function 1)
+(register-definition-prefixes "gptel-gh" '("gptel-"))
+
+
+;;; Generated autoloads from gptel-integrations.el
+
+(register-definition-prefixes "gptel-integrations" '("gptel-mcp-"))
 
 
 ;;; Generated autoloads from gptel-kagi.el
@@ -532,13 +598,47 @@ parameters.
 (autoload 'gptel-make-deepseek "gptel-openai-extras" "\
 Register a DeepSeek backend for gptel with NAME.
 
-(fn NAME &key CURL-ARGS STREAM KEY REQUEST-PARAMS (HEADER (lambda nil (when-let (key (gptel--get-api-key)) \\=`((\"Authorization\" \\=\\, (concat \"Bearer \" key)))))) (HOST \"api.deepseek.com\") (PROTOCOL \"https\") (ENDPOINT \"/v1/chat/completions\") (MODELS \\='((deepseek-reasoner :capabilities (tool reasoning) :context-window 64 :input-cost 0.55 :output-cost 2.19) (deepseek-chat :capabilities (tool) :context-window 64 :input-cost 0.27 :output-cost 1.1))))")
+(fn NAME &key CURL-ARGS STREAM KEY REQUEST-PARAMS (HEADER (lambda nil (when-let* ((key (gptel--get-api-key))) \\=`((\"Authorization\" \\=\\, (concat \"Bearer \" key)))))) (HOST \"api.deepseek.com\") (PROTOCOL \"https\") (ENDPOINT \"/v1/chat/completions\") (MODELS \\='((deepseek-reasoner :capabilities (tool reasoning) :context-window 64 :input-cost 0.55 :output-cost 2.19) (deepseek-chat :capabilities (tool) :context-window 64 :input-cost 0.27 :output-cost 1.1))))")
 (function-put 'gptel-make-deepseek 'lisp-indent-function 1)
+(autoload 'gptel-make-xai "gptel-openai-extras" "\
+Register an xAI backend for gptel with NAME.
+
+Keyword arguments:
+
+KEY is a variable whose value is the API key, or function that
+returns the key.
+
+STREAM is a boolean to toggle streaming responses, defaults to
+false.
+
+The other keyword arguments are all optional.  For their meanings
+see `gptel-make-openai'.
+
+(fn NAME &key CURL-ARGS STREAM KEY REQUEST-PARAMS (HEADER (lambda nil (when-let* ((key (gptel--get-api-key))) \\=`((\"Authorization\" \\=\\, (concat \"Bearer \" key)))))) (HOST \"api.x.ai\") (PROTOCOL \"https\") (ENDPOINT \"/v1/chat/completions\") (MODELS \\='((grok-3-latest :description \"Grok 3\" :capabilities \\='(tool-use json) :context-window 131072 :input-cost 3 :output-cost 15) (grok-3-fast-latest :description \"Faster Grok 3\" :capabilities \\='(tool-use json) :context-window 131072 :input-cost 5 :output-cost 25) (grok-3-mini-latest :description \"Mini Grok 3\" :capabilities \\='(tool-use json reasoning) :context-window 131072 :input-cost 0.3 :output-cost 0.5) (grok-3-mini-fast-latest :description \"Faster mini Grok 3\" :capabilities \\='(tool-use json reasoning) :context-window 131072 :input-cost 0.6 :output-cost 4) (grok-2-vision-1212 :description \"Grok 2 Vision\" :capabilities \\='(tool-use json) :mime-types \\='(\"image/jpeg\" \"image/png\" \"image/gif\" \"image/webp\") :context-window 32768 :input-cost 2 :output-cost 10))))")
+(function-put 'gptel-make-xai 'lisp-indent-function 1)
 (register-definition-prefixes "gptel-openai-extras" '("gptel--p"))
 
 
 ;;; Generated autoloads from gptel-org.el
 
+(autoload 'gptel--convert-markdown->org "gptel-org" "\
+Convert string STR from markdown to org markup.
+
+This is a very basic converter that handles only a few markup
+elements.
+
+(fn STR)")
+(autoload 'gptel--stream-convert-markdown->org "gptel-org" "\
+Return a Markdown to Org converter.
+
+This function parses a stream of Markdown text to Org
+continuously when it is called with successive chunks of the
+text stream.
+
+START-MARKER is used to identify the corresponding process when
+cleaning up after.
+
+(fn START-MARKER)")
 (register-definition-prefixes "gptel-org" '("gptel-"))
 
 

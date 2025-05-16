@@ -1,4 +1,4 @@
-;;; gptel-transient.el --- Transient menu for GPTel  -*- lexical-binding: t; -*-
+;;; gptel-transient.el --- Transient menu for gptel  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023  Karthik Chikmagalur
 
@@ -497,28 +497,28 @@ This is used only for setting this variable via `gptel-menu'.")
            (oset obj value value)))
 
 (defclass gptel-provider-variable (transient-lisp-variable)
-  ((model       :initarg :model)
-   (model-value :initarg :model-value)
+  ((backend       :initarg :backend)
+   (backend-value :initarg :backend-value)
    (always-read :initform t)
    (set-value :initarg :set-value :initform #'set))
   "Class used for gptel-backends.")
 
 (cl-defmethod transient-format-value ((obj gptel-provider-variable))
   (propertize (concat
-               (gptel-backend-name (oref obj value)) ":"
-               (gptel--model-name
-                (buffer-local-value (oref obj model) transient--original-buffer)))
+               (gptel-backend-name
+                (buffer-local-value (oref obj backend) transient--original-buffer)) ":"
+               (gptel--model-name (oref obj value)))
               'face 'transient-value))
 
 (cl-defmethod transient-infix-set ((obj gptel-provider-variable) value)
   (pcase-let ((`(,backend-value ,model-value) value))
     (funcall (oref obj set-value)
              (oref obj variable)
-             (oset obj value backend-value)
+             (oset obj value model-value)
              gptel--set-buffer-locally)
     (funcall (oref obj set-value)
-             (oref obj model)
-             (oset obj model-value model-value)
+             (oref obj backend)
+             (oset obj backend-value backend-value)
              gptel--set-buffer-locally))
   (transient-setup))
 
@@ -557,8 +557,6 @@ Also format its value in the Transient menu."
 
 ;; * Transient Prefixes
 
-(define-obsolete-function-alias 'gptel-send-menu 'gptel-menu "0.3.2")
-
 ;;;###autoload (autoload 'gptel-menu "gptel-transient" nil t)
 (transient-define-prefix gptel-menu ()
   "Change parameters of prompt to send to the LLM."
@@ -579,7 +577,8 @@ Also format its value in the Transient menu."
     (gptel--infix-context-remove-all)
     (gptel--suffix-context-buffer)]
    [:pad-keys t
-    :if (lambda () (and gptel-use-tools gptel--known-tools))
+    :if (lambda () (and gptel-use-tools
+                   (or gptel--known-tools (featurep 'gptel-integrations))))
     "" (:info
         (lambda ()
           (concat
@@ -689,7 +688,8 @@ MSG is the meaning of symbol, used when messaging.
 If EXTERNAL is non-nil, include external sources of directives."
   (cl-loop for (type . prompt) in gptel-directives
            ;; Avoid clashes with the custom directive key
-           with unused-keys = (delete ?s (number-sequence ?a ?z))
+           with unused-keys = (delete ?s (nconc (number-sequence ?a ?z)
+                                                (number-sequence ?0 ?9)))
            with width = (window-width)
            for name = (symbol-name type)
            for key = (seq-find (lambda (k) (member k unused-keys)) name (seq-first unused-keys))
@@ -803,7 +803,8 @@ only (\"oneshot\")."
         nconc
         (cl-loop                    ;for each category, collect tools as infixes
          for (name . tool) in tools-alist
-         with tool-keys = (delete category-key (number-sequence ?a ?z))
+         with tool-keys = (delete category-key (nconc (number-sequence ?a ?z)
+                                                      (number-sequence ?0 ?9)))
          for tool-key = (seq-find (lambda (k) (member k tool-keys)) name
                                   (seq-first tool-keys))
          do (setq tool-keys (delete tool-key tool-keys))
@@ -825,7 +826,7 @@ only (\"oneshot\")."
          (identity ;TODO(tool): Replace with vconcat for groups separated by category
           ;; Add a category header that can be used to toggle all tools in that category
           (nconc (list " " (list (key-description (list category-key category-key))
-                                 (concat (propertize (concat (capitalize category) " tools")
+                                 (concat (propertize (concat category " tools")
                                                      'face 'transient-heading)
                                          (make-string (max (- 14 (length category)) 0) ? ))
                                  "(*)"
@@ -913,9 +914,9 @@ responses."
   :description "Model"
   :class 'gptel-provider-variable
   :prompt "Model: "
-  :variable 'gptel-backend
+  :variable 'gptel-model
   :set-value #'gptel--set-with-scope
-  :model 'gptel-model
+  :backend 'gptel-backend
   :key "-m"
   :reader (lambda (prompt &rest _)
             (cl-loop
@@ -950,7 +951,9 @@ responses."
 		       " " (propertize " " 'display `(space :align-to 166))
 		       cutoff)))))
              finally return
-             (cdr (assoc (completing-read prompt models-alist nil t)
+             (cdr (assoc (completing-read prompt models-alist nil t nil nil
+					  (concat (gptel-backend-name gptel-backend) ":"
+						  (gptel--model-name gptel-model)))
                          models-alist)))))
 
 (transient-define-infix gptel--infix-temperature ()
@@ -982,7 +985,7 @@ querying the LLM."
   :set-value #'gptel--set-with-scope
   :display-if-true "Yes"
   :display-if-false "No"
-  :key "-v")
+  :key "-R")
 
 (transient-define-infix gptel--infix-track-media ()
   "Send media from \"standalone\" links in the prompt.
@@ -1124,7 +1127,7 @@ Available behaviors are
   :display-map '((nil    . "No")
                  (ignore . "and ignore")
                  (t      . "with response"))
-  :key "-r"
+  :key "-v"
   :prompt "Include reasoning: "
   :reader (lambda (prompt &rest _)
             (let* ((choices '(("no"     . nil)

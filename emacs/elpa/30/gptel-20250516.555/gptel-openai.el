@@ -201,7 +201,7 @@ information if the stream contains it."
                   (cl-loop
                    for tool-call in tool-use ; Construct the call specs for running the function calls
                    for spec = (plist-get tool-call :function)
-                   collect (list :id (gptel--openai-unformat-tool-id (plist-get tool-call :id))
+                   collect (list :id (plist-get tool-call :id)
                                  :name (plist-get spec :name)
                                  :args (ignore-errors (gptel--json-read-string
                                                        (plist-get spec :arguments))))
@@ -210,7 +210,7 @@ information if the stream contains it."
               (when-let* ((response (gptel--json-read))
                           (delta (map-nested-elt response '(:choices 0 :delta))))
                 (if-let* ((content (plist-get delta :content))
-                          ((not (eq content :null))))
+                          ((not (or (eq content :null) (string-empty-p content)))))
                     (push content content-strs)
                   ;; No text content, so look for tool calls
                   (when-let* ((tool-call (map-nested-elt delta '(:tool_calls 0)))
@@ -230,8 +230,8 @@ information if the stream contains it."
                       ;; old tool block continues, so continue collecting arguments in :partial_json 
                       (push (plist-get func :arguments) (plist-get info :partial_json)))))
                 ;; Check for reasoning blocks, currently only used by Openrouter
-                ;; FIXME: Should this be moved to a dedicated Openrouter backend?
-                (unless (or (eq (plist-get info :reasoning) 'done)
+                ;; MAYBE: Should this be moved to a dedicated Openrouter backend?
+                (unless (or (eq (plist-get info :reasoning-block) 'done)
                             (not (plist-member delta :reasoning)))
                   (if-let* ((reasoning-chunk (plist-get delta :reasoning)) ;for openrouter
                             ((not (eq reasoning-chunk :null))))
@@ -240,10 +240,9 @@ information if the stream contains it."
                     ;; Done with reasoning if we get non-empty content
                     (if-let* ((c (plist-get delta :content))
                               ((not (or (eq c :null) (string-empty-p c)))))
-                        (unless (plist-get info :reasoning) ;Don't overwrite existing value
-                          (if (plist-member info :reasoning) ;Is this a reasoning model?
-                              (plist-put info :reasoning t) ;End of streaming reasoning block
-                            (plist-put info :reasoning 'done)))))))))) ;Not using a reasoning model
+                        (if (plist-member info :reasoning) ;Is this a reasoning model?
+                            (plist-put info :reasoning-block t) ;End of streaming reasoning block
+                          (plist-put info :reasoning-block 'done))))))))) ;Not using a reasoning model
       (error (goto-char (match-beginning 0))))
     (apply #'concat (nreverse content-strs))))
 
@@ -258,26 +257,27 @@ Mutate state INFO with response metadata."
                (plist-get choice0 :finish_reason))
     (plist-put info :output-tokens
                (map-nested-elt response '(:usage :completion_tokens)))
-    ;; OpenAI returns either non-blank text content or a tool call, not both
-    (if (and content (not (or (eq content :null) (string-empty-p content))))
-        (prog1 content
-          (when-let* ((reasoning (plist-get message :reasoning)) ;look for reasoning blocks
-                      ((and (stringp reasoning) (not (string-empty-p reasoning)))))
-            (plist-put info :reasoning reasoning)))
-      (prog1 nil                        ; Look for tool calls only if no content
-        (when-let* ((tool-calls (plist-get message :tool_calls)))
-          (gptel--inject-prompt    ; First add the tool call to the prompts list
-           (plist-get info :backend) (plist-get info :data) message)
-          (cl-loop         ;Then capture the tool call data for running the tool
-           for tool-call across tool-calls ;replace ":arguments" with ":args"
-           for call-spec = (copy-sequence (plist-get tool-call :function))
-           do (ignore-errors (plist-put call-spec :args
-                                        (gptel--json-read-string
-                                         (plist-get call-spec :arguments))))
-           (plist-put call-spec :arguments nil)
-           (plist-put call-spec :id (gptel--openai-unformat-tool-id (plist-get tool-call :id)))
-           collect call-spec into tool-use
-           finally (plist-put info :tool-use tool-use)))))))
+    ;; OpenAI returns either non-blank text content or a tool call, not both.
+    ;; However OpenAI-compatible APIs like llama.cpp can include both (#819), so
+    ;; we check for both tool calls and responses independently.
+    (when-let* ((tool-calls (plist-get message :tool_calls)))
+      (gptel--inject-prompt        ; First add the tool call to the prompts list
+       (plist-get info :backend) (plist-get info :data) message)
+      (cl-loop             ;Then capture the tool call data for running the tool
+       for tool-call across tool-calls  ;replace ":arguments" with ":args"
+       for call-spec = (copy-sequence (plist-get tool-call :function))
+       do (ignore-errors (plist-put call-spec :args
+                                    (gptel--json-read-string
+                                     (plist-get call-spec :arguments))))
+       (plist-put call-spec :arguments nil)
+       (plist-put call-spec :id (plist-get tool-call :id))
+       collect call-spec into tool-use
+       finally (plist-put info :tool-use tool-use)))
+    (when (and content (not (or (eq content :null) (string-empty-p content))))
+      (when-let* ((reasoning (plist-get message :reasoning)) ;look for reasoning blocks
+                  ((and (stringp reasoning) (not (string-empty-p reasoning)))))
+        (plist-put info :reasoning reasoning))
+      content)))
 
 (cl-defmethod gptel--request-data ((backend gptel-openai) prompts)
   "JSON encode PROMPTS for sending to ChatGPT."
@@ -290,7 +290,7 @@ Mutate state INFO with response metadata."
            :messages [,@prompts]
            :stream ,(or gptel-stream :json-false)))
         (reasoning-model-p ; TODO: Embed this capability in the model's properties
-         (memq gptel-model '(o1 o1-preview o1-mini o3-mini o3))))
+         (memq gptel-model '(o1 o1-preview o1-mini o3-mini o3 o4-mini))))
     (when (and gptel-temperature (not reasoning-model-p))
       (plist-put prompts-plist :temperature gptel-temperature))
     (when gptel-use-tools
@@ -323,29 +323,60 @@ Mutate state INFO with response metadata."
    (lambda (tool-call)
      (list
       :role "tool"
-      :tool_call_id (gptel--openai-format-tool-id
-                     (plist-get tool-call :id))
+      :tool_call_id (plist-get tool-call :id)
       :content (plist-get tool-call :result)))
    tool-use))
 
+;; TODO: Remove these functions (#792)
 (defun gptel--openai-format-tool-id (tool-id)
-  (format "call_%s" tool-id))
+  "Format TOOL-ID for OpenAI.
+
+If the ID has the format used by a different backend, use as-is."
+  (unless tool-id
+    (setq tool-id (substring
+                   (md5 (format "%s%s" (random) (float-time)))
+                   nil 24)))
+  (if (or (string-prefix-p "toolu_" tool-id) ;#747
+          (string-prefix-p "call_"  tool-id))
+      tool-id
+    (format "call_%s" tool-id)))
 
 (defun gptel--openai-unformat-tool-id (tool-id)
   (or (and (string-match "call_\\(.+\\)" tool-id)
            (match-string 1 tool-id))
-      (progn
-        (message "Unexpected tool_call_id format: %s" tool-id)
-        tool-id)))
+      tool-id))
 
 ;; NOTE: No `gptel--inject-prompt' method required for gptel-openai, since this
 ;; is handled by its defgeneric implementation
 
-(cl-defmethod gptel--parse-list ((_backend gptel-openai) prompt-list)
-  (cl-loop for text in prompt-list
-           for role = t then (not role)
-           if text collect
-           (list :role (if role "user" "assistant") :content text)))
+(cl-defmethod gptel--parse-list ((backend gptel-openai) prompt-list)
+  (if (stringp (car prompt-list))
+      (cl-loop for text in prompt-list  ; Simple format, list of strings
+               for role = t then (not role)
+               if text collect
+               (list :role (if role "user" "assistant") :content text))
+    (let ((full-prompt))                ; Advanced format, list of lists
+      (dolist (entry prompt-list)
+        (pcase entry
+          (`(prompt . ,msg)
+           (push (list :role "user" :content (or (car-safe msg) msg)) full-prompt))
+          (`(response . ,msg)
+           (push (list :role "assistant" :content (or (car-safe msg) msg)) full-prompt))
+          (`(tool . ,call)
+           (unless (plist-get call :id)
+             (plist-put call :id (gptel--openai-format-tool-id nil)))
+           (push
+            (list
+             :role "assistant"
+             :tool_calls
+             (vector
+              (list :type "function"
+                    :id (plist-get call :id)
+                    :function `( :name ,(plist-get call :name)
+                                 :arguments ,(gptel--json-encode (plist-get call :args))))))
+            full-prompt)
+           (push (car (gptel--parse-tool-results backend (list (cdr entry)))) full-prompt))))
+      (nreverse full-prompt))))
 
 (cl-defmethod gptel--parse-buffer ((backend gptel-openai) &optional max-entries)
   (let ((prompts) (prev-pt (point))
@@ -377,7 +408,7 @@ Mutate state INFO with response metadata."
                      (push (list :role "assistant"
                                  :tool_calls
                                  (vector (list :type "function"
-                                               :id (gptel--openai-format-tool-id id)
+                                               :id id
                                                :function `( :name ,name
                                                             :arguments ,arguments))))
                            prompts))

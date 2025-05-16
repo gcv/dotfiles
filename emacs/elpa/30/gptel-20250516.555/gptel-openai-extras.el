@@ -280,7 +280,7 @@ parameters."
 
 (cl-defmethod gptel-curl--parse-stream :before ((_backend gptel-deepseek) info)
   "Capture reasoning block stream into INFO."
-  (unless (eq (plist-get info :reasoning) 'done)
+  (unless (eq (plist-get info :reasoning-block) 'done)
     (save-excursion
       (ignore-errors
         (catch 'done
@@ -288,18 +288,17 @@ parameters."
             (unless (looking-at-p " *\\[DONE\\]")
               (when-let* ((response (gptel--json-read))
                           (delta (map-nested-elt response '(:choices 0 :delta))))
-                (if-let* ((reasoning-content (plist-get delta :reasoning_content))
-                          ((not (eq reasoning-content :null))))
+                (if-let* ((reasoning (plist-get delta :reasoning_content))
+                          ((not (eq reasoning :null))))
                     ;; :reasoning will be consumed by the gptel-request callback
                     ;; and reset by the stream filter.
                     (plist-put info :reasoning
-                               (concat (plist-get info :reasoning) reasoning-content))
+                               (concat (plist-get info :reasoning) reasoning))
                   (when-let* ((content (plist-get delta :content))
                               ((not (eq content :null))))
-                    (unless (plist-get info :reasoning) ;Don't overwrite existing value
-                      (if (plist-member delta :reasoning_content) ;Check for reasoning model
-                          (plist-put info :reasoning t) ;End of streaming reasoning block
-                        (plist-put info :reasoning 'done))) ;Not using a reasoning model
+                    (if (eq (plist-get info :reasoning-block) 'in) ;Check if in reasoning block
+                        (plist-put info :reasoning-block t) ;End of streaming reasoning block
+                      (plist-put info :reasoning-block 'done)) ;Not using a reasoning model
                     (throw 'done t)))))))))))
 
 (cl-defmethod gptel--parse-response :before ((_backend gptel-deepseek) response info)
@@ -310,10 +309,29 @@ parameters."
     (when (and (stringp reasoning) (length> reasoning 0))
       (plist-put info :reasoning reasoning))))
 
+(cl-defmethod gptel--parse-buffer :around ((_backend gptel-deepseek) max-entries)
+  "Merge successive prompts in the prompts list that have the same role.
+
+The Deepseek API requires strictly alternating roles (user/assistant) in messages."
+  (let* ((prompts (cl-call-next-method))
+         (index prompts))
+    (prog1 prompts
+      (while index
+        (let ((p1 (car index))
+              (p2 (cadr index))
+              (rest (cdr index)))
+          (when (and p2 (equal (plist-get p1 :role)
+                               (plist-get p2 :role)))
+            (setf (plist-get p1 :content)
+                  (concat (plist-get p1 :content) "\n"
+                          (plist-get p2 :content)))
+            (setcdr index (cdr rest)))
+          (setq index (cdr index)))))))
+
 ;;;###autoload
 (cl-defun gptel-make-deepseek
     (name &key curl-args stream key request-params
-          (header (lambda () (when-let (key (gptel--get-api-key))
+          (header (lambda () (when-let* ((key (gptel--get-api-key)))
                           `(("Authorization" . ,(concat "Bearer " key))))))
           (host "api.deepseek.com")
           (protocol "https")
@@ -344,6 +362,79 @@ parameters."
                   :url (concat protocol "://" host endpoint))))
     (setf (alist-get name gptel--known-backends nil nil #'equal) backend)
     backend))
+
+;;; xAI
+;;;###autoload
+(cl-defun gptel-make-xai
+    (name &key curl-args stream key request-params
+          (header (lambda () (when-let* ((key (gptel--get-api-key)))
+                          `(("Authorization" . ,(concat "Bearer " key))))))
+          (host "api.x.ai")
+          (protocol "https")
+          (endpoint "/v1/chat/completions")
+          (models '((grok-3-latest
+                     :description "Grok 3"
+                     :capabilities '(tool-use json)
+                     :context-window 131072
+                     :input-cost 3
+                     :output-cost 15)
+
+                    (grok-3-fast-latest
+                     :description "Faster Grok 3"
+                     :capabilities '(tool-use json)
+                     :context-window 131072
+                     :input-cost 5
+                     :output-cost 25)
+
+                    (grok-3-mini-latest
+                     :description "Mini Grok 3"
+                     :capabilities '(tool-use json reasoning)
+                     :context-window 131072
+                     :input-cost 0.3
+                     :output-cost 0.5)
+
+                    (grok-3-mini-fast-latest
+                     :description "Faster mini Grok 3"
+                     :capabilities '(tool-use json reasoning)
+                     :context-window 131072
+                     :input-cost 0.6
+                     :output-cost 4)
+
+                    (grok-2-vision-1212
+                     :description "Grok 2 Vision"
+                     :capabilities '(tool-use json)
+                     :mime-types '("image/jpeg" "image/png" "image/gif" "image/webp")
+                     :context-window 32768
+                     :input-cost 2
+                     :output-cost 10))))
+  "Register an xAI backend for gptel with NAME.
+
+Keyword arguments:
+
+KEY is a variable whose value is the API key, or function that
+returns the key.
+
+STREAM is a boolean to toggle streaming responses, defaults to
+false.
+
+The other keyword arguments are all optional.  For their meanings
+see `gptel-make-openai'."
+  (declare (indent 1))
+  (let ((backend (gptel--make-openai
+                  :name name
+                  :host host
+                  :header header
+                  :key key
+                  :models (gptel--process-models models)
+                  :protocol protocol
+                  :endpoint endpoint
+                  :stream stream
+                  :request-params request-params
+                  :curl-args curl-args
+                  :url (concat protocol "://" host endpoint))))
+    (setf (alist-get name gptel--known-backends nil nil #'equal) backend)
+    backend))
+
 
 (provide 'gptel-openai-extras)
 ;;; gptel-openai-extras.el ends here
