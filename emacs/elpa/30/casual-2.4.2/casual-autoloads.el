@@ -275,6 +275,21 @@
 (register-definition-prefixes "casual-lib" '("casual-lib-"))
 
 
+;;; Generated autoloads from casual-make.el
+
+ (autoload 'casual-make-tmenu "casual-make" nil t)
+
+
+;;; Generated autoloads from casual-make-settings.el
+
+(register-definition-prefixes "casual-make-settings" '("casual-make-"))
+
+
+;;; Generated autoloads from casual-make-utils.el
+
+(register-definition-prefixes "casual-make-utils" '("casual-make-"))
+
+
 ;;; Generated autoloads from casual-re-builder.el
 
  (autoload 'casual-re-builder-tmenu "casual-re-builder" nil t)

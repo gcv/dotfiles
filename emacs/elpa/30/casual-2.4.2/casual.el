@@ -5,8 +5,8 @@
 ;; Author: Charles Choi <kickingvegas@gmail.com>
 ;; URL: https://github.com/kickingvegas/casual
 ;; Keywords: tools, wp
-;; Package-Version: 2.3.2
-;; Package-Revision: 5ffd4d992894
+;; Package-Version: 2.4.2
+;; Package-Revision: f478f82a9cf1
 ;; Package-Requires: ((emacs "29.1") (transient "0.6.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -74,6 +74,10 @@
 ;; - I-Search (Elisp library: `casual-isearch')
 ;;   An interface for the many commands supported by I-Search.
 ;;   URL: `https://github.com/kickingvegas/casual/blob/main/docs/isearch.org'
+
+;; - Make (Elisp library: `casual-make')
+;;   An interface to `make-mode'.
+;;   URL: `https://github.com/kickingvegas/casual/blob/main/docs/make-mode.org'
 
 ;; - Re-Builder (Elisp library: `casual-re-builder')
 ;;   An interface for the Emacs regular expression tool.
