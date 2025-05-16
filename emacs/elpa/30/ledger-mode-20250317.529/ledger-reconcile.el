@@ -160,7 +160,7 @@ described above."
 (defvar-local ledger-reconcile-last-balance-equals-target nil)
 
 (defface ledger-reconcile-last-balance-equals-target-face
-  '((t :inherit header-line :foreground "green3"))
+  '((t :inherit (header-line success)))
   "Face used for header line when cleared-or-pending balance equals the target."
   :group 'ledger-reconcile)
 
@@ -509,7 +509,7 @@ Return a count of the uncleared transactions."
             (ledger-exec-ledger buf (current-buffer)
                                 "--uncleared" "--real" "emacs" "--sort" sort-by account)
             (goto-char (point-min))
-            (when (and (not (eobp)) (looking-at "("))
+            (when (and (not (eobp)) (looking-at-p "("))
               (read (current-buffer)))))
          (fmt (ledger-reconcile-compile-format-string ledger-reconcile-buffer-line-format)))
     (if (null xacts)
