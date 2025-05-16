@@ -1,4 +1,54 @@
 # -*- mode: org -*-
+* v0.8.8    2025-05-01
+
+- Added option ~transient-common-command-prefix~ to allow using a key
+  other than ~C-x~ as the prefix key used for many commands common to
+  all transient menus.  Because the use of the ~C-x~ prefix for these
+  commands causes many global bindings to be shadowed even for menus
+  that allow invoking non-suffix commands, I highly recommend that
+  users customize this.  7d08039c
+
+- Added option ~transient-error-on-insert-failure~, defaulting to ~nil~.
+  I.e., go back to the pre-v0.8.7 behavior by default but let users
+  opt-in to errors for certain minor issues.  #374
+
+- Address a conflict with the keyboard used by the Android port.
+  #376.
+
+* v0.8.7    2025-04-01
+
+- Added new hook ~transient-post-exit-hook~.  55050b60
+
+- ~transient-insert-suffix~ and ~transient-append-suffix~ now signal
+  error if the specified location is invalid.  #374
+
+Bug fixes:
+
+- Autoloaded commands were loaded too late in ~transient-init-suffix~,
+  resulting in the suffix prototype object not being used.  00112c11
+
+* v0.8.6    2025-03-15
+
+Bug fixes:
+
+- ~transient-show-summary~ errored for commands that have neither a
+  summary nor a docstring.  0886651d
+
+- ~transient-format-description~ errored for ~transient-information~
+  and ~transient-information*~ suffixes.  #366
+
+- ~transient--wrap-command~ failed to load autoloaded commands.
+  40308623
+
+- ~transient-suffix-object~ errored if a command is bound more than
+  once and is invoked using the mouse or ~RET~.  f69e1286
+
+- For some releases ~transient-suffix-object~ errored if it could not
+  identify a unique suffix, which helped establish that it is in fact
+  legitimate to use this function as a predicate.  No longer error if
+  there are zero matches, but continue to error if their are multiple
+  matches that cannot be disambiguated.  4a06aeb0
+
 * v0.8.5    2025-03-01
 
 - Added new faces ~transient-key-recurse~ and ~transient-key-stack~.
@@ -19,7 +69,7 @@ Bug fixes:
   when there isn't actually an outer prefix.  e88005d2
 
 - When potentially removing other bindings for the same command
-  while adding a new binding, false-negative avoidance was to heavily
+  while adding a new binding, false-negative avoidance was too heavily
   favored over false-positive avoidance.  #355
 
 - Defining the ~transient-higher-level~ face involves calling
