@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.9
+;; Version: 2.0
 ;; Package-Requires: ((emacs "28.1") (compat "30"))
 ;; URL: https://github.com/minad/cape
 ;; Keywords: abbrev, convenience, matching, completion, text
@@ -414,7 +414,8 @@ If INTERACTIVE is nil the function acts like a Capf."
       (when (or prefix
                 (not cape-file-directory-must-exist)
                 (and (string-search "/" file)
-                     (file-exists-p (file-name-directory file))))
+                     (file-exists-p (file-name-directory
+                                     (substitute-in-file-name file)))))
         (unless (boundp 'comint-unquote-function)
           (require 'comint))
         `( ,beg ,end
@@ -810,10 +811,11 @@ again if the input prefix changed."
       (funcall backend 'init)
       (put backend 'company-init t)
       (setf (alist-get backend cape--company-init) t))
-    (when-let ((prefix (cape--company-call backend 'prefix))
-               (initial-input (if (stringp prefix) prefix (car-safe prefix))))
-      (let* ((end (point)) (beg (- end (length initial-input)))
-             (valid (if (cape--company-call backend 'no-cache initial-input)
+    (when-let ((pre (pcase (cape--company-call backend 'prefix)
+                      ((or `(,p ,_s) (and (pred stringp) p)) (cons p (length p)))
+                      ((or `(,p ,_s ,l) `(,p . ,l)) (cons p l)))))
+      (let* ((end (point)) (beg (- end (length (car pre))))
+             (valid (if (cape--company-call backend 'no-cache (car pre))
                         #'equal (or valid #'string-prefix-p)))
              (sort-fun (and (cape--company-call backend 'sorted) #'identity))
              restore-props)
@@ -834,7 +836,7 @@ again if the input prefix changed."
                     (cons (apply-partially valid input) cands)))))
               :category backend
               :exclusive 'no
-              :company-prefix-length (cdr-safe prefix)
+              :company-prefix-length (cdr pre)
               :company-doc-buffer (lambda (x) (cape--company-call backend 'doc-buffer x))
               :company-location (lambda (x) (cape--company-call backend 'location x))
               :company-docsig (lambda (x) (cape--company-call backend 'meta x))
