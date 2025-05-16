@@ -1,12 +1,12 @@
 ;;; ef-themes.el --- Colorful and legible themes -*- lexical-binding:t -*-
 
-;; Copyright (C) 2022-2024  Free Software Foundation, Inc.
+;; Copyright (C) 2022-2025  Free Software Foundation, Inc.
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
 ;; Maintainer: Protesilaos Stavrou <info@protesilaos.com>
 ;; URL: https://github.com/protesilaos/ef-themes
-;; Version: 1.9.0
-;; Package-Requires: ((emacs "27.1"))
+;; Version: 1.10.0
+;; Package-Requires: ((emacs "28.1"))
 ;; Keywords: faces, theme, accessibility
 
 ;; This file is NOT part of GNU Emacs.
@@ -104,6 +104,9 @@
   (append ef-themes-light-themes ef-themes-dark-themes)
   "Symbols of all the Ef themes.")
 
+(defvaralias 'ef-themes-after-load-theme-hook 'ef-themes-post-load-hook
+  "Alias for `ef-themes-post-load-hook'.")
+
 (defcustom ef-themes-post-load-hook nil
   "Hook that runs after loading an Ef theme.
 This is used by the commands `ef-themes-select' and
@@ -151,11 +154,11 @@ themes that form part of this collection."
   :group 'ef-themes)
 
 (defcustom ef-themes-to-rotate ef-themes-items
-  "List of Ef themes to rotate among, per `modus-themes-rotate'."
+  "List of Ef themes to rotate among, per `ef-themes-rotate'."
   :type `(repeat (choice
                   :tag "A theme among the `ef-themes-items'"
                   ,@(mapcar (lambda (theme) (list 'const theme)) ef-themes-items)))
-  :package-version '(modus-themes . "1.9.0")
+  :package-version '(ef-themes . "1.9.0")
   :group 'ef-themes)
 
 (defconst ef-themes-weights
@@ -413,8 +416,7 @@ This function is used in the macros `ef-themes-theme',
      ((or (stringp value)
           (eq value 'unspecified))
       value)
-     ((and (symbolp value)
-           (memq value (mapcar #'car palette)))
+     ((and (symbolp value) value)
       (ef-themes--retrieve-palette-value value palette))
      (t
       'unspecified))))
@@ -653,12 +655,13 @@ whether it is light or dark."
 
 (defun ef-themes--toggle-theme-p ()
   "Return non-nil if `ef-themes-to-toggle' are valid."
-  (mapc (lambda (theme)
-          (if (or (memq theme ef-themes-collection)
-                  (memq theme (ef-themes--list-known-themes)))
-              theme
-            (user-error "`%s' is not part of `ef-themes-collection'" theme)))
-        ef-themes-to-toggle))
+  (condition-case nil
+      (dolist (theme ef-themes-to-toggle)
+        (or (memq theme ef-themes-collection)
+            (memq theme (ef-themes--list-known-themes))
+            (error "`%s' is not part of `ef-themes-collection'" theme)))
+    (error nil)
+    (:success ef-themes-to-toggle)))
 
 ;;;; Toggle between two themes
 
@@ -756,87 +759,88 @@ the list becomes the last.  Do not modify THEMES in the process."
 
 ;;;; Preview a theme palette
 
-(defun ef-themes--preview-colors-render (buffer theme &optional mappings &rest _)
-  "Render colors in BUFFER from THEME for `ef-themes-preview-colors'.
-Optional MAPPINGS changes the output to only list the semantic
-color mappings of the palette, instead of its named colors."
+(defun ef-themes--list-colors-get-mappings (palette)
+  "Get the semantic palette entries in PALETTE.
+PALETTE is the value of a variable like `ef-summer-palette'."
+  (seq-remove
+   (lambda (cell)
+     (stringp (cadr cell)))
+   palette))
+
+(defun ef-themes--list-colors-tabulated (theme &optional mappings)
+  "Return a data structure of THEME palette or MAPPINGS for tabulated list."
   (let* ((current-palette (ef-themes--palette-value theme mappings))
          (palette (if mappings
-                      (seq-remove (lambda (cell)
-                                    (stringp (cadr cell)))
-                                  current-palette)
-                    current-palette))
-         (current-buffer buffer)
-         (current-theme theme))
-    (with-help-window buffer
-      (with-current-buffer standard-output
-        (erase-buffer)
-        (when (<= (display-color-cells) 256)
-          (insert (concat "Your display terminal may not render all color previews!\n"
-                          "It seems to only support <= 256 colors.\n\n"))
-          (put-text-property (point-min) (point) 'face 'warning))
-        ;; We need this to properly render the first line.
-        (insert " ")
-        (dolist (cell palette)
-          (let* ((name (car cell))
-                 (color (ef-themes-get-color-value name mappings theme))
-                 (pad (make-string 10 ?\s))
-                 (fg (if (eq color 'unspecified)
-                         (progn
-                           (readable-foreground-color (ef-themes-get-color-value 'bg-main nil theme))
-                           (setq pad (make-string 6 ?\s)))
-                       (readable-foreground-color color))))
-            (let ((old-point (point)))
-              (insert (format "%s %s" color pad))
-              (put-text-property old-point (point) 'face `( :foreground ,color)))
-            (let ((old-point (point)))
-              (insert (format " %s %s %s\n" color pad name))
-              (put-text-property old-point (point)
-                                 'face `( :background ,color
-                                          :foreground ,fg
-                                          :extend t)))
-            ;; We need this to properly render the last line.
-            (insert " ")))
-        (setq-local revert-buffer-function
-                    (lambda (_ignore-auto _noconfirm)
-                      (ef-themes--preview-colors-render current-buffer current-theme mappings)))))))
+                      (ef-themes--list-colors-get-mappings current-palette)
+                    current-palette)))
+    (mapcar (lambda (cell)
+              (pcase-let* ((`(,name ,value) cell)
+                           (name-string (format "%s" name))
+                           (value-string (format "%s" value))
+                           (value-string-padded (string-pad value-string 30))
+                           (color (ef-themes-get-color-value name mappings theme))) ; resolve a semantic mapping
+                (list name
+                      (vector
+                       (if (and (symbolp value)
+                                (not (eq value 'unspecified)))
+                           "Yes"
+                         "")
+                       name-string
+                       (propertize value-string 'face `( :foreground ,color))
+                       (propertize value-string-padded 'face (list :background color
+                                                                   :foreground (if (string= color "unspecified")
+                                                                                   (readable-foreground-color (ef-themes-get-color-value 'bg-main nil theme))
+                                                                                 (readable-foreground-color color))))))))
+            palette)))
 
-(defvar ef-themes--preview-colors-prompt-history '()
-  "Minibuffer history for `ef-themes--preview-colors-prompt'.")
+(defvar ef-themes-current-preview nil)
+(defvar ef-themes-current-preview-show-mappings nil)
 
-(defun ef-themes--preview-colors-prompt ()
-  "Prompt for Ef theme.
-Helper function for `ef-themes-preview-colors'."
-  (let ((def (format "%s" (ef-themes--current-theme)))
-        (completion-extra-properties `(:annotation-function ,#'ef-themes--annotate-theme)))
-    (completing-read
-     (format "Use palette from theme [%s]: " def)
-     (ef-themes--load-subset :all-themes)
-     nil t nil
-     'ef-themes--preview-colors-prompt-history def)))
+(defun ef-themes--set-tabulated-entries ()
+  "Set the value of `tabulated-list-entries' with palette entries."
+  (setq-local tabulated-list-entries
+              (ef-themes--list-colors-tabulated ef-themes-current-preview ef-themes-current-preview-show-mappings)))
 
-(defun ef-themes-preview-colors (theme &optional mappings)
-  "Preview named colors of the Ef THEME of choice.
-With optional prefix argument for MAPPINGS preview the semantic
-color mappings instead of the named colors."
-  (interactive (list (intern (ef-themes--preview-colors-prompt)) current-prefix-arg))
-  (ef-themes--preview-colors-render
-   (format (if mappings "*%s-preview-mappings*" "*%s-preview-colors*") theme)
-   theme
-   mappings))
+(defun ef-themes-list-colors (theme &optional mappings)
+  "Preview the palette of the Ef THEME of choice.
+With optional prefix argument for MAPPINGS preview only the semantic
+color mappings instead of the complete palette."
+  (interactive
+   (let ((prompt (if current-prefix-arg
+                     "Preview palette mappings of THEME: "
+                   "Preview palette of THEME: ")))
+     (list
+      (ef-themes--select-prompt prompt)
+      current-prefix-arg)))
+  (let ((buffer (get-buffer-create (format (if mappings "*%s-list-mappings*" "*%s-list-all*") theme))))
+    (with-current-buffer buffer
+      (let ((ef-themes-current-preview theme)
+            (ef-themes-current-preview-show-mappings mappings))
+        (ef-themes-preview-mode)))
+    (pop-to-buffer buffer)))
 
-(defalias 'ef-themes-list-colors 'ef-themes-preview-colors
-  "Alias of `ef-themes-preview-colors'.")
+(defalias 'ef-themes-preview-colors 'ef-themes-list-colors
+  "Alias for `ef-themes-list-colors'.")
 
-(defun ef-themes-preview-colors-current (&optional mappings)
-  "Call `ef-themes-list-colors' for the current Ef theme.
-Optional prefix argument MAPPINGS has the same meaning as for
-`ef-themes-list-colors'."
+(defun ef-themes-list-colors-current (&optional mappings)
+  "Like `ef-themes-list-colors' with optional MAPPINGS for the current theme."
   (interactive "P")
   (ef-themes-list-colors (ef-themes--current-theme) mappings))
 
-(defalias 'ef-themes-list-colors-current 'ef-themes-preview-colors-current
-  "Alias of `ef-themes-preview-colors-current'.")
+(defalias 'ef-themes-preview-colors-current 'ef-themes-list-colors-current
+  "Alias for `ef-themes-list-colors-current'.")
+
+(define-derived-mode ef-themes-preview-mode tabulated-list-mode "Ef palette"
+  "Major mode to display a Ef themes palette."
+  :interactive nil
+  (setq-local tabulated-list-format
+              [("Mapping?" 10 t)
+               ("Symbol name" 30 t)
+               ("As foreground" 30 t)
+               ("As background" 0 t)])
+  (ef-themes--set-tabulated-entries)
+  (tabulated-list-init-header)
+  (tabulated-list-print))
 
 ;;; Faces and variables
 
@@ -999,6 +1003,25 @@ text should not be underlined as well) yet still blend in."
     `(tooltip ((,c :background ,bg-alt :foreground ,fg-intense)))
     `(trailing-whitespace ((,c :background ,bg-red-intense :foreground ,fg-intense)))
     `(warning ((,c :inherit bold :foreground ,warning)))
+;;;; adoc-mode
+    `(adoc-code-face ((,c :inherit font-lock-constant-face)))
+    `(adoc-command-face ((,c :foreground ,prose-macro)))
+    `(adoc-complex-replacement-face ((,c :background ,bg-magenta-subtle :foreground ,magenta)))
+    `(adoc-emphasis-face ((,c (:inherit bold))))
+    `(adoc-gen-face ((,c :foreground ,blue)))
+    `(adoc-meta-face ((,c :inherit ef-themes-fixed-pitch :foreground ,prose-metadata)))
+    `(adoc-meta-hide-face ((,c :inherit ef-themes-fixed-pitch :foreground ,prose-metadata)))
+    `(adoc-replacement-face ((,c :inherit font-lock-escape-face)))
+    `(adoc-secondary-text-face ((,c :inherit ef-themes-fixed-pitch :foreground ,prose-metadata-value)))
+    `(adoc-table-face ((,c :inherit ef-themes-fixed-pitch :foreground ,prose-table)))
+    `(adoc-title-0-face ((,c :inherit ef-themes-heading-0)))
+    `(adoc-title-1-face ((,c :inherit ef-themes-heading-1)))
+    `(adoc-title-2-face ((,c :inherit ef-themes-heading-2)))
+    `(adoc-title-3-face ((,c :inherit ef-themes-heading-3)))
+    `(adoc-title-4-face ((,c :inherit ef-themes-heading-4)))
+    `(adoc-title-5-face ((,c :inherit ef-themes-heading-5)))
+    `(adoc-typewriter-face ((,c :foreground ,prose-verbatim)))
+    `(adoc-verbatim-face ((,c :foreground ,prose-verbatim)))
 ;;;; all-the-icons
     `(all-the-icons-blue ((,c :foreground ,blue-cooler)))
     `(all-the-icons-blue-alt ((,c :foreground ,blue-warmer)))
@@ -1082,6 +1105,7 @@ text should not be underlined as well) yet still blend in."
     `(TeX-error-description-warning ((,c :inherit warning)))
 ;;;; auto-dim-other-buffers
     `(auto-dim-other-buffers-face ((,c :background ,bg-inactive)))
+    `(auto-dim-other-buffers-hide-face ((,c :foreground ,bg-inactive :background ,bg-inactive)))
 ;;;; avy
     `(avy-background-face ((,c :background ,bg-dim :foreground ,fg-dim :extend t)))
     `(avy-goto-char-timer-face ((,c :inherit bold :background ,bg-active)))
@@ -1620,12 +1644,14 @@ text should not be underlined as well) yet still blend in."
     `(gnus-summary-low-ticked ((,c :inherit italic :foreground ,err)))
     `(gnus-summary-low-undownloaded ((,c :inherit italic :foreground ,warning)))
     `(gnus-summary-low-unread ((,c :inherit italic)))
-    `(gnus-summary-normal-ancient (( )))
+    `(gnus-summary-normal-ancient ((,c :foreground ,fg-dim)))
     `(gnus-summary-normal-read ((,c :inherit shadow)))
     `(gnus-summary-normal-ticked ((,c :foreground ,err)))
     `(gnus-summary-normal-undownloaded ((,c :foreground ,warning)))
     `(gnus-summary-normal-unread (( )))
     `(gnus-summary-selected ((,c :inherit highlight)))
+;;;; helpful-mode
+    `(helpful-heading ((,c :inherit ef-themes-heading-1)))
 ;;;; hexl-mode
     `(hexl-address-region ((,c :foreground ,constant)))
     `(hexl-ascii-region ((,c :foreground ,variable)))
@@ -1670,6 +1696,30 @@ text should not be underlined as well) yet still blend in."
                   :background "black" :foreground "#faea00" :inverse-video t)))
 ;;;; highlight-indentation mode
     `(highlight-indentation-face ((,c :background ,bg-dim)))
+;;;; howm
+    `(action-lock-face ((,c :inherit button)))
+    `(howm-mode-keyword-face (( )))
+    `(howm-mode-ref-face ((,c :inherit link)))
+    `(howm-mode-title-face ((,c :inherit ef-themes-heading-0)))
+    `(howm-mode-wiki-face ((,c :inherit link)))
+    `(howm-reminder-deadline-face ((,c :foreground ,date-deadline)))
+    `(howm-reminder-late-deadline-face ((,c :inherit bold :foreground ,date-deadline)))
+    `(howm-reminder-defer-face ((,c :foreground ,date-scheduled)))
+    `(howm-reminder-scheduled-face ((,c :foreground ,date-scheduled)))
+    `(howm-reminder-done-face ((,c :foreground ,prose-done)))
+    `(howm-reminder-todo-face ((,c :foreground ,prose-todo)))
+    `(howm-reminder-normal-face ((,c :foreground ,date-common)))
+    `(howm-reminder-today-face ((,c :inherit bold :foreground ,date-common)))
+    `(howm-reminder-tomorrow-face ((,c :inherit bold :foreground ,date-scheduled)))
+    `(howm-simulate-todo-mode-line-face ((,c :inherit bold)))
+    `(howm-view-empty-face (( )))
+    `(howm-view-hilit-face ((,c :inherit match)))
+    `(howm-view-name-face ((,c :inherit bold)))
+    `(iigrep-counts-face1 ((,c :foreground ,rainbow-1)))
+    `(iigrep-counts-face2 ((,c :foreground ,rainbow-2)))
+    `(iigrep-counts-face3 ((,c :foreground ,rainbow-3)))
+    `(iigrep-counts-face4 ((,c :foreground ,rainbow-4)))
+    `(iigrep-counts-face5 ((,c :foreground ,rainbow-5)))
 ;;;; ibuffer
     `(ibuffer-locked-buffer ((,c :foreground ,warning)))
 ;;;; image-dired
@@ -2077,7 +2127,7 @@ text should not be underlined as well) yet still blend in."
     `(org-clock-overlay ((,c :background ,bg-hover-secondary)))
     `(org-code ((,c :inherit ef-themes-fixed-pitch :foreground ,prose-code)))
     `(org-column ((,c :inherit default :background ,bg-alt)))
-    `(org-column-title ((,c :inherit (bold default) :underline t :background ,bg-alt)))
+    `(org-column-title ((,c :inherit (ef-themes-fixed-pitch bold default) :underline t :background ,bg-alt)))
     `(org-date ((,c :inherit ef-themes-fixed-pitch :foreground ,date-common)))
     `(org-date-selected ((,c :foreground ,date-common :inverse-video t)))
     `(org-dispatcher-highlight ((,c :inherit warning :background ,bg-warning)))
@@ -2284,6 +2334,9 @@ text should not be underlined as well) yet still blend in."
     `(smerge-refined-changed (( )))
     `(smerge-refined-removed ((,c :inherit diff-refine-removed)))
     `(smerge-upper ((,c :inherit diff-removed)))
+;;;; spacious-padding
+    `(spacious-padding-subtle-mode-line-active ((,c :foreground ,accent-0)))
+    `(spacious-padding-subtle-mode-line-inactive ((,c :foreground ,border)))
 ;;;; tab-bar-mode
     `(tab-bar ((,c :inherit ef-themes-ui-variable-pitch :background ,bg-tab-bar)))
     `(tab-bar-tab-group-current ((,c :inherit bold :background ,bg-tab-current :box (:line-width -2 :color ,bg-tab-current) :foreground ,fg-alt)))
@@ -2328,6 +2381,14 @@ text should not be underlined as well) yet still blend in."
     `(tldr-description ((,c :inherit font-lock-doc-face)))
     `(tldr-introduction ((,c :inherit font-lock-comment-face)))
     `(tldr-title ((,c :inherit bold)))
+;;;; tmr
+    `(tmr-mode-line-active ((,c :inherit bold :foreground ,modeline-info)))
+    `(tmr-mode-line-soon ((,c :inherit bold :foreground ,modeline-warning)))
+    `(tmr-mode-line-urgent ((,c :inherit bold :foreground ,modeline-err)))
+    `(tmr-tabulated-description ((,c :foreground ,docstring)))
+    `(tmr-tabulated-end-time ((,c :foreground ,date-deadline)))
+    `(tmr-tabulated-remaining-time ((,c :foreground ,date-scheduled)))
+    `(tmr-tabulated-start-time ((,c :foreground ,date-common)))
 ;;;; transient
     `(transient-active-infix ((,c :background ,bg-active :foreground ,fg-intense)))
     `(transient-amaranth ((,c :inherit bold :foreground ,yellow-warmer)))
@@ -2350,7 +2411,9 @@ text should not be underlined as well) yet still blend in."
     `(transient-key ((,c :inherit ef-themes-key-binding)))
     `(transient-key-exit ((,c :inherit ef-themes-key-binding)))
     `(transient-key-noop ((,c :inherit (shadow ef-themes-key-binding))))
+    `(transient-key-recurse ((,c :inherit ef-themes-key-binding)))
     `(transient-key-return ((,c :inherit ef-themes-key-binding)))
+    `(transient-key-stack ((,c :inherit ef-themes-key-binding)))
     `(transient-key-stay ((,c :inherit ef-themes-key-binding)))
     `(transient-mismatched-key ((,c :underline t)))
     `(transient-nonstandard-key ((,c :underline t)))

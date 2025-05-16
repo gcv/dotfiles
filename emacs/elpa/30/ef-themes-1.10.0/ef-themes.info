@@ -1,7 +1,7 @@
-This is docOHznZd.info, produced by makeinfo version 6.8 from
+This is docuHugFb.info, produced by makeinfo version 6.8 from
 ef-themes.texi.
 
-Copyright (C) 2022-2023 Free Software Foundation, Inc.
+Copyright (C) 2022-2025 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -20,12 +20,12 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docOHznZd.info,  Node: Top,  Next: Installation,  Up: (dir)
+File: docuHugFb.info,  Node: Top,  Next: Installation,  Up: (dir)
 
 ef-themes: colorful and legible themes
 **************************************
 
-Copyright (C) 2022-2023 Free Software Foundation, Inc.
+Copyright (C) 2022-2025 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -43,11 +43,11 @@ package called ‘ef-themes’, and provides every other piece of
 information pertinent to it.
 
    The documentation furnished herein corresponds to stable version
-1.9.0, released on 2024-11-16.  Any reference to a newer feature which
+1.10.0, released on 2025-04-29.  Any reference to a newer feature which
 does not yet form part of the latest tagged commit, is explicitly marked
 as such.
 
-   Current development target is 1.10.0-dev.
+   Current development target is 1.11.0-dev.
 
    • Package name (GNU ELPA): ‘ef-themes’
    • Official manual: <https://protesilaos.com/emacs/ef-themes>
@@ -144,7 +144,7 @@ Indices
 
 
 
-File: docOHznZd.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
+File: docuHugFb.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
 
 1 Installation
 **************
@@ -155,7 +155,7 @@ File: docOHznZd.info,  Node: Installation,  Next: Sample configuration,  Prev: T
 * Manual installation::
 
 
-File: docOHznZd.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
+File: docuHugFb.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
 
 1.1 GNU ELPA package
 ====================
@@ -174,7 +174,7 @@ archive.  Read:
 <https://protesilaos.com/codelog/2022-05-13-emacs-elpa-devel/>.
 
 
-File: docOHznZd.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
+File: docuHugFb.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
 
 1.2 Manual installation
 =======================
@@ -201,7 +201,7 @@ following commands in a shell prompt:
    Everything is in place to set up the package.
 
 
-File: docOHznZd.info,  Node: Sample configuration,  Next: Themes for red-green or blue-yellow color deficiency,  Prev: Installation,  Up: Top
+File: docuHugFb.info,  Node: Sample configuration,  Next: Themes for red-green or blue-yellow color deficiency,  Prev: Installation,  Up: Top
 
 2 Sample configuration
 **********************
@@ -254,7 +254,7 @@ File: docOHznZd.info,  Node: Sample configuration,  Next: Themes for red-green o
      ;; - `ef-themes-preview-colors-current'
 
 
-File: docOHznZd.info,  Node: Themes for red-green or blue-yellow color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
+File: docuHugFb.info,  Node: Themes for red-green or blue-yellow color deficiency,  Next: Customization options,  Prev: Sample configuration,  Up: Top
 
 3 Themes for red-green or blue-yellow color deficiency
 ******************************************************
@@ -273,7 +273,7 @@ themes that are optimized for such cases.  The names of the themes are:
    *note Loading a theme::.
 
 
-File: docOHznZd.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green or blue-yellow color deficiency,  Up: Top
+File: docuHugFb.info,  Node: Customization options,  Next: Loading a theme,  Prev: Themes for red-green or blue-yellow color deficiency,  Up: Top
 
 4 Customization options
 ***********************
@@ -298,7 +298,7 @@ Principles.).
 * Stylistic variants using palette overrides::
 
 
-File: docOHznZd.info,  Node: Disable other themes,  Next: Toggle between two Ef themes,  Up: Customization options
+File: docuHugFb.info,  Node: Disable other themes,  Next: Toggle between two Ef themes,  Up: Customization options
 
 4.1 Disable other themes
 ========================
@@ -321,7 +321,7 @@ customizations.  Users who use such customization bundles must set this
 variable to a nil value.
 
 
-File: docOHznZd.info,  Node: Toggle between two Ef themes,  Next: Rotate among a list of Ef themes,  Prev: Disable other themes,  Up: Customization options
+File: docuHugFb.info,  Node: Toggle between two Ef themes,  Next: Rotate among a list of Ef themes,  Prev: Disable other themes,  Up: Customization options
 
 4.2 Toggle between two Ef themes
 ================================
@@ -342,7 +342,7 @@ either with minibuffer completion or at random (*note Commands to load
 an Ef theme::).
 
 
-File: docOHznZd.info,  Node: Rotate among a list of Ef themes,  Next: Enable mixed fonts,  Prev: Toggle between two Ef themes,  Up: Customization options
+File: docuHugFb.info,  Node: Rotate among a list of Ef themes,  Next: Enable mixed fonts,  Prev: Toggle between two Ef themes,  Up: Customization options
 
 4.3 Rotate among a list of Ef themes
 ====================================
@@ -360,7 +360,7 @@ either with minibuffer completion or at random (*note Commands to load
 an Ef theme::).
 
 
-File: docOHznZd.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Rotate among a list of Ef themes,  Up: Customization options
+File: docuHugFb.info,  Node: Enable mixed fonts,  Next: UI typeface,  Prev: Rotate among a list of Ef themes,  Up: Customization options
 
 4.4 Enable mixed fonts
 ======================
@@ -389,7 +389,7 @@ family of the ‘fixed-pitch’ and ‘variable-pitch’ faces.  The ‘fontaine
 package on GNU ELPA (by Protesilaos) can be helpful in this regard.
 
 
-File: docOHznZd.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
+File: docuHugFb.info,  Node: UI typeface,  Next: Option for headings,  Prev: Enable mixed fonts,  Up: Customization options
 
 4.5 UI typeface
 ===============
@@ -413,7 +413,7 @@ family of the ‘fixed-pitch’ and ‘variable-pitch’ faces.  The ‘fontaine
 package on GNU ELPA (by Protesilaos) can be helpful in this regard.
 
 
-File: docOHznZd.info,  Node: Option for headings,  Next: Palette overrides,  Prev: UI typeface,  Up: Customization options
+File: docuHugFb.info,  Node: Option for headings,  Next: Palette overrides,  Prev: UI typeface,  Up: Customization options
 
 4.6 Option for headings
 =======================
@@ -500,7 +500,7 @@ This will retain the original aesthetic for that level.  For example:
              (t . t))) ; default style for all unspecified levels
 
 
-File: docOHznZd.info,  Node: Palette overrides,  Next: Stylistic variants using palette overrides,  Prev: Option for headings,  Up: Customization options
+File: docuHugFb.info,  Node: Palette overrides,  Next: Stylistic variants using palette overrides,  Prev: Option for headings,  Up: Customization options
 
 4.7 Palette overrides
 =====================
@@ -681,7 +681,7 @@ top of the buffer.  In the above example, the first instance of
 ‘blue-warmer’ is the override and the second is the original one.
 
 
-File: docOHznZd.info,  Node: Stylistic variants using palette overrides,  Prev: Palette overrides,  Up: Customization options
+File: docuHugFb.info,  Node: Stylistic variants using palette overrides,  Prev: Palette overrides,  Up: Customization options
 
 4.8 Stylistic variants using palette overrides
 ==============================================
@@ -697,7 +697,7 @@ the call that loads the theme.
 * Make the region more intense::
 
 
-File: docOHznZd.info,  Node: Make the region more intense,  Up: Stylistic variants using palette overrides
+File: docuHugFb.info,  Node: Make the region more intense,  Up: Stylistic variants using palette overrides
 
 4.8.1 Make the region more intense
 ----------------------------------
@@ -735,7 +735,7 @@ intense.
              (fg-region fg-main)))
 
 
-File: docOHznZd.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
+File: docuHugFb.info,  Node: Loading a theme,  Next: Commands to load an Ef theme,  Prev: Customization options,  Up: Top
 
 5 Loading a theme
 *****************
@@ -767,7 +767,7 @@ theme::).  For example:
      (ef-themes-select 'ef-summer)
 
 
-File: docOHznZd.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
+File: docuHugFb.info,  Node: Commands to load an Ef theme,  Next: Preview theme colors,  Prev: Loading a theme,  Up: Top
 
 6 Commands to load an Ef theme
 ******************************
@@ -844,7 +844,7 @@ a light/dark theme and then loads an appropriate Ef theme at random:
        (ef-themes-load-random 'light))
 
 
-File: docOHznZd.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
+File: docuHugFb.info,  Node: Preview theme colors,  Next: Use colors from the active Ef theme,  Prev: Commands to load an Ef theme,  Up: Top
 
 7 Preview theme colors
 **********************
@@ -878,7 +878,7 @@ contents are, such as ‘*ef-summer-list-colors*’ for named colors and
 ‘*ef-summer-list-mappings*’ for the semantic color mappings.
 
 
-File: docOHznZd.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
+File: docuHugFb.info,  Node: Use colors from the active Ef theme,  Next: Do-It-Yourself customizations,  Prev: Preview theme colors,  Up: Top
 
 8 Use colors from the active Ef theme
 *************************************
@@ -907,7 +907,7 @@ color mapping are still possible.  At any rate, we will not outright
 break any code that uses ‘ef-themes-with-colors’.
 
 
-File: docOHznZd.info,  Node: Do-It-Yourself customizations,  Next: Faces defined by the Ef themes,  Prev: Use colors from the active Ef theme,  Up: Top
+File: docuHugFb.info,  Node: Do-It-Yourself customizations,  Next: Faces defined by the Ef themes,  Prev: Use colors from the active Ef theme,  Up: Top
 
 9 Do-It-Yourself customizations
 *******************************
@@ -928,7 +928,7 @@ their liking.
 * Tweak goto-address-mode faces::
 
 
-File: docOHznZd.info,  Node: Get a single color from the palette,  Next: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: Get a single color from the palette,  Next: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
 9.1 Get a single color from the palette
 =======================================
@@ -982,7 +982,7 @@ with/without overrides and when recursive mappings are introduced.
      ;; => "#d3303a"
 
 
-File: docOHznZd.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Prev: Get a single color from the palette,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: The general approach to advanced DIY changes,  Next: A theme-agnostic hook for theme loading,  Prev: Get a single color from the palette,  Up: Do-It-Yourself customizations
 
 9.2 The general approach to advanced DIY changes
 ================================================
@@ -1069,7 +1069,7 @@ mechanism.  We are willing to help and shall provide comprehensive
 documentation where necessary.
 
 
-File: docOHznZd.info,  Node: A theme-agnostic hook for theme loading,  Next: Do not extend the region background,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: A theme-agnostic hook for theme loading,  Next: Do not extend the region background,  Prev: The general approach to advanced DIY changes,  Up: Do-It-Yourself customizations
 
 9.3 A theme-agnostic hook for theme loading
 ===========================================
@@ -1120,7 +1120,7 @@ the user can replace it with ‘after-enable-theme-hook’ should they need
 to (provided they understand the implications).
 
 
-File: docOHznZd.info,  Node: Do not extend the region background,  Next: Add support for hl-todo,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: Do not extend the region background,  Next: Add support for hl-todo,  Prev: A theme-agnostic hook for theme loading,  Up: Do-It-Yourself customizations
 
 9.4 Do not extend the region background
 =======================================
@@ -1137,7 +1137,7 @@ to the Emacs configuration file will suffice:
    *note Make the region more intense::.
 
 
-File: docOHznZd.info,  Node: Add support for hl-todo,  Next: Make the mode line like the modus-themes default,  Prev: Do not extend the region background,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: Add support for hl-todo,  Next: Make the mode line like the modus-themes default,  Prev: Do not extend the region background,  Up: Do-It-Yourself customizations
 
 9.5 Add support for hl-todo
 ===========================
@@ -1181,7 +1181,7 @@ method.
 commands for previewing the palette (*note Preview theme colors::).
 
 
-File: docOHznZd.info,  Node: Make the mode line like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: Make the mode line like the modus-themes default,  Next: Configure bold and italic faces,  Prev: Add support for hl-todo,  Up: Do-It-Yourself customizations
 
 9.6 Make the mode line like the ‘modus-themes’ default
 ======================================================
@@ -1215,7 +1215,7 @@ snippet:
      `(mode-line ((,c :background ,bg-mode-line :foreground ,fg-mode-line :box (:line-width 1 :color ,fg-dim))))
 
 
-File: docOHznZd.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the mode line like the modus-themes default,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: Configure bold and italic faces,  Next: Tweak org-modern timestamps,  Prev: Make the mode line like the modus-themes default,  Up: Do-It-Yourself customizations
 
 9.7 Configure bold and italic faces
 ===================================
@@ -1267,7 +1267,7 @@ pick fonts that work in tandem):
 provides the means to configure font families via faces.
 
 
-File: docOHznZd.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: Tweak org-modern timestamps,  Next: Tweak goto-address-mode faces,  Prev: Configure bold and italic faces,  Up: Do-It-Yourself customizations
 
 9.8 Tweak ‘org-modern’ timestamps
 =================================
@@ -1297,7 +1297,7 @@ further trouble (*note Enable mixed fonts::).
    For any further issues, you are welcome to ask for help.
 
 
-File: docOHznZd.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
+File: docuHugFb.info,  Node: Tweak goto-address-mode faces,  Prev: Tweak org-modern timestamps,  Up: Do-It-Yourself customizations
 
 9.9 Tweak goto-address-mode faces
 =================================
@@ -1322,7 +1322,7 @@ addresses stand out more, due to the use of the uncommon ‘@’ caharacter
 but also because they are often enclosed in angled brackets).
 
 
-File: docOHznZd.info,  Node: Faces defined by the Ef themes,  Next: Supported packages or face groups,  Prev: Do-It-Yourself customizations,  Up: Top
+File: docuHugFb.info,  Node: Faces defined by the Ef themes,  Next: Supported packages or face groups,  Prev: Do-It-Yourself customizations,  Up: Top
 
 10 Faces defined by the Ef themes
 *********************************
@@ -1357,7 +1357,7 @@ packages, like Dired, Trashed, Ibuffer.
    • ‘ef-themes-underline-warning’
 
 
-File: docOHznZd.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Faces defined by the Ef themes,  Up: Top
+File: docuHugFb.info,  Node: Supported packages or face groups,  Next: Principles,  Prev: Faces defined by the Ef themes,  Up: Top
 
 11 Supported packages or face groups
 ************************************
@@ -1374,7 +1374,7 @@ already covers everything most users need.
 * Packages that are hard to support::
 
 
-File: docOHznZd.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docuHugFb.info,  Node: Explicitly supported packages or face groups,  Next: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.1 Explicitly supported packages or face groups
 =================================================
@@ -1437,9 +1437,11 @@ File: docOHznZd.info,  Node: Explicitly supported packages or face groups,  Next
    • git-gutter-fr
    • git-rebase
    • gnus
+   • helpful
    • hexl-mode
    • hi-lock (‘M-x highlight-regexp’)
    • highlight-indentation
+   • howm
    • ibuffer
    • image-dired
    • imenu-list
@@ -1490,12 +1492,14 @@ File: docOHznZd.info,  Node: Explicitly supported packages or face groups,  Next
    • show-paren-mode
    • shr
    • smerge
+   • spacious-padding
    • tab-bar-mode
    • tab-line-mode
    • tempel
    • term
    • textsec
    • tldr
+   • tmr
    • transient
    • trashed
    • tree-sitter
@@ -1516,7 +1520,7 @@ File: docOHznZd.info,  Node: Explicitly supported packages or face groups,  Next
    • ztree
 
 
-File: docOHznZd.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docuHugFb.info,  Node: Implicitly supported packages or face groups,  Next: Packages that are hard to support,  Prev: Explicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.2 Implicitly supported packages or face groups
 =================================================
@@ -1541,7 +1545,7 @@ in perfectly.  If there are refinements we need to made, then we need to
 intervene (*note Explicitly supported packages or face groups::).
 
 
-File: docOHznZd.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
+File: docuHugFb.info,  Node: Packages that are hard to support,  Prev: Implicitly supported packages or face groups,  Up: Supported packages or face groups
 
 11.3 Packages that are hard to support
 ======================================
@@ -1609,7 +1613,7 @@ web-mode
    The above list is non-exhaustive though you get the idea.
 
 
-File: docOHznZd.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
+File: docuHugFb.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages or face groups,  Up: Top
 
 12 Principles
 *************
@@ -1653,7 +1657,7 @@ File: docOHznZd.info,  Node: Principles,  Next: FAQ,  Prev: Supported packages o
 * Minimal VS maximal scope::
 
 
-File: docOHznZd.info,  Node: Minimal VS maximal scope,  Up: Principles
+File: docuHugFb.info,  Node: Minimal VS maximal scope,  Up: Principles
 
 12.1 Minimal VS maximal scope
 =============================
@@ -1672,7 +1676,7 @@ necessity.  The ‘modus-themes’ are such because:
 have such a lofty accessibility target.
 
 
-File: docOHznZd.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
+File: docuHugFb.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  Up: Top
 
 13 FAQ
 ******
@@ -1688,7 +1692,7 @@ File: docOHznZd.info,  Node: FAQ,  Next: Acknowledgements,  Prev: Principles,  U
 * Add something like Nord or Zenburn?::
 
 
-File: docOHznZd.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
+File: docuHugFb.info,  Node: What does Ef mean?,  Next: Will you stop using the modus-themes?,  Up: FAQ
 
 13.1 What does Ef mean?
 =======================
@@ -1698,7 +1702,7 @@ good, nice, and/or easy.  For example, eftopia (ευτοπία) is the opposite
 of dystopia (δυστοπία): a good place as opposed to a bad place.
 
 
-File: docOHznZd.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
+File: docuHugFb.info,  Node: Will you stop using the modus-themes?,  Next: Then why develop the ef-themes?,  Prev: What does Ef mean?,  Up: FAQ
 
 13.2 Will you stop using the modus-themes?
 ==========================================
@@ -1707,7 +1711,7 @@ No.  For my workflow, accessibility is the most important quality.  The
 ‘modus-themes’ will remain my default choice.
 
 
-File: docOHznZd.info,  Node: Then why develop the ef-themes?,  Next: Difference between ef-themes and modus-themes?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
+File: docuHugFb.info,  Node: Then why develop the ef-themes?,  Next: Difference between ef-themes and modus-themes?,  Prev: Will you stop using the modus-themes?,  Up: FAQ
 
 13.3 Then why develop the ef-themes?
 ====================================
@@ -1720,7 +1724,7 @@ considerations for legibility, and (ii) are not designed on a whimsy.
 fine with a bit more relaxed accessibility target.
 
 
-File: docOHznZd.info,  Node: Difference between ef-themes and modus-themes?,  Next: Too many options what should I do?,  Prev: Then why develop the ef-themes?,  Up: FAQ
+File: docuHugFb.info,  Node: Difference between ef-themes and modus-themes?,  Next: Too many options what should I do?,  Prev: Then why develop the ef-themes?,  Up: FAQ
 
 13.4 Difference between ef-themes and modus-themes?
 ===================================================
@@ -1784,7 +1788,7 @@ pay attention.  In short: I am not picking random colors and
 implementing them on a whimsy.  Theme development is not easy.
 
 
-File: docOHznZd.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Difference between ef-themes and modus-themes?,  Up: FAQ
+File: docuHugFb.info,  Node: Too many options what should I do?,  Next: Let Org tags inherit the heading color?,  Prev: Difference between ef-themes and modus-themes?,  Up: FAQ
 
 13.5 Too many options, what should I do?
 ========================================
@@ -1797,7 +1801,7 @@ tweaks to toggle between those two and don’t worry anymore about the
 abundance of choice (*note Toggle between two Ef themes::).  Good luck!
 
 
-File: docOHznZd.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
+File: docuHugFb.info,  Node: Let Org tags inherit the heading color?,  Next: Add something like Nord or Zenburn?,  Prev: Too many options what should I do?,  Up: FAQ
 
 13.6 Let Org tags inherit the heading color?
 ============================================
@@ -1830,7 +1834,7 @@ Realigning tags by inserting spaces also creates noise in
 version-controlled files, which is undesirable.
 
 
-File: docOHznZd.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
+File: docuHugFb.info,  Node: Add something like Nord or Zenburn?,  Prev: Let Org tags inherit the heading color?,  Up: FAQ
 
 13.7 Add something like Nord or Zenburn?
 ========================================
@@ -1859,7 +1863,7 @@ compromises and sub-optimal choices, which make no sense for a project
 with opinionanted design principles.
 
 
-File: docOHznZd.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
+File: docuHugFb.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: FAQ,  Up: Top
 
 14 Acknowledgements
 *******************
@@ -1871,9 +1875,9 @@ Author/maintainer
      Protesilaos Stavrou.
 
 Contributions to code or the manual
-     Alex Lu, Christopher League, Eshel Yaron, Gautier Ponsinet, Oleksii
-     (Alex) Koval, Pedro Cunha, Philip Kaludercic, Ryan Kaskel,
-     Walheimat.
+     Alex Lu, Christopher League, Eshel Yaron, Gautier Ponsinet, John
+     Haman, Kevin Fleming, Oleksii (Alex) Koval, Leilei332, Pedro Cunha,
+     Philip Kaludercic, Ryan Kaskel, Walheimat.
 
 Ideas and/or user feedback
      Adam Porter (alphapapa), Alan Schmitt, Amo DelBello, Anthony
@@ -1884,7 +1888,7 @@ Ideas and/or user feedback
      goldfita, marasenna, newhallroad.
 
 
-File: docOHznZd.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
+File: docuHugFb.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
 
 15 GNU Free Documentation License
 *********************************
@@ -2366,7 +2370,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docOHznZd.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
+File: docuHugFb.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
 
 16 Indices
 **********
@@ -2378,7 +2382,7 @@ File: docOHznZd.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up
 * Concept index::
 
 
-File: docOHznZd.info,  Node: Function index,  Next: Variable index,  Up: Indices
+File: docuHugFb.info,  Node: Function index,  Next: Variable index,  Up: Indices
 
 16.1 Function index
 ===================
@@ -2408,7 +2412,7 @@ File: docOHznZd.info,  Node: Function index,  Next: Variable index,  Up: Indices
                                                                (line  6)
 
 
-File: docOHznZd.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
+File: docuHugFb.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
 
 16.2 Variable index
 ===================
@@ -2463,7 +2467,7 @@ File: docOHznZd.info,  Node: Variable index,  Next: Concept index,  Prev: Functi
 * ef-winter-palette-overrides:           Palette overrides.    (line 90)
 
 
-File: docOHznZd.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
+File: docuHugFb.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 16.3 Concept index
 ==================
@@ -2482,56 +2486,56 @@ File: docOHznZd.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 Tag Table:
 Node: Top840
-Node: Installation4579
-Node: GNU ELPA package4761
-Node: Manual installation5325
-Node: Sample configuration6106
-Node: Themes for red-green or blue-yellow color deficiency8101
-Node: Customization options8965
-Node: Disable other themes9742
-Node: Toggle between two Ef themes10676
-Node: Rotate among a list of Ef themes11583
-Node: Enable mixed fonts12356
-Node: UI typeface13736
-Node: Option for headings14672
-Node: Palette overrides18348
-Node: Stylistic variants using palette overrides24049
-Node: Make the region more intense24628
-Node: Loading a theme26107
-Node: Commands to load an Ef theme27303
-Node: Preview theme colors30775
-Node: Use colors from the active Ef theme32285
-Node: Do-It-Yourself customizations33496
-Node: Get a single color from the palette34168
-Node: The general approach to advanced DIY changes36195
-Node: A theme-agnostic hook for theme loading40264
-Node: Do not extend the region background42810
-Node: Add support for hl-todo43515
-Node: Make the mode line like the modus-themes default45428
-Node: Configure bold and italic faces46998
-Node: Tweak org-modern timestamps49425
-Node: Tweak goto-address-mode faces50812
-Node: Faces defined by the Ef themes51913
-Node: Supported packages or face groups53183
-Node: Explicitly supported packages or face groups53789
-Node: Implicitly supported packages or face groups56631
-Node: Packages that are hard to support57484
-Node: Principles59621
-Node: Minimal VS maximal scope61631
-Node: FAQ62390
-Node: What does Ef mean?62816
-Node: Will you stop using the modus-themes?63204
-Node: Then why develop the ef-themes?63561
-Node: Difference between ef-themes and modus-themes?64150
-Node: Too many options what should I do?67666
-Node: Let Org tags inherit the heading color?68366
-Node: Add something like Nord or Zenburn?70189
-Node: Acknowledgements71483
-Node: GNU Free Documentation License72366
-Node: Indices97711
-Node: Function index97889
-Node: Variable index99498
-Node: Concept index102950
+Node: Installation4580
+Node: GNU ELPA package4762
+Node: Manual installation5326
+Node: Sample configuration6107
+Node: Themes for red-green or blue-yellow color deficiency8102
+Node: Customization options8966
+Node: Disable other themes9743
+Node: Toggle between two Ef themes10677
+Node: Rotate among a list of Ef themes11584
+Node: Enable mixed fonts12357
+Node: UI typeface13737
+Node: Option for headings14673
+Node: Palette overrides18349
+Node: Stylistic variants using palette overrides24050
+Node: Make the region more intense24629
+Node: Loading a theme26108
+Node: Commands to load an Ef theme27304
+Node: Preview theme colors30776
+Node: Use colors from the active Ef theme32286
+Node: Do-It-Yourself customizations33497
+Node: Get a single color from the palette34169
+Node: The general approach to advanced DIY changes36196
+Node: A theme-agnostic hook for theme loading40265
+Node: Do not extend the region background42811
+Node: Add support for hl-todo43516
+Node: Make the mode line like the modus-themes default45429
+Node: Configure bold and italic faces46999
+Node: Tweak org-modern timestamps49426
+Node: Tweak goto-address-mode faces50813
+Node: Faces defined by the Ef themes51914
+Node: Supported packages or face groups53184
+Node: Explicitly supported packages or face groups53790
+Node: Implicitly supported packages or face groups56694
+Node: Packages that are hard to support57547
+Node: Principles59684
+Node: Minimal VS maximal scope61694
+Node: FAQ62453
+Node: What does Ef mean?62879
+Node: Will you stop using the modus-themes?63267
+Node: Then why develop the ef-themes?63624
+Node: Difference between ef-themes and modus-themes?64213
+Node: Too many options what should I do?67729
+Node: Let Org tags inherit the heading color?68429
+Node: Add something like Nord or Zenburn?70252
+Node: Acknowledgements71546
+Node: GNU Free Documentation License72467
+Node: Indices97812
+Node: Function index97990
+Node: Variable index99599
+Node: Concept index103051
 
 End Tag Table
 
