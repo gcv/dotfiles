@@ -207,7 +207,7 @@
 (setopt use-package-enable-imenu-support t)
 (setopt use-package-always-ensure t)
 (setopt use-package-always-defer t)
-(setopt use-package-always-pin "melpa-stable")
+(setq use-package-always-pin "melpa-stable") ; XXX: should be setopt but it's incorrectly typed as symbol
 ;;(setq use-package-verbose t)
 
 (defmacro use-feature (name &rest args)
