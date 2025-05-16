@@ -165,8 +165,7 @@ RANGE can be `buffer', `session', `all'."
             (message "Task FAILED with exit code %s" (process-exit-status proc))
             (pop-to-buffer (current-buffer)))))
       (when (eq buffer (current-buffer))
-        (with-current-buffer buffer
-          (revert-buffer) (dirvish--update-display))))))
+        (with-current-buffer buffer (revert-buffer) (dirvish--redisplay))))))
 
 (defun dirvish-yank-proc-filter (proc string)
   "Filter for yank task PROC's STRING."
@@ -251,13 +250,13 @@ is t."
    for help-form = (format-message "\
 File `%s' exists, type one of the following keys to continue.
 
-- `y' or SPC to overwrite this file WITHOUT backup
-- `!' answer `y' (overwrite) for all remaining files
-- `n' or DEL to skip this file
-- `N' answer `n' (skip) for all remaining files
-- `b' to overwrite and backup this files
-- `B' answer `b' (overwrite and backup) for all remaining files
-- `q' or ESC to abort the task" src)
+- y or SPC to overwrite this file WITHOUT backup
+- ! answer y for all remaining files
+- n or DEL to skip this file
+- N answer n for all remaining files
+- b to overwrite and backup this files
+- B answer b for all remaining files
+- q or ESC to abort the task" src)
    for base = (file-name-nondirectory src)
    for collision = (member base dfiles) do
    (cond ((equal src (concat dest base))

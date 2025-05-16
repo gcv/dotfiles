@@ -12,7 +12,7 @@
 ;; dispatchers (fast and non-blocking media files preview) for dirvish.
 ;;
 ;; Attributes:
-;; `file-size', `file-time'
+;; `file-size', `file-time', `file-modes'
 ;;
 ;; Mode-line segments:
 ;;
@@ -30,10 +30,9 @@
 ;; - `audio':       preview audio files with metadata, requires `mediainfo'
 ;; - `epub':        preview epub documents, requires `epub-thumbnail'
 ;; - `font':        preview font files, requires `magick'
-;; - `pdf':         preview pdf documents via `pdf-tools'
+;; - `pdf':         preview pdf documents with thumbnail image, require `pdftoppm'
+;; - `pdf-tools':   preview pdf documents via `pdf-tools'
 ;; - `archive':     preview archive files, requires `tar' and `unzip'
-;; - `dired':       preview directories using `dired' (asynchronously)
-;; - `pdf-preface': preview pdf documents with thumbnail image, require `pdftoppm'
 ;; - `image-dired'  NOT implemented yet | TODO
 
 ;;; Code:
@@ -44,6 +43,10 @@
   "FORMAT-STRING for `file-time' mode line segment.
 This value is passed to function `format-time-string'."
   :group 'dirvish :type 'string)
+
+(defcustom dirvish-file-count-overflow 15000
+  "Up limit for counting directory files, to improve performance."
+  :group 'dirvish :type 'natnum)
 
 (defcustom dirvish-path-separators '("  ⌂" "  ∀" " ⋗ ")
   "Separators in path mode line segment.
@@ -149,18 +152,20 @@ Audio;(Audio-codec . \"\"%CodecID%\"\")(Audio-bitrate . \"\"%BitRate/String%\"\"
   :group 'dirvish)
 
 (defface dirvish-file-time
-  '((t (:inherit shadow :underline nil :italic nil)))
-  "Face used for file access/modify/change time mode-line segment."
+  '((((background dark)) (:foreground "#5699AF")) ; a light cyan
+    (t                   (:foreground "#979797")))
+  "Face used for `file-time' attribute and mode line segment."
   :group 'dirvish)
 
 (defface dirvish-file-size
   '((t (:inherit completions-annotations :underline nil :italic nil)))
-  "Face used for display file size attributes / mode-line segment."
+  "Face used for `file-size' attribute and mode-line segment."
   :group 'dirvish)
 
 (defface dirvish-file-modes
-  '((t (:inherit font-lock-builtin-face)))
-  "Face used for file mode (privilege) mode-line segment."
+  '((((background dark)) (:foreground "#a9a1e1")) ; magenta
+    (t                   (:foreground "#6b6b6b")))
+  "Face used for `file-modes' attribute and mode line segment."
   :group 'dirvish)
 
 (defface dirvish-file-inode-number
@@ -185,57 +190,61 @@ Audio;(Audio-codec . \"\"%CodecID%\"\")(Audio-bitrate . \"\"%BitRate/String%\"\"
 
 ;;;; Helpers
 
-(defun dirvish--attr-size-human-readable (file-size)
-  "Produce a string showing FILE-SIZE in human-readable form."
-  (let ((power 1024.0)
-        (prefixes '("" "k" "M" "G" "T" "P" "E" "Z" "Y")))
-    (while (and (>= file-size power) (cdr prefixes))
-      (setq file-size (/ file-size power)
-            prefixes (cdr prefixes)))
-    (substring (format (if (and (< file-size 10)
-                                (>= (mod file-size 1.0) 0.05)
-                                (< (mod file-size 1.0) 0.95))
-                           "      %.1f%s%s"
-                         "      %.0f%s%s")
-                       file-size (car prefixes)
-                       (if (dirvish-prop :gui) " " ""))
-               -6)))
+(defun dirvish--attr-size-human-readable (file-size kilo)
+  "Produce a string showing FILE-SIZE in human-readable form.
+KILO is 1024.0 / 1000 for file size / counts respectively."
+  (if (and (eq kilo 1000) (> file-size (- dirvish-file-count-overflow 3)))
+      " MANY "
+    (let ((prefixes '("" "k" "M" "G" "T" "P" "E" "Z" "Y")))
+      (while (and (>= file-size kilo) (cdr prefixes))
+        (setq file-size (/ file-size kilo)
+              prefixes (cdr prefixes)))
+      (substring (format (if (and (< file-size 10)
+                                  (>= (mod file-size 1.0) 0.05)
+                                  (< (mod file-size 1.0) 0.95))
+                             "      %.1f%s%s"
+                           "      %.0f%s%s")
+                         file-size (car prefixes)
+                         (if (dirvish-prop :gui) " " ""))
+                 -6))))
 
 (defun dirvish--file-attr-size (name attrs)
   "Get file size of file NAME from ATTRS."
-  (cond ((dirvish-prop :remote)
+  (cond ((and (dirvish-prop :remote) (not (dirvish-prop :sudo)))
          (substring (format "      %s%s"
                             (or (file-attribute-size attrs) "?")
                             (if (dirvish-prop :gui) " " ""))
                     -6))
         ((stringp (file-attribute-type attrs))
-         (let ((ct (dirvish-attribute-cache name :f-count
-                     (condition-case nil
-                         (let ((files (directory-files name nil nil t)))
-                           (dirvish--attr-size-human-readable
-                            (- (length files) 2)))
-                       (file-error 'file)))))
+         (let* ((ovfl dirvish-file-count-overflow)
+                (ct (dirvish-attribute-cache name :f-count
+                      (condition-case nil
+                          (let ((files (directory-files name nil nil t ovfl)))
+                            (dirvish--attr-size-human-readable
+                             (- (length files) 2) 1000))
+                        (file-error 'file)))))
            (if (not (eq ct 'file)) ct
              (dirvish-attribute-cache name :f-size
                (dirvish--attr-size-human-readable
-                 (file-attribute-size (file-attributes name)))))))
+                (file-attribute-size (file-attributes name)) 1024.0)))))
         ((file-attribute-type attrs)
-         (let ((ct (dirvish-attribute-cache name :f-count
+         (let* ((ovfl dirvish-file-count-overflow)
+                (ct (dirvish-attribute-cache name :f-count
                      (condition-case nil
-                         (let ((files (directory-files name nil nil t)))
+                         (let ((files (directory-files name nil nil t ovfl)))
                            (dirvish--attr-size-human-readable
-                            (- (length files) 2)))
+                            (- (length files) 2) 1000))
                        (file-error 'no-permission)))))
            (if (eq ct 'no-permission) " ---- " ct)))
         (t (dirvish-attribute-cache name :f-size
              (dirvish--attr-size-human-readable
-              (or (file-attribute-size attrs) 0))))))
+              (or (file-attribute-size attrs) 0) 1024.0)))))
 
 (defun dirvish--file-attr-time (name attrs)
   "File NAME's modified time from ATTRS."
-  (if (dirvish-prop :remote)
-      (format "  %s " (or (file-attribute-modification-time attrs) "?"))
-    (format "  %s " (dirvish-attribute-cache name :f-time
+  (if (and (dirvish-prop :remote) (not (dirvish-prop :sudo)))
+      (format " %s " (or (file-attribute-modification-time attrs) "?"))
+    (format " %s " (dirvish-attribute-cache name :f-time
                       (format-time-string
                        dirvish-time-format-string
                        (file-attribute-modification-time attrs))))))
@@ -267,7 +276,7 @@ EXT is a suffix such as \".jpg\" that is attached to FILE's md5 hash."
   (when-let* ((dv (dirvish-curr))
               (path (dirvish-prop :index)))
     (and (equal path (process-get proc 'path))
-         (dirvish-debounce nil (dirvish--preview-update dv path)))))
+         (dirvish--preview-update dv path))))
 
 (defun dirvish-media--group-heading (group-titles)
   "Format media group heading in Dirvish preview buffer.
@@ -315,20 +324,39 @@ GROUP-TITLES is a list of group titles."
 ;;;; Attributes
 
 (dirvish-define-attribute file-size
-  "File size or directories file count at right fringe."
-  :index 1
-  :when (and dired-hide-details-mode (> win-width 25))
+  "File size or directories file count."
+  :right 6
+  :when (and dired-hide-details-mode (>= win-width 20))
   (let* ((str (concat (dirvish--file-attr-size f-name f-attrs)))
          (face (or hl-face 'dirvish-file-size)))
     (add-face-text-property 0 (length str) face t str)
     `(right . ,str)))
 
 (dirvish-define-attribute file-time
-  "File's modified time at right fringe before the file size."
-  :when (and dired-hide-details-mode (> win-width 60))
-  (let* ((str (concat (dirvish--file-attr-time f-name f-attrs)))
-         (face (or hl-face 'dirvish-file-time)))
-    (add-face-text-property 0 (length str) face t str)
+  "File's modified time reported by `file-attribute-modification-time'."
+  :right (+ 2 (string-width
+                     (format-time-string
+                      dirvish-time-format-string (current-time))))
+  :when (and dired-hide-details-mode (>= win-width 25))
+  (let* ((raw (dirvish--file-attr-time f-name f-attrs))
+         (face (or hl-face 'dirvish-file-time)) str str-len)
+    (cond ((or (not raw) (< w-width 40)) (setq str (propertize " …  ")))
+          (t (setq str (format " %s " raw))))
+    (add-face-text-property 0 (setq str-len (length str)) face t str)
+    (add-text-properties 0 str-len `(help-echo ,raw) str)
+    `(right . ,str)))
+
+(dirvish-define-attribute file-modes
+  "File's modes reported by `file-attribute-modes'."
+  :right 12
+  :when (and dired-hide-details-mode (>= win-width 30))
+  (let* ((raw (file-attribute-modes
+               (dirvish-attribute-cache f-name :builtin)))
+         (face (or hl-face 'dirvish-file-modes)) str str-len)
+    (cond ((or (not raw) (< w-width 48)) (setq str (propertize " …  ")))
+          (t (setq str (format " %s " raw))))
+    (add-face-text-property 0 (setq str-len (length str)) face t str)
+    (add-text-properties 0 str-len `(help-echo ,raw) str)
     `(right . ,str)))
 
 ;;;; Mode line segments
@@ -405,14 +433,19 @@ GROUP-TITLES is a list of group titles."
             (propertize truename 'face 'dired-symlink))))
 
 (dirvish-define-mode-line index
-  "Current file's index and total files count."
-  (let ((cur-pos (format "%3d " (- (line-number-at-pos (point)) 1)))
-        (fin-pos (format "/%3d " (- (line-number-at-pos (point-max)) 2))))
+  "Cursor file's index and total files count within current subdir."
+  (let* ((count (if (cdr dired-subdir-alist)
+                    (format "[ %s subdirs ] " (length dired-subdir-alist)) ""))
+         (smin (line-number-at-pos (dired-subdir-min)))
+         (cpos (- (line-number-at-pos (point)) smin))
+         (fpos (- (line-number-at-pos (dired-subdir-max)) smin 1))
+         (cur (format "%3d " cpos)) (end (format "/%3d " fpos)))
     (if (dirvish--selected-p)
-        (put-text-property 0 (length fin-pos) 'face 'bold fin-pos)
-      (put-text-property 0 (length cur-pos) 'face 'dirvish-inactive cur-pos)
-      (put-text-property 0 (length fin-pos) 'face 'dirvish-inactive fin-pos))
-    (format "%s%s" cur-pos fin-pos)))
+        (put-text-property 0 (length end) 'face 'bold end)
+      (put-text-property 0 (length count) 'face 'dirvish-inactive count)
+      (put-text-property 0 (length cur) 'face 'dirvish-inactive cur)
+      (put-text-property 0 (length end) 'face 'dirvish-inactive end))
+    (format "%s%s%s" cur end count)))
 
 (dirvish-define-mode-line free-space
   "Amount of free space on `default-directory''s file system."
@@ -443,7 +476,7 @@ GROUP-TITLES is a list of group titles."
   "Last modification time of file."
   (pcase-let ((`(,time . ,face)
                (dirvish--format-file-attr 'modification-time 'time)))
-    (unless (dirvish-prop :remote)
+    (unless (and (dirvish-prop :remote) (not (dirvish-prop :sudo)))
       (setq time (format-time-string dirvish-time-format-string time)))
     (propertize (format "%s" time) 'face face)))
 
@@ -471,7 +504,7 @@ GROUP-TITLES is a list of group titles."
 
 (dirvish-define-mode-line project
   "Return a string showing current project."
-  (let ((project (dirvish--get-project-root))
+  (let ((project (dirvish--vc-root-dir))
         (face (if (dirvish--selected-p) 'dired-header 'dirvish-inactive)))
     (if project
         (setq project (file-name-base (directory-file-name project)))
@@ -565,9 +598,7 @@ GROUP-TITLES is a list of group titles."
                    (type (cond ((member ext dirvish-image-exts) 'image)
                                ((member ext dirvish-video-exts) 'video)
                                ((member ext dirvish-font-exts) 'font)
-                               ((and (memq 'pdf-preface
-                                           dirvish-preview-dispatchers)
-                                     (equal ext "pdf") 'pdf))
+                               ((equal ext "pdf") 'pdf)
                                (t (user-error "Not a media file")))))
               ;; ensure the content is higher than the window height to avoid
               ;; unexpected auto scrolling
@@ -689,7 +720,7 @@ Require: `epub-thumbnailer' (executable)"
           `(img . ,(create-image cache nil nil :max-width width :max-height height))
         `(cache . (,dirvish-epub-thumbnailer-program ,file ,cache ,(number-to-string width)))))))
 
-(dirvish-define-preview pdf (file ext)
+(dirvish-define-preview pdf-tools (file ext)
   "Preview pdf files.
 Require: `pdf-tools' (Emacs package)"
   (when (equal ext "pdf")
@@ -699,8 +730,8 @@ Require: `pdf-tools' (Emacs package)"
         (dirvish--find-file-temporarily file)
       '(info . "`epdfinfo' program required to preview pdfs; run `M-x pdf-tools-install'"))))
 
-(dirvish-define-preview pdf-preface (file ext preview-window)
-  "Display the preface image as preview for pdf files."
+(dirvish-define-preview pdf (file ext preview-window)
+  "Display thumbnail for pdf files."
   :require (dirvish-pdftoppm-program)
   (when (equal ext "pdf")
     (let* ((width (dirvish-media--img-size preview-window))

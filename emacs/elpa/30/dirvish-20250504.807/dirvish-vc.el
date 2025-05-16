@@ -20,10 +20,6 @@
 (defclass dirvish-vc-preview (transient-switches) ()
   "Class for dirvish vc-* preview dispatchers.")
 
-(defcustom dirvish-vc-state-fringe 2
-  "The width of the fringe used to display the vc state indicator."
-  :group 'dirvish :type 'integer)
-
 (defcustom dirvish-vc-state-face-alist
   '((up-to-date       . nil)
     (edited           . dirvish-vc-edited-state)
@@ -42,6 +38,9 @@ face used for that VC-STATE.  See `vc-state' in (in vc-hooks.el) for
 detail explanation of these states."
   :group 'dirvish
   :type '(alist :key-type symbol :value-type (symbol :tag "Face")))
+
+(defvar dirvish-vc--always-ignored "/node_modules"
+  "Always ignore folders matches this regex, as they may choke Emacs.")
 
 (defface dirvish-vc-needs-merge-face
   '((((background dark)) (:background "#500f29"))
@@ -113,7 +112,8 @@ It is called when `:vc-backend' is included in DIRVISH-PROPs while
        (advice-add #'vc-git--git-status-to-vc-state :around
                    (lambda (fn codes) (apply fn (list (delete-dups codes)))))
        (dolist (file (directory-files ,dir t nil t))
-         (let ((state (vc-state-refresh file bk))
+         (let ((state (if (string-suffix-p ,dirvish-vc--always-ignored file)
+                          'ignored (vc-state-refresh file bk)))
                (msg (and (eq bk 'Git)
                          (shell-command-to-string
                           (format "git log -1 --pretty=%%s %s"
@@ -135,9 +135,8 @@ It is called when `:vc-backend' is included in DIRVISH-PROPs while
                 (puthash k orig dirvish--dir-data)))
             data)
            (dirvish-prop :vc-info info)
-           (unless inhibit-setup (run-hooks 'dirvish-setup-hook))))
-       (when-let* ((win (get-buffer-window buf)) ((window-live-p win)))
-         (with-selected-window win (dirvish--update-display))))
+           (unless inhibit-setup (run-hooks 'dirvish-setup-hook))
+           (dirvish--redisplay))))
      (delete-process p)
      (dirvish--kill-buffer (process-buffer p)))
    nil 'meta (cons buffer inhibit-setup)))
@@ -171,29 +170,37 @@ It is called when `:vc-backend' is included in DIRVISH-PROPs while
 (dirvish-define-attribute vc-state
   "The version control state at left fringe.
 This attribute only works on graphic displays."
-  ;; Avoid setting fringes repeatedly
-  :when (prog1 t (unless (dirvish-prop :fringe)
-                   (dirvish-prop :fringe (car (window-fringes)))
-                   (set-window-fringes nil dirvish-vc-state-fringe)))
+  :when (and (symbolp (dirvish-prop :vc-backend)) (not (dirvish-prop :remote)))
   (let ((ov (make-overlay l-beg l-beg)))
-    (when-let* (((symbolp (dirvish-prop :vc-backend)))
-                (state (dirvish-attribute-cache f-name :vc-state))
+    (when-let* ((state (dirvish-attribute-cache f-name :vc-state))
                 (face (alist-get state dirvish-vc-state-face-alist))
                 (display `(left-fringe dirvish-vc-gutter . ,(cons face nil))))
       (overlay-put ov 'before-string (propertize " " 'display display)))
     `(ov . ,ov)))
 
 (dirvish-define-attribute git-msg
-  "Append git commit message to filename."
-  :index 1
-  :when (and (eq (dirvish-prop :vc-backend) 'Git)
-             (not (dirvish-prop :remote))
-             (> win-width 65))
-  (let* ((info (dirvish-attribute-cache f-name :git-msg))
+  "Display short git log."
+  :when (and (eq (dirvish-prop :vc-backend) 'Git) (not (dirvish-prop :remote)))
+  :setup (dirvish-prop :gm-chop
+           (seq-reduce (lambda (acc i) (cl-incf acc (nth 2 i)))
+                       (dirvish-prop :attrs) 0))
+  (let* ((msg-raw (dirvish-attribute-cache f-name :git-msg))
+         (msg (if (>= (length msg-raw) 1) (substring msg-raw 0 -1) ""))
          (face (or hl-face 'dirvish-git-commit-message-face))
-         (str (concat (substring (concat "  " info) 0 -1) " ")))
-    (add-face-text-property 0 (length str) face t str)
-    `(left . ,str)))
+         (chop (dirvish-prop :gm-chop)) (mlen (length msg)) (stop t)
+         (limit (- (floor (* (if (< w-width 70) 0.48 0.6) w-width)) chop))
+         (count 0) (whole (concat " " msg (make-string w-width ?\ ))) str len)
+    (cond ((or (not msg-raw) (< w-width 30)) (setq str ""))
+          ((and (>= w-width 30) (< w-width 50)) (setq str (propertize " …  ")))
+          (t (setq str "" stop (<= limit 0))))
+    (while (not stop) ; prevent multibyte string taking too much space
+      (setq str (substring whole 0 count))
+      (if (>= (- limit (string-width str)) 1)
+          (cl-incf count)
+        (setq str (concat str (if (> count mlen) "  " "… ")) stop t)))
+    (add-face-text-property 0 (setq len (length str)) face t str)
+    (add-text-properties 0 len `(help-echo ,msg) str)
+    `(right . ,str)))
 
 (dirvish-define-preview vc-diff (ext)
   "Use output of `vc-diff' as preview."

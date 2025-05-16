@@ -119,31 +119,17 @@ current layout defined in `dirvish-layout-recipes'.
 ;;; Generated autoloads from dirvish-fd.el
 
  (autoload 'dirvish-fd-switches-menu "dirvish-fd" nil t)
-(autoload 'dirvish-fd-jump "dirvish-fd" "\
-Browse directories using `fd' command.
-This command takes a while to index all the directories the first time
-you run it.  After the indexing, it fires up instantly except for those
-huge directories such as root.  It is recommended to setup your
-.fdignore properly before using this command.
-
-If called with \\`C-u' or if CURRENT-DIR-P holds the value 4,
-search for directories in the current directory.  Otherwise,
-search for directories in `dirvish-fd-default-dir'.
-
-If prefixed twice with \\`C-u' or if CURRENT-DIR-P holds the
-value 16, let the user choose the root directory of their search.
-
-(fn &optional CURRENT-DIR-P)" t)
 (autoload 'dirvish-fd "dirvish-fd" "\
 Run `fd' on DIR and go into Dired mode on a buffer of the output.
 The command run is essentially:
 
-  fd --color=never -0 `dirvish-fd-switches' PATTERN
-     --exec-batch `dirvish-fd-ls-program' `dired-listing-switches' --directory.
+  fd --color=never `dirvish-fd-switches'
+     --and PATTERN [--and PATTERN1 --and PATTERN2 … ]
+     --exec-batch `dirvish-fd-ls-program' `dired-listing-switches' --directory
 
-(fn DIR PATTERN)" t)
-(autoload 'dirvish-fd-ask "dirvish-fd" "\
-The same as `dirvish-fd' but ask initial DIR and PATTERN via prompt.
+If called with \\`C-u', prompt for the target directory,
+`default-directory' is used.  If prefixed with \\`C-u' twice, also
+prompt for the search regex PATTERN as a comma separated list.
 
 (fn DIR PATTERN)" t)
 (register-definition-prefixes "dirvish-fd" '("dirvish-fd-"))
@@ -152,7 +138,7 @@ The same as `dirvish-fd' but ask initial DIR and PATTERN via prompt.
 ;;; Generated autoloads from dirvish-history.el
 
 (autoload 'dirvish-history-jump "dirvish-history" "\
-Open a target directory from `dirvish--history'." t)
+Read a recently visited directory from minibuffer and revisit it." t)
 (autoload 'dirvish-history-last "dirvish-history" "\
 Switch to the most recently visited dirvish buffer." t)
 (autoload 'dirvish-history-go-forward "dirvish-history" "\
@@ -184,7 +170,7 @@ ARG defaults to 1.
 ;;; Generated autoloads from dirvish-narrow.el
 
 (autoload 'dirvish-narrow "dirvish-narrow" "\
-Narrow a Dirvish buffer to the files matching a regex." t)
+Narrow a Dirvish buffer to the files matching a regex." '(dired-mode))
 (register-definition-prefixes "dirvish-narrow" '("dirvish-narrow-"))
 
 
@@ -280,7 +266,7 @@ Toggle a Dirvish session at the side window.
 - If the current window is a side session window, hide it.
 - If a side session is visible, select it.
 - If a side session exists but is not visible, show it.
-- If there is no side session exists,create a new one with PATH.
+- If there is no side session exists, create a new one with PATH.
 
 If called with \\[universal-arguments], prompt for PATH,
 otherwise it defaults to `project-current'.
