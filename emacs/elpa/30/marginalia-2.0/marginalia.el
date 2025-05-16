@@ -1,11 +1,11 @@
 ;;; marginalia.el --- Enrich existing commands with completion annotations -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; Author: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 1.8
+;; Version: 2.0
 ;; Package-Requires: ((emacs "28.1") (compat "30"))
 ;; URL: https://github.com/minad/marginalia
 ;; Keywords: docs, help, matching, completion
@@ -322,7 +322,10 @@ The value of `this-command' is used as key for the lookup."
 ;;;; Marginalia mode
 
 (defalias 'marginalia--orig-completion-metadata-get
-  (symbol-function (compat-function completion-metadata-get))
+  (symbol-function
+   (if (fboundp 'marginalia--orig-completion-metadata-get)
+       'marginalia--orig-completion-metadata-get
+     (compat-function completion-metadata-get)))
   "Original `completion-metadata-get' function.")
 
 (defvar marginalia--pangram "Cwm fjord bank glyphs vext quiz.")
@@ -401,7 +404,13 @@ FACE is the name of the face, with which the field should be propertized."
   (setq field (if format `(format ,format ,field) `(or ,field "")))
   (when width (setq field `(format ,(format "%%%ds" (- width)) ,field)))
   (when truncate (setq field `(marginalia--truncate ,field ,truncate)))
-  (when face (setq field `(propertize ,field 'face ,face)))
+  (when face
+    (setq field (if (or format width truncate)
+                    (cl-with-gensyms (f)
+                      `(let ((,f ,field))
+                         (put-text-property 0 (length ,f) 'face ,face ,f)
+                         ,f))
+                  `(propertize ,field 'face ,face))))
   field)
 
 (defmacro marginalia--fields (&rest fields)
@@ -568,7 +577,7 @@ t cl-type"
 ;; Derived from elisp-get-fnsym-args-string
 (defun marginalia--function-args (sym)
   "Return function arguments for SYM."
-  (let ((tmp))
+  (let (tmp)
     (elisp-function-argstring
      (cond
       ((listp (setq tmp (gethash (indirect-function sym)
@@ -577,15 +586,12 @@ t cl-type"
       ((setq tmp (help-split-fundoc
                   (ignore-errors (documentation sym t))
                   sym))
-       (substitute-command-keys (car tmp)))
+       (car tmp))
       ((setq tmp (help-function-arglist sym))
-       (and
-        (if (and (stringp tmp)
-                 (string-search "Arg list not available" tmp))
-            ;; A shorter text fits better into the
-            ;; limited Marginalia space.
-            "[autoload]"
-          tmp)))))))
+       (if (and (stringp tmp) (string-search "not available" tmp))
+           ;; A shorter text fits better into the limited Marginalia space.
+           "[autoload]"
+         tmp))))))
 
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
@@ -679,7 +685,12 @@ keybinding since CAND includes it."
          (format (propertize "#'%s" 'face 'marginalia-function) val))
         ((pred recordp) (format (propertize "#<record %s>" 'face 'marginalia-value) (type-of val)))
         ((pred symbolp) (propertize (symbol-name val) 'face 'marginalia-symbol))
-        ((pred numberp) (propertize (number-to-string val) 'face 'marginalia-number))
+        ((pred numberp)
+         (propertize (number-to-string val)
+                     'face 'marginalia-number
+                     'help-echo (and (integerp val)
+                                     (format "%d, #o%o, #x%x%s" val val val
+                                             (if (characterp val) (format ", ?%c" val) "")))))
         (_ (let ((print-escape-newlines t)
                  (print-escape-control-characters t)
                  ;;(print-escape-multibyte t)
@@ -1304,6 +1315,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
   ;; As a small optimization we track the base position only for file
   ;; completions, since `marginalia--full-candidate' is currently used only by
   ;; the file annotation function.
+  ;; bug#75910: category instead of `minibuffer-completing-file-name'
   (when minibuffer-completing-file-name
     (let ((base (or (cdr (last completions)) 0)))
       (unless (= marginalia--base-position base)
