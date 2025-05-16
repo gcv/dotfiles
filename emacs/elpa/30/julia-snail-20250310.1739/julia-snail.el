@@ -3,8 +3,8 @@
 
 ;; URL: https://github.com/gcv/julia-snail
 ;; Package-Requires: ((emacs "26.2") (dash "2.16.0") (julia-mode "0.3") (s "1.12.0") (spinner "1.7.3") (popup "0.5.9"))
-;; Package-Version: 20241216.2010
-;; Package-Revision: e2b08f37b89a
+;; Package-Version: 20250310.1739
+;; Package-Revision: cacf52e4c8db
 ;; Created: 2019-10-27
 
 ;; This program is free software; you can redistribute it and/or modify
