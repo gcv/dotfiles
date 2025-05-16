@@ -5,8 +5,8 @@
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; URL: https://github.com/Wilfred/helpful
 ;; Keywords: help, lisp
-;; Package-Version: 20250227.1527
-;; Package-Revision: 3794389ef685
+;; Package-Version: 20250408.334
+;; Package-Revision: 03756fa6ad4d
 ;; Package-Requires: ((emacs "25") (dash "2.18.0") (s "1.11.0") (f "0.20.0") (elisp-refs "1.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -3042,7 +3042,7 @@ See also `helpful-max-buffers'."
   "Store \"help\" type link when in a helpful buffer."
   (when (derived-mode-p 'helpful-mode)
     ;; Create a "help" link instead of a dedicated "helpful" link: the
-    ;; author of the Org document uses helful, but this is not
+    ;; author of the Org document uses helpful, but this is not
     ;; necessarily the case of the reader of the document.
     (org-link-store-props :type "help"
                           :link (format "help:%s" helpful--sym)
