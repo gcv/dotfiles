@@ -1,6 +1,46 @@
 ``master`` (unreleased)
 ======================
 
+35.0 (2025-04-23)
+======================
+
+------------
+New Features
+------------
+
+- [#2105]: Add options for configuring the ``jsonnet`` checker.
+- [#1975]: Add support for ``--expt-relaxed-constexpr`` flag to ``cuda`` checker.
+- [#2055]: Add support for ``--expt-extended-lambda`` flag to ``cuda`` checker.
+- [#1987]: Add a flag ``flycheck-auto-display-errors-after-checking`` control whether to display errors automatically after checking.
+- [#2035]: Add colors to FlyC mode line and update mode line menu. Introduce ``flycheck-mode-success-indicator``.
+- [#2059]: Enable checkers for new AUCTeX 14 modes.
+- [#2070]: Add a new syntax checker ``r`` for R with the builtin ``parse`` function.
+- [#2073]: Add new syntax checker ``salt-lint`` for the salt infrastructure-as-code language.
+- [#2071]: Add a new checker ``perl-perlimports``, for cleaning up Perl import statements.
+- [#1972]: New defcustom ``flycheck-clear-displayed-errors-function`` to
+  customize how error messages are to be cleared.
+- [#2075]: Add the ``flycheck-chktex-extra-flags`` option to the ``tex-chktex`` checker.
+- [#2107]: Add ``-Xcompiler`` option for ``cuda-nvcc``.
+- Add new ``markdownlint-cli2`` checker.
+
+-----------
+Bugs fixed
+-----------
+
+- [#2057]: Revert the replacement of ``flycheck-version`` with ``lm-version``.
+- [#1972]: Refine flycheck-display-errors lifecycle so error messages can be cleared.
+- [#2067]: Handle correctly GHC 9.6 error output format.
+- [#2079]: Fix ruff ``error-patterns`` and ``error-filter``.
+
+----------
+Changes
+----------
+
+- **(Breaking)** [#2066]: Remove support for versions of ``stylelint`` older than v14.
+- Update ``error-patterns`` for ghdl 4.1.0.
+- [#2078]: ruff: ``--output-format=text`` replaced with ``--output-format=concise`` due to upstream changes in ruff.
+
+
 34.1 (2024-02-18)
 ======================
 
@@ -8,7 +48,7 @@
 Bugs fixed
 -----------
 
-- [#2054]: Remove explicit dep on a built-in package.
+- [#2054]: Remove explicit dep on the built-in package ``seq.el``.
 
 34.0 (2024-02-14)
 ======================
@@ -402,9 +442,9 @@ include a Info manual in Flycheck’s MELPA packages.
 From this release onward Flycheck will use a single continuously increasing
 version number.  Breaking changes may occur at any point.
 
-.. _Code of Conduct: http://www.flycheck.org/en/latest/community/conduct.html
+.. _Code of Conduct: https://www.flycheck.org/en/latest/community/conduct.html
 .. _Gitter channel: https://gitter.im/flycheck/flycheck
-.. _Sphinx: http://sphinx-doc.org
+.. _Sphinx: https://sphinx-doc.org
 
 - **Breaking changes**:
 

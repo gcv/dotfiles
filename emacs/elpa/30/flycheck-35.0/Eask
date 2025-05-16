@@ -1,8 +1,8 @@
 (package "flycheck"
-         "34.1"
+         "35.0"
          "On-the-fly syntax checking")
 
-(website-url "http://www.flycheck.org")
+(website-url "https://www.flycheck.org")
 (keywords "convenience" "languages" "tools")
 
 (package-file "flycheck.el")
@@ -14,7 +14,7 @@
 (source 'gnu)
 (source 'melpa)
 
-(depends-on "emacs" "26.1")
+(depends-on "emacs" "27.1")
 
 (development
  (depends-on "f")                       ; For some maintenance tools

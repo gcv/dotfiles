@@ -1,9 +1,10 @@
-# [![Flycheck][logo]](https://www.flycheck.org) #
+# [![Flycheck][logo]](https://www.flycheck.org)
 
 [![License GPL 3](https://img.shields.io/github/license/flycheck/flycheck.svg)][COPYING]
 [![Join the chat](https://img.shields.io/gitter/room/flycheck/flycheck.svg)](https://gitter.im/flycheck/flycheck)
 [![MELPA](https://melpa.org/packages/flycheck-badge.svg)](https://melpa.org/#/flycheck)
 [![MELPA stable version](http://stable.melpa.org/packages/flycheck-badge.svg)](https://stable.melpa.org/#/flycheck)
+[![NonGNU ELPA](https://elpa.nongnu.org/nongnu/flycheck.svg)](https://elpa.nongnu.org/nongnu/flycheck.html)
 [![CI](https://github.com/flycheck/flycheck/actions/workflows/test.yml/badge.svg)](https://github.com/flycheck/flycheck/actions/workflows/test.yml)
 [![Docs](https://github.com/flycheck/flycheck/actions/workflows/docs.yml/badge.svg)](https://github.com/flycheck/flycheck/actions/workflows/docs.yml)
 [![Lint Python](https://github.com/flycheck/flycheck/actions/workflows/lint-python.yml/badge.svg)](https://github.com/flycheck/flycheck/actions/workflows/lint-python.yml)
@@ -16,9 +17,9 @@ Modern on-the-fly syntax checking extension for GNU Emacs.  [Try it][]!
 
 ## Getting Started
 
-Flycheck is available for installation with `package.el` on
-[MELPA Stable](http://stable.melpa.org)
-and [MELPA](http://melpa.org).
+Flycheck is available for installation with `package.el` on [NonGNU
+ELPA](https://elpa.nongnu.org/nongnu), [MELPA
+Stable](http://stable.melpa.org) and [MELPA](http://melpa.org).
 
 You can install Flycheck with the following command:
 
@@ -157,7 +158,6 @@ PARTICULAR PURPOSE.  See the [GNU General Public License][copying] for more
 details.
 
 [COPYING]: https://github.com/flycheck/flycheck/blob/master/COPYING
-[manual]: https://www.flycheck.org/en/latest/index.html#the-user-guide
 [logo]: https://raw.githubusercontent.com/flycheck/flycheck/master/doc/_static/logo.png
 [try it]: https://www.flycheck.org/en/latest/#try-out
 [Installation]: https://www.flycheck.org/en/latest/user/installation.html
