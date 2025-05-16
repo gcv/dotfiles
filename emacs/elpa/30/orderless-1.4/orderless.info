@@ -1,4 +1,4 @@
-This is docyuj0Tv.info, produced by makeinfo version 6.8 from
+This is docAZVnrO.info, produced by makeinfo version 6.8 from
 orderless.texi.
 
 INFO-DIR-SECTION Emacs misc features
@@ -7,7 +7,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docyuj0Tv.info,  Node: Top,  Next: Overview,  Up: (dir)
+File: docAZVnrO.info,  Node: Top,  Next: Overview,  Up: (dir)
 
 Orderless
 *********
@@ -49,7 +49,7 @@ Related packages
 
 
 
-File: docyuj0Tv.info,  Node: Overview,  Next: Customization,  Prev: Top,  Up: Top
+File: docAZVnrO.info,  Node: Overview,  Next: Customization,  Prev: Top,  Up: Top
 
 1 Overview
 **********
@@ -131,7 +131,7 @@ completion and partial paths, e.g., ‘/u/s/l’ for ‘/usr/share/local’.
    Bug reports are highly welcome and appreciated!
 
 
-File: docyuj0Tv.info,  Node: Customization,  Next: Integration with other completion UIs,  Prev: Overview,  Up: Top
+File: docAZVnrO.info,  Node: Customization,  Next: Integration with other completion UIs,  Prev: Overview,  Up: Top
 
 2 Customization
 ***************
@@ -146,7 +146,7 @@ File: docyuj0Tv.info,  Node: Customization,  Next: Integration with other comple
 * Interactively changing the configuration::
 
 
-File: docyuj0Tv.info,  Node: Component matching styles,  Next: Component separator regexp,  Up: Customization
+File: docAZVnrO.info,  Node: Component matching styles,  Next: Component separator regexp,  Up: Customization
 
 2.1 Component matching styles
 =============================
@@ -212,7 +212,7 @@ regexp styles.
 * Style dispatchers::
 
 
-File: docyuj0Tv.info,  Node: Style modifiers,  Next: Style dispatchers,  Up: Component matching styles
+File: docAZVnrO.info,  Node: Style modifiers,  Next: Style dispatchers,  Up: Component matching styles
 
 2.1.1 Style modifiers
 ---------------------
@@ -231,7 +231,7 @@ orderless-not
      which do not match the pattern.
 
 
-File: docyuj0Tv.info,  Node: Style dispatchers,  Prev: Style modifiers,  Up: Component matching styles
+File: docAZVnrO.info,  Node: Style dispatchers,  Prev: Style modifiers,  Up: Component matching styles
 
 2.1.2 Style dispatchers
 -----------------------
@@ -311,7 +311,7 @@ following setup:
                                          not-if-bang))
 
 
-File: docyuj0Tv.info,  Node: Component separator regexp,  Next: Defining custom orderless styles,  Prev: Component matching styles,  Up: Customization
+File: docAZVnrO.info,  Node: Component separator regexp,  Next: Defining custom orderless styles,  Prev: Component matching styles,  Up: Customization
 
 2.2 Component separator regexp
 ==============================
@@ -336,7 +336,7 @@ different separator for the components, bind
 ‘orderless-component-separator’ in a ‘let’ form.
 
 
-File: docyuj0Tv.info,  Node: Defining custom orderless styles,  Next: Faces for component matches,  Prev: Component separator regexp,  Up: Customization
+File: docAZVnrO.info,  Node: Defining custom orderless styles,  Next: Faces for component matches,  Prev: Component separator regexp,  Up: Customization
 
 2.3 Defining custom orderless styles
 ====================================
@@ -373,7 +373,7 @@ the above example configuration, or other similarly fine-grained control
 of completion styles according to completion category.
 
 
-File: docyuj0Tv.info,  Node: Faces for component matches,  Next: Pattern compiler,  Prev: Defining custom orderless styles,  Up: Customization
+File: docAZVnrO.info,  Node: Faces for component matches,  Next: Pattern compiler,  Prev: Defining custom orderless styles,  Up: Customization
 
 2.4 Faces for component matches
 ===============================
@@ -390,7 +390,7 @@ matches.  You will only see these particular faces when the ‘orderless’
 completion is the one that ends up being used, of course.
 
 
-File: docyuj0Tv.info,  Node: Pattern compiler,  Next: Interactively changing the configuration,  Prev: Faces for component matches,  Up: Customization
+File: docAZVnrO.info,  Node: Pattern compiler,  Next: Interactively changing the configuration,  Prev: Faces for component matches,  Up: Customization
 
 2.5 Pattern compiler
 ====================
@@ -403,7 +403,7 @@ Under special circumstances it may be useful to implement a custom
 pattern compiler by advising ‘orderless-compile’.
 
 
-File: docyuj0Tv.info,  Node: Interactively changing the configuration,  Prev: Pattern compiler,  Up: Customization
+File: docAZVnrO.info,  Node: Interactively changing the configuration,  Prev: Pattern compiler,  Up: Customization
 
 2.6 Interactively changing the configuration
 ============================================
@@ -435,7 +435,7 @@ components match literally.  You could use the following code:
 the values are only used for that minibuffer completion session.
 
 
-File: docyuj0Tv.info,  Node: Integration with other completion UIs,  Next: Related packages,  Prev: Customization,  Up: Top
+File: docAZVnrO.info,  Node: Integration with other completion UIs,  Next: Related packages,  Prev: Customization,  Up: Top
 
 3 Integration with other completion UIs
 ***************************************
@@ -457,7 +457,7 @@ from your effort.  The functions ‘orderless-filter’,
 * Company::
 
 
-File: docyuj0Tv.info,  Node: Ivy,  Next: Helm,  Up: Integration with other completion UIs
+File: docAZVnrO.info,  Node: Ivy,  Next: Helm,  Up: Integration with other completion UIs
 
 3.1 Ivy
 =======
@@ -468,7 +468,7 @@ To use ‘orderless’ from Ivy add this to your Ivy configuration:
      (add-to-list 'ivy-highlight-functions-alist '(orderless-ivy-re-builder . orderless-ivy-highlight))
 
 
-File: docyuj0Tv.info,  Node: Helm,  Next: Company,  Prev: Ivy,  Up: Integration with other completion UIs
+File: docAZVnrO.info,  Node: Helm,  Next: Company,  Prev: Ivy,  Up: Integration with other completion UIs
 
 3.2 Helm
 ========
@@ -480,7 +480,7 @@ Helm configuration:
      (setq helm-completion-style 'emacs)
 
 
-File: docyuj0Tv.info,  Node: Company,  Prev: Helm,  Up: Integration with other completion UIs
+File: docAZVnrO.info,  Node: Company,  Prev: Helm,  Up: Integration with other completion UIs
 
 3.3 Company
 ===========
@@ -528,7 +528,7 @@ This means that the ‘company-capf’ backend will automatically use
      (advice-add 'company-capf :around #'company-completion-styles)
 
 
-File: docyuj0Tv.info,  Node: Related packages,  Prev: Integration with other completion UIs,  Up: Top
+File: docAZVnrO.info,  Node: Related packages,  Prev: Integration with other completion UIs,  Up: Top
 
 4 Related packages
 ******************
@@ -540,7 +540,7 @@ File: docyuj0Tv.info,  Node: Related packages,  Prev: Integration with other com
 * Restricting to current matches in Icicles, Ido and Ivy: Restricting to current matches in Icicles Ido and Ivy.
 
 
-File: docyuj0Tv.info,  Node: Ivy and Helm,  Next: Prescient,  Up: Related packages
+File: docAZVnrO.info,  Node: Ivy and Helm,  Next: Prescient,  Up: Related packages
 
 4.1 Ivy and Helm
 ================
@@ -572,7 +572,7 @@ configure Icomplete to use it as follows:
 ‘helm-mode’ rather than Icomplete.)
 
 
-File: docyuj0Tv.info,  Node: Prescient,  Next: Restricting to current matches in Icicles Ido and Ivy,  Prev: Ivy and Helm,  Up: Related packages
+File: docAZVnrO.info,  Node: Prescient,  Next: Restricting to current matches in Icicles Ido and Ivy,  Prev: Ivy and Helm,  Up: Related packages
 
 4.2 Prescient
 =============
@@ -589,7 +589,7 @@ sorting of candidates, while Orderless leaves that up to the candidate
 source and the completion UI.
 
 
-File: docyuj0Tv.info,  Node: Restricting to current matches in Icicles Ido and Ivy,  Prev: Prescient,  Up: Related packages
+File: docAZVnrO.info,  Node: Restricting to current matches in Icicles Ido and Ivy,  Prev: Prescient,  Up: Related packages
 
 4.3 Restricting to current matches in Icicles, Ido and Ivy
 ==========================================================
