@@ -1,7 +1,7 @@
 ;;; sly.el --- Sylvester the Cat's Common Lisp IDE  -*- lexical-binding: t; -*-
 
-;; Package-Version: 20250203.2040
-;; Package-Revision: c48defcf5859
+;; Package-Version: 20250501.1918
+;; Package-Revision: ce17a568efd3
 ;; URL: https://github.com/joaotavora/sly
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, lisp, sly
@@ -7393,7 +7393,7 @@ as nil.  With non-nil STRINGP, only look for strings"
                    (not (eq (syntax-class (syntax-after (car bounds)))
                             (char-syntax ?\"))))
           (if (and interactive
-                   interactive)
+                   errorp)
               (user-error "No string at point")
             (throw 'return nil)))
         (when interactive
