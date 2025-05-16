@@ -22,13 +22,6 @@ When called interactively, prompt for FAMILY.  When called from Lisp,
 FAMILY is a string that satisfies `show-font-installed-p'.
 
 (fn FAMILY)" t)
-(autoload 'show-font-list "show-font" "\
-Produce a list of installed fonts with `show-font-pangram' preview text.
-With optional REGEXP as a prefix argument, prompt for a string or
-regular expression to list only fonts matching the given input.
-Otherwise, list all installed fonts.
-
-(fn &optional REGEXP)" t)
 (autoload 'show-font-tabulated "show-font" "\
 Produce a tabulated view of installed fonts with `show-font-pangram' preview.
 With optional REGEXP as a prefix argument, prompt for a string or

@@ -4,9 +4,9 @@
 #+language: en
 #+options: ':t toc:nil author:t email:t num:t
 #+startup: content
-#+macro: stable-version 0.2.0
-#+macro: release-date 2025-01-25
-#+macro: development-version 0.3.0-dev
+#+macro: stable-version 0.3.0
+#+macro: release-date 2025-04-26
+#+macro: development-version 0.4.0-dev
 #+export_file_name: show-font.texi
 #+texinfo_filename: show-font.info
 #+texinfo_dir_category: Emacs misc features
@@ -42,90 +42,6 @@ If you are viewing the README.org version of this file, please note that
 the GNU ELPA machinery automatically generates an Info manual out of it.
 
 #+toc: headlines 8 insert TOC here, with eight headline levels
-
-* Overview
-:PROPERTIES:
-:CUSTOM_ID: h:4d8e439b-e0b3-43f2-b909-2279e1851270
-:END:
-
-With ~show-font~ the user has the means to preview fonts inside of
-Emacs. This can be done in the following ways:
-
-#+findex: show-font-select-preview
-- The command ~show-font-select-preview~ uses the minibuffer to
-  prompt with completion for a font on the system. The selected
-  font is then displayed in a bespoke buffer.
-
-#+findex: show-font-list
-- The command ~show-font-list~ produces a list with all the fonts
-  available on the system. Each font on display is styled with its
-  given character set. With an optional prefix argument (=C-u= by
-  default), it prompt for a string or regular expression to limit the
-  list of fonts to only the matching ones.
-
-#+findex: show-font-tabulated
-- The command ~show-font-tabulated~ is almost the same as
-  ~show-font-list~ except it uses the built-in Emacs framework of a
-  tabulated view. Concretely, users can sort by column and may prefer
-  the slightly more compact listing.
-
-#+findex: show-font-mode
-- The ~show-font-mode~ is a major mode that gets activated when the
-  user visits a =.ttf= or =.otf= file. It will preview with the font,
-  if it is installed on the system, else it will provide a helpful
-  message and an option to install the font (NOTE 2024-09-10: this
-  only works on Linux).
-
-#+vindex: show-font-display-buffer-action-alist
-Where the buffer which previews the font is displayed is controlled by
-the user option ~show-font-display-buffer-action-alist~. The default
-value is to show the buffer at the bottom of the frame.
-
-#+vindex: show-font-pangram
-The previews include a pangram, which is controlled by the user option
-~show-font-pangram~. The default value is a playful take on the more
-familiar "the quick brown fox jumps over the lazy dog" phrase. Users
-can select among a few presets, or define their own custom string.
-
-#+findex: show-font-pangram-p
-The function ~show-font-pangram-p~ is available for those who wish to
-experiment with writing their own pangrams (it is not actually limited
-to the Latin alphabet).
-
-#+vindex: show-font-character-sample
-The user option ~show-font-character-sample~ provides a more complete
-character set that is intended for use in full buffer previews (i.e.
-not in the list of fonts). It can be set to any string. The default
-value is a set of alphanumeric characters that are commonly used in
-programming: a good monospaced font should render all of them
-unambiguously.
-
-Finally, the following faces control the appearance of various
-elements.
-
-#+vindex: show-font-small
-- ~show-font-small~
-
-#+vindex: show-font-regular
-- ~show-font-regular~
-
-#+vindex: show-font-medium
-- ~show-font-medium~
-
-#+vindex: show-font-large
-- ~show-font-large~
-
-#+vindex: show-font-title
-- ~show-font-title~
-
-#+vindex: show-font-title-small
-- ~show-font-title-small~
-
-#+vindex: show-font-misc
-- ~show-font-misc~
-
-#+vindex: show-font-button
-- ~show-font-button~
 
 * Installation
 :PROPERTIES:
@@ -189,9 +105,106 @@ Everything is in place to set up the package.
 (require 'show-font)
 
 (define-key global-map (kbd "C-c s f") #'show-font-select-preview)
-(define-key global-map (kbd "C-c s l") #'show-font-list)
 (define-key global-map (kbd "C-c s t") #'show-font-tabulated)
 #+end_src
+
+Or with ~use-package~:
+
+#+begin_src emacs-lisp
+(use-package show-font
+  :ensure t
+  :bind
+  (("C-c s f" . show-font-select-preview)
+   ("C-c s t" . show-font-tabulated)))
+#+end_src
+
+* Overview
+:PROPERTIES:
+:CUSTOM_ID: h:4d8e439b-e0b3-43f2-b909-2279e1851270
+:END:
+
+With ~show-font~ the user has the means to preview fonts inside of
+Emacs. This can be done in the following ways:
+
+#+findex: show-font-select-preview
+- The command ~show-font-select-preview~ uses the minibuffer to
+  prompt with completion for a font on the system. The selected
+  font is then displayed in a bespoke buffer.
+
+#+findex: show-font-tabulated
+#+findex: show-font-list
+- The command ~show-font-tabulated~ (alias ~show-font-list~) produces
+  a list with all the fonts available on the system. Each font on
+  display is styled with its given character set. With an optional
+  prefix argument (=C-u= by default), it prompt for a string or
+  regular expression to limit the list of fonts to only the matching
+  ones. In this tabulated interface, users can sort by column and may
+  prefer the slightly more compact listing.
+
+#+findex: show-font-mode
+- The ~show-font-mode~ is a major mode that gets activated when the
+  user visits a =.ttf= or =.otf= file. It will preview with the font,
+  if it is installed on the system, else it will provide a helpful
+  message and an option to install the font (NOTE 2024-09-10: this
+  only works on Linux).
+
+#+vindex: show-font-display-buffer-action-alist
+Where the buffer which previews the font is displayed is controlled by
+the user option ~show-font-display-buffer-action-alist~. The default
+value is to show the buffer at the bottom of the frame.
+
+#+vindex: show-font-pangram
+The previews include a pangram, which is controlled by the user option
+~show-font-pangram~. The default value is a playful take on the more
+familiar "the quick brown fox jumps over the lazy dog" phrase. Users
+can select among a few presets, or define their own custom string.
+
+#+findex: show-font-pangram-p
+The function ~show-font-pangram-p~ is available for those who wish to
+experiment with writing their own pangrams (it is not actually limited
+to the Latin alphabet).
+
+#+vindex: show-font-character-sample
+The user option ~show-font-character-sample~ provides a more complete
+character set that is intended for use in full buffer previews (i.e.
+not in the list of fonts). It can be set to any string. The default
+value is a set of alphanumeric characters that are commonly used in
+programming: a good monospaced font should render all of them
+unambiguously. This text is shown in the buffer of the command
+~show-font-select-preview~.
+
+#+vindex: show-font-sentences-sample
+The user option ~show-font-sentences-sample~ is a list of strings that
+can be used to showcase common patterns and letter combinations in
+words. The default value should cover many such examples. Those are
+displayed in the buffer produced by the command ~show-font-select-preview~.
+
+Finally, the following faces control the appearance of various
+elements.
+
+#+vindex: show-font-small
+- ~show-font-small~
+
+#+vindex: show-font-regular
+- ~show-font-regular~
+
+#+vindex: show-font-medium
+- ~show-font-medium~
+
+#+vindex: show-font-large
+- ~show-font-large~
+
+#+vindex: show-font-title
+- ~show-font-title~
+
+#+vindex: show-font-title-in-listing
+- ~show-font-title-in-listing~
+
+#+vindex: show-font-misc
+- ~show-font-misc~
+
+#+vindex: show-font-button
+- ~show-font-button~
 
 * Acknowledgements
 :PROPERTIES:

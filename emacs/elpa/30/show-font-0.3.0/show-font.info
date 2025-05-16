@@ -1,4 +1,4 @@
-This is docNiAnne.info, produced by makeinfo version 6.8 from
+This is docBHHQGb.info, produced by makeinfo version 6.8 from
 show-font.texi.
 
 Copyright (C) 2024-2025 Free Software Foundation, Inc.
@@ -20,7 +20,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docNiAnne.info,  Node: Top,  Next: Overview,  Up: (dir)
+File: docBHHQGb.info,  Node: Top,  Next: Installation,  Up: (dir)
 
 show-font: preview fonts
 ************************
@@ -44,11 +44,11 @@ customization options for the Emacs package called ‘show-font’ (or
 to it.
 
    The documentation furnished herein corresponds to stable version
-0.2.0, released on 2025-01-25.  Any reference to a newer feature which
+0.3.0, released on 2025-04-26.  Any reference to a newer feature which
 does not yet form part of the latest tagged commit, is explicitly marked
 as such.
 
-   Current development target is 0.3.0-dev.
+   Current development target is 0.4.0-dev.
 
    • Package name (GNU ELPA): ‘show-font’
    • Official manual: <https://protesilaos.com/emacs/show-font>
@@ -65,9 +65,9 @@ of it.
 
 * Menu:
 
-* Overview::
 * Installation::
 * Sample configuration::
+* Overview::
 * Acknowledgements::
 * GNU Free Documentation License::
 * Indices::
@@ -87,9 +87,85 @@ Indices
 
 
 
-File: docNiAnne.info,  Node: Overview,  Next: Installation,  Prev: Top,  Up: Top
+File: docBHHQGb.info,  Node: Installation,  Next: Sample configuration,  Prev: Top,  Up: Top
 
-1 Overview
+1 Installation
+**************
+
+* Menu:
+
+* GNU ELPA package::
+* Manual installation::
+
+
+File: docBHHQGb.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
+
+1.1 GNU ELPA package
+====================
+
+The package is available as ‘show-font’.  Simply do:
+
+     M-x package-refresh-contents
+     M-x package-install
+
+   And search for it.
+
+   GNU ELPA provides the latest stable release.  Those who prefer to
+follow the development process in order to report bugs or suggest
+changes, can use the version of the package from the GNU-devel ELPA
+archive.  Read:
+<https://protesilaos.com/codelog/2022-05-13-emacs-elpa-devel/>.
+
+
+File: docBHHQGb.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
+
+1.2 Manual installation
+=======================
+
+Assuming your Emacs files are found in ‘~/.emacs.d/’, execute the
+following commands in a shell prompt:
+
+     cd ~/.emacs.d
+
+     # Create a directory for manually-installed packages
+     mkdir manual-packages
+
+     # Go to the new directory
+     cd manual-packages
+
+     # Clone this repo, naming it "show-font"
+     git clone https://github.com/protesilaos/show-font show-font
+
+   Finally, in your ‘init.el’ (or equivalent) evaluate this:
+
+     ;; Make Elisp files in that directory available to the user.
+     (add-to-list 'load-path "~/.emacs.d/manual-packages/show-font")
+
+   Everything is in place to set up the package.
+
+
+File: docBHHQGb.info,  Node: Sample configuration,  Next: Overview,  Prev: Installation,  Up: Top
+
+2 Sample configuration
+**********************
+
+     (require 'show-font)
+
+     (define-key global-map (kbd "C-c s f") #'show-font-select-preview)
+     (define-key global-map (kbd "C-c s t") #'show-font-tabulated)
+
+   Or with ‘use-package’:
+
+     (use-package show-font
+       :ensure t
+       :bind
+       (("C-c s f" . show-font-select-preview)
+        ("C-c s t" . show-font-tabulated)))
+
+
+File: docBHHQGb.info,  Node: Overview,  Next: Acknowledgements,  Prev: Sample configuration,  Up: Top
+
+3 Overview
 **********
 
 With ‘show-font’ the user has the means to preview fonts inside of
@@ -99,16 +175,13 @@ Emacs.  This can be done in the following ways:
      prompt with completion for a font on the system.  The selected font
      is then displayed in a bespoke buffer.
 
-   • The command ‘show-font-list’ produces a list with all the fonts
-     available on the system.  Each font on display is styled with its
-     given character set.  With an optional prefix argument (‘C-u’ by
-     default), it prompt for a string or regular expression to limit the
-     list of fonts to only the matching ones.
-
-   • The command ‘show-font-tabulated’ is almost the same as
-     ‘show-font-list’ except it uses the built-in Emacs framework of a
-     tabulated view.  Concretely, users can sort by column and may
-     prefer the slightly more compact listing.
+   • The command ‘show-font-tabulated’ (alias ‘show-font-list’) produces
+     a list with all the fonts available on the system.  Each font on
+     display is styled with its given character set.  With an optional
+     prefix argument (‘C-u’ by default), it prompt for a string or
+     regular expression to limit the list of fonts to only the matching
+     ones.  In this tabulated interface, users can sort by column and
+     may prefer the slightly more compact listing.
 
    • The ‘show-font-mode’ is a major mode that gets activated when the
      user visits a ‘.ttf’ or ‘.otf’ file.  It will preview with the
@@ -134,7 +207,14 @@ character set that is intended for use in full buffer previews (i.e.
 not in the list of fonts).  It can be set to any string.  The default
 value is a set of alphanumeric characters that are commonly used in
 programming: a good monospaced font should render all of them
-unambiguously.
+unambiguously.  This text is shown in the buffer of the command
+‘show-font-select-preview’.
+
+   The user option ‘show-font-sentences-sample’ is a list of strings
+that can be used to showcase common patterns and letter combinations in
+words.  The default value should cover many such examples.  Those are
+displayed in the buffer produced by the command
+‘show-font-select-preview’.
 
    Finally, the following faces control the appearance of various
 elements.
@@ -149,83 +229,14 @@ elements.
 
    • ‘show-font-title’
 
-   • ‘show-font-title-small’
+   • ‘show-font-title-in-listing’
 
    • ‘show-font-misc’
 
    • ‘show-font-button’
 
 
-File: docNiAnne.info,  Node: Installation,  Next: Sample configuration,  Prev: Overview,  Up: Top
-
-2 Installation
-**************
-
-* Menu:
-
-* GNU ELPA package::
-* Manual installation::
-
-
-File: docNiAnne.info,  Node: GNU ELPA package,  Next: Manual installation,  Up: Installation
-
-2.1 GNU ELPA package
-====================
-
-The package is available as ‘show-font’.  Simply do:
-
-     M-x package-refresh-contents
-     M-x package-install
-
-   And search for it.
-
-   GNU ELPA provides the latest stable release.  Those who prefer to
-follow the development process in order to report bugs or suggest
-changes, can use the version of the package from the GNU-devel ELPA
-archive.  Read:
-<https://protesilaos.com/codelog/2022-05-13-emacs-elpa-devel/>.
-
-
-File: docNiAnne.info,  Node: Manual installation,  Prev: GNU ELPA package,  Up: Installation
-
-2.2 Manual installation
-=======================
-
-Assuming your Emacs files are found in ‘~/.emacs.d/’, execute the
-following commands in a shell prompt:
-
-     cd ~/.emacs.d
-
-     # Create a directory for manually-installed packages
-     mkdir manual-packages
-
-     # Go to the new directory
-     cd manual-packages
-
-     # Clone this repo, naming it "show-font"
-     git clone https://github.com/protesilaos/show-font show-font
-
-   Finally, in your ‘init.el’ (or equivalent) evaluate this:
-
-     ;; Make Elisp files in that directory available to the user.
-     (add-to-list 'load-path "~/.emacs.d/manual-packages/show-font")
-
-   Everything is in place to set up the package.
-
-
-File: docNiAnne.info,  Node: Sample configuration,  Next: Acknowledgements,  Prev: Installation,  Up: Top
-
-3 Sample configuration
-**********************
-
-     (require 'show-font)
-
-     (define-key global-map (kbd "C-c s f") #'show-font-select-preview)
-     (define-key global-map (kbd "C-c s l") #'show-font-list)
-     (define-key global-map (kbd "C-c s t") #'show-font-tabulated)
-
-
-File: docNiAnne.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: Sample configuration,  Up: Top
+File: docBHHQGb.info,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: Overview,  Up: Top
 
 4 Acknowledgements
 ******************
@@ -243,7 +254,7 @@ Ideas and/or user feedback
      Darryl Hebbes, Perry Metzger.
 
 
-File: docNiAnne.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
+File: docBHHQGb.info,  Node: GNU Free Documentation License,  Next: Indices,  Prev: Acknowledgements,  Up: Top
 
 5 GNU Free Documentation License
 ********************************
@@ -725,7 +736,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docNiAnne.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
+File: docBHHQGb.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up: Top
 
 6 Indices
 *********
@@ -737,7 +748,7 @@ File: docNiAnne.info,  Node: Indices,  Prev: GNU Free Documentation License,  Up
 * Concept index::
 
 
-File: docNiAnne.info,  Node: Function index,  Next: Variable index,  Up: Indices
+File: docBHHQGb.info,  Node: Function index,  Next: Variable index,  Up: Indices
 
 6.1 Function index
 ==================
@@ -746,13 +757,13 @@ File: docNiAnne.info,  Node: Function index,  Next: Variable index,  Up: Indices
 * Menu:
 
 * show-font-list:                        Overview.             (line 13)
-* show-font-mode:                        Overview.             (line 24)
-* show-font-pangram-p:                   Overview.             (line 39)
+* show-font-mode:                        Overview.             (line 21)
+* show-font-pangram-p:                   Overview.             (line 36)
 * show-font-select-preview:              Overview.             (line  9)
-* show-font-tabulated:                   Overview.             (line 19)
+* show-font-tabulated:                   Overview.             (line 13)
 
 
-File: docNiAnne.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
+File: docBHHQGb.info,  Node: Variable index,  Next: Concept index,  Prev: Function index,  Up: Indices
 
 6.2 Variable index
 ==================
@@ -760,20 +771,21 @@ File: docNiAnne.info,  Node: Variable index,  Next: Concept index,  Prev: Functi
  [index ]
 * Menu:
 
-* show-font-button:                      Overview.             (line 67)
-* show-font-character-sample:            Overview.             (line 43)
-* show-font-display-buffer-action-alist: Overview.             (line 30)
-* show-font-large:                       Overview.             (line 59)
-* show-font-medium:                      Overview.             (line 57)
-* show-font-misc:                        Overview.             (line 65)
-* show-font-pangram:                     Overview.             (line 34)
-* show-font-regular:                     Overview.             (line 55)
-* show-font-small:                       Overview.             (line 53)
-* show-font-title:                       Overview.             (line 61)
-* show-font-title-small:                 Overview.             (line 63)
+* show-font-button:                      Overview.             (line 71)
+* show-font-character-sample:            Overview.             (line 40)
+* show-font-display-buffer-action-alist: Overview.             (line 27)
+* show-font-large:                       Overview.             (line 63)
+* show-font-medium:                      Overview.             (line 61)
+* show-font-misc:                        Overview.             (line 69)
+* show-font-pangram:                     Overview.             (line 31)
+* show-font-regular:                     Overview.             (line 59)
+* show-font-sentences-sample:            Overview.             (line 48)
+* show-font-small:                       Overview.             (line 57)
+* show-font-title:                       Overview.             (line 65)
+* show-font-title-in-listing:            Overview.             (line 67)
 
 
-File: docNiAnne.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
+File: docBHHQGb.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 6.3 Concept index
 =================
@@ -788,17 +800,17 @@ File: docNiAnne.info,  Node: Concept index,  Prev: Variable index,  Up: Indices
 
 Tag Table:
 Node: Top826
-Node: Overview2933
-Node: Installation5630
-Node: GNU ELPA package5817
-Node: Manual installation6381
-Node: Sample configuration7162
-Node: Acknowledgements7547
-Node: GNU Free Documentation License7995
-Node: Indices33338
-Node: Function index33514
-Node: Variable index34024
-Node: Concept index34994
+Node: Installation2937
+Node: GNU ELPA package3119
+Node: Manual installation3683
+Node: Sample configuration4464
+Node: Overview4960
+Node: Acknowledgements7952
+Node: GNU Free Documentation License8388
+Node: Indices33731
+Node: Function index33907
+Node: Variable index34417
+Node: Concept index35460
 
 End Tag Table
 
