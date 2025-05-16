@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.11
-;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "1.11"))
+;; Version: 2.1
+;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "2.1"))
 ;; URL: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -88,20 +88,19 @@ Exit with current input if prefix ARG is given."
               (setq found t))))))))
 
 ;;;###autoload
-(defun vertico-directory-delete-char (&optional n)
+(defun vertico-directory-delete-char (n)
   "Delete N directories or chars before point."
   (interactive "p")
-  (unless (and (eq (char-before) ?/) (vertico-directory-up n))
-    (delete-char (- n))))
+  (unless (and (not (and (use-region-p) delete-active-region (= n 1)))
+               (eq (char-before) ?/) (vertico-directory-up n))
+    (with-no-warnings (delete-backward-char n))))
 
 ;;;###autoload
-(defun vertico-directory-delete-word (&optional n)
+(defun vertico-directory-delete-word (n)
   "Delete N directories or words before point."
   (interactive "p")
   (unless (and (eq (char-before) ?/) (vertico-directory-up n))
-    (let ((pt (point)))
-      (backward-word n)
-      (delete-region pt (point)))))
+    (delete-region (prog1 (point) (backward-word n)) (point))))
 
 ;;;###autoload
 (defun vertico-directory-tidy ()
@@ -112,8 +111,7 @@ Exit with current input if prefix ARG is given."
                  (setq ov (symbol-value ov))
                  (overlay-buffer ov)
                  (= (point) (point-max))
-                 (or (>= (- (point) (overlay-end ov)) 2)
-                     (eq ?/ (char-before (- (point) 2)))))
+                 (> (point) (overlay-end ov)))
         (delete-region (overlay-start ov) (overlay-end ov))))))
 
 (provide 'vertico-directory)

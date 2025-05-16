@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.11
-;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "1.11"))
+;; Version: 2.1
+;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "2.1"))
 ;; URL: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -28,10 +28,10 @@
 
 ;; This package is a Vertico extension providing a grid display.
 ;;
-;; The mode can be enabled globally or via `vertico-multiform-mode'
-;; per command or completion category.  Alternatively the grid display
-;; can be toggled temporarily with M-G if `vertico-multiform-mode' is
-;; enabled.
+;; The mode `vertico-grid-mode' can be enabled globally or via
+;; `vertico-multiform-mode' per command or completion category.
+;; Alternatively the grid display can be toggled temporarily with
+;; M-G if `vertico-multiform-mode' is enabled.
 
 ;;; Code:
 
@@ -131,7 +131,7 @@ When scrolling beyond this limit, candidates may be truncated."
          (width (- (/ (vertico--window-width) vertico-grid--columns) sep))
          (cands (funcall (if (> vertico-grid-annotate 0) #'vertico--affixate #'identity)
                          (cl-loop repeat count for c in (nthcdr start vertico--candidates)
-                                  collect (funcall vertico--hilit (substring c)))))
+                                  collect (vertico--hilit c))))
          (cands (cl-loop
                  for cand in cands for index from 0 collect
                  (let (prefix suffix)

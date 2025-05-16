@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.11
-;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "1.11"))
+;; Version: 2.1
+;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "2.1"))
 ;; URL: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -28,10 +28,10 @@
 
 ;; This package is a Vertico extension providing a horizontal display.
 ;;
-;; The mode can be enabled globally or via `vertico-multiform-mode'
-;; per command or completion category.  Alternatively the flat display
-;; can be toggled temporarily with M-F if `vertico-multiform-mode' is
-;; enabled.
+;; The mode `vertico-flat-mode' can be enabled globally or via
+;; `vertico-multiform-mode' per command or completion category.
+;; Alternatively the flat display can be toggled temporarily with
+;; M-F if `vertico-multiform-mode' is enabled.
 ;;
 ;; The flat display can be made to look like `ido-mode' by setting
 ;; `vertico-cycle' to t. See also the `vertico-flat-format'
@@ -56,7 +56,8 @@
                   3 4 (face minibuffer-prompt))
     :separator  #(" | " 0 3 (face minibuffer-prompt))
     :ellipsis   #("…" 0 1 (face minibuffer-prompt))
-    :no-match   "[No match]")
+    :no-match   "[No match]"
+    :spacer     #(" " 0 1 (cursor t)))
   "Formatting strings."
   :type 'plist
   :group 'vertico)
@@ -91,7 +92,7 @@
   (move-overlay vertico--candidates-ov (point-max) (point-max))
   (overlay-put
    vertico--candidates-ov 'after-string
-   (concat #(" " 0 1 (cursor t))
+   (concat (plist-get vertico-flat-format :spacer)
            (cond
             ((and (not candidates) (plist-get vertico-flat-format :no-match)))
             ((and (= vertico--total 1) (= vertico--index 0)
@@ -113,7 +114,7 @@
     (while (and candidates (not (eq wrapped (car candidates)))
                 (> width 0) (> count 0))
       (let ((cand (pop candidates)) (prefix "") (suffix ""))
-        (setq cand (funcall vertico--hilit (substring cand)))
+        (setq cand (vertico--hilit cand))
         (pcase (and vertico-flat-annotate (vertico--affixate (list cand)))
           (`((,c ,p ,s)) (setq cand c prefix p suffix s)))
         (when (string-search "\n" cand)

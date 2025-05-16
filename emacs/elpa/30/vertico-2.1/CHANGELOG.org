@@ -2,6 +2,25 @@
 #+author: Daniel Mendler
 #+language: en
 
+* Version 2.1 (2025-04-19)
+
+- =vertico-flat-format=: Customizable =:spacer= string.
+- =vertico-sort=: Extracted sort functions to separate extension.
+- =vertico-sort-history-duplicate= and =vertico-sort-history-decay=: New
+  customization options to adjust the rank of duplicate history elements, such
+  that they appear earlier in the completion list.
+- =vertico-repeat=: Add =vertico-repeat-history= to
+  =savehist-minibuffer-history-variables= in order to save the history if
+  =savehist-mode= is enabled.
+- =vertico-repeat=: Do not store overly long selected candidates in repeat
+  history.
+
+* Version 2.0 (2025-03-11)
+
+- ~vertico-directory-tidy~: Cleanup shadowed path more aggressively.
+- ~vertico-directory-delete-char~: Respect region.
+- ~vertico-directory-*~: Improve responsiveness when using directory commands.
+
 * Version 1.11 (2025-01-28)
 
 - Ignore touchscreen events.

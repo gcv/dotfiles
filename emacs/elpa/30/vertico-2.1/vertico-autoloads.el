@@ -85,11 +85,11 @@ Delete N names before point.
 (autoload 'vertico-directory-delete-char "vertico-directory" "\
 Delete N directories or chars before point.
 
-(fn &optional N)" t)
+(fn N)" t)
 (autoload 'vertico-directory-delete-word "vertico-directory" "\
 Delete N directories or words before point.
 
-(fn &optional N)" t)
+(fn N)" t)
 (autoload 'vertico-directory-tidy "vertico-directory" "\
 Tidy shadowed file name, see `rfn-eshadow-overlay'.")
 
@@ -312,6 +312,15 @@ disabled.
 
 (fn &optional ARG)" t)
 (register-definition-prefixes "vertico-reverse" '("vertico-reverse-map"))
+
+
+;;; Generated autoloads from vertico-sort.el
+
+ (autoload 'vertico-sort-history-length-alpha "vertico-sort")
+ (autoload 'vertico-sort-history-alpha "vertico-sort")
+ (autoload 'vertico-sort-length-alpha "vertico-sort")
+ (autoload 'vertico-sort-alpha "vertico-sort")
+(register-definition-prefixes "vertico-sort" '("vertico-sort-"))
 
 
 ;;; Generated autoloads from vertico-suspend.el

@@ -5,8 +5,8 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 1.11
-;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "1.11"))
+;; Version: 2.1
+;; Package-Requires: ((emacs "28.1") (compat "30") (vertico "2.1"))
 ;; URL: https://github.com/minad/vertico
 
 ;; This file is part of GNU Emacs.
@@ -30,10 +30,10 @@
 ;; regular buffer in a large window instead of the miniwindow.  The
 ;; buffer display can be enabled by the `vertico-buffer-mode'.
 
-;; The mode can be enabled globally or via `vertico-multiform-mode'
-;; per command or completion category.  Alternatively the buffer
-;; display can be toggled temporarily with M-B if
-;; `vertico-multiform-mode' is enabled.
+;; The mode `vertico-buffer-mode' can be enabled globally or via
+;; `vertico-multiform-mode' per command or completion category.
+;; Alternatively the buffer display can be toggled temporarily with
+;; M-B if `vertico-multiform-mode' is enabled.
 
 ;;; Code:
 
