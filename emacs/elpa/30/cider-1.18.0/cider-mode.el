@@ -673,7 +673,7 @@ The result depends on the buffer CIDER connection type."
 (defface cider-traced-face
   '((((type graphic)) :box (:color "cyan" :line-width -1))
     (t :underline t :background "#066"))
-  "Face used to mark code being traced."
+  "Face used to mark functions being traced or profiled."
   :group 'cider
   :package-version '(cider . "0.11.0"))
 
@@ -805,18 +805,14 @@ with the given LIMIT."
                           (push sym instrumented))
                          (`"\"light-form\""
                           (push sym enlightened)))
-                       ;; The ::traced keywords can be inlined by MrAnderson, so
-                       ;; we catch that case too.
                        ;; FIXME: This matches values too, not just keys.
-                       (when (seq-find (lambda (k) (and (stringp k)
-                                                        (string-match (rx "orchard.trace/traced" eos) k)))
-                                       meta)
+                       (when (or (nrepl-dict-get meta "orchard.trace/traced")
+                                 (nrepl-dict-get meta "orchard.profile/profiled"))
                          (push sym traced))
                        (when (and do-deprecated (nrepl-dict-get meta "deprecated"))
                          (push sym deprecated))
                        (let ((is-macro (nrepl-dict-get meta "macro"))
-                             (is-function (or (nrepl-dict-get meta "fn")
-                                              (nrepl-dict-get meta "arglists"))))
+                             (is-function (nrepl-dict-get meta "fn")))
                          (cond ((and do-macro is-macro)
                                 (push sym macros))
                                ((and do-function is-function)
@@ -982,7 +978,12 @@ before point."
                       (not (eq (char-after) ?\()))
                   (condition-case nil
                       (progn (backward-up-list) t)
-                    (scan-error nil))))
+                    (scan-error nil)
+                    ;; In `clojure-ts-mode', when `backward-up-list' is used,
+                    ;; `user-error' is signaled instead of `scan-error' because
+                    ;; the operation is delegated to the `treesit-up-list'
+                    ;; function.
+                    (user-error nil))))
       (setq beg (min beg (point)))
       ;; If there are locals above the current sexp, reapply them to the
       ;; current sexp.
@@ -1094,16 +1095,21 @@ property."
         ;; `tooltip' has variable-width by default, which looks terrible.
         (set-face-attribute 'tooltip nil :inherit 'unspecified)
         (when cider-dynamic-indentation
-          (setq-local clojure-get-indent-function #'cider--get-symbol-indent))
+          (setq-local clojure-get-indent-function #'cider--get-symbol-indent)
+          (with-suppressed-warnings ((free-vars clojure-ts-get-indent-function))
+            (setq-local clojure-ts-get-indent-function
+                        #'cider--get-symbol-indent)))
         (setq-local clojure-expected-ns-function #'cider-expected-ns)
         (when cider-use-xref
           (add-hook 'xref-backend-functions #'cider--xref-backend cider-xref-fn-depth 'local))
+        (cider-enable-cider-completion-style 1)
         (setq next-error-function #'cider-jump-to-compilation-error))
     ;; Mode cleanup
     (mapc #'kill-local-variable '(next-error-function
                                   x-gtk-use-system-tooltips
                                   font-lock-fontify-region-function
-                                  clojure-get-indent-function))
+                                  clojure-get-indent-function
+                                  clojure-ts-get-indent-function))
     (remove-hook 'completion-at-point-functions #'cider-complete-at-point t)
     (when cider-use-xref
       (remove-hook 'xref-backend-functions #'cider--xref-backend 'local))

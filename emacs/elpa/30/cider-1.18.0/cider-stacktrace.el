@@ -48,12 +48,15 @@
   "Fill column for error messages in stacktrace display.
 If nil, messages will not be wrapped.  If truthy but non-numeric,
 `fill-column' will be used."
-  :type 'list
+  :type '(radio
+          (integer :tag "Fill Column")
+          (const :tag "None" nil)
+          (const :tag "Use default fill-column" t))
   :package-version '(cider . "0.7.0"))
 
 (defcustom cider-stacktrace-default-filters '(tooling dup)
   "Frame types to omit from initial stacktrace display."
-  :type 'list
+  :type '(repeat symbol)
   :package-version '(cider . "0.6.0"))
 
 (defcustom cider-stacktrace-navigate-to-other-window t
@@ -61,10 +64,6 @@ If nil, messages will not be wrapped.  If truthy but non-numeric,
 Pick nil if you prefer the same window as *cider-error*."
   :type 'boolean
   :package-version '(cider . "1.8.0"))
-
-(make-obsolete 'cider-stacktrace-print-length 'cider-stacktrace-print-options "0.20")
-(make-obsolete 'cider-stacktrace-print-level 'cider-stacktrace-print-options "0.20")
-(make-obsolete-variable 'cider-stacktrace-print-options 'cider-print-options "0.21")
 
 (defvar cider-stacktrace-detail-max 2
   "The maximum detail level for causes.")
@@ -76,12 +75,10 @@ Pick nil if you prefer the same window as *cider-error*."
 
 (defconst cider-error-buffer "*cider-error*")
 
-(make-obsolete 'cider-visit-error-buffer 'cider-selector "0.18")
-
 (defcustom cider-stacktrace-suppressed-errors '()
-  "Errors that won't make the stacktrace buffer 'pop-over' your active window.
+  "Errors that won't make the stacktrace buffer pop over your active window.
 The error types are represented as strings."
-  :type 'list
+  :type '(list string)
   :package-version '(cider . "0.12.0"))
 
 ;; Faces
@@ -209,7 +206,9 @@ The error types are represented as strings."
   (setq-local electric-indent-chars nil)
   (setq-local cider-stacktrace-hidden-frame-count 0)
   (setq-local cider-stacktrace-filters cider-stacktrace-default-filters)
-  (setq-local cider-stacktrace-cause-visibility (make-vector 10 0))
+  ;; Expand all exception causes to "detail level 1" by default, meaning they
+  ;; will show the message and the data (but not the stacktrace).
+  (setq-local cider-stacktrace-cause-visibility (make-vector 10 1))
   (buffer-disable-undo))
 
 
@@ -707,8 +706,7 @@ This associates text properties to enable filtering and source navigation."
                 (put-text-property p1 p4 'font-lock-face 'cider-stacktrace-ns-face)
                 (put-text-property p2 p3 'font-lock-face 'cider-stacktrace-fn-face)
                 (put-text-property (line-beginning-position) (line-end-position)
-                                   'cider-stacktrace-frame t)))
-            (insert "\n")))))))
+                                   'cider-stacktrace-frame t)))))))))
 
 (defun cider-stacktrace-render-compile-error (buffer cause)
   "Emit into BUFFER the compile error CAUSE, and enable jumping to it."
@@ -801,34 +799,55 @@ the NAME.  The whole group is prefixed by string INDENT."
 
 (declare-function cider-inspector-inspect-last-exception "cider-inspector")
 
-(defun cider-stacktrace--inspect-class (event)
-  "Mouse handler for EVENT."
+(defun cider-stacktrace--inspect-mouse (event &optional ex-data)
+  "Mouse handler for EVENT.
+If EX-DATA is true, inspect ex-data of the exception instead."
   (interactive "e")
   (let* ((pos (posn-point (event-end event)))
          (window (posn-window (event-end event)))
          (buffer (window-buffer window))
          (inspect-index (with-current-buffer buffer
                           (get-text-property pos 'inspect-index))))
-    (cider-inspector-inspect-last-exception inspect-index)))
+    (cider-inspector-inspect-last-exception inspect-index ex-data)))
 
-(defun cider-stacktrace--inspect-class-kbd ()
-  "Keyboard handler."
+(defun cider-stacktrace--inspect-kbd (&optional ex-data)
+  "Keyboard handler.
+If EX-DATA is true, inspect ex-data of the exception instead."
   (interactive)
   (when-let ((inspect-index (get-text-property (point) 'inspect-index)))
-    (cider-inspector-inspect-last-exception inspect-index)))
+    (cider-inspector-inspect-last-exception inspect-index ex-data)))
+
+(defun cider-stacktrace--inspect-ex-data-mouse (event)
+  "Mouse handler for EVENT."
+  (interactive "e")
+  (cider-stacktrace--inspect-mouse event t))
+
+(defun cider-stacktrace--inspect-ex-data-kbd ()
+  "Keyboard handler."
+  (interactive)
+  (cider-stacktrace--inspect-kbd t))
 
 (defvar cider-stacktrace-exception-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [mouse-1] #'cider-stacktrace--inspect-class)
-    (define-key map (kbd "p") #'cider-stacktrace--inspect-class-kbd)
-    (define-key map (kbd "i") #'cider-stacktrace--inspect-class-kbd)
+    (define-key map [mouse-1] #'cider-stacktrace--inspect-mouse)
+    (define-key map (kbd "p") #'cider-stacktrace--inspect-kbd)
+    (define-key map (kbd "i") #'cider-stacktrace--inspect-kbd)
+    (define-key map (kbd "RET") #'cider-stacktrace--inspect-kbd)
+    map))
+
+(defvar cider-stacktrace-ex-data-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mouse-1] #'cider-stacktrace--inspect-ex-data-mouse)
+    (define-key map (kbd "p") #'cider-stacktrace--inspect-ex-data-kbd)
+    (define-key map (kbd "i") #'cider-stacktrace--inspect-ex-data-kbd)
+    (define-key map (kbd "RET") #'cider-stacktrace--inspect-ex-data-kbd)
     map))
 
 (defun cider-stacktrace-render-cause (buffer cause num note &optional inspect-index)
   "Emit into BUFFER the CAUSE NUM, exception class, message, data, and NOTE,
 make INSPECT-INDEX actionable if present."
   (with-current-buffer buffer
-    (nrepl-dbind-response cause (class message data spec stacktrace)
+    (nrepl-dbind-response cause (class message data spec triage stacktrace)
       (let ((indent "   ")
             (class-face 'cider-stacktrace-error-class-face)
             (message-face 'cider-stacktrace-error-message-face))
@@ -854,18 +873,31 @@ make INSPECT-INDEX actionable if present."
                (propertize (or message "(No message)")
                            'font-lock-face  message-face)
                indent t))
-            (insert "\n")
+            (when triage
+              (insert "\n")
+              (cider-stacktrace-emit-indented
+               (propertize (string-trim triage) 'font-lock-face  message-face)
+               indent nil))
             (when spec
+              (insert "\n")
               (cider-stacktrace--emit-spec-problems spec (concat indent "  ")))
             (when data
-              (cider-stacktrace-emit-indented data indent nil t)))
+              (insert "\n")
+              (cider-propertize-region `(inspect-index
+                                         ,inspect-index
+                                         keymap
+                                         ,cider-stacktrace-ex-data-map
+                                         mouse-face
+                                         highlight)
+                (cider-stacktrace-emit-indented data indent nil t)))
+            (insert "\n"))
           ;; Detail level 2: stacktrace
           (cider-propertize-region '(detail 2)
-            (insert "\n")
             (let ((beg (point))
                   (bg `(:background ,cider-stacktrace-frames-background-color :extend t)))
               (dolist (frame stacktrace)
-                (cider-stacktrace-render-frame buffer frame))
+                (cider-stacktrace-render-frame buffer frame)
+                (insert "\n"))
               (overlay-put (make-overlay beg (point)) 'font-lock-face bg)))
           ;; Add line break between causes, even when collapsed.
           (cider-propertize-region '(detail 0)
@@ -875,10 +907,6 @@ make INSPECT-INDEX actionable if present."
   "Set and apply CAUSES initial visibility, filters, and cursor position."
   (nrepl-dbind-response (car causes) (class)
     (let ((compile-error-p (equal class "clojure.lang.Compiler$CompilerException")))
-      ;; Partially display outermost cause if it's a compiler exception (the
-      ;; description reports reader location of the error).
-      (when compile-error-p
-        (cider-stacktrace-cycle-cause (length causes) 1))
       ;; Fully display innermost cause. This also applies visibility/filters.
       (cider-stacktrace-cycle-cause 1 cider-stacktrace-detail-max)
       ;; Move point (DWIM) to the compile error location if present, or to the
@@ -927,53 +955,19 @@ through the `cider-stacktrace-suppressed-errors' variable."
     (cider-stacktrace-initialize causes)
     (font-lock-refresh-defaults)))
 
-(defun cider-stacktrace--analyze-stacktrace-op (stacktrace)
-  "Return the Cider NREPL op to analyze STACKTRACE."
-  (list "op" "analyze-stacktrace" "stacktrace" stacktrace))
-
-(defun cider-stacktrace--stacktrace-request (stacktrace)
-  "Return the Cider NREPL request to analyze STACKTRACE."
-  (thread-last
-    (map-merge 'list
-               (list (cider-stacktrace--analyze-stacktrace-op stacktrace))
-               (cider--nrepl-print-request-map fill-column))
-    (seq-mapcat #'identity)))
-
-(defun cider-stacktrace--analyze-render (causes)
-  "Render the CAUSES of the stacktrace analysis result."
-  (let ((buffer (get-buffer-create cider-error-buffer)))
-    (with-current-buffer buffer
-      (cider-stacktrace-mode)
-      (cider-stacktrace-render buffer (reverse causes))
-      (display-buffer buffer cider-jump-to-pop-to-buffer-actions))))
-
-(defun cider-stacktrace-analyze-string (stacktrace)
-  "Analyze the STACKTRACE string and show the result."
-  (when (stringp stacktrace)
-    (set-text-properties 0 (length stacktrace) nil stacktrace))
-  (let (causes)
-    (cider-nrepl-send-request
-     (cider-stacktrace--stacktrace-request stacktrace)
-     (lambda (response)
-       (setq causes (nrepl-dbind-response response (class status)
-                      (cond (class (cons response causes))
-                            ((and (member "done" status) causes)
-                             (cider-stacktrace--analyze-render causes)))))))))
-
 (defun cider-stacktrace-analyze-at-point ()
-  "Analyze the stacktrace at point."
+  "Removed."
   (interactive)
-  (cond ((thing-at-point 'sentence)
-         (cider-stacktrace-analyze-string (thing-at-point 'sentence)))
-        ((thing-at-point 'paragraph)
-         (cider-stacktrace-analyze-string (thing-at-point 'paragraph)))
-        (t (cider-stacktrace-analyze-in-region (region-beginning) (region-end)))))
+  (message "This function has been removed.
+You can jump to functions and methods directly from the printed stacktrace now."))
+(make-obsolete 'cider-stacktrace-analyze-at-point nil "1.18")
 
-(defun cider-stacktrace-analyze-in-region (beg end)
-  "Analyze the stacktrace in the region between BEG and END."
-  (interactive (list (region-beginning) (region-end)))
-  (let ((stacktrace (buffer-substring beg end)))
-    (cider-stacktrace-analyze-string stacktrace)))
+(defun cider-stacktrace-analyze-in-region (&rest _)
+  "Removed."
+  (interactive)
+  (message "This function has been removed.
+You can jump to functions and methods directly from the printed stacktrace now."))
+(make-obsolete 'cider-stacktrace-analyze-in-region nil "1.18")
 
 (provide 'cider-stacktrace)
 

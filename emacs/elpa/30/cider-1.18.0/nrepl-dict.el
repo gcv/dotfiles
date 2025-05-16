@@ -33,11 +33,14 @@
 
 ;;; Code:
 (require 'cl-lib)
+(require 'cider-util)
 
 
 (defun nrepl-dict (&rest key-vals)
   "Create nREPL dict from KEY-VALS."
-  (cons 'dict key-vals))
+  (if (cl-evenp (length key-vals))
+      (cons 'dict key-vals)
+    (error "An even number of KEY-VALS is needed to build a dict object")))
 
 (defun nrepl-dict-from-hash (hash)
   "Create nREPL dict from HASH."
@@ -73,7 +76,7 @@ removed in a future release."
     (if (nrepl-dict-p dict)
         ;; Note: The structure of the following expression avoids the
         ;; expensive containment check in nearly all cases, see #3717
-        (or (lax-plist-get (cdr dict) key)
+        (or (cider-plist-get (cdr dict) key)
             ;; TODO: remove DEFAULT argument and the following clause
             (when default
               (and (not (nrepl-dict-contains dict key))
@@ -87,7 +90,7 @@ Return new dict.  Dict is modified by side effects."
       `(dict ,key ,value)
     (if (not (nrepl-dict-p dict))
         (error "Not an nREPL dict object: %s" dict)
-      (setcdr dict (lax-plist-put (cdr dict) key value))
+      (setcdr dict (cider-plist-put (cdr dict) key value))
       dict)))
 
 (defun nrepl-dict-keys (dict)
@@ -173,6 +176,16 @@ FUNCTION should be a function taking two arguments, key and value."
               obj
             (cons obj (car stack)))
           (cdr stack))))
+
+(defun nrepl--alist-to-plist (maybe-alist)
+  "Transform MAYBE-ALIST into a plist if it is an alist.
+Compatibility function for functions that used to accepts nrepl request
+options as alists.  A warning will be printed if alist is received."
+  (let ((first-arg (car-safe maybe-alist)))
+    (if (or (null first-arg) (not (listp first-arg)))
+        maybe-alist ;; It is a plist - don't have to convert
+      (warn "Received alist where it should have been plist: %s" maybe-alist)
+      (seq-mapcat #'identity maybe-alist))))
 
 (defun nrepl--merge (dict1 dict2 &optional no-join)
   "Join nREPL dicts DICT1 and DICT2 in a meaningful way.

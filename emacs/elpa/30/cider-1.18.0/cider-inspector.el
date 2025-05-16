@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'easymenu)
 (require 'seq)
+(require 'cider-client)
 (require 'cider-eval)
 
 ;; ===================================
@@ -78,6 +79,11 @@ The max depth can be also changed interactively within the inspector."
   :type 'boolean
   :package-version '(cider . "0.15.0"))
 
+(defcustom cider-inspector-pretty-print nil
+  "When true, pretty print values in the inspector."
+  :type 'boolean
+  :package-version '(cider . "1.18.0"))
+
 (defcustom cider-inspector-skip-uninteresting t
   "Controls whether to skip over uninteresting values in the inspector.
 Only applies to navigation with `cider-inspector-prev-inspectable-object'
@@ -90,6 +96,12 @@ by clicking or navigating to them by other means."
   "Determines if the inspector buffer should be auto selected."
   :type 'boolean
   :package-version '(cider . "0.27.0"))
+
+(defcustom cider-inspector-display-analytics-hint t
+  "When true, display hint about analytics feature for eligible objects.
+Can be turned to nil once the user sees and acknowledges the feature."
+  :type 'boolean
+  :package-version '(cider . "1.18.0"))
 
 (defvar cider-inspector-uninteresting-regexp
   (concat "nil"                      ; nils are not interesting
@@ -125,6 +137,7 @@ by clicking or navigating to them by other means."
     (define-key map "c" #'cider-inspector-set-max-coll-size)
     (define-key map "C" #'cider-inspector-set-max-nested-depth)
     (define-key map "v" #'cider-inspector-toggle-view-mode)
+    (define-key map "y" #'cider-inspector-display-analytics)
     (define-key map "d" #'cider-inspector-def-current-val)
     (define-key map "t" #'cider-inspector-tap-current-val)
     (define-key map "1" #'cider-inspector-tap-at-point)
@@ -133,6 +146,8 @@ by clicking or navigating to them by other means."
     (define-key map "n" #'cider-inspector-next-inspectable-object)
     (define-key map [(shift tab)] #'cider-inspector-previous-inspectable-object)
     (define-key map "p" #'cider-inspector-previous-inspectable-object)
+    (define-key map "P" #'cider-inspector-toggle-pretty-print)
+    (define-key map (kbd "C-c C-p") #'cider-inspector-print-current-value)
     (define-key map ":" #'cider-inspect-expr-from-inspector)
     (define-key map "f" #'forward-char)
     (define-key map "b" #'backward-char)
@@ -205,22 +220,6 @@ With a second prefix argument it prompts for an expression to eval and inspect."
 These locations are used to emulate `save-excursion' between
 `cider-inspector-push' and `cider-inspector-pop' operations.")
 
-(defvar cider-inspector-page-location-stack nil
-  "A stack used to save point locations in inspector buffers.
-These locations are used to emulate `save-excursion' between
-`cider-inspector-next-page' and `cider-inspector-prev-page' operations.")
-
-(defvar cider-inspector-last-command nil
-  "Contains the value of the most recently used `cider-inspector-*' command.
-This is used as an alternative to the built-in `last-command'.  Whenever we
-invoke any command through \\[execute-extended-command] and its variants,
-the value of `last-command' is not set to the command it invokes.")
-
-(defvar cider-inspector--current-repl nil
-  "Contains the reference to the REPL where inspector was last invoked from.
-This is needed for internal inspector buffer operations (push,
-pop) to execute against the correct REPL session.")
-
 ;; Operations
 ;;;###autoload
 (defun cider-inspect-expr (expr ns)
@@ -229,10 +228,10 @@ Interactively, EXPR is read from the minibuffer, and NS the
 current buffer's namespace."
   (interactive (list (cider-read-from-minibuffer "Inspect expression: " (cider-sexp-at-point))
                      (cider-current-ns)))
-  (setq cider-inspector--current-repl (cider-current-repl))
-  (let ((result (cider-sync-request:inspect-expr expr ns 'v2)))
+  (let ((result (cider-sync-request:inspect-expr expr ns)))
     (when (nrepl-dict-get result "value")
-      (cider-inspector--render-value result 'v2))))
+      (setq cider-inspector-location-stack nil)
+      (cider-inspector--render-value result :next-inspectable))))
 
 (defun cider-inspect-expr-from-inspector ()
   "Performs `cider-inspect-expr' in a way that is suitable from the Inspector itself.
@@ -248,63 +247,60 @@ In particular, it does not read `cider-sexp-at-point'."
   "Pop the last value off the inspector stack and render it.
 See `cider-sync-request:inspect-pop' and `cider-inspector--render-value'."
   (interactive)
-  (setq cider-inspector-last-command 'cider-inspector-pop)
-  (let ((result (cider-sync-request:inspect-pop 'v2)))
+  (let ((result (cider-sync-request:inspect-pop)))
     (when (nrepl-dict-get result "value")
-      (cider-inspector--render-value result 'v2))))
+      (cider-inspector--render-value result :pop))))
 
 (defun cider-inspector-push (idx)
   "Inspect the value at IDX in the inspector stack and render it.
 See `cider-sync-request:inspect-push' and `cider-inspector--render-value'"
   (interactive)
-  (let ((result (cider-sync-request:inspect-push idx 'v2)))
+  (let ((result (cider-sync-request:inspect-push idx)))
     (when (nrepl-dict-get result "value")
       (push (point) cider-inspector-location-stack)
-      (cider-inspector--render-value result 'v2)
-      (cider-inspector-next-inspectable-object 1))))
+      (cider-inspector--render-value result :next-inspectable))))
 
-(defun cider-inspector-inspect-last-exception (index)
-  "Inspects the exception in the cause stack identified by INDEX."
+(defun cider-inspector-inspect-last-exception (index &optional ex-data)
+  "Inspects the exception in the cause stack identified by INDEX.
+If EX-DATA is true, inspect ex-data of the exception instead."
   (interactive)
   (cl-assert (numberp index))
-  (setq cider-inspector--current-repl (cider-current-repl))
-  (let ((result (cider-sync-request:inspect-last-exception index 'v2)))
+  (let ((result (cider-nrepl-send-sync-request
+                 `("op" "inspect-last-exception"
+                   "index" ,index
+                   ,@(when ex-data
+                       `("ex-data" "true")))
+                 (cider-current-repl))))
     (when (nrepl-dict-get result "value")
-      (push (point) cider-inspector-location-stack)
-      (cider-inspector--render-value result 'v2)
-      (cider-inspector-next-inspectable-object 1))))
+      (setq cider-inspector-location-stack nil)
+      (cider-inspector--render-value result :next-inspectable))))
 
 (defun cider-inspector-previous-sibling ()
   "Inspect the previous sibling value within a sequential parent.
 See `cider-sync-request:inspect-previous-sibling' and `cider-inspector--render-value'"
   (interactive)
-  (let ((result (cider-sync-request:inspect-previous-sibling 'v2)))
+  (let ((result (cider-sync-request:inspect-previous-sibling)))
     (when (nrepl-dict-get result "value")
-      (push (point) cider-inspector-location-stack)
-      (cider-inspector--render-value result 'v2)
-      (cider-inspector-next-inspectable-object 1))))
+      (cider-inspector--render-value result))))
 
 (defun cider-inspector-next-sibling ()
   "Inspect the next sibling value within a sequential parent.
 See `cider-sync-request:inspect-next-sibling' and `cider-inspector--render-value'"
   (interactive)
-  (let ((result (cider-sync-request:inspect-next-sibling 'v2)))
+  (let ((result (cider-sync-request:inspect-next-sibling)))
     (when (nrepl-dict-get result "value")
-      (push (point) cider-inspector-location-stack)
-      (cider-inspector--render-value result 'v2)
-      (cider-inspector-next-inspectable-object 1))))
+      (cider-inspector--render-value result))))
 
 (defun cider-inspector--refresh-with-opts (&rest opts)
   "Invokes `inspect-refresh' op with supplied extra OPTS.
 Re-renders the currently inspected value."
   (let ((result (cider-nrepl-send-sync-request `("op" "inspect-refresh" ,@opts)
-                                               cider-inspector--current-repl)))
+                                               (cider-current-repl))))
     (when (nrepl-dict-get result "value")
-      (cider-inspector--render-value result 'v2))))
+      (cider-inspector--render-value result))))
 
 (defun cider-inspector-refresh ()
-  "Re-render the currently inspected value.
-See `cider-sync-request:inspect-refresh' and `cider-inspector--render-value'"
+  "Re-render the currently inspected value."
   (interactive)
   (cider-inspector--refresh-with-opts))
 
@@ -313,20 +309,18 @@ See `cider-sync-request:inspect-refresh' and `cider-inspector--render-value'"
 
 Does nothing if already on the last page."
   (interactive)
-  (push (point) cider-inspector-page-location-stack)
-  (let ((result (cider-sync-request:inspect-next-page 'v2)))
+  (let ((result (cider-sync-request:inspect-next-page)))
     (when (nrepl-dict-get result "value")
-      (cider-inspector--render-value result 'v2))))
+      (cider-inspector--render-value result))))
 
 (defun cider-inspector-prev-page ()
   "Jump to the previous page when expecting a paginated sequence/map.
 
 Does nothing if already on the first page."
   (interactive)
-  (setq cider-inspector-last-command 'cider-inspector-prev-page)
-  (let ((result (cider-sync-request:inspect-prev-page 'v2)))
+  (let ((result (cider-sync-request:inspect-prev-page)))
     (when (nrepl-dict-get result "value")
-      (cider-inspector--render-value result 'v2))))
+      (cider-inspector--render-value result))))
 
 (defun cider-inspector-set-page-size (page-size)
   "Set the page size in pagination mode to the specified PAGE-SIZE.
@@ -352,13 +346,33 @@ MAX-NESTED-DEPTH is the new value."
   (interactive (list (read-number "Max nested depth: " cider-inspector-max-nested-depth)))
   (cider-inspector--refresh-with-opts "max-nested-depth" max-nested-depth))
 
+(defun cider-inspector-display-analytics ()
+  "Toggle the display of analytics for the inspected object."
+  (interactive)
+  ;; Disable hint about analytics feature so that it is never displayed again.
+  (when cider-inspector-display-analytics-hint
+    (customize-set-variable 'cider-inspector-display-analytics-hint nil))
+  (let ((result (cider-nrepl-send-sync-request `("op" "inspect-display-analytics")
+                                               (cider-current-repl))))
+    (when (nrepl-dict-get result "value")
+      (cider-inspector--render-value result :next-inspectable))))
+
+(defun cider-inspector-toggle-pretty-print ()
+  "Toggle the pretty printing of values in the inspector."
+  (interactive)
+  (let ((result (cider-nrepl-send-sync-request
+                 `("op" "inspect-toggle-pretty-print")
+                 (cider-current-repl))))
+    (when (nrepl-dict-get result "value")
+      (cider-inspector--render-value result))))
+
 (defun cider-inspector-toggle-view-mode ()
   "Toggle the view mode of the inspector between normal and object view mode."
   (interactive)
   (let ((result (cider-nrepl-send-sync-request `("op" "inspect-toggle-view-mode")
-                                               cider-inspector--current-repl)))
+                                               (cider-current-repl))))
     (when (nrepl-dict-get result "value")
-      (cider-inspector--render-value result 'v2))))
+      (cider-inspector--render-value result :next-inspectable))))
 
 (defcustom cider-inspector-preferred-var-names nil
   "The preferred var names to be suggested by `cider-inspector-def-current-val'.
@@ -388,234 +402,159 @@ current-namespace."
   (interactive (let ((ns (cider-current-ns)))
                  (list (cider-inspector--read-var-name-from-user ns)
                        ns)))
-  (when-let* ((result (cider-sync-request:inspect-def-current-val ns var-name 'v2)))
-    (cider-inspector--render-value result 'v2)
+  (when-let* ((result (cider-sync-request:inspect-def-current-val ns var-name)))
+    (cider-inspector--render-value result)
     (message "Defined current inspector value as #'%s/%s" ns var-name)))
+
+(defun cider-inspector-print-current-value ()
+  "Print the current value of the inspector."
+  (interactive)
+  (cider-ensure-connected)
+  (cider-ensure-op-supported "inspect-print-current-value")
+  (let ((buffer (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary)))
+    (cider-nrepl-send-request
+     `("op" "inspect-print-current-value"
+       ,@(cider--nrepl-print-request-plist fill-column))
+     (cider-popup-eval-handler buffer)
+     (cider-current-repl))))
 
 (defun cider-inspector-tap-current-val ()
   "Sends the current Inspector current value to `tap>'."
   (interactive)
-  ;; NOTE: we don't set `cider-inspector--current-repl', because we mean to tap the current value of an existing Inspector,
-  ;; so whatever repl was used for it, should be used here.
-  (if cider-inspector--current-repl
-      (let ((response (cider-sync-request:inspect-tap-current-val)))
-        (nrepl-dbind-response response (value err)
-          (if value
-              (message "Successfully tapped the current Inspector value")
-            (error "Could not tap the current Inspector value: %s" err))))
-    (user-error "No CIDER session found")))
+  (let ((response (cider-sync-request:inspect-tap-current-val)))
+    (nrepl-dbind-response response (value err)
+      (if value
+          (message "Successfully tapped the current Inspector value")
+        (error "Could not tap the current Inspector value: %s" err)))))
 
 (defun cider-inspector-tap-at-point ()
   "Sends the current Inspector current sub-value (per POINT) to `tap>'."
   (interactive)
-  ;; NOTE: we don't set `cider-inspector--current-repl', because we mean to tap the current value of an existing Inspector,
-  ;; so whatever repl was used for it, should be used here.
-  (if cider-inspector--current-repl
-      (seq-let (property value) (cider-inspector-property-at-point)
-        (pcase property
-          (`cider-value-idx
-           (let* ((idx value)
-                  (response (cider-sync-request:inspect-tap-indexed idx)))
-             (nrepl-dbind-response response (value err)
-               (if value
-                   (message "Successfully tapped the Inspector item at point")
-                 (error "Could not tap the Inspector item at point: %s" err)))))
-          (_ (error "No object at point"))))
-    (user-error "No CIDER session found")))
+  (seq-let (property value) (cider-inspector-property-at-point)
+    (pcase property
+      (`cider-value-idx
+       (let* ((idx value)
+              (response (cider-sync-request:inspect-tap-indexed idx)))
+         (nrepl-dbind-response response (value err)
+           (if value
+               (message "Successfully tapped the Inspector item at point")
+             (error "Could not tap the Inspector item at point: %s" err)))))
+      (_ (error "No object at point")))))
 
 ;; nREPL interactions
-(defun cider-sync-request:inspect-pop (&optional v2)
-  "Move one level up in the inspector stack,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first '("op" "inspect-pop")
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
 
-(defun cider-sync-request:inspect-push (idx &optional v2)
-  "Inspect the inside value specified by IDX,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first `("op" "inspect-push"
-                                "idx" ,idx)
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+(defun cider-sync-request:inspect-pop ()
+  "Move one level up in the inspector stack."
+  (cider-nrepl-send-sync-request `("op" "inspect-pop")
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-previous-sibling (&optional v2)
-  "Inspect the previous sibling value within a sequential parent,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first `("op" "inspect-previous-sibling")
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+(defun cider-sync-request:inspect-push (idx)
+  "Inspect the inside value specified by IDX."
+  (cider-nrepl-send-sync-request `("op" "inspect-push"
+                                   "idx" ,idx)
+                                 (cider-current-repl)))
 
-;;;###autoload
-(defun cider-sync-request:inspect-last-exception (index &optional v2)
-  "Inspects the exception in the cause stack identified by INDEX,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (cl-assert (numberp index))
-  (let ((result (thread-first `("op" "inspect-last-exception"
-                                "index" ,index)
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+(defun cider-sync-request:inspect-previous-sibling ()
+  "Inspect the previous sibling value within a sequential parent."
+  (cider-nrepl-send-sync-request `("op" "inspect-previous-sibling")
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-next-sibling (&optional v2)
-  "Inspect the next sibling value within a sequential parent,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first `("op" "inspect-next-sibling")
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+(defun cider-sync-request:inspect-next-sibling ()
+  "Inspect the next sibling value within a sequential parent."
+  (cider-nrepl-send-sync-request `("op" "inspect-next-sibling")
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-refresh (&optional v2)
-  "Re-render the currently inspected value,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first '("op" "inspect-refresh")
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+(defun cider-sync-request:inspect-next-page ()
+  "Jump to the next page in paginated collection view."
+  (cider-nrepl-send-sync-request '("op" "inspect-next-page")
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-next-page (&optional v2)
-  "Jump to the next page in paginated collection view,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first '("op" "inspect-next-page")
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+(defun cider-sync-request:inspect-prev-page ()
+  "Jump to the previous page in paginated collection view."
+  (cider-nrepl-send-sync-request '("op" "inspect-prev-page")
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-prev-page (&optional v2)
-  "Jump to the previous page in paginated collection view,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first '("op" "inspect-prev-page")
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
-
-(defun cider-sync-request:inspect-set-page-size (page-size &optional v2)
-  "Set the page size in paginated view to PAGE-SIZE,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
+(defun cider-sync-request:inspect-set-page-size (page-size)
+  "Set the page size in paginated view to PAGE-SIZE."
   (declare (obsolete "use `inspect-refresh' op instead." "1.15.0"))
-  (let ((result (thread-first `("op" "inspect-set-page-size"
-                                "page-size" ,page-size)
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+  (cider-nrepl-send-sync-request `("op" "inspect-set-page-size"
+                                   "page-size" ,page-size)
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-set-max-atom-length (max-length &optional v2)
-  "Set the max length of nested atoms to MAX-LENGTH,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
+(defun cider-sync-request:inspect-set-max-atom-length (max-length)
+  "Set the max length of nested atoms to MAX-LENGTH."
   (declare (obsolete "use `inspect-refresh' op instead." "1.15.0"))
-  (let ((result (thread-first `("op" "inspect-set-max-atom-length"
-                                "max-atom-length" ,max-length)
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+  (cider-nrepl-send-sync-request `("op" "inspect-set-max-atom-length"
+                                   "max-atom-length" ,max-length)
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-set-max-coll-size (max-size &optional v2)
-  "Set the number of nested collection members to display before truncating.
-MAX-SIZE is the new value, V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
+(defun cider-sync-request:inspect-set-max-coll-size (max-size)
+  "Set the maximum number of nested collection members to display to MAX-SIZE."
   (declare (obsolete "use `inspect-refresh' op instead." "1.15.0"))
-  (let ((result (thread-first `("op" "inspect-set-max-coll-size"
-                                "max-coll-size" ,max-size)
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+  (cider-nrepl-send-sync-request `("op" "inspect-set-max-coll-size"
+                                   "max-coll-size" ,max-size)
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-set-max-nested-depth (max-nested-depth &optional v2)
-  "Set the level of nesting for collections to display before truncating.
-MAX-NESTED-DEPTH is the new value, V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
+(defun cider-sync-request:inspect-set-max-nested-depth (max-nested-depth)
+  "Set the level of nesting to display before truncating to MAX-NESTED-DEPTH."
   (declare (obsolete "use `inspect-refresh' op instead." "1.15.0"))
-  (let ((result (thread-first `("op" "inspect-set-max-nested-depth"
-                                "max-nested-depth" ,max-nested-depth)
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+  (cider-nrepl-send-sync-request `("op" "inspect-set-max-nested-depth"
+                                   "max-nested-depth" ,max-nested-depth)
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-def-current-val (ns var-name &optional v2)
-  "Defines a var with VAR-NAME in NS with the current inspector value,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first `("op" "inspect-def-current-value"
-                                "ns" ,ns
-                                "var-name" ,var-name)
-                              (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+(defun cider-sync-request:inspect-def-current-val (ns var-name)
+  "Defines a var with VAR-NAME in NS with the current inspector value."
+  (cider-nrepl-send-sync-request `("op" "inspect-def-current-value"
+                                   "ns" ,ns
+                                   "var-name" ,var-name)
+                                 (cider-current-repl)))
 
 (defun cider-sync-request:inspect-tap-current-val ()
   "Sends current inspector value to tap>."
-  (cider-nrepl-send-sync-request '("op" "inspect-tap-current-value") cider-inspector--current-repl))
+  (cider-nrepl-send-sync-request '("op" "inspect-tap-current-value")
+                                 (cider-current-repl)))
 
 (defun cider-sync-request:inspect-tap-indexed (idx)
   "Sends current inspector sub-value to tap>, per IDX."
   (cl-assert idx)
   (cider-nrepl-send-sync-request `("op" "inspect-tap-indexed"
                                    "idx" ,idx)
-                                 cider-inspector--current-repl))
+                                 (cider-current-repl)))
 
-(defun cider-sync-request:inspect-expr (expr ns &optional v2)
+(defun cider-sync-request:inspect-expr (expr ns)
   "Evaluate EXPR in context of NS and inspect its result.
 Set the page size in paginated view to PAGE-SIZE, maximum length of atomic
 collection members to MAX-ATOM-LENGTH, and maximum size of nested collections to
-MAX-COLL-SIZE if non nil,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry."
-  (let ((result (thread-first
-                  (append (nrepl--eval-request expr ns)
-                          `("inspect" "true"
-                            ,@(when cider-inspector-page-size
-                                `("page-size" ,cider-inspector-page-size))
-                            ,@(when cider-inspector-max-atom-length
-                                `("max-atom-length" ,cider-inspector-max-atom-length))
-                            ,@(when cider-inspector-max-coll-size
-                                `("max-coll-size" ,cider-inspector-max-coll-size))
-                            ,@(when cider-inspector-max-nested-depth
-                                `("max-nested-depth" ,cider-inspector-max-nested-depth))
-                            "spacious" ,(if cider-inspector-spacious-collections
-                                            "true" "false")))
-                  (cider-nrepl-send-sync-request cider-inspector--current-repl))))
-    (if v2
-        result
-      (nrepl-dict-get result "value"))))
+MAX-COLL-SIZE if non nil."
+  (thread-first
+    (append (nrepl--eval-request expr ns)
+            `("inspect" "true"
+              ,@(when cider-inspector-page-size
+                  `("page-size" ,cider-inspector-page-size))
+              ,@(when cider-inspector-max-atom-length
+                  `("max-atom-length" ,cider-inspector-max-atom-length))
+              ,@(when cider-inspector-max-coll-size
+                  `("max-coll-size" ,cider-inspector-max-coll-size))
+              ,@(when cider-inspector-max-nested-depth
+                  `("max-nested-depth" ,cider-inspector-max-nested-depth))
+              ,@(when cider-inspector-display-analytics-hint
+                  `("display-analytics-hint" "true"))
+              ,@(when cider-inspector-pretty-print
+                  `("pretty-print" "true"))))
+    (cider-nrepl-send-sync-request (cider-current-repl))))
 
 (declare-function cider-set-buffer-ns "cider-mode")
 
 ;; Render Inspector from Structured Values
-(defun cider-inspector--render-value (dict-or-value &optional v2)
-  "Render DICT-OR-VALUE, depending on V2."
-  (let* ((value (if v2
+(defun cider-inspector--render-value (dict-or-value &optional point-action)
+  "Render DICT-OR-VALUE.
+It can either be a value directly or a inspector response that contains
+`value' field.
+POINT-ACTION can either be nil (leave point where it is now), `:pop' (pop point
+from stack), `:next-inspectable' (move point to next inspectable object)."
+  (let* ((value (if (nrepl-dict-p dict-or-value)
                     (nrepl-dict-get dict-or-value "value")
                   dict-or-value))
-         (fragments (when v2
-                      (nrepl-dict-get dict-or-value "doc-fragments")))
-         (block-tags (when v2
-                       (nrepl-dict-get dict-or-value "doc-block-tags-fragments")))
          (ns (cider-current-ns))
          (font-size (when-let* ((b (get-buffer cider-inspector-buffer))
                                 (variable 'text-scale-mode-amount)
@@ -628,34 +567,27 @@ instead of just its \"value\" entry."
                                    (local-variable-p 'truncate-lines b)))
          (truncate-lines-p (when-let* ((b (get-buffer cider-inspector-buffer))
                                        (continue truncate-lines-defined))
-                             (buffer-local-value 'truncate-lines b))))
+                             (buffer-local-value 'truncate-lines b)))
+         (repl (cider-current-repl))
+         (current-point (point)))
     (cider-make-popup-buffer cider-inspector-buffer 'cider-inspector-mode 'ancillary)
     (cider-inspector-render cider-inspector-buffer value
                             :font-size font-size
                             :truncate-lines-defined truncate-lines-defined
-                            :truncate-lines-p truncate-lines-p
-                            :fragments fragments
-                            :block-tags block-tags)
+                            :truncate-lines-p truncate-lines-p)
     (cider-popup-buffer-display cider-inspector-buffer cider-inspector-auto-select-buffer)
     (when cider-inspector-fill-frame (delete-other-windows))
-    (ignore-errors (cider-inspector-next-inspectable-object 1))
     (with-current-buffer cider-inspector-buffer
+      (setq cider--ancillary-buffer-repl repl)
       (cider-set-buffer-ns ns)
-      (when (eq cider-inspector-last-command 'cider-inspector-pop)
-        (setq cider-inspector-last-command nil)
-        ;; Prevents error message being displayed when we try to pop
-        ;; from the top-level of a data structure
-        (when cider-inspector-location-stack
-          (goto-char (pop cider-inspector-location-stack))))
+      (cond ((eq point-action nil) (goto-char current-point))
+            ((eq point-action :next-inspectable) (ignore-errors (cider-inspector-next-inspectable-object 1)))
+            ((eq point-action :pop)
+             (goto-char (or (when cider-inspector-location-stack
+                              (pop cider-inspector-location-stack))
+                            current-point)))))))
 
-      (when (eq cider-inspector-last-command 'cider-inspector-prev-page)
-        (setq cider-inspector-last-command nil)
-        ;; Prevents error message being displayed when we try to
-        ;; go to a prev-page from the first page
-        (when cider-inspector-page-location-stack
-          (goto-char (pop cider-inspector-page-location-stack)))))))
-
-(cl-defun cider-inspector-render (buffer str &key font-size truncate-lines-defined truncate-lines-p fragments block-tags)
+(cl-defun cider-inspector-render (buffer str &key font-size truncate-lines-defined truncate-lines-p)
   "Render STR in BUFFER."
   (with-current-buffer buffer
     (cider-inspector-mode)
@@ -665,23 +597,17 @@ instead of just its \"value\" entry."
       (setq-local truncate-lines truncate-lines-p))
     (let ((inhibit-read-only t))
       (condition-case nil
-          (cider-inspector-render* (car (read-from-string str))
-                                   fragments
-                                   block-tags)
+          (cider-inspector-render* (car (read-from-string str)))
         (error (insert "\nInspector error for: " str))))
     (goto-char (point-min))))
 
 (defvar cider-inspector-looking-at-java-p nil)
 
-(defun cider-inspector-render* (elements &optional fragments block-tags)
-  "Render ELEMENTS, and FRAGMENTS, BLOCK-TAGS if present."
+(defun cider-inspector-render* (elements)
+  "Render ELEMENTS."
   (setq cider-inspector-looking-at-java-p nil)
   (dolist (el elements)
-    (cider-inspector-render-el* el))
-  (when fragments
-    (insert "\n\n")
-    (insert (cider--render-docstring (list "doc-fragments" fragments
-                                           "doc-block-tags-fragments" block-tags)))))
+    (cider-inspector-render-el* el)))
 
 (defconst cider--inspector-java-headers
   ;; NOTE "--- Static fields:" "--- Instance fields:" are for objects,

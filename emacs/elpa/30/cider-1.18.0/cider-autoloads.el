@@ -377,12 +377,6 @@ Interactively, EXPR is read from the minibuffer, and NS the
 current buffer's namespace.
 
 (fn EXPR NS)" t)
-(autoload 'cider-sync-request:inspect-last-exception "cider-inspector" "\
-Inspects the exception in the cause stack identified by INDEX,
-V2 indicates if the entire response should be returned
-instead of just its \"value\" entry.
-
-(fn INDEX &optional V2)")
 (register-definition-prefixes "cider-inspector" '("cider-"))
 
 
@@ -525,16 +519,6 @@ refresh functions (defined in `cider-ns-refresh-before-fn' and
 
 ;;; Generated autoloads from cider-profile.el
 
-(autoload 'cider-profile-samples "cider-profile" "\
-Displays current max-sample-count.
-If optional QUERY is specified, set max-sample-count and display new value.
-
-(fn &optional QUERY)" t)
-(autoload 'cider-profile-var-profiled-p "cider-profile" "\
-Displays the profiling status of var under point.
-Prompts for var if none under point or QUERY is present.
-
-(fn QUERY)" t)
 (autoload 'cider-profile-ns-toggle "cider-profile" "\
 Toggle profiling for the ns associated with optional QUERY.
 
@@ -550,12 +534,6 @@ With prefix arg or no symbol at point, prompts for a var.
 (fn QUERY)" t)
 (autoload 'cider-profile-summary "cider-profile" "\
 Display a summary of currently collected profile data." t)
-(autoload 'cider-profile-var-summary "cider-profile" "\
-Display profile data for var under point QUERY.
-Defaults to the symbol at point.  With prefix arg or no symbol at point,
-prompts for a var.
-
-(fn QUERY)" t)
 (autoload 'cider-profile-clear "cider-profile" "\
 Clear any collected profile data." t)
 (register-definition-prefixes "cider-profile" '("cider-profile-"))

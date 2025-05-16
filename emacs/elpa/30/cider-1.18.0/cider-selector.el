@@ -34,7 +34,6 @@
 (require 'cider-client)
 (require 'cider-eval)
 (require 'cider-scratch)
-(require 'cider-profile)
 
 (defconst cider-selector-help-buffer "*CIDER Selector Help*"
   "The name of the selector's help buffer.")
@@ -104,6 +103,7 @@ selects a buffer.
 BODY is a series of forms which are evaluated when the selector
 is chosen.  The returned buffer is selected with
 `switch-to-buffer'."
+  (declare (indent 1))
   (let ((method `(lambda ()
                    (let ((buffer (progn ,@body)))
                      (cond ((not (and buffer (get-buffer buffer)))
@@ -143,7 +143,8 @@ is chosen.  The returned buffer is selected with
   "Most recently visited emacs-lisp-mode buffer."
   (cider-selector--recently-visited-buffer 'emacs-lisp-mode))
 
-(def-cider-selector-method ?q "Abort."
+(def-cider-selector-method ?q
+  "Abort."
   (top-level))
 
 (def-cider-selector-method ?r
@@ -159,10 +160,6 @@ visited cider-repl-mode buffer."
 (def-cider-selector-method ?x
   "*cider-error* buffer."
   cider-error-buffer)
-
-(def-cider-selector-method ?p
-  "*cider-profile* buffer."
-  cider-profile-buffer)
 
 (def-cider-selector-method ?d
   "*cider-doc* buffer."

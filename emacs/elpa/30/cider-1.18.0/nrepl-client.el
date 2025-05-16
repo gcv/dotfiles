@@ -86,19 +86,6 @@
   :prefix "nrepl-"
   :group 'applications)
 
-;; (defcustom nrepl-buffer-name-separator " "
-;;   "Used in constructing the REPL buffer name.
-;; The `nrepl-buffer-name-separator' separates cider-repl from the project name."
-;;   :type '(string)
-;;   :group 'nrepl)
-(make-obsolete-variable 'nrepl-buffer-name-separator 'cider-session-name-template "0.18")
-
-;; (defcustom nrepl-buffer-name-show-port nil
-;;   "Show the connection port in the nrepl REPL buffer name, if set to t."
-;;   :type 'boolean
-;;   :group 'nrepl)
-(make-obsolete-variable 'nrepl-buffer-name-show-port 'cider-session-name-template "0.18")
-
 (defcustom nrepl-connected-hook nil
   "List of functions to call when connecting to the nREPL server."
   :type 'hook)
@@ -436,13 +423,30 @@ decoded message or nil if the strings were completely decoded."
       (erase-buffer)
       (cons string-q response-q))))
 
+(defun nrepl--bencode-dict (dict)
+  "Encode DICT with bencode.
+According to the Bittorrent protocol specification[1], when bencoding
+dictionaries, keys must be strings and appear in sorted order (sorted as
+raw strings, not alphanumerics).
+
+[1] https://www.bittorrent.org/beps/bep_0003.html#bencoding"
+  (let* ((sorted-keys (sort (nrepl-dict-keys dict)
+                            (lambda (a b)
+                              (string< a b))))
+         (sorted-dict (nrepl-dict)))
+    (dolist (k sorted-keys sorted-dict)
+      (nrepl-dict-put sorted-dict
+                      k
+                      (nrepl-dict-get dict k)))
+    (mapconcat #'nrepl-bencode (cdr sorted-dict) "")))
+
 (defun nrepl-bencode (object)
   "Encode OBJECT with bencode.
 Integers, lists and nrepl-dicts are treated according to bencode
 specification.  Everything else is encoded as string."
   (cond
    ((integerp object) (format "i%de" object))
-   ((nrepl-dict-p object) (format "d%se" (mapconcat #'nrepl-bencode (cdr object) "")))
+   ((nrepl-dict-p object) (format "d%se" (nrepl--bencode-dict object)))
    ((listp object) (format "l%se" (mapconcat #'nrepl-bencode object "")))
    (t (format "%s:%s" (string-bytes object) object))))
 
@@ -833,13 +837,13 @@ to the REPL."
                                            truncated-handler)
   "Make a response handler for connection BUFFER.
 A handler is a function that takes one argument - response received from
-the server process.  The response is an alist that contains at least 'id'
-and 'session' keys.  Other standard response keys are 'value', 'out', 'err',
-and 'status'.
+the server process.  The response is an alist that contains at least `id'
+and `session' keys.  Other standard response keys are `value', `out', `err',
+and `status'.
 
 The presence of a particular key determines the type of the response.  For
-example, if 'value' key is present, the response is of type 'value', if
-'out' key is present the response is 'stdout' etc.
+example, if `value' key is present, the response is of type `value', if
+`out' key is present the response is `stdout' etc.
 
 Depending on the type, the handler dispatches the appropriate value to one
 of the supplied handlers: VALUE-HANDLER, STDOUT-HANDLER, STDERR-HANDLER,
@@ -886,7 +890,7 @@ the corresponding type of response."
              (when (member "interrupted" status)
                (message "Evaluation interrupted."))
              (when (member "eval-error" status)
-               (funcall (or eval-error-handler nrepl-err-handler)))
+               (funcall (or eval-error-handler nrepl-err-handler) buffer))
              (when (member "namespace-not-found" status)
                (message "Namespace `%s' not found." ns))
              (when (member "need-input" status)
@@ -926,7 +930,7 @@ the standard session."
     (when-let* ((session (if tooling nrepl-tooling-session nrepl-session)))
       (setq request (append request `("session" ,session))))
     (let* ((id (nrepl-next-request-id connection))
-           (request (cons 'dict (lax-plist-put request "id" id)))
+           (request (cons 'dict (cider-plist-put request "id" id)))
            (message (nrepl-bencode request)))
       (nrepl-log-message request 'request)
       (puthash id callback nrepl-pending-requests)
@@ -1045,12 +1049,16 @@ ADDITIONAL-PARAMS is a plist to be appended to the request message."
                       connection
                       tooling))
 
+(defvar cider-version)
+
 (defun nrepl-sync-request:clone (connection &optional tooling)
   "Sent a :clone request to create a new client session.
 The request is dispatched via CONNECTION.
 Optional argument TOOLING Tooling is set to t if wanting the tooling session
 from CONNECTION."
-  (nrepl-send-sync-request '("op" "clone")
+  (nrepl-send-sync-request `("op" "clone"
+                             "client-name" "CIDER"
+                             "client-version" ,cider-version)
                            connection
                            nil tooling))
 
@@ -1219,7 +1227,7 @@ up."
 (defun nrepl-server-sentinel (process event)
   "Handle nREPL server PROCESS EVENT.
 If the nREPL PROCESS failed to initiate and encountered a fatal EVENT
-signal, raise an 'error'.  Additionally, if the EVENT signal is SIGHUP,
+signal, raise an `error'.  Additionally, if the EVENT signal is SIGHUP,
 close any existing client connections."
   ;; only interested on fatal signals.
   (when (not (process-live-p process))
@@ -1316,8 +1324,8 @@ described by `nrepl-message-buffer-name-template'."
     ;; append a time-stamp to the message before logging it
     ;; the time-stamps are quite useful for debugging
     (setq msg (cons (car msg)
-                    (lax-plist-put (cdr msg) "time-stamp"
-                                   (format-time-string "%Y-%m-%0d %H:%M:%S.%N"))))
+                    (cider-plist-put (cdr msg) "time-stamp"
+                                     (format-time-string "%Y-%m-%0d %H:%M:%S.%N"))))
     (with-current-buffer (nrepl-messages-buffer (current-buffer))
       (setq buffer-read-only nil)
       (when (> (buffer-size) nrepl-message-buffer-max-size)
@@ -1326,7 +1334,7 @@ described by `nrepl-message-buffer-name-template'."
         (delete-region (point-min) (- (point) 1)))
       (goto-char (point-max))
       (nrepl-log-pp-object (nrepl-decorate-msg msg type)
-                           (nrepl-log--message-color (lax-plist-get (cdr msg) "id"))
+                           (nrepl-log--message-color (cider-plist-get (cdr msg) "id"))
                            t)
       (when-let* ((win (get-buffer-window)))
         (set-window-point win (point-max)))
@@ -1510,8 +1518,6 @@ The default buffer name is *nrepl-error*."
     (when-let* ((win (get-buffer-window)))
       (set-window-point win (point-max)))
     (setq buffer-read-only t)))
-
-(make-obsolete 'nrepl-default-client-buffer-builder nil "0.18")
 
 (provide 'nrepl-client)
 

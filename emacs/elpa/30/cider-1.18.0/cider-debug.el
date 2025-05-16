@@ -97,10 +97,6 @@ configure `cider-debug-prompt' instead."
                  (const :tag "Both" both))
   :package-version '(cider . "0.9.1"))
 
-(make-obsolete 'cider-debug-print-length 'cider-debug-print-options "0.20")
-(make-obsolete 'cider-debug-print-level 'cider-debug-print-options "0.20")
-(make-obsolete-variable 'cider-debug-print-options 'cider-print-options "0.21")
-
 
 ;;; Implementation
 (declare-function cider-browse-ns--combined-vars-with-meta "cider-browse-ns")
@@ -143,11 +139,8 @@ configure `cider-debug-prompt' instead."
 (defun cider--debug-init-connection ()
   "Initialize a connection with the cider.debug middleware."
   (cider-nrepl-send-request
-   (thread-last
-     (map-merge 'list
-                '(("op" "init-debugger"))
-                (cider--nrepl-print-request-map fill-column))
-     (seq-mapcat #'identity))
+   `("op" "init-debugger"
+     ,@(cider--nrepl-print-request-plist fill-column))
    #'cider--debug-response-handler))
 
 
@@ -683,8 +676,7 @@ needed.  It is expected to contain at least \"key\", \"input-type\", and
              (setq cider--debug-mode-response response)
              (cider--debug-mode 1)))
           (when inspect
-            (setq cider-inspector--current-repl (cider-current-repl))
-            (cider-inspector--render-value inspect)))
+            (cider-inspector--render-value inspect :next-inspectable)))
       ;; If something goes wrong, we send a "quit" or the session hangs.
       (error (cider-debug-mode-send-reply ":quit" key)
              (message "Error encountered while handling the debug message: %S" e)))))
