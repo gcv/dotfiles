@@ -1,0 +1,13 @@
+[
+  {
+    "context": "Editor",
+    "bindings": {
+      "cmd-p": "command_palette::Toggle",
+      "cmd-o": "file_finder::Toggle",
+      "cmd-shift-o": "workspace::Open",
+      "cmd-i": "outline::Toggle",
+      "cmd-[": "pane::GoBack",
+      "cmd-]": "pane::GoForward"
+    }
+  }
+]

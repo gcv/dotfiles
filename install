@@ -63,6 +63,7 @@ parse_params() {
     link_starship=0
     link_tmux=0
     link_wezterm=0
+    link_zed=0
     link_zsh=0
 
     while :; do
@@ -89,6 +90,7 @@ parse_params() {
             --starship) link_all=0; link_starship=1 ;;
             --tmux) link_all=0; link_tmux=1 ;;
             --wezterm) link_all=0; link_wezterm=1 ;;
+            --zed) link_all=0; link_zed=1 ;;
             --zsh) link_all=0; link_zsh=1 ;;
             -?*) die "unknown option: $1" ;;
             *) break ;;
@@ -266,6 +268,10 @@ fi
 
 if [[ $link_all = "1" || $link_wezterm = "1" ]]; then
     link "public/wezterm" ".config/wezterm"
+fi
+
+if [[ $link_all = "1" || $link_zed = "1" ]]; then
+    link "public/zed" ".config/zed"
 fi
 
 if [[ $link_all = "1" || $link_zsh = "1" ]]; then
