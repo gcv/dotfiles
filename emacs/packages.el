@@ -512,6 +512,7 @@
     (setq-local tab-width 4))
 
   (add-hook 'go-mode-hook #'/go-mode-hook)
+  (add-hook 'go-dot-mod-mode-hook #'/go-mode-hook)
   )
 
 
