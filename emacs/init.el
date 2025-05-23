@@ -806,7 +806,11 @@
 ;;; project.el
 (use-feature project
   :bind
-  (("C-c p f" . project-find-file)))
+  (("C-c p f" . project-find-file))
+  :config
+  (require 'cl-lib)
+  (setopt project-vc-extra-root-markers (cl-adjoin ".jj" project-vc-extra-root-markers))
+  )
 
 
 ;;; abbrev
