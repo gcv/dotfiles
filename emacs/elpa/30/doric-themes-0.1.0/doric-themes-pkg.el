@@ -1,0 +1,2 @@
+;; Generated package description from doric-themes.el  -*- mode: lisp-data; no-byte-compile: t -*-
+(define-package "doric-themes" "0.1.0" "Minimalist themes" '((emacs "29.1")) :commit "88e924ea72d1a26196d418297a44e523167dfdde" :authors '(("Protesilaos Stavrou" . "info@protesilaos.com")) :maintainer '("Protesilaos Stavrou" . "info@protesilaos.com") :keywords '("faces" "theme" "accessibility") :url "https://github.com/protesilaos/doric-themes")
