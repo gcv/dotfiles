@@ -230,7 +230,7 @@ tmuxl() {
         echo "session name is required" >&2
         return 1
     fi
-   SHELL=$(command -v zsh) tmux new -A -s "$1" $SHELL
+    SHELL="$(command -v zsh)"; tmux new -A -s "$1" "${SHELL}" \; set-option default-shell "${SHELL}"
 }
 
 [ "${UNAME}" = "Darwin" ] && [ -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ] && \
