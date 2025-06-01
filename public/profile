@@ -225,6 +225,14 @@ if command_exists mc; then # use Midnight Commander directory-following wrapper
     fi
 fi
 
+tmuxl() {
+    if [ -z "$1" ]; then
+        echo "session name is required" >&2
+        return 1
+    fi
+   SHELL=$(command -v zsh) tmux new -A -s "$1" $SHELL
+}
+
 [ "${UNAME}" = "Darwin" ] && [ -x "/usr/libexec/ApplicationFirewall/socketfilterfw" ] && \
     alias firewall="sudo /usr/libexec/ApplicationFirewall/socketfilterfw"
 
