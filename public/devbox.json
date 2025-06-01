@@ -103,7 +103,8 @@
     "yazi@latest",
     "yt-dlp@latest",
     "zoxide@latest",
-    "zsh@latest"
+    "zsh@latest",
+    "gitu@latest"
   ],
   "shell": {
     "init_hook": [
