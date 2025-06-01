@@ -555,9 +555,13 @@
   :custom
   (gptel-display-buffer-action nil)
   :config
+  (setq gptel-api-key (getenv "OPENAI_API_KEY"))
   (gptel-make-anthropic "Claude"
     :stream t
     :key (getenv "ANTHROPIC_API_KEY"))
+  (gptel-make-gemini "Gemini"
+    :stream t
+    :key (getenv "GEMINI_API_KEY"))
   )
 
 
