@@ -17,6 +17,7 @@ cursor-click-to-move = true
 
 # TODO: Maybe add another binding here to reload Ghostty configuration?
 keybind = cmd+shift+comma=unbind
+keybind = cmd+enter=unbind
 
 # Set up Cmd-Shift versions of common Mac shortcuts:
 # - T new tab
@@ -107,9 +108,9 @@ keybind = cmd+comma=text:\x1B,
 #keybind = cmd+grave_accent=text:\x1B`
 keybind = cmd+period=text:\x1B.
 keybind = cmd+slash=text:\x1B/
-keybind = cmd+minus=text:\x1B-
-keybind = cmd+plus=text:\x1B+
-keybind = cmd+equal=text:\x1B=
+#keybind = cmd+minus=text:\x1B-
+#keybind = cmd+plus=text:\x1B+
+#keybind = cmd+equal=text:\x1B=
 keybind = cmd+left_bracket=text:\x1B[
 keybind = cmd+right_bracket=text:\x1B]
 keybind = cmd+backslash=text:\x1B\\
@@ -123,8 +124,8 @@ keybind = cmd+shift+comma=text:\x1B<
 keybind = cmd+shift+period=text:\x1B>
 keybind = cmd+shift+slash=text:\x1B?
 keybind = cmd+shift+minus=text:\x1B_
-keybind = cmd+shift+plus=text:\x1B+
-keybind = cmd+shift+equal=text:\x1B+
+#keybind = cmd+shift+plus=text:\x1B+
+#keybind = cmd+shift+equal=text:\x1B+
 #keybind = cmd+shift+left_bracket=text:\x1B{
 #keybind = cmd+shift+right_bracket=text:\x1B}
 keybind = cmd+shift+backslash=text:\x1B|
