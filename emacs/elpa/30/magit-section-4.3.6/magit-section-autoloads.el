@@ -38,6 +38,35 @@ See `auto-revert-mode' for more information on Auto-Revert mode.
 (register-definition-prefixes "magit-autorevert" '("auto-revert-buffer" "magit-"))
 
 
+;;; Generated autoloads from magit-dired.el
+
+(autoload 'magit-dired-jump "magit-dired" "\
+Visit file at point using Dired.
+With a prefix argument, visit in another window.  If there
+is no file at point, then instead visit `default-directory'.
+
+(fn &optional OTHER-WINDOW)" t)
+(autoload 'magit-dired-stage "magit-dired" "\
+In Dired, staged all marked files or the file at point." t)
+(autoload 'magit-dired-unstage "magit-dired" "\
+In Dired, unstaged all marked files or the file at point." t)
+(autoload 'magit-dired-log "magit-dired" "\
+In Dired, show log for all marked files or the directory if none are marked.
+
+(fn &optional FOLLOW)" t)
+(autoload 'magit-dired-am-apply-patches "magit-dired" "\
+In Dired, apply the marked (or next ARG) files as patches.
+If inside a repository, then apply in that.  Otherwise prompt
+for a repository.
+
+(fn REPO &optional ARG)" t)
+(autoload 'magit-do-async-shell-command "magit-dired" "\
+Open FILE with `dired-do-async-shell-command'.
+Interactively, open the file at point.
+
+(fn FILE)" t)
+
+
 ;;; Generated autoloads from magit-section.el
 
 (autoload 'magit-add-section-hook "magit-section" "\
