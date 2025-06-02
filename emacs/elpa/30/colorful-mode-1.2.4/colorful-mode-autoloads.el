@@ -28,6 +28,8 @@ evaluate the variable `colorful-mode'.
 The mode's hook is called both when the mode is enabled and when it is
 disabled.
 
+\\{colorful-mode-map}
+
 (fn &optional ARG)" t)
 (autoload 'turn-on-colorful-mode "colorful-mode" "\
 Turn on `colorful-mode' mode in the current buffer.")
