@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler and Consult contributors
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
-;; Version: 2.3
+;; Version: 2.4
 ;; Package-Requires: ((emacs "28.1") (compat "30"))
 ;; URL: https://github.com/minad/consult
 ;; Keywords: matching, files, completion
@@ -573,7 +573,7 @@ We use invalid characters outside the Unicode range.")
 (defvar consult--gc-threshold (* 64 1024 1024)
   "Large GC threshold for temporary increase.")
 
-(defvar consult--gc-percentage 0.5
+(defvar consult--gc-percentage 0.2
   "Large GC percentage for temporary increase.")
 
 (defvar consult--process-chunk (* 1024 1024)
