@@ -7,7 +7,7 @@
 #+texinfo_dir_category: Emacs misc features
 #+texinfo_dir_title: Transient: (transient).
 #+texinfo_dir_desc: Transient Commands
-#+subtitle: for version 0.8.8
+#+subtitle: for version 0.9.0
 
 #+setupfile: .orgconfig
 
@@ -20,7 +20,7 @@ resource to get over that hurdle is Psionic K's interactive tutorial,
 available at https://github.com/positron-solutions/transient-showcase.
 
 #+texinfo: @noindent
-This manual is for Transient version 0.8.8.
+This manual is for Transient version 0.9.0.
 
 #+texinfo: @insertcopying
 :END:
@@ -860,11 +860,14 @@ with an example:
 #+end_src
 
 This inserts a new infix argument to toggle the ~--reverse~ argument
-after the infix argument that toggles ~-3~ in ~magit-patch-apply~.
+after the infix argument that is bound to ~-3~ in ~magit-patch-apply~.
 
 The following functions share a few arguments:
 
 - {{{var(PREFIX)}}} is a transient prefix command, a symbol.
+
+  PREFIX may also by a symbol identifying a separately defined group,
+  which can be included in multiple prefixes.  See TODO.
 
 - {{{var(SUFFIX)}}} is a transient infix or suffix specification in the same form
   as expected by ~transient-define-prefix~.  Note that an infix is a
@@ -875,24 +878,32 @@ The following functions share a few arguments:
   {{{var(SUFFIX)}}} may also be a group in the same form as expected by
   ~transient-define-prefix~.  See [[*Group Specifications]].
 
-- {{{var(LOC)}}} is a command, a key vector, a key description (a string as
-  returned by ~key-description~), or a list specifying coordinates (the
-  last element may also be a command or key).  For example ~(1 0 -1)~
+- {{{var(LOC)}}} is a key description (a string as returned by ~key-description~
+  and understood by ~kbd~), a command, a symbol identifying an included
+  group, or a vector specifying coordinates.  For example, ~[1 0 -1]~
   identifies the last suffix (~-1~) of the first subgroup (~0~) of the
   second group (~1~).
 
-  If {{{var(LOC)}}} is a list of coordinates, then it can be used to identify a
-  group, not just an individual suffix command.
+  If {{{var(LOC)}}} is a vector, then it can be used to identify a group, not
+  just an individual suffix command.  The last element in a vector may
+  also be a symbol or key, in which case the preceding elements must
+  match a group and the last element is looked up within that group.
 
   The function ~transient-get-suffix~ can be useful to determine whether
-  a certain coordination list identifies the suffix or group that you
+  a certain coordinate vector identifies the suffix or group that you
   expect it to identify.  In hairy cases it may be necessary to look
-  at the definition of the transient prefix command.
+  at the internal layout representation, which you can access using
+  the function ~transient--get-layout~.
 
 These functions operate on the information stored in the
-~transient--layout~ property of the {{{var(PREFIX)}}} symbol.  Suffix entries in
-that tree are not objects but have the form {{{codevar((LEVEL CLASS PLIST))}}}, where
-{{{var(PLIST)}}} should set at least ~:key~, ~:description~ and ~:command~.
+~transient--layout~ property of the {{{var(PREFIX)}}} symbol.  Elements in that
+tree are not objects but have the form {{{codevar((CLASS PLIST) for suffixes)}}} and
+[CLASS PLIST CHILDREN] for groups.  At the root of the tree is an
+element [N nil CHILDREN], where N is the version of the layout format,
+currently and hopefully for a long time 2.  While that element looks
+like a group vector, that element does not count when identifying a
+group using a coordinate vector, i.e., [0] is its first child, not the
+root element itself.
 
 - Function: transient-insert-suffix prefix loc suffix &optional keep-other ::
 - Function: transient-append-suffix prefix loc suffix &optional keep-other ::
@@ -906,8 +917,8 @@ that tree are not objects but have the form {{{codevar((LEVEL CLASS PLIST))}}}, 
   they are never active at the same time, see [[*Predicate Slots]].
 
   Unfortunately both false-positives and false-negatives are possible.
-  To deal with the former use non-~nil~ {{{var(KEEP-OTHER.)}}}  The symbol ~always~
-  prevents the removal of a false-positive in some cases where other
+  To deal with the former, use non-~nil~ {{{var(KEEP-OTHER.)}}}  The symbol ~always~
+  prevents the removal of a false-positive, in some cases where other
   non-~nil~ values would fail.  To deal with false-negatives remove the
   conflicting binding separately, using ~transient-remove-suffix~.
 
@@ -929,6 +940,19 @@ that tree are not objects but have the form {{{codevar((LEVEL CLASS PLIST))}}}, 
 
   This function edits the suffix or group at {{{var(LOC)}}} in {{{var(PREFIX)}}}, by setting
   the {{{var(PROP)}}} of its plist to {{{var(VALUE)}}}.
+
+Some prefix commands share suffixes, which are separately and then
+included in each prefix when it is defined.  The inclusion is done by
+reference, the included suffix groups are not inlined by default.  So
+if you change, for example, the key binding for an argument in
+~magit-diff~ (~d~) the same change also applies to ~magit-diff-refresh~ (~D~).
+In the rare case that this is not desirable use ~transient-inline-group~
+before making changes to included suffixes.
+
+- Function: transient-inline-group PREFIX GROUP ::
+
+  This function inlines the included GROUP into PREFIX, by replacing
+  the symbol GROUP with its expanded layout in the layout of PREFIX.
 
 Most of these functions do not signal an error if they cannot perform
 the requested modification.  The functions that insert new suffixes
@@ -1094,6 +1118,22 @@ that is used to invoke that transient.
 
   For example, the scope of the ~magit-branch-configure~ transient is
   the branch whose variables are being configured.
+
+Sometimes multiple prefix commands share a common set of suffixes.
+For example, while ~magit-diff~ (~d~) and ~magit-diff-refresh~ (~D~) offer
+different suffixes to actually create or update a diff, they both
+offer the same infix arguments to control how that diff is formatted.
+Such shared groups should be defined using ~transient-define-group~
+and then included in multiple prefixes, by using the symbol that
+identifies the group in the prefix definition, in a location where
+you would otherwise use a group vector.  If an included group is
+placed at the top-level of a prefix (as opposed of inside inside
+a vector as a child group), then the symbol should be quoted.
+
+- Macro: transient-define-group name group... ::
+
+  This macro define one or more groups and stores them in symbol NAME.
+  GROUPs have the same form as for ~transient-define-prefix~.
 
 ** Binding Suffix and Infix Commands
 
@@ -1285,7 +1325,15 @@ the object's values just for the binding inside this transient.
 - {{{var(LEVEL)}}} is the suffix level, an integer between 1 and 7.  See
   [[*Enabling and Disabling Suffixes]].
 
-- {{{var(KEY)}}} is the key binding, either a vector or key description string.
+- KEY is the key binding, a string in the format returned by
+  ~describe-key~ and understood by ~kbd~.
+
+  That format is more permissive than the one accepted by ~key-valid-p~.
+  Being more permissive makes it possible, for example, to write the
+  key binding, which toggles the ~-a~ command line argument, as "-a",
+  instead of having to write "- a".  Likewise additional spaces can be
+  added, which is not removed when displaying the binding in the menu,
+  which is useful for alignment purposes.
 
 - {{{var(DESCRIPTION)}}} is the description, either a string or a function that
   takes zero or one arguments (the suffix object) and returns a string.
@@ -2014,8 +2062,8 @@ object should not affect later invocations.
   take these form:
 
   #+begin_src emacs-lisp
-    ([LEVEL] :info DESCRIPTION [KEYWORD VALUE]...)
-    ([LEVEL] :info* DESCRIPTION [KEYWORD VALUE]...)
+    (:info DESCRIPTION [KEYWORD VALUE]...)
+    (:info* DESCRIPTION [KEYWORD VALUE]...)
   #+end_src
 
   The ~:info~ and ~:info*~ keyword arguments replaces the ~:description~
@@ -2034,6 +2082,25 @@ object should not affect later invocations.
   value of lisp variables.  This class is not fully featured yet and
   it is somewhat likely that future improvements won't be fully
   backward compatible.
+
+- The ~transient-cons-option~ class is intended for situations where
+  ~transient-args~ should return an alist, instead of a list of strings
+  (arguments).  Such suffixes can be specified in prefix definitions
+  like so:
+
+  #+begin_src emacs-lisp
+    (:cons OPTION :key KEY [KEYWORD VALUE]...)
+  #+end_src
+
+  OPTION may be something other than a string, likely a keyword or
+  some other symbol, it is used as the ~car~ of the cons-cell.  When
+  using such an inline definition ~:key~ has to be specified.  In most
+  cases ~:reader~ should also be specified.  When defining such a suffix
+  separately, the "alist key" has to be specified using the ~:variable~
+  keyword argument.
+
+  This class is still experimental it is somewhat likely that future
+  improvements won't be fully backward compatible.
 
 - The ~transient-describe-target~ class is used by the command
   ~transient-describe~.
@@ -2410,7 +2477,15 @@ and ~advice*~ slots (see [[*Slots of ~transient-suffix~]]) are defined.
 :UNNUMBERED: notoc
 :END:
 
-- ~key~ The key, a key vector or a key description string.
+- ~key~ is the key binding, a string in the format returned by
+  ~describe-key~ and understood by ~kbd~.
+
+  That format is more permissive than the one accepted by ~key-valid-p~.
+  Being more permissive makes it possible, for example, to write the
+  key binding, which toggles the ~-a~ command line argument, as "-a",
+  instead of having to write "- a".  Likewise additional spaces can be
+  added, which is not removed when displaying the binding in the menu,
+  which is useful for alignment purposes.
 
 - ~command~ The command, a symbol.
 

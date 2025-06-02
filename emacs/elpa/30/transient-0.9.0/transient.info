@@ -1,4 +1,4 @@
-This is docrbYgZo.info, produced by makeinfo version 6.8 from
+This is docdcopNP.info, produced by makeinfo version 6.8 from
 transient.texi.
 
      Copyright (C) 2018–2025 Free Software Foundation, Inc.
@@ -19,7 +19,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docrbYgZo.info,  Node: Top,  Next: Introduction,  Up: (dir)
+File: docdcopNP.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
 Transient User and Developer Manual
 ***********************************
@@ -32,7 +32,7 @@ used to implement similar menus in other packages.
 resource to get over that hurdle is Psionic K’s interactive tutorial,
 available at <https://github.com/positron-solutions/transient-showcase>.
 
-This manual is for Transient version 0.8.8.
+This manual is for Transient version 0.9.0.
 
      Copyright (C) 2018–2025 Free Software Foundation, Inc.
 
@@ -112,7 +112,7 @@ Suffix Methods
 
 
 
-File: docrbYgZo.info,  Node: Introduction,  Next: Usage,  Prev: Top,  Up: Top
+File: docdcopNP.info,  Node: Introduction,  Next: Usage,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -185,7 +185,7 @@ you’ve tried it, it’s hard to go back to the ‘C-u what can I do here
 again?’ way.
 
 
-File: docrbYgZo.info,  Node: Usage,  Next: Modifying Existing Transients,  Prev: Introduction,  Up: Top
+File: docdcopNP.info,  Node: Usage,  Next: Modifying Existing Transients,  Prev: Introduction,  Up: Top
 
 2 Usage
 *******
@@ -203,7 +203,7 @@ File: docrbYgZo.info,  Node: Usage,  Next: Modifying Existing Transients,  Prev:
 * Configuration::
 
 
-File: docrbYgZo.info,  Node: Invoking Transients,  Next: Aborting and Resuming Transients,  Up: Usage
+File: docdcopNP.info,  Node: Invoking Transients,  Next: Aborting and Resuming Transients,  Up: Usage
 
 2.1 Invoking Transients
 =======================
@@ -229,7 +229,7 @@ commands may also set some value by side-effect, e.g., by setting the
 value of some variable.
 
 
-File: docrbYgZo.info,  Node: Aborting and Resuming Transients,  Next: Common Suffix Commands,  Prev: Invoking Transients,  Up: Usage
+File: docdcopNP.info,  Node: Aborting and Resuming Transients,  Next: Common Suffix Commands,  Prev: Invoking Transients,  Up: Usage
 
 2.2 Aborting and Resuming Transients
 ====================================
@@ -286,7 +286,7 @@ Key: M-x transient-resume
      if any.
 
 
-File: docrbYgZo.info,  Node: Common Suffix Commands,  Next: Saving Values,  Prev: Aborting and Resuming Transients,  Up: Usage
+File: docdcopNP.info,  Node: Common Suffix Commands,  Next: Saving Values,  Prev: Aborting and Resuming Transients,  Up: Usage
 
 2.3 Common Suffix Commands
 ==========================
@@ -344,7 +344,7 @@ Key: C-x t (transient-toggle-common)
 one of the following sections.
 
 
-File: docrbYgZo.info,  Node: Saving Values,  Next: Using History,  Prev: Common Suffix Commands,  Up: Usage
+File: docdcopNP.info,  Node: Saving Values,  Next: Using History,  Prev: Common Suffix Commands,  Up: Usage
 
 2.4 Saving Values
 =================
@@ -390,7 +390,7 @@ their handling of buffer-local values is actually a bit more complicated
 than outlined above and even customizable.
 
 
-File: docrbYgZo.info,  Node: Using History,  Next: Getting Help for Suffix Commands,  Prev: Saving Values,  Up: Usage
+File: docdcopNP.info,  Node: Using History,  Next: Getting Help for Suffix Commands,  Prev: Saving Values,  Up: Usage
 
 2.5 Using History
 =================
@@ -441,7 +441,7 @@ User Option: transient-history-limit
      the history is saved in ‘transient-history-file’.
 
 
-File: docrbYgZo.info,  Node: Getting Help for Suffix Commands,  Next: Enabling and Disabling Suffixes,  Prev: Using History,  Up: Usage
+File: docdcopNP.info,  Node: Getting Help for Suffix Commands,  Next: Enabling and Disabling Suffixes,  Prev: Using History,  Up: Usage
 
 2.6 Getting Help for Suffix Commands
 ====================================
@@ -469,7 +469,7 @@ supported.  The fallback is to show the command’s documentation string,
 for non-infix suffixes this is usually appropriate.
 
 
-File: docrbYgZo.info,  Node: Enabling and Disabling Suffixes,  Next: Other Commands,  Prev: Getting Help for Suffix Commands,  Up: Usage
+File: docdcopNP.info,  Node: Enabling and Disabling Suffixes,  Next: Other Commands,  Prev: Getting Help for Suffix Commands,  Up: Usage
 
 2.7 Enabling and Disabling Suffixes
 ===================================
@@ -584,7 +584,7 @@ Function: transient-set-default-level suffix level
      new feature, so you might encounter this quite often.)
 
 
-File: docrbYgZo.info,  Node: Other Commands,  Next: Configuration,  Prev: Enabling and Disabling Suffixes,  Up: Usage
+File: docdcopNP.info,  Node: Other Commands,  Next: Configuration,  Prev: Enabling and Disabling Suffixes,  Up: Usage
 
 2.8 Other Commands
 ==================
@@ -621,7 +621,7 @@ Command: transient-toggle-docstrings
      is used when displaying docstrings.
 
 
-File: docrbYgZo.info,  Node: Configuration,  Prev: Other Commands,  Up: Usage
+File: docdcopNP.info,  Node: Configuration,  Prev: Other Commands,  Up: Usage
 
 2.9 Configuration
 =================
@@ -925,7 +925,7 @@ Variable: transient-setup-buffer-hook
      buffer is current and empty when this hook is runs.
 
 
-File: docrbYgZo.info,  Node: Modifying Existing Transients,  Next: Defining New Commands,  Prev: Usage,  Up: Top
+File: docdcopNP.info,  Node: Modifying Existing Transients,  Next: Defining New Commands,  Prev: Usage,  Up: Top
 
 3 Modifying Existing Transients
 *******************************
@@ -939,11 +939,14 @@ an example:
        '("-R" "Apply in reverse" "--reverse"))
 
    This inserts a new infix argument to toggle the ‘--reverse’ argument
-after the infix argument that toggles ‘-3’ in ‘magit-patch-apply’.
+after the infix argument that is bound to ‘-3’ in ‘magit-patch-apply’.
 
    The following functions share a few arguments:
 
    • PREFIX is a transient prefix command, a symbol.
+
+     PREFIX may also by a symbol identifying a separately defined group,
+     which can be included in multiple prefixes.  See TODO.
 
    • SUFFIX is a transient infix or suffix specification in the same
      form as expected by ‘transient-define-prefix’.  Note that an infix
@@ -954,24 +957,33 @@ after the infix argument that toggles ‘-3’ in ‘magit-patch-apply’.
      SUFFIX may also be a group in the same form as expected by
      ‘transient-define-prefix’.  See *note Group Specifications::.
 
-   • LOC is a command, a key vector, a key description (a string as
-     returned by ‘key-description’), or a list specifying coordinates
-     (the last element may also be a command or key).  For example ‘(1 0
-     -1)’ identifies the last suffix (‘-1’) of the first subgroup (‘0’)
-     of the second group (‘1’).
+   • LOC is a key description (a string as returned by ‘key-description’
+     and understood by ‘kbd’), a command, a symbol identifying an
+     included group, or a vector specifying coordinates.  For example,
+     ‘[1 0 -1]’ identifies the last suffix (‘-1’) of the first subgroup
+     (‘0’) of the second group (‘1’).
 
-     If LOC is a list of coordinates, then it can be used to identify a
-     group, not just an individual suffix command.
+     If LOC is a vector, then it can be used to identify a group, not
+     just an individual suffix command.  The last element in a vector
+     may also be a symbol or key, in which case the preceding elements
+     must match a group and the last element is looked up within that
+     group.
 
      The function ‘transient-get-suffix’ can be useful to determine
-     whether a certain coordination list identifies the suffix or group
+     whether a certain coordinate vector identifies the suffix or group
      that you expect it to identify.  In hairy cases it may be necessary
-     to look at the definition of the transient prefix command.
+     to look at the internal layout representation, which you can access
+     using the function ‘transient--get-layout’.
 
    These functions operate on the information stored in the
-‘transient--layout’ property of the PREFIX symbol.  Suffix entries in
-that tree are not objects but have the form ‘(LEVEL CLASS PLIST)’, where
-PLIST should set at least ‘:key’, ‘:description’ and ‘:command’.
+‘transient--layout’ property of the PREFIX symbol.  Elements in that
+tree are not objects but have the form ‘(CLASS PLIST) for suffixes’ and
+[CLASS PLIST CHILDREN] for groups.  At the root of the tree is an
+element [N nil CHILDREN], where N is the version of the layout format,
+currently and hopefully for a long time 2.  While that element looks
+like a group vector, that element does not count when identifying a
+group using a coordinate vector, i.e., [0] is its first child, not the
+root element itself.
 
 Function: transient-insert-suffix prefix loc suffix &optional keep-other
 
@@ -986,8 +998,8 @@ Function: transient-append-suffix prefix loc suffix &optional keep-other
      Predicate Slots::.
 
      Unfortunately both false-positives and false-negatives are
-     possible.  To deal with the former use non-‘nil’ KEEP-OTHER.  The
-     symbol ‘always’ prevents the removal of a false-positive in some
+     possible.  To deal with the former, use non-‘nil’ KEEP-OTHER.  The
+     symbol ‘always’ prevents the removal of a false-positive, in some
      cases where other non-‘nil’ values would fail.  To deal with
      false-negatives remove the conflicting binding separately, using
      ‘transient-remove-suffix’.
@@ -1007,6 +1019,18 @@ Function: transient-suffix-put prefix loc prop value
      This function edits the suffix or group at LOC in PREFIX, by
      setting the PROP of its plist to VALUE.
 
+   Some prefix commands share suffixes, which are separately and then
+included in each prefix when it is defined.  The inclusion is done by
+reference, the included suffix groups are not inlined by default.  So if
+you change, for example, the key binding for an argument in ‘magit-diff’
+(‘d’) the same change also applies to ‘magit-diff-refresh’ (‘D’).  In
+the rare case that this is not desirable use ‘transient-inline-group’
+before making changes to included suffixes.
+
+Function: transient-inline-group PREFIX GROUP
+     This function inlines the included GROUP into PREFIX, by replacing
+     the symbol GROUP with its expanded layout in the layout of PREFIX.
+
    Most of these functions do not signal an error if they cannot perform
 the requested modification.  The functions that insert new suffixes show
 a warning if LOC cannot be found in PREFIX without signaling an error.
@@ -1018,7 +1042,7 @@ an error by default.  If you really want the insert functions to also
 signal an error, set ‘transient-error-on-insert-failure’ to ‘t’.
 
 
-File: docrbYgZo.info,  Node: Defining New Commands,  Next: Classes and Methods,  Prev: Modifying Existing Transients,  Up: Top
+File: docdcopNP.info,  Node: Defining New Commands,  Next: Classes and Methods,  Prev: Modifying Existing Transients,  Up: Top
 
 4 Defining New Commands
 ***********************
@@ -1036,7 +1060,7 @@ File: docrbYgZo.info,  Node: Defining New Commands,  Next: Classes and Methods, 
 * Transient State::
 
 
-File: docrbYgZo.info,  Node: Technical Introduction,  Next: Defining Transients,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Technical Introduction,  Next: Defining Transients,  Up: Defining New Commands
 
 4.1 Technical Introduction
 ==========================
@@ -1136,7 +1160,7 @@ incomplete key sequences, and those cannot be interrupted with prefix
 commands.)
 
 
-File: docrbYgZo.info,  Node: Defining Transients,  Next: Binding Suffix and Infix Commands,  Prev: Technical Introduction,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Defining Transients,  Next: Binding Suffix and Infix Commands,  Prev: Technical Introduction,  Up: Defining New Commands
 
 4.2 Defining Transients
 =======================
@@ -1189,8 +1213,23 @@ Macro: transient-define-prefix name arglist [docstring] [keyword value]... group
      For example, the scope of the ‘magit-branch-configure’ transient is
      the branch whose variables are being configured.
 
+   Sometimes multiple prefix commands share a common set of suffixes.
+For example, while ‘magit-diff’ (‘d’) and ‘magit-diff-refresh’ (‘D’)
+offer different suffixes to actually create or update a diff, they both
+offer the same infix arguments to control how that diff is formatted.
+Such shared groups should be defined using ‘transient-define-group’ and
+then included in multiple prefixes, by using the symbol that identifies
+the group in the prefix definition, in a location where you would
+otherwise use a group vector.  If an included group is placed at the
+top-level of a prefix (as opposed of inside inside a vector as a child
+group), then the symbol should be quoted.
+
+Macro: transient-define-group name group...
+     This macro define one or more groups and stores them in symbol
+     NAME.  GROUPs have the same form as for ‘transient-define-prefix’.
+
 
-File: docrbYgZo.info,  Node: Binding Suffix and Infix Commands,  Next: Defining Suffix and Infix Commands,  Prev: Defining Transients,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Binding Suffix and Infix Commands,  Next: Defining Suffix and Infix Commands,  Prev: Defining Transients,  Up: Defining New Commands
 
 4.3 Binding Suffix and Infix Commands
 =====================================
@@ -1212,7 +1251,7 @@ used in ‘transient-define-prefix’.
 * Suffix Specifications::
 
 
-File: docrbYgZo.info,  Node: Group Specifications,  Next: Suffix Specifications,  Up: Binding Suffix and Infix Commands
+File: docdcopNP.info,  Node: Group Specifications,  Next: Suffix Specifications,  Up: Binding Suffix and Infix Commands
 
 4.3.1 Group Specifications
 --------------------------
@@ -1357,7 +1396,7 @@ This feature is experimental and should be avoided.
    The form of suffix specifications is documented in the next node.
 
 
-File: docrbYgZo.info,  Node: Suffix Specifications,  Prev: Group Specifications,  Up: Binding Suffix and Infix Commands
+File: docdcopNP.info,  Node: Suffix Specifications,  Prev: Group Specifications,  Up: Binding Suffix and Infix Commands
 
 4.3.2 Suffix Specifications
 ---------------------------
@@ -1390,7 +1429,16 @@ transient.
    • LEVEL is the suffix level, an integer between 1 and 7.  See *note
      Enabling and Disabling Suffixes::.
 
-   • KEY is the key binding, either a vector or key description string.
+   • KEY is the key binding, a string in the format returned by
+     ‘describe-key’ and understood by ‘kbd’.
+
+     That format is more permissive than the one accepted by
+     ‘key-valid-p’.  Being more permissive makes it possible, for
+     example, to write the key binding, which toggles the ‘-a’ command
+     line argument, as "-a", instead of having to write "- a".  Likewise
+     additional spaces can be added, which is not removed when
+     displaying the binding in the menu, which is useful for alignment
+     purposes.
 
    • DESCRIPTION is the description, either a string or a function that
      takes zero or one arguments (the suffix object) and returns a
@@ -1457,7 +1505,7 @@ supported.  Inside suffix bindings, the use of ‘##’ is not supported
 anywhere but directly following a keyword symbol.
 
 
-File: docrbYgZo.info,  Node: Defining Suffix and Infix Commands,  Next: Using Infix Arguments,  Prev: Binding Suffix and Infix Commands,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Defining Suffix and Infix Commands,  Next: Using Infix Arguments,  Prev: Binding Suffix and Infix Commands,  Up: Defining New Commands
 
 4.4 Defining Suffix and Infix Commands
 ======================================
@@ -1520,7 +1568,7 @@ Macro: transient-define-argument name arglist [docstring] [keyword value]...
      ‘transient-define-infix’ instead.
 
 
-File: docrbYgZo.info,  Node: Using Infix Arguments,  Next: Using Prefix Scope,  Prev: Defining Suffix and Infix Commands,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Using Infix Arguments,  Next: Using Prefix Scope,  Prev: Defining Suffix and Infix Commands,  Up: Defining New Commands
 
 4.5 Using Infix Arguments
 =========================
@@ -1572,7 +1620,7 @@ Function: transient-suffixes prefix
      if the current command is not being invoked from PREFIX.
 
 
-File: docrbYgZo.info,  Node: Using Prefix Scope,  Next: Current Suffix Command,  Prev: Using Infix Arguments,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Using Prefix Scope,  Next: Current Suffix Command,  Prev: Using Infix Arguments,  Up: Defining New Commands
 
 4.6 Using Prefix Scope
 ======================
@@ -1619,7 +1667,7 @@ Function: transient-scope prefixes classes
      If no prefix matches, return nil.
 
 
-File: docrbYgZo.info,  Node: Current Suffix Command,  Next: Current Prefix Command,  Prev: Using Prefix Scope,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Current Suffix Command,  Next: Current Prefix Command,  Prev: Using Prefix Scope,  Up: Defining New Commands
 
 4.7 Current Suffix Command
 ==========================
@@ -1672,7 +1720,7 @@ Variable: transient-current-suffixes
      the value.
 
 
-File: docrbYgZo.info,  Node: Current Prefix Command,  Next: Transient State,  Prev: Current Suffix Command,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Current Prefix Command,  Next: Transient State,  Prev: Current Suffix Command,  Up: Defining New Commands
 
 4.8 Current Prefix Command
 ==========================
@@ -1727,7 +1775,7 @@ Function: transient-active-prefix &optional prefixes
      object is only returned if it matches one of the PREFIXES.
 
 
-File: docrbYgZo.info,  Node: Transient State,  Prev: Current Prefix Command,  Up: Defining New Commands
+File: docdcopNP.info,  Node: Transient State,  Prev: Current Prefix Command,  Up: Defining New Commands
 
 4.9 Transient State
 ===================
@@ -1935,7 +1983,7 @@ Function: transient–do-suspend
      This is used when the user pressed ‘C-z’.
 
 
-File: docrbYgZo.info,  Node: Classes and Methods,  Next: FAQ,  Prev: Defining New Commands,  Up: Top
+File: docdcopNP.info,  Node: Classes and Methods,  Next: FAQ,  Prev: Defining New Commands,  Up: Top
 
 5 Classes and Methods
 *********************
@@ -1988,7 +2036,7 @@ This happens in two ways.
 * Predicate Slots::
 
 
-File: docrbYgZo.info,  Node: Group Classes,  Next: Group Methods,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Group Classes,  Next: Group Methods,  Up: Classes and Methods
 
 5.1 Group Classes
 =================
@@ -2036,7 +2084,7 @@ beginning of the class specification, e.g., ‘[:class transient-columns
      their elements.
 
 
-File: docrbYgZo.info,  Node: Group Methods,  Next: Prefix Classes,  Prev: Group Classes,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Group Methods,  Next: Prefix Classes,  Prev: Group Classes,  Up: Classes and Methods
 
 5.2 Group Methods
 =================
@@ -2066,7 +2114,7 @@ Function: transient–insert-group group
      buffer.
 
 
-File: docrbYgZo.info,  Node: Prefix Classes,  Next: Suffix Classes,  Prev: Group Methods,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Prefix Classes,  Next: Suffix Classes,  Prev: Group Methods,  Up: Classes and Methods
 
 5.3 Prefix Classes
 ==================
@@ -2084,7 +2132,7 @@ is active, a clone of that object is stored in the variable
 to the active transient’s object should not affect later invocations.
 
 
-File: docrbYgZo.info,  Node: Suffix Classes,  Next: Prefix Methods,  Prev: Prefix Classes,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Suffix Classes,  Next: Prefix Methods,  Prev: Prefix Classes,  Up: Classes and Methods
 
 5.4 Suffix Classes
 ==================
@@ -2134,8 +2182,8 @@ File: docrbYgZo.info,  Node: Suffix Classes,  Next: Prefix Methods,  Prev: Prefi
      that anywhere a suffix can appear.  Display-only suffix
      specifications take these form:
 
-          ([LEVEL] :info DESCRIPTION [KEYWORD VALUE]...)
-          ([LEVEL] :info* DESCRIPTION [KEYWORD VALUE]...)
+          (:info DESCRIPTION [KEYWORD VALUE]...)
+          (:info* DESCRIPTION [KEYWORD VALUE]...)
 
      The ‘:info’ and ‘:info*’ keyword arguments replaces the
      ‘:description’ keyword used for other suffix classes.  Other
@@ -2155,6 +2203,23 @@ File: docrbYgZo.info,  Node: Suffix Classes,  Next: Prefix Methods,  Prev: Prefi
      and it is somewhat likely that future improvements won’t be fully
      backward compatible.
 
+   • The ‘transient-cons-option’ class is intended for situations where
+     ‘transient-args’ should return an alist, instead of a list of
+     strings (arguments).  Such suffixes can be specified in prefix
+     definitions like so:
+
+          (:cons OPTION :key KEY [KEYWORD VALUE]...)
+
+     OPTION may be something other than a string, likely a keyword or
+     some other symbol, it is used as the ‘car’ of the cons-cell.  When
+     using such an inline definition ‘:key’ has to be specified.  In
+     most cases ‘:reader’ should also be specified.  When defining such
+     a suffix separately, the "alist key" has to be specified using the
+     ‘:variable’ keyword argument.
+
+     This class is still experimental it is somewhat likely that future
+     improvements won’t be fully backward compatible.
+
    • The ‘transient-describe-target’ class is used by the command
      ‘transient-describe’.
 
@@ -2167,7 +2232,7 @@ classes will likely get generalized and added to Transient.  For now
 they are very much subject to change and not documented.
 
 
-File: docrbYgZo.info,  Node: Prefix Methods,  Next: Suffix Methods,  Prev: Suffix Classes,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Prefix Methods,  Next: Suffix Methods,  Prev: Suffix Classes,  Up: Classes and Methods
 
 5.5 Prefix Methods
 ==================
@@ -2222,7 +2287,7 @@ prefix commands.  The default method effectively describes the command
 using ‘describe-function’.
 
 
-File: docrbYgZo.info,  Node: Suffix Methods,  Next: Prefix Slots,  Prev: Prefix Methods,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Suffix Methods,  Next: Prefix Slots,  Prev: Prefix Methods,  Up: Classes and Methods
 
 5.6 Suffix Methods
 ==================
@@ -2236,7 +2301,7 @@ functions use ‘describe-function’.
 * Suffix Format Methods::
 
 
-File: docrbYgZo.info,  Node: Suffix Value Methods,  Next: Suffix Format Methods,  Up: Suffix Methods
+File: docdcopNP.info,  Node: Suffix Value Methods,  Next: Suffix Format Methods,  Up: Suffix Methods
 
 5.6.1 Suffix Value Methods
 --------------------------
@@ -2314,7 +2379,7 @@ Function: transient-init-scope obj
      default implementation, which is a noop.
 
 
-File: docrbYgZo.info,  Node: Suffix Format Methods,  Prev: Suffix Value Methods,  Up: Suffix Methods
+File: docdcopNP.info,  Node: Suffix Format Methods,  Prev: Suffix Value Methods,  Up: Suffix Methods
 
 5.6.2 Suffix Format Methods
 ---------------------------
@@ -2384,7 +2449,7 @@ Function: transient-show-summary obj &optional return
      of showing it.  This is used when a tooltip is needed.
 
 
-File: docrbYgZo.info,  Node: Prefix Slots,  Next: Suffix Slots,  Prev: Suffix Methods,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Prefix Slots,  Next: Suffix Slots,  Prev: Suffix Methods,  Up: Classes and Methods
 
 5.7 Prefix Slots
 ================
@@ -2509,7 +2574,7 @@ set in calls to ‘transient-define-prefix’.
      properly exited, even in case of an error.
 
 
-File: docrbYgZo.info,  Node: Suffix Slots,  Next: Predicate Slots,  Prev: Prefix Slots,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Suffix Slots,  Next: Predicate Slots,  Prev: Prefix Slots,  Up: Classes and Methods
 
 5.8 Suffix Slots
 ================
@@ -2534,7 +2599,16 @@ Slots of transient-suffix::) are defined.
 Slots of ‘transient-suffix’
 ---------------------------
 
-   • ‘key’ The key, a key vector or a key description string.
+   • ‘key’ is the key binding, a string in the format returned by
+     ‘describe-key’ and understood by ‘kbd’.
+
+     That format is more permissive than the one accepted by
+     ‘key-valid-p’.  Being more permissive makes it possible, for
+     example, to write the key binding, which toggles the ‘-a’ command
+     line argument, as "-a", instead of having to write "- a".  Likewise
+     additional spaces can be added, which is not removed when
+     displaying the binding in the menu, which is useful for alignment
+     purposes.
 
    • ‘command’ The command, a symbol.
 
@@ -2675,7 +2749,7 @@ Slots of ‘transient-switches’
      E.g., ‘\\(--\\(topo\\|author-date\\|date\\)-order\\)’.
 
 
-File: docrbYgZo.info,  Node: Predicate Slots,  Prev: Suffix Slots,  Up: Classes and Methods
+File: docdcopNP.info,  Node: Predicate Slots,  Prev: Suffix Slots,  Up: Classes and Methods
 
 5.9 Predicate Slots
 ===================
@@ -2724,7 +2798,7 @@ depending on user preference.  See *note Enabling and Disabling
 Suffixes::.
 
 
-File: docrbYgZo.info,  Node: FAQ,  Next: Keystroke Index,  Prev: Classes and Methods,  Up: Top
+File: docdcopNP.info,  Node: FAQ,  Next: Keystroke Index,  Prev: Classes and Methods,  Up: Top
 
 Appendix A FAQ
 **************
@@ -2794,25 +2868,25 @@ have implemented a function, ‘transient-bind-q-to-quit’ that makes the
 necessary changes.  See its documentation string for more information.
 
 
-File: docrbYgZo.info,  Node: Keystroke Index,  Next: Command and Function Index,  Prev: FAQ,  Up: Top
+File: docdcopNP.info,  Node: Keystroke Index,  Next: Command and Function Index,  Prev: FAQ,  Up: Top
 
 Appendix B Keystroke Index
 **************************
 
 
-File: docrbYgZo.info,  Node: Command and Function Index,  Next: Variable Index,  Prev: Keystroke Index,  Up: Top
+File: docdcopNP.info,  Node: Command and Function Index,  Next: Variable Index,  Prev: Keystroke Index,  Up: Top
 
 Appendix C Command and Function Index
 *************************************
 
 
-File: docrbYgZo.info,  Node: Variable Index,  Next: Concept Index,  Prev: Command and Function Index,  Up: Top
+File: docdcopNP.info,  Node: Variable Index,  Next: Concept Index,  Prev: Command and Function Index,  Up: Top
 
 Appendix D Variable Index
 *************************
 
 
-File: docrbYgZo.info,  Node: Concept Index,  Next: GNU General Public License,  Prev: Variable Index,  Up: Top
+File: docdcopNP.info,  Node: Concept Index,  Next: GNU General Public License,  Prev: Variable Index,  Up: Top
 
 Appendix E Concept Index
 ************************
@@ -2857,7 +2931,7 @@ Appendix E Concept Index
 * value history:                         Using History.        (line  6)
 
 
-File: docrbYgZo.info,  Node: GNU General Public License,  Prev: Concept Index,  Up: Top
+File: docdcopNP.info,  Node: GNU General Public License,  Prev: Concept Index,  Up: Top
 
 Appendix F GNU General Public License
 *************************************
@@ -3597,56 +3671,56 @@ Ref: Auxiliary Options32968
 Ref: Developer Options37508
 Ref: Hook Variables39023
 Node: Modifying Existing Transients39539
-Node: Defining New Commands43999
-Node: Technical Introduction44439
-Node: Defining Transients50148
-Node: Binding Suffix and Infix Commands52600
-Node: Group Specifications53458
-Node: Suffix Specifications60394
-Node: Defining Suffix and Infix Commands64957
-Node: Using Infix Arguments67963
-Node: Using Prefix Scope70336
-Node: Current Suffix Command72338
-Node: Current Prefix Command74687
-Node: Transient State77227
-Ref: Pre-commands for Infixes81578
-Ref: Pre-commands for Suffixes82095
-Ref: Pre-commands for Non-Suffixes84527
-Ref: Special Pre-Commands85654
-Node: Classes and Methods86153
-Node: Group Classes88240
-Node: Group Methods90167
-Node: Prefix Classes91419
-Node: Suffix Classes92264
-Node: Prefix Methods96244
-Node: Suffix Methods98621
-Node: Suffix Value Methods98942
-Node: Suffix Format Methods102263
-Node: Prefix Slots105237
-Ref: Value and Scope105387
-Ref: Behavior106866
-Ref: Appearance108207
-Ref: Documentation108893
-Ref: Internal109513
-Node: Suffix Slots110868
-Ref: Slots of transient-child111236
-Ref: Slots of transient-suffix111694
-Ref: Slots of transient-infix114061
-Ref: Slots of transient-variable117357
-Ref: Slots of transient-switches117459
-Node: Predicate Slots117822
-Node: FAQ120167
-Ref: Can I control how the menu buffer is displayed?120296
-Ref: How can I copy text from the menu buffer?120620
-Ref: How can I autoload prefix and suffix commands?121110
-Ref: How does Transient compare to prefix keys and universal arguments?121584
-Ref: How does Transient compare to Magit-Popup and Hydra?121827
-Ref: Why does q not quit popups anymore?122021
-Node: Keystroke Index123124
-Node: Command and Function Index123284
-Node: Variable Index123477
-Node: Concept Index123644
-Node: GNU General Public License126380
+Node: Defining New Commands45349
+Node: Technical Introduction45789
+Node: Defining Transients51498
+Node: Binding Suffix and Infix Commands54833
+Node: Group Specifications55691
+Node: Suffix Specifications62627
+Node: Defining Suffix and Infix Commands67664
+Node: Using Infix Arguments70670
+Node: Using Prefix Scope73043
+Node: Current Suffix Command75045
+Node: Current Prefix Command77394
+Node: Transient State79934
+Ref: Pre-commands for Infixes84285
+Ref: Pre-commands for Suffixes84802
+Ref: Pre-commands for Non-Suffixes87234
+Ref: Special Pre-Commands88361
+Node: Classes and Methods88860
+Node: Group Classes90947
+Node: Group Methods92874
+Node: Prefix Classes94126
+Node: Suffix Classes94971
+Node: Prefix Methods99769
+Node: Suffix Methods102146
+Node: Suffix Value Methods102467
+Node: Suffix Format Methods105788
+Node: Prefix Slots108762
+Ref: Value and Scope108912
+Ref: Behavior110391
+Ref: Appearance111732
+Ref: Documentation112418
+Ref: Internal113038
+Node: Suffix Slots114393
+Ref: Slots of transient-child114761
+Ref: Slots of transient-suffix115219
+Ref: Slots of transient-infix118072
+Ref: Slots of transient-variable121368
+Ref: Slots of transient-switches121470
+Node: Predicate Slots121833
+Node: FAQ124178
+Ref: Can I control how the menu buffer is displayed?124307
+Ref: How can I copy text from the menu buffer?124631
+Ref: How can I autoload prefix and suffix commands?125121
+Ref: How does Transient compare to prefix keys and universal arguments?125595
+Ref: How does Transient compare to Magit-Popup and Hydra?125838
+Ref: Why does q not quit popups anymore?126032
+Node: Keystroke Index127135
+Node: Command and Function Index127295
+Node: Variable Index127488
+Node: Concept Index127655
+Node: GNU General Public License130391
 
 End Tag Table
 
