@@ -27,7 +27,11 @@
 (autoload 'git-rebase-current-line "git-rebase" "\
 Parse current line into a `git-rebase-action' instance.
 If the current line isn't recognized as a rebase line, an
-instance with all nil values is returned.")
+instance with all nil values is returned, unless optional
+BATCH is non-nil, in which case nil is returned.  Non-nil
+BATCH also ignores commented lines.
+
+(fn &optional BATCH)")
 (autoload 'git-rebase-mode "git-rebase" "\
 Major mode for editing of a Git rebase file.
 
