@@ -1,4 +1,4 @@
-This is docB4cQXc.info, produced by makeinfo version 6.8 from
+This is docdbAmSM.info, produced by makeinfo version 6.8 from
 racket-mode.texi.
 
 Copyright (C) 2013-2025 by Greg Hendershott.
@@ -10,7 +10,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docB4cQXc.info,  Node: Top,  Next: Introduction,  Up: (dir)
+File: docdbAmSM.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
 Racket Mode
 ***********
@@ -333,7 +333,7 @@ All
 
 
 
-File: docB4cQXc.info,  Node: Introduction,  Next: Install Update and Uninstall,  Prev: Top,  Up: Top
+File: docdbAmSM.info,  Node: Introduction,  Next: Install Update and Uninstall,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -367,7 +367,7 @@ variety of Emacs major and minor modes, including:
 (https://www.paypal.me/greghendershott).
 
 
-File: docB4cQXc.info,  Node: Install Update and Uninstall,  Next: Configure,  Prev: Introduction,  Up: Top
+File: docdbAmSM.info,  Node: Install Update and Uninstall,  Next: Configure,  Prev: Introduction,  Up: Top
 
 2 Install, Update, and Uninstall
 ********************************
@@ -391,7 +391,7 @@ Stable”), and is available as a “rolling release” from NonGNU ELPA.
 * Update::
 
 
-File: docB4cQXc.info,  Node: Use Emacs 281 or newer with NonGNU ELPA,  Next: Configure Emacs to use MELPA,  Up: Install Update and Uninstall
+File: docdbAmSM.info,  Node: Use Emacs 281 or newer with NonGNU ELPA,  Next: Configure Emacs to use MELPA,  Up: Install Update and Uninstall
 
 2.1 Use Emacs 28.1 or newer with NonGNU ELPA
 ============================================
@@ -403,7 +403,7 @@ Install::.
    With older versions of Emacs, you can use MELPA.
 
 
-File: docB4cQXc.info,  Node: Configure Emacs to use MELPA,  Next: Install,  Prev: Use Emacs 281 or newer with NonGNU ELPA,  Up: Install Update and Uninstall
+File: docdbAmSM.info,  Node: Configure Emacs to use MELPA,  Next: Install,  Prev: Use Emacs 281 or newer with NonGNU ELPA,  Up: Install Update and Uninstall
 
 2.2 Configure Emacs to use MELPA
 ================================
@@ -427,7 +427,7 @@ instructions and the latest trouble-shooting tips, please see
      Please see <https://melpa.org/#/getting-started>.
 
 
-File: docB4cQXc.info,  Node: Install,  Next: Minimal Racket,  Prev: Configure Emacs to use MELPA,  Up: Install Update and Uninstall
+File: docdbAmSM.info,  Node: Install,  Next: Minimal Racket,  Prev: Configure Emacs to use MELPA,  Up: Install Update and Uninstall
 
 2.3 Install
 ===========
@@ -445,7 +445,7 @@ When Emacs is configured to use NonGNU ELPA or MELPA:
      Please see <https://melpa.org/#/getting-started>.
 
 
-File: docB4cQXc.info,  Node: Minimal Racket,  Next: Uninstall,  Prev: Install,  Up: Install Update and Uninstall
+File: docdbAmSM.info,  Node: Minimal Racket,  Next: Uninstall,  Prev: Install,  Up: Install Update and Uninstall
 
 2.4 Minimal Racket
 ==================
@@ -475,7 +475,7 @@ On the other hand, if you leave ‘gui-lib’ installed, you should be
 careful to run the Racket Mode back end using ‘xvfb-run racket’.
 
 
-File: docB4cQXc.info,  Node: Uninstall,  Next: Update,  Prev: Minimal Racket,  Up: Install Update and Uninstall
+File: docdbAmSM.info,  Node: Uninstall,  Next: Update,  Prev: Minimal Racket,  Up: Install Update and Uninstall
 
 2.5 Uninstall
 =============
@@ -486,7 +486,7 @@ To uninstall Racket Mode, simply type ‘M-x’ ‘package-delete’ ‘RET’
    You should probably also exit and restart Emacs.
 
 
-File: docB4cQXc.info,  Node: Update,  Prev: Uninstall,  Up: Install Update and Uninstall
+File: docdbAmSM.info,  Node: Update,  Prev: Uninstall,  Up: Install Update and Uninstall
 
 2.6 Update
 ==========
@@ -497,7 +497,7 @@ File: docB4cQXc.info,  Node: Update,  Prev: Uninstall,  Up: Install Update and U
 * Updating just Racket Mode::
 
 
-File: docB4cQXc.info,  Node: Upgrading all packages,  Next: Updating just Racket Mode,  Up: Update
+File: docdbAmSM.info,  Node: Upgrading all packages,  Next: Updating just Racket Mode,  Up: Update
 
 2.6.1 Upgrading all packages
 ----------------------------
@@ -524,7 +524,7 @@ section — here is how to do so:
      Please see <https://melpa.org/#/getting-started>.
 
 
-File: docB4cQXc.info,  Node: Updating just Racket Mode,  Prev: Upgrading all packages,  Up: Update
+File: docdbAmSM.info,  Node: Updating just Racket Mode,  Prev: Upgrading all packages,  Up: Update
 
 2.6.2 Updating just Racket Mode
 -------------------------------
@@ -543,7 +543,7 @@ on.
   3. *note Install:: again.  This will install the latest version.
 
 
-File: docB4cQXc.info,  Node: Configure,  Next: Architecture,  Prev: Install Update and Uninstall,  Up: Top
+File: docdbAmSM.info,  Node: Configure,  Next: Architecture,  Prev: Install Update and Uninstall,  Up: Top
 
 3 Configure
 ***********
@@ -583,7 +583,7 @@ might want to set ‘racket-program’ to a complete pathname.
 * Ligatures::
 
 
-File: docB4cQXc.info,  Node: Which major mode to use,  Next: Key bindings,  Up: Configure
+File: docdbAmSM.info,  Node: Which major mode to use,  Next: Key bindings,  Up: Configure
 
 3.1 Which major mode to use
 ===========================
@@ -627,7 +627,7 @@ takes the approach of DrRacket to work for all langs.
    • For editing ‘.rkt’ files and s-expression langs, which mode to use
      is personal preference.
 
-   • For ‘.scrbl’ and at-expression langs like ‘scribble/manual’,
+   • For ‘.scrbl’ files and at-expression langs like ‘scribble/manual’,
      ‘racket-hash-lang-mode’ is probably better than ‘racket-mode’.
      (Note there is also an unrelated ‘scribble-mode’ package.)
 
@@ -641,7 +641,7 @@ initially for certain file extensions.  Also, in a buffer you can use
 them.
 
 
-File: docB4cQXc.info,  Node: Key bindings,  Next: Font-lock (syntax highlighting),  Prev: Which major mode to use,  Up: Configure
+File: docdbAmSM.info,  Node: Key bindings,  Next: Font-lock (syntax highlighting),  Prev: Which major mode to use,  Up: Configure
 
 3.2 Key bindings
 ================
@@ -658,7 +658,7 @@ wanted ‘F5’ to be an additional binding:
    Likewise for ‘racket-repl-mode-hook’ and ‘racket-repl-mode-map’.
 
 
-File: docB4cQXc.info,  Node: Font-lock (syntax highlighting),  Next: Completion at point,  Prev: Key bindings,  Up: Configure
+File: docdbAmSM.info,  Node: Font-lock (syntax highlighting),  Next: Completion at point,  Prev: Key bindings,  Up: Configure
 
 3.3 Font-lock (syntax highlighting)
 ===================================
@@ -689,7 +689,7 @@ you might do so because you prefer a simpler appearance.
      languages.).
 
 
-File: docB4cQXc.info,  Node: Completion at point,  Next: Completion in minibuffer,  Prev: Font-lock (syntax highlighting),  Up: Configure
+File: docdbAmSM.info,  Node: Completion at point,  Next: Completion in minibuffer,  Prev: Font-lock (syntax highlighting),  Up: Configure
 
 3.4 Completion at point
 =======================
@@ -732,7 +732,7 @@ following to your Emacs init file:
 ‘racket-mode’ and ‘racket-repl-mode’.
 
 
-File: docB4cQXc.info,  Node: Completion in minibuffer,  Next: Xref (definitions and references),  Prev: Completion at point,  Up: Configure
+File: docdbAmSM.info,  Node: Completion in minibuffer,  Next: Xref (definitions and references),  Prev: Completion at point,  Up: Configure
 
 3.5 Completion in minibuffer
 ============================
@@ -747,7 +747,7 @@ as helm, ivy, ido-completing-read+, vertico, and so on.
 simply install the ido-completing-read+ package.)
 
 
-File: docB4cQXc.info,  Node: Xref (definitions and references),  Next: Indent,  Prev: Completion in minibuffer,  Up: Configure
+File: docdbAmSM.info,  Node: Xref (definitions and references),  Next: Indent,  Prev: Completion in minibuffer,  Up: Configure
 
 3.6 Xref (definitions and references)
 =====================================
@@ -809,7 +809,7 @@ names, shortcut keys, and even a special buffer to navigate among
 references and visit each source location.
 
 
-File: docB4cQXc.info,  Node: Indent,  Next: paredit,  Prev: Xref (definitions and references),  Up: Configure
+File: docdbAmSM.info,  Node: Indent,  Next: paredit,  Prev: Xref (definitions and references),  Up: Configure
 
 3.7 Indent
 ==========
@@ -829,7 +829,7 @@ emacs-format-all-the-code
 (https://github.com/lassik/emacs-format-all-the-code).)
 
 
-File: docB4cQXc.info,  Node: paredit,  Next: smartparens,  Prev: Indent,  Up: Configure
+File: docdbAmSM.info,  Node: paredit,  Next: smartparens,  Prev: Indent,  Up: Configure
 
 3.8 paredit
 ===========
@@ -880,7 +880,7 @@ do this for all related keys:
        (define-key paredit-mode-map (kbd k) nil))
 
 
-File: docB4cQXc.info,  Node: smartparens,  Next: Appearance of parentheses,  Prev: paredit,  Up: Configure
+File: docdbAmSM.info,  Node: smartparens,  Next: Appearance of parentheses,  Prev: paredit,  Up: Configure
 
 3.9 smartparens
 ===============
@@ -896,7 +896,7 @@ it provides for Lisp modes generally and for Racket Mode specifically:
      (require 'smartparens-config)
 
 
-File: docB4cQXc.info,  Node: Appearance of parentheses,  Next: Edit buffers and REPL buffers,  Prev: smartparens,  Up: Configure
+File: docdbAmSM.info,  Node: Appearance of parentheses,  Next: Edit buffers and REPL buffers,  Prev: smartparens,  Up: Configure
 
 3.10 Appearance of parentheses
 ==============================
@@ -908,7 +908,7 @@ If you prefer parentheses to appear “dimmed”, see paren-face
 (https://melpa.org/#/rainbow-delimiters).
 
 
-File: docB4cQXc.info,  Node: Edit buffers and REPL buffers,  Next: eldoc,  Prev: Appearance of parentheses,  Up: Configure
+File: docdbAmSM.info,  Node: Edit buffers and REPL buffers,  Next: eldoc,  Prev: Appearance of parentheses,  Up: Configure
 
 3.11 Edit buffers and REPL buffers
 ==================================
@@ -941,7 +941,7 @@ if you wanted to make the REPL buffer appear in a new frame:
                     (inhibit-same-window . t)))
 
 
-File: docB4cQXc.info,  Node: eldoc,  Next: Start faster,  Prev: Edit buffers and REPL buffers,  Up: Configure
+File: docdbAmSM.info,  Node: eldoc,  Next: Start faster,  Prev: Edit buffers and REPL buffers,  Up: Configure
 
 3.12 eldoc
 ==========
@@ -974,7 +974,7 @@ frame) instead of the echo area.
 ‘eldoc-documentation-function’, singular.
 
 
-File: docB4cQXc.info,  Node: Start faster,  Next: Inserting Unicode math symbols,  Prev: eldoc,  Up: Configure
+File: docdbAmSM.info,  Node: Start faster,  Next: Inserting Unicode math symbols,  Prev: eldoc,  Up: Configure
 
 3.13 Start faster
 =================
@@ -983,7 +983,7 @@ You can use *note racket-mode-start-faster:: to make the Racket REPL
 start faster.
 
 
-File: docB4cQXc.info,  Node: Inserting Unicode math symbols,  Next: Ligatures,  Prev: Start faster,  Up: Configure
+File: docdbAmSM.info,  Node: Inserting Unicode math symbols,  Next: Ligatures,  Prev: Start faster,  Up: Configure
 
 3.14 Inserting Unicode math symbols
 ===================================
@@ -996,7 +996,7 @@ To insert various Unicode math symbols, you can:
      minor mode: *Note racket-input-mode::.
 
 
-File: docB4cQXc.info,  Node: Ligatures,  Prev: Inserting Unicode math symbols,  Up: Configure
+File: docdbAmSM.info,  Node: Ligatures,  Prev: Inserting Unicode math symbols,  Up: Configure
 
 3.15 Ligatures
 ==============
@@ -1011,7 +1011,7 @@ known work-around is to change the value of ‘racket-show-functions’ to
 something “boring” such as ‘(racket-show-echo-area)’.
 
 
-File: docB4cQXc.info,  Node: Architecture,  Next: Reference,  Prev: Configure,  Up: Top
+File: docdbAmSM.info,  Node: Architecture,  Next: Reference,  Prev: Configure,  Up: Top
 
 4 Architecture
 **************
@@ -1091,7 +1091,7 @@ normally be done by ‘raco pkg install’.  To address this: *Note
 racket-mode-start-faster::.
 
 
-File: docB4cQXc.info,  Node: Reference,  Next: Commands,  Prev: Architecture,  Up: Top
+File: docdbAmSM.info,  Node: Reference,  Next: Commands,  Prev: Architecture,  Up: Top
 
 5 Reference
 ***********
@@ -1106,7 +1106,7 @@ not be quite as nice or correct as in the previous sections.)
    • ‘C-h v’ and enter the name of a variable.
 
 
-File: docB4cQXc.info,  Node: Commands,  Next: Variables,  Prev: Reference,  Up: Top
+File: docdbAmSM.info,  Node: Commands,  Next: Variables,  Prev: Reference,  Up: Top
 
 6 Commands
 **********
@@ -1125,7 +1125,7 @@ File: docB4cQXc.info,  Node: Commands,  Next: Variables,  Prev: Reference,  Up: 
 * Other::
 
 
-File: docB4cQXc.info,  Node: Edit,  Next: Hash Langs,  Up: Commands
+File: docdbAmSM.info,  Node: Edit,  Next: Hash Langs,  Up: Commands
 
 6.1 Edit
 ========
@@ -1152,14 +1152,20 @@ File: docB4cQXc.info,  Node: Edit,  Next: Hash Langs,  Up: Commands
 * racket-complete-at-point::
 
 
-File: docB4cQXc.info,  Node: racket-mode,  Next: racket-insert-lambda,  Up: Edit
+File: docdbAmSM.info,  Node: racket-mode,  Next: racket-insert-lambda,  Up: Edit
 
 6.1.1 racket-mode
 -----------------
 
 ‘M-x’ ‘racket-mode’
 
-   Major mode for editing Racket source files.
+   The “classic” major mode to edit an s-expression Racket #lang.
+
+   This major mode is implemented entirely in Emacs and does _not_ need
+Racket Mode’s back end racket process to be running.  Font-lock
+(coloring) uses rules for a fixed set of identifiers from ‘racket’ lang
+and popular modules like ‘racket/match’.  Indentation uses rules for a
+fixed set of forms, and may be customized.
 
 Key                                                                                                                                     Binding
 ‘TAB’                                                                                                                                   ‘indent-for-tab-command’
@@ -1190,7 +1196,7 @@ this mode runs the hook ‘racket-mode-hook’, as the final or penultimate
 step during initialization.
 
 
-File: docB4cQXc.info,  Node: racket-insert-lambda,  Next: racket-insert-symbol,  Prev: racket-mode,  Up: Edit
+File: docdbAmSM.info,  Node: racket-insert-lambda,  Next: racket-insert-symbol,  Prev: racket-mode,  Up: Edit
 
 6.1.2 racket-insert-lambda
 --------------------------
@@ -1202,7 +1208,7 @@ File: docB4cQXc.info,  Node: racket-insert-lambda,  Next: racket-insert-symbol, 
    To insert Unicode symbols generally, see *note racket-input-mode::.
 
 
-File: docB4cQXc.info,  Node: racket-insert-symbol,  Next: racket-fold-all-tests,  Prev: racket-insert-lambda,  Up: Edit
+File: docdbAmSM.info,  Node: racket-insert-symbol,  Next: racket-fold-all-tests,  Prev: racket-insert-lambda,  Up: Edit
 
 6.1.3 racket-insert-symbol
 --------------------------
@@ -1219,7 +1225,7 @@ inserted are shown as annotations – a preview unlike what is currently
 provided by the Emacs UI for input method.
 
 
-File: docB4cQXc.info,  Node: racket-fold-all-tests,  Next: racket-unfold-all-tests,  Prev: racket-insert-symbol,  Up: Edit
+File: docdbAmSM.info,  Node: racket-fold-all-tests,  Next: racket-unfold-all-tests,  Prev: racket-insert-symbol,  Up: Edit
 
 6.1.4 racket-fold-all-tests
 ---------------------------
@@ -1229,7 +1235,7 @@ File: docB4cQXc.info,  Node: racket-fold-all-tests,  Next: racket-unfold-all-tes
    Fold (hide) all test submodules.
 
 
-File: docB4cQXc.info,  Node: racket-unfold-all-tests,  Next: racket-tidy-requires,  Prev: racket-fold-all-tests,  Up: Edit
+File: docdbAmSM.info,  Node: racket-unfold-all-tests,  Next: racket-tidy-requires,  Prev: racket-fold-all-tests,  Up: Edit
 
 6.1.5 racket-unfold-all-tests
 -----------------------------
@@ -1239,7 +1245,7 @@ File: docB4cQXc.info,  Node: racket-unfold-all-tests,  Next: racket-tidy-require
    Unfold (show) all test submodules.
 
 
-File: docB4cQXc.info,  Node: racket-tidy-requires,  Next: racket-trim-requires,  Prev: racket-unfold-all-tests,  Up: Edit
+File: docdbAmSM.info,  Node: racket-tidy-requires,  Next: racket-trim-requires,  Prev: racket-unfold-all-tests,  Up: Edit
 
 6.1.6 racket-tidy-requires
 --------------------------
@@ -1262,7 +1268,7 @@ m and elide (combine-in).
 racket-base-requires::.
 
 
-File: docB4cQXc.info,  Node: racket-trim-requires,  Next: racket-base-requires,  Prev: racket-tidy-requires,  Up: Edit
+File: docdbAmSM.info,  Node: racket-trim-requires,  Next: racket-base-requires,  Prev: racket-tidy-requires,  Up: Edit
 
 6.1.7 racket-trim-requires
 --------------------------
@@ -1289,7 +1295,7 @@ outer requires that are actually needed by such submodules.
    See also: *note racket-base-requires::.
 
 
-File: docB4cQXc.info,  Node: racket-base-requires,  Next: racket-add-require-for-identifier,  Prev: racket-trim-requires,  Up: Edit
+File: docdbAmSM.info,  Node: racket-base-requires,  Next: racket-add-require-for-identifier,  Prev: racket-trim-requires,  Up: Edit
 
 6.1.8 racket-base-requires
 --------------------------
@@ -1312,7 +1318,7 @@ racket/base”.  It does not help with other similar conversions, such as
 changing “#lang typed/racket” to “#lang typed/racket/base”.
 
 
-File: docB4cQXc.info,  Node: racket-add-require-for-identifier,  Next: racket-indent-line,  Prev: racket-base-requires,  Up: Edit
+File: docdbAmSM.info,  Node: racket-add-require-for-identifier,  Next: racket-indent-line,  Prev: racket-base-requires,  Up: Edit
 
 6.1.9 racket-add-require-for-identifier
 ---------------------------------------
@@ -1336,7 +1342,7 @@ Today there exists no system-wide database of identifiers that are
 exported but not documented.
 
 
-File: docB4cQXc.info,  Node: racket-indent-line,  Next: racket-smart-open-bracket-mode,  Prev: racket-add-require-for-identifier,  Up: Edit
+File: docdbAmSM.info,  Node: racket-indent-line,  Next: racket-smart-open-bracket-mode,  Prev: racket-add-require-for-identifier,  Up: Edit
 
 6.1.10 racket-indent-line
 -------------------------
@@ -1447,7 +1453,7 @@ forms:
            body)
 
 
-File: docB4cQXc.info,  Node: racket-smart-open-bracket-mode,  Next: racket-insert-closing,  Prev: racket-indent-line,  Up: Edit
+File: docdbAmSM.info,  Node: racket-smart-open-bracket-mode,  Next: racket-insert-closing,  Prev: racket-indent-line,  Up: Edit
 
 6.1.11 racket-smart-open-bracket-mode
 -------------------------------------
@@ -1508,7 +1514,7 @@ evaluate *note racket-smart-open-bracket-mode::.
 is disabled.
 
 
-File: docB4cQXc.info,  Node: racket-insert-closing,  Next: racket-cycle-paren-shapes,  Prev: racket-smart-open-bracket-mode,  Up: Edit
+File: docdbAmSM.info,  Node: racket-insert-closing,  Next: racket-cycle-paren-shapes,  Prev: racket-smart-open-bracket-mode,  Up: Edit
 
 6.1.12 racket-insert-closing
 ----------------------------
@@ -1524,7 +1530,7 @@ File: docB4cQXc.info,  Node: racket-insert-closing,  Next: racket-cycle-paren-sh
 added in Emacs 24.5.
 
 
-File: docB4cQXc.info,  Node: racket-cycle-paren-shapes,  Next: racket-backward-up-list,  Prev: racket-insert-closing,  Up: Edit
+File: docdbAmSM.info,  Node: racket-cycle-paren-shapes,  Next: racket-backward-up-list,  Prev: racket-insert-closing,  Up: Edit
 
 6.1.13 racket-cycle-paren-shapes
 --------------------------------
@@ -1534,7 +1540,7 @@ File: docB4cQXc.info,  Node: racket-cycle-paren-shapes,  Next: racket-backward-u
    Cycle the sexpr among () [] {}.
 
 
-File: docB4cQXc.info,  Node: racket-backward-up-list,  Next: racket-input-mode,  Prev: racket-cycle-paren-shapes,  Up: Edit
+File: docdbAmSM.info,  Node: racket-backward-up-list,  Next: racket-input-mode,  Prev: racket-cycle-paren-shapes,  Up: Edit
 
 6.1.14 racket-backward-up-list
 ------------------------------
@@ -1550,7 +1556,7 @@ not repeatedly.  Instead, initially use
 comment, if any, then use normal ‘backward-up-list’ repeatedly.
 
 
-File: docB4cQXc.info,  Node: racket-input-mode,  Next: racket-align,  Prev: racket-backward-up-list,  Up: Edit
+File: docdbAmSM.info,  Node: racket-input-mode,  Next: racket-align,  Prev: racket-backward-up-list,  Up: Edit
 
 6.1.15 racket-input-mode
 ------------------------
@@ -1600,7 +1606,7 @@ evaluate *note racket-input-mode::.
 is disabled.
 
 
-File: docB4cQXc.info,  Node: racket-align,  Next: racket-unalign,  Prev: racket-input-mode,  Up: Edit
+File: docdbAmSM.info,  Node: racket-align,  Next: racket-unalign,  Prev: racket-input-mode,  Up: Edit
 
 6.1.16 racket-align
 -------------------
@@ -1665,7 +1671,7 @@ For example:
    See also: *note racket-unalign::.
 
 
-File: docB4cQXc.info,  Node: racket-unalign,  Next: racket-complete-at-point,  Prev: racket-align,  Up: Edit
+File: docdbAmSM.info,  Node: racket-unalign,  Next: racket-complete-at-point,  Prev: racket-align,  Up: Edit
 
 6.1.17 racket-unalign
 ---------------------
@@ -1678,7 +1684,7 @@ File: docB4cQXc.info,  Node: racket-unalign,  Next: racket-complete-at-point,  P
 couple’s value.
 
 
-File: docB4cQXc.info,  Node: racket-complete-at-point,  Prev: racket-unalign,  Up: Edit
+File: docdbAmSM.info,  Node: racket-complete-at-point,  Prev: racket-unalign,  Up: Edit
 
 6.1.18 racket-complete-at-point
 -------------------------------
@@ -1690,7 +1696,7 @@ font-lock.  This is a static list.  If you want dynamic, smarter
 completion candidates, enable the minor mode *note racket-xp-mode::.
 
 
-File: docB4cQXc.info,  Node: Hash Langs,  Next: Explore,  Prev: Edit,  Up: Commands
+File: docdbAmSM.info,  Node: Hash Langs,  Next: Explore,  Prev: Edit,  Up: Commands
 
 6.2 Hash Langs
 ==============
@@ -1705,17 +1711,18 @@ File: docB4cQXc.info,  Node: Hash Langs,  Next: Explore,  Prev: Edit,  Up: Comma
 * racket-hash-lang-C-M-q-dwim::
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-mode,  Next: racket-hash-lang-backward,  Up: Hash Langs
+File: docdbAmSM.info,  Node: racket-hash-lang-mode,  Next: racket-hash-lang-backward,  Up: Hash Langs
 
 6.2.1 racket-hash-lang-mode
 ---------------------------
 
 ‘M-x’ ‘racket-hash-lang-mode’
 
-   Use color-lexer, indent, and navigation supplied by a #lang.
+   An “experimental” major mode to edit any Racket #lang.
 
-   An experimental major mode alternative to *note racket-mode:: for
-source file edit buffers.
+   This major mode uses color-lexer, indent, and navigation supplied by
+each #lang – which means Racket Mode’s back end process needs to be
+running.
 
    In your Emacs configuration, you may want to update the variable
 ‘auto-mode-alist’ to use *note racket-hash-lang-mode:: for file
@@ -1761,7 +1768,7 @@ this mode runs the hook ‘racket-hash-lang-mode-hook’, as the final or
 penultimate step during initialization.
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-backward,  Next: racket-hash-lang-forward,  Prev: racket-hash-lang-mode,  Up: Hash Langs
+File: docdbAmSM.info,  Node: racket-hash-lang-backward,  Next: racket-hash-lang-forward,  Prev: racket-hash-lang-mode,  Up: Hash Langs
 
 6.2.2 racket-hash-lang-backward
 -------------------------------
@@ -1771,7 +1778,7 @@ File: docB4cQXc.info,  Node: racket-hash-lang-backward,  Next: racket-hash-lang-
    Like ‘backward-sexp’ but uses #lang supplied navigation.
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-forward,  Next: racket-hash-lang-up,  Prev: racket-hash-lang-backward,  Up: Hash Langs
+File: docdbAmSM.info,  Node: racket-hash-lang-forward,  Next: racket-hash-lang-up,  Prev: racket-hash-lang-backward,  Up: Hash Langs
 
 6.2.3 racket-hash-lang-forward
 ------------------------------
@@ -1781,7 +1788,7 @@ File: docB4cQXc.info,  Node: racket-hash-lang-forward,  Next: racket-hash-lang-u
    Like ‘forward-sexp’ but uses #lang supplied navigation.
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-up,  Next: racket-hash-lang-down,  Prev: racket-hash-lang-forward,  Up: Hash Langs
+File: docdbAmSM.info,  Node: racket-hash-lang-up,  Next: racket-hash-lang-down,  Prev: racket-hash-lang-forward,  Up: Hash Langs
 
 6.2.4 racket-hash-lang-up
 -------------------------
@@ -1791,7 +1798,7 @@ File: docB4cQXc.info,  Node: racket-hash-lang-up,  Next: racket-hash-lang-down, 
    Like ‘backward-up-list’ but uses #lang supplied navigation.
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-down,  Next: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lang-up,  Up: Hash Langs
+File: docdbAmSM.info,  Node: racket-hash-lang-down,  Next: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lang-up,  Up: Hash Langs
 
 6.2.5 racket-hash-lang-down
 ---------------------------
@@ -1801,7 +1808,7 @@ File: docB4cQXc.info,  Node: racket-hash-lang-down,  Next: racket-hash-lang-C-M-
    Like ‘down-list’ but uses #lang supplied navigation.
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lang-down,  Up: Hash Langs
+File: docdbAmSM.info,  Node: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lang-down,  Up: Hash Langs
 
 6.2.6 racket-hash-lang-C-M-q-dwim
 ---------------------------------
@@ -1821,7 +1828,7 @@ File: docB4cQXc.info,  Node: racket-hash-lang-C-M-q-dwim,  Prev: racket-hash-lan
    • anything else, do ‘prog-indent-sexp’.
 
 
-File: docB4cQXc.info,  Node: Explore,  Next: Run,  Prev: Hash Langs,  Up: Commands
+File: docdbAmSM.info,  Node: Explore,  Next: Run,  Prev: Hash Langs,  Up: Commands
 
 6.3 Explore
 ===========
@@ -1846,7 +1853,7 @@ File: docB4cQXc.info,  Node: Explore,  Next: Run,  Prev: Hash Langs,  Up: Comman
 * racket-describe-search::
 
 
-File: docB4cQXc.info,  Node: racket-xp-mode,  Next: racket-xp-describe,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-mode,  Next: racket-xp-describe,  Up: Explore
 
 6.3.1 racket-xp-mode
 --------------------
@@ -2018,7 +2025,7 @@ evaluate *note racket-xp-mode::.
 is disabled.
 
 
-File: docB4cQXc.info,  Node: racket-xp-describe,  Next: racket-xp-documentation,  Prev: racket-xp-mode,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-describe,  Next: racket-xp-documentation,  Prev: racket-xp-mode,  Up: Explore
 
 6.3.2 racket-xp-describe
 ------------------------
@@ -2063,7 +2070,7 @@ within Emacs, without switching to a web browser.
 F1 or C-h in its pop up completion list.
 
 
-File: docB4cQXc.info,  Node: racket-xp-documentation,  Next: racket-xp-next-definition,  Prev: racket-xp-describe,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-documentation,  Next: racket-xp-next-definition,  Prev: racket-xp-describe,  Up: Explore
 
 6.3.3 racket-xp-documentation
 -----------------------------
@@ -2100,7 +2107,7 @@ supply.
      for example.
 
 
-File: docB4cQXc.info,  Node: racket-xp-next-definition,  Next: racket-xp-previous-definition,  Prev: racket-xp-documentation,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-next-definition,  Next: racket-xp-previous-definition,  Prev: racket-xp-documentation,  Up: Explore
 
 6.3.4 racket-xp-next-definition
 -------------------------------
@@ -2110,7 +2117,7 @@ File: docB4cQXc.info,  Node: racket-xp-next-definition,  Next: racket-xp-previou
    Move point to the next definition.
 
 
-File: docB4cQXc.info,  Node: racket-xp-previous-definition,  Next: racket-xp-next-use,  Prev: racket-xp-next-definition,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-previous-definition,  Next: racket-xp-next-use,  Prev: racket-xp-next-definition,  Up: Explore
 
 6.3.5 racket-xp-previous-definition
 -----------------------------------
@@ -2120,7 +2127,7 @@ File: docB4cQXc.info,  Node: racket-xp-previous-definition,  Next: racket-xp-nex
    Move point to the previous definition.
 
 
-File: docB4cQXc.info,  Node: racket-xp-next-use,  Next: racket-xp-previous-use,  Prev: racket-xp-previous-definition,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-next-use,  Next: racket-xp-previous-use,  Prev: racket-xp-previous-definition,  Up: Explore
 
 6.3.6 racket-xp-next-use
 ------------------------
@@ -2130,7 +2137,7 @@ File: docB4cQXc.info,  Node: racket-xp-next-use,  Next: racket-xp-previous-use, 
    When point is on a use, go to the next, sibling use.
 
 
-File: docB4cQXc.info,  Node: racket-xp-previous-use,  Next: racket-xp-next-error,  Prev: racket-xp-next-use,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-previous-use,  Next: racket-xp-next-error,  Prev: racket-xp-next-use,  Up: Explore
 
 6.3.7 racket-xp-previous-use
 ----------------------------
@@ -2140,7 +2147,7 @@ File: docB4cQXc.info,  Node: racket-xp-previous-use,  Next: racket-xp-next-error
    When point is on a use, go to the previous, sibling use.
 
 
-File: docB4cQXc.info,  Node: racket-xp-next-error,  Next: racket-xp-previous-error,  Prev: racket-xp-previous-use,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-next-error,  Next: racket-xp-previous-error,  Prev: racket-xp-previous-use,  Up: Explore
 
 6.3.8 racket-xp-next-error
 --------------------------
@@ -2150,7 +2157,7 @@ File: docB4cQXc.info,  Node: racket-xp-next-error,  Next: racket-xp-previous-err
    An obsolete alias for ‘next-error’.
 
 
-File: docB4cQXc.info,  Node: racket-xp-previous-error,  Next: racket-xp-tail-up,  Prev: racket-xp-next-error,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-previous-error,  Next: racket-xp-tail-up,  Prev: racket-xp-next-error,  Up: Explore
 
 6.3.9 racket-xp-previous-error
 ------------------------------
@@ -2160,7 +2167,7 @@ File: docB4cQXc.info,  Node: racket-xp-previous-error,  Next: racket-xp-tail-up,
    An obsolete alias for ‘previous-error’.
 
 
-File: docB4cQXc.info,  Node: racket-xp-tail-up,  Next: racket-xp-tail-down,  Prev: racket-xp-previous-error,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-tail-up,  Next: racket-xp-tail-down,  Prev: racket-xp-previous-error,  Up: Explore
 
 6.3.10 racket-xp-tail-up
 ------------------------
@@ -2174,7 +2181,7 @@ position, go its “target” – that is, go to the enclosing expression with
 the same continuation as the tail expression.
 
 
-File: docB4cQXc.info,  Node: racket-xp-tail-down,  Next: racket-xp-tail-next-sibling,  Prev: racket-xp-tail-up,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-tail-down,  Next: racket-xp-tail-next-sibling,  Prev: racket-xp-tail-up,  Up: Explore
 
 6.3.11 racket-xp-tail-down
 --------------------------
@@ -2185,7 +2192,7 @@ File: docB4cQXc.info,  Node: racket-xp-tail-down,  Next: racket-xp-tail-next-sib
 expression.
 
 
-File: docB4cQXc.info,  Node: racket-xp-tail-next-sibling,  Next: racket-xp-tail-previous-sibling,  Prev: racket-xp-tail-down,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-tail-next-sibling,  Next: racket-xp-tail-previous-sibling,  Prev: racket-xp-tail-down,  Up: Explore
 
 6.3.12 racket-xp-tail-next-sibling
 ----------------------------------
@@ -2195,7 +2202,7 @@ File: docB4cQXc.info,  Node: racket-xp-tail-next-sibling,  Next: racket-xp-tail-
    Go to the next tail position sharing the same enclosing expression.
 
 
-File: docB4cQXc.info,  Node: racket-xp-tail-previous-sibling,  Next: racket-documentation-search,  Prev: racket-xp-tail-next-sibling,  Up: Explore
+File: docdbAmSM.info,  Node: racket-xp-tail-previous-sibling,  Next: racket-documentation-search,  Prev: racket-xp-tail-next-sibling,  Up: Explore
 
 6.3.13 racket-xp-tail-previous-sibling
 --------------------------------------
@@ -2206,7 +2213,7 @@ File: docB4cQXc.info,  Node: racket-xp-tail-previous-sibling,  Next: racket-docu
 expression.
 
 
-File: docB4cQXc.info,  Node: racket-documentation-search,  Next: racket-describe-mode,  Prev: racket-xp-tail-previous-sibling,  Up: Explore
+File: docdbAmSM.info,  Node: racket-documentation-search,  Next: racket-describe-mode,  Prev: racket-xp-tail-previous-sibling,  Up: Explore
 
 6.3.14 racket-documentation-search
 ----------------------------------
@@ -2233,7 +2240,7 @@ definition provided by any specific module.  Instead it goes to the
 Racket “Search Manuals” page.
 
 
-File: docB4cQXc.info,  Node: racket-describe-mode,  Next: racket-describe-search,  Prev: racket-documentation-search,  Up: Explore
+File: docdbAmSM.info,  Node: racket-describe-mode,  Next: racket-describe-search,  Prev: racket-documentation-search,  Up: Explore
 
 6.3.15 racket-describe-mode
 ---------------------------
@@ -2283,7 +2290,7 @@ run, this mode runs the hook ‘racket-describe-mode-hook’, as the final
 or penultimate step during initialization.
 
 
-File: docB4cQXc.info,  Node: racket-describe-search,  Prev: racket-describe-mode,  Up: Explore
+File: docdbAmSM.info,  Node: racket-describe-search,  Prev: racket-describe-mode,  Up: Explore
 
 6.3.16 racket-describe-search
 -----------------------------
@@ -2294,7 +2301,7 @@ File: docB4cQXc.info,  Node: racket-describe-search,  Prev: racket-describe-mode
 racket-describe-mode::.
 
 
-File: docB4cQXc.info,  Node: Run,  Next: Test,  Prev: Explore,  Up: Commands
+File: docdbAmSM.info,  Node: Run,  Next: Test,  Prev: Explore,  Up: Commands
 
 6.4 Run
 =======
@@ -2318,7 +2325,7 @@ File: docB4cQXc.info,  Node: Run,  Next: Test,  Prev: Explore,  Up: Commands
 * racket-repl-clear-leaving-last-prompt::
 
 
-File: docB4cQXc.info,  Node: racket-repl-mode,  Next: racket-run,  Up: Run
+File: docdbAmSM.info,  Node: racket-repl-mode,  Next: racket-run,  Up: Run
 
 6.4.1 racket-repl-mode
 ----------------------
@@ -2362,7 +2369,7 @@ Key                                                                             
 penultimate step during initialization.
 
 
-File: docB4cQXc.info,  Node: racket-run,  Next: racket-run-and-switch-to-repl,  Prev: racket-repl-mode,  Up: Run
+File: docdbAmSM.info,  Node: racket-run,  Next: racket-run-and-switch-to-repl,  Prev: racket-repl-mode,  Up: Run
 
 6.4.2 racket-run
 ----------------
@@ -2417,7 +2424,7 @@ click.  Or, use the standard ‘next-error’ and ‘previous-error’ commands
 from either the edit or REPL buffer.
 
 
-File: docB4cQXc.info,  Node: racket-run-and-switch-to-repl,  Next: racket-run-module-at-point,  Prev: racket-run,  Up: Run
+File: docdbAmSM.info,  Node: racket-run-and-switch-to-repl,  Next: racket-run-module-at-point,  Prev: racket-run,  Up: Run
 
 6.4.3 racket-run-and-switch-to-repl
 -----------------------------------
@@ -2433,7 +2440,7 @@ window.
 to the variable *note racket-before-run-hook::.
 
 
-File: docB4cQXc.info,  Node: racket-run-module-at-point,  Next: racket-repl,  Prev: racket-run-and-switch-to-repl,  Up: Run
+File: docdbAmSM.info,  Node: racket-run-module-at-point,  Next: racket-repl,  Prev: racket-run-and-switch-to-repl,  Up: Run
 
 6.4.4 racket-run-module-at-point
 --------------------------------
@@ -2448,7 +2455,7 @@ which is determined textually by looking for “module”, “module*”, or
 module.
 
 
-File: docB4cQXc.info,  Node: racket-repl,  Next: racket-repl-describe,  Prev: racket-run-module-at-point,  Up: Run
+File: docdbAmSM.info,  Node: racket-repl,  Next: racket-repl-describe,  Prev: racket-run-module-at-point,  Up: Run
 
 6.4.5 racket-repl
 -----------------
@@ -2470,7 +2477,7 @@ exist, it is created to contain just “#lang racket/base”.  You may edit
 the file to use a different lang, require other modules, or whatever.
 
 
-File: docB4cQXc.info,  Node: racket-repl-describe,  Next: racket-repl-documentation,  Prev: racket-repl,  Up: Run
+File: docdbAmSM.info,  Node: racket-repl-describe,  Next: racket-repl-documentation,  Prev: racket-repl,  Up: Run
 
 6.4.6 racket-repl-describe
 --------------------------
@@ -2512,7 +2519,7 @@ regardless of whether it has installed documentation – and to do so
 within Emacs, without switching to a web browser.
 
 
-File: docB4cQXc.info,  Node: racket-repl-documentation,  Next: racket-racket,  Prev: racket-repl-describe,  Up: Run
+File: docdbAmSM.info,  Node: racket-repl-documentation,  Next: racket-racket,  Prev: racket-repl-describe,  Up: Run
 
 6.4.7 racket-repl-documentation
 -------------------------------
@@ -2549,7 +2556,7 @@ supply.
      for example.
 
 
-File: docB4cQXc.info,  Node: racket-racket,  Next: racket-profile,  Prev: racket-repl-documentation,  Up: Run
+File: docdbAmSM.info,  Node: racket-racket,  Next: racket-profile,  Prev: racket-repl-documentation,  Up: Run
 
 6.4.8 racket-racket
 -------------------
@@ -2562,7 +2569,7 @@ File: docB4cQXc.info,  Node: racket-racket,  Next: racket-profile,  Prev: racket
 variable *note racket-shell-or-terminal-function::.
 
 
-File: docB4cQXc.info,  Node: racket-profile,  Next: racket-profile-mode,  Prev: racket-racket,  Up: Run
+File: docdbAmSM.info,  Node: racket-profile,  Next: racket-profile-mode,  Prev: racket-racket,  Up: Run
 
 6.4.9 racket-profile
 --------------------
@@ -2583,7 +2590,7 @@ functions in the REPL, and refresh the profile results.
 compiled/*.zo files.
 
 
-File: docB4cQXc.info,  Node: racket-profile-mode,  Next: racket-logger,  Prev: racket-profile,  Up: Run
+File: docdbAmSM.info,  Node: racket-profile-mode,  Next: racket-logger,  Prev: racket-profile,  Up: Run
 
 6.4.10 racket-profile-mode
 --------------------------
@@ -2604,7 +2611,7 @@ have run, this mode runs the hook ‘racket-profile-mode-hook’, as the
 final or penultimate step during initialization.
 
 
-File: docB4cQXc.info,  Node: racket-logger,  Next: racket-logger-mode,  Prev: racket-profile-mode,  Up: Run
+File: docdbAmSM.info,  Node: racket-logger,  Next: racket-logger-mode,  Prev: racket-profile-mode,  Up: Run
 
 6.4.11 racket-logger
 --------------------
@@ -2614,7 +2621,7 @@ File: docB4cQXc.info,  Node: racket-logger,  Next: racket-logger-mode,  Prev: ra
    Create the *note racket-logger-mode:: buffer.
 
 
-File: docB4cQXc.info,  Node: racket-logger-mode,  Next: racket-debug-mode,  Prev: racket-logger,  Up: Run
+File: docdbAmSM.info,  Node: racket-logger-mode,  Next: racket-debug-mode,  Prev: racket-logger,  Up: Run
 
 6.4.12 racket-logger-mode
 -------------------------
@@ -2642,7 +2649,7 @@ run, this mode runs the hook ‘racket-logger-mode-hook’, as the final or
 penultimate step during initialization.
 
 
-File: docB4cQXc.info,  Node: racket-debug-mode,  Next: racket-repl-clear,  Prev: racket-logger-mode,  Up: Run
+File: docdbAmSM.info,  Node: racket-debug-mode,  Next: racket-repl-clear,  Prev: racket-logger-mode,  Up: Run
 
 6.4.13 racket-debug-mode
 ------------------------
@@ -2714,7 +2721,7 @@ evaluate *note racket-debug-mode::.
 is disabled.
 
 
-File: docB4cQXc.info,  Node: racket-repl-clear,  Next: racket-repl-clear-leaving-last-prompt,  Prev: racket-debug-mode,  Up: Run
+File: docdbAmSM.info,  Node: racket-repl-clear,  Next: racket-repl-clear-leaving-last-prompt,  Prev: racket-debug-mode,  Up: Run
 
 6.4.14 racket-repl-clear
 ------------------------
@@ -2731,7 +2738,7 @@ file something like:
    See also the command *note racket-repl-clear-leaving-last-prompt::.
 
 
-File: docB4cQXc.info,  Node: racket-repl-clear-leaving-last-prompt,  Prev: racket-repl-clear,  Up: Run
+File: docdbAmSM.info,  Node: racket-repl-clear-leaving-last-prompt,  Prev: racket-repl-clear,  Up: Run
 
 6.4.15 racket-repl-clear-leaving-last-prompt
 --------------------------------------------
@@ -2741,7 +2748,7 @@ File: docB4cQXc.info,  Node: racket-repl-clear-leaving-last-prompt,  Prev: racke
    Delete all text in the REPL, except for the last prompt.
 
 
-File: docB4cQXc.info,  Node: Test,  Next: Eval,  Prev: Run,  Up: Commands
+File: docdbAmSM.info,  Node: Test,  Next: Eval,  Prev: Run,  Up: Commands
 
 6.5 Test
 ========
@@ -2752,7 +2759,7 @@ File: docB4cQXc.info,  Node: Test,  Next: Eval,  Prev: Run,  Up: Commands
 * racket-raco-test::
 
 
-File: docB4cQXc.info,  Node: racket-test,  Next: racket-raco-test,  Up: Test
+File: docdbAmSM.info,  Node: racket-test,  Next: racket-raco-test,  Up: Test
 
 6.5.1 racket-test
 -----------------
@@ -2781,7 +2788,7 @@ and highlights uncovered code using ‘font-lock-warning-face’.
    • *note racket-unfold-all-tests::
 
 
-File: docB4cQXc.info,  Node: racket-raco-test,  Prev: racket-test,  Up: Test
+File: docdbAmSM.info,  Node: racket-raco-test,  Prev: racket-test,  Up: Test
 
 6.5.2 racket-raco-test
 ----------------------
@@ -2794,7 +2801,7 @@ File: docB4cQXc.info,  Node: racket-raco-test,  Prev: racket-test,  Up: Test
 variable *note racket-shell-or-terminal-function::.
 
 
-File: docB4cQXc.info,  Node: Eval,  Next: Collections,  Prev: Test,  Up: Commands
+File: docdbAmSM.info,  Node: Eval,  Next: Collections,  Prev: Test,  Up: Commands
 
 6.6 Eval
 ========
@@ -2806,7 +2813,7 @@ File: docB4cQXc.info,  Node: Eval,  Next: Collections,  Prev: Test,  Up: Command
 * racket-send-last-sexp::
 
 
-File: docB4cQXc.info,  Node: racket-send-region,  Next: racket-send-definition,  Up: Eval
+File: docdbAmSM.info,  Node: racket-send-region,  Next: racket-send-definition,  Up: Eval
 
 6.6.1 racket-send-region
 ------------------------
@@ -2819,7 +2826,7 @@ File: docB4cQXc.info,  Node: racket-send-region,  Next: racket-send-definition, 
 racket-repl-echo-sent-expressions::.
 
 
-File: docB4cQXc.info,  Node: racket-send-definition,  Next: racket-send-last-sexp,  Prev: racket-send-region,  Up: Eval
+File: docdbAmSM.info,  Node: racket-send-definition,  Next: racket-send-last-sexp,  Prev: racket-send-region,  Up: Eval
 
 6.6.2 racket-send-definition
 ----------------------------
@@ -2832,7 +2839,7 @@ File: docB4cQXc.info,  Node: racket-send-definition,  Next: racket-send-last-sex
 racket-repl-echo-sent-expressions::.
 
 
-File: docB4cQXc.info,  Node: racket-send-last-sexp,  Prev: racket-send-definition,  Up: Eval
+File: docdbAmSM.info,  Node: racket-send-last-sexp,  Prev: racket-send-definition,  Up: Eval
 
 6.6.3 racket-send-last-sexp
 ---------------------------
@@ -2850,7 +2857,7 @@ without the #; prefix.
 racket-repl-echo-sent-expressions::.
 
 
-File: docB4cQXc.info,  Node: Collections,  Next: Macro expand,  Prev: Eval,  Up: Commands
+File: docdbAmSM.info,  Node: Collections,  Next: Macro expand,  Prev: Eval,  Up: Commands
 
 6.7 Collections
 ===============
@@ -2860,7 +2867,7 @@ File: docB4cQXc.info,  Node: Collections,  Next: Macro expand,  Prev: Eval,  Up:
 * racket-open-require-path::
 
 
-File: docB4cQXc.info,  Node: racket-open-require-path,  Up: Collections
+File: docdbAmSM.info,  Node: racket-open-require-path,  Up: Collections
 
 6.7.1 racket-open-require-path
 ------------------------------
@@ -2881,7 +2888,7 @@ the top, marked with “->”.
    • C-g aborts.
 
 
-File: docB4cQXc.info,  Node: Macro expand,  Next: Packages,  Prev: Collections,  Up: Commands
+File: docdbAmSM.info,  Node: Macro expand,  Next: Packages,  Prev: Collections,  Up: Commands
 
 6.8 Macro expand
 ================
@@ -2895,7 +2902,7 @@ File: docB4cQXc.info,  Node: Macro expand,  Next: Packages,  Prev: Collections, 
 * racket-expand-last-sexp::
 
 
-File: docB4cQXc.info,  Node: racket-stepper-mode,  Next: racket-expand-file,  Up: Macro expand
+File: docdbAmSM.info,  Node: racket-stepper-mode,  Next: racket-expand-file,  Up: Macro expand
 
 6.8.1 racket-stepper-mode
 -------------------------
@@ -2919,7 +2926,7 @@ run, this mode runs the hook ‘racket-stepper-mode-hook’, as the final or
 penultimate step during initialization.
 
 
-File: docB4cQXc.info,  Node: racket-expand-file,  Next: racket-expand-region,  Prev: racket-stepper-mode,  Up: Macro expand
+File: docdbAmSM.info,  Node: racket-expand-file,  Next: racket-expand-region,  Prev: racket-stepper-mode,  Up: Macro expand
 
 6.8.2 racket-expand-file
 ------------------------
@@ -2941,7 +2948,7 @@ displayed and you can start stepping.
    With ‘C-u’ behaves as if *note racket-expand-hiding:: were ’disabled.
 
 
-File: docB4cQXc.info,  Node: racket-expand-region,  Next: racket-expand-definition,  Prev: racket-expand-file,  Up: Macro expand
+File: docdbAmSM.info,  Node: racket-expand-region,  Next: racket-expand-definition,  Prev: racket-expand-file,  Up: Macro expand
 
 6.8.3 racket-expand-region
 --------------------------
@@ -2955,7 +2962,7 @@ File: docB4cQXc.info,  Node: racket-expand-region,  Next: racket-expand-definiti
    With ‘C-u’ behaves as if *note racket-expand-hiding:: were ’disabled.
 
 
-File: docB4cQXc.info,  Node: racket-expand-definition,  Next: racket-expand-last-sexp,  Prev: racket-expand-region,  Up: Macro expand
+File: docdbAmSM.info,  Node: racket-expand-definition,  Next: racket-expand-last-sexp,  Prev: racket-expand-region,  Up: Macro expand
 
 6.8.4 racket-expand-definition
 ------------------------------
@@ -2969,7 +2976,7 @@ File: docB4cQXc.info,  Node: racket-expand-definition,  Next: racket-expand-last
    With ‘C-u’ behaves as if *note racket-expand-hiding:: were ’disabled.
 
 
-File: docB4cQXc.info,  Node: racket-expand-last-sexp,  Prev: racket-expand-definition,  Up: Macro expand
+File: docdbAmSM.info,  Node: racket-expand-last-sexp,  Prev: racket-expand-definition,  Up: Macro expand
 
 6.8.5 racket-expand-last-sexp
 -----------------------------
@@ -2983,7 +2990,7 @@ File: docB4cQXc.info,  Node: racket-expand-last-sexp,  Prev: racket-expand-defin
    With ‘C-u’ behaves as if *note racket-expand-hiding:: were ’disabled.
 
 
-File: docB4cQXc.info,  Node: Packages,  Next: Other,  Prev: Macro expand,  Up: Commands
+File: docdbAmSM.info,  Node: Packages,  Next: Other,  Prev: Macro expand,  Up: Commands
 
 6.9 Packages
 ============
@@ -2996,7 +3003,7 @@ File: docB4cQXc.info,  Node: Packages,  Next: Other,  Prev: Macro expand,  Up: C
 * describe-racket-package::
 
 
-File: docB4cQXc.info,  Node: racket-package-refresh,  Next: list-racket-packages,  Up: Packages
+File: docdbAmSM.info,  Node: racket-package-refresh,  Next: list-racket-packages,  Up: Packages
 
 6.9.1 racket-package-refresh
 ----------------------------
@@ -3009,7 +3016,7 @@ File: docB4cQXc.info,  Node: racket-package-refresh,  Next: list-racket-packages
 seconds to complete.
 
 
-File: docB4cQXc.info,  Node: list-racket-packages,  Next: racket-package-mode,  Prev: racket-package-refresh,  Up: Packages
+File: docdbAmSM.info,  Node: list-racket-packages,  Next: racket-package-mode,  Prev: racket-package-refresh,  Up: Packages
 
 6.9.2 list-racket-packages
 --------------------------
@@ -3019,7 +3026,7 @@ File: docB4cQXc.info,  Node: list-racket-packages,  Next: racket-package-mode,  
    Open a *note racket-package-mode:: buffer for the active back end.
 
 
-File: docB4cQXc.info,  Node: racket-package-mode,  Next: describe-racket-package,  Prev: list-racket-packages,  Up: Packages
+File: docdbAmSM.info,  Node: racket-package-mode,  Next: describe-racket-package,  Prev: list-racket-packages,  Up: Packages
 
 6.9.3 racket-package-mode
 -------------------------
@@ -3045,7 +3052,7 @@ have run, this mode runs the hook ‘racket-package-mode-hook’, as the
 final or penultimate step during initialization.
 
 
-File: docB4cQXc.info,  Node: describe-racket-package,  Prev: racket-package-mode,  Up: Packages
+File: docdbAmSM.info,  Node: describe-racket-package,  Prev: racket-package-mode,  Up: Packages
 
 6.9.4 describe-racket-package
 -----------------------------
@@ -3082,7 +3089,7 @@ be shown, assuming you have run the command *note
 racket-package-refresh::.
 
 
-File: docB4cQXc.info,  Node: Other,  Prev: Packages,  Up: Commands
+File: docdbAmSM.info,  Node: Other,  Prev: Packages,  Up: Commands
 
 6.10 Other
 ==========
@@ -3094,7 +3101,7 @@ File: docB4cQXc.info,  Node: Other,  Prev: Packages,  Up: Commands
 * racket-mode-start-slower::
 
 
-File: docB4cQXc.info,  Node: racket-debug-toggle-breakpoint,  Next: racket-mode-start-faster,  Up: Other
+File: docdbAmSM.info,  Node: racket-debug-toggle-breakpoint,  Next: racket-mode-start-faster,  Up: Other
 
 6.10.1 racket-debug-toggle-breakpoint
 -------------------------------------
@@ -3139,7 +3146,7 @@ positions that are tail calls – most open parens and close parens are
 breakble positions.
 
 
-File: docB4cQXc.info,  Node: racket-mode-start-faster,  Next: racket-mode-start-slower,  Prev: racket-debug-toggle-breakpoint,  Up: Other
+File: docdbAmSM.info,  Node: racket-mode-start-faster,  Next: racket-mode-start-slower,  Prev: racket-debug-toggle-breakpoint,  Up: Other
 
 6.10.2 racket-mode-start-faster
 -------------------------------
@@ -3174,7 +3181,7 @@ not be worth the complication.
 racket-mode-start-slower::.
 
 
-File: docB4cQXc.info,  Node: racket-mode-start-slower,  Prev: racket-mode-start-faster,  Up: Other
+File: docdbAmSM.info,  Node: racket-mode-start-slower,  Prev: racket-mode-start-faster,  Up: Other
 
 6.10.3 racket-mode-start-slower
 -------------------------------
@@ -3185,7 +3192,7 @@ File: docB4cQXc.info,  Node: racket-mode-start-slower,  Prev: racket-mode-start-
 racket-mode-start-faster::.
 
 
-File: docB4cQXc.info,  Node: Variables,  Next: Configuration functions,  Prev: Commands,  Up: Top
+File: docdbAmSM.info,  Node: Variables,  Next: Configuration functions,  Prev: Commands,  Up: Top
 
 7 Variables
 ***********
@@ -3202,7 +3209,7 @@ File: docB4cQXc.info,  Node: Variables,  Next: Configuration functions,  Prev: C
 * Racket input method::
 
 
-File: docB4cQXc.info,  Node: General variables,  Next: Hash lang variables,  Up: Variables
+File: docdbAmSM.info,  Node: General variables,  Next: Hash lang variables,  Up: Variables
 
 7.1 General variables
 =====================
@@ -3223,7 +3230,7 @@ File: docB4cQXc.info,  Node: General variables,  Next: Hash lang variables,  Up:
 * racket-expand-hiding::
 
 
-File: docB4cQXc.info,  Node: racket-program,  Next: racket-command-timeout,  Up: General variables
+File: docdbAmSM.info,  Node: racket-program,  Next: racket-command-timeout,  Up: General variables
 
 7.1.1 racket-program
 --------------------
@@ -3241,7 +3248,7 @@ Pathname of the Racket executable or command line to launch it.
 ‘racket-program’ property list value.  See *note racket-add-back-end::.
 
 
-File: docB4cQXc.info,  Node: racket-command-timeout,  Next: racket-memory-limit,  Prev: racket-program,  Up: General variables
+File: docdbAmSM.info,  Node: racket-command-timeout,  Next: racket-memory-limit,  Prev: racket-program,  Up: General variables
 
 7.1.2 racket-command-timeout
 ----------------------------
@@ -3254,7 +3261,7 @@ Instead most Racket Mode commands these days receive their response
 asychronously.
 
 
-File: docB4cQXc.info,  Node: racket-memory-limit,  Next: racket-error-context,  Prev: racket-command-timeout,  Up: General variables
+File: docdbAmSM.info,  Node: racket-memory-limit,  Next: racket-error-context,  Prev: racket-command-timeout,  Up: General variables
 
 7.1.3 racket-memory-limit
 -------------------------
@@ -3270,7 +3277,7 @@ the first garbage collection where memory exceeds the limit (maybe by a
 significant amount).
 
 
-File: docB4cQXc.info,  Node: racket-error-context,  Next: racket-user-command-line-arguments,  Prev: racket-memory-limit,  Up: General variables
+File: docdbAmSM.info,  Node: racket-error-context,  Next: racket-user-command-line-arguments,  Prev: racket-memory-limit,  Up: General variables
 
 7.1.4 racket-error-context
 --------------------------
@@ -3297,7 +3304,7 @@ using ‘C-u’ .  This lets you normally run with a lower, faster setting,
 and re-run when desired to get a more-helpful error message.
 
 
-File: docB4cQXc.info,  Node: racket-user-command-line-arguments,  Next: racket-browse-url-function,  Prev: racket-error-context,  Up: General variables
+File: docdbAmSM.info,  Node: racket-user-command-line-arguments,  Next: racket-browse-url-function,  Prev: racket-error-context,  Up: General variables
 
 7.1.5 racket-user-command-line-arguments
 ----------------------------------------
@@ -3325,7 +3332,7 @@ example:
          (list "-f" "bar")
 
 
-File: docB4cQXc.info,  Node: racket-browse-url-function,  Next: racket-xp-after-change-refresh-delay,  Prev: racket-user-command-line-arguments,  Up: General variables
+File: docdbAmSM.info,  Node: racket-browse-url-function,  Next: racket-xp-after-change-refresh-delay,  Prev: racket-user-command-line-arguments,  Up: General variables
 
 7.1.6 racket-browse-url-function
 --------------------------------
@@ -3336,7 +3343,7 @@ Function to call to browse a URL.
 and ‘browse-url-browser-function’ on other platforms.
 
 
-File: docB4cQXc.info,  Node: racket-xp-after-change-refresh-delay,  Next: racket-xp-highlight-unused-regexp,  Prev: racket-browse-url-function,  Up: General variables
+File: docdbAmSM.info,  Node: racket-xp-after-change-refresh-delay,  Next: racket-xp-highlight-unused-regexp,  Prev: racket-browse-url-function,  Up: General variables
 
 7.1.7 racket-xp-after-change-refresh-delay
 ------------------------------------------
@@ -3347,7 +3354,7 @@ Seconds to wait before refreshing *note racket-xp-mode:: annotations.
 ‘racket-xp-annotate’.
 
 
-File: docB4cQXc.info,  Node: racket-xp-highlight-unused-regexp,  Next: racket-xp-add-binding-faces,  Prev: racket-xp-after-change-refresh-delay,  Up: General variables
+File: docdbAmSM.info,  Node: racket-xp-highlight-unused-regexp,  Next: racket-xp-add-binding-faces,  Prev: racket-xp-after-change-refresh-delay,  Up: General variables
 
 7.1.8 racket-xp-highlight-unused-regexp
 ---------------------------------------
@@ -3359,7 +3366,7 @@ this regexp.
 underline, which is a common convention.
 
 
-File: docB4cQXc.info,  Node: racket-xp-add-binding-faces,  Next: racket-xp-eldoc-level,  Prev: racket-xp-highlight-unused-regexp,  Up: General variables
+File: docdbAmSM.info,  Node: racket-xp-add-binding-faces,  Next: racket-xp-eldoc-level,  Prev: racket-xp-highlight-unused-regexp,  Up: General variables
 
 7.1.9 racket-xp-add-binding-faces
 ---------------------------------
@@ -3381,7 +3388,7 @@ Have *note racket-xp-mode:: fontify binding identifier sites.
 property applied by the major mode’s fontification.
 
 
-File: docB4cQXc.info,  Node: racket-xp-eldoc-level,  Next: racket-documentation-search-location,  Prev: racket-xp-add-binding-faces,  Up: General variables
+File: docdbAmSM.info,  Node: racket-xp-eldoc-level,  Next: racket-documentation-search-location,  Prev: racket-xp-add-binding-faces,  Up: General variables
 
 7.1.10 racket-xp-eldoc-level
 ----------------------------
@@ -3402,7 +3409,7 @@ minimal level.  Even some bluebox signatures can take many lines to show
 on screen.
 
 
-File: docB4cQXc.info,  Node: racket-documentation-search-location,  Next: racket-expand-hiding,  Prev: racket-xp-eldoc-level,  Up: General variables
+File: docdbAmSM.info,  Node: racket-documentation-search-location,  Next: racket-expand-hiding,  Prev: racket-xp-eldoc-level,  Up: General variables
 
 7.1.11 racket-documentation-search-location
 -------------------------------------------
@@ -3420,7 +3427,7 @@ racket-repl-documentation:: should look for the search page.
      be a properly encoded URL.
 
 
-File: docB4cQXc.info,  Node: racket-expand-hiding,  Prev: racket-documentation-search-location,  Up: General variables
+File: docdbAmSM.info,  Node: racket-expand-hiding,  Prev: racket-documentation-search-location,  Up: General variables
 
 7.1.12 racket-expand-hiding
 ---------------------------
@@ -3428,7 +3435,7 @@ File: docB4cQXc.info,  Node: racket-expand-hiding,  Prev: racket-documentation-s
 The macro hiding policy for commands like *note racket-expand-file::.
 
 
-File: docB4cQXc.info,  Node: Hash lang variables,  Next: REPL variables,  Prev: General variables,  Up: Variables
+File: docdbAmSM.info,  Node: Hash lang variables,  Next: REPL variables,  Prev: General variables,  Up: Variables
 
 7.2 Hash lang variables
 =======================
@@ -3439,7 +3446,7 @@ File: docB4cQXc.info,  Node: Hash lang variables,  Next: REPL variables,  Prev: 
 * racket-hash-lang-module-language-hook::
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-token-face-alist,  Next: racket-hash-lang-module-language-hook,  Up: Hash lang variables
+File: docdbAmSM.info,  Node: racket-hash-lang-token-face-alist,  Next: racket-hash-lang-module-language-hook,  Up: Hash lang variables
 
 7.2.1 racket-hash-lang-token-face-alist
 ---------------------------------------
@@ -3469,7 +3476,7 @@ defined, as by the paren-face package.  String tokens use
 *note racket-hash-lang-text::.
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-module-language-hook,  Prev: racket-hash-lang-token-face-alist,  Up: Hash lang variables
+File: docdbAmSM.info,  Node: racket-hash-lang-module-language-hook,  Prev: racket-hash-lang-token-face-alist,  Up: Hash lang variables
 
 7.2.2 racket-hash-lang-module-language-hook
 -------------------------------------------
@@ -3546,7 +3553,7 @@ choices include:
                                             racket-font-lock-keywords-3)))
 
 
-File: docB4cQXc.info,  Node: REPL variables,  Next: Other variables,  Prev: Hash lang variables,  Up: Variables
+File: docdbAmSM.info,  Node: REPL variables,  Next: Other variables,  Prev: Hash lang variables,  Up: Variables
 
 7.3 REPL variables
 ==================
@@ -3567,7 +3574,7 @@ File: docB4cQXc.info,  Node: REPL variables,  Next: Other variables,  Prev: Hash
 * racket-repl-echo-sent-expressions::
 
 
-File: docB4cQXc.info,  Node: racket-repl-buffer-name-function,  Next: racket-submodules-to-run,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-repl-buffer-name-function,  Next: racket-submodules-to-run,  Up: REPL variables
 
 7.3.1 racket-repl-buffer-name-function
 --------------------------------------
@@ -3593,7 +3600,7 @@ racket-repl-mode:: buffer name.  As a result, *note racket-run::
 commands will use a buffer of that name, creating it if necessary.
 
 
-File: docB4cQXc.info,  Node: racket-submodules-to-run,  Next: racket-repl-history-directory,  Prev: racket-repl-buffer-name-function,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-submodules-to-run,  Next: racket-repl-history-directory,  Prev: racket-repl-buffer-name-function,  Up: REPL variables
 
 7.3.2 racket-submodules-to-run
 ------------------------------
@@ -3615,7 +3622,7 @@ to support submodules nested to any depth.
    • *note racket-profile::
 
 
-File: docB4cQXc.info,  Node: racket-repl-history-directory,  Next: racket-history-filter-regexp,  Prev: racket-submodules-to-run,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-repl-history-directory,  Next: racket-history-filter-regexp,  Prev: racket-submodules-to-run,  Up: REPL variables
 
 7.3.3 racket-repl-history-directory
 -----------------------------------
@@ -3623,7 +3630,7 @@ File: docB4cQXc.info,  Node: racket-repl-history-directory,  Next: racket-histor
 Directory for *note racket-repl-mode:: history files.
 
 
-File: docB4cQXc.info,  Node: racket-history-filter-regexp,  Next: racket-images-inline,  Prev: racket-repl-history-directory,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-history-filter-regexp,  Next: racket-images-inline,  Prev: racket-repl-history-directory,  Up: REPL variables
 
 7.3.4 racket-history-filter-regexp
 ----------------------------------
@@ -3632,7 +3639,7 @@ Input matching this regexp are NOT saved on the history list.  Default
 value is a regexp to ignore input that is all whitespace.
 
 
-File: docB4cQXc.info,  Node: racket-images-inline,  Next: racket-imagemagick-props,  Prev: racket-history-filter-regexp,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-images-inline,  Next: racket-imagemagick-props,  Prev: racket-history-filter-regexp,  Up: REPL variables
 
 7.3.5 racket-images-inline
 --------------------------
@@ -3640,7 +3647,7 @@ File: docB4cQXc.info,  Node: racket-images-inline,  Next: racket-imagemagick-pro
 Whether to display inline images in the REPL.
 
 
-File: docB4cQXc.info,  Node: racket-imagemagick-props,  Next: racket-images-keep-last,  Prev: racket-images-inline,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-imagemagick-props,  Next: racket-images-keep-last,  Prev: racket-images-inline,  Up: REPL variables
 
 7.3.6 racket-imagemagick-props
 ------------------------------
@@ -3656,7 +3663,7 @@ and with this property list.
 supply (:max-width 500).
 
 
-File: docB4cQXc.info,  Node: racket-images-keep-last,  Next: racket-images-system-viewer,  Prev: racket-imagemagick-props,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-images-keep-last,  Next: racket-images-system-viewer,  Prev: racket-imagemagick-props,  Up: REPL variables
 
 7.3.7 racket-images-keep-last
 -----------------------------
@@ -3664,7 +3671,7 @@ File: docB4cQXc.info,  Node: racket-images-keep-last,  Next: racket-images-syste
 How many images to keep in the image cache.
 
 
-File: docB4cQXc.info,  Node: racket-images-system-viewer,  Next: racket-images-do-not-use-svg,  Prev: racket-images-keep-last,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-images-system-viewer,  Next: racket-images-do-not-use-svg,  Prev: racket-images-keep-last,  Up: REPL variables
 
 7.3.8 racket-images-system-viewer
 ---------------------------------
@@ -3672,7 +3679,7 @@ File: docB4cQXc.info,  Node: racket-images-system-viewer,  Next: racket-images-d
 The image viewer program to use for ‘racket-view-image’.
 
 
-File: docB4cQXc.info,  Node: racket-images-do-not-use-svg,  Next: racket-pretty-print,  Prev: racket-images-system-viewer,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-images-do-not-use-svg,  Next: racket-pretty-print,  Prev: racket-images-system-viewer,  Up: REPL variables
 
 7.3.9 racket-images-do-not-use-svg
 ----------------------------------
@@ -3684,7 +3691,7 @@ each run.  If you change this, for it to take effect you must restart by
 using ‘racket-start-back-end’.
 
 
-File: docB4cQXc.info,  Node: racket-pretty-print,  Next: racket-repl-command-file,  Prev: racket-images-do-not-use-svg,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-pretty-print,  Next: racket-repl-command-file,  Prev: racket-images-do-not-use-svg,  Up: REPL variables
 
 7.3.10 racket-pretty-print
 --------------------------
@@ -3699,7 +3706,7 @@ with its own global port print handler – for example to implement
 printing a non-s-expression syntax.
 
 
-File: docB4cQXc.info,  Node: racket-repl-command-file,  Next: racket-repl-echo-sent-expressions,  Prev: racket-pretty-print,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-repl-command-file,  Next: racket-repl-echo-sent-expressions,  Prev: racket-pretty-print,  Up: REPL variables
 
 7.3.11 racket-repl-command-file
 -------------------------------
@@ -3707,7 +3714,7 @@ File: docB4cQXc.info,  Node: racket-repl-command-file,  Next: racket-repl-echo-s
 Name of the file used by *note racket-repl::.
 
 
-File: docB4cQXc.info,  Node: racket-repl-echo-sent-expressions,  Prev: racket-repl-command-file,  Up: REPL variables
+File: docdbAmSM.info,  Node: racket-repl-echo-sent-expressions,  Prev: racket-repl-command-file,  Up: REPL variables
 
 7.3.12 racket-repl-echo-sent-expressions
 ----------------------------------------
@@ -3721,7 +3728,7 @@ racket-repl-message:: to distinguish them from result values.
 and *note racket-send-definition::.
 
 
-File: docB4cQXc.info,  Node: Other variables,  Next: Experimental debugger variables,  Prev: REPL variables,  Up: Variables
+File: docdbAmSM.info,  Node: Other variables,  Next: Experimental debugger variables,  Prev: REPL variables,  Up: Variables
 
 7.4 Other variables
 ===================
@@ -3740,7 +3747,7 @@ File: docB4cQXc.info,  Node: Other variables,  Next: Experimental debugger varia
 * racket-sexp-comment-fade::
 
 
-File: docB4cQXc.info,  Node: racket-doc-index-directory,  Next: racket-doc-index-predicate-function,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-doc-index-directory,  Next: racket-doc-index-predicate-function,  Up: Other variables
 
 7.4.1 racket-doc-index-directory
 --------------------------------
@@ -3748,7 +3755,7 @@ File: docB4cQXc.info,  Node: racket-doc-index-directory,  Next: racket-doc-index
 Directory for *note racket-describe-search:: doc index files.
 
 
-File: docB4cQXc.info,  Node: racket-doc-index-predicate-function,  Next: racket-indent-curly-as-sequence,  Prev: racket-doc-index-directory,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-doc-index-predicate-function,  Next: racket-indent-curly-as-sequence,  Prev: racket-doc-index-directory,  Up: Other variables
 
 7.4.2 racket-doc-index-predicate-function
 -----------------------------------------
@@ -3766,7 +3773,7 @@ of completion candidates.  An example that limits candidates to the
 “Rhombus”)
 
 
-File: docB4cQXc.info,  Node: racket-indent-curly-as-sequence,  Next: racket-indent-sequence-depth,  Prev: racket-doc-index-predicate-function,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-indent-curly-as-sequence,  Next: racket-indent-sequence-depth,  Prev: racket-doc-index-predicate-function,  Up: Other variables
 
 7.4.3 racket-indent-curly-as-sequence
 -------------------------------------
@@ -3777,7 +3784,7 @@ Indent ‘{}’ with items aligned with the head item?
 is 0.  This is safe to set as a file-local variable.
 
 
-File: docB4cQXc.info,  Node: racket-indent-sequence-depth,  Next: racket-pretty-lambda,  Prev: racket-indent-curly-as-sequence,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-indent-sequence-depth,  Next: racket-pretty-lambda,  Prev: racket-indent-curly-as-sequence,  Up: Other variables
 
 7.4.4 racket-indent-sequence-depth
 ----------------------------------
@@ -3792,7 +3799,7 @@ this to a high value can make indentation noticeably slower.  This is
 safe to set as a file-local variable.
 
 
-File: docB4cQXc.info,  Node: racket-pretty-lambda,  Next: racket-smart-open-bracket-enable,  Prev: racket-indent-sequence-depth,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-pretty-lambda,  Next: racket-smart-open-bracket-enable,  Prev: racket-indent-sequence-depth,  Up: Other variables
 
 7.4.5 racket-pretty-lambda
 --------------------------
@@ -3803,7 +3810,7 @@ Display lambda keywords using λ.  This is DEPRECATED.
 use *note racket-insert-lambda:: to insert actual λ characters.
 
 
-File: docB4cQXc.info,  Node: racket-smart-open-bracket-enable,  Next: racket-logger-config,  Prev: racket-pretty-lambda,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-smart-open-bracket-enable,  Next: racket-logger-config,  Prev: racket-pretty-lambda,  Up: Other variables
 
 7.4.6 racket-smart-open-bracket-enable
 --------------------------------------
@@ -3815,7 +3822,7 @@ This variable is obsolete and has no effect.
 ‘racket-repl-mode-map’ keymaps.
 
 
-File: docB4cQXc.info,  Node: racket-logger-config,  Next: racket-before-run-hook,  Prev: racket-smart-open-bracket-enable,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-logger-config,  Next: racket-before-run-hook,  Prev: racket-smart-open-bracket-enable,  Up: Other variables
 
 7.4.7 racket-logger-config
 --------------------------
@@ -3837,7 +3844,7 @@ quieter.  That way you can set the “*” topic to a level like “debug” and
 not get overhwelmed by these noisy topics.
 
 
-File: docB4cQXc.info,  Node: racket-before-run-hook,  Next: racket-after-run-hook,  Prev: racket-logger-config,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-before-run-hook,  Next: racket-after-run-hook,  Prev: racket-logger-config,  Up: Other variables
 
 7.4.8 racket-before-run-hook
 ----------------------------
@@ -3853,7 +3860,7 @@ needs the *note racket-repl-mode:: buffer, it should get that from the
 variable ‘racket-repl-buffer-name’.
 
 
-File: docB4cQXc.info,  Node: racket-after-run-hook,  Next: racket-sexp-comment-fade,  Prev: racket-before-run-hook,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-after-run-hook,  Next: racket-sexp-comment-fade,  Prev: racket-before-run-hook,  Up: Other variables
 
 7.4.9 racket-after-run-hook
 ---------------------------
@@ -3869,7 +3876,7 @@ needs the *note racket-repl-mode:: buffer, it should get that from the
 variable ‘racket-repl-buffer-name’.
 
 
-File: docB4cQXc.info,  Node: racket-sexp-comment-fade,  Prev: racket-after-run-hook,  Up: Other variables
+File: docdbAmSM.info,  Node: racket-sexp-comment-fade,  Prev: racket-after-run-hook,  Up: Other variables
 
 7.4.10 racket-sexp-comment-fade
 -------------------------------
@@ -3887,7 +3894,7 @@ change the value of this customization variable and after any
 ‘racket-refresh-sexp-comment-faces’.
 
 
-File: docB4cQXc.info,  Node: Experimental debugger variables,  Next: Showing information,  Prev: Other variables,  Up: Variables
+File: docdbAmSM.info,  Node: Experimental debugger variables,  Next: Showing information,  Prev: Other variables,  Up: Variables
 
 7.5 Experimental debugger variables
 ===================================
@@ -3897,7 +3904,7 @@ File: docB4cQXc.info,  Node: Experimental debugger variables,  Next: Showing inf
 * racket-debuggable-files::
 
 
-File: docB4cQXc.info,  Node: racket-debuggable-files,  Up: Experimental debugger variables
+File: docdbAmSM.info,  Node: racket-debuggable-files,  Up: Experimental debugger variables
 
 7.5.1 racket-debuggable-files
 -----------------------------
@@ -3916,7 +3923,7 @@ with respect to the file being run and given to
 ‘racket-file-name-front-to-back’.
 
 
-File: docB4cQXc.info,  Node: Showing information,  Next: Running racket and raco commands in a shell or terminal,  Prev: Experimental debugger variables,  Up: Variables
+File: docdbAmSM.info,  Node: Showing information,  Next: Running racket and raco commands in a shell or terminal,  Prev: Experimental debugger variables,  Up: Variables
 
 7.6 Showing information
 =======================
@@ -3926,7 +3933,7 @@ File: docB4cQXc.info,  Node: Showing information,  Next: Running racket and raco
 * racket-show-functions::
 
 
-File: docB4cQXc.info,  Node: racket-show-functions,  Up: Showing information
+File: docdbAmSM.info,  Node: racket-show-functions,  Up: Showing information
 
 7.6.1 racket-show-functions
 ---------------------------
@@ -3960,7 +3967,7 @@ POS.  Examples: *note racket-show-echo-area:: and *note
 racket-show-header-line::
 
 
-File: docB4cQXc.info,  Node: Running racket and raco commands in a shell or terminal,  Next: Racket input method,  Prev: Showing information,  Up: Variables
+File: docdbAmSM.info,  Node: Running racket and raco commands in a shell or terminal,  Next: Racket input method,  Prev: Showing information,  Up: Variables
 
 7.7 Running racket and raco commands in a shell or terminal
 ===========================================================
@@ -3970,7 +3977,7 @@ File: docB4cQXc.info,  Node: Running racket and raco commands in a shell or term
 * racket-shell-or-terminal-function::
 
 
-File: docB4cQXc.info,  Node: racket-shell-or-terminal-function,  Up: Running racket and raco commands in a shell or terminal
+File: docdbAmSM.info,  Node: racket-shell-or-terminal-function,  Up: Running racket and raco commands in a shell or terminal
 
 7.7.1 racket-shell-or-terminal-function
 ---------------------------------------
@@ -3985,7 +3992,7 @@ enter.
 *note racket-ansi-term::, and *note racket-vterm::.
 
 
-File: docB4cQXc.info,  Node: Racket input method,  Prev: Running racket and raco commands in a shell or terminal,  Up: Variables
+File: docdbAmSM.info,  Node: Racket input method,  Prev: Running racket and raco commands in a shell or terminal,  Up: Variables
 
 7.8 Racket input method
 =======================
@@ -3996,7 +4003,7 @@ File: docB4cQXc.info,  Node: Racket input method,  Prev: Running racket and raco
 * racket-input-translations::
 
 
-File: docB4cQXc.info,  Node: racket-input-prefix,  Next: racket-input-translations,  Up: Racket input method
+File: docdbAmSM.info,  Node: racket-input-prefix,  Next: racket-input-translations,  Up: Racket input method
 
 7.8.1 racket-input-prefix
 -------------------------
@@ -4015,7 +4022,7 @@ customization buffer or ‘setopt’) you need to call ‘racket-input-setup’
 in order for the change to take effect.
 
 
-File: docB4cQXc.info,  Node: racket-input-translations,  Prev: racket-input-prefix,  Up: Racket input method
+File: docdbAmSM.info,  Node: racket-input-translations,  Prev: racket-input-prefix,  Up: Racket input method
 
 7.8.2 racket-input-translations
 -------------------------------
@@ -4033,7 +4040,7 @@ customization buffer or ‘setopt’) you need to call ‘racket-input-setup’
 in order for the change to take effect.
 
 
-File: docB4cQXc.info,  Node: Configuration functions,  Next: Faces,  Prev: Variables,  Up: Top
+File: docdbAmSM.info,  Node: Configuration functions,  Next: Faces,  Prev: Variables,  Up: Top
 
 8 Configuration functions
 *************************
@@ -4047,7 +4054,7 @@ File: docB4cQXc.info,  Node: Configuration functions,  Next: Faces,  Prev: Varia
 * Running racket and raco commands in a shell or terminal: Running racket and raco commands in a shell or terminal (1).
 
 
-File: docB4cQXc.info,  Node: Showing information (1),  Next: Associating edit buffers with REPL buffers,  Up: Configuration functions
+File: docdbAmSM.info,  Node: Showing information (1),  Next: Associating edit buffers with REPL buffers,  Up: Configuration functions
 
 8.1 Showing information
 =======================
@@ -4060,7 +4067,7 @@ File: docB4cQXc.info,  Node: Showing information (1),  Next: Associating edit bu
 * racket-show-pos-tip::
 
 
-File: docB4cQXc.info,  Node: racket-show-pseudo-tooltip,  Next: racket-show-echo-area,  Up: Showing information (1)
+File: docdbAmSM.info,  Node: racket-show-pseudo-tooltip,  Next: racket-show-echo-area,  Up: Showing information (1)
 
 8.1.1 racket-show-pseudo-tooltip
 --------------------------------
@@ -4080,7 +4087,7 @@ that spans multiple lines or is too wide to fit the window.  In that
 case, we simply left-justify everything and do not draw any border.
 
 
-File: docB4cQXc.info,  Node: racket-show-echo-area,  Next: racket-show-header-line,  Prev: racket-show-pseudo-tooltip,  Up: Showing information (1)
+File: docdbAmSM.info,  Node: racket-show-echo-area,  Next: racket-show-header-line,  Prev: racket-show-pseudo-tooltip,  Up: Showing information (1)
 
 8.1.2 racket-show-echo-area
 ---------------------------
@@ -4094,7 +4101,7 @@ File: docB4cQXc.info,  Node: racket-show-echo-area,  Next: racket-show-header-li
    This does _not_ add STR to the “*Messages*” log buffer.
 
 
-File: docB4cQXc.info,  Node: racket-show-header-line,  Next: racket-show-pos-tip,  Prev: racket-show-echo-area,  Up: Showing information (1)
+File: docdbAmSM.info,  Node: racket-show-header-line,  Next: racket-show-pos-tip,  Prev: racket-show-echo-area,  Up: Showing information (1)
 
 8.1.3 racket-show-header-line
 -----------------------------
@@ -4110,7 +4117,7 @@ the buffer below doesn’t “jump up and down” by a line as messages appear
 and disappear.  Only when V is nil do we remove the header line.
 
 
-File: docB4cQXc.info,  Node: racket-show-pos-tip,  Prev: racket-show-header-line,  Up: Showing information (1)
+File: docdbAmSM.info,  Node: racket-show-pos-tip,  Prev: racket-show-header-line,  Up: Showing information (1)
 
 8.1.4 racket-show-pos-tip
 -------------------------
@@ -4122,7 +4129,7 @@ File: docB4cQXc.info,  Node: racket-show-pos-tip,  Prev: racket-show-header-line
    A value for the variable *note racket-show-functions::.
 
 
-File: docB4cQXc.info,  Node: Associating edit buffers with REPL buffers,  Next: Browsing file URLs with anchors,  Prev: Showing information (1),  Up: Configuration functions
+File: docdbAmSM.info,  Node: Associating edit buffers with REPL buffers,  Next: Browsing file URLs with anchors,  Prev: Showing information (1),  Up: Configuration functions
 
 8.2 Associating edit buffers with REPL buffers
 ==============================================
@@ -4135,7 +4142,7 @@ File: docB4cQXc.info,  Node: Associating edit buffers with REPL buffers,  Next: 
 * racket-project-root::
 
 
-File: docB4cQXc.info,  Node: racket-repl-buffer-name-shared,  Next: racket-repl-buffer-name-unique,  Up: Associating edit buffers with REPL buffers
+File: docdbAmSM.info,  Node: racket-repl-buffer-name-shared,  Next: racket-repl-buffer-name-unique,  Up: Associating edit buffers with REPL buffers
 
 8.2.1 racket-repl-buffer-name-shared
 ------------------------------------
@@ -4147,7 +4154,7 @@ File: docB4cQXc.info,  Node: racket-repl-buffer-name-shared,  Next: racket-repl-
    A value for the variable *note racket-repl-buffer-name-function::.
 
 
-File: docB4cQXc.info,  Node: racket-repl-buffer-name-unique,  Next: racket-repl-buffer-name-project,  Prev: racket-repl-buffer-name-shared,  Up: Associating edit buffers with REPL buffers
+File: docdbAmSM.info,  Node: racket-repl-buffer-name-unique,  Next: racket-repl-buffer-name-project,  Prev: racket-repl-buffer-name-shared,  Up: Associating edit buffers with REPL buffers
 
 8.2.2 racket-repl-buffer-name-unique
 ------------------------------------
@@ -4160,7 +4167,7 @@ racket-repl-mode:: buffer.
    A value for the variable *note racket-repl-buffer-name-function::.
 
 
-File: docB4cQXc.info,  Node: racket-repl-buffer-name-project,  Next: racket-project-root,  Prev: racket-repl-buffer-name-unique,  Up: Associating edit buffers with REPL buffers
+File: docdbAmSM.info,  Node: racket-repl-buffer-name-project,  Next: racket-project-root,  Prev: racket-repl-buffer-name-unique,  Up: Associating edit buffers with REPL buffers
 
 8.2.3 racket-repl-buffer-name-project
 -------------------------------------
@@ -4174,7 +4181,7 @@ File: docB4cQXc.info,  Node: racket-repl-buffer-name-project,  Next: racket-proj
    The “project” is determined by *note racket-project-root::.
 
 
-File: docB4cQXc.info,  Node: racket-project-root,  Prev: racket-repl-buffer-name-project,  Up: Associating edit buffers with REPL buffers
+File: docdbAmSM.info,  Node: racket-project-root,  Prev: racket-repl-buffer-name-project,  Up: Associating edit buffers with REPL buffers
 
 8.2.4 racket-project-root
 -------------------------
@@ -4192,7 +4199,7 @@ directory.
    • ‘file-name-directory’
 
 
-File: docB4cQXc.info,  Node: Browsing file URLs with anchors,  Next: Configuring back ends,  Prev: Associating edit buffers with REPL buffers,  Up: Configuration functions
+File: docdbAmSM.info,  Node: Browsing file URLs with anchors,  Next: Configuring back ends,  Prev: Associating edit buffers with REPL buffers,  Up: Configuration functions
 
 8.3 Browsing file URLs with anchors
 ===================================
@@ -4202,7 +4209,7 @@ File: docB4cQXc.info,  Node: Browsing file URLs with anchors,  Next: Configuring
 * racket-browse-url-using-temporary-file::
 
 
-File: docB4cQXc.info,  Node: racket-browse-url-using-temporary-file,  Up: Browsing file URLs with anchors
+File: docdbAmSM.info,  Node: racket-browse-url-using-temporary-file,  Up: Browsing file URLs with anchors
 
 8.3.1 racket-browse-url-using-temporary-file
 --------------------------------------------
@@ -4227,7 +4234,7 @@ racket-browse-url-function:: instead to be ‘browse-url’, or
 indeed whatever you want.
 
 
-File: docB4cQXc.info,  Node: Configuring back ends,  Next: Running racket and raco commands in a shell or terminal (1),  Prev: Browsing file URLs with anchors,  Up: Configuration functions
+File: docdbAmSM.info,  Node: Configuring back ends,  Next: Running racket and raco commands in a shell or terminal (1),  Prev: Browsing file URLs with anchors,  Up: Configuration functions
 
 8.4 Configuring back ends
 =========================
@@ -4237,7 +4244,7 @@ File: docB4cQXc.info,  Node: Configuring back ends,  Next: Running racket and ra
 * racket-add-back-end::
 
 
-File: docB4cQXc.info,  Node: racket-add-back-end,  Up: Configuring back ends
+File: docdbAmSM.info,  Node: racket-add-back-end,  Up: Configuring back ends
 
 8.4.1 racket-add-back-end
 -------------------------
@@ -4362,7 +4369,7 @@ file:
          ((nil . ((eval . (racket-add-back-end default-directory)))))
 
 
-File: docB4cQXc.info,  Node: Running racket and raco commands in a shell or terminal (1),  Prev: Configuring back ends,  Up: Configuration functions
+File: docdbAmSM.info,  Node: Running racket and raco commands in a shell or terminal (1),  Prev: Configuring back ends,  Up: Configuration functions
 
 8.5 Running racket and raco commands in a shell or terminal
 ===========================================================
@@ -4375,7 +4382,7 @@ File: docB4cQXc.info,  Node: Running racket and raco commands in a shell or term
 * racket-vterm::
 
 
-File: docB4cQXc.info,  Node: racket-shell,  Next: racket-term,  Up: Running racket and raco commands in a shell or terminal (1)
+File: docdbAmSM.info,  Node: racket-shell,  Next: racket-term,  Up: Running racket and raco commands in a shell or terminal (1)
 
 8.5.1 racket-shell
 ------------------
@@ -4387,7 +4394,7 @@ File: docB4cQXc.info,  Node: racket-shell,  Next: racket-term,  Up: Running rack
    A value for the variable *note racket-shell-or-terminal-function::.
 
 
-File: docB4cQXc.info,  Node: racket-term,  Next: racket-ansi-term,  Prev: racket-shell,  Up: Running racket and raco commands in a shell or terminal (1)
+File: docdbAmSM.info,  Node: racket-term,  Next: racket-ansi-term,  Prev: racket-shell,  Up: Running racket and raco commands in a shell or terminal (1)
 
 8.5.2 racket-term
 -----------------
@@ -4399,7 +4406,7 @@ File: docB4cQXc.info,  Node: racket-term,  Next: racket-ansi-term,  Prev: racket
    A value for the variable *note racket-shell-or-terminal-function::.
 
 
-File: docB4cQXc.info,  Node: racket-ansi-term,  Next: racket-vterm,  Prev: racket-term,  Up: Running racket and raco commands in a shell or terminal (1)
+File: docdbAmSM.info,  Node: racket-ansi-term,  Next: racket-vterm,  Prev: racket-term,  Up: Running racket and raco commands in a shell or terminal (1)
 
 8.5.3 racket-ansi-term
 ----------------------
@@ -4411,7 +4418,7 @@ File: docB4cQXc.info,  Node: racket-ansi-term,  Next: racket-vterm,  Prev: racke
    A value for the variable *note racket-shell-or-terminal-function::.
 
 
-File: docB4cQXc.info,  Node: racket-vterm,  Prev: racket-ansi-term,  Up: Running racket and raco commands in a shell or terminal (1)
+File: docdbAmSM.info,  Node: racket-vterm,  Prev: racket-ansi-term,  Up: Running racket and raco commands in a shell or terminal (1)
 
 8.5.4 racket-vterm
 ------------------
@@ -4423,7 +4430,7 @@ File: docB4cQXc.info,  Node: racket-vterm,  Prev: racket-ansi-term,  Up: Running
    A value for the variable *note racket-shell-or-terminal-function::.
 
 
-File: docB4cQXc.info,  Node: Faces,  Prev: Configuration functions,  Up: Top
+File: docdbAmSM.info,  Node: Faces,  Prev: Configuration functions,  Up: Top
 
 9 Faces
 *******
@@ -4433,7 +4440,7 @@ File: docB4cQXc.info,  Node: Faces,  Prev: Configuration functions,  Up: Top
 * All::
 
 
-File: docB4cQXc.info,  Node: All,  Up: Faces
+File: docdbAmSM.info,  Node: All,  Up: Faces
 
 9.1 All
 =======
@@ -4476,7 +4483,7 @@ File: docB4cQXc.info,  Node: All,  Up: Faces
 * racket-hash-lang-text::
 
 
-File: docB4cQXc.info,  Node: racket-keyword-argument-face,  Next: racket-reader-quoted-symbol-face,  Up: All
+File: docdbAmSM.info,  Node: racket-keyword-argument-face,  Next: racket-reader-quoted-symbol-face,  Up: All
 
 9.1.1 racket-keyword-argument-face
 ----------------------------------
@@ -4484,7 +4491,7 @@ File: docB4cQXc.info,  Node: racket-keyword-argument-face,  Next: racket-reader-
 Face for ‘#:keyword’ arguments.
 
 
-File: docB4cQXc.info,  Node: racket-reader-quoted-symbol-face,  Next: racket-reader-syntax-quoted-symbol-face,  Prev: racket-keyword-argument-face,  Up: All
+File: docdbAmSM.info,  Node: racket-reader-quoted-symbol-face,  Next: racket-reader-syntax-quoted-symbol-face,  Prev: racket-keyword-argument-face,  Up: All
 
 9.1.2 racket-reader-quoted-symbol-face
 --------------------------------------
@@ -4497,7 +4504,7 @@ quoted using “quote” or “quasiquote”, get the face
 ‘font-lock-constant-face’.
 
 
-File: docB4cQXc.info,  Node: racket-reader-syntax-quoted-symbol-face,  Next: racket-here-string-face,  Prev: racket-reader-quoted-symbol-face,  Up: All
+File: docdbAmSM.info,  Node: racket-reader-syntax-quoted-symbol-face,  Next: racket-here-string-face,  Prev: racket-reader-quoted-symbol-face,  Up: All
 
 9.1.3 racket-reader-syntax-quoted-symbol-face
 ---------------------------------------------
@@ -4510,7 +4517,7 @@ symbols quoted using “syntax” or “quasisyntax”, get the face
 ‘font-lock-constant-face’.
 
 
-File: docB4cQXc.info,  Node: racket-here-string-face,  Next: racket-xp-def-face,  Prev: racket-reader-syntax-quoted-symbol-face,  Up: All
+File: docdbAmSM.info,  Node: racket-here-string-face,  Next: racket-xp-def-face,  Prev: racket-reader-syntax-quoted-symbol-face,  Up: All
 
 9.1.4 racket-here-string-face
 -----------------------------
@@ -4518,7 +4525,7 @@ File: docB4cQXc.info,  Node: racket-here-string-face,  Next: racket-xp-def-face,
 Face for here strings.
 
 
-File: docB4cQXc.info,  Node: racket-xp-def-face,  Next: racket-xp-use-face,  Prev: racket-here-string-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-def-face,  Next: racket-xp-use-face,  Prev: racket-here-string-face,  Up: All
 
 9.1.5 racket-xp-def-face
 ------------------------
@@ -4526,7 +4533,7 @@ File: docB4cQXc.info,  Node: racket-xp-def-face,  Next: racket-xp-use-face,  Pre
 Face *note racket-xp-mode:: uses when point is on a definition.
 
 
-File: docB4cQXc.info,  Node: racket-xp-use-face,  Next: racket-xp-unused-face,  Prev: racket-xp-def-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-use-face,  Next: racket-xp-unused-face,  Prev: racket-xp-def-face,  Up: All
 
 9.1.6 racket-xp-use-face
 ------------------------
@@ -4534,7 +4541,7 @@ File: docB4cQXc.info,  Node: racket-xp-use-face,  Next: racket-xp-unused-face,  
 Face *note racket-xp-mode:: uses when point is on a use.
 
 
-File: docB4cQXc.info,  Node: racket-xp-unused-face,  Next: racket-xp-tail-target-face,  Prev: racket-xp-use-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-unused-face,  Next: racket-xp-tail-target-face,  Prev: racket-xp-use-face,  Up: All
 
 9.1.7 racket-xp-unused-face
 ---------------------------
@@ -4543,7 +4550,7 @@ Face *note racket-xp-mode:: uses to highlight unused requires or
 definitions.
 
 
-File: docB4cQXc.info,  Node: racket-xp-tail-target-face,  Next: racket-xp-tail-position-face,  Prev: racket-xp-unused-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-tail-target-face,  Next: racket-xp-tail-position-face,  Prev: racket-xp-unused-face,  Up: All
 
 9.1.8 racket-xp-tail-target-face
 --------------------------------
@@ -4552,7 +4559,7 @@ Face *note racket-xp-mode:: uses to highlight targets of a tail
 position.
 
 
-File: docB4cQXc.info,  Node: racket-xp-tail-position-face,  Next: racket-xp-binding-lang-face,  Prev: racket-xp-tail-target-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-tail-position-face,  Next: racket-xp-binding-lang-face,  Prev: racket-xp-tail-target-face,  Up: All
 
 9.1.9 racket-xp-tail-position-face
 ----------------------------------
@@ -4561,7 +4568,7 @@ Face *note racket-xp-mode:: uses to highlight expressions in a tail
 position.
 
 
-File: docB4cQXc.info,  Node: racket-xp-binding-lang-face,  Next: racket-xp-binding-lang-use-face,  Prev: racket-xp-tail-position-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-binding-lang-face,  Next: racket-xp-binding-lang-use-face,  Prev: racket-xp-tail-position-face,  Up: All
 
 9.1.10 racket-xp-binding-lang-face
 ----------------------------------
@@ -4571,7 +4578,7 @@ Face *note racket-xp-mode:: gives to the module language name.
    See the variable ‘nil’.
 
 
-File: docB4cQXc.info,  Node: racket-xp-binding-lang-use-face,  Next: racket-xp-binding-import-face,  Prev: racket-xp-binding-lang-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-binding-lang-use-face,  Next: racket-xp-binding-import-face,  Prev: racket-xp-binding-lang-face,  Up: All
 
 9.1.11 racket-xp-binding-lang-use-face
 --------------------------------------
@@ -4582,7 +4589,7 @@ module language.
    See the variable ‘nil’.
 
 
-File: docB4cQXc.info,  Node: racket-xp-binding-import-face,  Next: racket-xp-binding-import-use-face,  Prev: racket-xp-binding-lang-use-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-binding-import-face,  Next: racket-xp-binding-import-use-face,  Prev: racket-xp-binding-lang-use-face,  Up: All
 
 9.1.12 racket-xp-binding-import-face
 ------------------------------------
@@ -4592,7 +4599,7 @@ Face *note racket-xp-mode:: gives to imported module names.
    See the variable ‘nil’.
 
 
-File: docB4cQXc.info,  Node: racket-xp-binding-import-use-face,  Next: racket-xp-binding-local-face,  Prev: racket-xp-binding-import-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-binding-import-use-face,  Next: racket-xp-binding-local-face,  Prev: racket-xp-binding-import-face,  Up: All
 
 9.1.13 racket-xp-binding-import-use-face
 ----------------------------------------
@@ -4602,7 +4609,7 @@ Face *note racket-xp-mode:: gives uses of imported bindings.
    See the variable ‘nil’.
 
 
-File: docB4cQXc.info,  Node: racket-xp-binding-local-face,  Next: racket-xp-binding-local-use-face,  Prev: racket-xp-binding-import-use-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-binding-local-face,  Next: racket-xp-binding-local-use-face,  Prev: racket-xp-binding-import-use-face,  Up: All
 
 9.1.14 racket-xp-binding-local-face
 -----------------------------------
@@ -4612,7 +4619,7 @@ Face *note racket-xp-mode:: gives to local definitions.
    See the variable ‘nil’.
 
 
-File: docB4cQXc.info,  Node: racket-xp-binding-local-use-face,  Next: racket-logger-config-face,  Prev: racket-xp-binding-local-face,  Up: All
+File: docdbAmSM.info,  Node: racket-xp-binding-local-use-face,  Next: racket-logger-config-face,  Prev: racket-xp-binding-local-face,  Up: All
 
 9.1.15 racket-xp-binding-local-use-face
 ---------------------------------------
@@ -4622,7 +4629,7 @@ Face *note racket-xp-mode:: gives to uses of local definitions.
    See the variable ‘nil’.
 
 
-File: docB4cQXc.info,  Node: racket-logger-config-face,  Next: racket-logger-topic-face,  Prev: racket-xp-binding-local-use-face,  Up: All
+File: docdbAmSM.info,  Node: racket-logger-config-face,  Next: racket-logger-topic-face,  Prev: racket-xp-binding-local-use-face,  Up: All
 
 9.1.16 racket-logger-config-face
 --------------------------------
@@ -4630,7 +4637,7 @@ File: docB4cQXc.info,  Node: racket-logger-config-face,  Next: racket-logger-top
 Face for *note racket-logger-mode:: configuration.
 
 
-File: docB4cQXc.info,  Node: racket-logger-topic-face,  Next: racket-logger-fatal-face,  Prev: racket-logger-config-face,  Up: All
+File: docdbAmSM.info,  Node: racket-logger-topic-face,  Next: racket-logger-fatal-face,  Prev: racket-logger-config-face,  Up: All
 
 9.1.17 racket-logger-topic-face
 -------------------------------
@@ -4638,7 +4645,7 @@ File: docB4cQXc.info,  Node: racket-logger-topic-face,  Next: racket-logger-fata
 Face for *note racket-logger-mode:: topics.
 
 
-File: docB4cQXc.info,  Node: racket-logger-fatal-face,  Next: racket-logger-error-face,  Prev: racket-logger-topic-face,  Up: All
+File: docdbAmSM.info,  Node: racket-logger-fatal-face,  Next: racket-logger-error-face,  Prev: racket-logger-topic-face,  Up: All
 
 9.1.18 racket-logger-fatal-face
 -------------------------------
@@ -4646,7 +4653,7 @@ File: docB4cQXc.info,  Node: racket-logger-fatal-face,  Next: racket-logger-erro
 Face for *note racket-logger-mode:: fatal level.
 
 
-File: docB4cQXc.info,  Node: racket-logger-error-face,  Next: racket-logger-warning-face,  Prev: racket-logger-fatal-face,  Up: All
+File: docdbAmSM.info,  Node: racket-logger-error-face,  Next: racket-logger-warning-face,  Prev: racket-logger-fatal-face,  Up: All
 
 9.1.19 racket-logger-error-face
 -------------------------------
@@ -4654,7 +4661,7 @@ File: docB4cQXc.info,  Node: racket-logger-error-face,  Next: racket-logger-warn
 Face for *note racket-logger-mode:: error level.
 
 
-File: docB4cQXc.info,  Node: racket-logger-warning-face,  Next: racket-logger-info-face,  Prev: racket-logger-error-face,  Up: All
+File: docdbAmSM.info,  Node: racket-logger-warning-face,  Next: racket-logger-info-face,  Prev: racket-logger-error-face,  Up: All
 
 9.1.20 racket-logger-warning-face
 ---------------------------------
@@ -4662,7 +4669,7 @@ File: docB4cQXc.info,  Node: racket-logger-warning-face,  Next: racket-logger-in
 Face for *note racket-logger-mode:: warning level.
 
 
-File: docB4cQXc.info,  Node: racket-logger-info-face,  Next: racket-logger-debug-face,  Prev: racket-logger-warning-face,  Up: All
+File: docdbAmSM.info,  Node: racket-logger-info-face,  Next: racket-logger-debug-face,  Prev: racket-logger-warning-face,  Up: All
 
 9.1.21 racket-logger-info-face
 ------------------------------
@@ -4670,7 +4677,7 @@ File: docB4cQXc.info,  Node: racket-logger-info-face,  Next: racket-logger-debug
 Face for *note racket-logger-mode:: info level.
 
 
-File: docB4cQXc.info,  Node: racket-logger-debug-face,  Next: racket-doc-link-face,  Prev: racket-logger-info-face,  Up: All
+File: docdbAmSM.info,  Node: racket-logger-debug-face,  Next: racket-doc-link-face,  Prev: racket-logger-info-face,  Up: All
 
 9.1.22 racket-logger-debug-face
 -------------------------------
@@ -4678,7 +4685,7 @@ File: docB4cQXc.info,  Node: racket-logger-debug-face,  Next: racket-doc-link-fa
 Face for *note racket-logger-mode:: debug level.
 
 
-File: docB4cQXc.info,  Node: racket-doc-link-face,  Next: racket-ext-link-face,  Prev: racket-logger-debug-face,  Up: All
+File: docdbAmSM.info,  Node: racket-doc-link-face,  Next: racket-ext-link-face,  Prev: racket-logger-debug-face,  Up: All
 
 9.1.23 racket-doc-link-face
 ---------------------------
@@ -4688,7 +4695,7 @@ Note: When some special face is already specified by the documentation,
 then to avoid visual clutter this face is NOT also added.
 
 
-File: docB4cQXc.info,  Node: racket-ext-link-face,  Next: racket-doc-output-face,  Prev: racket-doc-link-face,  Up: All
+File: docdbAmSM.info,  Node: racket-ext-link-face,  Next: racket-doc-output-face,  Prev: racket-doc-link-face,  Up: All
 
 9.1.24 racket-ext-link-face
 ---------------------------
@@ -4697,7 +4704,7 @@ Face *note racket-describe-mode:: uses for external links.  See the
 variable *note racket-browse-url-function::.
 
 
-File: docB4cQXc.info,  Node: racket-doc-output-face,  Next: racket-doc-litchar-face,  Prev: racket-ext-link-face,  Up: All
+File: docdbAmSM.info,  Node: racket-doc-output-face,  Next: racket-doc-litchar-face,  Prev: racket-ext-link-face,  Up: All
 
 9.1.25 racket-doc-output-face
 -----------------------------
@@ -4706,7 +4713,7 @@ Face *note racket-describe-mode:: uses for Scribble @example or
 @interactions output.
 
 
-File: docB4cQXc.info,  Node: racket-doc-litchar-face,  Next: racket-repl-message,  Prev: racket-doc-output-face,  Up: All
+File: docdbAmSM.info,  Node: racket-doc-litchar-face,  Next: racket-repl-message,  Prev: racket-doc-output-face,  Up: All
 
 9.1.26 racket-doc-litchar-face
 ------------------------------
@@ -4714,7 +4721,7 @@ File: docB4cQXc.info,  Node: racket-doc-litchar-face,  Next: racket-repl-message
 Face *note racket-describe-mode:: uses for Scribble @litchar.
 
 
-File: docB4cQXc.info,  Node: racket-repl-message,  Next: racket-repl-prompt,  Prev: racket-doc-litchar-face,  Up: All
+File: docdbAmSM.info,  Node: racket-repl-message,  Next: racket-repl-prompt,  Prev: racket-doc-litchar-face,  Up: All
 
 9.1.27 racket-repl-message
 --------------------------
@@ -4722,7 +4729,7 @@ File: docB4cQXc.info,  Node: racket-repl-message,  Next: racket-repl-prompt,  Pr
 Face *note racket-repl-mode:: uses for messages from the back end.
 
 
-File: docB4cQXc.info,  Node: racket-repl-prompt,  Next: racket-repl-value,  Prev: racket-repl-message,  Up: All
+File: docdbAmSM.info,  Node: racket-repl-prompt,  Next: racket-repl-value,  Prev: racket-repl-message,  Up: All
 
 9.1.28 racket-repl-prompt
 -------------------------
@@ -4730,7 +4737,7 @@ File: docB4cQXc.info,  Node: racket-repl-prompt,  Next: racket-repl-value,  Prev
 Face *note racket-repl-mode:: uses for prompts.
 
 
-File: docB4cQXc.info,  Node: racket-repl-value,  Next: racket-repl-error-message,  Prev: racket-repl-prompt,  Up: All
+File: docdbAmSM.info,  Node: racket-repl-value,  Next: racket-repl-error-message,  Prev: racket-repl-prompt,  Up: All
 
 9.1.29 racket-repl-value
 ------------------------
@@ -4738,7 +4745,7 @@ File: docB4cQXc.info,  Node: racket-repl-value,  Next: racket-repl-error-message
 Face *note racket-repl-mode:: uses for ‘print’-ed values.
 
 
-File: docB4cQXc.info,  Node: racket-repl-error-message,  Next: racket-repl-error-location,  Prev: racket-repl-value,  Up: All
+File: docdbAmSM.info,  Node: racket-repl-error-message,  Next: racket-repl-error-location,  Prev: racket-repl-value,  Up: All
 
 9.1.30 racket-repl-error-message
 --------------------------------
@@ -4746,7 +4753,7 @@ File: docB4cQXc.info,  Node: racket-repl-error-message,  Next: racket-repl-error
 Face *note racket-repl-mode:: uses for error messages.
 
 
-File: docB4cQXc.info,  Node: racket-repl-error-location,  Next: racket-repl-stdout,  Prev: racket-repl-error-message,  Up: All
+File: docdbAmSM.info,  Node: racket-repl-error-location,  Next: racket-repl-stdout,  Prev: racket-repl-error-message,  Up: All
 
 9.1.31 racket-repl-error-location
 ---------------------------------
@@ -4754,7 +4761,7 @@ File: docB4cQXc.info,  Node: racket-repl-error-location,  Next: racket-repl-stdo
 Face *note racket-repl-mode:: uses for error locations.
 
 
-File: docB4cQXc.info,  Node: racket-repl-stdout,  Next: racket-repl-stderr,  Prev: racket-repl-error-location,  Up: All
+File: docdbAmSM.info,  Node: racket-repl-stdout,  Next: racket-repl-stderr,  Prev: racket-repl-error-location,  Up: All
 
 9.1.32 racket-repl-stdout
 -------------------------
@@ -4762,7 +4769,7 @@ File: docB4cQXc.info,  Node: racket-repl-stdout,  Next: racket-repl-stderr,  Pre
 Face *note racket-repl-mode:: uses for output to current-output-port.
 
 
-File: docB4cQXc.info,  Node: racket-repl-stderr,  Next: racket-hash-lang-text,  Prev: racket-repl-stdout,  Up: All
+File: docdbAmSM.info,  Node: racket-repl-stderr,  Next: racket-hash-lang-text,  Prev: racket-repl-stdout,  Up: All
 
 9.1.33 racket-repl-stderr
 -------------------------
@@ -4770,7 +4777,7 @@ File: docB4cQXc.info,  Node: racket-repl-stderr,  Next: racket-hash-lang-text,  
 Face *note racket-repl-mode:: uses for output to current-error-port.
 
 
-File: docB4cQXc.info,  Node: racket-hash-lang-text,  Prev: racket-repl-stderr,  Up: All
+File: docdbAmSM.info,  Node: racket-hash-lang-text,  Prev: racket-repl-stderr,  Up: All
 
 9.1.34 racket-hash-lang-text
 ----------------------------
@@ -4793,213 +4800,213 @@ Node: Upgrading all packages12677
 Node: Updating just Racket Mode13635
 Node: Configure14199
 Node: Which major mode to use15518
-Node: Key bindings18374
-Node: Font-lock (syntax highlighting)19035
-Node: Completion at point20488
-Node: Completion in minibuffer22448
-Node: Xref (definitions and references)23098
-Node: Indent26053
-Node: paredit26818
-Node: smartparens28819
-Node: Appearance of parentheses29372
-Node: Edit buffers and REPL buffers29764
-Node: eldoc31306
-Node: Start faster32747
-Node: Inserting Unicode math symbols32982
-Node: Ligatures33396
-Node: Architecture34091
-Ref: Architecture-Footnote-137526
-Node: Reference37911
-Node: Commands38404
-Node: Edit38642
-Node: racket-mode39204
-Node: racket-insert-lambda43482
-Node: racket-insert-symbol43750
-Node: racket-fold-all-tests44317
-Node: racket-unfold-all-tests44552
-Node: racket-tidy-requires44793
-Node: racket-trim-requires45496
-Node: racket-base-requires46318
-Node: racket-add-require-for-identifier47198
-Node: racket-indent-line48035
-Node: racket-smart-open-bracket-mode51987
-Node: racket-insert-closing54422
-Node: racket-cycle-paren-shapes54913
-Node: racket-backward-up-list55162
-Node: racket-input-mode55703
-Node: racket-align57582
-Node: racket-unalign59620
-Node: racket-complete-at-point59951
-Node: Hash Langs60371
-Node: racket-hash-lang-mode60666
-Node: racket-hash-lang-backward65349
-Node: racket-hash-lang-forward65630
-Node: racket-hash-lang-up65906
-Node: racket-hash-lang-down66172
-Node: racket-hash-lang-C-M-q-dwim66438
-Node: Explore66955
-Node: racket-xp-mode67512
-Node: racket-xp-describe76342
-Node: racket-xp-documentation77944
-Node: racket-xp-next-definition79096
-Node: racket-xp-previous-definition79357
-Node: racket-xp-next-use79625
-Node: racket-xp-previous-use79882
-Node: racket-xp-next-error80142
-Node: racket-xp-previous-error80410
-Node: racket-xp-tail-up80689
-Node: racket-xp-tail-down81151
-Node: racket-xp-tail-next-sibling81430
-Node: racket-xp-tail-previous-sibling81730
-Node: racket-documentation-search82050
-Node: racket-describe-mode83074
-Node: racket-describe-search86976
-Node: Run87244
-Node: racket-repl-mode87711
-Node: racket-run92549
-Node: racket-run-and-switch-to-repl94600
-Node: racket-run-module-at-point95054
-Node: racket-repl95559
-Node: racket-repl-describe96494
-Node: racket-repl-documentation97980
-Node: racket-racket99096
-Node: racket-profile99433
-Node: racket-profile-mode100149
-Node: racket-logger101335
-Node: racket-logger-mode101554
-Node: racket-debug-mode102690
-Node: racket-repl-clear105971
-Node: racket-repl-clear-leaving-last-prompt106556
-Node: Test106869
-Node: racket-test107012
-Node: racket-raco-test107828
-Node: Eval108175
-Node: racket-send-region108365
-Node: racket-send-definition108659
-Node: racket-send-last-sexp108984
-Node: Collections109448
-Node: racket-open-require-path109613
-Node: Macro expand110222
-Node: racket-stepper-mode110493
-Node: racket-expand-file111668
-Node: racket-expand-region112369
-Node: racket-expand-definition112780
-Node: racket-expand-last-sexp113214
-Node: Packages113611
-Node: racket-package-refresh113843
-Node: list-racket-packages114181
-Node: racket-package-mode114472
-Node: describe-racket-package115524
-Node: Other116897
-Node: racket-debug-toggle-breakpoint117093
-Node: racket-mode-start-faster118967
-Node: racket-mode-start-slower120349
-Node: Variables120642
-Node: General variables121007
-Node: racket-program121524
-Node: racket-command-timeout122190
-Node: racket-memory-limit122658
-Node: racket-error-context123262
-Node: racket-user-command-line-arguments124377
-Node: racket-browse-url-function125243
-Node: racket-xp-after-change-refresh-delay125646
-Node: racket-xp-highlight-unused-regexp126061
-Node: racket-xp-add-binding-faces126508
-Node: racket-xp-eldoc-level127342
-Node: racket-documentation-search-location128033
-Node: racket-expand-hiding128889
-Node: Hash lang variables129139
-Node: racket-hash-lang-token-face-alist129395
-Node: racket-hash-lang-module-language-hook130872
-Node: REPL variables134328
-Node: racket-repl-buffer-name-function134863
-Node: racket-submodules-to-run135896
-Node: racket-repl-history-directory136641
-Node: racket-history-filter-regexp136922
-Node: racket-images-inline137272
-Node: racket-imagemagick-props137518
-Node: racket-images-keep-last138124
-Node: racket-images-system-viewer138376
-Node: racket-images-do-not-use-svg138657
-Node: racket-pretty-print139089
-Node: racket-repl-command-file139644
-Node: racket-repl-echo-sent-expressions139904
-Node: Other variables140419
-Node: racket-doc-index-directory140906
-Node: racket-doc-index-predicate-function141161
-Node: racket-indent-curly-as-sequence141872
-Node: racket-indent-sequence-depth142297
-Node: racket-pretty-lambda142985
-Node: racket-smart-open-bracket-enable143390
-Node: racket-logger-config143844
-Node: racket-before-run-hook144693
-Node: racket-after-run-hook145293
-Node: racket-sexp-comment-fade145896
-Node: Experimental debugger variables146600
-Node: racket-debuggable-files146843
-Node: Showing information147469
-Node: racket-show-functions147726
-Node: Running racket and raco commands in a shell or terminal148819
-Node: racket-shell-or-terminal-function149148
-Node: Racket input method149707
-Node: racket-input-prefix149952
-Node: racket-input-translations150709
-Node: Configuration functions151309
-Node: Showing information (1)151747
-Node: racket-show-pseudo-tooltip152052
-Node: racket-show-echo-area152769
-Node: racket-show-header-line153185
-Node: racket-show-pos-tip153762
-Node: Associating edit buffers with REPL buffers154091
-Node: racket-repl-buffer-name-shared154503
-Node: racket-repl-buffer-name-unique154900
-Node: racket-repl-buffer-name-project155364
-Node: racket-project-root155875
-Node: Browsing file URLs with anchors156361
-Node: racket-browse-url-using-temporary-file156662
-Node: Configuring back ends157751
-Node: racket-add-back-end158030
-Node: Running racket and raco commands in a shell or terminal (1)163238
-Node: racket-shell163592
-Node: racket-term163891
-Node: racket-ansi-term164211
-Node: racket-vterm164551
-Node: Faces164885
-Node: All165000
-Node: racket-keyword-argument-face166075
-Node: racket-reader-quoted-symbol-face166295
-Node: racket-reader-syntax-quoted-symbol-face166815
-Node: racket-here-string-face167350
-Node: racket-xp-def-face167576
-Node: racket-xp-use-face167812
-Node: racket-xp-unused-face168039
-Node: racket-xp-tail-target-face168301
-Node: racket-xp-tail-position-face168579
-Node: racket-xp-binding-lang-face168871
-Node: racket-xp-binding-lang-use-face169185
-Node: racket-xp-binding-import-face169531
-Node: racket-xp-binding-import-use-face169853
-Node: racket-xp-binding-local-face170181
-Node: racket-xp-binding-local-use-face170497
-Node: racket-logger-config-face170821
-Node: racket-logger-topic-face171082
-Node: racket-logger-fatal-face171326
-Node: racket-logger-error-face171574
-Node: racket-logger-warning-face171824
-Node: racket-logger-info-face172079
-Node: racket-logger-debug-face172325
-Node: racket-doc-link-face172568
-Node: racket-ext-link-face172952
-Node: racket-doc-output-face173246
-Node: racket-doc-litchar-face173520
-Node: racket-repl-message173771
-Node: racket-repl-prompt174015
-Node: racket-repl-value174232
-Node: racket-repl-error-message174467
-Node: racket-repl-error-location174719
-Node: racket-repl-stdout174975
-Node: racket-repl-stderr175222
-Node: racket-hash-lang-text175463
+Node: Key bindings18380
+Node: Font-lock (syntax highlighting)19041
+Node: Completion at point20494
+Node: Completion in minibuffer22454
+Node: Xref (definitions and references)23104
+Node: Indent26059
+Node: paredit26824
+Node: smartparens28825
+Node: Appearance of parentheses29378
+Node: Edit buffers and REPL buffers29770
+Node: eldoc31312
+Node: Start faster32753
+Node: Inserting Unicode math symbols32988
+Node: Ligatures33402
+Node: Architecture34097
+Ref: Architecture-Footnote-137532
+Node: Reference37917
+Node: Commands38410
+Node: Edit38648
+Node: racket-mode39210
+Node: racket-insert-lambda43844
+Node: racket-insert-symbol44112
+Node: racket-fold-all-tests44679
+Node: racket-unfold-all-tests44914
+Node: racket-tidy-requires45155
+Node: racket-trim-requires45858
+Node: racket-base-requires46680
+Node: racket-add-require-for-identifier47560
+Node: racket-indent-line48397
+Node: racket-smart-open-bracket-mode52349
+Node: racket-insert-closing54784
+Node: racket-cycle-paren-shapes55275
+Node: racket-backward-up-list55524
+Node: racket-input-mode56065
+Node: racket-align57944
+Node: racket-unalign59982
+Node: racket-complete-at-point60313
+Node: Hash Langs60733
+Node: racket-hash-lang-mode61028
+Node: racket-hash-lang-backward65767
+Node: racket-hash-lang-forward66048
+Node: racket-hash-lang-up66324
+Node: racket-hash-lang-down66590
+Node: racket-hash-lang-C-M-q-dwim66856
+Node: Explore67373
+Node: racket-xp-mode67930
+Node: racket-xp-describe76760
+Node: racket-xp-documentation78362
+Node: racket-xp-next-definition79514
+Node: racket-xp-previous-definition79775
+Node: racket-xp-next-use80043
+Node: racket-xp-previous-use80300
+Node: racket-xp-next-error80560
+Node: racket-xp-previous-error80828
+Node: racket-xp-tail-up81107
+Node: racket-xp-tail-down81569
+Node: racket-xp-tail-next-sibling81848
+Node: racket-xp-tail-previous-sibling82148
+Node: racket-documentation-search82468
+Node: racket-describe-mode83492
+Node: racket-describe-search87394
+Node: Run87662
+Node: racket-repl-mode88129
+Node: racket-run92967
+Node: racket-run-and-switch-to-repl95018
+Node: racket-run-module-at-point95472
+Node: racket-repl95977
+Node: racket-repl-describe96912
+Node: racket-repl-documentation98398
+Node: racket-racket99514
+Node: racket-profile99851
+Node: racket-profile-mode100567
+Node: racket-logger101753
+Node: racket-logger-mode101972
+Node: racket-debug-mode103108
+Node: racket-repl-clear106389
+Node: racket-repl-clear-leaving-last-prompt106974
+Node: Test107287
+Node: racket-test107430
+Node: racket-raco-test108246
+Node: Eval108593
+Node: racket-send-region108783
+Node: racket-send-definition109077
+Node: racket-send-last-sexp109402
+Node: Collections109866
+Node: racket-open-require-path110031
+Node: Macro expand110640
+Node: racket-stepper-mode110911
+Node: racket-expand-file112086
+Node: racket-expand-region112787
+Node: racket-expand-definition113198
+Node: racket-expand-last-sexp113632
+Node: Packages114029
+Node: racket-package-refresh114261
+Node: list-racket-packages114599
+Node: racket-package-mode114890
+Node: describe-racket-package115942
+Node: Other117315
+Node: racket-debug-toggle-breakpoint117511
+Node: racket-mode-start-faster119385
+Node: racket-mode-start-slower120767
+Node: Variables121060
+Node: General variables121425
+Node: racket-program121942
+Node: racket-command-timeout122608
+Node: racket-memory-limit123076
+Node: racket-error-context123680
+Node: racket-user-command-line-arguments124795
+Node: racket-browse-url-function125661
+Node: racket-xp-after-change-refresh-delay126064
+Node: racket-xp-highlight-unused-regexp126479
+Node: racket-xp-add-binding-faces126926
+Node: racket-xp-eldoc-level127760
+Node: racket-documentation-search-location128451
+Node: racket-expand-hiding129307
+Node: Hash lang variables129557
+Node: racket-hash-lang-token-face-alist129813
+Node: racket-hash-lang-module-language-hook131290
+Node: REPL variables134746
+Node: racket-repl-buffer-name-function135281
+Node: racket-submodules-to-run136314
+Node: racket-repl-history-directory137059
+Node: racket-history-filter-regexp137340
+Node: racket-images-inline137690
+Node: racket-imagemagick-props137936
+Node: racket-images-keep-last138542
+Node: racket-images-system-viewer138794
+Node: racket-images-do-not-use-svg139075
+Node: racket-pretty-print139507
+Node: racket-repl-command-file140062
+Node: racket-repl-echo-sent-expressions140322
+Node: Other variables140837
+Node: racket-doc-index-directory141324
+Node: racket-doc-index-predicate-function141579
+Node: racket-indent-curly-as-sequence142290
+Node: racket-indent-sequence-depth142715
+Node: racket-pretty-lambda143403
+Node: racket-smart-open-bracket-enable143808
+Node: racket-logger-config144262
+Node: racket-before-run-hook145111
+Node: racket-after-run-hook145711
+Node: racket-sexp-comment-fade146314
+Node: Experimental debugger variables147018
+Node: racket-debuggable-files147261
+Node: Showing information147887
+Node: racket-show-functions148144
+Node: Running racket and raco commands in a shell or terminal149237
+Node: racket-shell-or-terminal-function149566
+Node: Racket input method150125
+Node: racket-input-prefix150370
+Node: racket-input-translations151127
+Node: Configuration functions151727
+Node: Showing information (1)152165
+Node: racket-show-pseudo-tooltip152470
+Node: racket-show-echo-area153187
+Node: racket-show-header-line153603
+Node: racket-show-pos-tip154180
+Node: Associating edit buffers with REPL buffers154509
+Node: racket-repl-buffer-name-shared154921
+Node: racket-repl-buffer-name-unique155318
+Node: racket-repl-buffer-name-project155782
+Node: racket-project-root156293
+Node: Browsing file URLs with anchors156779
+Node: racket-browse-url-using-temporary-file157080
+Node: Configuring back ends158169
+Node: racket-add-back-end158448
+Node: Running racket and raco commands in a shell or terminal (1)163656
+Node: racket-shell164010
+Node: racket-term164309
+Node: racket-ansi-term164629
+Node: racket-vterm164969
+Node: Faces165303
+Node: All165418
+Node: racket-keyword-argument-face166493
+Node: racket-reader-quoted-symbol-face166713
+Node: racket-reader-syntax-quoted-symbol-face167233
+Node: racket-here-string-face167768
+Node: racket-xp-def-face167994
+Node: racket-xp-use-face168230
+Node: racket-xp-unused-face168457
+Node: racket-xp-tail-target-face168719
+Node: racket-xp-tail-position-face168997
+Node: racket-xp-binding-lang-face169289
+Node: racket-xp-binding-lang-use-face169603
+Node: racket-xp-binding-import-face169949
+Node: racket-xp-binding-import-use-face170271
+Node: racket-xp-binding-local-face170599
+Node: racket-xp-binding-local-use-face170915
+Node: racket-logger-config-face171239
+Node: racket-logger-topic-face171500
+Node: racket-logger-fatal-face171744
+Node: racket-logger-error-face171992
+Node: racket-logger-warning-face172242
+Node: racket-logger-info-face172497
+Node: racket-logger-debug-face172743
+Node: racket-doc-link-face172986
+Node: racket-ext-link-face173370
+Node: racket-doc-output-face173664
+Node: racket-doc-litchar-face173938
+Node: racket-repl-message174189
+Node: racket-repl-prompt174433
+Node: racket-repl-value174650
+Node: racket-repl-error-message174885
+Node: racket-repl-error-location175137
+Node: racket-repl-stdout175393
+Node: racket-repl-stderr175640
+Node: racket-hash-lang-text175881
 
 End Tag Table
 

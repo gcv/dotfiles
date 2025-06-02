@@ -102,10 +102,11 @@ Before doing anything runs the hook `racket-stop-back-end-hook'." t)
 ;;; Generated autoloads from racket-hash-lang.el
 
 (autoload 'racket-hash-lang-mode "racket-hash-lang" "\
-Use color-lexer, indent, and navigation supplied by a #lang.
+An \"experimental\" major mode to edit any Racket #lang.
 
-An experimental major mode alternative to `racket-mode' for
-source file edit buffers.
+This major mode uses color-lexer, indent, and navigation supplied
+by each #lang -- which means Racket Mode's back end process needs
+to be running.
 
 In your Emacs configuration, you may want to update the
 variable `auto-mode-alist' to use `racket-hash-lang-mode' for
@@ -160,7 +161,16 @@ A discussion of the information provided by a Racket language:
 ;;; Generated autoloads from racket-mode.el
 
 (autoload 'racket-mode "racket-mode" "\
-Major mode for editing Racket source files.
+The \"classic\" major mode to edit an s-expression Racket #lang.
+
+This major mode is implemented entirely in Emacs and does /not/
+need Racket Mode's back end racket process to be running.
+Font-lock (coloring) uses rules for a fixed set of identifiers
+from ~racket~ lang and popular modules like ~racket/match~.
+Indentation uses rules for a fixed set of forms, and may be
+customized.
+
+See also `racket-hash-lang-mode'.
 
 \\{racket-mode-map}
 

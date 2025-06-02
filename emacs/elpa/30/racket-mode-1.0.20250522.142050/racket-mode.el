@@ -3,7 +3,7 @@
 ;; Copyright (c) 2013-2025 by Greg Hendershott.
 
 ;; Package: racket-mode
-;; Package-Requires: ((emacs "25.1") (compat "30.0.20.0"))
+;; Package-Requires: ((emacs "25.1") (compat "30.0.2.0"))
 ;; Author: Greg Hendershott <racket-mode-author@greghendershott.com>
 ;; Maintainer: Greg Hendershott
 ;; URL: https://www.racket-mode.com/
@@ -132,7 +132,16 @@
 ;;;###autoload
 (define-derived-mode racket-mode prog-mode
   "Racket"
-  "Major mode for editing Racket source files.
+  "The \"classic\" major mode to edit an s-expression Racket #lang.
+
+This major mode is implemented entirely in Emacs and does /not/
+need Racket Mode's back end racket process to be running.
+Font-lock (coloring) uses rules for a fixed set of identifiers
+from ~racket~ lang and popular modules like ~racket/match~.
+Indentation uses rules for a fixed set of forms, and may be
+customized.
+
+See also `racket-hash-lang-mode'.
 
 \\{racket-mode-map}"
   (racket--polite-user-f-keys racket-mode-map racket--f5-bindings)
