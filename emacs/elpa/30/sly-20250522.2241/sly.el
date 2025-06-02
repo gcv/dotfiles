@@ -1,7 +1,7 @@
 ;;; sly.el --- Sylvester the Cat's Common Lisp IDE  -*- lexical-binding: t; -*-
 
-;; Package-Version: 20250501.1918
-;; Package-Revision: ce17a568efd3
+;; Package-Version: 20250522.2241
+;; Package-Revision: f13ceb762c30
 ;; URL: https://github.com/joaotavora/sly
 ;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: languages, lisp, sly

@@ -1,8 +1,8 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "sly" "20250501.1918"
+(define-package "sly" "20250522.2241"
   "Sylvester the Cat's Common Lisp IDE."
   '((emacs "24.3"))
   :url "https://github.com/joaotavora/sly"
-  :commit "ce17a568efd3673e9d6f41438acc4023379c198e"
-  :revdesc "ce17a568efd3"
+  :commit "f13ceb762c306c77d5e87366713a2a1689bb5113"
+  :revdesc "f13ceb762c30"
   :keywords '("languages" "lisp" "sly"))
