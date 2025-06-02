@@ -1,13 +1,13 @@
 ;;; with-editor.el --- Use the Emacsclient as $EDITOR  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2014-2024 The Magit Project Contributors
+;; Copyright (C) 2014-2025 The Magit Project Contributors
 
 ;; Author: Jonas Bernoulli <emacs.with-editor@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/magit/with-editor
 ;; Keywords: processes terminals
 
-;; Package-Version: 3.4.3
-;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0"))
+;; Package-Version: 3.4.4
+;; Package-Requires: ((emacs "26.1") (compat "30.1"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -158,10 +158,15 @@ please see https://github.com/magit/magit/wiki/Emacsclient."))))
         (let ((dir (expand-file-name "bin" invocation-directory)))
           (when (file-directory-p dir)
             (push dir path)))
-        (when (string-search "Cellar" invocation-directory)
+        (cond
+         ((string-search "Cellar" invocation-directory)
           (let ((dir (expand-file-name "../../../bin" invocation-directory)))
             (when (file-directory-p dir)
-              (push dir path))))))
+              (push dir path))))
+         ((string-search "Emacs.app" invocation-directory)
+          (let ((dir (expand-file-name "../../../../bin" invocation-directory)))
+            (when (file-directory-p dir)
+              (push dir path)))))))
     (cl-remove-duplicates path :test #'equal)))
 
 (defcustom with-editor-emacsclient-executable (with-editor-locate-emacsclient)
