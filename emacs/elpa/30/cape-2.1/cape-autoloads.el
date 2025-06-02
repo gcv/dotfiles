@@ -40,8 +40,7 @@ Complete with Dabbrev at point.
 If INTERACTIVE is nil the function acts like a Capf.  In case you
 observe a performance issue with auto-completion and `cape-dabbrev'
 it is strongly recommended to disable scanning in other buffers.
-See the user options `cape-dabbrev-min-length' and
-`cape-dabbrev-check-other-buffers'.
+See the user option `cape-dabbrev-buffer-function'.
 
 (fn &optional INTERACTIVE)" t)
 (autoload 'cape-dict "cape" "\
@@ -81,10 +80,10 @@ Create interactive completion function from CAPF.
 (autoload 'cape-wrap-super "cape" "\
 Call CAPFS and return merged completion result.
 The CAPFS list can contain the keyword `:with' to mark the Capfs
-afterwards as auxiliary One of the non-auxiliary Capfs before
-`:with' must return non-nil for the super Capf to set in and
-return a non-nil result.  Such behavior is useful when listing
-multiple super Capfs in the `completion-at-point-functions':
+afterwards as auxiliary.  One of the non-auxiliary Capfs before `:with'
+must return non-nil for the super Capf to set in and return a non-nil
+result.  Such behavior is useful when listing multiple super Capfs in
+the `completion-at-point-functions':
 
   (setq completion-at-point-functions
         (list (cape-capf-super \\='eglot-completion-at-point

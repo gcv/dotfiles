@@ -364,6 +364,11 @@
      "binary" "bool" "byte" "const" "double" "enum" "exception" "extends" "i16"
      "i32" "i64" "include" "list" "map" "oneway" "optional" "required" "service"
      "set" "string" "struct" "throws" "typedef" "void")
+    (sh-mode
+     "break" "case" "continue" "do" "done" "elif" "else" "esac" "eval"
+     "exec" "exit" "export" "false" "fi" "for" "function" "if" "in" "readonly"
+     "return" "set" "shift" "test" "then" "time" "times" "trap" "true" "unset"
+     "until" "while")
     ;; Aliases
     (cperl-mode perl-mode)
     (enh-ruby-mode ruby-mode)
@@ -387,16 +392,23 @@
     (go-ts-mode go-mode)
     (java-ts-mode java-mode)
     (js-ts-mode javascript-mode)
+    (lua-ts-mode lua-mode)
     (python-ts-mode python-mode)
     (ruby-ts-mode ruby-mode)
-    (rust-ts-mode rust-mode))
+    (rust-ts-mode rust-mode)
+    (bash-ts-mode sh-mode))
   "Alist of major modes and keywords."
   :type 'alist
   :group 'cape)
 
 (defun cape--keyword-list ()
   "Return keywords for current major mode."
-  (when-let (kw (alist-get major-mode cape-keyword-list))
+  (when-let ((kw (or (alist-get major-mode cape-keyword-list)
+                     (when-let (((eval-when-compile (> emacs-major-version 28)))
+                                (remap (rassq
+                                        major-mode
+                                        (bound-and-true-p major-mode-remap-alist))))
+                       (alist-get (car remap) cape-keyword-list)))))
     (if (symbolp (car kw)) (alist-get (car kw) cape-keyword-list) kw)))
 
 (defvar cape--keyword-properties

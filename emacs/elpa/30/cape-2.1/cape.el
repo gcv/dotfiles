@@ -5,7 +5,7 @@
 ;; Author: Daniel Mendler <mail@daniel-mendler.de>
 ;; Maintainer: Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2021
-;; Version: 2.0
+;; Version: 2.1
 ;; Package-Requires: ((emacs "28.1") (compat "30"))
 ;; URL: https://github.com/minad/cape
 ;; Keywords: abbrev, convenience, matching, completion, text
@@ -76,36 +76,24 @@ a function returning a single or more paths."
 (defcustom cape-dict-case-replace 'case-replace
   "Preserve case of input.
 See `dabbrev-case-replace' for details."
-  :type '(choice (const :tag "off" nil)
-                 (const :tag "use `case-replace'" case-replace)
-                 (other :tag "on" t)))
+  :type '(choice (const :tag "Disable" nil)
+                 (const :tag "Use `case-replace'" case-replace)
+                 (other :tag "Enable" t)))
 
 (defcustom cape-dict-case-fold 'case-fold-search
   "Case fold search during search.
 See `dabbrev-case-fold-search' for details."
-  :type '(choice (const :tag "off" nil)
-                 (const :tag "use `case-fold-search'" case-fold-search)
-                 (other :tag "on" t)))
+  :type '(choice (const :tag "Disable" nil)
+                 (const :tag "Use `case-fold-search'" case-fold-search)
+                 (other :tag "Enable" t)))
 
-(defcustom cape-dabbrev-min-length 4
-  "Minimum length of Dabbrev expansions.
-This setting ensures that words which are too short
-are not offered as completion candidates, such that
-auto completion does not pop up too aggressively."
-  :type 'natnum)
-
-(defcustom cape-dabbrev-check-other-buffers t
-  "Buffers to check for Dabbrev.
-
-If t, check all other buffers, subject to Dabbrev ignore rules.
-If a function, only search the buffers returned by this function.
-Any other non-nil value only checks some other buffers, as per
-`dabbrev-select-buffers-function'."
-  :type `(choice (const :tag "off" nil)
-                 (const :tag "same-mode buffers" ,#'cape--buffers-major-mode)
-                 (function :tag "function")
-                 (const :tag "some" some)
-                 (other :tag "all" t)))
+(defcustom cape-dabbrev-buffer-function #'cape-same-mode-buffers
+  "Function which returns list of buffers.
+The buffers are scanned for completion candidates by `cape-dabbrev'."
+  :type `(choice (const :tag "Current buffer" current-buffer)
+                 (const :tag "Text buffers" ,#'cape-text-buffers)
+                 (const :tag "Buffers with same mode" ,#'cape-same-mode-buffers)
+                 (function :tag "Custom function")))
 
 (defcustom cape-file-directory nil
   "Base directory used by `cape-file."
@@ -122,12 +110,12 @@ buffers via `org-open-at-point-global'."
   "The parent directory must exist for file completion."
   :type 'boolean)
 
-(defcustom cape-line-buffer-function #'cape--buffers-major-mode
+(defcustom cape-line-buffer-function #'cape-same-mode-buffers
   "Function which returns list of buffers.
 The buffers are scanned for completion candidates by `cape-line'."
-  :type '(choice (const :tag "Current buffer" current-buffer)
-                 (const :tag "All buffers" buffer-list)
-                 (const :tag "Buffers with same major mode" cape--buffers-major-mode)
+  :type `(choice (const :tag "Current buffer" current-buffer)
+                 (const :tag "Text buffers" ,#'cape-text-buffers)
+                 (const :tag "Buffers with same mode" ,#'cape-same-mode-buffers)
                  (function :tag "Custom function")))
 
 (defcustom cape-elisp-symbol-wrapper
@@ -144,6 +132,29 @@ The buffers are scanned for completion candidates by `cape-line'."
                                                    (choice character string))))
 
 ;;;; Helpers
+
+(defun cape--buffer-list (pred)
+  "Return list of buffers satisfying PRED."
+  (let* ((cur (current-buffer))
+         (orig (and (minibufferp) (window-buffer (minibuffer-selected-window))))
+         (list (cl-loop for buf in (buffer-list)
+                        if (and (not (eq buf cur)) (not (eq buf orig))
+                                (funcall pred buf))
+                        collect buf)))
+    `(,cur ,@(and orig (list orig)) ,@list)))
+
+(defun cape-same-mode-buffers ()
+  "Return buffers with same major mode as current buffer."
+  (cape--buffer-list
+   (lambda (buf) (eq major-mode (buffer-local-value 'major-mode buf)))))
+
+(defun cape-text-buffers ()
+  "Return `text-mode' and `prog-mode' buffers."
+  (cape--buffer-list
+   (lambda (buf)
+     (let ((mode (buffer-local-value 'major-mode buf)))
+       (or (provided-mode-derived-p mode #'text-mode)
+           (provided-mode-derived-p mode #'prog-mode))))))
 
 (defun cape--case-fold-p (fold)
   "Return non-nil if case folding is enabled for FOLD."
@@ -551,19 +562,19 @@ If INTERACTIVE is nil the function acts like a Capf."
 (defun cape--dabbrev-list (input)
   "Find all Dabbrev expansions for INPUT."
   (cape--silent
-    (let* ((chk cape-dabbrev-check-other-buffers)
-           (funp (and (not (memq chk '(nil t some))) (functionp chk))))
-      (dlet ((dabbrev-check-other-buffers (and chk (not funp)))
-             (dabbrev-check-all-buffers (eq chk t))
-             (dabbrev-search-these-buffers-only (and funp (funcall chk))))
-        (dabbrev--reset-global-variables)
-        (cons
-         (apply-partially #'string-prefix-p input)
-         (cl-loop with min-len = (+ cape-dabbrev-min-length (length input))
-                  with ic = (cape--case-fold-p dabbrev-case-fold-search)
-                  for w in (dabbrev--find-all-expansions input ic)
-                  if (>= (length w) min-len) collect
-                  (cape--case-replace (and ic dabbrev-case-replace) input w)))))))
+    (dlet ((dabbrev-check-other-buffers nil)
+           (dabbrev-check-all-buffers nil)
+           (dabbrev-backward-only nil)
+           (dabbrev-limit nil)
+           (dabbrev-search-these-buffers-only
+            (ensure-list (funcall cape-dabbrev-buffer-function))))
+      (dabbrev--reset-global-variables)
+      (cons
+       (apply-partially #'string-prefix-p input)
+       (cl-loop
+        with ic = (cape--case-fold-p dabbrev-case-fold-search)
+        for w in (dabbrev--find-all-expansions input ic)
+        collect (cape--case-replace (and ic dabbrev-case-replace) input w))))))
 
 (defun cape--dabbrev-bounds ()
   "Return bounds of abbreviation."
@@ -594,11 +605,10 @@ If INTERACTIVE is nil the function acts like a Capf."
 If INTERACTIVE is nil the function acts like a Capf.  In case you
 observe a performance issue with auto-completion and `cape-dabbrev'
 it is strongly recommended to disable scanning in other buffers.
-See the user options `cape-dabbrev-min-length' and
-`cape-dabbrev-check-other-buffers'."
+See the user option `cape-dabbrev-buffer-function'."
   (interactive (list t))
   (if interactive
-      (cape-interactive '((cape-dabbrev-min-length 0)) #'cape-dabbrev)
+      (cape-interactive #'cape-dabbrev)
     (when-let ((bounds (cape--dabbrev-bounds)))
       `(,(car bounds) ,(cdr bounds)
         ,(completion-table-case-fold
@@ -713,12 +723,6 @@ If INTERACTIVE is nil the function acts like a Capf."
         :exclusive 'no
         :category 'cape-line)
   "Completion extra properties for `cape-line'.")
-
-(defun cape--buffers-major-mode ()
-  "Return buffers with same major mode as current buffer."
-  (cl-loop for buf in (buffer-list)
-           if (eq major-mode (buffer-local-value 'major-mode buf))
-           collect buf))
 
 (defun cape--line-list ()
   "Return all lines from buffer."
@@ -882,10 +886,10 @@ again if the input prefix changed."
 (defun cape-wrap-super (&rest capfs)
   "Call CAPFS and return merged completion result.
 The CAPFS list can contain the keyword `:with' to mark the Capfs
-afterwards as auxiliary One of the non-auxiliary Capfs before
-`:with' must return non-nil for the super Capf to set in and
-return a non-nil result.  Such behavior is useful when listing
-multiple super Capfs in the `completion-at-point-functions':
+afterwards as auxiliary.  One of the non-auxiliary Capfs before `:with'
+must return non-nil for the super Capf to set in and return a non-nil
+result.  Such behavior is useful when listing multiple super Capfs in
+the `completion-at-point-functions':
 
   (setq completion-at-point-functions
         (list (cape-capf-super \\='eglot-completion-at-point
