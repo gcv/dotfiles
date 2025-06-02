@@ -1,6 +1,6 @@
 ;;; gptel-transient.el --- Transient menu for gptel  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023  Karthik Chikmagalur
+;; Copyright (C) 2023-2025  Karthik Chikmagalur
 
 ;; Author: Karthik Chikmagalur <karthikchikmagalur@gmail.com>
 ;; Keywords: convenience
@@ -71,6 +71,44 @@ global value."
     ('t (set (make-local-variable sym) value))
     (_ (kill-local-variable sym)
        (set sym value))))
+
+(defvar gptel--preset nil
+  "Name of last applied gptel preset.
+
+For internal use only.")
+
+(defun gptel--preset-mismatch-p (name)
+  "Check if gptel preset with NAME is in effect."
+  (let ((elm (or (gptel-get-preset name)
+                 (gptel-get-preset (intern-soft name))))
+        key val)
+    (catch 'mismatch
+      (while elm
+        (setq key (pop elm) val (pop elm))
+        (cond
+         ((memq key '(:description :parents)) 'nil)
+         ((eq key :system)
+          (or (equal gptel--system-message val)
+              (and-let* (((symbolp val))
+                         (p (assq val gptel-directives)))
+                (equal gptel--system-message (cdr p)))
+              (throw 'mismatch t)))
+         ((eq key :backend)
+          (or (if (stringp val)
+                  (equal (gptel-backend-name gptel-backend) val)
+                (eq gptel-backend val))
+              (throw 'mismatch t)))
+         ((eq key :tools)
+          (or (equal (sort val #'string-lessp)
+                     (sort (mapcar #'gptel-tool-name gptel-tools)
+                           #'string-lessp))
+              (throw 'mismatch t)))
+         (t (let* ((suffix (substring (symbol-name key) 1))
+                   (sym (or (intern-soft (concat "gptel-" suffix))
+                            (intern-soft (concat "gptel--" suffix)))))
+              (or (null sym)
+                  (and (boundp sym) (equal (eval sym) val))
+                  (throw 'mismatch t)))))))))
 
 (defun gptel--get-directive (args)
   "Find the additional directive in the transient ARGS.
@@ -383,6 +421,24 @@ which see."
                        context (if dest (concat (pth ", with response to ") dest)
                                  (concat (pth ", insert response at point")))))))))
 
+(defun gptel--format-preset-string ()
+  "Format the preset indicator display for `gptel-menu'."
+  (if (and gptel--known-presets gptel--preset)
+      (apply
+       #'format " (%s%s)"
+       (let ((mismatch (gptel--preset-mismatch-p gptel--preset)))
+         (list (propertize "@" 'face (if mismatch 'transient-key
+                                       '( :inherit transient-key
+                                          :inherit secondary-selection
+                                          :box -1 :weight bold)))
+               (propertize (format "%s" gptel--preset) 'face
+                           (if mismatch
+                               '(:inherit warning :strike-through t)
+                             '(:inherit secondary-selection :box -1))))))
+    (format " (%s%s)"
+            (propertize "@" 'face 'transient-key)
+            (propertize "preset" 'face 'transient-inactive-value))))
+
 
 ;; * Transient classes and methods for gptel
 
@@ -571,6 +627,7 @@ Also format its value in the Transient menu."
    [:pad-keys t ""
     (:info #'gptel--describe-infix-context
      :face transient-heading :format "%d")
+    (gptel--infix-context-add-current-kill)
     (gptel--infix-context-add-region)
     (gptel--infix-context-add-buffer)
     (gptel--infix-context-add-file)
@@ -593,7 +650,12 @@ Also format its value in the Transient menu."
      (lambda () (interactive) (gptel--handle-tool-use gptel--fsm-last))
      :if (lambda () (and gptel--fsm-last
                     (eq (gptel-fsm-state gptel--fsm-last) 'TOOL))))]]
-  [["Request Parameters"
+  [[(gptel--preset
+     :key "@" :format "%d"
+     :description
+     (lambda ()
+       (concat (propertize "Request Parameters" 'face 'transient-heading)
+               (gptel--format-preset-string))))
     (gptel--infix-variable-scope)
     (gptel--infix-provider)
     (gptel--infix-max-tokens)
@@ -606,8 +668,7 @@ Also format its value in the Transient menu."
     (gptel--infix-use-tools)
     (gptel--infix-track-response
      :if (lambda () (and gptel-expert-commands (not gptel-mode))))
-    (gptel--infix-track-media
-     :if (lambda () (and gptel-mode (gptel--model-capable-p 'media))))]
+    (gptel--infix-track-media :if (lambda () gptel-mode))]
    [" <Prompt from"
     ("m" "Minibuffer instead" "m")
     ("y" "Kill-ring instead" "y")
@@ -752,6 +813,65 @@ Customize `gptel-directives' for task-specific prompts."
             (gptel--setup-directive-menu
              'gptel--system-message "Directive" t)))
     :pad-keys t])
+
+;; ** Prefix for saving and applying presets
+
+(transient-define-prefix gptel--preset ()
+  "Apply a gptel preset, or save the current configuration as a preset.
+
+A \"preset\" is a collection of gptel settings, such as the model,
+backend, system message and enabled tools, that are applied and used
+together.  See `gptel-make-preset' for details."
+  :transient-suffix #'transient--do-return
+  [:description "Save or apply a preset collection of gptel options"
+   [:pad-keys t
+    ("C-s" "Save current settings to preset" gptel--save-preset)]]
+  [:if (lambda () gptel--known-presets)
+   :class transient-column
+   :setup-children
+   (lambda (_)
+     (transient-parse-suffixes
+      'gptel--preset
+      (cl-loop
+       for (name-sym . preset) in gptel--known-presets
+       for name = (symbol-name name-sym)
+       with unused-keys = (nconc (number-sequence ?a ?z)
+                                 (number-sequence ?0 ?9))
+       for description = (plist-get preset :description)
+       for key = (seq-find (lambda (k) (member k unused-keys))
+                           name (seq-first unused-keys))
+       do (setq unused-keys (delq key unused-keys))
+       collect
+       (list
+        (key-description (list key))
+        (concat name
+                (propertize " " 'display '(space :align-to 20))
+                (and description
+                     (propertize (concat
+                                  "(" (gptel--describe-directive
+                                       description (- (window-width) 30))
+                                  ")")
+                                 'face 'shadow)))
+        `(lambda () (interactive)
+           (gptel--set-with-scope 'gptel--preset ',name-sym
+            gptel--set-buffer-locally)
+           (gptel--apply-preset
+            ',(cons name-sym preset)
+            (lambda (sym val) (gptel--set-with-scope
+                               sym val gptel--set-buffer-locally)))
+           (message "Applied gptel preset %s"
+            (propertize ,name 'face 'transient-value))
+           (when transient--stack
+            (run-at-time 0 nil #'transient-setup))))
+       into generated
+       finally return
+       (nconc (list '(gptel--infix-variable-scope
+                      :format "%d %k %v"
+                      :description
+                      (lambda () (format "%s        %s"
+                             (propertize "Apply preset" 'face 'transient-heading)
+                             (propertize "Scope" 'face 'transient-active-prefix)))))
+              generated))))])
 
 ;; ** Prefix for selecting tools
 
@@ -1009,6 +1129,18 @@ supports.  See `gptel-track-media' for more information."
 
 (declare-function gptel-context--at-point "gptel-context")
 (declare-function gptel-add "gptel-context")
+(declare-function gptel-context-add-current-kill "gptel-context")
+
+(transient-define-suffix gptel--infix-context-add-current-kill (&optional arg)
+  "Add current kill to gptel's context."
+  :transient 'transient--do-stay
+  :key "C-y"
+  :if (lambda () gptel-expert-commands)
+  :description
+  "Yank to context"
+  (interactive "P")
+  (gptel-context-add-current-kill arg)
+  (transient-setup))
 
 (transient-define-suffix gptel--infix-context-add-region ()
   "Add current region to gptel's context."
@@ -1254,11 +1386,14 @@ This sets the variable `gptel-include-tool-results', which see."
         (prompt
          (cond
           ((member "m" args)
-           (read-string
-            (format "Ask %s: " (gptel-backend-name gptel-backend))
-            (and (use-region-p)
-                 (buffer-substring-no-properties
-                  (region-beginning) (region-end)))))
+           (minibuffer-with-setup-hook
+               (lambda () (add-hook 'completion-at-point-functions
+                               #'gptel-preset-capf nil t))
+             (read-string
+              (format "Ask %s: " (gptel-backend-name gptel-backend))
+              (and (use-region-p)
+                   (buffer-substring-no-properties
+                    (region-beginning) (region-end))))))
           ((member "y" args)
            (unless (car-safe kill-ring)
              (user-error "`kill-ring' is empty!  Nothing to send"))
@@ -1363,6 +1498,7 @@ This sets the variable `gptel-include-tool-results', which see."
                  (gptel--merge-additional-directive system-extra)
                gptel--system-message)
              :callback callback
+             :transforms gptel-prompt-transform-functions
              :fsm (gptel-make-fsm :handlers gptel-send--handlers)
              :dry-run dry-run)
 

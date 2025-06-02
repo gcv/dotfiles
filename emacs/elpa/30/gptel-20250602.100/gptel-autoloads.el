@@ -118,17 +118,37 @@ for.
 (register-definition-prefixes "gptel-anthropic" '("gptel--anthropic-"))
 
 
+;;; Generated autoloads from gptel-bedrock.el
+
+(autoload 'gptel-make-bedrock "gptel-bedrock" "\
+Register an AWS Bedrock backend for gptel with NAME.
+
+Keyword arguments:
+
+REGION - AWS region name (e.g. \"us-east-1\")
+MODELS - The list of models supported by this backend
+MODEL-REGION - one of apac, eu, us or nil
+CURL-ARGS - additional curl args
+STREAM - Whether to use streaming responses or not.
+
+(fn NAME &key REGION (MODELS gptel--bedrock-models) (MODEL-REGION nil) (STREAM nil) CURL-ARGS (PROTOCOL \"https\"))")
+(function-put 'gptel-make-bedrock 'lisp-indent-function 1)
+(register-definition-prefixes "gptel-bedrock" '("gptel-"))
+
+
 ;;; Generated autoloads from gptel-context.el
 
  (autoload 'gptel-add "gptel-context" "Add/remove regions or buffers from gptel's context." t)
  (autoload 'gptel-add-file "gptel-context" "Add files to gptel's context." t)
 (autoload 'gptel-context--wrap "gptel-context" "\
-Wrap MESSAGE with context string.
+Add request context to DATA-BUF and run CALLBACK.
 
-(fn MESSAGE)")
+DATA-BUF is the buffer where the request prompt is constructed.
+
+(fn CALLBACK DATA-BUF)")
 (autoload 'gptel-context--collect "gptel-context" "\
 Get the list of all active context overlays.")
-(register-definition-prefixes "gptel-context" '("gptel-"))
+(register-definition-prefixes "gptel-context" '("gptel-context-"))
 
 
 ;;; Generated autoloads from gptel-curl.el
@@ -267,7 +287,7 @@ parameters (as plist keys) and values supported by the API.  Use
 these to set parameters that gptel does not provide user options
 for.
 
-(fn NAME &key CURL-ARGS REQUEST-PARAMS (HEADER (lambda nil (gptel--gh-auth) \\=`((\"openai-intent\" . \"conversation-panel\") (\"authorization\" \\=\\, (concat \"Bearer \" (plist-get (gptel--gh-token gptel-backend) :token))) (\"x-request-id\" \\=\\, (gptel--gh-uuid)) (\"vscode-sessionid\" \\=\\, (or (gptel--gh-sessionid gptel-backend) \"\")) (\"vscode-machineid\" \\=\\, (or (gptel--gh-machineid gptel-backend) \"\")) (\"copilot-vision-request\" . \"true\") (\"copilot-integration-id\" . \"vscode-chat\")))) (HOST \"api.githubcopilot.com\") (PROTOCOL \"https\") (ENDPOINT \"/chat/completions\") (STREAM t) (MODELS gptel--gh-models))")
+(fn NAME &key CURL-ARGS REQUEST-PARAMS (HEADER (lambda nil (gptel--gh-auth) \\=`((\"openai-intent\" . \"conversation-panel\") (\"authorization\" \\=\\, (concat \"Bearer \" (plist-get (gptel--gh-token gptel-backend) :token))) (\"x-request-id\" \\=\\, (gptel--gh-uuid)) (\"vscode-sessionid\" \\=\\, (or (gptel--gh-sessionid gptel-backend) \"\")) (\"vscode-machineid\" \\=\\, (or (gptel--gh-machineid gptel-backend) \"\")) ,@(when (and gptel-track-media (gptel--model-capable-p \\='media)) \\=`((\"copilot-vision-request\" . \"true\"))) (\"copilot-integration-id\" . \"vscode-chat\")))) (HOST \"api.githubcopilot.com\") (PROTOCOL \"https\") (ENDPOINT \"/chat/completions\") (STREAM t) (MODELS gptel--gh-models))")
 (function-put 'gptel-make-gh-copilot 'lisp-indent-function 1)
 (register-definition-prefixes "gptel-gh" '("gptel-"))
 
@@ -402,7 +422,7 @@ information, in the form
  (model-name . plist)
 
 For a list of currently recognized plist keys, see
-`gptel--openai-models'. An example of a model specification
+`gptel--openai-models'.  An example of a model specification
 including both kinds of specs:
 
 :models
@@ -597,6 +617,8 @@ parameters.
 (function-put 'gptel-make-perplexity 'lisp-indent-function 1)
 (autoload 'gptel-make-deepseek "gptel-openai-extras" "\
 Register a DeepSeek backend for gptel with NAME.
+
+For the meanings of the keyword arguments, see `gptel-make-openai'.
 
 (fn NAME &key CURL-ARGS STREAM KEY REQUEST-PARAMS (HEADER (lambda nil (when-let* ((key (gptel--get-api-key))) \\=`((\"Authorization\" \\=\\, (concat \"Bearer \" key)))))) (HOST \"api.deepseek.com\") (PROTOCOL \"https\") (ENDPOINT \"/v1/chat/completions\") (MODELS \\='((deepseek-reasoner :capabilities (tool reasoning) :context-window 64 :input-cost 0.55 :output-cost 2.19) (deepseek-chat :capabilities (tool) :context-window 64 :input-cost 0.27 :output-cost 1.1))))")
 (function-put 'gptel-make-deepseek 'lisp-indent-function 1)

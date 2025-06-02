@@ -1,6 +1,6 @@
 ;;; gptel-ollama.el --- Ollama support for gptel     -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023  Karthik Chikmagalur
+;; Copyright (C) 2023-2025  Karthik Chikmagalur
 
 ;; Author: Karthik Chikmagalur <karthikchikmagalur@gmail.com>
 ;; Keywords: hypermedia
@@ -136,34 +136,32 @@ Store response metadata in state INFO."
 ;; handled by its defgeneric implementation
 
 (cl-defmethod gptel--parse-list ((backend gptel-ollama) prompt-list)
-  (if (stringp (car prompt-list))
-      (cl-loop for text in prompt-list  ; Simple format, list of strings
-               for role = t then (not role)
-               if text collect
-               (list :role (if role "user" "assistant") :content text))
-    (let ((full-prompt))                ; Advanced format, list of lists
-      (dolist (entry prompt-list)
-        (pcase entry
-          (`(prompt . ,msg)
-           (push (list :role "user" :content (or (car-safe msg) msg))
-                 full-prompt))
-          (`(response . ,msg)
-           (push (list :role "assistant" :content (or (car-safe msg) msg))
-                 full-prompt))
-          (`(tool . ,call)
-           (push (list :role "assistant"
-                       :content ""
-                       :tool_calls `[(:function (:name ,(plist-get call :name)
-                                                 :arguments ,(plist-get call :args)))])
-                 full-prompt)
-           (push (car (gptel--parse-tool-results backend (list (cdr entry))))
-                 full-prompt))))
-      (nreverse full-prompt))))
+  (if (consp (car prompt-list))
+      (let ((full-prompt))              ; Advanced format, list of lists
+        (dolist (entry prompt-list)
+          (pcase entry
+            (`(prompt . ,msg)
+             (push (list :role "user" :content (or (car-safe msg) msg))
+                   full-prompt))
+            (`(response . ,msg)
+             (push (list :role "assistant" :content (or (car-safe msg) msg))
+                   full-prompt))
+            (`(tool . ,call)
+             (push (list :role "assistant"
+                         :content ""
+                         :tool_calls `[(:function (:name ,(plist-get call :name)
+                                                   :arguments ,(plist-get call :args)))])
+                   full-prompt)
+             (push (car (gptel--parse-tool-results backend (list (cdr entry))))
+                   full-prompt))))
+        (nreverse full-prompt))
+    (cl-loop for text in prompt-list    ; Simple format, list of strings
+             for role = t then (not role)
+             if text collect
+             (list :role (if role "user" "assistant") :content text))))
 
 (cl-defmethod gptel--parse-buffer ((backend gptel-ollama) &optional max-entries)
-  (let ((prompts) (prev-pt (point))
-        (include-media (and gptel-track-media (or (gptel--model-capable-p 'media)
-                                                  (gptel--model-capable-p 'url)))))
+  (let ((prompts) (prev-pt (point)))
     (if (or gptel-mode gptel-track-response)
         (while (and (or (not max-entries) (>= max-entries 0))
                     (goto-char (previous-single-property-change
@@ -194,7 +192,7 @@ Store response metadata in state INFO."
                                    (line-number-at-pos (point))))))))
             ('ignore)
             ('nil
-             (if include-media
+             (if gptel-track-media
                  (when-let* ((content (gptel--ollama-parse-multipart
                                        (gptel--parse-media-links major-mode (point) prev-pt))))
                    (when (> (length content) 0)
@@ -230,7 +228,13 @@ format."
    if text
    collect text into text-array end
    else if media
-   collect (gptel--base64-encode media) into media-array end
+   collect (gptel--base64-encode media) into media-array
+   else if (plist-get part :textfile)
+   collect
+   (with-temp-buffer
+     (gptel--insert-file-string (plist-get part :textfile))
+     (buffer-string))
+   into text-array
    finally return
    `(,@(and text-array  (list :content (mapconcat #'identity text-array " ")))
      ,@(and media-array (list :images  (vconcat media-array))))))
@@ -239,7 +243,8 @@ format."
                                        &optional inject-media)
   "Wrap the last user prompt in PROMPTS with the context string.
 
-If INJECT-MEDIA is non-nil wrap it with base64-encoded media files in the context."
+If INJECT-MEDIA is non-nil wrap it with base64-encoded media
+files in the context."
   (if inject-media
       ;; Wrap the first user prompt with included media files/contexts
       (when-let* ((media-list (gptel-context--collect-media))

@@ -1,6 +1,6 @@
 ;;; gptel-openai.el ---  ChatGPT suppport for gptel  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023  Karthik Chikmagalur
+;; Copyright (C) 2023-2025  Karthik Chikmagalur
 
 ;; Author: Karthik Chikmagalur <karthikchikmagalur@gmail.com>
 
@@ -151,7 +151,8 @@ Throw an error if there is no match."
                    (:copier gptel--copy-backend))
   name host header protocol stream
   endpoint key models url request-params
-  curl-args)
+  curl-args
+  (coding-system nil :documentation "Can be set to `binary' if the backend expects non UTF-8 output."))
 
 ;;; OpenAI (ChatGPT)
 (cl-defstruct (gptel-openai (:constructor gptel--make-openai)
@@ -260,7 +261,8 @@ Mutate state INFO with response metadata."
     ;; OpenAI returns either non-blank text content or a tool call, not both.
     ;; However OpenAI-compatible APIs like llama.cpp can include both (#819), so
     ;; we check for both tool calls and responses independently.
-    (when-let* ((tool-calls (plist-get message :tool_calls)))
+    (when-let* ((tool-calls (plist-get message :tool_calls))
+                ((not (eq tool-calls :null))))
       (gptel--inject-prompt        ; First add the tool call to the prompts list
        (plist-get info :backend) (plist-get info :data) message)
       (cl-loop             ;Then capture the tool call data for running the tool
@@ -350,39 +352,36 @@ If the ID has the format used by a different backend, use as-is."
 ;; is handled by its defgeneric implementation
 
 (cl-defmethod gptel--parse-list ((backend gptel-openai) prompt-list)
-  (if (stringp (car prompt-list))
-      (cl-loop for text in prompt-list  ; Simple format, list of strings
-               for role = t then (not role)
-               if text collect
-               (list :role (if role "user" "assistant") :content text))
-    (let ((full-prompt))                ; Advanced format, list of lists
-      (dolist (entry prompt-list)
-        (pcase entry
-          (`(prompt . ,msg)
-           (push (list :role "user" :content (or (car-safe msg) msg)) full-prompt))
-          (`(response . ,msg)
-           (push (list :role "assistant" :content (or (car-safe msg) msg)) full-prompt))
-          (`(tool . ,call)
-           (unless (plist-get call :id)
-             (plist-put call :id (gptel--openai-format-tool-id nil)))
-           (push
-            (list
-             :role "assistant"
-             :tool_calls
-             (vector
-              (list :type "function"
-                    :id (plist-get call :id)
-                    :function `( :name ,(plist-get call :name)
-                                 :arguments ,(gptel--json-encode (plist-get call :args))))))
-            full-prompt)
-           (push (car (gptel--parse-tool-results backend (list (cdr entry)))) full-prompt))))
-      (nreverse full-prompt))))
+  (if (consp (car prompt-list))
+      (let ((full-prompt))              ; Advanced format, list of lists
+        (dolist (entry prompt-list)
+          (pcase entry
+            (`(prompt . ,msg)
+             (push (list :role "user" :content (or (car-safe msg) msg)) full-prompt))
+            (`(response . ,msg)
+             (push (list :role "assistant" :content (or (car-safe msg) msg)) full-prompt))
+            (`(tool . ,call)
+             (unless (plist-get call :id)
+               (plist-put call :id (gptel--openai-format-tool-id nil)))
+             (push
+              (list
+               :role "assistant"
+               :tool_calls
+               (vector
+                (list :type "function"
+                      :id (plist-get call :id)
+                      :function `( :name ,(plist-get call :name)
+                                   :arguments ,(gptel--json-encode (plist-get call :args))))))
+              full-prompt)
+             (push (car (gptel--parse-tool-results backend (list (cdr entry)))) full-prompt))))
+        (nreverse full-prompt))
+    (cl-loop for text in prompt-list    ; Simple format, list of strings
+             for role = t then (not role)
+             if text collect
+             (list :role (if role "user" "assistant") :content text))))
 
 (cl-defmethod gptel--parse-buffer ((backend gptel-openai) &optional max-entries)
-  (let ((prompts) (prev-pt (point))
-        (include-media (and gptel-track-media
-                            (or (gptel--model-capable-p 'media)
-                                (gptel--model-capable-p 'url)))))
+  (let ((prompts) (prev-pt (point)))
     (if (or gptel-mode gptel-track-response)
         (while (and (or (not max-entries) (>= max-entries 0))
                     (/= prev-pt (point-min))
@@ -418,7 +417,7 @@ If the ID has the format used by a different backend, use as-is."
             ('ignore)
             ('nil
              (and max-entries (cl-decf max-entries))
-             (if include-media
+             (if gptel-track-media
                  (when-let* ((content (gptel--openai-parse-multipart
                                        (gptel--parse-media-links major-mode
                                                                  (point) prev-pt))))
@@ -454,11 +453,16 @@ format."
    (and (or (= n 1) (= n last)) (setq text (gptel--trim-prefixes text)))
    and if text
    collect `(:type "text" :text ,text) into parts-array end
-   else if media
-   collect
+   else if media collect
    `(:type "image_url"
      :image_url (:url ,(concat "data:" (plist-get part :mime)
                         ";base64," (gptel--base64-encode media))))
+   into parts-array
+   else if (plist-get part :textfile) collect
+   `(:type "text"
+     :text ,(with-temp-buffer
+              (gptel--insert-file-string (plist-get part :textfile))
+              (buffer-string)))
    into parts-array end and
    if (plist-get part :url)
    collect
@@ -520,7 +524,7 @@ information, in the form
  (model-name . plist)
 
 For a list of currently recognized plist keys, see
-`gptel--openai-models'. An example of a model specification
+`gptel--openai-models'.  An example of a model specification
 including both kinds of specs:
 
 :models
@@ -688,3 +692,7 @@ Example:
 
 (provide 'gptel-openai)
 ;;; gptel-openai.el ends here
+
+;; Local Variables:
+;; byte-compile-warnings: (not docstrings)
+;; End:
