@@ -105,6 +105,11 @@
 (register-definition-prefixes "casual-calc-stack" '("casual-calc-"))
 
 
+;;; Generated autoloads from casual-calc-time.el
+
+(register-definition-prefixes "casual-calc-time" '("casual-calc-push-timestamp"))
+
+
 ;;; Generated autoloads from casual-calc-utils.el
 
 (register-definition-prefixes "casual-calc-utils" '("casual-calc-"))
@@ -123,7 +128,7 @@
 
 ;;; Generated autoloads from casual-calendar-constants.el
 
-(register-definition-prefixes "casual-calendar-constants" '("casual-calendar-"))
+(register-definition-prefixes "casual-calendar-constants" '("casual-calendar-unicode-"))
 
 
 ;;; Generated autoloads from casual-calendar-settings.el
@@ -166,7 +171,7 @@
 
 ;;; Generated autoloads from casual-editkit-constants.el
 
-(register-definition-prefixes "casual-editkit-constants" '("casual-editkit-"))
+(register-definition-prefixes "casual-editkit-constants" '("casual-editkit-unicode-"))
 
 
 ;;; Generated autoloads from casual-editkit-settings.el
@@ -302,7 +307,22 @@
 
 ;;; Generated autoloads from casual-re-builder-utils.el
 
-(register-definition-prefixes "casual-re-builder-utils" '("casual-re-builder-"))
+(register-definition-prefixes "casual-re-builder-utils" '("casual-re"))
+
+
+;;; Generated autoloads from casual-timezone.el
+
+ (autoload 'casual-timezone-tmenu "casual-timezone" nil t)
+
+
+;;; Generated autoloads from casual-timezone-settings.el
+
+(register-definition-prefixes "casual-timezone-settings" '("casual-timezone-"))
+
+
+;;; Generated autoloads from casual-timezone-utils.el
+
+(register-definition-prefixes "casual-timezone-utils" '("casual-timezone-"))
 
 ;;; End of scraped data
 

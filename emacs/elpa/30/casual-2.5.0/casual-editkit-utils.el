@@ -29,8 +29,10 @@
 (require 'simple)
 (require 'text-mode)
 (require 'tabify)
+(require 'electric)
 (require 'casual-editkit-constants)
 (require 'casual-editkit-settings)
+(require 'casual-timezone)
 
 ;;; Predicates
 
@@ -270,7 +272,12 @@ inserting common miscellaneous symbols."
    ("\"" "“double”" casual-editkit-smart-double-quote-dwim)
    ("_" "„low”" casual-editkit-smart-low-quote-dwim)
    ("c" "«comillas»" casual-editkit-smart-comillas-quote-dwim)
-   ("a" "’" (lambda () (interactive) (insert "’")))]
+   ("a" "’" (lambda () (interactive) (insert "’")))
+   ("Q" "Electric Quote"
+    electric-quote-mode
+    :description
+    (lambda () (casual-lib-checkbox-label
+                electric-quote-mode "Electric Quote")))]
 
   ["Misc"
    :class transient-row
@@ -582,35 +589,38 @@ accessed here."
 Commands pertaining to invoking different tools can be accessed here."
   ["Tools"
    ["Shells & REPLs"
-    ("s" "Shell" shell)
+    :pad-keys t
+    ("sh" "Shell" shell)
     ("!" "Shell Command…" shell-command)
     ("&" "Shell Command &…" async-shell-command)
-    ("e" "Eshell" eshell)
-    ("i" "IELM" ielm)
-    ("t" "term" term)
-    ("p" "Python" run-python)]
+    ("es" "Eshell" eshell)
+    ("ie" "IELM" ielm)
+    ("te" "term" term)
+    ("py" "Python" run-python)]
 
    ["Utilities"
-    ("c" "Calc" calc)
-    ("r" "RE-Builder" re-builder)
-    ("w" "Word Count" (lambda ()
+    ("cc" "Calc" calc)
+    ("re" "RE-Builder" re-builder)
+    ("wc" "Word Count" (lambda ()
                         (interactive)
                         (call-interactively #'count-words)))]
 
    ["Almanac"
     :pad-keys t
-    ("a" "Calendar" calendar)
-    ("C" "World Clock" world-clock)
-    ("S" "Sunrise/Sunset" sunrise-sunset)]
+    ("ca" "Calendar" calendar)
+    ("cl" "World Clock" world-clock)
+    ("su" "Sunrise/Sunset" sunrise-sunset)
+    ("tz" "Time Zone›" casual-timezone-tmenu
+     :if-not (lambda () (eq system-type 'windows-nt)))]
 
    ["Misc"
     :pad-keys t
-    ("E" "erc" erc)
-    ("M-e" "eww" eww)]
+    ("er" "erc" erc)
+    ("ew" "eww" eww)]
 
    ["Fun"
-    ("T" "Tetris" tetris)
-    ("z" "Zone" zone)]]
+    ("ts" "Tetris" tetris)
+    ("zo" "Zone" zone)]]
 
   casual-editkit-navigation-group)
 
