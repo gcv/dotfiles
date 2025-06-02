@@ -1,7 +1,7 @@
 ;;; clojure-mode.el --- Major mode for Clojure code -*- lexical-binding: t; -*-
 
 ;; Copyright © 2007-2013 Jeffrey Chu, Lennart Staflin, Phil Hagelberg
-;; Copyright © 2013-2024 Bozhidar Batsov, Artur Malabarba, Magnar Sveen
+;; Copyright © 2013-2025 Bozhidar Batsov, Artur Malabarba, Magnar Sveen
 ;;
 ;; Authors: Jeffrey Chu <jochu0@gmail.com>
 ;;       Lennart Staflin <lenst@lysator.liu.se>
@@ -12,7 +12,8 @@
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/clojure-emacs/clojure-mode
 ;; Keywords: languages clojure clojurescript lisp
-;; Version: 5.19.0
+;; Package-Version: 5.20.0
+;; Package-Revision: d336db623e7a
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is not part of GNU Emacs.
@@ -542,16 +543,6 @@ ENDP and DELIM."
                "\\_<\\(?:'+\\|#\\)")
              (line-beginning-position)))))
 
-(defconst clojure--collection-tag-regexp "#\\(::[a-zA-Z0-9._-]*\\|:?\\([a-zA-Z0-9._-]+/\\)?[a-zA-Z0-9._-]+\\)"
-  "Collection reader macro tag regexp.
-It is intended to check for allowed strings that can come before a
-collection literal (e.g. '[]' or '{}'), as reader macro tags.
-This includes #fully.qualified/my-ns[:kw val] and #::my-ns{:kw
-val} as of Clojure 1.9.")
-
-(make-obsolete-variable 'clojure--collection-tag-regexp nil "5.12.0")
-(make-obsolete 'clojure-no-space-after-tag 'clojure-space-for-delimiter-p "5.12.0")
-
 (declare-function paredit-open-curly "ext:paredit" t t)
 (declare-function paredit-close-curly "ext:paredit" t t)
 (declare-function paredit-convolute-sexp "ext:paredit")
@@ -625,7 +616,7 @@ replacement for `cljr-expand-let`."
   (add-to-list 'imenu-generic-expression '(nil clojure-match-next-def 0))
   (setq-local indent-tabs-mode nil)
   (setq-local paragraph-ignore-fill-prefix t)
-  (setq-local outline-regexp ";;;;* ")
+  (setq-local outline-regexp ";;;;* \\|(") ; comments and top-level forms
   (setq-local outline-level 'lisp-outline-level)
   (setq-local comment-start ";")
   (setq-local comment-start-skip ";+ *")
@@ -2266,11 +2257,11 @@ renaming a namespace."
 (defconst clojure-def-type-and-name-regex
   (concat "(\\(?:\\(?:\\sw\\|\\s_\\)+/\\)?"
           ;; Declaration
-          "\\(def\\(?:\\sw\\|\\s_\\)*\\)\\>"
+          "\\(def\\(?:\\sw\\|\\s_\\)*\\(?:-\\|\\>\\)\\)"
           ;; Any whitespace
           "[ \r\n\t]*"
           ;; Possibly type or metadata
-          "\\(?:#?^\\(?:{[^}]*}\\|\\(?:\\sw\\|\\s_\\)+\\)[ \r\n\t]*\\)*"
+          "\\(?:#?^\\(?:{[^}]*}+\\|\\(?:\\sw\\|\\s_\\)+\\)[ \r\n\t]*\\)*"
           ;; Symbol name
           "\\(\\(?:\\sw\\|\\s_\\)+\\)"))
 
@@ -3321,11 +3312,32 @@ With universal argument \\[universal-argument], act on the \"top-level\" form."
 \\{clojurec-mode-map}")
 
 ;;;###autoload
+(define-derived-mode clojuredart-mode clojure-mode "ClojureDart"
+  "Major mode for editing Clojure Dart code.
+
+\\{clojuredart-mode-map}")
+
+;;;###autoload
+(define-derived-mode jank-mode clojure-mode "Jank"
+  "Major mode for editing Jank code.
+
+\\{jank-mode-map}")
+
+;;;###autoload
+(define-derived-mode joker-mode clojure-mode "Joker"
+  "Major mode for editing Joker code.
+
+\\{joker-mode-map}")
+
+;;;###autoload
 (progn
   (add-to-list 'auto-mode-alist
                '("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-mode))
   (add-to-list 'auto-mode-alist '("\\.cljc\\'" . clojurec-mode))
   (add-to-list 'auto-mode-alist '("\\.cljs\\'" . clojurescript-mode))
+  (add-to-list 'auto-mode-alist '("\\.cljd\\'" . clojuredart-mode))
+  (add-to-list 'auto-mode-alist '("\\.jank\\'" . jank-mode))
+  (add-to-list 'auto-mode-alist '("\\.joke\\'" . joker-mode))
   ;; boot build scripts are Clojure source files
   (add-to-list 'auto-mode-alist '("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode))
   ;; babashka scripts are Clojure source files
