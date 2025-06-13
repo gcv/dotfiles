@@ -104,6 +104,8 @@ fi
 
 ### environment variables
 
+export UNAME=$(uname -s)
+
 export DO_NOT_TRACK=1 # https://consoledonottrack.com
 
 if command_exists hx; then
